@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_discussions_by;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by(IN _json_is_object BOOLEAN, IN _params JSONB, IN _case hivemind_postgrest_utilities.ranked_post_sort_type)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by(IN _params JSONB, IN _case hivemind_postgrest_utilities.ranked_post_sort_type)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -13,38 +13,38 @@ _limit INT;
 _truncate_body INT;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"start_author","start_permlink","limit","tag","truncate_body","filter_tags","observer"}', '{"string","string","number","string","number","array","string"}', 0);
-  IF hivemind_postgrest_utilities.parse_array_argument_from_json(_params, _json_is_object, 'filter_tags', 5, False) IS NOT NULL THEN
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "truncate_body": "number", "filter_tags": "array", "observer": "string"}', 2, '{"start_permlink": "permlink must be string", "start_author": "invalid account name type"}');
+  IF hivemind_postgrest_utilities.parse_argument_from_json(_params, 'filter_tags', False) IS NOT NULL THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('filter_tags not supported');
   END IF;
 
   _limit =
     hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 2, False),
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
     20, 1, 100, 'limit');
 
   _truncate_body =
     hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'truncate_body', 4, False),
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
     0, NULL, NULL, 'truncate_body');
 
   _observer_id =
     hivemind_postgrest_utilities.find_account_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 6, False), True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
   _tag = hivemind_postgrest_utilities.valid_tag(
-    hivemind_postgrest_utilities.valid_tag(hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'tag', 3, False), True),
+    hivemind_postgrest_utilities.valid_tag(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'tag', False), True),
     True);
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_author', 0, False),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', False),
       True),
       hivemind_postgrest_utilities.valid_permlink(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_permlink', 1, False),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
       True),
     True);
   

@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_unread_notifications;
-CREATE FUNCTION hivemind_endpoints.bridge_api_unread_notifications(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_unread_notifications(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,16 +12,16 @@ DECLARE
   _last_read_at_block hivemind_app.blocks_view.num%TYPE;
   _limit_block hivemind_app.blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "min_score"}', '{"string", "number"}', 1);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number"}', 1, '{"account": "invalid account name type"}');
 
   _account_id = 
     hivemind_postgrest_utilities.find_account_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True),
       False),
     True);
 
-  _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'min_score', 1, False);
+  _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'min_score', False);
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
   SELECT ha.lastread_at INTO _last_read_at FROM hivemind_app.hive_accounts ha WHERE ha.id = _account_id;

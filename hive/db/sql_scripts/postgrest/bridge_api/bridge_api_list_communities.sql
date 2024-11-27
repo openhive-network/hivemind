@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_list_communities;
-CREATE FUNCTION hivemind_endpoints.bridge_api_list_communities(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_list_communities(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,25 +12,25 @@ DECLARE
     _observer_id INT;
     _community_id INT;
 BEGIN
-    PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"last", "limit", "query", "sort", "observer"}', '{"string", "number", "string", "string", "string"}', 0);
+    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"last": "string", "limit": "number", "query": "string", "sort": "string", "observer": "string"}', 0, '{"observer": "invalid account name type"}');
 
-    _limit := hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 1, False);
+    _limit := hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
     _limit := hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
 
-    _search := hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'query', 2, False);
-    _sort := COALESCE(hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'sort', 3, False), 'rank');
+    _search := hivemind_postgrest_utilities.parse_argument_from_json(_params, 'query', False);
+    _sort := COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'sort', False), 'rank');
 
     _observer_id = 
       hivemind_postgrest_utilities.find_account_id(
         hivemind_postgrest_utilities.valid_account(
-          hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 1, False),
+          hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
         True),
       True);
     
     _community_id = 
       hivemind_postgrest_utilities.find_community_id(
         hivemind_postgrest_utilities.valid_community(
-          hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'last', 0, False),
+          hivemind_postgrest_utilities.parse_argument_from_json(_params, 'last', False),
         True),
       True);
 

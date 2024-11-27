@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_posts_header;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_posts_header(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_posts_header(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -10,9 +10,9 @@ _author TEXT;
 _permlink TEXT;
 _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}', '{"string","string"}');
-  _author = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True);
-  _permlink = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string"}', 2, '{"permlink": "permlink must be string"}');
+  _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
+  _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
   
   _author = hivemind_postgrest_utilities.valid_account(_author, False);
   _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink, False);

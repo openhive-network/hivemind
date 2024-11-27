@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_post_notifications;
-CREATE FUNCTION hivemind_endpoints.bridge_api_post_notifications(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_post_notifications(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,25 +12,25 @@ DECLARE
   _limit INTEGER := 100;
   _notifications JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author", "permlink", "min_score", "last_id", "limit"}', '{"string", "string", "number", "number", "number"}', 2);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "min_score": "number", "last_id": "number", "limit": "number"}', 2, '{"start_permlink": "permlink must be string", "author": "invalid account name type"}');
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
         False),
       hivemind_postgrest_utilities.valid_permlink(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True),
         False),
       True);
 
-  _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'min_score', 2, False);
+  _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'min_score', False);
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
-  _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'last_id', 3, False);
+  _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'last_id', False);
   _last_id = hivemind_postgrest_utilities.valid_number(_last_id, 0, NULL, NULL, 'last_id');
 
-  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 4, False);
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
 
   RETURN (

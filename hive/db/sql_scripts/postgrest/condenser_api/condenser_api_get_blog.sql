@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_blog;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_blog(IN _json_is_object BOOLEAN, IN _params JSONB, IN _get_entries BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_blog(IN _params JSONB, IN _get_entries BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -13,10 +13,10 @@ DECLARE
   _account_id INT;
   _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "start_entry_id", "limit"}', '{"string", "number", "number"}', 1);
-  _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
-  _offset = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'start_entry_id', 1, False);
-  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 2, False);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "start_entry_id": "number", "limit": "number"}', 1, NULL);
+  _account = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True);
+  _offset = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'start_entry_id', False);
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
 
   _account = hivemind_postgrest_utilities.valid_account(_account, False);
 

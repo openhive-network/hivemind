@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS hivemind_postgrest_utilities.database_api_author_permlink CA
 CREATE TYPE hivemind_postgrest_utilities.database_api_author_permlink AS (author TEXT, permlink TEXT);
 
 DROP FUNCTION IF EXISTS hivemind_endpoints.database_api_find_comments;
-CREATE FUNCTION hivemind_endpoints.database_api_find_comments(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.database_api_find_comments(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -15,8 +15,8 @@ DECLARE
   _authors_and_permlinks hivemind_postgrest_utilities.database_api_author_permlink[];
   _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"comments"}', '{"array"}');
-  _comments = hivemind_postgrest_utilities.parse_array_argument_from_json(_params, _json_is_object, 'comments', 0, True);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"comments": "array"}', 1, '{"comments": "Expected array of author+permlink pairs"}');
+  _comments = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'comments', True);
 
   IF _comments IS NULL THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Expected array of author+permlink pairs');

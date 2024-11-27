@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_relationship_between_accounts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_relationship_between_accounts(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_relationship_between_accounts(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -18,18 +18,18 @@ DECLARE
   _created_at TIMESTAMP;
   _block_num INT;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account1", "account2", "observer", "debug"}', '{"string", "string", "string", "boolean"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account1": "string", "account2": "string", "observer": "string", "debug": "boolean"}', 4, NULL);
 
-  _account1 = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account1', 0, True);
+  _account1 = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account1', True);
   _account1 = hivemind_postgrest_utilities.valid_account(_account1);
 
-  _account2 = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account2', 1, True);
+  _account2 = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account2', True);
   _account2 = hivemind_postgrest_utilities.valid_account(_account2);
 
-  _observer = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 2, False);
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
   PERFORM hivemind_postgrest_utilities.valid_account(_observer, True);
 
-  _debug = hivemind_postgrest_utilities.parse_boolean_argument_from_json(_params, _json_is_object, 'debug', 3, False);
+  _debug = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'debug', False);
 
   SELECT state,
          COALESCE(blacklisted, FALSE),

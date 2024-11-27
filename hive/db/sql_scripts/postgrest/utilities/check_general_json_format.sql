@@ -6,13 +6,12 @@ CREATE FUNCTION hivemind_postgrest_utilities.check_general_json_format(
     IN __id JSONB
 ) RETURNS JSONB
 LANGUAGE 'plpgsql'
-STABLE
+IMMUTABLE
 AS
 $$
 DECLARE
   __api_type TEXT;
   __method_type TEXT;
-  __json_with_params_is_object BOOLEAN;
 BEGIN
   IF __jsonrpc != '2.0' OR __jsonrpc IS NULL OR __params IS NULL OR __id IS NULL OR __method IS NULL THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
@@ -24,30 +23,19 @@ BEGIN
     END IF;
     __api_type = __params->>0;
     __method_type = __params->>1;
-    __params = __params->>2;
+
+    -- this 'call' keyword in test cases gives another error messages, so it is important
+    __params = jsonb_build_object('used_call_keyword', True,
+                                  'params', __params->2);
   ELSE
     SELECT substring(__method FROM '^[^.]+') INTO __api_type;
     SELECT substring(__method FROM '[^.]+$') INTO __method_type;
   END IF;
 
-  IF jsonb_typeof(__params) = 'object' THEN
-    __json_with_params_is_object = True;
-  ELSEIF jsonb_typeof(__params) = 'array' THEN
-    IF jsonb_array_length(__params) = 1 AND jsonb_typeof(__params->0) = 'object' THEN
-      __json_with_params_is_object = True;
-      __params = __params->0;
-    ELSE
-      __json_with_params_is_object = False;
-    END IF;
-  ELSE
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || jsonb_typeof(__params)::text);
-  END IF;
-
   RETURN jsonb_build_object(
     'api_type', __api_type,
     'method_type', __method_type,
-    'params', __params,
-    'json_with_params_is_object', __json_with_params_is_object
+    'params', __params
   );
 
 END

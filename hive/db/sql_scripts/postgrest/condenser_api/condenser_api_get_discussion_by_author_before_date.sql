@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_discussions_by_author_before_date;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by_author_before_date(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by_author_before_date(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -14,30 +14,30 @@ _limit INT;
 _truncate_body INT;
 _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","start_permlink","before_date","limit","truncate_body"}', '{"string","string","string","number","number"}', 1);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "start_permlink": "string","before_date": "string", "limit": "number", "truncate_body":"number"}', 1, '{"start_permlink": "permlink must be string"}');
 
   -- BEFORE DATE IS IGNORED BECAUSE IN PYTHON CODE IT IS ALSO IGNORED
 
   _author =
     hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
       False);
 
   _author_id = hivemind_postgrest_utilities.find_account_id(_author, True);
 
   _permlink =
     hivemind_postgrest_utilities.valid_permlink(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_permlink', 1, False),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
     True);
 
   _limit =
     hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 3, False),
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
     10, 1, 100, 'limit');
 
   _truncate_body =
     hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'truncate_body', 4, False),
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
     0, 0, NULL, 'truncate_body');
 
   _post_id = hivemind_postgrest_utilities.find_comment_id(_author, _permlink, (CASE WHEN _permlink IS NULL OR _permlink = '' THEN False ELSE True END));

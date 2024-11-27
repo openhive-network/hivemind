@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.hive_api_get_info;
-CREATE FUNCTION hivemind_endpoints.hive_api_get_info(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.hive_api_get_info(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE

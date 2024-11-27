@@ -703,7 +703,7 @@ def setup_runtime_code(db):
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
         "postgrest/utilities/exceptions.sql",
-        "postgrest/utilities/validate_json_parameters.sql",
+        "postgrest/utilities/validate_json_arguments.sql",
         "postgrest/utilities/parse_argument_from_json.sql",
         "postgrest/utilities/valid_account.sql",
         "postgrest/utilities/find_account_id.sql",

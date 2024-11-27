@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_account_posts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -15,33 +15,36 @@ _account TEXT;
 _permlink TEXT;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"sort","account","start_author","start_permlink","limit","observer"}', '{"string","string","string","string","number","string"}', 2);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
+                                                                 '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string"}',
+                                                                 2,
+                                                                 '{"start_permlink": "permlink must be string"}');
 
   _account = hivemind_postgrest_utilities.valid_account(
-    hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 1, True),
+    hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True),
     False);
 
   _account_id = hivemind_postgrest_utilities.find_account_id(_account, True);
 
   _permlink = hivemind_postgrest_utilities.valid_permlink(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_permlink', 3, False), True);
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False), True);
 
   _post_id = hivemind_postgrest_utilities.find_comment_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_author', 2, False), True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', False), True),
     _permlink,
     True);
 
   _limit = hivemind_postgrest_utilities.valid_number(
-    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 4, False),
+    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
     20, 1, 100, 'limit');
   
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 5, False), True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
-  CASE hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'sort', 0, True)
+  CASE hivemind_postgrest_utilities.parse_argument_from_json(_params, 'sort', True)
     WHEN 'blog' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account, _account_id, _post_id, _observer_id, _limit, 0, True);
     WHEN 'comments' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_comments(_account_id, _post_id, _observer_id, _limit, 0, True);
     WHEN 'feed' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_feed(_account_id, _post_id, _observer_id, _limit, 0, True);
