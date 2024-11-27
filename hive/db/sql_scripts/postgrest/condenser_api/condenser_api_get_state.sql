@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_state;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -15,8 +15,8 @@ _field_text_1 TEXT;
 
 BEGIN
   RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('condenser_api get state is not supported');
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"path"}', '{"string"}');
-  _path = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'path', 0, False);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"path"}', '{"string"}');
+  _path = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'path', 0, False);
   SELECT path, parts FROM hivemind_postgrest_utilities.gs_normalize_path(_path) AS (path TEXT, parts TEXT[]) INTO _path, _parts;
 
   -- account (feed, blog, comments, replies)

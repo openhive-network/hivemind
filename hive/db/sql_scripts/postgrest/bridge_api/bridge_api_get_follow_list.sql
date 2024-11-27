@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_follow_list;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_follow_list(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_follow_list(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -13,14 +13,14 @@ _get_blacklists BOOLEAN; -- if follow_blacklist/muted
 _result JSONB;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"observer", "follow_type"}', '{"string", "string"}', 1);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"observer": "string", "follow_type": "string"}', 1, NULL);
 
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 0, True), True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', True), True),
     True);
 
-  CASE hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'follow_type', 1, False)
+  CASE hivemind_postgrest_utilities.parse_argument_from_json(_params, 'follow_type', False)
     WHEN NULL then
       _get_blacklists = False;
       _follow_muted = False;

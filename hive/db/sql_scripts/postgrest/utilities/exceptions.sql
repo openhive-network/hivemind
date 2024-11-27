@@ -128,7 +128,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception;
-CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER, in _parameters_count INTEGER)
+CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -227,18 +227,6 @@ AS
 $$
 BEGIN
   RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
-END
-$$
-;
-
-DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_missing_arg;
-CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_missing_arg(_arg_name TEXT, _id JSON)
-RETURNS JSONB
-LANGUAGE 'plpgsql'
-AS
-$$
-BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', format('missing a required argument: ''%s''', _arg_name), _id);
 END
 $$
 ;

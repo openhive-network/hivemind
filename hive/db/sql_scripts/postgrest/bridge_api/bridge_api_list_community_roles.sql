@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_list_community_roles;
-CREATE FUNCTION hivemind_endpoints.bridge_api_list_community_roles(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_list_community_roles(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -13,19 +13,19 @@ _last_role INT;
 
 _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"community","last","limit"}', '{"string","string","number"}', 1);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"community": "string", "last": "string", "limit": "number"}', 1, NULL);
 
-  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 2, False);
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 50, 1, 1000, 'limit');
 
   _last = hivemind_postgrest_utilities.valid_account(
-    hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'last', 1, False),
+    hivemind_postgrest_utilities.parse_argument_from_json(_params, 'last', False),
     True);
   
   _community_id = 
     hivemind_postgrest_utilities.find_community_id(
       hivemind_postgrest_utilities.valid_community(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'community', 0, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', True),
         False
       ),
     True);

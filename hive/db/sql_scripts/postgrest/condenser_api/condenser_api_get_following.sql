@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_following;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_following(IN _json_is_object BOOLEAN, IN _params JSONB, IN _called_from_condenser_api BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_following(IN _params JSONB, IN _called_from_condenser_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -8,7 +8,7 @@ $$
 DECLARE
 _start_id INT DEFAULT 0;
 BEGIN
-  _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_json_is_object, _params, _called_from_condenser_api);
+  _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_params, _called_from_condenser_api);
 
   IF (_params->'start_id')::INT <> 0 THEN
     _start_id = (

@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_reblogged_by;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,9 +12,9 @@ DECLARE
   _account_id INT;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}','{"string","string"}');
-  _author = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True);
-  _permlink = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string","permlink":"string"}', 2, NULL);
+  _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
+  _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
   _account_id = hivemind_postgrest_utilities.find_account_id( hivemind_postgrest_utilities.valid_account(_author, False), True );
   _post_id = hivemind_postgrest_utilities.find_comment_id( _author, hivemind_postgrest_utilities.valid_permlink(_permlink, False), True );
 

@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_list_all_subscriptions;
-CREATE FUNCTION hivemind_endpoints.bridge_api_list_all_subscriptions(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_list_all_subscriptions(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -9,11 +9,11 @@ DECLARE
 _account_id INT;
 _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account"}', '{"string"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string"}', 1, NULL);
   
   _account_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True),
       False),
     True);
 

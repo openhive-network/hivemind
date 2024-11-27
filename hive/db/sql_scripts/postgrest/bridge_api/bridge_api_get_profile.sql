@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_profile;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_profile(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_profile(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,13 +11,13 @@ DECLARE
   _result JSONB;
   _followed_muted JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account","observer"}', '{"string","string"}', 1);
-  _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "observer": "string"}', 1, '{"account": "invalid account name type"}');
+  _account = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True);
   _account = hivemind_postgrest_utilities.valid_account(_account, False);
 
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 2, False),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
       True),
     True);
 

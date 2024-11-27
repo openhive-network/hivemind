@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_list_subscribers;
-CREATE FUNCTION hivemind_endpoints.bridge_api_list_subscribers(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_list_subscribers(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,21 +11,21 @@ DECLARE
     _subscription_id INT;
     _limit INTEGER := 100;
 BEGIN
-    PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"community", "last", "limit"}', '{"string", "string", "number"}', 1);
+    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"community": "string", "last": "string", "limit": "number"}', 1, '{"community": "given community name is not valid"}');
 
-    _community = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'community', 0, True);
+    _community = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', True);
     _community = hivemind_postgrest_utilities.valid_community(_community);
     _community_id = hivemind_postgrest_utilities.find_community_id(_community, True);
 
     _subscription_id =
       hivemind_postgrest_utilities.find_subscription_id(
         hivemind_postgrest_utilities.valid_account(
-          hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'last', 1, False),
+          hivemind_postgrest_utilities.parse_argument_from_json(_params, 'last', False),
           True),
         _community,
         True);
 
-    _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 2, False);
+    _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
     _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
 
     RETURN COALESCE(

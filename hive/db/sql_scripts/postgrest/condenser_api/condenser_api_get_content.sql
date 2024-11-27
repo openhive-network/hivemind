@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_content;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_content(IN _json_is_object BOOLEAN, IN _params JSONB, IN _get_replies BOOLEAN, IN _content_additions BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_content(IN _params JSONB, IN _get_replies BOOLEAN, IN _content_additions BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,10 +11,10 @@ _permlink TEXT;
 _post_id INT;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author", "permlink", "observer"}', '{"string", "string", "string"}', 2);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer": "string"}', 2, NULL);
   -- observer is ignored in python, so it is ignored here as well
-  _author = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True);
-  _permlink = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True);
+  _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
+  _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
   _author = hivemind_postgrest_utilities.valid_account(_author);
   _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink);
   _post_id = hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True );

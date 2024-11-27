@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_active_votes;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_active_votes(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_active_votes(IN _params JSONB)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
@@ -8,15 +8,15 @@ $$
 DECLARE
   _post_id INT;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}', '{"string","string"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string","permlink": "string"}', 2, NULL);
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
         False),
       hivemind_postgrest_utilities.valid_permlink(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True),
         False),
       True);
 

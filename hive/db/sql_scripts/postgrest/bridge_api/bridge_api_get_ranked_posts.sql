@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_ranked_posts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_ranked_posts(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_ranked_posts(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -13,30 +13,30 @@ _observer_id INT;
 _sort_type hivemind_postgrest_utilities.ranked_post_sort_type;
 
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"sort","start_author","start_permlink","limit","tag","observer"}', '{"string","string","string","number","string","string"}', 1);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "observer": "string"}', 1, '{"start_permlink": "permlink must be string"}');
 
   _limit = hivemind_postgrest_utilities.valid_number(
-    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 3, False),
+    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
     20, 1, 100, 'limit');
 
   _post_id = hivemind_postgrest_utilities.find_comment_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_author', 1, False), True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', False), True),
     hivemind_postgrest_utilities.valid_permlink(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_permlink', 2, False), True),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False), True),
     True);
 
   _tag = hivemind_postgrest_utilities.valid_tag(
-    hivemind_postgrest_utilities.valid_tag(hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'tag', 4, False), True),
+    hivemind_postgrest_utilities.valid_tag(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'tag', False), True),
     True);
 
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 5, False),
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
       /* allow_empty */ (CASE WHEN _tag = 'my' THEN False ELSE True END)),
     True);
 
-  CASE hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'sort', 0, True)
+  CASE hivemind_postgrest_utilities.parse_argument_from_json(_params, 'sort', True)
     WHEN 'trending' THEN _sort_type = 'trending';
     WHEN 'hot' THEN _sort_type = 'hot';
     WHEN 'created' THEN _sort_type = 'created';

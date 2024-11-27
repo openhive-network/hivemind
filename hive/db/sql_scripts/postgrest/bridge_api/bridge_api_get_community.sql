@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_community;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_community(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_community(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -9,19 +9,19 @@ DECLARE
   _community_id INT;
   _observer_id INT;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"name","observer"}', '{"string", "string"}', 1);
+   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"name": "string","observer":"string"}', 1, '{"name": "given community name is not valid", "observer": "invalid account name type"}');
 
   _community_id = 
     hivemind_postgrest_utilities.find_community_id(
       hivemind_postgrest_utilities.valid_community(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'name', 0, True)
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'name', True)
       ),
     True);
   
   _observer_id = 
     hivemind_postgrest_utilities.find_account_id(
       hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 1, False),
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
       True),
     True);
 

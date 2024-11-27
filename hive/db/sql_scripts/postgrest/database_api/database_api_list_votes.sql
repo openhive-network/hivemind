@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.database_api_list_votes;
-CREATE FUNCTION hivemind_endpoints.database_api_list_votes(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.database_api_list_votes(IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -18,10 +18,10 @@ DECLARE
   _voter_id INT;
   _post_id INT;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"start","limit","order"}', '{"array","number","string"}');
-  _start = hivemind_postgrest_utilities.parse_array_argument_from_json(_params, _json_is_object, 'start', 0, True);
-  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 1, False);
-  _order = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'order', 2, True);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start": "array", "limit": "number", "order": "string"}', 3, NULL);
+  _start = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', True);
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
+  _order = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'order', True);
 
   _order = lower(_order);
 
