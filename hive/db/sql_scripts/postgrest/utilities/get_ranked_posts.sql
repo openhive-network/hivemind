@@ -145,7 +145,6 @@ BEGIN
     )
     ) FROM (
       WITH -- get_trending_ranked_posts_for_communities
-      WITH 
       community_posts as MATERIALIZED
       (
         SELECT id FROM hivemind_app.live_posts_view
