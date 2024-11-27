@@ -112,6 +112,7 @@ def build_metadata():
             'hive_posts_parent_id_id_idx',
             sa.text('parent_id, id DESC'),
             postgresql_where=sql_text("counter_deleted = 0"),
+            postgresql_include=['author_id'],
         ),
 
         # used by i.e. bridge_get_ranked_post_by_created_for_observer_communities

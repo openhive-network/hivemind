@@ -22,26 +22,17 @@ BEGIN
       SELECT jsonb_agg (
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
-        WITH
-        community_data AS -- get_ranked_posts_for_communities pinned
-        (
-          SELECT
-            id
-          FROM hivemind_app.hive_communities
-          WHERE
-            name = _tag
-          LIMIT 1
-        ),
+        WITH -- get_ranked_posts_for_communities pinned
         pinned_post AS
         (
           SELECT 
             hp.id,
             blacklist.source
-          FROM hivemind_app.live_posts_comments_view hp
+          FROM hivemind_app.live_posts_view hp
           JOIN community_data cd ON hp.community_id = cd.id
           LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
           WHERE
-            hp.is_pinned
+            hp.is_pinned  AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) --use hive_posts_community_id_is_pinned_idx
             AND NOT (_post_id <> 0 AND hp.id >= _post_id)
             AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           ORDER BY hp.id DESC
@@ -148,7 +139,8 @@ BEGIN
       community_posts as MATERIALIZED
       (
         SELECT id FROM hivemind_app.live_posts_view
-        WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) 
+        WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) 
+        AND NOT hp.is_paidout --use index hive_posts_community_id_not_is_paidout_idx
       ),
       ranked_community_posts as (
         SELECT
@@ -157,9 +149,8 @@ BEGIN
         FROM community_posts hp
         LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
-          NOT hp.is_paidout 
+          NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT(_called_from_bridge_api AND hp.is_pinned)
-          AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -622,10 +613,11 @@ BEGIN
     )
     ) FROM (
       WITH -- get_created_ranked_posts_for_communities
-      live_community_posts AS MATERIALIZED
+      live_community_posts as
       (
         SELECT id, author_id, is_pinned FROM hivemind_app.live_posts_view
-        where community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
+        where community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag)
+        AND NOT(_called_from_bridge_api AND is_pinned) --use index hive_posts_community_id_not_is_pinned_idx
       ),
       community_posts as
       (
@@ -636,10 +628,8 @@ BEGIN
         LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT (_post_id <> 0 AND hp.id >= _post_id)
-          AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
-        ORDER BY
-          hp.id DESC
+        ORDER BY hp.id DESC
         LIMIT _limit
       )
       SELECT
