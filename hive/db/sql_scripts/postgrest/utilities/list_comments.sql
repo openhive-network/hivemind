@@ -32,7 +32,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                        WITH comments AS
+                        WITH comments AS -- list_comments_by_cashout_time
                         (
                           SELECT
                             hp.id,
@@ -141,7 +141,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                     hivemind_postgrest_utilities.create_database_post_object(row, 0)
                   ) FROM (
-                      WITH comments AS
+                      WITH comments AS -- list_comments_by_root_or_parent
                       (
                         SELECT
                           hp.id
@@ -250,7 +250,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS
+                      WITH comments AS -- list_comments_by_last_update
                       (
                         SELECT
                           lpcv.id,
@@ -361,7 +361,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS
+                      WITH comments AS -- list_comments_by_author_last_update
                       (
                         SELECT
                           lpcv.id,
@@ -464,7 +464,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS
+                      WITH comments AS -- list_comments_by_permlink
                       (
                         SELECT
                           hph.id,

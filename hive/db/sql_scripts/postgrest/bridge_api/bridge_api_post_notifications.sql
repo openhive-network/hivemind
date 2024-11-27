@@ -36,7 +36,7 @@ BEGIN
   RETURN (
     SELECT jsonb_agg(to_jsonb(row)) FROM
     (
-      WITH notifications AS
+      WITH notifications AS  -- bridge_api_post_notifications
       (
         SELECT
           hnv.id,

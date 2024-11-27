@@ -39,7 +39,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg (
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH posts AS
+                      WITH posts AS -- database_api_find_comments
                       (
                         SELECT
                           hp.id

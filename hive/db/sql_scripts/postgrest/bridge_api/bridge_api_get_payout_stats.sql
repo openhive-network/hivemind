@@ -18,7 +18,7 @@ BEGIN
     SELECT jsonb_agg(item)
     INTO _result
     FROM (
-        SELECT jsonb_build_array(
+        SELECT jsonb_build_array(  -- bridge_api_get_payout_stats
                 COALESCE(hc.name, '@' || hpv.author),
                 COALESCE(hc.title, COALESCE('@' || hpv.author, 'Unknown')),
                 hpv.payout::float,

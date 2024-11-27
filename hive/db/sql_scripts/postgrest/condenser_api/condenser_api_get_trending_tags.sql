@@ -26,7 +26,7 @@ BEGIN
   END IF;
 
 _result = (
-  SELECT jsonb_agg(to_jsonb(row)) FROM (
+  SELECT jsonb_agg(to_jsonb(row)) FROM ( -- condenser_api_get_trending_tags
     WITH row AS (
       SELECT
         hcd.category AS name,

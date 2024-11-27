@@ -59,7 +59,7 @@ BEGIN
           'reblogged_on', hivemind_postgrest_utilities.json_date(row.reblogged_at)
         )
       ) FROM (
-        SELECT
+        SELECT  -- condenser_api_get_blog_entries
           blog.entry_id::INT,
           ha.name as author,
           hpd.permlink,
@@ -90,6 +90,7 @@ BEGIN
     );
   ELSE
     _result = (
+      -- condenser_api_get_blog
       SELECT jsonb_agg(
         jsonb_build_object(
           'blog', _account,

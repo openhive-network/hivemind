@@ -26,7 +26,7 @@ BEGIN
     True);
 
   RETURN (
-    SELECT to_jsonb(row) FROM (
+    SELECT to_jsonb(row) FROM ( -- bridge_api_get_community
       SELECT
         hc.id,
         hc.name,

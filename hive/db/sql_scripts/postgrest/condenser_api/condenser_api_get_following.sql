@@ -28,7 +28,7 @@ BEGIN
         )
         ORDER BY row.id DESC
       ) FROM (
-        WITH following_set AS
+        WITH following_set AS -- condenser_api_get_following
         (
           SELECT
             hf.id,

@@ -23,7 +23,7 @@ BEGIN
     'category', (CASE WHEN row.category IS NULL THEN '' ELSE row.category END),
     'depth', row.depth
   ) FROM (
-      SELECT 
+      SELECT  -- bridge_api_get_posts_header
         ha_a.name as author, hpd_p.permlink as permlink, hcd.category as category, depth
       FROM 
         hivemind_app.hive_posts hp

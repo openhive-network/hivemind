@@ -23,7 +23,7 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
-        community_data AS
+        community_data AS -- get_ranked_posts_for_communities pinned
         (
           SELECT
             id
@@ -144,7 +144,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_trending_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -237,7 +237,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_promoted_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -334,7 +334,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_payout_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -429,7 +429,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_payout_comments_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -524,7 +524,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_hot_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -617,7 +617,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH
+      WITH -- get_created_ranked_posts_for_communities
       community_data AS
       (
         SELECT
@@ -715,7 +715,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_muted_ranked_posts_for_communities
       community_posts as
       (
         SELECT
@@ -813,7 +813,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_trending_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -910,7 +910,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_hot_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1001,7 +1001,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_created_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1098,7 +1098,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_promoted_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1196,7 +1196,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_payout_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1294,7 +1294,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_payout_comments_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1386,7 +1386,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_muted_ranked_posts_for_tag
       tag_posts as
       (
         SELECT
@@ -1476,7 +1476,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_trending_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -1565,7 +1565,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_hot_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -1649,7 +1649,7 @@ BEGIN
     SELECT jsonb_agg (
         hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_created_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -1739,7 +1739,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_promoted_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -1831,7 +1831,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_payout_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -1922,7 +1922,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_payout_comments_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -2012,7 +2012,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_muted_ranked_posts_for_observer_communities
       observer_posts as
       (
         SELECT
@@ -2107,7 +2107,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_trending_ranked_posts
       all_posts as
       (
         SELECT
@@ -2199,7 +2199,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_hot_ranked_posts
       all_posts as
       (
         SELECT
@@ -2287,7 +2287,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_created_ranked_posts
       all_posts as
       (
         SELECT
@@ -2381,7 +2381,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_promoted_ranked_posts
       all_posts as
       (
         SELECT
@@ -2477,7 +2477,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_payout_ranked_posts
       all_posts as
       (
         SELECT
@@ -2572,7 +2572,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH 
+      WITH -- get_all_payout_comments_ranked_posts
       all_posts as
       (
         SELECT
@@ -2661,7 +2661,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
-      WITH 
+      WITH -- get_all_muted_ranked_posts
       all_posts as
       (
         SELECT

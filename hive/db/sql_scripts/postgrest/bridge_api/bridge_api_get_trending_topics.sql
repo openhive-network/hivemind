@@ -20,7 +20,7 @@ BEGIN
     _observer := hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 1, False);
     PERFORM hivemind_postgrest_utilities.valid_account(_observer, True);
 
-    WITH main_communities AS (
+    WITH main_communities AS ( -- bridge_api_get_trending_topics
         SELECT jsonb_build_array(
                     community_data->>0,
                     COALESCE(NULLIF(community_data->>1, ''), community_data->>0)

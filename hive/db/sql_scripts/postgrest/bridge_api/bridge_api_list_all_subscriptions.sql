@@ -18,7 +18,7 @@ BEGIN
     True);
 
   _result = (
-    SELECT jsonb_agg(
+    SELECT jsonb_agg(  -- bridge_api_list_all_subscriptions
       jsonb_build_array(row.name, row.title, row.role, row.role_title)
     ) FROM (
       SELECT
