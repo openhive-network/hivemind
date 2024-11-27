@@ -145,16 +145,21 @@ BEGIN
     )
     ) FROM (
       WITH -- get_trending_ranked_posts_for_communities
-      community_posts as
+      WITH 
+      community_posts as MATERIALIZED
       (
+        SELECT id FROM hivemind_app.live_posts_view
+        WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) 
+      ),
+      ranked_community_posts as (
         SELECT
           hp.id,
           blacklist.source
-        FROM hivemind_app.live_posts_view hp
-        JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
+        FROM community_posts hp
         LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
-          hc.name = _tag AND NOT hp.is_paidout AND NOT(_called_from_bridge_api AND hp.is_pinned)
+          NOT hp.is_paidout 
+          AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
@@ -199,10 +204,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        ranked_community_posts.source AS blacklists,
         hp.muted_reasons
-      FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      FROM ranked_community_posts,
+      LATERAL hivemind_app.get_post_view_by_id(ranked_community_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
       LIMIT _limit
