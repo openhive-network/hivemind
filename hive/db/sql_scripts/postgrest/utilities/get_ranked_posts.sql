@@ -29,7 +29,6 @@ BEGIN
             hp.id,
             blacklist.source
           FROM hivemind_app.live_posts_view hp
-          JOIN community_data cd ON hp.community_id = cd.id
           LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
           WHERE
             hp.is_pinned  AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) --use hive_posts_community_id_is_pinned_idx
