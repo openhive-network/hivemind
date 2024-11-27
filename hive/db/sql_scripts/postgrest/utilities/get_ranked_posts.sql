@@ -622,7 +622,7 @@ BEGIN
     )
     ) FROM (
       WITH -- get_created_ranked_posts_for_communities
-      live_community_posts AS
+      live_community_posts AS MATERIALIZED
       (
         SELECT id, author_id, is_pinned FROM hivemind_app.live_posts_view
         where community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)

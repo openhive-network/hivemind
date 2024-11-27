@@ -393,10 +393,6 @@ BEGIN
     IF _account_id = 0 THEN _account_id = NULL; END IF;
   END IF;
 
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
-    RETURN '[]'::jsonb;
-  END IF; 
-
   _result = (
     SELECT jsonb_agg (
         -- in python code i saw in that case is_pinned should be set, but I couldn't find an example in db to do a test case.
@@ -407,19 +403,19 @@ BEGIN
       END
     )
     ) FROM (
-      WITH author_posts_comments AS -- get_account_posts_by_replies
-      (
-        SELECT id, author_id
-        FROM hivemind_app.hive_posts
+      WITH author_posts_comments AS MATERIALIZED -- get_account_posts_by_replies
+      ( --get all posts by the author
+        SELECT id, author_id FROM hivemind_app.hive_posts
         WHERE author_id = _account_id
       ),
       replies AS
       (
         SELECT hpr.id, blacklist.source
         FROM hivemind_app.live_posts_comments_view hpr
-        JOIN author_posts_comments hp1 ON hp1.id = hpr.parent_id
+        JOIN author_posts_comments hp1 ON hp1.id = hpr.parent_id --only get replies to the author's posts (hpr holds the replies)
         LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp1.author_id)
         WHERE NOT(_post_id <> 0 AND hpr.id >= _post_id )
+        AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr._account_id))
         ORDER BY hpr.id + 1 DESC
         LIMIT _limit
       )
