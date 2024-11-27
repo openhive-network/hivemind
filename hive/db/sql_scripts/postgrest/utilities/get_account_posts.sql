@@ -407,11 +407,7 @@ BEGIN
       END
     )
     ) FROM (
-<<<<<<< HEAD
       WITH author_posts_comments AS -- get_account_posts_by_replies
-=======
-      WITH author_posts_comments AS
->>>>>>> 25fbbf1f12de3db547a5830b993d7cb42135e1d4
       (
         SELECT id, author_id
         FROM hivemind_app.hive_posts
