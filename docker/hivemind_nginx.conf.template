@@ -1,0 +1,39 @@
+worker_processes  5;
+error_log /dev/stdout info;
+worker_rlimit_nofile 8192;
+
+events {
+  worker_connections 4096;
+}
+http {
+    access_log /dev/stdout;
+    server {
+            listen 0.0.0.0:80 default_server;
+            server_name _;
+
+            location / {
+                    include rewrite_rules.conf;
+                    # ${REWRITE_LOG} will be replaced by the docker entrypoint script.
+                    # Set REWRITE_LOG=on in the environment to enable rewrite logging,
+                    # otherwise it will remain disabled
+                    ${REWRITE_LOG}
+
+                    proxy_pass  http://hivemind-postgrest:3000;  # my PostREST is  here!
+
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    #default_type;
+                    proxy_hide_header Content-Location;
+                    proxy_set_header  Connection "";
+                    proxy_http_version 1.1;
+            }
+    }
+    server {
+        listen 0.0.0.0:81;
+
+        location /health {
+            return 204;
+        }
+    }
+}
