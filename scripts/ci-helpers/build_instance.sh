@@ -78,6 +78,7 @@ BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
 MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
 ALTERNATE_TAG="${REGISTRY_WITHOUT_SLASH}:$BUILD_IMAGE_TAG"
+REWRITER_IMAGE_NAME=${REGISTRY}postgrest-rewriter:$BUILD_IMAGE_TAG
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -95,7 +96,7 @@ fi
 
 GIT_CURRENT_BRANCH="$(git branch --show-current || true)"
 if [ -z "$GIT_CURRENT_BRANCH" ]; then
-  GIT_CURRENT_BRANCH="$(git describe --abbrev=0 --all | sed 's/^.*\///' || true)"
+  GIT_CURRENT_BRANCH="$(git describe --abbrev=0 --all --exclude 'pipelines/*' | sed 's/^.*\///' || true)"
   if [ -z "$GIT_CURRENT_BRANCH" ]; then
     GIT_CURRENT_BRANCH="[unknown]"
   fi
@@ -116,6 +117,12 @@ if [ -z "$GIT_LAST_COMMIT_DATE" ]; then
   GIT_LAST_COMMIT_DATE="[unknown]"
 fi
 
+REWRITER_TARGET=without_tag
+if [ ! -z "$BUILD_IMAGE_TAG" ]; then
+  REWRITER_TARGET=with_tag
+  TAG_BUILD_ARGS="--build-arg GIT_COMMIT_TAG=$BUILD_IMAGE_TAG"
+fi
+
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-context "runtime=docker-image://${REGISTRY}runtime:${CI_IMAGE_TAG}" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
@@ -126,6 +133,19 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
   --tag "$TAG" \
   --file Dockerfile .
+
+  docker buildx build \
+    --build-arg BUILD_TIME="$BUILD_TIME" \
+    --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
+    --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
+    --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
+    --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
+    --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
+    --target=$REWRITER_TARGET \
+    $TAG_BUILD_ARGS \
+    --tag "$REWRITER_IMAGE_NAME" \
+    --load \
+    --file Dockerfile.rewriter .
 
 # Since CI pushes the image directly to the registry, it needs to be pulled to be tagged
 if [[ -n "${CI:-}" ]]; then
