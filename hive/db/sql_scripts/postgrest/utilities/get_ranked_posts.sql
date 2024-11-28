@@ -1620,7 +1620,7 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_created_ranked_posts_for_observer_communities
-      observer_posts as
+      observer_posts AS
       (
         SELECT
           posts.id
