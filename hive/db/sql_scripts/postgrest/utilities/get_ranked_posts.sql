@@ -1650,21 +1650,29 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_created_ranked_posts_for_observer_communities
-      observer_posts as
+      observer_posts AS
       (
         SELECT
-          hp.id,
-          blacklist.source
-        FROM hivemind_app.live_posts_view hp
-        JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        JOIN hivemind_app.hive_subscriptions hs ON hs.community_id = hp.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
-        WHERE
-          hs.account_id = _observer_id
-          AND NOT ha.is_grayed AND NOT(_post_id <> 0 AND hp.id >= _post_id)
-          AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
-        ORDER BY
-          hp.id DESC
+          posts.id
+        FROM
+        (
+          SELECT community_id
+          FROM hivemind_app.hive_subscriptions
+          WHERE account_id = _observer_id
+        ) communities
+        CROSS JOIN LATERAL
+        (
+          SELECT hp.id
+          FROM hivemind_app.live_posts_view hp
+          JOIN hivemind_app.hive_accounts_view ha ON (hp.author_id = ha.id)
+          WHERE
+            hp.community_id = communities.community_id
+            AND NOT ha.is_grayed
+            AND NOT(_post_id <> 0 AND hp.id >= _post_id)
+          ORDER BY id DESC
+          LIMIT _limit
+        ) posts
+        ORDER BY posts.id DESC
         LIMIT _limit
       )
       SELECT
@@ -1705,10 +1713,11 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        blacklist.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
       ORDER BY
         hp.id DESC
       LIMIT _limit
