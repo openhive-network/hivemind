@@ -137,7 +137,7 @@ BEGIN
       WITH -- get_trending_ranked_posts_for_communities
       community_posts as MATERIALIZED
       (
-        SELECT id FROM hivemind_app.live_posts_view
+        SELECT id, author_id, sc_trend FROM hivemind_app.live_posts_view
         WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) 
         AND NOT hp.is_paidout --use index hive_posts_community_id_not_is_paidout_idx
       ),
