@@ -23,16 +23,7 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
-        community_data AS -- get_ranked_posts_for_communities pinned
-        (
-          SELECT
-            id
-          FROM hivemind_app.hive_communities
-          WHERE
-            name = _tag
-          LIMIT 1
-        ),
-        pinned_post AS
+        pinned_post AS -- get_ranked_posts_for_communities pinned
         (
           SELECT 
             hp.id
