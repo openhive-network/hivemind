@@ -609,26 +609,26 @@ BEGIN
     )
     ) FROM (
       WITH -- get_created_ranked_posts_for_communities
-      community_data AS
+      live_community_posts AS
       (
         SELECT
-          id
-        FROM hivemind_app.hive_communities
+          id,
+          author_id,
+          is_pinned
+        FROM hivemind_app.live_posts_view
         WHERE
-          name = _tag
-        LIMIT 1
+          community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
+          AND NOT(_called_from_bridge_api AND is_pinned) --use index hive_posts_community_id_not_is_pinned_idx
       ),
       community_posts as
       (
         SELECT
           hp.id,
           blacklist.source
-        FROM hivemind_app.live_posts_view hp
-        JOIN community_data cd ON hp.community_id = cd.id
+        FROM live_community_posts hp
         LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT (_post_id <> 0 AND hp.id >= _post_id)
-          AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.id DESC
