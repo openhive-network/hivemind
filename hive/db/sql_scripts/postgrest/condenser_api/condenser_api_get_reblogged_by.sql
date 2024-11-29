@@ -20,12 +20,10 @@ BEGIN
 
   RETURN COALESCE(
     (
-      SELECT jsonb_agg(ha.name)
+      SELECT jsonb_agg(ha.name ORDER BY ha.name)
       FROM hivemind_app.hive_accounts ha
       JOIN hivemind_app.hive_feed_cache hfc ON ha.id = hfc.account_id
       WHERE hfc.post_id = _post_id AND ha.id <> _account_id
-      GROUP BY ha.name
-      ORDER BY ha.name
     )
     ,
     '[]'::jsonb
