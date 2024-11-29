@@ -23,25 +23,16 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
-        community_data AS -- get_ranked_posts_for_communities pinned
-        (
-          SELECT
-            id
-          FROM hivemind_app.hive_communities
-          WHERE
-            name = _tag
-          LIMIT 1
-        ),
-        pinned_post AS
+        pinned_post AS -- get_ranked_posts_for_communities pinned
         (
           SELECT 
             hp.id,
             blacklist.source
-          FROM hivemind_app.live_posts_comments_view hp
-          JOIN community_data cd ON hp.community_id = cd.id
+          FROM hivemind_app.live_posts_view hp
           LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
           WHERE
             hp.is_pinned
+            AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
             AND NOT (_post_id <> 0 AND hp.id >= _post_id)
             AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           ORDER BY hp.id DESC
