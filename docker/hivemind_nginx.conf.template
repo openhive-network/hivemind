@@ -18,7 +18,7 @@ http {
                     # otherwise it will remain disabled
                     ${REWRITE_LOG}
 
-                    proxy_pass  http://hivemind-postgrest:3000;  # my PostREST is  here!
+                    proxy_pass  http://hivemind-postgrest-server:8080;  # my PostREST is  here!
 
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
