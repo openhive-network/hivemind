@@ -607,8 +607,14 @@ BEGIN
       WITH -- get_created_ranked_posts_for_communities
       live_community_posts AS
       (
-        SELECT id, author_id, is_pinned FROM hivemind_app.live_posts_view
-        where community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
+        SELECT
+          id,
+          author_id,
+          is_pinned
+        FROM hivemind_app.live_posts_view
+        WHERE
+          community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
+          AND NOT(_called_from_bridge_api AND is_pinned) --use index hive_posts_community_id_not_is_pinned_idx
       ),
       community_posts as
       (
