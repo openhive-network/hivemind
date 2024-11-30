@@ -887,74 +887,77 @@ BEGIN
   END IF;
 
   _result = (
-    SELECT jsonb_agg (
-    ( 
-      CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
-      END
-    )
-    ) FROM (
-      WITH -- get_hot_ranked_posts_for_tag
-      tag_posts as
-      (
-        SELECT
-          hp.id
-        FROM hivemind_app.live_posts_view hp
-        JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
-        WHERE
-          hpt.tag_id = _tag_id AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT ( hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
-        ORDER BY hp.sc_hot DESC, hp.id DESC
-        LIMIT _limit
-      )
-      SELECT
-        hp.id,
-        hp.author,
-        hp.parent_author,
-        hp.author_rep,
-        hp.root_title,
-        hp.beneficiaries,
-        hp.max_accepted_payout,
-        hp.percent_hbd,
-        hp.url,
-        hp.permlink,
-        hp.parent_permlink_or_category,
-        hp.title,
-        hp.body,
-        hp.category,
-        hp.depth,
-        hp.promoted,
-        hp.payout,
-        hp.pending_payout,
-        hp.payout_at,
-        hp.is_paidout,
-        hp.children,
-        hp.votes,
-        hp.created_at,
-        hp.updated_at,
-        hp.rshares,
-        hp.abs_rshares,
-        hp.json,
-        hp.is_hidden,
-        hp.is_grayed,
-        hp.total_votes,
-        hp.sc_trend,
-        hp.role_title,
-        hp.community_title,
-        hp.role_id,
-        hp.is_pinned,
-        hp.curator_payout_value,
-        hp.is_muted,
-        hp.source AS blacklists,
-        hp.muted_reasons
-      FROM tag_posts,
-      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
-      ORDER BY
-        hp.sc_hot DESC, hp.id DESC
+    WITH tag_posts AS MATERIALIZED -- get_hot_ranked_posts_for_tag
+    (
+    SELECT
+      hp.id
+    FROM hivemind_app.live_posts_view hp
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+    WHERE
+      hpt.tag_id = _tag_id AND NOT hp.is_paidout
+      --NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT ( hp.sc_hot = _hot_limit AND hp.id < _post_id))
+      --- Reverting back to original condition since above is improperly transformed due to broken last condition
+      AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+      AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+      ORDER BY hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
-    ) row
+    )
+    ,supplemented_data AS MATERIALIZED
+    (
+    SELECT
+      hp.id,
+      hp.author,
+      hp.parent_author,
+      hp.author_rep,
+      hp.root_title,
+      hp.beneficiaries,
+      hp.max_accepted_payout,
+      hp.percent_hbd,
+      hp.url,
+      hp.permlink,
+      hp.parent_permlink_or_category,
+      hp.title,
+      hp.body,
+      hp.category,
+      hp.depth,
+      hp.promoted,
+      hp.payout,
+      hp.pending_payout,
+      hp.payout_at,
+      hp.is_paidout,
+      hp.children,
+      hp.votes,
+      hp.created_at,
+      hp.updated_at,
+      hp.rshares,
+      hp.abs_rshares,
+      hp.json,
+      hp.is_hidden,
+      hp.is_grayed,
+      hp.total_votes,
+      hp.sc_trend,
+      hp.sc_hot,
+      hp.role_title,
+      hp.community_title,
+      hp.role_id,
+      hp.is_pinned,
+      hp.curator_payout_value,
+      hp.is_muted,
+      blacklist.source AS blacklists,
+      hp.muted_reasons
+    FROM tag_posts,
+    LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+    --- Evaluate blacklists only for final set of data
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+    )
+    SELECT jsonb_agg (
+      CASE
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(sd, _truncate_body, NULL, sd.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(sd, _truncate_body, False)
+      END
+      ORDER BY sd.sc_hot DESC, sd.id DESC
+    )
+    FROM supplemented_data sd
   );
 
   RETURN COALESCE(_result, '[]'::jsonb);
