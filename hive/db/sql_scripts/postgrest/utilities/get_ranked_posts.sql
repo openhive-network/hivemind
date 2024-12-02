@@ -144,7 +144,6 @@ BEGIN
           hp.id
         FROM community_posts hp
         WHERE
-          NOT hp.is_paidout 
           AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
@@ -1130,7 +1129,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, _observer_id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
       LIMIT _limit
@@ -1413,7 +1412,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, _observer_id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
       LIMIT _limit

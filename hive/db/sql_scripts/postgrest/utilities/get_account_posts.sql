@@ -174,7 +174,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM ds,
-      LATERAL hivemind_app.get_full_post_view_by_id(ds.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(ds.id, _observer_id) hp
       ORDER BY ds.id DESC
       LIMIT _limit
     ) row
