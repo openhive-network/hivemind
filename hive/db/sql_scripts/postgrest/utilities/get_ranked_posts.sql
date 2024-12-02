@@ -853,12 +853,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      blacklist.source AS blacklists,
-      hp.muted_reasons
+      hp.muted_reasons,
+      hp.blacklists
     FROM tag_posts,
-    LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
-    --- Evaluate blacklists only for final set of data
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+    LATERAL hivemind_app.get_post_with_blacklists_view_by_id(tag_posts.id, _observer_id) hp
     )
     SELECT jsonb_agg (
       CASE
@@ -951,12 +949,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      blacklist.source AS blacklists,
-      hp.muted_reasons
+      hp.muted_reasons,
+      hp.blacklists
     FROM tag_posts,
-    LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
-    --- Evaluate blacklists only for final set of data
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+    LATERAL hivemind_app.get_post_with_blacklists_view_by_id(tag_posts.id, _observer_id) hp
     )
     SELECT jsonb_agg (
       CASE
