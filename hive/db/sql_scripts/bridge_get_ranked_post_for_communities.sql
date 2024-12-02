@@ -100,7 +100,7 @@ BEGIN
     FROM hivemind_app.live_posts_view hp1
     JOIN hivemind_app.hive_communities hc ON hp1.community_id = hc.id
     WHERE hc.name = _community 
-       AND NOT hp1.is_paidout 
+       AND NOT hp1.is_paidout --use "hive_posts_community_id_not_is_paidout_idx" index
        AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
        AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
        AND ( __observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
