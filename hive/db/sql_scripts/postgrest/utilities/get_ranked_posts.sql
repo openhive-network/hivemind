@@ -27,7 +27,7 @@ BEGIN
         (
           SELECT 
             hp.id
-          FROM hivemind_app.live_posts_comments_view hp
+          FROM hivemind_app.live_posts_view hp
           WHERE
             hp.is_pinned
             AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
@@ -135,10 +135,6 @@ BEGIN
     ) FROM (
       WITH -- get_trending_ranked_posts_for_communities
       community_posts as MATERIALIZED
-=======
-      WITH -- get_trending_ranked_posts_for_communities
-      community_posts as
->>>>>>> e02e4640 (Postgrest: add comments to queries for diagnostic purposes)
       (
         SELECT id FROM hivemind_app.live_posts_view
         WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) --LIMIT 1 is not necessary here
