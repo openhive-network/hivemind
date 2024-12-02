@@ -363,7 +363,7 @@ BEGIN
      JOIN hivemind_app.hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
      JOIN hivemind_app.hive_category_data rcd ON rcd.id = rp.category_id
      JOIN hivemind_app.hive_post_data rpd ON rpd.id = rp.id
-     JOIN hivemind_app.get_blacklisted_by_observer(_observer_id) blacklist ON (blacklist.blacklisted_id = hp.author_id) 
+     LEFT JOIN hivemind_app.get_blacklisted_by_observer(_observer_id) blacklist ON (blacklist.blacklisted_id = hp.author_id) 
      -- largest joined data
      JOIN hivemind_app.hive_post_data hpd ON hpd.id = hp.id
   WHERE hp.id = _id AND hp.counter_deleted = 0;
