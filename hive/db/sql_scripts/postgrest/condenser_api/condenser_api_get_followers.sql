@@ -37,8 +37,7 @@ BEGIN
         hf.state = (_params->'hive_follows_state')::SMALLINT
         AND hf.following = (_params->'account_id')::INT
         AND NOT (_start_id <> 0 AND hf.id >= _start_id )
-      -- + 1 is important hack for Postgres Intelligence to use dedicated index and avoid choosing PK index and performing a linear filtering on it
-      ORDER BY hf.id + 1 DESC
+      ORDER BY hf.id DESC
       LIMIT (_params->'limit')::INT
     ) row
   ),
