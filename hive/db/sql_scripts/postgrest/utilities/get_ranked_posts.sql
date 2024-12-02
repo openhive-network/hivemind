@@ -144,7 +144,7 @@ BEGIN
           hp.id
         FROM community_posts hp
         WHERE
-          AND NOT(_called_from_bridge_api AND hp.is_pinned)
+          NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
