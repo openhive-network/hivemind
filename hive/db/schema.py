@@ -281,7 +281,8 @@ def build_metadata():
         sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
         sa.Index('hive_follows_created_at_idx', 'created_at'),
-        sa.Index('hive_follows_follower_where_blacklisted_idx', 'follower', postgresql_where=sql_text('blacklisted')),
+        sa.Index('hive_follows_follower_where_blacklisted_idx', 'follower', postgresql_where=sql_text('blacklisted')), # needed by blacklisted_by_observer_view
+        sa.Index('hive_follows_following_where_blacklisted_idx', 'following', postgresql_where=sql_text('blacklisted')), # needed by blacklisted_by_observer_view
         sa.Index('hive_follows_follower_where_follow_muted_idx', 'follower', postgresql_where=sql_text('follow_muted')),
         sa.Index('hive_follows_follower_where_follow_blacklists_idx', 'follower', postgresql_where=sql_text('follow_blacklists')),
     )
