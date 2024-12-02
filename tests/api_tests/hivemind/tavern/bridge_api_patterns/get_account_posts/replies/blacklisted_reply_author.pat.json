@@ -395,7 +395,9 @@
     "author_payout_value": "0.036 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Features such as sharing posts to other social sites, sign up gifts, referral bonuses, notifications of rewards ..... many others, but hopefully most important, good content and community!",
     "category": "steemit-ideas",
     "children": 0,

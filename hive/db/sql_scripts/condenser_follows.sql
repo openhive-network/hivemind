@@ -63,8 +63,8 @@ BEGIN
   SELECT
      hf.id, hf.following
   FROM hivemind_app.hive_follows hf
-  WHERE hf.follower = __account_id AND hf.state = _type AND ( __start_id = 0 OR hf.id < __start_id )
-  ORDER BY hf.id + 1 DESC --- + 1 is important hack for Postgres Intelligence to use dedicated index and avoid choosing PK index and performing a linear filtering on it
+  WHERE hf.follower = __account_id AND hf.state = _type AND ( __start_id = 0 OR hf.id < __start_id ) -- use hive_follows_follower_state_idx
+  ORDER BY hf.id DESC
   LIMIT _limit
   )
   SELECT
