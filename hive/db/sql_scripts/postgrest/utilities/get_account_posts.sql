@@ -400,9 +400,9 @@ BEGIN
       WITH replies AS -- get_account_posts_by_replies
       (
         SELECT hpr.id
-        FROM hivemind_app.live_posts_comments_view hpr
-        JOIN hivemind_app.hive_posts hp1 ON hp1.id = hpr.parent_id
-        WHERE hp1.author_id = _account_id
+        FROM hivemind_app.live_posts_comments_view hp1      
+        JOIN hivemind_app.live_posts_comments_view hpr ON hp1.id = hpr.parent_id   --hive_posts_parent_id_id_idx INDEX ONLY
+        WHERE hp1.author_id = _account_id       --hive_posts_author_id_id_idx will be used because hp1.counter_deleted = 0 INDEX ONLY
           AND NOT(_post_id <> 0 AND hpr.id >= _post_id )
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
         ORDER BY hpr.id DESC
