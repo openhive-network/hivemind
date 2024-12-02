@@ -396,7 +396,7 @@ BEGIN
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
-    ) FROM (      
+    ) FROM (      -- get_account_posts_by_replies
       WITH 
       posts_comment_by_author AS MATERIALIZED
       (
@@ -404,13 +404,18 @@ BEGIN
         FROM hivemind_app.live_posts_comments_view
         WHERE author_id = _account_id       --hive_posts_author_id_id_idx will be used because hp1.counter_deleted = 0 INDEX ONLY
       ) ,
-      replies AS -- get_account_posts_by_replies
+      all_replies AS MATERIALIZED 
       (
-        SELECT hpr.id
+        SELECT hpr.id, hpr.author_id
         FROM posts_comment_by_author hp1
         JOIN hivemind_app.live_posts_comments_view hpr ON hp1.id = hpr.parent_id   --hive_posts_parent_id_id_idx INDEX ONLY
+      ),
+      all_unmuted_replies AS
+      (
+        SELECT hpr.id
+        FROM all_replies hpr
         WHERE
-           NOT(_post_id <> 0 AND hpr.id >= _post_id )
+          NOT(_post_id <> 0 AND hpr.id >= _post_id )
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
         ORDER BY hpr.id DESC
         LIMIT _limit
@@ -455,9 +460,9 @@ BEGIN
         hp.is_muted,
         hp.source AS blacklists,
         hp.muted_reasons
-      FROM replies,
-      LATERAL hivemind_app.get_full_post_view_by_id(replies.id, _observer_id) hp
-      ORDER BY replies.id DESC
+      FROM all_unmuted_replies,
+      LATERAL hivemind_app.get_full_post_view_by_id(all_unmuted_replies.id, _observer_id) hp
+      ORDER BY all_unmuted_replies.id DESC
       LIMIT _limit
     ) row
   );
