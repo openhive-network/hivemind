@@ -112,7 +112,7 @@ BEGIN
           LEFT JOIN post_replies r ON r.parent_id = cp.id
           ORDER BY cp.id
         ) ds,
-          LATERAL hivemind_app.get_full_post_view_by_id(ds.id, __observer_id) hpv
+          LATERAL hivemind_app.get_full_post_view_by_id(ds.id, _observer_id) hpv
         ORDER BY ds.id
         LIMIT 2000
     ) row),

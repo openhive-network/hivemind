@@ -86,7 +86,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM blog,
-      LATERAL hivemind_app.get_full_post_view_by_id(blog.post_id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(blog.post_id, _observer_id) hp
       ORDER BY blog.created_at DESC, blog.post_id DESC
       LIMIT _limit
     ) row
