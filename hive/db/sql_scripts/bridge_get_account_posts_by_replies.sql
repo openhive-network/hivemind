@@ -21,10 +21,9 @@ BEGIN
   RETURN QUERY
   WITH replies AS MATERIALIZED --bridge_get_account_posts_by_replies
   (
-    SELECT hpr.id, blacklist.source
+    SELECT hpr.id
     FROM hivemind_app.live_posts_comments_view hpr
     JOIN hivemind_app.hive_posts hp1 ON hp1.id = hpr.parent_id
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.author_id = __account_id
       AND (__post_id = 0 OR hpr.id < __post_id )
       AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hpr.author_id))
@@ -69,10 +68,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      replies.source,
+      hp.source,
       hp.muted_reasons
   FROM replies,
-  LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(replies.id, __observer_id) hp
   ORDER BY replies.id DESC
   LIMIT _limit;
 END

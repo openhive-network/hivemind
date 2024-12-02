@@ -23,13 +23,20 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
-        pinned_post AS -- get_ranked_posts_for_communities pinned
+        community_data AS  --get_ranked_posts_for_communities
+        (
+          SELECT
+            id
+          FROM hivemind_app.hive_communities
+          WHERE
+            name = _tag
+          LIMIT 1
+        ),
+        pinned_post AS
         (
           SELECT 
-            hp.id,
-            blacklist.source
-          FROM hivemind_app.live_posts_view hp
-          LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+            hp.id
+          FROM hivemind_app.live_posts_comments_view hp
           WHERE
             hp.is_pinned
             AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
@@ -76,10 +83,10 @@ BEGIN
           hp.is_pinned,
           hp.curator_payout_value,
           hp.is_muted,
-          pinned_post.source AS blacklists,
+          hp.source AS blacklists,
           hp.muted_reasons
         FROM pinned_post,
-        LATERAL hivemind_app.get_post_view_by_id(pinned_post.id) hp
+        LATERAL hivemind_app.get_full_post_view_by_id(pinned_post.id, __observer_id) hp
         ORDER BY hp.id DESC
         LIMIT _limit
       ) row
@@ -136,16 +143,18 @@ BEGIN
     )
     ) FROM (
       WITH -- get_trending_ranked_posts_for_communities
-      community_posts as
+      community_posts as MATERIALIZED
       (
+        SELECT id FROM hivemind_app.live_posts_view
+        WHERE community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag) --LIMIT 1 is not necessary here
+      ),
+      ranked_community_posts as (
         SELECT
-          hp.id,
-          blacklist.source
-        FROM hivemind_app.live_posts_view hp
-        JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+          hp.id
+        FROM community_posts hp
         WHERE
-          hc.name = _tag AND NOT hp.is_paidout AND NOT(_called_from_bridge_api AND hp.is_pinned)
+          NOT hp.is_paidout 
+          AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
@@ -190,10 +199,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
-      FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      FROM ranked_community_posts,
+      LATERAL hivemind_app.get_full_post_view_by_id(ranked_community_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
       LIMIT _limit
@@ -232,11 +241,9 @@ BEGIN
       community_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hc.name = _tag AND hp.promoted > 0 AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT ( hp.promoted = _promoted_limit AND hp.id < _post_id ))
@@ -283,10 +290,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
       LIMIT _limit
@@ -330,11 +337,9 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
           AND NOT (_post_id <> 0 AND hp.payout + hp.pending_payout >= _payout_limit AND NOT (hp.payout + hp.pending_payout = _payout_limit AND hp.id < _post_id ))
@@ -381,10 +386,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -425,11 +430,9 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ( (hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id ))
@@ -476,10 +479,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -519,11 +522,9 @@ BEGIN
       community_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT (hp.sc_hot = _hot_limit AND hp.id < _post_id))
@@ -570,10 +571,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
@@ -623,10 +624,8 @@ BEGIN
       community_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM live_community_posts hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT (_post_id <> 0 AND hp.id >= _post_id)
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
@@ -672,10 +671,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         community_posts.id DESC
       LIMIT _limit
@@ -711,12 +710,10 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -762,10 +759,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        community_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM community_posts,
-      LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(community_posts.id, __observer_id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -999,12 +996,10 @@ BEGIN
       tag_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hpt.tag_id = _tag_id
           AND NOT (_post_id <> 0 AND hp.id >= _post_id)
@@ -1051,10 +1046,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        tag_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
       ORDER BY
         hp.id DESC
       LIMIT _limit
@@ -1096,11 +1091,9 @@ BEGIN
       tag_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND hp.promoted > 0
           AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
@@ -1147,10 +1140,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        tag_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
       LIMIT _limit
@@ -1195,10 +1188,8 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_comments_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
@@ -1246,10 +1237,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        tag_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -1293,10 +1284,8 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_comments_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -1343,10 +1332,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        tag_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -1385,12 +1374,10 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_comments_view hp
         JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -1436,10 +1423,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        tag_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM tag_posts,
-      LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, __observer_id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -1474,11 +1461,9 @@ BEGIN
       observer_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.promoted >= _trending_limit AND NOT (hp.promoted = _trending_limit AND hp.id < _post_id))
@@ -1525,10 +1510,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
       LIMIT _limit
@@ -1563,11 +1548,9 @@ BEGIN
       observer_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.promoted >= _hot_limit AND NOT (hp.promoted = _hot_limit AND hp.id < _post_id))
@@ -1614,10 +1597,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
@@ -1707,11 +1690,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        blacklist.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
-      LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         hp.id DESC
       LIMIT _limit
@@ -1746,11 +1728,9 @@ BEGIN
       observer_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND hp.promoted > 0
           AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
@@ -1797,10 +1777,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
       LIMIT _limit
@@ -1839,11 +1819,9 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
@@ -1891,10 +1869,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -1930,11 +1908,9 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -1981,10 +1957,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -2020,12 +1996,10 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         JOIN hivemind_app.hive_accounts_view ha ON ha.id = hp.author_id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -2071,10 +2045,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        observer_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM observer_posts,
-      LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, __observer_id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
       LIMIT _limit
@@ -2114,10 +2088,8 @@ BEGIN
       all_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT (hp.sc_trend = _trending_limit AND hp.id < _post_id))
@@ -2164,10 +2136,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
       LIMIT _limit
@@ -2206,10 +2178,8 @@ BEGIN
       all_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT (hp.sc_hot = _hot_limit AND hp.id < _post_id))
@@ -2256,10 +2226,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
@@ -2294,11 +2264,9 @@ BEGIN
       all_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT ha.is_grayed
           AND NOT (_post_id <> 0 AND hp.id >= _post_id)
@@ -2345,10 +2313,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         hp.id DESC
       LIMIT _limit
@@ -2388,10 +2356,8 @@ BEGIN
       all_posts as
       (
         SELECT
-          hp.id,
-          blacklist.source
+          hp.id
         FROM hivemind_app.live_posts_comments_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout AND hp.promoted > 0
           AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
@@ -2438,10 +2404,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
       LIMIT _limit
@@ -2485,10 +2451,8 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_comments_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
@@ -2536,10 +2500,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
       LIMIT _limit
@@ -2580,10 +2544,8 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_comments_view hp
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -2630,10 +2592,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
       LIMIT _limit
@@ -2669,11 +2631,9 @@ BEGIN
       (
         SELECT
           hp.id,
-          (hp.payout + hp.pending_payout) as total_payout,
-          blacklist.source
+          (hp.payout + hp.pending_payout) as total_payout
         FROM hivemind_app.live_posts_comments_view hp
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE
           NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
@@ -2718,10 +2678,10 @@ BEGIN
         hp.is_pinned,
         hp.curator_payout_value,
         hp.is_muted,
-        all_posts.source AS blacklists,
+        hp.source AS blacklists,
         hp.muted_reasons
       FROM all_posts,
-      LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, __observer_id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
       LIMIT _limit

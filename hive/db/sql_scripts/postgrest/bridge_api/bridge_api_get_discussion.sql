@@ -70,7 +70,7 @@ BEGIN
           hpv.curator_payout_value,
           hpv.is_muted,
           hpv.parent_id,
-          ds.source AS blacklists,
+          hpv.source AS blacklists,
           hpv.muted_reasons,
           ds.replies
         FROM
@@ -80,10 +80,8 @@ BEGIN
             SELECT
               hp.id,
               hp.parent_id,
-              hivemind_app.blacklisted_by_observer_view.source as source,
               NULL::TEXT COLLATE "C" AS reply
             FROM hivemind_app.live_posts_comments_view hp 
-            left outer join hivemind_app.blacklisted_by_observer_view on (hivemind_app.blacklisted_by_observer_view.observer_id = _observer_id AND hivemind_app.blacklisted_by_observer_view.blacklisted_id = hp.author_id)
             WHERE 
               hp.id = _post_id
               AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
@@ -93,10 +91,8 @@ BEGIN
             SELECT
               children.id,
               children.parent_id,
-              hivemind_app.blacklisted_by_observer_view.source as source,
               ha.name || '/' || hp.permlink  AS reply
             FROM hivemind_app.live_posts_comments_view children
-            left outer join hivemind_app.blacklisted_by_observer_view on (hivemind_app.blacklisted_by_observer_view.observer_id = _observer_id AND hivemind_app.blacklisted_by_observer_view.blacklisted_id = children.author_id)
             JOIN child_posts ON children.parent_id = child_posts.id
             JOIN hivemind_app.hive_accounts ha ON children.author_id = ha.id AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = children.author_id))
             JOIN hivemind_app.hive_permlink_data hp ON hp.id = children.permlink_id
@@ -117,7 +113,7 @@ BEGIN
           LEFT JOIN post_replies r ON r.parent_id = cp.id
           ORDER BY cp.id
         ) ds,
-          LATERAL hivemind_app.get_post_view_by_id(ds.id) hpv
+          LATERAL hivemind_app.get_full_post_view_by_id(ds.id, __observer_id) hpv
         ORDER BY ds.id
         LIMIT 2000
     ) row),

@@ -31,12 +31,10 @@ BEGIN
     SELECT 
       hfc.post_id, 
       MIN(hfc.created_at) as min_created, 
-      array_agg(ha.name) AS reblogged_by,
-      array_agg(blacklist.source) as blacklist_source
+      array_agg(ha.name) AS reblogged_by
     FROM hivemind_app.hive_feed_cache hfc
     JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
     JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hfc.account_id)
     WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
     AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hfc.account_id))
     GROUP BY hfc.post_id
@@ -83,10 +81,10 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       feed.reblogged_by,
-      (SELECT array_to_string(feed.blacklist_source, ',', '')),
+      hp.source,
       hp.muted_reasons
   FROM feed,
-  LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(feed.post_id, __observer_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC
   LIMIT _limit;
 END
