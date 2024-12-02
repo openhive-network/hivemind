@@ -27,7 +27,7 @@ BEGIN
     WHERE hp1.author_id = __account_id
       AND (__post_id = 0 OR hpr.id < __post_id )
       AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hpr.author_id))
-    ORDER BY hpr.id + 1 DESC
+    ORDER BY hpr.id DESC
     LIMIT _limit
   )
   SELECT

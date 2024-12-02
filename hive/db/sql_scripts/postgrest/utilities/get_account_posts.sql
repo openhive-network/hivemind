@@ -405,7 +405,7 @@ BEGIN
         WHERE hp1.author_id = _account_id
           AND NOT(_post_id <> 0 AND hpr.id >= _post_id )
           AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
-        ORDER BY hpr.id + 1 DESC
+        ORDER BY hpr.id DESC
         LIMIT _limit
       )
       SELECT

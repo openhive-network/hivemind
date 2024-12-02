@@ -35,7 +35,7 @@ BEGIN
       JOIN hivemind_app.hive_accounts ha ON hf.follower = ha.id
       WHERE
         hf.state = (_params->'hive_follows_state')::SMALLINT
-        AND hf.following = (_params->'account_id')::INT
+        AND hf.following = (_params->'account_id')::INT       -- use hive_follows_following_state_id_idx
         AND NOT (_start_id <> 0 AND hf.id >= _start_id )
       ORDER BY hf.id DESC
       LIMIT (_params->'limit')::INT
