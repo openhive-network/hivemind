@@ -63,7 +63,7 @@ BEGIN
     'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
                     'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
-                    WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN to_jsonb(string_to_array(_row.blacklists, ',')) 
+                    WHEN _row.blacklists IS NOT NULL AND CARDINALITY(_row.blacklists) > 0 THEN to_jsonb(_row.blacklists) 
                     ELSE to_jsonb('{}'::INT[])
                   END)
   );
