@@ -107,7 +107,6 @@ BEGIN
           )
           SELECT
             cp.id,
-            cp.source,
             r.replies
           FROM child_posts cp
           LEFT JOIN post_replies r ON r.parent_id = cp.id

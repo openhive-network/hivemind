@@ -65,7 +65,7 @@ BEGIN
             JOIN hivemind_app.hive_accounts ON children.author_id = hivemind_app.hive_accounts.id
             AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
         )
-        SELECT hp2.id, cp.source
+        SELECT hp2.id
         FROM hivemind_app.hive_posts hp2
         JOIN child_posts cp ON cp.id = hp2.id
         ORDER BY hp2.id
