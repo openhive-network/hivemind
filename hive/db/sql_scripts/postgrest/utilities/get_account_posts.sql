@@ -274,7 +274,7 @@ BEGIN
           hp.source AS blacklists,
           hp.muted_reasons
         FROM feed,
-        LATERAL hivemind_app.get_full_post_view_by_id(feed.post_id, __observer_id) hp
+        LATERAL hivemind_app.get_full_post_view_by_id(feed.post_id, _observer_id) hp
         ORDER BY feed.min_created DESC, feed.post_id DESC
         LIMIT _limit
       ) row
@@ -358,7 +358,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM posts,
-      LATERAL hivemind_app.get_full_post_view_by_id(posts.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(posts.id, _observer_id) hp
       ORDER BY posts.id DESC
       LIMIT _limit
     ) row
@@ -449,7 +449,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM replies,
-      LATERAL hivemind_app.get_full_post_view_by_id(replies.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(replies.id, _observer_id) hp
       ORDER BY replies.id DESC
       LIMIT _limit
     ) row
@@ -540,7 +540,7 @@ BEGIN
         hp.source AS blacklists,
         hp.muted_reasons
       FROM payouts,
-      LATERAL hivemind_app.get_full_post_view_by_id(payouts.id, __observer_id) hp
+      LATERAL hivemind_app.get_full_post_view_by_id(payouts.id, _observer_id) hp
       ORDER BY payouts.total_payout DESC, payouts.id DESC
       LIMIT _limit
     ) row
