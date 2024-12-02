@@ -21,11 +21,10 @@ BEGIN
   RETURN QUERY
   WITH posts AS MATERIALIZED -- bridge_get_account_posts_by_posts
   (
-    SELECT id, author_id, blacklist.source
+    SELECT id, author_id
     FROM hivemind_app.live_posts_view hp
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE
-      hp.author_id = __account_id
+      hp.author_id = __account_id                        --hive_posts_author_id_id_depth0_idx
       AND ( __post_id = 0 OR hp.id < __post_id )
     ORDER BY hp.id DESC
     LIMIT _limit
@@ -69,10 +68,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      posts.source,
+      hp.source,
       hp.muted_reasons
   FROM posts,
-  LATERAL hivemind_app.get_post_view_by_id(posts.id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(posts.id, __observer_id) hp
   ORDER BY posts.id DESC
   LIMIT _limit;
 END

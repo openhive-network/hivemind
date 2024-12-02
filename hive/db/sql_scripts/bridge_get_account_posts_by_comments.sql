@@ -21,9 +21,8 @@ BEGIN
   RETURN QUERY
   WITH ds AS MATERIALIZED --bridge_get_account_posts_by_comments
   (
-    SELECT hp1.id, hp1.author_id, blacklist.source
-    FROM hivemind_app.live_comments_view hp1
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    SELECT hp1.id, hp1.author_id
+    FROM hivemind_app.live_comments_view hp1    
     WHERE hp1.author_id = __account_id
       AND (__post_id = 0 OR hp1.id < __post_id)
     ORDER BY hp1.id DESC
@@ -68,10 +67,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      ds.source,
+      hp.source,
       hp.muted_reasons
   FROM ds,
-  LATERAL hivemind_app.get_post_view_by_id(ds.id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(ds.id, __observer_id) hp
   ORDER BY ds.id DESC
   LIMIT _limit;
 END

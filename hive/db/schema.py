@@ -155,6 +155,7 @@ def build_metadata():
         # bridge_get_account_posts_by_comments, bridge_get_account_posts_by_posts
 
         sa.Index('hive_posts_author_id_id_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('counter_deleted = 0')),
+        sa.Index('hive_posts_author_id_id_depth0_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('depth = 0 AND counter_deleted = 0')),
 
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),

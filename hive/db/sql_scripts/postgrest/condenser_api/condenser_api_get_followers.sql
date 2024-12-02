@@ -27,18 +27,25 @@ BEGIN
         'what', jsonb_build_array(_params->'follow_type')
       )
       ORDER BY row.id DESC
-    ) FROM (
+    ) 
+    FROM (
+      WITH followers AS MATERIALIZED
+        (
+        SELECT
+          hf.id,
+          hf.follower
+        FROM hivemind_app.hive_follows hf
+        WHERE hf.following = (_params->'account_id')::INT  AND hf.state = (_params->'hive_follows_state')::SMALLINT  -- use "hive_follows_following_state_id_idx"
+              AND ( _start_id = 0 OR hf.id < _start_id ) 
+        ORDER BY hf.id DESC
+        LIMIT (_params->'limit')::INT
+        )      
       SELECT
-        hf.id,
+        followers.id,
         ha.name
-      FROM hivemind_app.hive_follows hf
-      JOIN hivemind_app.hive_accounts ha ON hf.follower = ha.id
-      WHERE
-        hf.state = (_params->'hive_follows_state')::SMALLINT
-        AND hf.following = (_params->'account_id')::INT
-        AND NOT (_start_id <> 0 AND hf.id >= _start_id )
-      -- + 1 is important hack for Postgres Intelligence to use dedicated index and avoid choosing PK index and performing a linear filtering on it
-      ORDER BY hf.id + 1 DESC
+      FROM followers
+      JOIN hivemind_app.hive_accounts ha ON followers.follower = ha.id
+      ORDER BY followers.id DESC
       LIMIT (_params->'limit')::INT
     ) row
   ),
