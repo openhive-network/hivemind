@@ -179,23 +179,28 @@ BEGIN
         RETURN QUERY SELECT NULL::INTEGER AS blacklisted_id, NULL::TEXT AS source WHERE FALSE;
     ELSE
         RETURN QUERY
-        WITH blacklisters AS MATERIALIZED 
+        WITH blacklisters AS MATERIALIZED  --all blacklists followed by account
         (
-          SELECT following as id FROM hivemind_app.hive_follows WHERE follow_blacklists AND follower = _observer_id --use hive_follows_follower_where_blacklisted_idx
+          SELECT following as id FROM hivemind_app.hive_follows WHERE follow_blacklists AND follower = _observer_id -- hive_follows_follower_where_follow_blacklists_idx
+        ),
+        indirects AS MATERIALIZED             -- get all indirectly blacklisted accounts with the ids of their sources
+        (
+          SELECT blacklister_follows.following AS blacklisted_id,
+                 blacklister_follows.follower AS blacklister_id
+          FROM blacklisters
+          JOIN hivemind_app.hive_follows blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
+          WHERE blacklister_follows.blacklisted  --hive_follows_follower_where_blacklisted_idx
         )
-        SELECT following AS blacklisted_id,        -- get directly blacklisted accounts
+        SELECT following AS blacklisted_id,        -- directly blacklisted accounts
                'my blacklist'::text AS source
         FROM hivemind_app.hive_follows
-        WHERE hive_follows.blacklisted
-          AND hive_follows.follower = _observer_id
+        WHERE hive_follows.blacklisted AND hive_follows.follower = _observer_id  --hive_follows_follower_where_blacklisted_idx
         UNION ALL
-        SELECT blacklister_follows.following AS blacklisted_id,              -- get indirectly blacklisted accounts
+        SELECT indirects.blacklisted_id AS blacklisted_id,                       -- collapse duplicate indirectly blacklisted accounts and aggreagate their sources
                string_agg('blacklisted by '::text || blacklister_accounts.name::text, ','::text ORDER BY blacklister_accounts.name) AS source
-        FROM blacklisters
-        JOIN hivemind_app.hive_follows blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
-        JOIN hivemind_app.hive_accounts blacklister_accounts ON blacklister_accounts.id = blacklisters.id    -- need this to get name of blacklister
-        WHERE blacklister_follows.blacklisted
-        GROUP BY blacklister_follows.following;
+        FROM indirects
+        JOIN hivemind_app.hive_accounts blacklister_accounts ON blacklister_accounts.id = indirects.blacklister_id    -- need this to get name of blacklister, use hive_accounts_ux1
+        GROUP BY indirects.blacklisted_id;
     END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;
