@@ -45,6 +45,7 @@ class Conf:
 
         # common
         add('--database-url', env_var='DATABASE_URL', required=False, help='database connection url', default='')
+        add('--superuser-database-url', env_var='SUPERUSER_DATABASE_URL', required=False, help='superuser database connection url', default='')
 
         # server
         add('--http-server-port', type=int, env_var='HTTP_SERVER_PORT', default=8080)

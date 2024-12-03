@@ -13,6 +13,7 @@ from jsonrpcserver.methods import Methods
 import simplejson
 from sqlalchemy.exc import OperationalError
 import psycopg2
+import contextvars
 
 from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api import methods as bridge_api
@@ -31,10 +32,10 @@ from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
 from hive.server.hive_api.public import get_info as hive_api_get_info
 from hive.server.tags_api import methods as tags_api
+from hive.server.context import autoexplain_enabled  # Import the shared context variable
 
 
 # pylint: disable=too-many-lines
-
 
 def decimal_serialize(obj):
     return simplejson.dumps(obj=obj, use_decimal=True)
@@ -237,7 +238,9 @@ def run_server(conf):
     async def init_db(app):
         """Initialize db adapter."""
         args = app['config']['args']
-        app['db'] = await Db.create(args['database_url'])
+        superuser_database_url = args['superuser_database_url']
+        print(f"In initdb, superuser_database_url is {superuser_database_url}")
+        app['db'] = await Db.create(args['database_url'], superuser_database_url)
 
     async def close_db(app):
         """Teardown db adapter."""
@@ -326,52 +329,63 @@ def run_server(conf):
             return round(time.time() * 1000)
 
         t_start = perf_counter()
-        request = await request.text()
+        request_text = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
         response = None
+
+        # Check for 'X-Autoexplain' header
+        autoexplain_header = request.headers.get('X-Autoexplain', 'false').lower()
+        autoexplain_reset_token = None
+        if autoexplain_header == 'true':
+            autoexplain_reset_token = autoexplain_enabled.set(True)
+
         try:
-            response = await dispatch(
-                request,
-                methods=methods,
-                debug=True,
-                context=app,
-                serialize=decimal_serialize,
-                deserialize=decimal_deserialize,
-            )
-        except simplejson.errors.JSONDecodeError as ex:
-            # first log exception
-            # TODO: consider removing this log - potential log spam
-            log.exception(ex)
+            try:
+                response = await dispatch(
+                    request_text,
+                    methods=methods,
+                    debug=True,
+                    context=app,
+                    serialize=decimal_serialize,
+                    deserialize=decimal_deserialize,
+                )
+            except simplejson.errors.JSONDecodeError as ex:
+                # first log exception
+                # TODO: consider removing this log - potential log spam
+                log.exception(ex)
 
-            # create and send error response
-            error_response = {
-                "jsonrpc": "2.0",
-                "error": {
-                    "code": -32602,
-                    "data": "Invalid JSON in request: " + str(ex),
-                    "message": "Invalid parameters",
-                },
-                "id": -1,
-            }
-            headers = {'Access-Control-Allow-Origin': '*'}
-            ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+                # create and send error response
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "error": {
+                        "code": -32602,
+                        "data": "Invalid JSON in request: " + str(ex),
+                        "message": "Invalid parameters",
+                    },
+                    "id": -1,
+                }
+                headers = {'Access-Control-Allow-Origin': '*'}
+                ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+                if req_res_log is not None:
+                    req_res_log.info(f"{current_millis()} Request: {request_text} processed in {perf_counter() - t_start:.4f}s")
+
+                return ret
+
+            if response is not None and response.wanted:
+                headers = {'Access-Control-Allow-Origin': '*'}
+                ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
+                if req_res_log is not None:
+                    req_res_log.info(f"{current_millis()} Request: {request_text} processed in {perf_counter() - t_start:.4f}s")
+                return ret
+            ret = web.Response()
+
             if req_res_log is not None:
-                req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
+                req_res_log.info(f"{current_millis()} Request: {request_text} processed in {perf_counter() - t_start:.4f}s")
 
             return ret
-
-        if response is not None and response.wanted:
-            headers = {'Access-Control-Allow-Origin': '*'}
-            ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
-            if req_res_log is not None:
-                req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
-            return ret
-        ret = web.Response()
-
-        if req_res_log is not None:
-            req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
-
-        return ret
+        finally:
+            if autoexplain_reset_token is not None:
+                autoexplain_enabled.reset(autoexplain_reset_token)
 
     if conf.get('sync_to_s3'):
         app.router.add_get('/head_age', head_age)
