@@ -75,7 +75,7 @@ BEGIN
     hp.source,
     hp.muted_reasons
   FROM post_ids,
-  LATERAL hivemind_app.get_full_post_view_by_id(post_ids.id, __observer_id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(post_ids.id, _observer_id) hp
   ORDER BY post_ids.id DESC;
 END
 $function$
@@ -151,7 +151,7 @@ BEGIN
       hp.source,
       hp.muted_reasons
   FROM hot,
-  LATERAL hivemind_app.get_full_post_view_by_id(hot.id, __observer_id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(hot.id, _observer_id) hp
   ORDER BY hp.sc_hot DESC, hp.id DESC
   LIMIT _limit;
 END
@@ -312,7 +312,7 @@ BEGIN
       hp.source,
       hp.muted_reasons
   FROM payout,
-  LATERAL hivemind_app.get_full_post_view_by_id(payout.id, __observer_id) hp
+  LATERAL hivemind_app.get_full_post_view_by_id(payout.id, _observer_id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
   LIMIT _limit;
 END
