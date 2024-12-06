@@ -150,7 +150,7 @@ BEGIN
                         WHERE
                           (CASE WHEN _by_root THEN hp.root_id = _root_or_parent_id ELSE hp.parent_id = _root_or_parent_id END)
                           AND NOT hp.is_muted
-                          AND (_post_id = 0 OR hp.id > _post_id)
+                          AND (_post_id = 0 OR hp.id >= _post_id)
                         ORDER BY
                           hp.id ASC
                         LIMIT
