@@ -134,7 +134,7 @@ BEGIN
         SELECT hp1.id, hp1.author_id
         FROM hivemind_app.live_comments_view hp1
         WHERE hp1.author_id = _account_id
-          AND NOT ( _post_id <> 0 AND hp1.id >= _post_id)
+          AND (_post_id = 0 OR hp1.id < _post_id)
         ORDER BY hp1.id DESC
         LIMIT _limit
       )
@@ -234,7 +234,7 @@ BEGIN
           WHERE hfc.block_num > _cutoff AND hf.state = 1 AND hf.follower = _account_id
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
           GROUP BY hfc.post_id
-          HAVING NOT(_post_id <> 0 AND NOT MIN(hfc.created_at) < _min_date AND NOT ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
+          HAVING (_post_id = 0 OR MIN(hfc.created_at) < _min_date OR ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
           ORDER BY min_created DESC, hfc.post_id DESC
           LIMIT _limit
         )
@@ -501,7 +501,7 @@ BEGIN
       WHERE
         hp.author_id = _account_id
         AND NOT hp.is_paidout
-        AND NOT( _post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id) )
+        AND ( _post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id) )
       ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
       LIMIT _limit
       )
