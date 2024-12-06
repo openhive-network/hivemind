@@ -53,7 +53,7 @@ BEGIN
         FROM hivemind_app.live_posts_view hp
         WHERE
           hp.author_id = _author_id
-          AND NOT((_post_id <> 0) AND NOT (hp.id < _post_id))
+          AND (_post_id = 0 OR hp.id < _post_id)
           ORDER BY hp.id DESC
           LIMIT _limit
       )

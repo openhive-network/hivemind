@@ -31,7 +31,7 @@ BEGIN
           WHERE
             hp.is_pinned
             AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
-            AND NOT (_post_id <> 0 AND hp.id >= _post_id)
+            AND (_post_id = 0 OR hp.id < _post_id)
             AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           ORDER BY hp.id DESC
           LIMIT _limit
@@ -143,7 +143,7 @@ BEGIN
           hc.name = _tag
           AND NOT hp.is_paidout --use index hive_posts_community_id_is_paidout_idx
           AND NOT(_called_from_bridge_api AND hp.is_pinned)
-          AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
+          AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -234,7 +234,7 @@ BEGIN
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         WHERE
           hc.name = _tag AND hp.promoted > 0 AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT ( hp.promoted = _promoted_limit AND hp.id < _post_id ))
+          AND (_post_id = 0 OR hp.promoted < _promoted_limit OR ( hp.promoted = _promoted_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.promoted DESC, hp.id DESC
@@ -330,7 +330,7 @@ BEGIN
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
-          AND NOT (_post_id <> 0 AND hp.payout + hp.pending_payout >= _payout_limit AND NOT (hp.payout + hp.pending_payout = _payout_limit AND hp.id < _post_id ))
+          AND (_post_id = 0 OR hp.payout + hp.pending_payout < _payout_limit OR (hp.payout + hp.pending_payout = _payout_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -423,7 +423,7 @@ BEGIN
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ( (hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id ))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ( (hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -515,7 +515,7 @@ BEGIN
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
@@ -615,7 +615,7 @@ BEGIN
           hp.id
         FROM live_community_posts hp
         WHERE
-          NOT (_post_id <> 0 AND hp.id >= _post_id)
+          (_post_id = 0 OR hp.id < _post_id)
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.id DESC
@@ -704,7 +704,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id)) --DLN I didn't invert last term, as it seems right, which would mean original was wrong....
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -790,8 +790,6 @@ BEGIN
     JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
     WHERE
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
-      --AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-      --- Reverting back to original condition since above is improperly transformed due to broken last condition
       AND (_post_id = 0 OR hp.sc_trend < __trending_limit OR (hp.sc_trend = __trending_limit AND hp.id < _post_id))
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
     ORDER BY
@@ -886,8 +884,6 @@ BEGIN
     JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
     WHERE
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
-      --NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT ( hp.sc_hot = _hot_limit AND hp.id < _post_id))
-      --- Reverting back to original condition since above is improperly transformed due to broken last condition
       AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
       ORDER BY hp.sc_hot DESC, hp.id DESC
@@ -986,7 +982,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
         WHERE
           hpt.tag_id = _tag_id
-          AND NOT (_post_id <> 0 AND hp.id >= _post_id)
+          AND (_post_id = 0 OR hp.id < _post_id)
           AND NOT ha.is_grayed
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY hp.id DESC
@@ -1080,7 +1076,7 @@ BEGIN
         JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND hp.promoted > 0
-          AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.promoted < _promoted_limit OR (hp.promoted = _promoted_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.promoted DESC, hp.id DESC
@@ -1177,7 +1173,7 @@ BEGIN
         WHERE
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -1272,7 +1268,7 @@ BEGIN
         FROM hivemind_app.live_comments_view hp
         WHERE
           hp.category_id = _category_id AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -1364,7 +1360,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1450,7 +1446,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.promoted >= _trending_limit AND NOT (hp.promoted = _trending_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.promoted < _trending_limit OR (hp.promoted = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -1537,7 +1533,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.promoted >= _hot_limit AND NOT (hp.promoted = _hot_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.promoted < _hot_limit OR (hp.promoted = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
@@ -1629,7 +1625,7 @@ BEGIN
           WHERE
             hp.community_id = communities.community_id
             AND NOT ha.is_grayed
-            AND NOT(_post_id <> 0 AND hp.id >= _post_id)
+            AND (_post_id = 0 OR hp.id < _post_id)
           ORDER BY id DESC
           LIMIT _limit
         ) posts
@@ -1717,7 +1713,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND hp.promoted > 0
-          AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.promoted < _promoted_limit OR (hp.promoted = _promoted_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.promoted DESC, hp.id DESC
@@ -1809,7 +1805,7 @@ BEGIN
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -1897,7 +1893,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -1986,7 +1982,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON ha.id = hp.author_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2076,7 +2072,7 @@ BEGIN
         FROM hivemind_app.live_posts_view hp
         WHERE
           NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.sc_trend >= _trending_limit AND NOT (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -2166,7 +2162,7 @@ BEGIN
         FROM hivemind_app.live_posts_view hp
         WHERE
           NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND hp.sc_hot >= _hot_limit AND NOT (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
@@ -2253,7 +2249,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
         WHERE
           NOT ha.is_grayed
-          AND NOT (_post_id <> 0 AND hp.id >= _post_id)
+          AND (_post_id = 0 OR hp.id < _post_id)
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.id DESC
@@ -2344,7 +2340,7 @@ BEGIN
         FROM hivemind_app.live_posts_comments_view hp
         WHERE
           NOT hp.is_paidout AND hp.promoted > 0
-          AND NOT (_post_id <> 0 AND hp.promoted >= _promoted_limit AND NOT (hp.promoted = _promoted_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.promoted < _promoted_limit OR (hp.promoted = _promoted_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.promoted DESC, hp.id DESC
@@ -2440,7 +2436,7 @@ BEGIN
         WHERE
           NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -2532,7 +2528,7 @@ BEGIN
         FROM hivemind_app.live_comments_view hp
         WHERE
           NOT hp.is_paidout
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
@@ -2620,7 +2616,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
         WHERE
           NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
-          AND NOT (_post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
         ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
       )
