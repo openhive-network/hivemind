@@ -35,9 +35,9 @@ BEGIN
     _permlink,
     True);
 
-  _limit = hivemind_postgrest_utilities.valid_number(
-    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
-    20, 1, 100, 'limit');
+  _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
+                                                     least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+                                                     1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
   
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
