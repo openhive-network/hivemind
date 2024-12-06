@@ -197,6 +197,7 @@ BEGIN
     FROM hivemind_app.live_posts_comments_view hp
     WHERE hp.parent_id = __parent_id
       AND NOT hp.is_muted
+--    AND (__post_id = 0 OR hp.id > __post_id) --DLN I think correct version should look like this to avoid dups in paging, but we should get rid of all list_comments instead probably, so not going to fix it nwo in all the places
       AND (__post_id = 0 OR hp.id >= __post_id)
     ORDER BY hp.id ASC
     LIMIT _limit
