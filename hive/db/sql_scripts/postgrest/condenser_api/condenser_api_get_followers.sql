@@ -6,9 +6,15 @@ STABLE
 AS
 $$
 DECLARE
-  _start_id INT DEFAULT 0;
+  _start_id INT DEFAULT MAX_INT;
+  _account_id INT;
+  _state SMALLINT;
+  _limit INT;
 BEGIN
   _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_json_is_object, _params, _called_from_condenser_api);
+  _account_id = (_params->'account_id')::INT;
+  _state = (_params->'hive_follows_state')::SMALLINT;
+  _limit = (_params->'limit')::INT;
 
   IF (_params->'start_id')::INT <> 0 THEN
     _start_id = (
@@ -35,10 +41,10 @@ BEGIN
           hf.id,
           hf.follower
         FROM hivemind_app.hive_follows hf
-        WHERE hf.following = (_params->'account_id')::INT  AND hf.state = (_params->'hive_follows_state')::SMALLINT  -- use "hive_follows_following_state_id_idx"
-              AND ( _start_id = 0 OR hf.id < _start_id ) 
+        WHERE hf.following = _account_id  AND hf.state = _state  -- hive_follows_following_state_id_idx
+              AND hf.id < _start_id
         ORDER BY hf.id DESC
-        LIMIT (_params->'limit')::INT
+        LIMIT _limit
         )      
       SELECT
         followers.id,
@@ -46,7 +52,7 @@ BEGIN
       FROM followers
       JOIN hivemind_app.hive_accounts ha ON followers.follower = ha.id
       ORDER BY followers.id DESC
-      LIMIT (_params->'limit')::INT
+      LIMIT _limit
     ) row
   ),
   '[]'::jsonb
