@@ -10,9 +10,6 @@ _created_at TIMESTAMP;
 _posts_should_be_grayed BOOLEAN;
 _result JSONB;
 BEGIN
-  IF _limit > 20 THEN --a client should not need more than 20 full posts at a time
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Limit cannot be greater than 20');
-  END IF;
   IF _post_id <> 0 THEN
     SELECT hfc.created_at INTO _created_at
     FROM hivemind_app.hive_feed_cache hfc

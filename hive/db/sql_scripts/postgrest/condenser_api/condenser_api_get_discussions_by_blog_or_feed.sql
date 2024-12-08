@@ -30,7 +30,7 @@ BEGIN
   _limit =
     hivemind_postgrest_utilities.valid_number(
       hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 3, False),
-    20, 1, 100, 'limit');
+    20, 1, 20, 'limit');
 
   _truncate_body =
     hivemind_postgrest_utilities.valid_number(
