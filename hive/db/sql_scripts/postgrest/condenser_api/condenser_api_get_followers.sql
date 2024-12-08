@@ -6,7 +6,7 @@ STABLE
 AS
 $$
 DECLARE
-  _start_id INT DEFAULT MAX_INT;
+  _start_id INT DEFAULT 2147483647; --default to max allowed INT value to get the latest followers if _start_id is set to 0
   _account_id INT;
   _state SMALLINT;
   _limit INT;
