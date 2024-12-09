@@ -227,9 +227,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True, postgresql_not_valid=True),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4', deferrable=True, postgresql_not_valid=True),
         sa.Index(
-            'hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'
-        ),  # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
-        sa.Index(
             'hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'
         ),  # this index is critical for hive_accounts_info_view performance
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
@@ -352,6 +349,7 @@ def build_metadata():
         sa.Column('hivemind_git_rev', sa.Text, nullable=False, server_default=''),
     )
 
+    # hive_posts_api_helper is only used by list_comments, so this should be removed with that api call
     sa.Table(
         'hive_posts_api_helper',
         metadata,
@@ -360,7 +358,7 @@ def build_metadata():
         sa.Column(
             'author_s_permlink', VARCHAR(275, collation='C'), nullable=False
         ),  # concatenation of author '/' permlink
-        sa.Index('hive_posts_api_helper_author_s_permlink_idx', 'author_s_permlink'),
+        sa.Index('hive_posts_api_helper_author_s_permlink_idx', 'author_s_permlink'), 
     )
 
     sa.Table(
