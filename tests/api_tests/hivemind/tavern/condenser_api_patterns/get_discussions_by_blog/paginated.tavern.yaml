@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_blog"
-          params: {"tag":"funny","start_author":"funny","start_permlink":"a-new-steemit-logo-for-you-guys","limit":100}
+          params: {"tag":"funny","start_author":"funny","start_permlink":"a-new-steemit-logo-for-you-guys","limit":20}
       response:
         status_code: 200
         verify_response_with:

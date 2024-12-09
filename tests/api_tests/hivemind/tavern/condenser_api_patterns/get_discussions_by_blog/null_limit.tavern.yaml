@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # there was a bug with limit not applying default when null was passed explicitly (result exceeded max of 100 posts)
+    - patterntest # there was a bug with limit not applying default when null was passed explicitly (result exceeded max of 100 posts) (note: max now changed to 20)
     
 
   includes:
