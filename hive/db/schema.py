@@ -704,6 +704,7 @@ def setup_runtime_code(db):
         "hafapp_api.sql",
         "postgrest/utilities/exceptions.sql",
         "postgrest/utilities/validate_json_parameters.sql",
+        "postgrest/utilities/api_limits.sql",
         "postgrest/utilities/parse_argument_from_json.sql",
         "postgrest/utilities/valid_account.sql",
         "postgrest/utilities/find_account_id.sql",

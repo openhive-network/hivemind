@@ -34,7 +34,8 @@ BEGIN
 
   _limit = hivemind_postgrest_utilities.valid_number(
     hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 4, False),
-    20, 1, 20, 'limit');
+    least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+    1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
   
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
