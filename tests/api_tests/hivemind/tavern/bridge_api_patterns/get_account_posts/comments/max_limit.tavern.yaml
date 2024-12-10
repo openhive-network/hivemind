@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_account_posts"
-          params: {"sort":"comments", "account":"cheetah","limit":100}
+          params: {"sort":"comments", "account":"cheetah","limit":20}
       response:
         status_code: 200
         verify_response_with:

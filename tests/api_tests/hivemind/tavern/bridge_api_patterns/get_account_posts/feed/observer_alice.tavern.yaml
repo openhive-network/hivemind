@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_account_posts"
-          params: {"sort":"feed", "account":"always1success", "start_author":"knozaki2015", "start_permlink":"the-strangest-building-in-berlin", "limit":100, "observer":"alice"}
+          params: {"sort":"feed", "account":"always1success", "start_author":"knozaki2015", "start_permlink":"the-strangest-building-in-berlin", "limit":20, "observer":"alice"}
       response:
         status_code: 200
         verify_response_with:

@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_feed"
-          params: {"tag":"jamesc","start_author":"rossulbricht","start_permlink":"is-ross-ulbricht-a-political-prisoner","limit":100}
+          params: {"tag":"jamesc","start_author":"rossulbricht","start_permlink":"is-ross-ulbricht-a-political-prisoner","limit":20}
       response:
         status_code: 200
         verify_response_with:
