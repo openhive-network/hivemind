@@ -268,7 +268,7 @@ async def get_ranked_posts(
 
     start_author = valid_account(start_author, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
-    limit = valid_limit(limit, 100, 20)
+    limit = valid_limit(limit, 20, 20)
     tag = valid_tag(tag, allow_empty=True)
     observer = valid_account(observer, allow_empty=(tag != "my"))
 
@@ -310,7 +310,7 @@ async def get_account_posts(
     start_author = valid_account(start_author, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     observer = valid_account(observer, allow_empty=True)
-    limit = valid_limit(limit, 100, 20)
+    limit = valid_limit(limit, 20, 20)
     sql = None
     account_posts = True  # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':

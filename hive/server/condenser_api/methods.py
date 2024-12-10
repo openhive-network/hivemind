@@ -211,7 +211,7 @@ async def get_posts_by_given_sort(
 
     start_author = (valid_account(start_author, allow_empty=True),)
     start_permlink = (valid_permlink(start_permlink, allow_empty=True),)
-    limit = (valid_limit(limit, 100, 20),)
+    limit = (valid_limit(limit, 20, 20),)
     tag = valid_tag(tag, allow_empty=True)
     observer = valid_account(observer, allow_empty=True)
     truncate_body = valid_truncate(truncate_body)
@@ -389,7 +389,7 @@ async def get_discussions_by_blog(
     observer = valid_account(observer, allow_empty=True)
     start_author = valid_account(start_author, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
-    limit = valid_limit(limit, 100, 20)
+    limit = valid_limit(limit, 20, 20)
     truncate_body = valid_truncate(truncate_body)
 
     sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR, False )"
@@ -460,7 +460,7 @@ async def get_discussions_by_feed(
         valid_account(tag),
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
+        valid_limit(limit, 20, 20),
         valid_truncate(truncate_body),
         valid_account(observer, allow_empty=True),
     )
@@ -482,7 +482,7 @@ async def get_discussions_by_comments(
     start_author = valid_account(start_author)
     observer = valid_account(observer, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
-    limit = valid_limit(limit, 100, 20)
+    limit = valid_limit(limit, 20, 20)
     truncate_body = valid_truncate(truncate_body)
 
     posts = []
@@ -520,7 +520,7 @@ async def get_replies_by_last_update(
         context['db'],
         valid_account(start_author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
+        valid_limit(limit, 20, 20),
         valid_truncate(truncate_body),
         valid_account(observer, allow_empty=True),
     )
