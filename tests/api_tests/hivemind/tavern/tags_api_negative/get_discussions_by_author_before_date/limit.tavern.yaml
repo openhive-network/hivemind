@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "tags_api.get_discussions_by_author_before_date"
-          params: ["dragonho", "", "", 101]
+          params: ["dragonho", "", "", 21]
       response:
         status_code: 200
         verify_response_with:

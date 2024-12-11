@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_author_before_date"
-          params: {"author":"steemit","start_permlink":"firstpost","before_date":"2009-04-19T22:49:43","limit":101}
+          params: {"author":"steemit","start_permlink":"firstpost","before_date":"2009-04-19T22:49:43","limit":21}
       response:
         status_code: 200
         verify_response_with:

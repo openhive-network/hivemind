@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_blog"
-          params: {"account":"steemit","start_entry_id":0,"limit":501}
+          params: {"account":"steemit","start_entry_id":0,"limit":21}
       response:
         status_code: 200
         verify_response_with:
