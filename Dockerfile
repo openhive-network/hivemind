@@ -117,6 +117,8 @@ ENV PGRST_DB_ROOT_SPEC="home"
 
 ENV LANG=en_US.UTF-8
 
+RUN apt update && DEBIAN_FRONTEND=noniteractive apt install -y nginx
+
 USER hivemind
 WORKDIR /home/hivemind
 
@@ -133,6 +135,10 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/bloc
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
 COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/postgrest.conf .
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/hivemind_nginx.conf.template /home/hivemind/app/docker/hivemind_nginx.conf.template
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/rewrite_rules.conf /usr/local/openresty/nginx/conf/rewrite_rules.conf
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/rewriter_entrypoint.sh /home/hivemind/app/docker/rewriter_entrypoint.sh
+
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
