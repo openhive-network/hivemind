@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_created"
-          params: {"start_author":"liz-wolfe", "start_permlink":"hi-steemit-im-liz-20-y-o","limit":100, "observer":"funny"}
+          params: {"start_author":"liz-wolfe", "start_permlink":"hi-steemit-im-liz-20-y-o","limit":20, "observer":"funny"}
       response:
         status_code: 200
         verify_response_with:
