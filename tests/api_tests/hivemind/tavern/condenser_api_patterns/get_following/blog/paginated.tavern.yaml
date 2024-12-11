@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_following"
-          params: {"account":"always1success","start":"sunsallo"}
+          params: {"account":"skyefox","start":"jfallout"}
       response:
         status_code: 200
         verify_response_with:

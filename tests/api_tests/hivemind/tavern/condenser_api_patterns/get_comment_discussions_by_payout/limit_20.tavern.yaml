@@ -2,9 +2,8 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # differences in pending payout make it incomparable with original (also order of comments with the same payout was basically random)
     
-
   includes:
     - !include ../../common.yaml
 
@@ -18,8 +17,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "condenser_api.get_replies_by_last_update"
-          params: ["gtg","",100]
+          method: "condenser_api.get_comment_discussions_by_payout"
+          params: {"tag":"test","limit":20}
       response:
         status_code: 200
         verify_response_with:

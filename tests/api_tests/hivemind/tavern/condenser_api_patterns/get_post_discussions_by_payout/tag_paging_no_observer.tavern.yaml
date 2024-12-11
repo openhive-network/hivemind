@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_post_discussions_by_payout"
-          params: {"tag":"life", "limit":100,
+          params: {"tag":"life", "limit":20,
                    "start_author": "groovedigital", "start_permlink": "when-your-dad-works-in-hollywood"}
       response:
         status_code: 200

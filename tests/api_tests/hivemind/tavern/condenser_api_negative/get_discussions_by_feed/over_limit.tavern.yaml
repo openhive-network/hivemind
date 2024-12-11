@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_feed"
-          params: {"tag":"steemit","limit":101}
+          params: {"tag":"steemit","limit":21}
       response:
         status_code: 200
         verify_response_with:
