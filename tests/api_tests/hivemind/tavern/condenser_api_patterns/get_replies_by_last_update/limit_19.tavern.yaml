@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_replies_by_last_update"
-          params: ["gtg","",100]
+          params: ["gtg","",19]
       response:
         status_code: 200
         verify_response_with:
