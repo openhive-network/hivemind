@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_comments"
-          params: {"start_author":"stellabelle","start_permlink":"re-extie-dasilva-my-thoughts-on-steemit-20160909t154633902z","limit":100}
+          params: {"start_author":"stellabelle","start_permlink":"re-extie-dasilva-my-thoughts-on-steemit-20160909t154633902z","limit":20}
       response:
         status_code: 200
         verify_response_with:

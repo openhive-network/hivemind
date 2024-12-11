@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_discussions_by_blog"
-          params: {"tag":"npo31","start_author":"et42k","start_permlink":"iqx-hashtag","limit":100}
+          params: {"tag":"npo31","start_author":"et42k","start_permlink":"iqx-hashtag","limit":20}
       response:
         status_code: 200
         verify_response_with:

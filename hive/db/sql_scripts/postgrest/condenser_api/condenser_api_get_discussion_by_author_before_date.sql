@@ -30,10 +30,9 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
     True);
 
-  _limit =
-    hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
-    10, 1, 100, 'limit');
+  _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
+                                                     least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+                                                     1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
 
   _truncate_body =
     hivemind_postgrest_utilities.valid_number(

@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_comment_discussions_by_payout"
-          params: {"tag":"tag","limit":101}
+          params: {"tag":"tag","limit":21}
       response:
         status_code: 200
         verify_response_with:

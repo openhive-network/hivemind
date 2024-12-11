@@ -9,6 +9,7 @@ DECLARE
   _account TEXT;
   _offset INT;
   _limit INT;
+  _max_allowed_limit INT;
 
   _account_id INT;
   _result JSONB;
@@ -26,12 +27,19 @@ BEGIN
 
   _offset = hivemind_postgrest_utilities.valid_offset(_offset);
 
-  IF _limit IS NULL OR _limit = 0 THEN
-    _limit = GREATEST(_offset + 1, 1);
-    _limit = LEAST(_limit, 500);
+  IF _get_entries THEN
+    _max_allowed_limit = 500;
+  ELSE
+    _max_allowed_limit = hivemind_postgrest_utilities.get_max_posts_per_call_limit();
   END IF;
 
-  _limit = hivemind_postgrest_utilities.valid_number(_limit, NULL, 1, 500, 'limit');
+
+  IF _limit IS NULL OR _limit = 0 THEN
+    _limit = GREATEST(_offset + 1, 1);
+    _limit = LEAST(_limit, _max_allowed_limit);
+  END IF;
+
+  _limit = hivemind_postgrest_utilities.valid_number(_limit, NULL, 1, _max_allowed_limit, 'limit');
   _account_id = hivemind_postgrest_utilities.find_account_id(_account, True);
 
   IF _offset < 0 THEN

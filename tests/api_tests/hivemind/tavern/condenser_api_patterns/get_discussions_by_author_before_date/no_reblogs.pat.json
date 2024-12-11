@@ -1662,5 +1662,706 @@
     "title": "Psychology: This Might Be The Reason Why You Like The Things You Do",
     "total_payout_value": "0.000 HBD",
     "url": "/psychology/@funny/6ociuh-psychology-this-might-be-the-reason-why-you-like-the-things-you-do"
+  },{
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1124648368001,
+        "rshares": 924825759,
+        "voter": "schattenjaeger"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>I think there was an error or something wrong with my post, I put $45 and it didn't get promoted. I have deleted it (after 20 min), can someone help get me a refund so I can try with another post. There is a record on my transfer page.</p>\n<p>Thank you</p>\n<p><br></p>\n</html>",
+    "body_length": 286,
+    "cashout_time": "2016-09-13T17:39:27",
+    "category": "steemit",
+    "children": 2,
+    "created": "2016-09-06T17:39:27",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-06T17:39:27",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 924825759,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "can-someone-help-me-get-a-refund-on-my-promoted-post-it-didn-t-show-up",
+    "post_id": 1148799,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Can Someone Help Me Get A Refund On My Promoted Post, It Didn't Show Up",
+    "title": "Can Someone Help Me Get A Refund On My Promoted Post, It Didn't Show Up",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@funny/can-someone-help-me-get-a-refund-on-my-promoted-post-it-didn-t-show-up"
+  },
+  {
+    "active_votes": [],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>Hey steemit staff,</p>\n<p>I promoted a post for $45 about 25 minutes ago and it didn't get on the promoted list. I deleted the post. Can I get a refund to try again? You can see the transfer on my account to @null.</p>\n</html>",
+    "body_length": 236,
+    "cashout_time": "2016-09-13T16:55:57",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-06T16:55:57",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\"],\"users\":[\"null\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-06T16:55:57",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "my-post-didn-t-get-promoted-after-spening-usd45",
+    "post_id": 1148293,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "My Post Didn't Get Promoted After Spening $45",
+    "title": "My Post Didn't Get Promoted After Spening $45",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@funny/my-post-didn-t-get-promoted-after-spening-usd45"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1214229078,
+        "rshares": 3102979597,
+        "voter": "boy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4712949449,
+        "rshares": 3767294574,
+        "voter": "bue-witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1789951494550,
+        "rshares": 690894989,
+        "voter": "bunny"
+      },
+      {
+        "percent": "10000",
+        "reputation": 103443134841,
+        "rshares": 54615672590,
+        "voter": "bue"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1662773074,
+        "voter": "mini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 213775837,
+        "voter": "moon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 124431502021980,
+        "rshares": 1296916063013,
+        "voter": "steempower"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 624865483,
+        "voter": "healthcare"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 969731732,
+        "voter": "daniel.pan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 288326627,
+        "voter": "helen.tan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8604717232,
+        "rshares": 489465667,
+        "voter": "eatgrits"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1663549830469,
+        "rshares": 579540800,
+        "voter": "coar"
+      },
+      {
+        "percent": "3301",
+        "reputation": 2902189818091,
+        "rshares": 1425635859,
+        "voter": "murh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1795711046224,
+        "rshares": 3831582061,
+        "voter": "verelst"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2761596392902,
+        "rshares": 3536849129,
+        "voter": "tee-em"
+      },
+      {
+        "percent": "10000",
+        "reputation": 12656810345430,
+        "rshares": 42736904295,
+        "voter": "clement"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1959446497877,
+        "rshares": 5190813802,
+        "voter": "dennygalindo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9824421122,
+        "rshares": 247431561,
+        "voter": "aidar88"
+      },
+      {
+        "percent": "10000",
+        "reputation": 793209170784,
+        "rshares": 1541861524,
+        "voter": "leksimus"
+      },
+      {
+        "percent": "10000",
+        "reputation": 84837731290,
+        "rshares": 234625478,
+        "voter": "jacksongarcia"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5528318017618,
+        "rshares": 5493935053,
+        "voter": "lpfaust"
+      },
+      {
+        "percent": "5100",
+        "reputation": 1416246303584,
+        "rshares": 7785030460,
+        "voter": "michaeldodridge"
+      },
+      {
+        "percent": "10000",
+        "reputation": 75109707260,
+        "rshares": 21859467854,
+        "voter": "persianqueen"
+      },
+      {
+        "percent": "10000",
+        "reputation": 16577047541,
+        "rshares": 15465046979,
+        "voter": "sunshine"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1769025564652,
+        "rshares": 872335135,
+        "voter": "boddhisattva"
+      },
+      {
+        "percent": "10000",
+        "reputation": 303910488530,
+        "rshares": 10957338888,
+        "voter": "goingpaper"
+      },
+      {
+        "percent": "10000",
+        "reputation": 64878458203,
+        "rshares": 1281695438,
+        "voter": "alexma3x"
+      },
+      {
+        "percent": "10000",
+        "reputation": 363503808,
+        "rshares": 2866923182,
+        "voter": "netaterra"
+      },
+      {
+        "percent": "10000",
+        "reputation": 166185808108,
+        "rshares": 92181663,
+        "voter": "artsteemit"
+      },
+      {
+        "percent": "10000",
+        "reputation": 682893592,
+        "rshares": 632867250,
+        "voter": "gear66"
+      },
+      {
+        "percent": "10000",
+        "reputation": 511520729,
+        "rshares": 3073290791,
+        "voter": "landofcrypto"
+      },
+      {
+        "percent": "10000",
+        "reputation": 27027586,
+        "rshares": 50404294,
+        "voter": "wanglai"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4961345,
+        "rshares": 158040578,
+        "voter": "lavrin999"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>Steemit can be daunting when you start. &nbsp;You can post on literally anything. &nbsp;Or you can spend all your time looking at other posts as you upvote and comment them. &nbsp;Both can get you your start in the network and build you steem. &nbsp;But with so many people on this site already, and with so many more sure to join, you will want to utilize your time properly if you are going to see results. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>So what are you posting about? &nbsp;I recommend sticking with topics that you already have knowledge in at the start of your steemiting (yeah I made that a verb). &nbsp;When you already have a handle on the subject you can cut-down/out on time spent on preperation and research. &nbsp;I don't recommend getting stuck on one topic, cause you really will miss out if you don't continue to learn, but, when you need to build an account, you don't want to spend too much time reading other work when you need to produce your own. &nbsp;When you get a good start on steemit, built up steem power and are comfortable as a writer, then start to branch out. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>If you need some topics to post about, here are some ideas: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022life (tell us about your first vacation, or that embarrasing story that always gets a laugh) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>&nbsp;\u2022hobbies (sports, gaming, shopping, movies, you have to have something you like to do and something that you are knowledgable about it. &nbsp;Find it and share it.) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022teach us something (Where do you work? &nbsp;Bring your expertise over to steemit and blog about it) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022photography (Got the eye for it? &nbsp;Steemit is also a place where photos and video can be shared.) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Also make sure you give yourself a goal for the day regardless of the results that happen after your first post. &nbsp;Tell yourself that you are going to complete two articles today and post them. &nbsp;Even if the first article doesn't get well-recieved, don't get discouraged about the second one. &nbsp;Get it out of your head and push forward. &nbsp;Working hard when things seem glim in a trait that will help you a lot in anything you want to be successful in. &nbsp;Anyone can work when things are going well, but those that can make it through the rough patches will see an increase in their chances of success. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Now for the BIG mistake we are all making. &nbsp;Have you read the story of Narcissus? &nbsp;He thought he was so beautiful that he spent all his time staring at his reflection in the lake. &nbsp;Until one day he worried his reflecting was drowning, so he dived in after himself and ended up dead. &nbsp;Why am I telling you this story? &nbsp;Because like him, we all spend too much time admiring, or checking, our own work. &nbsp;Let's be honest, after you put you post out there you are pressing that F5 refresh button like mad to see how your post is doing. &nbsp;Then you wait five minutes and check it again. &nbsp;Maybe you check it again after another 5 minutes. &nbsp;We all do it. &nbsp;But this process is not only taking a lot of time but draining our mood and energy. &nbsp;If the post is doing well, great, don't get too cocky, just because you had one good post, it does not mean you don't have to work on the next ones. &nbsp;And if the post is doing bad, you will just make yourself less and less motivated with every click of the refresh button. &nbsp;Don't forget to check your articles later in the day to see what is working and reply to comments, but that time you waste watching how many upvotes you are getting is time that can be better spent elsewhere.&nbsp;</p>\n<p><img src=\"https://s21.postimg.org/699h8yexz/pexels_photo_1.jpg\" width=\"640\" height=\"423\"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>And here are some other tips &nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Long, well-written articles tend to do better than shorter posts. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Don't forget about commenting, well-liked comments get paid as well. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>&nbsp;\u2022In order to do a link, highlight the text you want to add the link to, click the link icon and paste the link in the box. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Remember this system uses a blockchain, so everything you post will be permantly saved somewhere. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>&nbsp;\u2022Yes I can not deny having a niche can help you build your profile faster, but you're a person not a brand, you want to randomly post about flowers and motorcycles, go for it. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Don't be intimidated if you know nothing about bitcoins or blockchains or anything with the word crypto in front of it. &nbsp;This is a forum like any other, as it grows so will the topics. &nbsp;If there isn't a topic about something you want to post about then start it yourself. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022You don't have to be an english major to blog, find your voice and write about your expertise. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Sometimes your post will be on at a bad time and fall under the radar. &nbsp;Don't be discouraged. &nbsp;I personally think its okay to repost it especailly since we currently don't have views. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022If you see something you like, upvote it. &nbsp;It is only polite. &nbsp;&nbsp;You help out the author and you get paid for it. The amounts are still not set but even if it is low it is still payment to vote. &nbsp;There are a lot worse ways to make money. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022But don't just scroll and upvote everything you see. &nbsp;Integrity goes a long way to keeping a system fair. &nbsp;And your voting power takes time to reset to full. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022WRITE DOWN YOUR PASSWORD AND KEEP IT SOMEWHERE SAFE! &nbsp;There is no password recovery system here. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022There are several free image hosting sites you can use to link photos from. &nbsp;Upload your photo, copy the link and post it in the image box. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022The Steemit white paper is like an instruction manuel. &nbsp;Keep in mind changes are still being made. &nbsp;Read it here. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Take time with your title, make it catchy without being misleading. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Steemit is not a link farm. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022Post your own work. &nbsp;Even camera phone photos are better than ones from the net. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022If you post photography make sure you add something that lets people know it is your photo. &nbsp;You don't want people to not upvote it becuase they don't know if it is taken from the internet or not and no one wants to do an image search on every photo. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>\u2022And finally, don't be an ass. &nbsp;&nbsp;&nbsp;This is more of a tip for life in general but hey, it applies here too.</p>\n</html>",
+    "body_length": 7741,
+    "cashout_time": "2016-09-13T13:46:33",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-09-06T13:46:33",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\",\"blog\",\"writing\"],\"image\":[\"https://s21.postimg.org/699h8yexz/pexels_photo_1.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-06T13:46:33",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1493255645257,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "0.733 HBD",
+    "percent_hbd": 10000,
+    "permlink": "how-to-manage-your-time-on-steemit-and-other-tips-plus-one-big-mistake-we-all-make-blogging",
+    "post_id": 1146511,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "How To Manage Your Time On Steemit And Other Tips, Plus One Big Mistake We All Make Blogging",
+    "title": "How To Manage Your Time On Steemit And Other Tips, Plus One Big Mistake We All Make Blogging",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@funny/how-to-manage-your-time-on-steemit-and-other-tips-plus-one-big-mistake-we-all-make-blogging"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 8923501480463,
+        "rshares": 90446471717,
+        "voter": "funny"
+      },
+      {
+        "percent": "500",
+        "reputation": 3814152361740,
+        "rshares": 731702144,
+        "voter": "matrixdweller"
+      },
+      {
+        "percent": "10000",
+        "reputation": 74146534174,
+        "rshares": 75542539,
+        "voter": "drbr18"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>Here are a couple of older photos I took around the theme of body image.&nbsp;</p>\n<p><img src=\"https://s22.postimg.org/o2wmg6m4h/obsession2.jpg\" width=\"536\" height=\"800\"/></p>\n<p><img src=\"https://s17.postimg.org/m6veu8nvz/Obsession.jpg\" width=\"800\" height=\"536\"/></p>\n<p>&nbsp;</p>\n<p><br></p>\n</html>",
+    "body_length": 313,
+    "cashout_time": "2016-09-12T23:26:39",
+    "category": "art",
+    "children": 0,
+    "created": "2016-09-05T23:26:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"art\",\"photography\",\"\"],\"image\":[\"https://s22.postimg.org/o2wmg6m4h/obsession2.jpg\",\"https://s17.postimg.org/m6veu8nvz/Obsession.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T23:26:39",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 91253716400,
+    "parent_author": "",
+    "parent_permlink": "art",
+    "pending_payout_value": "0.026 HBD",
+    "percent_hbd": 10000,
+    "permlink": "art-my-photography-about-the-theme-of-body-image",
+    "post_id": 1140806,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Art - My Photography About The Theme Of Body Image",
+    "title": "Art - My Photography About The Theme Of Body Image",
+    "total_payout_value": "0.000 HBD",
+    "url": "/art/@funny/art-my-photography-about-the-theme-of-body-image"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 2761596392902,
+        "rshares": 3454029091,
+        "voter": "tee-em"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2619388406406,
+        "rshares": 1097727026,
+        "voter": "vlad"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1653800202958,
+        "rshares": 472205442585,
+        "voter": "glitterfart"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1433416370023,
+        "rshares": 55885841475,
+        "voter": "driv3n"
+      },
+      {
+        "percent": "10000",
+        "reputation": 110840095927,
+        "rshares": 148403993,
+        "voter": "steem-engine"
+      },
+      {
+        "percent": "10000",
+        "reputation": 12120801513,
+        "rshares": 56159400,
+        "voter": "mikhailzezyulko"
+      },
+      {
+        "percent": "10000",
+        "reputation": 774561357,
+        "rshares": 51185859,
+        "voter": "sageboba"
+      },
+      {
+        "percent": "10000",
+        "reputation": 450193486835,
+        "rshares": 57640928,
+        "voter": "grisha-danunaher"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3525299486,
+        "rshares": 151552203,
+        "voter": "iliyaa"
+      },
+      {
+        "percent": "10000",
+        "reputation": 241128479,
+        "rshares": 161739406,
+        "voter": "camenec"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>We are already heading in that direction. &nbsp;Credit cards, e-transfers, bitcoin. &nbsp;I think a lot of people already walk around without cash in their pocket. &nbsp;But eliminating the coin and bill altogether is a big step for an economic system to take, one which needs to work for everyone in every financial situation. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>MORE MONEY MORE PROBLEMS &nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Eliminating psychical money would cut down on costs in the long run. &nbsp;We don't have to worry about printng costs, materials and shipping and handling fees. &nbsp;Digital currency is easy to send and recieve. &nbsp;The metal from coins can be recycled. &nbsp;Money has become inefficient and moving to a system where digital payment is user-friendly and accepted everywhere will help move the system along quicker. &nbsp;But the system needs to be accepted everywhere for it to work. &nbsp;One of the reasons cash has staying power is it doesn't need infrastructure to work. &nbsp;You give someone a $20 bill, they pocket it and the transaction is completed. &nbsp;For a digital system to take over completely every vendor needs a system in place and every person will need the means to use it and that can be costly. &nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>IS IT SAFE? &nbsp;&nbsp;</p>\n<p>Security, or the idea of feeling secure is an issue. &nbsp;The fear of hackers is a prominant one and one that conjures images of hooded figures stealing your life savings. &nbsp;But there are ways to stop it. &nbsp;Having an institution that is liable for lose is one and it creates jobs. &nbsp;Personally I feel more secure when my money is in a bank account then when I am holding on to it. &nbsp;I'm not insured for that random $20 bill that fell out of my pocket. &nbsp;There is a comfort knowing someone is protecting your money, as long as feel you can trust them. &nbsp;But banks and other institutions have yet to implete blockchain technology. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>DOES STEEM HAVE STAYING POWER? &nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>I'm curious to see how well steem works as a currency and how well it will translate into real world applications (hey can I give you an upvote as payment for my coffee). &nbsp;Right now it is a third link over, cryptocurrency needs to be exchanged for digital currency which can then be exchanged into physchical currnecy. &nbsp;But that is just a temporary problem, digital currency and cryptocurrency can be intergated together. &nbsp;It will depend on how people feel about blockchain technology. &nbsp;Having data permanent and public can be a problem for a lot of people and businesses. &nbsp;But bitcoin seems to have proven that it has staying power and with the 2 year investment of steem back into the system, steem should have a future, at least until we figure out what the world thinks of blockchains. &nbsp;&nbsp;&nbsp;&nbsp;I'm sure there are users on here who are a lot more versed in cryptocurrency and blockchains, what do you think of the idea of a digital economy?</p>\n<p><img src=\"https://s13.postimg.org/op1mohcuf/money_card_business_credit_card_50987.jpg\" width=\"640\" height=\"426\"/></p>\n<p>(pexels.com)</p>\n</html>",
+    "body_length": 3235,
+    "cashout_time": "2016-09-12T21:10:15",
+    "category": "money",
+    "children": 1,
+    "created": "2016-09-05T21:10:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"money\",\"steem\",\"bitcoin\",\"cryptocurrnecy\"],\"image\":[\"https://s13.postimg.org/op1mohcuf/money_card_business_credit_card_50987.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T21:10:15",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 533269721966,
+    "parent_author": "",
+    "parent_permlink": "money",
+    "pending_payout_value": "0.221 HBD",
+    "percent_hbd": 10000,
+    "permlink": "6pqzck-can-an-economy-without-physical-currency-work",
+    "post_id": 1139432,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Can An Economy Without Physical Currency Work?",
+    "title": "Can An Economy Without Physical Currency Work?",
+    "total_payout_value": "0.000 HBD",
+    "url": "/money/@funny/6pqzck-can-an-economy-without-physical-currency-work"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 45485816669,
+        "rshares": 257444410,
+        "voter": "adamgud"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2090799841362,
+        "rshares": 1741656736,
+        "voter": "dimon14"
+      },
+      {
+        "percent": "10000",
+        "reputation": 166185808108,
+        "rshares": 90374180,
+        "voter": "artsteemit"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>Screen flickers, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>hope for a better tomorrow, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>delivered from men and women, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>I never met. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><br></p>\n<p>Click. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><br></p>\n<p>That's all it takes, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>from ones who had been there before, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>not torched passed, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>but torched blazing, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>for the light compounds, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>interest from your interest. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><br></p>\n<p>If the pen is mighter than the sword, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>then how much so, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>the keyboard, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>whose ink bleeds internationally, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>permanent yet quick to fade, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>in the designs of each other. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><br></p>\n<p>Yet we need each other, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>if our lines are to make any sense. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>&nbsp;</p>\n<p>Or maybe I'm too tired to make any sense.</p>\n<p><img src=\"https://s17.postimg.org/ey2yu57sv/pexels_photo_128362.jpg\" width=\"640\" height=\"360\"/></p>\n<p>(pexels.com)</p>\n</html>",
+    "body_length": 3457,
+    "cashout_time": "2016-09-12T17:43:24",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-05T17:43:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\",\"poetry\",\"writing\"],\"image\":[\"https://s17.postimg.org/ey2yu57sv/pexels_photo_128362.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T17:43:24",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 2089475326,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "netted-ink-steemit-poem",
+    "post_id": 1136836,
+    "promoted": "16.000 HBD",
+    "replies": [],
+    "root_title": "Netted Ink: Steemit Poem",
+    "title": "Netted Ink: Steemit Poem",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@funny/netted-ink-steemit-poem"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 2136142852031,
+        "rshares": 8745030066,
+        "voter": "aleksandraz"
+      },
+      {
+        "percent": "3300",
+        "reputation": 3725920343994,
+        "rshares": 3374517040,
+        "voter": "booky"
+      },
+      {
+        "percent": "10000",
+        "reputation": 7850286110,
+        "rshares": 54638891,
+        "voter": "charlchristo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3061556951554,
+        "rshares": 1827181686,
+        "voter": "puffin"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>Have you ever fallen into a pattern of behaviour with a group of people? &nbsp;Maybe you are the one who tells funny stories all the time or you are the one who tells others about the latest gagdets. &nbsp;It may be because you like comedy or love tech and are happy to share your interests. &nbsp;But there is a chance that your behaviour is the result of postive reactions from the previous times you started to do that behviour. &nbsp;If you share an app that no one heard of and everyone starts to use it, maybe it made you feel good. &nbsp;So you tell them about another one and still, another positve result. &nbsp;This carries over to the next week where you let everyone know about this cool new site called Steemit, which leads them to high five you after they make there first dollar. &nbsp;What begins to happen is you start to pay more attention to the tech world. &nbsp;You might go out of your way to look for new things to tell people about. &nbsp;And soon you become an expert who can spot the next thing from a mile away. &nbsp;</p>\n<p>There is this idea that we tend to like what we are good at. Our interests and hobbies are, in a way, molded by the postive feelings we get from them. &nbsp;And being good at something is quite a positve feeling. &nbsp;Think of the things you enjoy doing. &nbsp;If it is something you put any considerable time into, it was probably because you had a knack for it. It is more likely you will follow a career in a field if you are quick to understand that field and feel like you can excel in it. &nbsp;&nbsp;And a lot of the time, since we are social creatures, excel-at-it is a relative term where other people acknowledge that you are good at it. &nbsp;It can come in the form of applause, laughter, good grades or money, but the external stimulus that you are getting that shows you are good at the thing you are doing is giving by someone else. This is why we need to encourage people and not be discoruaged ourselves when we fail at something. &nbsp;Getting good at anything takes practice. &nbsp;And if you have people giving you positive and realisitic (don't lie to someone if they are really bad at something) support, you might be suprised how far you can impove in a field of your choice. &nbsp;</p>\n<p>But we are not salvidating dogs. We are not animals. &nbsp;All the behaviour tests on animals in the world cannot fully help us to udnerstand huamns. &nbsp;People who like something will do it even if they suck at it and will do so with a smile on there face. &nbsp;And more power to them. &nbsp;Good for them rocking that shower ballad even when they are clearly tone deaf. &nbsp;People are more then how the outside world rewards them. &nbsp;And on top of that we are aware of why we likes things. &nbsp;Take this article for example, I can write about the idea of it because we can look outside of ourselves and see why we are doing what we do. &nbsp;Just something to think about the next time your eye wanders to that new tech article. &nbsp;&nbsp;&nbsp;</p>\n<p>@funny - follow, promote, vote \")</p>\n<p><img src=\"https://s11.postimg.org/76p03ocmb/pexels_photo_65121_1.jpg\" width=\"640\" height=\"426\"/></p>\n<p>(pexels.com)</p>\n</html>",
+    "body_length": 3213,
+    "cashout_time": "2016-09-12T15:14:36",
+    "category": "psychology",
+    "children": 2,
+    "created": "2016-09-05T15:14:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"psychology\"],\"users\":[\"funny\"],\"image\":[\"https://s11.postimg.org/76p03ocmb/pexels_photo_65121_1.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T15:14:36",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 14001367683,
+    "parent_author": "",
+    "parent_permlink": "psychology",
+    "pending_payout_value": "0.005 HBD",
+    "percent_hbd": 10000,
+    "permlink": "2qpu1c-psychology-this-might-be-the-reason-why-you-like-the-things-you-do",
+    "post_id": 1135203,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Psychology: This Might Be The Reason Why You Like The Things You Do",
+    "title": "Psychology: This Might Be The Reason Why You Like The Things You Do",
+    "total_payout_value": "0.000 HBD",
+    "url": "/psychology/@funny/2qpu1c-psychology-this-might-be-the-reason-why-you-like-the-things-you-do"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 3864679285504,
+        "rshares": 59235713527,
+        "voter": "avarice"
+      },
+      {
+        "percent": "10000",
+        "reputation": 126444536302,
+        "rshares": 1391662098,
+        "voter": "hms818"
+      },
+      {
+        "percent": "3100",
+        "reputation": 3725920343994,
+        "rshares": 3175482199,
+        "voter": "booky"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1996672246136,
+        "rshares": 1259521991,
+        "voter": "anomaly"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1013164758868,
+        "rshares": 181130260,
+        "voter": "borishaifa"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>So who here has missed an investment or startup stage that they wished that had taken a part it? &nbsp;I'm guessing we are all raising our hands. &nbsp;I'm sure even the smartest people have missed a company they probably wished they had invested their time or money in. &nbsp;You are not alone. &nbsp;Yeah it can leave you with that punch in the gut feeling. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Take A Deep Breath. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>FUCK! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Feel better? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Yeah there is going to be a period of frustration. &nbsp;Go for a run or hit the gym. &nbsp;Blow it off. &nbsp;But don't dwell on it. &nbsp;There will ALWAYS be another opportunity to capatilze on. &nbsp;That is the secret. But if you waste your time with regret of what could have been you are going to miss out on what is coming next. &nbsp;Keep looking forward and keep looking outward. If you are focused on your field it is easy to feel like another opportunity like the one that passed in your field will not happen again in your lifetime. &nbsp;The key is realizing it may not be in your field. &nbsp;It may be something you have never heard of. &nbsp;Take steemit for example. &nbsp;How many people knew nothing of blockchains but learned about it and spotted an opportunity when the site was new and even now as it is still growing? &nbsp;This carries over to everything. There will always be a next big thing and if you are willing to widen your scope (if only for investment purposes) you will pick up on more of them. &nbsp;It takes a little more work then when it is something that is in your scope of expertise, but taking some time to spot an opportunity while still staying in your field can help you build the capitial you need to continue to pursue your field of choice. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Remeber you didn't actually lose anything. I know me telling you this is probably not helping, but it is true. &nbsp;Losing an opportunity is not the same as losing something you actually have. &nbsp;If you knew about the opportunity after the fact, knew about it before and decided not to do anything or didn't know about it at all, the results are all the same. &nbsp;Technically, even if the opportunity never existsed, you are in the same boat then if it did and you didn't act. &nbsp;What is causing any frustration is the knowing that you have missed out, which means, quite literally, that it is all in your head. &nbsp;There are probably dozens of opportunities you are missing a month that are not even on your radar and you don't loss sleep over an of them (and no, don't start thinking about all those other missed opportunities). &nbsp;The loss of what could have been hits as badly as if we actually had it. &nbsp;It is even something you might feel more suddenly than losing something you actually had. &nbsp;That is because we, as forward thinkers, are visualizing what will be and since that is what is in our head, we feel the lose of possibilites quite instantly. &nbsp;While feeling the loss for something you had may take more time as we tend to take for granted what is in our life. &nbsp;&nbsp;So dust yourself off, raise your head and look forward to the next big thing.</p>\n<p><img src=\"https://s10.postimg.org/6t2iaz195/woman_dropped_fail_failure.jpg\" width=\"640\" height=\"426\"/></p>\n<p>(pexels.com)</p>\n</html>",
+    "body_length": 3657,
+    "cashout_time": "2016-09-12T06:22:12",
+    "category": "money",
+    "children": 3,
+    "created": "2016-09-05T06:22:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"money\",\"psychology\"],\"image\":[\"https://s10.postimg.org/6t2iaz195/woman_dropped_fail_failure.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T06:22:12",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 65243510075,
+    "parent_author": "",
+    "parent_permlink": "money",
+    "pending_payout_value": "0.025 HBD",
+    "percent_hbd": 10000,
+    "permlink": "3dsbt4-how-to-deal-with-the-feeling-of-a-missed-opportunity-don-t-cry-over-dropped-ice-cream",
+    "post_id": 1130868,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "How To Deal With The Feeling Of A Missed Opportunity; Don't Cry Over Dropped Ice Cream",
+    "title": "How To Deal With The Feeling Of A Missed Opportunity; Don't Cry Over Dropped Ice Cream",
+    "total_payout_value": "0.000 HBD",
+    "url": "/money/@funny/3dsbt4-how-to-deal-with-the-feeling-of-a-missed-opportunity-don-t-cry-over-dropped-ice-cream"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1933204465,
+        "rshares": 54738831720,
+        "voter": "sonzweil"
+      },
+      {
+        "percent": "10000",
+        "reputation": 213364405044,
+        "rshares": 537905171,
+        "voter": "jearson"
+      },
+      {
+        "percent": "10000",
+        "reputation": 61580657554,
+        "rshares": 94507255,
+        "voter": "moodledidoodledi"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5963920739546,
+        "rshares": 4833316766,
+        "voter": "lgm-1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 33467338593,
+        "rshares": 60354652,
+        "voter": "sijoittaja"
+      }
+    ],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>About ten years ago, maybe five, internet dating got saddled with this idea that if you use it there was something wrong with you. &nbsp;That you were socially awkward and had trouble finding a date in real life. &nbsp;But the same things were said when you were a nerd. &nbsp;It wasn't that long ago that nerds were at the bottom of the popularity chart and now it's almost uncool if you are not one. &nbsp;Things and people change. &nbsp;So @funny is announcing that internet dating is no longer something to scoff at. &nbsp;Why do I say this? &nbsp;Well here is a list of reasons why internet dating is a legit, and sometimes better, way to meet new people. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>You Mean You Have A Personality &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>If you meet someone at a bar or club what are you really basing your decision on. &nbsp;It's simple, you're basing it on looks and looks alone. &nbsp;I'm not going to argue how important looks are, or are are not, in a relationship but I can tell you, if you don't have anything in common, the relationship is going to suffer. &nbsp;There are cases, and this is rare, when you happen to see a tattoo of something the person likes that you like as well, but even if that is the case, basing a relationship on one common interest isn't a solid plan. &nbsp;And yes, you can argue that internet dating is shallow as well, people with hot pictures are the ones getting more messages. &nbsp;But under that picture is a bio and depending on the site, other information about the person beside how they look in a swimsuit. &nbsp;It may not be a lot but it is something. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Get To Know The Person First &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>So you flash a smile at a club and the person comes over. &nbsp;You try to make funny banter in their ear but they can't hear a word you're saying. &nbsp;But they think you're cute, so they smile and start to dance with you. &nbsp;Maybe you end up exchanging numbers or a kiss in the corner of the club. &nbsp;That is great, but what did you really learn about the person. &nbsp;I have had times, and yes I am embarrased to admit this, where I wasn't even sure of the woman's name when I called her. &nbsp;Needless to say that relationship didn't work out. &nbsp;But when you meet someone online you have to converse with them. &nbsp;There has to be some kind of back and forth before a meetup is agreed upon. &nbsp;For some people it a quick hey let's meet for coffee and others it may be months of late night conversations, but either way the option to really talk is presented in every case. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Less Pressure &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>It's easier, in a way, to be yourself on the net. &nbsp;You can tell people things about yourself that you would have trouble saying in person. &nbsp;There is no fear of what the other person will say or how they will look at you and once you are comfortable that this person likes the real you then you can decide to meet. &nbsp;And there is the added benefit of being able to end the conversation anytime without any awkwardness. &nbsp;It can take months to tell someone things about you that you can spill out online in an conversation and see how they react. &nbsp;And if the getting to know the person doesn't work out, you can send a friendly goodbye message and move on to someone else. &nbsp;No need to have to wait until the date is over as you look at the clock every five minutes. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>I Don't Have The Time To Meet People &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>That isn't just an excuse. &nbsp;People are busy and dating takes time. &nbsp;Meeting people even takes time. &nbsp;When you go out to a club or bar, you have to get ready, get there and spend, who knows how long, trying to make eye contact, or 'bump into', someone who wants to be 'bumped into' by you. &nbsp;That is if the person even wants to be bothered to chat. &nbsp;There are people who go to clubs because they want to dance or unwind and they don't want to be bothered by some one who is looking for a date. &nbsp;Plus it gets expensive. &nbsp;There are cover charges, costs of transport, drinks. &nbsp;And if you do meet someone you can only get to know them so much in the bar, so that means going on a date, which costs more money. &nbsp;It adds up, especially when you are meeting a lot of people who are not right for you. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>I'm Shy &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>There is nothing wrong with being shy. &nbsp;Some people need time before they are comfortable putting themselves out there. &nbsp;Who cares. &nbsp;You are worth it and you want to find someone who knows that. &nbsp;And maybe you are a bit \"weird\" by some people's standards. &nbsp;Again, who cares. &nbsp;Okay techincally this doesn't argue agianst being socially awkward. &nbsp;But if you are, so what, good for you. &nbsp;We all have our quirks. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>Now I know there are negatives. &nbsp;There are people who are not who they say are and times when you meet someone online that you click with over the net but don't seem to gel with when you meet up in person. &nbsp;It is not perfect. &nbsp;And yeah there are benefits to meeting people in person rather than online. But that does not take away from the benefits that online dating has. &nbsp;It is an option, a very viable one, of meeting people and you, if you choose to use it, should not feel lesser for doing so. &nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><img src=\"https://s17.postimg.org/nv066jnj3/smartphone_friends_internet_connection.jpg\" width=\"630\" height=\"380\"/></p>\n<p>(pexels.com) &nbsp;</p>\n<p>So you are starting to meet new people, now what? &nbsp;I'm not going to lie to you. &nbsp;I'm not going to tell you that all you have to do is be yourself and everyone will be interested in you. &nbsp;That phone numbers will fall at your feet and your social calender will run out of space. Cause it won't. &nbsp;In reality, being yourself probably won't attract as many dates as you possibly could get. But getting a higher number of yeses shouldn't be your goal, especially if you are looking for a long-term serious relationship. &nbsp;What you want is to find that one person, the one who is going to be there for the real you. &nbsp;That one who knows who you are on your good days and your bad and will still stick it out for you when you are at your worse. &nbsp;If you waste all your time impressing the wrong people, you might miss your chance with the right ones. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>When I was younger and didn't know better, I had made mistakes of acting in a way that I thought the person I liked wanted me to act like. &nbsp;And I have seen times when others have done it for me. &nbsp;We have all been there. &nbsp;Maybe its something small, like you pretend to like a band that you would never listen to, or something bigger, like pretending your an outdoors person when really all you want to do is stay home on a Saturday night in your pajamas. &nbsp;And this can work at first. &nbsp;If you are good enough at understanding what the other person likes, and wants, you can give it to them. &nbsp;But how long can you do it before it becomes a chore? &nbsp;When you start to act \"differently\" because you start to voice what you really think. &nbsp;At some point the person who you are will start to surface. &nbsp;Or worse it won't and that pushed down resentment can lead to some bad moods and arguements down the line. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>So give it a try. &nbsp;You are going to meet a lot of people that you will not, in one way or another, click with. &nbsp;That is just fine. &nbsp;So is being rejected. &nbsp;It does not feel great when it happens, but it happens. &nbsp;You are no worse off then before you got rejected. &nbsp;And who knows how much time you would have wasted chasing the wrong person. &nbsp;Be smart about your time and just be yourself.</p>\n</html>",
+    "body_length": 9406,
+    "cashout_time": "2016-09-12T04:11:03",
+    "category": "dating",
+    "children": 1,
+    "created": "2016-09-05T04:11:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"dating\",\"life\"],\"users\":[\"funny\"],\"image\":[\"https://s17.postimg.org/nv066jnj3/smartphone_friends_internet_connection.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-05T04:11:03",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 60264915564,
+    "parent_author": "",
+    "parent_permlink": "dating",
+    "pending_payout_value": "0.022 HBD",
+    "percent_hbd": 10000,
+    "permlink": "2eercq-why-you-should-try-internet-dating-and-just-be-yourself",
+    "post_id": 1129949,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Why You Should Try Internet Dating And Just Be Yourself",
+    "title": "Why You Should Try Internet Dating And Just Be Yourself",
+    "total_payout_value": "0.000 HBD",
+    "url": "/dating/@funny/2eercq-why-you-should-try-internet-dating-and-just-be-yourself"
+  },
+  {
+    "active_votes": [],
+    "author": "funny",
+    "author_reputation": 8923501480463,
+    "beneficiaries": [],
+    "body": "<html>\n<p>I will admit, I was one of those kids who was not a fan of gym. You know the ones. The ones that hope the three outs pass before the ball makes it to the outfield. Come on strike-out! I like to hit the ball, but the whole catching and throwing thing was not for me. I couldn't kick in soccer and apparently you need something called co-ordination for tennis. Basketball required dribbling, so that was out and football was a time to chill on the bench. I never played rugby but I'm sure I would suck at it. Golf is a no unless it is mini. Surfing involves balance and I would sink like a stone at the first wave. Skateboarding lead to ripped pants and scrapped knees. I was not winning an olympic medal when we did our track and field events in school. Hockey, ha! I was happy if I didn't fall on my ass when I was skating. I was not bad at bowling, so that is something. The point is (if there is a point) is if you did suck at sports, you are not alone. I wanted to be on the bench with a pad and a pencil drawing. So if you are or were like me, don't sweat it, find your own ways to stay in shape, eat right and embarce your lack of strength, speed and co-ordination.</p>\n<p><img src=\"https://s17.postimg.org/z2zqr8c73/black_and_white_sport_fight_boxer.jpg\" width=\"640\" height=\"465\"/></p>\n</html>",
+    "body_length": 1309,
+    "cashout_time": "2016-09-09T02:32:00",
+    "category": "life",
+    "children": 0,
+    "created": "2016-09-02T02:32:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"life\",\"funny\",\"sports\"],\"image\":[\"https://s17.postimg.org/z2zqr8c73/black_and_white_sport_fight_boxer.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-02T02:32:00",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "",
+    "parent_permlink": "life",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "any-one-else-suck-at-sports-growing-up",
+    "post_id": 1093501,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Any One Else Suck At Sports Growing Up?",
+    "title": "Any One Else Suck At Sports Growing Up?",
+    "total_payout_value": "0.000 HBD",
+    "url": "/life/@funny/any-one-else-suck-at-sports-growing-up"
   }
 ]

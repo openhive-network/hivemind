@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_replies_by_last_update"
-          params: ["admin","non_existing_permlink",101]
+          params: ["admin","non_existing_permlink",21]
       response:
         status_code: 200
         verify_response_with:

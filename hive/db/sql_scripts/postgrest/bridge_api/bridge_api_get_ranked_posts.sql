@@ -15,9 +15,9 @@ _sort_type hivemind_postgrest_utilities.ranked_post_sort_type;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "observer": "string"}', 1, '{"start_permlink": "permlink must be string"}');
 
-  _limit = hivemind_postgrest_utilities.valid_number(
-    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
-    20, 1, 100, 'limit');
+  _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
+                                                     least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+                                                     1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
 
   _post_id = hivemind_postgrest_utilities.find_comment_id(
     hivemind_postgrest_utilities.valid_account(
