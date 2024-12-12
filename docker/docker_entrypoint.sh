@@ -95,7 +95,7 @@ run_hive() {
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
     if [[ "$POSTGREST_SERVER" = 1 ]]; then
       echo "Running nginx setup..."
-      exec "$SCRIPT_DIR/app/docker/rewriter_entrypoint.sh"
+      exec "$SCRIPT_DIR/app/rewriter/rewriter_entrypoint.sh" &
       echo "Running postgrest setup..."
       exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
     else
@@ -105,7 +105,7 @@ run_hive() {
     log "run_hive" "Starting Hivemind..."
     if [[ "$POSTGREST_SERVER" = 1 ]]; then
       echo "Running nginx setup..."
-      exec "$SCRIPT_DIR/app/docker/rewriter_entrypoint.sh"
+      exec "$SCRIPT_DIR/app/rewriter/rewriter_entrypoint.sh" &
       echo "Running postgrest setup..."
       exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
     else
