@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "Expecting 4 arguments in 'start' array: parent post author and permlink, optional page start author and permlink",
-  "message": "Invalid parameters"
-}

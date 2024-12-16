@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "Date should be in format Y-m-d H:M:S or Y-m-dTH:M:S",
-  "message": "Invalid parameters"
-}

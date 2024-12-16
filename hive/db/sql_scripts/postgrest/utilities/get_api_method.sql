@@ -224,8 +224,6 @@ BEGIN
       result := hivemind_endpoints.database_api_list_votes(__params);
     WHEN __method_type = 'find_comments' THEN
       result := hivemind_endpoints.database_api_find_comments(__params);
-    WHEN __method_type = 'list_comments' THEN
-      result := hivemind_endpoints.database_api_list_comments(__params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('database_api' || __method_type);
   END CASE;

@@ -349,18 +349,6 @@ def build_metadata():
         sa.Column('hivemind_git_rev', sa.Text, nullable=False, server_default=''),
     )
 
-    # hive_posts_api_helper is only used by list_comments, so this should be removed with that api call
-    sa.Table(
-        'hive_posts_api_helper',
-        metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column(
-            'author_s_permlink', VARCHAR(275, collation='C'), nullable=False
-        ),  # concatenation of author '/' permlink
-        sa.Index('hive_posts_api_helper_author_s_permlink_idx', 'author_s_permlink'), 
-    )
-
     sa.Table(
         'hive_mentions',
         metadata,
@@ -672,8 +660,6 @@ def setup_runtime_code(db):
         "condenser_follows.sql",
         "hot_and_trends.sql",
         "update_hive_posts_children_count.sql",
-        "update_hive_posts_api_helper.sql",
-        "database_api_list_comments.sql",
         "database_api_list_votes.sql",
         "update_posts_rshares.sql",
         "update_hive_post_root_id.sql",
@@ -761,8 +747,6 @@ def setup_runtime_code(db):
         "postgrest/utilities/create_database_post_object.sql",
         "postgrest/database_api/database_api_find_comments.sql",
         "postgrest/utilities/valid_date.sql",
-        "postgrest/utilities/list_comments.sql",
-        "postgrest/database_api/database_api_list_comments.sql",
         "postgrest/bridge_api/bridge_api_list_subscribers.sql",
         "postgrest/bridge_api/bridge_api_get_trending_topics.sql",
         "postgrest/bridge_api/bridge_api_list_communities.sql",

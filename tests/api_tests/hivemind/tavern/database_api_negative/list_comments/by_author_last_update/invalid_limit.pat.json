@@ -1,5 +1,0 @@
-{
-    "code": -32602,
-    "data": "invalid literal for int() with base 10: 'p'",
-    "message": "Invalid parameters"
-}
