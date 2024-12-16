@@ -8,6 +8,7 @@ END$$;
 -- In case such tables have been created directly by admin, drop them first to allow correct creation and access during upgrade process.
 DROP TABLE IF EXISTS hivemind_app.hive_db_vacuum_needed;
 DROP TABLE IF EXISTS hivemind_app.hive_db_data_migration;
+DROP TABLE IF EXISTS hivemind_app.hive_posts_api_helper;
 
 SET ROLE hivemind;
 

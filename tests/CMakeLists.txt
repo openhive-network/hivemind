@@ -42,8 +42,6 @@ ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tes
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind condenser_api get_tags_used_by_author steemit)
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind condenser_api get_trending_tags blocktrades 1)
 
-ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind database_api list_comments ["steemit","firstpost","",""] 1 by_root)
-
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind follow_api get_account_reputations 1 blocktrades 1)
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind follow_api get_blog 1 blocktardes 0 1)
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind follow_api get_blog_entries 1 blocktrades 0 1)

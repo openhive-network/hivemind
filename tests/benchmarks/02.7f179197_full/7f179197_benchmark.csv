@@ -407,9 +407,6 @@ condenser_api_patterns/get_followers/most_blog_followers_page_2,12.2613640129566
 condenser_api_patterns/get_state/steemitboard,0.44658500398509204,628964
 condenser_api_patterns/get_state/travel,0.13122712704353034,671207
 condenser_api_patterns/get_trending_tags/test,0.20978554303292185,5250
-database_api_patterns/list_comments/most_root_comments,0.21175281691830605,846734
-database_api_patterns/list_comments/second_most_root_comments,0.20720506692305207,826148
-database_api_patterns/list_comments/third_most_root_comments,0.1972765780519694,782494
 condenser_api_patterns/get_state/et42k,3.871129173086956,2444665
 hive_api/get_info,0.003933237981982529,201
 database_api_patterns/list_votes/holger80,0.34071658505126834,255649
@@ -825,10 +822,7 @@ condenser_api_patterns/get_state/eat6tm6o,0.3686003010952845,101544
 condenser_api_patterns/get_state/steemitboard,0.43368410295806825,628964
 condenser_api_patterns/get_state/travel,0.1276686459314078,671207
 condenser_api_patterns/get_trending_tags/test,0.003411877085454762,5250
-database_api_patterns/list_comments/most_root_comments,0.1469030799344182,846734
-database_api_patterns/list_comments/second_most_root_comments,0.12726520805153996,826148
 database_api_patterns/list_votes/holger80,0.03600089892279357,255649
-database_api_patterns/list_comments/third_most_root_comments,0.12919992092065513,782494
 hive_api/get_info,0.004063131986185908,201
 condenser_api_patterns/get_state/et42k,3.72388129204046,2444665
 tags_api_patterns/get_discussion/vaneaventuras,0.01398130797315389,9263
@@ -1242,9 +1236,6 @@ condenser_api_patterns/get_state/hive_cn_payout,0.0030354729387909174,1245
 condenser_api_patterns/get_trending_tags/test,0.0035271230153739452,5250
 condenser_api_patterns/get_state/travel,0.12904393894132227,671207
 condenser_api_patterns/get_state/steemitboard,0.48794697993434966,628964
-database_api_patterns/list_comments/most_root_comments,0.15100728999823332,846734
-database_api_patterns/list_comments/second_most_root_comments,0.12682633905205876,826148
-database_api_patterns/list_comments/third_most_root_comments,0.15069363196380436,782494
 hive_api/get_info,0.005401902017183602,201
 database_api_patterns/list_votes/holger80,0.03512490005232394,255649
 condenser_api_patterns/get_state/et42k,3.694182844948955,2444665
@@ -1659,11 +1650,8 @@ condenser_api_patterns/get_state/hive_cn_payout,0.0033883610740303993,1245
 condenser_api_patterns/get_state/steemitboard,0.4280893399845809,628964
 condenser_api_patterns/get_state/travel,0.12739750603213906,671207
 condenser_api_patterns/get_trending_tags/test,0.0034280690597370267,5250
-database_api_patterns/list_comments/most_root_comments,0.13997257698792964,846734
-database_api_patterns/list_comments/second_most_root_comments,0.13168964302167296,826148
 database_api_patterns/list_votes/holger80,0.03591325902380049,255649
 hive_api/get_info,0.003694889019243419,201
-database_api_patterns/list_comments/third_most_root_comments,0.13286383193917572,782494
 condenser_api_patterns/get_state/et42k,3.762916094972752,2444665
 tags_api_patterns/get_discussion/vaneaventuras,0.013193767052143812,9263
 bridge_api_patterns/account_notifications/chekohler,0.01736759999766946,17651
@@ -2076,9 +2064,6 @@ condenser_api_patterns/get_state/eat6tm6o,0.35246639291290194,101544
 condenser_api_patterns/get_state/travel,0.12368898501154035,671207
 condenser_api_patterns/get_state/steemitboard,0.4292480369331315,628964
 condenser_api_patterns/get_trending_tags/test,0.003695362014696002,5250
-database_api_patterns/list_comments/most_root_comments,0.14081824198365211,846734
-database_api_patterns/list_comments/second_most_root_comments,0.12834368296898901,826148
-database_api_patterns/list_comments/third_most_root_comments,0.12115863407962024,782494
 database_api_patterns/list_votes/holger80,0.03554880095180124,255649
 hive_api/get_info,0.0036834159400314093,201
 condenser_api_patterns/get_state/et42k,3.7293794649885967,2444665
@@ -2493,10 +2478,7 @@ condenser_api_patterns/get_state/hive_cn_payout,0.0032533619087189436,1245
 condenser_api_patterns/get_trending_tags/test,0.023318100022152066,5250
 condenser_api_patterns/get_state/travel,0.12496561300940812,671207
 condenser_api_patterns/get_state/steemitboard,0.4300266259815544,628964
-database_api_patterns/list_comments/most_root_comments,0.14599233504850417,846734
 database_api_patterns/list_votes/holger80,0.06669893499929458,255649
-database_api_patterns/list_comments/third_most_root_comments,0.1571175518911332,782494
-database_api_patterns/list_comments/second_most_root_comments,0.16533525695558637,826148
 hive_api/get_info,0.01148356799967587,201
 condenser_api_patterns/get_state/et42k,3.869123133015819,2444665
 tags_api_patterns/get_discussion/vaneaventuras,0.006915518082678318,9263
@@ -2910,9 +2892,6 @@ condenser_api_patterns/get_state/eat6tm6o,0.35485008801333606,101544
 condenser_api_patterns/get_state/travel,0.12525696400552988,671207
 condenser_api_patterns/get_trending_tags/test,0.0035863700322806835,5250
 condenser_api_patterns/get_state/steemitboard,0.430851559038274,628964
-database_api_patterns/list_comments/most_root_comments,0.14145972998812795,846734
-database_api_patterns/list_comments/third_most_root_comments,0.10530676995404065,782494
-database_api_patterns/list_comments/second_most_root_comments,0.12959968904033303,826148
 database_api_patterns/list_votes/holger80,0.03576869296375662,255649
 hive_api/get_info,0.003448999021202326,201
 condenser_api_patterns/get_state/et42k,3.7432046139147133,2444665
@@ -3327,10 +3306,7 @@ condenser_api_patterns/get_state/eat6tm6o,0.3516237720614299,101544
 condenser_api_patterns/get_state/travel,0.1256414750823751,671298
 condenser_api_patterns/get_trending_tags/test,0.022202433086931705,5250
 condenser_api_patterns/get_state/steemitboard,0.4367845560191199,628964
-database_api_patterns/list_comments/most_root_comments,0.0986939079593867,846734
-database_api_patterns/list_comments/second_most_root_comments,0.1380698640132323,826148
 database_api_patterns/list_votes/holger80,0.03496896103024483,255649
-database_api_patterns/list_comments/third_most_root_comments,0.12633821193594486,782494
 hive_api/get_info,0.0034530969569459558,201
 condenser_api_patterns/get_state/et42k,3.8647192450007424,2444665
 tags_api_patterns/get_discussion/vaneaventuras,0.007721441914327443,9263
@@ -3744,10 +3720,7 @@ condenser_api_patterns/get_state/hive_cn_payout,0.0031579170608893037,1245
 condenser_api_patterns/get_state/travel,0.13969905790872872,671298
 condenser_api_patterns/get_trending_tags/test,0.0036017399979755282,5250
 condenser_api_patterns/get_state/steemitboard,0.4425038159824908,628964
-database_api_patterns/list_comments/most_root_comments,0.14077236701268703,846734
-database_api_patterns/list_comments/second_most_root_comments,0.1299466280033812,826148
 hive_api/get_info,0.003511844086460769,201
-database_api_patterns/list_comments/third_most_root_comments,0.12580685399007052,782494
 database_api_patterns/list_votes/holger80,0.03527054900769144,255649
 condenser_api_patterns/get_state/et42k,3.733253392041661,2444665
 tags_api_patterns/get_discussion/vaneaventuras,0.010176809038966894,9263
@@ -4161,9 +4134,6 @@ condenser_api_patterns/get_state/hive_cn_payout,0.003482252941466868,1245
 condenser_api_patterns/get_state/travel,0.12796812097076327,671298
 condenser_api_patterns/get_state/steemitboard,0.43050800799392164,628964
 condenser_api_patterns/get_trending_tags/test,0.0034652259200811386,5250
-database_api_patterns/list_comments/most_root_comments,0.09832959901541471,846734
-database_api_patterns/list_comments/second_most_root_comments,0.08703778602648526,826148
-database_api_patterns/list_comments/third_most_root_comments,0.1285668679047376,782494
 database_api_patterns/list_votes/holger80,0.05744237301405519,255649
 hive_api/get_info,0.004550626967102289,201
 condenser_api_patterns/get_state/et42k,3.770180796040222,2444665

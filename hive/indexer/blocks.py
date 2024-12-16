@@ -436,7 +436,6 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_posts_rshares({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",

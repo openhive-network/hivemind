@@ -137,7 +137,6 @@ class DbState:
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_author_id_created_at_id_idx',
             'hive_posts_author_id_id_idx',
-            'hive_posts_api_helper_author_s_permlink_idx',
             'hive_votes_voter_id_last_update_idx',
             'hive_votes_block_num_idx',
             'hive_subscriptions_block_num_idx',
@@ -409,14 +408,6 @@ class DbState:
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
-        with AutoDbDisposer(db, "finish_hive_posts_api_helper") as db_mgr:
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({last_imported_block}, {current_imported_block});"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
-
-    @classmethod
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_feed_cache") as db_mgr:
             time_start = perf_counter()
@@ -526,14 +517,8 @@ class DbState:
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
             ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]),
-            (
-                'hive_posts_api_helper',
-                cls._finish_hive_posts_api_helper,
-                [cls.db(), last_imported_block, current_imported_block],
-            ),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
-        # hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
