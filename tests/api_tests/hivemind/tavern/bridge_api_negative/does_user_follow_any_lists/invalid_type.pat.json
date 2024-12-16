@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "Account 1234 does not exist",
+  "data": "invalid observer type",
   "message": "Invalid parameters"
 }
