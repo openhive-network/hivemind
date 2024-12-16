@@ -732,6 +732,8 @@ build_and_publish_image:
   - |
     TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
     scripts/ci-helpers/build_and_publish_instance.sh --image-tag=$TAG
+    docker tag "$CI_REGISTRY_IMAGE/postgrest-rewriter:$TAG" "registry-upload.hive.blog/hivemind/postgrest-rewriter:$TAG"
+    docker push "registry-upload.hive.blog/hivemind/postgrest-rewriter:$TAG"
   tags: *shared_tags
 
 Trigger benchmark-results-collector:
