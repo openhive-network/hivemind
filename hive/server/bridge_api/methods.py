@@ -395,6 +395,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
 @return_error_info
 async def does_user_follow_any_lists(context, observer):
     """Tells if given observer follows any blacklist or mute list"""
+    observer = valid_account(observer)
     blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     if len(blacklists_for_user) == 0:

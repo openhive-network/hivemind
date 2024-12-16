@@ -4,7 +4,6 @@
   marks:
     - patterntest
     - negative
-    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
@@ -20,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.does_user_follow_any_lists"
-          params: {"observer": "not-existing-account"}
+          params: {"observer": "asdfqwerkjfes"}
       response:
         status_code: 200
         verify_response_with:
