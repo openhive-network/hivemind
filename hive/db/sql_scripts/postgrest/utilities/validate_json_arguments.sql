@@ -10,6 +10,7 @@ DECLARE
   _converted_args_json JSONB DEFAULT '{}'::JSONB;
   _json_is_array BOOLEAN;
   _json_has_call_keyword BOOLEAN DEFAULT False;
+  _unexpected_arg TEXT;
   _json_array_len INT;
   _expected_args_keys JSONB;
   _arg_name TEXT;
@@ -71,15 +72,21 @@ BEGIN
     END IF;
   END IF;
 
+  _idx = 0; -- reuse this int in order to calculate number of arguments passed to function
+
   SELECT jsonb_agg(key) FROM json_each(_expected_args) INTO _expected_args_keys;
 
   FOR _arg_name IN SELECT key FROM jsonb_each(_given_args) LOOP
-    IF NOT _expected_args_keys ? _arg_name THEN
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_unexpected_keyword_exception(_arg_name);
+    IF NOT _expected_args_keys ? _arg_name AND _unexpected_arg IS NULL THEN
+      -- THIS ERROR IN PYTHON IS THROWN ONLY WHEN ALL REQUIRED PARAMETERS ARE PASSED - SO IF SOMETHING REQUIRED IS MISSING, WE THROW AN ERROR OF EMPTY ACCOUNT OR SOMETHING
+      -- AND WHEN WE HAVE ALL REQUIRED ARGS AND SOMETHING STRANGE IN JSON, WE THROW UNEXPECTED ARGUMENT
+      _unexpected_arg = _arg_name;
+      CONTINUE;
     END IF;
 
     _arg_type = jsonb_typeof(_given_args->_arg_name);
     _expected_arg_type = _expected_args->>_arg_name;
+    _idx = _idx + 1;
 
     IF (_expected_arg_type = 'number' AND _arg_type NOT IN ('number', 'string','null', 'array')) OR
         (_expected_arg_type <> 'number' AND _arg_type <> _expected_arg_type AND _arg_type <> 'null') THEN
@@ -90,6 +97,11 @@ BEGIN
       END IF;  
     END IF;
   END LOOP;
+
+  IF _unexpected_arg IS NOT NULL AND _idx >= _min_args_number THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_unexpected_keyword_exception(_unexpected_arg);
+  END IF;
+
   RETURN _given_args;
 END
 $$
