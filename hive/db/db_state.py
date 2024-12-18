@@ -17,6 +17,7 @@ from hive.conf import (
   ,REPTRACKER_SCHEMA_NAME
   )
 
+from hive.signals import can_continue_thread
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
@@ -532,6 +533,32 @@ class DbState:
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
 
     @classmethod
+    def vacuum_hivemind_tables(cls, db):
+        log.info("Requesting vacuum on hivemind tables")
+        sql = f"""
+SELECT hive.app_request_table_vacuum(table_schema || '.' || table_name)
+FROM information_schema.tables
+WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
+"""
+        cls._execute_query(db=cls.db(), sql=sql)
+        sql = f"""
+SELECT COUNT(*)
+FROM hafd.vacuum_requests AS vr
+JOIN information_schema.tables AS t ON vr.table_name = t.table_schema || '.' || t.table_name
+WHERE t.table_schema = '{SCHEMA_NAME}'
+AND vr.status != 'vacuumed'
+"""
+        log.info("Waiting for hivemind tables to be vacuumed")
+        while can_continue_thread():
+            try:
+                count = cls.db().query_one(sql)
+                if count == 0:
+                    return
+            except sqlalchemy.exc.SQLAlchemyError as e:
+                print(f"Database error: {e}")
+            time.sleep(1)
+
+    @classmethod
     def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
@@ -540,12 +567,17 @@ class DbState:
             is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
 
             if is_initial_massive:
-                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+                cls.vacuum_hivemind_tables(cls.db())
 
             cls._finish_all_tables( is_initial_massive, last_completed_blocks, last_imported_blocks)
 
             if is_initial_massive:
-                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_feed_cache')")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_mentions')")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_communities')")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_state')")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_notification_cache')")
+                cls._execute_query(db=cls.db(), sql=f"SELECT hive.app_request_table_vacuum('{SCHEMA_NAME}' || '.hive_accounts')")
 
             log.info("[MASSIVE] Massive sync complete!")
             return True
