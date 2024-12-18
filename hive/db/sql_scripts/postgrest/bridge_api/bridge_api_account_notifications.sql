@@ -10,6 +10,7 @@ DECLARE
   _min_score SMALLINT;
   _last_id INTEGER;
   _limit INTEGER;
+  _oldest_block INTEGER;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number", "last_id": "number", "limit":"number"}', 1, NULL);
 
@@ -28,6 +29,7 @@ BEGIN
 
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
+  _oldest_block = hivemind_app.block_before_head( '90 days' );
 
   RETURN(
     SELECT jsonb_agg( -- bridge_api_account_notifications
@@ -74,7 +76,7 @@ BEGIN
           FROM hivemind_app.hive_notification_cache nv
           WHERE
             nv.dst = _account_id
-            AND nv.block_num > hivemind_app.block_before_head( '90 days' )
+            AND nv.block_num > _oldest_block
             AND nv.score >= _min_score
             AND NOT( _last_id <> 0 AND nv.id >= _last_id )
           ORDER BY nv.id DESC
