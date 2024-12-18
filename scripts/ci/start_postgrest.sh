@@ -51,7 +51,6 @@ start_webserver() {
     export PGRST_DB_URI=$POSTGRES_ACCESS
     export PGRST_SERVER_PORT=$WEBSERVER_PORT
     export PGRST_ADMIN_SERVER_PORT=$ADMIN_PORT
-    #export PGRST_DB_ROOT_SPEC="home"
 
     postgrest postgrest.conf
 }
