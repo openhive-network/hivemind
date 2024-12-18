@@ -111,6 +111,7 @@ def build_metadata():
         sa.Index(
             'hive_posts_parent_id_id_idx',
             sa.text('parent_id, id DESC'),
+            postgresql_include=['author_id'],
             postgresql_where=sql_text("counter_deleted = 0"),
         ),
 
