@@ -8,8 +8,7 @@ POSTGRES_PORT=5432
 POSTGRES_USER="hivemind"
 WEBSERVER_PORT=8080
 ADMIN_PORT=3001
-
-
+LOG_LEVEL="error"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -31,6 +30,9 @@ while [ $# -gt 0 ]; do
     --postgres-url=*)
         POSTGRES_URL="${1#*=}"
         ;;
+    --log-level=*)
+        LOG_LEVEL="${1#*=}"
+        ;;  
     -*)
         echo "ERROR: '$1' is not a valid option"
         echo
@@ -51,6 +53,7 @@ start_webserver() {
     export PGRST_DB_URI=$POSTGRES_ACCESS
     export PGRST_SERVER_PORT=$WEBSERVER_PORT
     export PGRST_ADMIN_SERVER_PORT=$ADMIN_PORT
+    export PGRST_LOG_LEVEL=$LOG_LEVEL
     #export PGRST_DB_ROOT_SPEC="home"
 
     postgrest postgrest.conf
