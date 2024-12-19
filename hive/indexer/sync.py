@@ -130,16 +130,19 @@ class SyncHiveDb:
             self._db.query_no_return( "START TRANSACTION" )
             self._lbound, self._ubound = self._query_for_app_next_block()
 
+            application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
+
             if self._break_requested(last_imported_block, active_connections_before):
                 return
 
             if self._lbound is None:
+                if application_stage == 'wait_for_haf':
+                    report_enter_to_stage(application_stage)
                 continue
 
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
 
-            application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
 
             # this  commit is added here only to prevent error idle-in-transaction timeout
             # it should be removed, but it requires to check any possible long-lasting actions
@@ -212,7 +215,6 @@ class SyncHiveDb:
         return False
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
-        log.info("Querying for next block for app context...")
         limit = "NULL"
         batch = "NULL"
         if self._last_block_to_process:
