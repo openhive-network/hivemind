@@ -532,6 +532,36 @@ class DbState:
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
 
     @classmethod
+    def vacuum_tables_in_threads(cls, tables):
+
+        def vacuum_table(table, db):
+            with AutoDbDisposer(db, "vacuum") as db_mgr:
+                log.info(f"Vacuuming table {table}")
+                db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
+
+        methods = []
+        for table in tables:
+            methods.append(('VACUUM ' + table, vacuum_table, [table, cls.db()]))
+
+        cls.process_tasks_in_threads("Requesting vacuum on hivemind tables", methods)
+
+    @classmethod
+    def vacuum_all_hivemind_tables_in_threads(cls):
+
+        log.info("Requesting vacuum on hivemind tables")
+        sql = f"""
+SELECT table_schema || '.' || table_name AS table_name
+FROM information_schema.tables
+WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
+"""
+        rows = cls.db().query_all(sql)
+        tables = []
+        for row in rows:
+            tables.append(row["table_name"])
+
+        cls.vacuum_tables_in_threads(tables)
+
+    @classmethod
     def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
@@ -540,12 +570,19 @@ class DbState:
             is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
 
             if is_initial_massive:
-                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+                cls.vacuum_all_hivemind_tables_in_threads()
 
             cls._finish_all_tables( is_initial_massive, last_completed_blocks, last_imported_blocks)
 
             if is_initial_massive:
-                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+                cls.vacuum_tables_in_threads([
+                        f"{SCHEMA_NAME}.hive_feed_cache",
+                        f"{SCHEMA_NAME}.hive_mentions",
+                        f"{SCHEMA_NAME}.hive_communities",
+                        f"{SCHEMA_NAME}.hive_state",
+                        f"{SCHEMA_NAME}.hive_notification_cache",
+                        f"{SCHEMA_NAME}.hive_accounts",
+                        ])
 
             log.info("[MASSIVE] Massive sync complete!")
             return True
