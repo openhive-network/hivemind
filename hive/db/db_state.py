@@ -488,7 +488,7 @@ class DbState:
                 raise exc
 
         pool.shutdown()
-        log.info(f'{info} Real elapsed time: {perf_counter() - start_time:.3f}', completedThreads)
+        log.info(f'{info} Real elapsed time: {perf_counter() - start_time:.3f}, completed threads: {completedThreads}')
 
     @classmethod
     def _finish_all_tables(cls, massive_sync_preconditions, last_imported_block, current_imported_block):
