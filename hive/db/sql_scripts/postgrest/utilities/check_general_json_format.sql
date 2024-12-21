@@ -13,7 +13,7 @@ DECLARE
   __api_type TEXT;
   __method_type TEXT;
 BEGIN
-  IF __jsonrpc != '2.0' OR __jsonrpc IS NULL OR __params IS NULL OR __id IS NULL OR __method IS NULL THEN
+  IF __jsonrpc != '2.0' OR __jsonrpc IS NULL OR __id IS NULL OR __method IS NULL THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
   END IF;
 
