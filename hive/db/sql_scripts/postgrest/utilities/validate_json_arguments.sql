@@ -20,6 +20,10 @@ DECLARE
   _idx INT DEFAULT 0;
 
 BEGIN
+  IF _min_args_number = 0 AND _given_args is NULL THEN
+    RETURN _given_args;
+  END IF;
+
   ASSERT json_typeof(_expected_args) = 'object', '_expected_args should be a jsonb object: "{key1: value1, key2: value2 ...}';
 
   IF jsonb_typeof(_given_args) = 'object' THEN
