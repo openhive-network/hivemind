@@ -8,13 +8,20 @@ $$
 DECLARE
   __request_data JSON = $1;
   __id JSONB;
+  __params JSON;
+  __params_jsonb JSONB;
   __request_params JSONB;
 BEGIN
   __id = __request_data->'id';
-
+  __params = __request_data->'params';
+  
+  IF __params is NULL THEN
+    RETURN jsonb_build_object('jsonrpc', '2.0', 'error', 'no parameters passed', 'id', __id);
+  END IF;
+  __params_jsonb = __params::JSONB;
   __request_params = hivemind_postgrest_utilities.check_general_json_format(__request_data->>'jsonrpc',
                                                                             __request_data->>'method',
-                                                                            (__request_data->'params')::JSONB,
+                                                                            __params_jsonb,
                                                                             __id);
 
   RETURN jsonb_build_object(
@@ -22,17 +29,13 @@ BEGIN
     'id', __id,
     'result', hivemind_postgrest_utilities.dispatch(__request_params->>'api_type',
                                                     __request_params->>'method_type',
-                                                    __request_params->'params'
+                                                    __params_jsonb
     )
   );
 
   EXCEPTION
     WHEN raise_exception THEN
-      RETURN jsonb_build_object(
-        'jsonrpc', '2.0',
-        'error', SQLERRM::JSONB,
-        'id', __id
-      );
+      RETURN jsonb_build_object('jsonrpc', '2.0', 'error', SQLERRM::JSONB, 'id', __id);
 END
 $$
 ;
