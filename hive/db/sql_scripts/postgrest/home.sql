@@ -8,19 +8,28 @@ $$
 DECLARE
   __request_data JSON = $1;
   __id JSONB;
+  __method TEXT;
   __params JSON;
   __params_jsonb JSONB;
   __request_params JSONB;
 BEGIN
   __id = __request_data->'id';
+  __method = __request_data->>'method';
+
   __params = __request_data->'params';
   
-  IF __params is NULL THEN
-    RETURN jsonb_build_object('jsonrpc', '2.0', 'error', 'no parameters passed', 'id', __id);
+  IF __method NOT IN ('hive.db_head_state', 'condenser.get_trending_tags', 
+                      'bridge.list_pop_communities', 'bridge.get_payout_stats', 
+                      'bridge.get_trending_topics','bridge.list_muted_reasons_enum'
+                     ) THEN
+    IF __params is NULL THEN
+      RETURN jsonb_build_object('jsonrpc', '2.0', 'error', 'no parameters passed', 'id', __id);
+    END IF;
   END IF;
+
   __params_jsonb = __params::JSONB;
   __request_params = hivemind_postgrest_utilities.check_general_json_format(__request_data->>'jsonrpc',
-                                                                            __request_data->>'method',
+                                                                            __method,
                                                                             __params_jsonb,
                                                                             __id);
 
