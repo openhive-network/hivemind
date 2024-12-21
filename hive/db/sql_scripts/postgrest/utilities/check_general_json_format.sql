@@ -28,8 +28,8 @@ BEGIN
     __params = jsonb_build_object('used_call_keyword', True,
                                   'params', __params->2);
   ELSE
-    SELECT substring(__method FROM '^[^.]+') INTO __api_type;
-    SELECT substring(__method FROM '[^.]+$') INTO __method_type;
+    SELECT split_part(__method, '.', 1) INTO __api_type;
+    SELECT split_part(__method, '.', 2) INTO __method_type;
   END IF;
 
   RETURN jsonb_build_object(
