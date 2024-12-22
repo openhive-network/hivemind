@@ -9,7 +9,7 @@ DECLARE
   _community_id INT;
   _account_id INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"name": "string", "account": "string"}', 0, '{"name": "given community name is not valid", "account": "invalid account name type"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"name": "string", "account": "string"}', 2, '{"name": "given community name is not valid", "account": "invalid account name type"}');
 
   _community_id = 
     hivemind_postgrest_utilities.find_community_id(
