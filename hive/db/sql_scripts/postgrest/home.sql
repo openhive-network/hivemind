@@ -17,7 +17,7 @@ DECLARE
 BEGIN
 
   __jsonrpc = __request_data->>'jsonrpc';
-  IF __jsonrpc != '2.0' OR __jsonrpc IS NULL THEN
+  IF __jsonrpc != '2.0' THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
   END IF;
 
@@ -67,7 +67,7 @@ END
 $$
 ;
 
-
+/*
 DROP FUNCTION IF EXISTS hivemind_endpoints.home_test;
 CREATE FUNCTION hivemind_endpoints.home_test(json_rpc JSON)
 RETURNS JSONB
@@ -112,3 +112,4 @@ BEGIN
 END
 $$
 ;
+*/
