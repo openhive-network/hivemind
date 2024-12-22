@@ -51,7 +51,7 @@ BEGIN
     __api_type = __params_jsonb->>0;
     __method_type = __params_jsonb->>1;
     -- this 'call' keyword in test cases gives another error messages, so it is important
-    __params = jsonb_build_object('used_call_keyword', True, 'params', __params_jsonb->2);
+    __params_jsonb = jsonb_build_object('used_call_keyword', True, 'params', __params_jsonb->2);
   ELSE
     SELECT split_part(__method, '.', 1) INTO __api_type;
     SELECT split_part(__method, '.', 2) INTO __method_type;
