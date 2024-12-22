@@ -1,31 +1,105 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_discussion;
+
+
 CREATE FUNCTION hivemind_endpoints.bridge_api_get_discussion(IN _params JSONB)
 RETURNS JSONB
-LANGUAGE 'plpgsql'
+LANGUAGE plpgsql
 STABLE
 AS
 $$
 DECLARE
-  _post_id  INT;
+  -- for extracting the parameters as parsed from the JSON-RPC
+  _author     TEXT;
+  _permlink   TEXT;
+  _observer   TEXT;
+  _params_len INT;
+
+  -- after extracting the parameters, look up the database ids they represent and store the results here: 
+  _post_id    INT;
   _observer_id INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer":"string"}', 2, NULL);
+  ---------------------------------------------------------------------------
+  -- 1. Handle null or unexpected input
+  ---------------------------------------------------------------------------
+  IF _params IS NULL THEN
+    RAISE EXCEPTION 'Missing JSON-RPC params';
+  END IF;
 
-  _post_id =
-    hivemind_postgrest_utilities.find_comment_id(
-      hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
-        False),
-      hivemind_postgrest_utilities.valid_permlink(
-        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True),
-        False),
-      True);
+  ---------------------------------------------------------------------------
+  -- 2. Distinguish between object vs. array
+  ---------------------------------------------------------------------------
+  IF jsonb_typeof(_params) = 'object' THEN
+    -- If an object, assume named parameters directly
+    _author   = _params->>'author';
+    _permlink = _params->>'permlink';
+    _observer = _params->>'observer';
+
+  ELSIF jsonb_typeof(_params) = 'array' THEN
+    -- If an array, could be:
+    --   (A) Positional params: ["author","permlink","observer"?]
+    --   (B) Single-object array: [{"author":"...","permlink":"...","observer":"..."}]
+    
+    _params_len = jsonb_array_length(_params);
+
+    -- (B) Single-object array?
+    --     If length=1 and the first element is an object, treat that object as our param set
+    IF _params_len = 1 AND jsonb_typeof(_params->0) = 'object' THEN
+      _author   = (_params->0)->>'author';
+      _permlink = (_params->0)->>'permlink';
+      _observer = (_params->0)->>'observer';
+
+    ELSE
+      -- (A) Otherwise, treat them as positional arguments
+      IF _params_len < 2 THEN
+        RAISE EXCEPTION 'Need at least 2 parameters: author, permlink. (3rd observer is optional)';
+      END IF;
+
+      -- Because jsonb->>N returns TEXT, you can directly assign
+      _author   = _params->>0;
+      _permlink = _params->>1;
+
+      IF _params_len >= 3 THEN
+        _observer = _params->>2;
+      END IF;
+    END IF;
+
+  ELSE
+    RAISE EXCEPTION 'params is neither an object nor an array';
+  END IF;
+
+  ---------------------------------------------------------------------------
+  -- 3. Validate we have at least author/permlink; observer is optional
+  ---------------------------------------------------------------------------
+  -- EMF: we don't really need to do this,the False parameter to valid_account/valid_permlink
+  --      will raise an exception if they're NULL or empty, the only benefit of doing it here
+  --      is we might be able to issue a slightly better error message
+  -- 
+  -- IF _author IS NULL OR _author = '' THEN
+  --   RAISE EXCEPTION 'Missing or empty "author" parameter';
+  -- END IF;
+  -- IF _permlink IS NULL OR _permlink = '' THEN
+  --   RAISE EXCEPTION 'Missing or empty "permlink" parameter';
+  -- END IF;
+  -- _observer is optional, so no error needed if NULL.
+
+  ---------------------------------------------------------------------------
+  -- 4. Now do the usual lookups/validations
+  ---------------------------------------------------------------------------
+  _post_id = hivemind_postgrest_utilities.find_comment_id(
+    hivemind_postgrest_utilities.valid_account(_author, False),
+    hivemind_postgrest_utilities.valid_permlink(_permlink, False),
+    True
+  );
 
   _observer_id = hivemind_postgrest_utilities.find_account_id(
-    hivemind_postgrest_utilities.valid_account(
-      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
-    True);
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    True
+  );
 
+  ---------------------------------------------------------------------------
+  -- 5. Return same final JSON as before
+  --    (the actual discussion data)
+  ---------------------------------------------------------------------------
   RETURN COALESCE(
   (
     SELECT     -- bridge_api_get_discussion
@@ -118,6 +192,4 @@ BEGIN
     ) row),
   '{}') ;
 END
-$$
-;
-
+$$;
