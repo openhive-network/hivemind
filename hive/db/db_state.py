@@ -537,6 +537,10 @@ class DbState:
         def vacuum_table(table, db):
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
+                if (table == f"{SCHEMA_NAME}.hive_posts"):
+                    db_mgr.db.get_connection(0).execute("VACUUM (FULL, VERBOSE,ANALYZE) " + table)
+                else:
+                    db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
                 db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
 
         methods = []
