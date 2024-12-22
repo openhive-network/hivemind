@@ -33,7 +33,7 @@ variables:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 66af7b2c4cad5af7c88234f8ff44c644509373b6   # develop
+  ref: 41a7e327c8e032f35b1832f53cc16a1daa44c123   # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 - project: hive/common-ci-configuration
   ref: e74d7109838ff05fdc239bced6a726aa7ad46a9b
@@ -274,7 +274,7 @@ include:
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
   ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
   ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" 2>&1 | tee -a -i "$AWAIT_LOG_PATH" && \
-  ${WORKING_DIR}/docker_entrypoint.sh postgrest-server --webserver-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
+  ${WORKING_DIR}/docker_entrypoint.sh postgrest-server --webserver-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} --log-level=${LOG_LEVEL}
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -630,6 +630,7 @@ e2e_benchmark_on_postgrest:
     variables:
       WORKING_DIR: /home/hivemind
       LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server.log
+      LOG_LEVEL: "info" # change to "debug" for more info
       AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server-await.log
       REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times_smoketests.log
   - name: $HIVEMIND_IMAGE
@@ -641,6 +642,7 @@ e2e_benchmark_on_postgrest:
     variables:
       WORKING_DIR: /home/hivemind
       LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server.log
+      LOG_LEVEL: "info" # change to "debug" for more info
       AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server-await.log
       REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times.log
   variables:
@@ -654,6 +656,7 @@ e2e_benchmark_on_postgrest:
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
+    CI_DEBUG_SERVICES: "false" # Change to true to debug services in this job
   script:
   - |
     echo "HAF image name $HAF_IMAGE_NAME"

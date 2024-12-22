@@ -73,7 +73,6 @@ log "global" "Collected Hivemind arguments: ${HIVEMIND_ARGS[*]}"
 log "global" "Using PostgreSQL instance: $POSTGRES_URL"
 log "global" "Using PostgreSQL Admin URL: $POSTGRES_ADMIN_URL"
 
-
 run_hive_no_exec() {
   local db_url=${1:-"${POSTGRES_URL}"}
   # shellcheck source=/dev/null
@@ -88,16 +87,16 @@ run_hive_no_exec() {
 }
 
 run_hive() {
-  local db_url=${1:-"${POSTGRES_URL}"}
+  local db_url=${POSTGRES_URL}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
     if [[ "$POSTGREST_SERVER" = 1 ]]; then
       echo "Running postgrest setup..."
-      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
     else
-      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name=${REPTRACKER_SCHEMA} --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
     fi
   else
     log "run_hive" "Starting Hivemind..."
@@ -105,7 +104,7 @@ run_hive() {
       echo "Running postgrest setup..."
       exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
     else
-      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name=${REPTRACKER_SCHEMA} --database-url="${db_url}"
+      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}"
     fi
   fi
 }
@@ -119,11 +118,11 @@ setup() {
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="${REPTRACKER_SCHEMA}" --is_forking="false"
     popd
   fi
 
-  ./install_app.sh --reptracker-schema-name=${REPTRACKER_SCHEMA} --postgres-url="${POSTGRES_ADMIN_URL}"
+  ./install_app.sh --reptracker-schema-name="${REPTRACKER_SCHEMA}" --postgres-url="${POSTGRES_ADMIN_URL}"
   
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
@@ -170,8 +169,8 @@ case "$COMMAND" in
         setup
         HIVEMIND_ARGS=("${SAVED_HIVEMIND_ARGS[@]}")
         log "global" "Done running install_app, now running the block processor"
-        echo ""
-        echo ""
+        log "global" ""
+        log "global" ""
       fi
       # save off the time the block processor started, for use in the health check
       date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
@@ -179,7 +178,9 @@ case "$COMMAND" in
       ;;
     postgrest-server)
       POSTGREST_SERVER=1
-      HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
+      # HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
+      HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]:1}")
+      log "global" "Running Hivemind with arguments ${HIVEMIND_ARGS[*]}"
       run_hive
       ;;
     *)

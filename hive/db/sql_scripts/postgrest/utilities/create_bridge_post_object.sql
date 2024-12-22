@@ -9,9 +9,20 @@ DECLARE
 _result JSONB;
 _tmp_currency hivemind_postgrest_utilities.currency;
 _tmp_amount NUMERIC;
-_tmp_muted_reasons JSONB;
+_tmp_jsonb JSONB;
 BEGIN
   _tmp_amount = hivemind_postgrest_utilities.rep_log10(_row.author_rep);
+
+  -- _tmp_jsonb used for json_metadata
+  IF _row.json IS NULL OR _row.json = '' THEN
+    _tmp_jsonb = '{}'::JSONB;
+  ELSE
+    BEGIN
+      _tmp_jsonb = _row.json::JSONB;
+    EXCEPTION WHEN others THEN _tmp_jsonb = '{}'::JSONB;
+    END;
+  END IF;
+
   _result = jsonb_build_object(
     'post_id', _row.id,
     'author', _row.author,
@@ -41,10 +52,7 @@ BEGIN
     'beneficiaries', _row.beneficiaries,
     'max_accepted_payout', _row.max_accepted_payout,
     'percent_hbd', _row.percent_hbd,
-    'json_metadata', (CASE
-                        WHEN _row.json IS NOT NULL AND _row.json <> '' AND _row.json::jsonb IS NOT NULL THEN _row.json::jsonb
-                        ELSE '{}'::jsonb
-                      END),
+    'json_metadata', _tmp_jsonb,
     'stats', jsonb_build_object(
               'hide', _row.is_hidden,
               'gray', (CASE
@@ -114,18 +122,19 @@ BEGIN
     _result = jsonb_set(_result, '{title}', to_jsonb('RE: ' || _row.root_title));
   END IF;
 
-  _tmp_muted_reasons = hivemind_postgrest_utilities.decode_muted_reasons_mask(_row.muted_reasons);
+  -- _tmp_json is used for muted_reasons
+  _tmp_jsonb = hivemind_postgrest_utilities.decode_muted_reasons_mask(_row.muted_reasons);
 
   IF _row.is_grayed THEN
-    _tmp_muted_reasons = _tmp_muted_reasons || jsonb_build_array(3);  -- MUTED_REPUTATION
+    _tmp_jsonb = _tmp_jsonb || jsonb_build_array(3);  -- MUTED_REPUTATION
   END IF;
 
   IF _row.role_id = -2 THEN
-    _tmp_muted_reasons = _tmp_muted_reasons || jsonb_build_array(4);  -- MUTED_ROLE_COMMUNITY
+    _tmp_jsonb = _tmp_jsonb || jsonb_build_array(4);  -- MUTED_ROLE_COMMUNITY
   END IF;
 
-  IF jsonb_array_length(_tmp_muted_reasons) <> 0 THEN
-    _result = jsonb_set(_result, '{stats}', _result->'stats' || jsonb_build_object('muted_reasons', _tmp_muted_reasons));
+  IF jsonb_array_length(_tmp_jsonb) <> 0 THEN
+    _result = jsonb_set(_result, '{stats}', _result->'stats' || jsonb_build_object('muted_reasons', _tmp_jsonb));
   END IF;
 
   IF _replies IS NOT NULL THEN
