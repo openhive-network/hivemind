@@ -42,22 +42,22 @@ BEGIN
     END IF;
   END IF;
 
+  __params_jsonb = __params::JSONB;
   --handle 'call' method (probably should remove this if condition, no one uses and it is inefficiently implemented)
   if lower(__method) = 'call' THEN
-    if jsonb_array_length(__params) < 2 THEN
+    if jsonb_array_length(__params_jsonb) < 2 THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
     END IF;
-    __api_type = __params->>0;
-    __method_type = __params->>1;
+    __api_type = __params_jsonb->>0;
+    __method_type = __params_jsonb->>1;
     -- this 'call' keyword in test cases gives another error messages, so it is important
-    __params = jsonb_build_object('used_call_keyword', True, 'params', __params->2);
+    __params = jsonb_build_object('used_call_keyword', True, 'params', __params_jsonb->2);
   ELSE
     SELECT split_part(__method, '.', 1) INTO __api_type;
     SELECT split_part(__method, '.', 2) INTO __method_type;
   END IF;
 
-  __params_jsonb = __params::JSONB;
-
+  
   RETURN jsonb_build_object( 'jsonrpc', '2.0', 'id', __id, 'result', hivemind_postgrest_utilities.dispatch(__api_type, __method_type, __params_jsonb) );
 
   EXCEPTION
