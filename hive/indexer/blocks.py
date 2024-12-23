@@ -16,6 +16,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
+from hive.indexer.new_follow import NewFollow
 from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.payments import Payments
@@ -55,6 +56,7 @@ class Blocks:
         ('PostDataCache', PostDataCache.flush, PostDataCache),
         ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
+        ('NewFollow', NewFollow.flush, NewFollow),
         ('Reblog', Reblog.flush, Reblog),
         ('Notify', Notify.flush, Notify),
         ('Accounts', Accounts.flush, Accounts),
@@ -81,6 +83,7 @@ class Blocks:
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
+        NewFollow.setup_own_db_access(shared_db_adapter, "NewFollow")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
@@ -94,6 +97,7 @@ class Blocks:
         PostDataCache.close_own_db_access()
         Votes.close_own_db_access()
         Follow.close_own_db_access()
+        NewFollow.close_own_db_access()
         Posts.close_own_db_access()
         Reblog.close_own_db_access()
         Notify.close_own_db_access()
