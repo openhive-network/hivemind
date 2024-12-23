@@ -112,5 +112,6 @@ class CustomOp:
         cmd, op_json = op_json  # ['follow', {data...}]
         if cmd == 'follow':
             Follow.follow_op(account, op_json, block_date, block_num)
+            NewFollow.process_new_follow_op(account, op_json, block_num)
         elif cmd == 'reblog':
             Reblog.reblog_op(account, op_json, block_date, block_num)
