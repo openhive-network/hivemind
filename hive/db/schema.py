@@ -197,9 +197,9 @@ def build_metadata():
         sa.Column('permlink_id', sa.Integer, nullable=False),
         sa.Column('weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('vote_percent', sa.Integer, server_default='0'),
+        sa.Column('vote_percent', sa.Integer, nullable=False, server_default='0'),
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('num_changes', sa.Integer, server_default='0'),
+        sa.Column('num_changes', sa.Integer, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
         sa.UniqueConstraint(
@@ -317,6 +317,56 @@ def build_metadata():
     )
 
     metadata = build_metadata_community(metadata)
+
+    sa.Table(
+        'follows', metadata,
+        sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('following', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Index('follows_follower_idx', 'follower'),
+        sa.Index('follows_following_idx', 'following'),
+        schema=SCHEMA_NAME
+    )
+
+    sa.Table(
+        'muted', metadata,
+        sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('following', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Index('muted_follower_idx', 'follower'),
+        sa.Index('muted_following_idx', 'following'),
+        schema=SCHEMA_NAME
+    )
+
+    sa.Table(
+        'blacklisted', metadata,
+        sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('following', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Index('blacklisted_follower_idx', 'follower'),
+        sa.Index('blacklisted_following_idx', 'following'),
+        schema=SCHEMA_NAME
+    )
+
+    sa.Table(
+        'follow_muted', metadata,
+        sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('following', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Index('follow_muted_follower_idx', 'follower'),
+        sa.Index('follow_muted_following_idx', 'following'),
+        schema=SCHEMA_NAME
+    )
+
+    sa.Table(
+        'follow_blacklisted', metadata,
+        sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('following', sa.Integer, primary_key=True, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Index('follow_blacklisted_follower_idx', 'follower'),
+        sa.Index('follow_blacklisted_following_idx', 'following'),
+        schema=SCHEMA_NAME
+    )
 
     return metadata
 
@@ -777,7 +827,7 @@ def set_logged_table_attribute(db, logged):
         'hive_votes',
     ]
 
-    for table in logged_config:
+    for table in logged_config.items():
         log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on a table: {table}")
         sql = """ALTER TABLE {} SET {}"""
         db.query_no_return(sql.format(table, 'LOGGED' if logged else 'UNLOGGED'))
