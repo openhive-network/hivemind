@@ -136,20 +136,43 @@ class NewFollow(DbAdapterHolder):
 
         if cls.mute_items_to_flush or cls.blacklisted_items_to_flush or cls.follow_muted_items_to_flush or cls.follow_blacklisted_items_to_flush or cls.follow_items_to_flush:
             cls.beginTx()
+
+            # Collect all unique account names to retrieve their IDs in a single query
+            unique_names = set()
+            for items in [cls.mute_items_to_flush, cls.blacklisted_items_to_flush, cls.follow_muted_items_to_flush, cls.follow_blacklisted_items_to_flush, cls.follow_items_to_flush]:
+                for key in items.keys():
+                    unique_names.update(key)
+            
+            # Retrieve all account IDs
+            name_to_id_records = cls.db.query_all("SELECT name, id FROM hive_accounts WHERE name IN :names", names=tuple(unique_names))
+            name_to_id = {record['name']: record['id'] for record in name_to_id_records}
+            
+            # Ensure all account names have corresponding IDs
+            missing_accounts = unique_names - set(name_to_id.keys())
+            if missing_accounts:
+                log.warning(f"Missing account IDs for names: {missing_accounts}")
+                # Optionally, handle missing accounts (e.g., skip inserts or raise an error)
+
             if cls.mute_items_to_flush:
                 # Insert or update mute records
                 for key, op in cls.mute_items_to_flush.items():
                     follower, following = key
+                    follower_id = name_to_id.get(follower)
+                    following_id = name_to_id.get(following)
+                    if not follower_id or not following_id:
+                        log.warning(f"Cannot insert mute record: missing IDs for follower '{follower}' or following '{following}'.")
+                        continue  # Skip this record
+
                     cls.db.query_no_return(
                         f"""
-                        INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
-                        VALUES (:follower, :following, :block_num)
-                        ON CONFLICT (follower, following) DO UPDATE
+                        INSERT INTO {SCHEMA_NAME}.muted (follower_id, following_id, block_num)
+                        VALUES (:follower_id, :following_id, :block_num)
+                        ON CONFLICT (follower_id, following_id) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        follower=follower,
-                        following=following,
-                        block_num=op['block_num']  # Pass parameters as keyword arguments
+                        follower_id=follower_id,
+                        following_id=following_id,
+                        block_num=op['block_num']
                     )
                 cls.mute_items_to_flush.clear()
                 n += 1
@@ -158,16 +181,22 @@ class NewFollow(DbAdapterHolder):
                 # Insert or update blacklist records
                 for key, op in cls.blacklisted_items_to_flush.items():
                     follower, following = key
+                    follower_id = name_to_id.get(follower)
+                    following_id = name_to_id.get(following)
+                    if not follower_id or not following_id:
+                        log.warning(f"Cannot insert blacklist record: missing IDs for follower '{follower}' or following '{following}'.")
+                        continue  # Skip this record
+
                     cls.db.query_no_return(
                         f"""
-                        INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
-                        VALUES (:follower, :following, :block_num)
-                        ON CONFLICT (follower, following) DO UPDATE
+                        INSERT INTO {SCHEMA_NAME}.blacklisted (follower_id, following_id, block_num)
+                        VALUES (:follower_id, :following_id, :block_num)
+                        ON CONFLICT (follower_id, following_id) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        follower=follower,
-                        following=following,
-                        block_num=op['block_num']  # Pass parameters as keyword arguments
+                        follower_id=follower_id,
+                        following_id=following_id,
+                        block_num=op['block_num']
                     )
                 cls.blacklisted_items_to_flush.clear()
                 n += 1
@@ -176,16 +205,22 @@ class NewFollow(DbAdapterHolder):
                 # Insert or update follow_muted records
                 for key, op in cls.follow_muted_items_to_flush.items():
                     follower, following = key
+                    follower_id = name_to_id.get(follower)
+                    following_id = name_to_id.get(following)
+                    if not follower_id or not following_id:
+                        log.warning(f"Cannot insert follow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
+                        continue  # Skip this record
+
                     cls.db.query_no_return(
                         f"""
-                        INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                        VALUES (:follower, :following, :block_num)
-                        ON CONFLICT (follower, following) DO UPDATE
+                        INSERT INTO {SCHEMA_NAME}.follow_muted (follower_id, following_id, block_num)
+                        VALUES (:follower_id, :following_id, :block_num)
+                        ON CONFLICT (follower_id, following_id) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        follower=follower,
-                        following=following,
-                        block_num=op['block_num']  # Pass parameters as keyword arguments
+                        follower_id=follower_id,
+                        following_id=following_id,
+                        block_num=op['block_num']
                     )
                 cls.follow_muted_items_to_flush.clear()
                 n += 1
@@ -194,16 +229,22 @@ class NewFollow(DbAdapterHolder):
                 # Insert or update follow_blacklist records
                 for key, op in cls.follow_blacklisted_items_to_flush.items():
                     follower, following = key
+                    follower_id = name_to_id.get(follower)
+                    following_id = name_to_id.get(following)
+                    if not follower_id or not following_id:
+                        log.warning(f"Cannot insert follow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
+                        continue  # Skip this record
+
                     cls.db.query_no_return(
                         f"""
-                        INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                        VALUES (:follower, :following, :block_num)
-                        ON CONFLICT (follower, following) DO UPDATE
+                        INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower_id, following_id, block_num)
+                        VALUES (:follower_id, :following_id, :block_num)
+                        ON CONFLICT (follower_id, following_id) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        follower=follower,
-                        following=following,
-                        block_num=op['block_num']  # Pass parameters as keyword arguments
+                        follower_id=follower_id,
+                        following_id=following_id,
+                        block_num=op['block_num']
                     )
                 cls.follow_blacklisted_items_to_flush.clear()
                 n += 1
@@ -212,16 +253,22 @@ class NewFollow(DbAdapterHolder):
                 # Insert or update follow records
                 for key, op in cls.follow_items_to_flush.items():
                     follower, following = key
+                    follower_id = name_to_id.get(follower)
+                    following_id = name_to_id.get(following)
+                    if not follower_id or not following_id:
+                        log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
+                        continue  # Skip this record
+
                     cls.db.query_no_return(
                         f"""
-                        INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
-                        VALUES (:follower, :following, :block_num)
-                        ON CONFLICT (follower, following) DO UPDATE
+                        INSERT INTO {SCHEMA_NAME}.follows (follower_id, following_id, block_num)
+                        VALUES (:follower_id, :following_id, :block_num)
+                        ON CONFLICT (follower_id, following_id) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        follower=follower,
-                        following=following,
-                        block_num=op['block_num']  # Pass parameters as keyword arguments
+                        follower_id=follower_id,
+                        following_id=following_id,
+                        block_num=op['block_num']
                     )
                 cls.follow_items_to_flush.clear()
                 n += 1
