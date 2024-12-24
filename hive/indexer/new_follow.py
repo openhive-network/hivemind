@@ -66,13 +66,25 @@ class NewFollow(DbAdapterHolder):
             log.info("follow_op %s ignored due to unknown type of follow", op)
             return None
 
+
+        # follower is empty or follower account does not exist, or it wasn't that account that authorized operation
         if not op['follower'] or not Accounts.exists(op['follower']) or op['follower'] != account:
             log.info("follow_op %s ignored due to invalid follower", op)
             return None
 
+        # normalize following to list
+        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
+
+        # if following name does not exist do not process it: basically equal to drop op for single following entry
+        op['following'] = [
+            following
+            for following in op['following']
+            if following and Accounts.exists(following) and following != op['follower']
+        ]
+
         return {
             'follower': escape_characters(op['follower']),
-            'following': escape_characters(op['following']),
+            'following': [escape_characters(following) for following in op['following']],
             'action': defs[what]
         }
 
@@ -88,38 +100,34 @@ class NewFollow(DbAdapterHolder):
         op['block_num'] = block_num
         action = op['action']
         follower = op['follower']
-        following = op['following']
+        followings = op['following']
 
-        key = (follower, following)
+        # Process each following individually
+        for following in followings:
+            key = (follower, following)
 
-        # Process the operation and accumulate in memory
-        if action == NewFollowAction.Mute:
-            cls.mute_items_to_flush[key] = op
-        elif action == NewFollowAction.Blacklist:
-            cls.blacklisted_items_to_flush[key] = op
-        elif action == NewFollowAction.Unmute:
-            if key in cls.mute_items_to_flush:
-                del cls.mute_items_to_flush[key]
-        elif action == NewFollowAction.Unblacklist:
-            if key in cls.blacklisted_items_to_flush:
-                del cls.blacklisted_items_to_flush[key]
-        elif action == NewFollowAction.Follow:
-            cls.follow_items_to_flush[key] = op
-        elif action == NewFollowAction.Unfollow:
-            if key in cls.follow_items_to_flush:
-                del cls.follow_items_to_flush[key]
-        elif action == NewFollowAction.FollowBlacklisted:
-            cls.follow_blacklisted_items_to_flush[key] = op
-        elif action == NewFollowAction.UnFollowBlacklisted:
-            if key in cls.follow_blacklisted_items_to_flush:
-                del cls.follow_blacklisted_items_to_flush[key]
-        elif action == NewFollowAction.FollowMuted:
-            cls.follow_muted_items_to_flush[key] = op
-        elif action == NewFollowAction.UnfollowMuted:
-            if key in cls.follow_muted_items_to_flush:
-                del cls.follow_muted_items_to_flush[key]
+            if action == NewFollowAction.Mute:
+                cls.mute_items_to_flush[key] = op
+            elif action == NewFollowAction.Blacklist:
+                cls.blacklisted_items_to_flush[key] = op
+            elif action == NewFollowAction.Unmute:
+                cls.mute_items_to_flush.pop(key, None)
+            elif action == NewFollowAction.Unblacklist:
+                cls.blacklisted_items_to_flush.pop(key, None)
+            elif action == NewFollowAction.Follow:
+                cls.follow_items_to_flush[key] = op
+            elif action == NewFollowAction.Unfollow:
+                cls.follow_items_to_flush.pop(key, None)
+            elif action == NewFollowAction.FollowBlacklisted:
+                cls.follow_blacklisted_items_to_flush[key] = op
+            elif action == NewFollowAction.UnFollowBlacklisted:
+                cls.follow_blacklisted_items_to_flush.pop(key, None)
+            elif action == NewFollowAction.FollowMuted:
+                cls.follow_muted_items_to_flush[key] = op
+            elif action == NewFollowAction.UnfollowMuted:
+                cls.follow_muted_items_to_flush.pop(key, None)
 
-        cls.idx += 1
+            cls.idx += 1
 
     @classmethod
     def flush(cls):
@@ -131,6 +139,7 @@ class NewFollow(DbAdapterHolder):
             if cls.mute_items_to_flush:
                 # Insert or update mute records
                 for key, op in cls.mute_items_to_flush.items():
+                    follower, following = key
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
@@ -138,7 +147,7 @@ class NewFollow(DbAdapterHolder):
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (op['follower'], op['following'], op['block_num'])
+                        (follower, following, op['block_num'])
                     )
                 cls.mute_items_to_flush.clear()
                 n += 1
@@ -146,6 +155,7 @@ class NewFollow(DbAdapterHolder):
             if cls.blacklisted_items_to_flush:
                 # Insert or update blacklist records
                 for key, op in cls.blacklisted_items_to_flush.items():
+                    follower, following = key
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
@@ -153,7 +163,7 @@ class NewFollow(DbAdapterHolder):
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (op['follower'], op['following'], op['block_num'])
+                        (follower, following, op['block_num'])
                     )
                 cls.blacklisted_items_to_flush.clear()
                 n += 1
@@ -161,6 +171,7 @@ class NewFollow(DbAdapterHolder):
             if cls.follow_muted_items_to_flush:
                 # Insert or update follow_muted records
                 for key, op in cls.follow_muted_items_to_flush.items():
+                    follower, following = key
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
@@ -168,7 +179,7 @@ class NewFollow(DbAdapterHolder):
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (op['follower'], op['following'], op['block_num'])
+                        (follower, following, op['block_num'])
                     )
                 cls.follow_muted_items_to_flush.clear()
                 n += 1
@@ -176,6 +187,7 @@ class NewFollow(DbAdapterHolder):
             if cls.follow_blacklisted_items_to_flush:
                 # Insert or update follow_blacklist records
                 for key, op in cls.follow_blacklisted_items_to_flush.items():
+                    follower, following = key
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
@@ -183,7 +195,7 @@ class NewFollow(DbAdapterHolder):
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (op['follower'], op['following'], op['block_num'])
+                        (follower, following, op['block_num'])
                     )
                 cls.follow_blacklisted_items_to_flush.clear()
                 n += 1
@@ -191,6 +203,7 @@ class NewFollow(DbAdapterHolder):
             if cls.follow_items_to_flush:
                 # Insert or update follow records
                 for key, op in cls.follow_items_to_flush.items():
+                    follower, following = key
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
@@ -198,7 +211,7 @@ class NewFollow(DbAdapterHolder):
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (op['follower'], op['following'], op['block_num'])
+                        (follower, following, op['block_num'])
                     )
                 cls.follow_items_to_flush.clear()
                 n += 1
