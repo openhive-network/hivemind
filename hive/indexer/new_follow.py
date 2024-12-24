@@ -167,7 +167,7 @@ class NewFollow(DbAdapterHolder):
                         f"""
                         INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
                         VALUES (:follower_id, :following_id, :block_num)
-                        ON CONFLICT (follower_id, following_id) DO UPDATE
+                        ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
                         follower_id=follower_id,
@@ -191,7 +191,7 @@ class NewFollow(DbAdapterHolder):
                         f"""
                         INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
                         VALUES (:follower_id, :following_id, :block_num)
-                        ON CONFLICT (follower_id, following_id) DO UPDATE
+                        ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
                         follower_id=follower_id,
@@ -215,7 +215,7 @@ class NewFollow(DbAdapterHolder):
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
                         VALUES (:follower_id, :following_id, :block_num)
-                        ON CONFLICT (follower_id, following_id) DO UPDATE
+                        ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
                         follower_id=follower_id,
@@ -239,7 +239,7 @@ class NewFollow(DbAdapterHolder):
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
                         VALUES (:follower_id, :following_id, :block_num)
-                        ON CONFLICT (follower_id, following_id) DO UPDATE
+                        ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
                         follower_id=follower_id,
@@ -263,7 +263,7 @@ class NewFollow(DbAdapterHolder):
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
                         VALUES (:follower_id, :following_id, :block_num)
-                        ON CONFLICT (follower_id, following_id) DO UPDATE
+                        ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
                         follower_id=follower_id,
