@@ -125,81 +125,82 @@ class NewFollow(DbAdapterHolder):
     def flush(cls):
         """Flush accumulated follow operations to the database in batches."""
         n = 0
-        with cls.db.get_connection() as conn:  # Changed from cls.db_adapter to cls.db
-            with conn.cursor() as cur:
-                if cls.mute_items_to_flush:
-                    # Insert or update mute records
-                    for key, op in cls.mute_items_to_flush.items():
-                        cur.execute(
-                            f"""
-                            INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
-                            VALUES (%s, %s, %s)
-                            ON CONFLICT (follower, following) DO UPDATE
-                            SET block_num = EXCLUDED.block_num
-                            """,
-                            (op['follower'], op['following'], op['block_num'])
-                        )
-                    cls.mute_items_to_flush.clear()
-                    n += 1
 
-                if cls.blacklisted_items_to_flush:
-                    # Insert or update blacklist records
-                    for key, op in cls.blacklisted_items_to_flush.items():
-                        cur.execute(
-                            f"""
-                            INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
-                            VALUES (%s, %s, %s)
-                            ON CONFLICT (follower, following) DO UPDATE
-                            SET block_num = EXCLUDED.block_num
-                            """,
-                            (op['follower'], op['following'], op['block_num'])
-                        )
-                    cls.blacklisted_items_to_flush.clear()
-                    n += 1
+        if cls.mute_items_to_flush or cls.blacklisted_items_to_flush or cls.follow_muted_items_to_flush or cls.follow_blacklisted_items_to_flush or cls.follow_items_to_flush:
+            cls.beginTx()
+            if cls.mute_items_to_flush:
+                # Insert or update mute records
+                for key, op in cls.mute_items_to_flush.items():
+                    cls.db.query_no_return(
+                        f"""
+                        INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (follower, following) DO UPDATE
+                        SET block_num = EXCLUDED.block_num
+                        """,
+                        (op['follower'], op['following'], op['block_num'])
+                    )
+                cls.mute_items_to_flush.clear()
+                n += 1
 
-                if cls.follow_muted_items_to_flush:
-                    # Insert or update follow_muted records
-                    for key, op in cls.follow_muted_items_to_flush.items():
-                        cur.execute(
-                            f"""
-                            INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                            VALUES (%s, %s, %s)
-                            ON CONFLICT (follower, following) DO UPDATE
-                            SET block_num = EXCLUDED.block_num
-                            """,
-                            (op['follower'], op['following'], op['block_num'])
-                        )
-                    cls.follow_muted_items_to_flush.clear()
-                    n += 1
+            if cls.blacklisted_items_to_flush:
+                # Insert or update blacklist records
+                for key, op in cls.blacklisted_items_to_flush.items():
+                    cls.db.query_no_return(
+                        f"""
+                        INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (follower, following) DO UPDATE
+                        SET block_num = EXCLUDED.block_num
+                        """,
+                        (op['follower'], op['following'], op['block_num'])
+                    )
+                cls.blacklisted_items_to_flush.clear()
+                n += 1
 
-                if cls.follow_blacklisted_items_to_flush:
-                    # Insert or update follow_blacklist records
-                    for key, op in cls.follow_blacklisted_items_to_flush.items():
-                        cur.execute(
-                            f"""
-                            INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                            VALUES (%s, %s, %s)
-                            ON CONFLICT (follower, following) DO UPDATE
-                            SET block_num = EXCLUDED.block_num
-                            """,
-                            (op['follower'], op['following'], op['block_num'])
-                        )
-                    cls.follow_blacklisted_items_to_flush.clear()
-                    n += 1
+            if cls.follow_muted_items_to_flush:
+                # Insert or update follow_muted records
+                for key, op in cls.follow_muted_items_to_flush.items():
+                    cls.db.query_no_return(
+                        f"""
+                        INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (follower, following) DO UPDATE
+                        SET block_num = EXCLUDED.block_num
+                        """,
+                        (op['follower'], op['following'], op['block_num'])
+                    )
+                cls.follow_muted_items_to_flush.clear()
+                n += 1
 
-                if cls.follow_items_to_flush:
-                    # Insert or update follow records
-                    for key, op in cls.follow_items_to_flush.items():
-                        cur.execute(
-                            f"""
-                            INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
-                            VALUES (%s, %s, %s)
-                            ON CONFLICT (follower, following) DO UPDATE
-                            SET block_num = EXCLUDED.block_num
-                            """,
-                            (op['follower'], op['following'], op['block_num'])
-                        )
-                    cls.follow_items_to_flush.clear()
-                    n += 1
+            if cls.follow_blacklisted_items_to_flush:
+                # Insert or update follow_blacklist records
+                for key, op in cls.follow_blacklisted_items_to_flush.items():
+                    cls.db.query_no_return(
+                        f"""
+                        INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (follower, following) DO UPDATE
+                        SET block_num = EXCLUDED.block_num
+                        """,
+                        (op['follower'], op['following'], op['block_num'])
+                    )
+                cls.follow_blacklisted_items_to_flush.clear()
+                n += 1
 
+            if cls.follow_items_to_flush:
+                # Insert or update follow records
+                for key, op in cls.follow_items_to_flush.items():
+                    cls.db.query_no_return(
+                        f"""
+                        INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (follower, following) DO UPDATE
+                        SET block_num = EXCLUDED.block_num
+                        """,
+                        (op['follower'], op['following'], op['block_num'])
+                    )
+                cls.follow_items_to_flush.clear()
+                n += 1
+            cls.commitTx()
         return n
