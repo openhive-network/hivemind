@@ -359,6 +359,7 @@ def build_metadata():
 
     follows = sa.Table(
         'follows', metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
@@ -369,6 +370,7 @@ def build_metadata():
 
     muted = sa.Table(
         'muted', metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
@@ -379,6 +381,7 @@ def build_metadata():
 
     blacklisted = sa.Table(
         'blacklisted', metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
@@ -389,6 +392,7 @@ def build_metadata():
 
     follow_muted = sa.Table(
         'follow_muted', metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
@@ -399,6 +403,7 @@ def build_metadata():
 
     follow_blacklisted = sa.Table(
         'follow_blacklisted', metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
