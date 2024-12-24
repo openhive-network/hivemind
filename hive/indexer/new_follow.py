@@ -143,11 +143,13 @@ class NewFollow(DbAdapterHolder):
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
-                        VALUES (%s, %s, %s)
+                        VALUES (:follower, :following, :block_num)
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (follower, following, op['block_num'])
+                        follower=follower,
+                        following=following,
+                        block_num=op['block_num']  # Pass parameters as keyword arguments
                     )
                 cls.mute_items_to_flush.clear()
                 n += 1
@@ -159,11 +161,13 @@ class NewFollow(DbAdapterHolder):
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
-                        VALUES (%s, %s, %s)
+                        VALUES (:follower, :following, :block_num)
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (follower, following, op['block_num'])
+                        follower=follower,
+                        following=following,
+                        block_num=op['block_num']  # Pass parameters as keyword arguments
                     )
                 cls.blacklisted_items_to_flush.clear()
                 n += 1
@@ -175,11 +179,13 @@ class NewFollow(DbAdapterHolder):
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                        VALUES (%s, %s, %s)
+                        VALUES (:follower, :following, :block_num)
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (follower, following, op['block_num'])
+                        follower=follower,
+                        following=following,
+                        block_num=op['block_num']  # Pass parameters as keyword arguments
                     )
                 cls.follow_muted_items_to_flush.clear()
                 n += 1
@@ -191,11 +197,13 @@ class NewFollow(DbAdapterHolder):
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                        VALUES (%s, %s, %s)
+                        VALUES (:follower, :following, :block_num)
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (follower, following, op['block_num'])
+                        follower=follower,
+                        following=following,
+                        block_num=op['block_num']  # Pass parameters as keyword arguments
                     )
                 cls.follow_blacklisted_items_to_flush.clear()
                 n += 1
@@ -207,11 +215,13 @@ class NewFollow(DbAdapterHolder):
                     cls.db.query_no_return(
                         f"""
                         INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
-                        VALUES (%s, %s, %s)
+                        VALUES (:follower, :following, :block_num)
                         ON CONFLICT (follower, following) DO UPDATE
                         SET block_num = EXCLUDED.block_num
                         """,
-                        (follower, following, op['block_num'])
+                        follower=follower,
+                        following=following,
+                        block_num=op['block_num']  # Pass parameters as keyword arguments
                     )
                 cls.follow_items_to_flush.clear()
                 n += 1
