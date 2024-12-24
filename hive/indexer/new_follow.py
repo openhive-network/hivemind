@@ -83,8 +83,8 @@ class NewFollow(DbAdapterHolder):
         ]
 
         return {
-            'follower': escape_characters(op['follower']),
-            'following': [escape_characters(following) for following in op['following']],
+            'follower': op['follower'],  # Removed escape_characters
+            'following': [following for following in op['following']],  # Removed escape_characters
             'action': defs[what]
         }
 
