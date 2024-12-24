@@ -11,6 +11,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.reblog import Reblog
 from hive.utils.json import valid_command, valid_date, valid_keys, valid_op_json
 from hive.utils.normalize import load_json_key
+from hive.indexer.new_follow import NewFollow  # Import NewFollow
 
 log = logging.getLogger(__name__)
 
