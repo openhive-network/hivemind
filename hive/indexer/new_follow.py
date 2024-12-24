@@ -33,10 +33,6 @@ class NewFollow(DbAdapterHolder):
     follow_muted_items_to_flush = {}
     follow_blacklisted_items_to_flush = {}
     follow_items_to_flush = {}
-    # Removed duplicated declarations
-
-    # Ensure 'db_adapter' is available as a class attribute
-    db_adapter = DbAdapterHolder.db_adapter  # Add this line
 
     idx = 0
 
