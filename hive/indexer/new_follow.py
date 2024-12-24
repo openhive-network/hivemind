@@ -144,7 +144,7 @@ class NewFollow(DbAdapterHolder):
                     unique_names.update(key)
             
             # Retrieve all account IDs
-            name_to_id_records = cls.db.query_all("SELECT name, id FROM hive_accounts WHERE name IN :names", names=tuple(unique_names))
+            name_to_id_records = cls.db.query_all(f"""SELECT name, id FROM {SCHEMA_NAME}.hive_accounts WHERE name IN :names""", names=tuple(unique_names))
             name_to_id = {record['name']: record['id'] for record in name_to_id_records}
             
             # Ensure all account names have corresponding IDs
