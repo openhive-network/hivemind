@@ -19,13 +19,13 @@ BEGIN
   _account := params->'account';
   _account_id := hivemind_postgrest_utilities.find_account_id( _account, TRUE );
   if (_account_id = 0) then
-    raise_parameter_validation_exception('Invalid account');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Invalid account');
   end if;
 
   _start := params->'start';
   _start_id := hivemind_postgrest_utilities.find_account_id( _start, TRUE );
   if (_start_id = 0) then
-    raise_parameter_validation_exception('Invalid start account');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Invalid start account');
   end if;
 
   _follow_type := hivemind_postgrest_utilities.parse_argument_from_json(_params, 'type', FALSE);
@@ -62,9 +62,7 @@ ELSIF _follow_type = 'ignore' THEN
       LIMIT _limit
     );
   ELSE
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
-      'Unsupported follow_type, valid values: blog, ignore'
-    );
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported follow_type, valid values: blog, ignore');
   END IF;
 
   RETURN COALESCE(_result, '[]'::jsonb);
