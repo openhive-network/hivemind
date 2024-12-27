@@ -16,13 +16,13 @@ DECLARE
 BEGIN
   _params := hivemind_postgrest_utilities.validate_json_arguments( _params, '{"account": "string", "start" : "string", "type" : "string", "limit" : "number"}',  4,   NULL  );
 
-  _account := params->'account';
+  _account := _params->'account';
   _account_id := hivemind_postgrest_utilities.find_account_id( _account, TRUE );
   if (_account_id = 0) then
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Invalid account');
   end if;
 
-  _start := params->'start';
+  _start := _params->'start';
   _start_id := hivemind_postgrest_utilities.find_account_id( _start, TRUE );
   if (_start_id = 0) then
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Invalid start account');
@@ -52,13 +52,13 @@ ELSIF _follow_type = 'ignore' THEN
         jsonb_build_object(
           'following', _account,
           'follower', ha.name,
-          'what', _f'[ignore]',
+          'what', '[ignore]',
         )
       )
       FROM {SCHEMA_NAME}.muted m
       JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.id = m.follower
       WHERE m.following = _account_id AND ha.id < _start_id
-      ORDER BY f.follower DESC
+      ORDER BY m.follower DESC
       LIMIT _limit
     );
   ELSE
