@@ -29,7 +29,7 @@ BEGIN
   end if;
 
   _follow_type := hivemind_postgrest_utilities.parse_argument_from_json(_params, 'type', FALSE);
-  _limit = (_params->'limit')::INT;
+  _limit := (_params->'limit')::INT;
 
   IF _follow_type = 'blog' THEN
     _result := (
@@ -37,7 +37,7 @@ BEGIN
         jsonb_build_object(
           'following', _account,
           'follower', ha.name,
-          'what', '[blog]',
+          'what', '[blog]'
         )
       )
       FROM {SCHEMA_NAME}.follows f
@@ -52,7 +52,7 @@ ELSIF _follow_type = 'ignore' THEN
         jsonb_build_object(
           'following', _account,
           'follower', ha.name,
-          'what', '[ignore]',
+          'what', '[ignore]'
         )
       )
       FROM {SCHEMA_NAME}.muted m
