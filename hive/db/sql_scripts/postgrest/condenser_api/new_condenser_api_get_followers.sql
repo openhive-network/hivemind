@@ -40,8 +40,8 @@ BEGIN
           'what', '[blog]'
         )
       )
-      FROM {SCHEMA_NAME}.follows f
-      JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.id = f.follower
+      FROM hivemind_app.follows f
+      JOIN hivemind_app.hive_accounts ha ON ha.id = f.follower
       WHERE f.following = _account_id AND ha.id < _start_id
       ORDER BY f.follower DESC
       LIMIT _limit
@@ -55,8 +55,8 @@ ELSIF _follow_type = 'ignore' THEN
           'what', '[ignore]'
         )
       )
-      FROM {SCHEMA_NAME}.muted m
-      JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.id = m.follower
+      FROM hivemind_app.muted m
+      JOIN hivemind_app.hive_accounts ha ON ha.id = m.follower
       WHERE m.following = _account_id AND ha.id < _start_id
       ORDER BY m.follower DESC
       LIMIT _limit
