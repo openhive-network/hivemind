@@ -17,8 +17,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_profile"
-          params: {"account":"ignoreall","observer":"alice"}
+          method: "bridge.get_accounts"
+          params: {"accounts":["ignoreall"],"observer":"alice"}
       response:
         status_code: 200
         verify_response_with:

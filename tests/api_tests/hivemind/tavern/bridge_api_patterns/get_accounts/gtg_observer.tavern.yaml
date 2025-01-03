@@ -17,8 +17,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_profile"
-          params: {"account":"gtg", "observer":"roelandp"}
+          method: "bridge.get_accounts"
+          params: {"accounts":["gtg"], "observer":"roelandp"}
       response:
         status_code: 200
         verify_response_with:

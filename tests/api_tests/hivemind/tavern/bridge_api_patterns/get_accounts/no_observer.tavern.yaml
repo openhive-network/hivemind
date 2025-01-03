@@ -2,8 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # relies on mock data
-    
+    - patterntest # new field followed (true/false) by observer (and muted if true)
 
   includes:
     - !include ../../common.yaml
@@ -18,8 +17,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_profile"
-          params: {"account":"alice","observer":"ignoreall"}
+          method: "bridge.get_accounts"
+          params: {"accounts":["mutetester", "ignoreall", "gtg", "followtest", "davr86", "bugtester", "blacklisttester", "alice", "hive-test-ac-1", "hive-test-ac-2"]}
       response:
         status_code: 200
         verify_response_with:

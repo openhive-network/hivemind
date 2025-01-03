@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_accounts"
-          params: {"account":"alice"}
+          params: {"accounts":["alice", "davr86", "hive-test-ac-1"], "observer":"ignoreall"}
       response:
         status_code: 200
         verify_response_with:
