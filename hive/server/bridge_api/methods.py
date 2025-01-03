@@ -47,10 +47,9 @@ async def get_accounts(context, accounts, observer=None):
     observer = valid_account(observer, allow_empty=True)
 
     ret = await load_profiles(db, accounts)
-
     if len(ret) != len(accounts):
-        found_accounts = {profile['account'] for profile in ret}
-        missing_accounts = [acc for acc in accounts if acc not in found_accounts]
+        found_accounts = {account['name'] for account in ret}
+        missing_accounts = [account for account in accounts if account not in found_accounts]
         assert len(ret) == len(accounts), f'Account(s) do not exist: {", ".join(missing_accounts)}'
 
     observer_id = await get_account_id(db, observer) if observer else None

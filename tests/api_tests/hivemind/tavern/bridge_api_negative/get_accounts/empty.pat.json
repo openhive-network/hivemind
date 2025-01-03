@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "missing a required argument: 'accounts'",
+  "message": "Invalid parameters"
+}

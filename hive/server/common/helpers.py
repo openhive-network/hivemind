@@ -1,6 +1,7 @@
 """Helpers for server/API functions."""
 
 import datetime
+import json
 from functools import wraps
 import logging
 import re
@@ -151,9 +152,9 @@ def valid_accounts(accounts):
         try:
             names.append(valid_account(account))
         except AssertionError as e:
-            invalid_accounts.append(f"{account}: {str(e)}")
+            invalid_accounts.append({"name": account, "error": str(e)})
 
-    assert not invalid_accounts, f"Invalid accounts found: {', '.join(invalid_accounts)}"
+    assert not invalid_accounts, json.dumps({"invalid_accounts": invalid_accounts})
     return names
 
 def valid_permlink(permlink, allow_empty=False):
