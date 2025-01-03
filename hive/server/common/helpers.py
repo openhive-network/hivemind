@@ -142,6 +142,20 @@ def valid_account(name, allow_empty=False):
     return name
 
 
+def valid_accounts(accounts):
+    """Validate multiple accounts and return valid ones or throw Assert with all errors."""
+    invalid_accounts = []
+    names = []
+
+    for account in accounts:
+        try:
+            names.append(valid_account(account))
+        except AssertionError as e:
+            invalid_accounts.append(f"{account}: {str(e)}")
+
+    assert not invalid_accounts, f"Invalid accounts found: {', '.join(invalid_accounts)}"
+    return names
+
 def valid_permlink(permlink, allow_empty=False):
     """Returns validated permlink or throws Assert."""
     if not permlink:

@@ -7,6 +7,7 @@ from hive.server.common.helpers import (
     json_date,
     return_error_info,
     valid_account,
+    valid_accounts,
     valid_limit,
     valid_permlink,
     valid_tag,
@@ -28,13 +29,34 @@ async def get_profile(context, account, observer=None):
     account = valid_account(account)
     observer = valid_account(observer, allow_empty=True)
 
-    ret = await load_profiles(db, [valid_account(account)])
+    ret = await load_profiles(db, [account])
     assert ret, f'Account \'{account}\' does not exist'  # should not be needed
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:
         await _follow_contexts(db, {ret[0]['id']: ret[0]}, observer_id, True)
     return ret[0]
+
+
+@return_error_info
+async def get_profiles(context, accounts, observer=None):
+    """Load accounts/profiles data."""
+    db = context['db']
+
+    accounts = valid_accounts(accounts)
+    observer = valid_account(observer, allow_empty=True)
+
+    ret = await load_profiles(db, accounts)
+
+    if len(ret) != len(accounts):
+        found_accounts = {profile['account'] for profile in ret}
+        missing_accounts = [acc for acc in accounts if acc not in found_accounts]
+        assert len(ret) == len(accounts), f'Account(s) do not exist: {", ".join(missing_accounts)}'
+
+    observer_id = await get_account_id(db, observer) if observer else None
+    if observer_id:
+        await _follow_contexts(db, {account['id']: account for account in ret}, observer_id, True)
+    return ret
 
 
 @return_error_info
