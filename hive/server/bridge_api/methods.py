@@ -39,7 +39,7 @@ async def get_profile(context, account, observer=None):
 
 
 @return_error_info
-async def get_profiles(context, accounts, observer=None):
+async def get_accounts(context, accounts, observer=None):
     """Load accounts/profiles data."""
     db = context['db']
 
