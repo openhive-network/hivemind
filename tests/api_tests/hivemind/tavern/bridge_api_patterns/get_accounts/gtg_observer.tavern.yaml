@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # new field followed (true/false) by observer (and muted if true)
+    - patterntest
     
   includes:
     - !include ../../common.yaml

@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # relies on mock data
+    - patterntest
     
   includes:
     - !include ../../common.yaml

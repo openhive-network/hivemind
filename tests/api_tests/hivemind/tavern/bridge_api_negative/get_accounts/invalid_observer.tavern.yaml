@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # very strange reaction in original - there was no observer parameter
+    - patterntest
     - negative
     
   includes:
