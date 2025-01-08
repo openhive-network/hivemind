@@ -22,7 +22,12 @@ class NewFollowAction(enum.IntEnum):
     UnFollowBlacklisted = 8  # Added for 'unfollow_blacklist'
     FollowMuted = 9  # Added for 'follow_muted'
     UnfollowMuted = 10  # Added for 'unfollow_muted'
-    # Add other actions as needed
+    ResetBlacklist = 11  # cancel all existing records of Blacklist type
+    ResetFollowingList = 12  # cancel all existing records of Blog type
+    ResetMutedList = 13  # cancel all existing records of Ignore type
+    ResetFollowBlacklist = 14  # cancel all existing records of Follow_blacklist type
+    ResetFollowMutedList = 15  # cancel all existing records of Follow_muted type
+    ResetAllLists = 16  # cancel all existing records of all types
 
 
 class NewFollow(DbAdapterHolder):
@@ -33,6 +38,12 @@ class NewFollow(DbAdapterHolder):
     follow_muted_items_to_flush = {}
     follow_blacklisted_items_to_flush = {}
     follow_items_to_flush = {}
+    reset_blacklists_to_flush = {}
+    reset_followinglists_to_flush = {}
+    reset_mutedlists_to_flush = {}
+    reset_follow_blacklists_to_flush = {}
+    reset_follow_mutedlists_to_flush = {}
+    reset_all_lists_to_flush = {}
 
     idx = 0
 
@@ -55,12 +66,12 @@ class NewFollow(DbAdapterHolder):
             'unfollow_blacklist': NewFollowAction.UnFollowBlacklisted,
             'follow_muted': NewFollowAction.FollowMuted,
             'unfollow_muted': NewFollowAction.UnfollowMuted,
-            'reset_blacklist': NewFollowAction.Nothing,
-            'reset_following_list': NewFollowAction.Nothing,
-            'reset_muted_list': NewFollowAction.Nothing,
-            'reset_follow_blacklist': NewFollowAction.Nothing,
-            'reset_follow_muted_list': NewFollowAction.Nothing,
-            'reset_all_lists': NewFollowAction.Nothing,
+            'reset_blacklist': NewFollowAction.ResetBlacklist,
+            'reset_following_list': NewFollowAction.ResetFollowingList,
+            'reset_muted_list': NewFollowAction.ResetMutedList,
+            'reset_follow_blacklist': NewFollowAction.ResetFollowBlacklist,
+            'reset_follow_muted_list': NewFollowAction.ResetFollowMutedList,
+            'reset_all_lists': NewFollowAction.ResetAllLists,
         }
         if not isinstance(what, str) or what not in defs:
             log.info("follow_op %s ignored due to unknown type of follow", op)
@@ -100,7 +111,7 @@ class NewFollow(DbAdapterHolder):
         op['block_num'] = block_num
         action = op['action']
         follower = op['follower']
-        followings = op['following']
+        followings = op.get('following', None)
 
         # Process each following individually
         for following in followings:
@@ -126,6 +137,18 @@ class NewFollow(DbAdapterHolder):
                 cls.follow_muted_items_to_flush[key] = op
             elif action == NewFollowAction.UnfollowMuted:
                 cls.follow_muted_items_to_flush.pop(key, None)
+            elif action == NewFollowAction.ResetBlacklist:
+                cls.reset_blacklists_to_flush[key] = op
+            elif action == NewFollowAction.ResetFollowingList:
+                cls.reset_followinglists_to_flush[key] = op
+            elif action == NewFollowAction.ResetMutedList:
+                cls.reset_mutedlists_to_flush[key] = op
+            elif action == NewFollowAction.ResetFollowBlacklist:
+                cls.reset_follow_blacklists_to_flush[key] = op
+            elif action == NewFollowAction.ResetFollowMutedList:
+                cls.reset_follow_mutedlists_to_flush[key] = op
+            elif action == NewFollowAction.ResetAllLists:
+                cls.reset_all_lists_to_flush[key] = op
 
             cls.idx += 1
 
@@ -134,7 +157,7 @@ class NewFollow(DbAdapterHolder):
         """Flush accumulated follow operations to the database in batches."""
         n = 0
 
-        if cls.mute_items_to_flush or cls.blacklisted_items_to_flush or cls.follow_muted_items_to_flush or cls.follow_blacklisted_items_to_flush or cls.follow_items_to_flush:
+        if cls.mute_items_to_flush or cls.blacklisted_items_to_flush or cls.follow_muted_items_to_flush or cls.follow_blacklisted_items_to_flush or cls.follow_items_to_flush or cls.reset_blacklists_to_flush or cls.reset_followinglists_to_flush or cls.reset_mutedlists_to_flush or cls.reset_follow_blacklists_to_flush or cls.reset_follow_mutedlists_to_flush or cls.reset_all_lists_to_flush:
             cls.beginTx()
 
             # Collect all unique account names to retrieve their IDs in a single query
@@ -272,5 +295,142 @@ class NewFollow(DbAdapterHolder):
                     )
                 cls.follow_items_to_flush.clear()
                 n += 1
+
+            if cls.reset_blacklists_to_flush:
+                for key, op in cls.reset_blacklists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset blacklist records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.blacklisted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_blacklists_to_flush.clear()
+                n += 1
+
+            if cls.reset_followinglists_to_flush:
+                for key, op in cls.reset_followinglists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset follow records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follows
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_followinglists_to_flush.clear()
+                n += 1
+
+            if cls.reset_mutedlists_to_flush:
+                for key, op in cls.reset_mutedlists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset muted list records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.muted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_mutedlists_to_flush.clear()
+                n += 1
+
+            if cls.reset_follow_blacklists_to_flush:
+                for key, op in cls.reset_follow_blacklists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset follow blacklist records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follow_blacklisted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_follow_blacklists_to_flush.clear()
+                n += 1
+
+            if cls.reset_follow_mutedlists_to_flush:
+                for key, op in cls.reset_follow_mutedlists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset follow muted list records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follow_muted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_follow_mutedlists_to_flush.clear()
+                n += 1
+
+            if cls.reset_all_lists_to_flush:
+                for key, op in cls.reset_all_lists_to_flush.items():
+                    follower, _ = key
+                    follower_id = name_to_id.get(follower)
+                    if not follower_id:
+                        log.warning("Cannot reset all follow list records: missing ID for follower.")
+                        continue  # Skip this record
+
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.blacklisted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follows
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.muted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follow_blacklisted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                    cls.db.query_no_return(
+                        f"""
+                        DELETE FROM {SCHEMA_NAME}.follow_muted
+                        WHERE follower=:follower_id
+                        """,
+                        follower_id=follower_id
+                    )
+                cls.reset_all_lists_to_flush.clear()
+                n += 1
+
             cls.commitTx()
         return n
