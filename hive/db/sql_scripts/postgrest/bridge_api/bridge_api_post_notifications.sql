@@ -84,7 +84,7 @@ BEGIN
           SELECT
             CASE
               WHEN hnv.type_id != 16 THEN 0 --evrything else than mentions (only optimization)
-              ELSE hivemind_app.get_number_of_mentions_in_post( hnv.post_id )
+              ELSE hivemind_postgrest_utilities.get_number_of_mentions_in_post( hnv.post_id )
             END as mentions
         ) as hm
         ORDER BY hnv.id DESC

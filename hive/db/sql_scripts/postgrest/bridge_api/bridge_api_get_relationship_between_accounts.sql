@@ -6,57 +6,92 @@ STABLE
 AS
 $$
 DECLARE
-  _account1 TEXT;
-  _account2 TEXT;
-  _observer TEXT;
+  _account1_id INT;
+  _account2_id INT;
+  _observer_id INT;
   _debug BOOLEAN;
-  _result JSONB;
-  _state INT;
-  _blacklisted BOOLEAN;
-  _follow_blacklists BOOLEAN;
-  _follow_muted BOOLEAN;
-  _created_at TIMESTAMP;
-  _block_num INT;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account1": "string", "account2": "string", "observer": "string", "debug": "boolean"}', 4, NULL);
 
-  _account1 = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account1', True);
-  _account1 = hivemind_postgrest_utilities.valid_account(_account1);
+  _account1_id = 
+    hivemind_postgrest_utilities.find_account_id(
+      hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account1', True),
+        False),
+    True);
 
-  _account2 = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account2', True);
-  _account2 = hivemind_postgrest_utilities.valid_account(_account2);
-
-  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
-  PERFORM hivemind_postgrest_utilities.valid_account(_observer, True);
+  _account2_id = 
+    hivemind_postgrest_utilities.find_account_id(
+      hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account2', True),
+        False),
+    True);
+  
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
+      True),
+    True);
 
   _debug = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'debug', False);
 
-  SELECT state,
-         COALESCE(blacklisted, FALSE),
-         COALESCE(follow_blacklists, FALSE),
-         COALESCE(follow_muted, FALSE),
-         created_at,
-         block_num
-  INTO _state, _blacklisted, _follow_blacklists, _follow_muted, _created_at, _block_num
-  FROM hivemind_app.bridge_get_relationship_between_accounts(_account1, _account2)
-  LIMIT 1;
-
-  _result := jsonb_build_object(
-      'follows', CASE WHEN _state = 1 THEN TRUE ELSE FALSE END,
-      'ignores', CASE WHEN _state = 2 THEN TRUE ELSE FALSE END,
-      'blacklists', _blacklisted,
-      'follows_blacklists', _follow_blacklists,
-      'follows_muted', _follow_muted
-  );
-
-  IF _debug IS NOT NULL AND _debug THEN
-      _result := _result || jsonb_build_object(
-          'created_at', COALESCE(to_char(_created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), NULL),
-          'block_num', _block_num
-      );
+  IF _debug IS NULL THEN
+    _debug = False;
   END IF;
 
-  RETURN _result;
+  RETURN COALESCE(
+    ( SELECT 
+      CASE WHEN NOT _debug THEN 
+        jsonb_build_object( -- bridge_api_get_relationship_between_accounts
+          'follows', CASE WHEN row.state = 1 THEN TRUE ELSE FALSE END,
+          'ignores', CASE WHEN row.state = 2 THEN TRUE ELSE FALSE END,
+          'blacklists', row.blacklisted,
+          'follows_blacklists', row.follow_blacklists,
+          'follows_muted', row.follow_muted
+      ) ELSE
+        jsonb_build_object( -- bridge_api_get_relationship_between_accounts with debug
+          'follows', CASE WHEN row.state = 1 THEN TRUE ELSE FALSE END,
+          'ignores', CASE WHEN row.state = 2 THEN TRUE ELSE FALSE END,
+          'blacklists', row.blacklisted,
+          'follows_blacklists', row.follow_blacklists,
+          'follows_muted', row.follow_muted,
+          'created_at', COALESCE(to_char(row.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), NULL),
+          'block_num', row.block_num
+        )
+      END
+      FROM (
+      SELECT
+        hf.state,
+        COALESCE(hf.blacklisted, False) AS blacklisted,
+        COALESCE(hf.follow_blacklists, FALSE) AS follow_blacklists,
+        COALESCE(hf.follow_muted, FALSE) AS follow_muted,
+        hf.created_at,
+        hf.block_num
+      FROM
+        hivemind_app.hive_follows hf
+      WHERE
+        hf.follower = _account1_id AND hf.following = _account2_id
+      LIMIT 1
+    ) row ),
+      CASE WHEN NOT _debug THEN
+        jsonb_build_object( -- bridge_api_get_relationship_between_accounts null
+          'follows', FALSE,
+          'ignores', FALSE,
+          'blacklists', FALSE,
+          'follows_blacklists', FALSE,
+          'follows_muted', FALSE
+      ) ELSE
+        jsonb_build_object( -- bridge_api_get_relationship_between_accounts null with debug
+          'follows', FALSE,
+          'ignores', FALSE,
+          'blacklists', FALSE,
+          'follows_blacklists', FALSE,
+          'follows_muted', FALSE,
+          'created_at', NULL,
+          'block_num', NULL
+        )
+      END
+  );
 END
 $$
 ;
