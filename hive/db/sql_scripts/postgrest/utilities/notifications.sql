@@ -101,3 +101,17 @@ BEGIN
 END;
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_number_of_mentions_in_post;
+CREATE FUNCTION hivemind_postgrest_utilities.get_number_of_mentions_in_post( _post_id hivemind_app.hive_posts.id%TYPE )
+RETURNS INTEGER
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$BODY$
+BEGIN
+  RETURN (
+    SELECT COUNT(*) FROM hivemind_app.hive_mentions hm WHERE hm.post_id = _post_id
+  );
+END
+$BODY$;
