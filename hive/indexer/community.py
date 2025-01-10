@@ -5,8 +5,6 @@
 from enum import IntEnum
 import logging
 import re
-from time import perf_counter
-from hive.utils.misc import UniqueCounter
 
 import ujson as json
 
@@ -14,8 +12,6 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.indexer.notification_cache import NotificationCache
-from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
 
@@ -34,9 +30,6 @@ TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
-
-# Includes also admin and owner, limit is set to prevent spam
-MAX_MOD_NB = 100
 
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
@@ -135,19 +128,6 @@ def encode_bitwise_mask(muted_reasons):
     return mask
 
 
-def decode_bitwise_mask(mask):
-    muted_reasons = []
-    bit_position = 0
-
-    while mask > 0:
-        if mask & 1:
-            muted_reasons.append(bit_position)
-
-        mask >>= 1
-        bit_position += 1
-
-    return muted_reasons
-
 class Community:
     """Handles hive community registration and operations."""
 
@@ -156,8 +136,6 @@ class Community:
 
     # id -> name map
     _names = {}
-
-    _counter = UniqueCounter()
 
     start_block = 37500000
 
@@ -169,11 +147,11 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
+        # if not re.match(r'^hive-[123]\d{4,6}$', name):
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
         _id = Accounts.get_id(name)
-        counter = cls._counter.increment(block_num)
 
         # insert community
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_communities (id, name, type_id, created_at, block_num)
@@ -184,17 +162,6 @@ class Community:
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_roles (community_id, account_id, role_id, created_at)
                         VALUES (:community_id, :account_id, :role_id, :date)"""
         DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
-
-        # insert community notification
-        # Howo: Maybe we should change this to set dst as the account creator instead
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        SELECT {SCHEMA_NAME}.notification_id((:created_at)::timestamp, 1, :counter), n.*
-                        FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
-                        AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
-                              AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                        """
-        DbAdapterHolder.common_block_processing_db().query(sql, block_num=block_num, created_at=block_date, dst=_id, community=name, counter=counter)
 
     @classmethod
     def validated_id(cls, name):
@@ -289,8 +256,6 @@ class Community:
 class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
 
-    _notification_first_block = None
-
     # pylint: disable=too-many-instance-attributes
 
     SCHEMA = {
@@ -364,15 +329,13 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             log.info("validation failed with message: '%s'", payload)
-            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload, community_id=self.community_id, src_id=self.community_id)
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload)
 
         return self.valid
 
     def process(self):
         """Applies a validated operation."""
         assert self.valid, 'cannot apply invalid op'
-
-        time_start = perf_counter()
 
         action = self.action
         params = dict(
@@ -397,7 +360,7 @@ class CommunityOp:
             DbAdapterHolder.common_block_processing_db().query(
                 f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
             )
-            self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             DbAdapterHolder.common_block_processing_db().query(
@@ -412,7 +375,6 @@ class CommunityOp:
                          WHERE id = :community_id""",
                 **params,
             )
-            NotificationCache.push_subscribe_notification(params)
         elif action == 'unsubscribe':
             DbAdapterHolder.common_block_processing_db().query(
                 f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions
@@ -429,28 +391,15 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            result = DbAdapterHolder.common_block_processing_db().query_all(
-                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role(
-                    :account_id, :community_id, :role_id, :date, 
-                    :max_mod_nb, :mod_role_threshold
-                )""",
-                max_mod_nb=MAX_MOD_NB,
-                mod_role_threshold=Role.mod,
-                **params
+            DbAdapterHolder.common_block_processing_db().query(
+                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
+                               (account_id, community_id, role_id, created_at)
+                        VALUES (:account_id, :community_id, :role_id, :date)
+                            ON CONFLICT (account_id, community_id)
+                            DO UPDATE SET role_id = :role_id """,
+                **params,
             )
-
-            if result[0]['status'] == 'success':
-                self._notify('set_role', payload=Role(self.role_id).name)
-            else:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    src_id=self.community_id,
-                    community_id=self.community_id,
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
-                )
+            self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             DbAdapterHolder.common_block_processing_db().query(
                 f"""INSERT INTO {SCHEMA_NAME}.hive_roles
@@ -460,7 +409,7 @@ class CommunityOp:
                             DO UPDATE SET title = :title""",
                 **params,
             )
-            self._notify('set_title', payload=self.title)
+            self._notify('set_label', payload=self.title)
 
         # Post-level actions
         elif action == 'mutePost':
@@ -494,16 +443,15 @@ class CommunityOp:
             )
             self._notify('unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            self._notify_team('flag_post', payload=self.notes)
+            self._notify('flag_post', payload=self.notes)
 
-        FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
 
     def _notify(self, op, **kwargs):
         dst_id = None
         score = 35
 
-        if self.account_id:
+        if self.account_id and not self.post_id:
             dst_id = self.account_id
             if not self._subscribed(self.account_id):
                 score = 15
@@ -519,34 +467,6 @@ class CommunityOp:
             score=score,
             **kwargs,
         )
-
-    def _notify_team(self, op, **kwargs):
-        """Send notifications to all team members (mod, admin, owner) in a community."""
-
-        team_members = DbAdapterHolder.common_block_processing_db().query_col(
-            f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                WHERE community_id = :community_id
-                  AND role_id >= :min_role_id""",
-            community_id=self.community_id,
-            min_role_id=Role.mod.value  # 4
-        )
-
-        for member_id in team_members:
-            # Skip sending notification to the source user (the one triggering the notification)
-            if member_id == self.actor_id:
-                continue
-
-            Notify(
-                block_num=self.block_num,
-                type_id=op,
-                src_id=self.actor_id,
-                dst_id=member_id,
-                post_id=self.post_id,
-                when=self.date,
-                community_id=self.community_id,
-                score=35,
-                **kwargs,
-            )
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
@@ -658,9 +578,7 @@ class CommunityOp:
             if 'avatar_url' in settings:
                 avatar_url = settings['avatar_url']
                 assert not avatar_url or _valid_url_proto(avatar_url)
-            if 'cover_url' in settings:
-                cover_url = settings['cover_url']
-                assert not cover_url or _valid_url_proto(cover_url)
+                out['avatar_url'] = avatar_url
         if 'type_id' in props:
             community_type = read_key_integer(props, 'type_id')
             assert community_type in valid_types, 'invalid community type'
@@ -732,20 +650,20 @@ class CommunityOp:
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _flagged(self):
-        """Check user's flag status. Note that because hive_notification_cache gets flushed every 90 days, this means you can re-flag every 90 days"""
+        """Check user's flag status."""
         from hive.indexer.notify import NotifyType
 
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
-                  WHERE community = :community
+        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notifs
+                  WHERE community_id = :community_id
                     AND post_id = :post_id
                     AND type_id = :type_id
-                    AND src = :src"""
+                    AND src_id = :src_id"""
         return bool(
             DbAdapterHolder.common_block_processing_db().query_one(
                 sql,
-                community=self.community,
+                community_id=self.community_id,
                 post_id=self.post_id,
                 type_id=NotifyType['flag_post'],
-                src=self.actor_id,
+                src_id=self.actor_id,
             )
         )

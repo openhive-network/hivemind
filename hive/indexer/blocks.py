@@ -23,21 +23,21 @@ from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
 from hive.indexer.mentions import Mentions
-from hive.indexer.notification_cache import (
-    NotificationCache,
-    VoteNotificationCache,
-    PostNotificationCache,
-    FollowNotificationCache,
-    ReblogNotificationCache
-)
 from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
-from hive.indexer.flusher import time_collector, process_flush_items, process_flush_items_threaded
+
+
 
 log = logging.getLogger(__name__)
+
+def time_collector(f):
+    start_time = FSM.start()
+    result = f()
+    elapsed_time = FSM.stop(start_time)
+    return result, elapsed_time
 
 
 class Blocks:
@@ -49,35 +49,28 @@ class Blocks:
     _last_safe_cashout_block = 0
     _is_initial_sync = False
 
-    _concurrent_flush_1 = [
+    _concurrent_flush = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
         ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
         ('Notify', Notify.flush, Notify),
-    ]
-    _concurrent_flush_2 = [
         ('Accounts', Accounts.flush, Accounts),
-        ("VoteNotifications", VoteNotificationCache.flush_vote_notifications, VoteNotificationCache),
-        ("PostNotifications", PostNotificationCache.flush_post_notifications, PostNotificationCache),
-        ("FollowNotifications", FollowNotificationCache.flush_follow_notifications, FollowNotificationCache),
-        ("ReblogNotifications", ReblogNotificationCache.flush_reblog_notifications, ReblogNotificationCache),
     ]
+
+    def __init__(self):
+        head_date = self.head_date()
+        if head_date == '':
+            self.__class__._head_block_date = None
+            self.__class__._current_block_date = None
+        else:
+            self.__class__._head_block_date = head_date
+            self.__class__._current_block_date = head_date
 
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
-
-    @classmethod
-    def set_head_date(cls):
-        head_date = cls.head_date()
-        if head_date == '':
-            cls._head_block_date = None
-            cls._current_block_date = None
-        else:
-            cls._head_block_date = head_date
-            cls._current_block_date = head_date
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
@@ -92,11 +85,6 @@ class Blocks:
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
         Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
-        NotificationCache.setup_own_db_access(shared_db_adapter, "NotificationCache")
-        VoteNotificationCache.setup_own_db_access(shared_db_adapter, "VoteNotificationCache")
-        PostNotificationCache.setup_own_db_access(shared_db_adapter, "PostNotificationCache")
-        FollowNotificationCache.setup_own_db_access(shared_db_adapter, "FollowNotificationCache")
-        ReblogNotificationCache.setup_own_db_access(shared_db_adapter, "ReblogNotificationCache")
 
     @staticmethod
     def close_own_db_access() -> None:
@@ -110,11 +98,6 @@ class Blocks:
         Notify.close_own_db_access()
         Accounts.close_own_db_access()
         Mentions.close_own_db_access()
-        NotificationCache.close_own_db_access()
-        VoteNotificationCache.close_own_db_access()
-        PostNotificationCache.close_own_db_access()
-        FollowNotificationCache.close_own_db_access()
-        ReblogNotificationCache.close_own_db_access()
 
     @staticmethod
     def head_num() -> int:
@@ -143,7 +126,7 @@ class Blocks:
     @staticmethod
     def head_date() -> str:
         """Get hive's head block date."""
-        sql = f"SELECT {SCHEMA_NAME}.head_block_time()"
+        sql = "SELECT head_block_time()"
         return str(Db.instance().query_one(sql) or '')
 
     @classmethod
@@ -166,13 +149,40 @@ class Blocks:
 
     @classmethod
     def flush_data_in_n_threads(cls) -> None:
-        process_flush_items_threaded(cls._concurrent_flush_1)
-        process_flush_items_threaded(cls._concurrent_flush_2)
+        completed_threads = 0
+
+        pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_flush))
+
+        flush_futures = {
+            pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush
+        }
+        for future in concurrent.futures.as_completed(flush_futures):
+            (description, c) = flush_futures[future]
+            completed_threads = completed_threads + 1
+            try:
+                (n, elapsedTime) = future.result()
+                assert n is not None
+                assert not c.sync_tx_active()
+
+                FSM.flush_stat(description, elapsedTime, n)
+
+            #                if n > 0:
+            #                    log.info('%r flush generated %d records' % (description, n))
+            except Exception as exc:
+                log.error(f'{description!r} generated an exception: {exc}')
+                raise exc
+        pool.shutdown()
+
+        assert completed_threads == len(cls._concurrent_flush)
 
     @classmethod
     def flush_data_in_1_thread(cls) -> None:
-        process_flush_items(cls._concurrent_flush_1)
-        process_flush_items(cls._concurrent_flush_2)
+        for description, f, c in cls._concurrent_flush:
+            try:
+                f()
+            except Exception as exc:
+                log.error(f'{description!r} generated an exception: {exc}')
+                raise exc
 
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
@@ -336,12 +346,7 @@ class Blocks:
             Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block
         )
 
-        def try_register_account(account_name, op, op_details):
-            if not Accounts.register(
-                account_name, op_details, cls._head_block_date, num
-            ):
-                log.error(f"Failed to register account {account_name} from operation: {op}")
-
+        json_ops = []
         for transaction in block.get_next_transaction():
             assert issubclass(type(transaction), Transaction)
             for operation in transaction.get_next_operation():
@@ -360,20 +365,36 @@ class Blocks:
                 assert 'block_num' not in op
                 op['block_num'] = num
 
+                account_name = None
+                op_details = None
+                potentially_new_account = False
                 # account ops
                 if op_type == OperationType.POW:
-                    try_register_account(op['worker_account'], op, None)
+                    account_name = op['worker_account']
+                    potentially_new_account = True
                 elif op_type == OperationType.POW_2:
-                    try_register_account(op['work']['value']['input']['worker_account'], op, None)
+                    account_name = op['work']['value']['input']['worker_account']
+                    potentially_new_account = True
                 elif op_type == OperationType.ACCOUNT_CREATE:
-                    try_register_account(op['new_account_name'], op, op)
+                    account_name = op['new_account_name']
+                    op_details = op
+                    potentially_new_account = True
                 elif op_type == OperationType.ACCOUNT_CREATE_WITH_DELEGATION:
-                    try_register_account(op['new_account_name'], op, op)
+                    account_name = op['new_account_name']
+                    op_details = op
+                    potentially_new_account = True
                 elif op_type == OperationType.CREATE_CLAIMED_ACCOUNT:
-                    try_register_account(op['new_account_name'], op, op)
+                    account_name = op['new_account_name']
+                    op_details = op
+                    potentially_new_account = True
+
+                if potentially_new_account and not Accounts.register(
+                    account_name, op_details, cls._head_block_date, num
+                ):
+                    log.error(f"Failed to register account {account_name} from operation: {op}")
 
                 # account metadata updates
-                elif op_type == OperationType.ACCOUNT_UPDATE:
+                if op_type == OperationType.ACCOUNT_UPDATE:
                     Accounts.update_op(op, False)
                 elif op_type == OperationType.ACCOUNT_UPDATE_2:
                     Accounts.update_op(op, True)
@@ -397,6 +418,7 @@ class Blocks:
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
+
         return num
 
     @staticmethod
@@ -405,12 +427,17 @@ class Blocks:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
+        is_hour_action = block_number % 1200 == 0
+
         queries = [
+            f"SELECT {SCHEMA_NAME}.update_posts_rshares({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
+            f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
-            f"SELECT {SCHEMA_NAME}.prune_notification_cache({block_number})",
         ]
 
         for query in queries:

@@ -6,7 +6,6 @@ from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 from hive.indexer.notify_type import NotifyType
-from hive.utils.misc import chunks, UniqueCounter
 
 # pylint: disable=too-many-lines,line-too-long
 
@@ -18,9 +17,6 @@ class Notify(DbAdapterHolder):
     # pylint: disable=too-many-instance-attributes,too-many-arguments
     DEFAULT_SCORE = 35
     _notifies = []
-    _notification_first_block = None
-    _counter = UniqueCounter()
-
 
     def __init__(
         self,
@@ -36,7 +32,6 @@ class Notify(DbAdapterHolder):
         **kwargs,
     ):
         """Create a notification."""
-        from hive.indexer.community import Community
 
         assert type_id, 'op is blank :('
         if isinstance(type_id, str):
@@ -56,10 +51,10 @@ class Notify(DbAdapterHolder):
         self.community_id = community_id
         self.payload = payload
         self._id = kwargs.get('id')
-        self.counter = self._counter.increment(block_num)
 
-        # This class is now only used for community logic, so we don't need to store notifications before
-        if block_num >= Community.start_block:
+        # for HF24 we started save notifications from block 44300000
+        # about 90 days before release day
+        if block_num > 44300000:
             Notify._notifies.append(self)
 
     @classmethod
@@ -70,7 +65,7 @@ class Notify(DbAdapterHolder):
 
     def to_db_values(self):
         """Generate a db row."""
-        return "( {}, {}, {}, '{}'::timestamp, {}::int, {}::int, {}::int, {}::int, {}, {}::int )".format(
+        return "( {}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {} )".format(
             self.block_num,
             self.enum.value,
             self.score,
@@ -80,39 +75,42 @@ class Notify(DbAdapterHolder):
             self.post_id if self.post_id else "NULL",
             self.community_id if self.community_id else "NULL",
             escape_characters(str(self.payload)) if self.payload else "NULL",
-            self.counter
         )
 
     @classmethod
     def flush(cls):
         """Store buffered notifs"""
 
-        n = len(Notify._notifies)
-        if n > 0:
-            if cls._notification_first_block is None:
-                cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
-            max_block_num = max(n.block_num for n in Notify._notifies)
+        def execute_query(sql, values):
+            values_str = ','.join(values)
+            actual_query = sql.format(values_str)
+            cls.db.query_prepared(actual_query)
+            values.clear()
+
+        n = 0
+        if Notify._notifies:
             cls.beginTx()
 
-            sql_cache = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache(
-                            id, block_num, type_id, score, created_at,
-                            src, dst, post_id, dst_post_id, community, community_title, payload)
-                          SELECT {SCHEMA_NAME}.notification_id(n.created_at, n.type_id, n.counter), n.block_num, n.type_id, n.score, n.created_at, n.src, n.dst, n.post_id, n.post_id, hc.name, hc.title, n.payload
-                          FROM
-                          (VALUES {{}})
-                          AS n(block_num, type_id, score, created_at, src, dst, post_id, community_id, payload, counter)
-                          JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.community_id = hc.id
-                          WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
-                                AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                          ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
-                          """
+            sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notifs (block_num, type_id, score, created_at, src_id,
+                                              dst_id, post_id, community_id,
+                                              payload)
+                          VALUES
+                          -- block_num, type_id, score, created_at, src_id, dst_id, post_id, community_id, payload
+                          {{}}"""
 
-            values = [notify.to_db_values() for notify in Notify._notifies]
-            for chunk in chunks(values, 1000):
-                joined_values = ','.join(chunk)
-                if max_block_num > cls._notification_first_block:
-                    cls.db.query_prepared(sql_cache.format(joined_values))
+            values = []
+            values_limit = 1000
 
+            for notify in Notify._notifies:
+                values.append(f"{notify.to_db_values()}")
+
+                if len(values) >= values_limit:
+                    execute_query(sql, values)
+
+            if len(values) > 0:
+                execute_query(sql, values)
+
+            n = len(Notify._notifies)
             Notify._notifies.clear()
             cls.commitTx()
 
