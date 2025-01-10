@@ -25,7 +25,7 @@ def _sanitized_conf(parser):
 
 
 class Conf:
-    """Manages sync/server configuration via args, ENVs, and hive.conf."""
+    """Manages sync configuration via args, ENVs, and hive.conf."""
 
     def __init__(self):
         self._args = None
@@ -40,7 +40,7 @@ class Conf:
         parser = configargparse.get_arg_parser(default_config_files=['./hive.conf'], **kwargs)
         add = parser.add
 
-        # runmodes: sync, server, status
+        # runmodes: sync, status
         add('mode', nargs='*', default=['sync'])
 
         # common
@@ -203,7 +203,8 @@ class Conf:
 
         if self.mode() == 'server':
             # DbStats.SLOW_QUERY_MS = 750
-            DbStats.SLOW_QUERY_MS = 200  # TODO
+            #DbStats.SLOW_QUERY_MS = 200  # TODO
+            raise ValueError("server mode is not longer supported - postgrest server is used instead")
 
     def __enter__(self):
         return self
@@ -234,7 +235,6 @@ class Conf:
     def mode(self):
         """Get the CLI runmode.
 
-        - `server`: API server
         - `sync`: db sync process
         - `status`: status info dump
         """

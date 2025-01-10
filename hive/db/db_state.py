@@ -20,7 +20,7 @@ from hive.conf import (
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
-from hive.server.common.payout_stats import PayoutStats
+from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
 from hive.utils.stats import FinalOperationStatusManager as FOSM
