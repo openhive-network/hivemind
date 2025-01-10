@@ -427,20 +427,41 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
 
 
 async def _follow_contexts(db, accounts, observer_id, include_mute=False):
-    sql = f"""SELECT following, state FROM {SCHEMA_NAME}.hive_follows
-              WHERE follower = :account_id AND following IN :ids"""
-    rows = await db.query_all(sql, account_id=observer_id, ids=tuple(accounts.keys()))
-    for row in rows:
-        following_id = row[0]
-        state = row[1]
-        context = {'followed': state == 1}
-        if include_mute and state == 2:
-            context['muted'] = True
-        accounts[following_id]['context'] = context
+    ids = list(accounts.keys())
+    sql = f"""
+    SELECT
+        p.following,
+        EXISTS (
+            SELECT 1
+            FROM {SCHEMA_NAME}.follows AS f
+            WHERE f.follower = :account_id
+            AND f.following = p.following
+        )
+    FROM unnest(:ids) AS p(following)
+    """
+    rows = await db.query_all(sql, account_id=observer_id, ids=ids)
+    follows = {row[0]: row[1] for row in rows}
 
-    for account in accounts.values():
-        if 'context' not in account:
-            account['context'] = {'followed': False}
+    mutes = {}
+    if include_mute:
+        sql = f"""
+        SELECT
+            p.following,
+            EXISTS (
+                SELECT 1
+                FROM {SCHEMA_NAME}.muted AS f
+                WHERE f.follower = :account_id
+                AND f.following = p.following
+            )
+        FROM unnest(:ids) AS p(following)
+        """
+        rows = await db.query_all(sql, account_id=observer_id, ids=ids)
+        mutes = {row[0]: row[1] for row in rows}
+
+    for id in ids:
+        accounts[id]['context'] = {'followed': follows[id]}
+        if mutes.get(id, False):
+            accounts[id]['context']['muted'] = True
 
 @return_error_info
 async def count_reblogs(db, post_id: int):
