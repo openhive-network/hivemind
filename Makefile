@@ -27,9 +27,6 @@ db:
 mysql:
 	docker run --env DATABASE_URL=mysql://root:root_password@mysql:3306/testdb -p 4000:8080 hive
 
-serve-local:
-	pipenv run python hive/server/serve.py --port 8080 --database_url='mysql://root:root_password@127.0.0.1:3306/testdb'
-
 .PHONY: db-head-state
 db-head-state:
 	curl -H 'Content-Type: application/json' -d '{"id":1,"jsonrpc":"2.0","method":"db_head_state"}' http://localhost:8080
@@ -63,9 +60,6 @@ test-lint:
 fmt:
 	yapf --recursive --in-place --style pep8 .
 	autopep8 --recursive --in-place .
-
-requirements.txt: serve.py
-	pip freeze > $@
 
 clean: clean-build clean-pyc
 

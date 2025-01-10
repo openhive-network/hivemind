@@ -23,8 +23,8 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
-from hive.server.common.mentions import Mentions
-from hive.server.common.payout_stats import PayoutStats
+from hive.indexer.mentions import Mentions
+from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
