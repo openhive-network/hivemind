@@ -5,7 +5,7 @@ from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
-from hive.server.common.notify_type import NotifyType
+from hive.indexer.notify_type import NotifyType
 
 # pylint: disable=too-many-lines,line-too-long
 

@@ -12,8 +12,6 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.server.common.helpers import check_community
-from hive.server.common.mute_reasons import encode_bitwise_mask
 
 log = logging.getLogger(__name__)
 
@@ -108,6 +106,26 @@ def read_key_integer(op, key):
         assert isinstance(op[key], int), 'must be int: %s' % key
         return op[key]
     return None
+
+def check_community(name) -> bool:
+    """Perform basic validation on community name"""
+    if (
+        name
+        and isinstance(name, str)
+        and len(name) > 5
+        and name[:5] == 'hive-'
+        and name[5] in ['1', '2', '3']
+        and re.match(r'^hive-[123]\d{4,6}$', name)
+    ):
+        return True
+    return False
+
+def encode_bitwise_mask(muted_reasons):
+    mask = 0
+    for number in muted_reasons:
+        # Shift number by one to accommodate the 0 value
+        mask |= 1 << number
+    return mask
 
 
 class Community:

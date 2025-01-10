@@ -67,11 +67,7 @@ def run():
 
 def launch_mode(mode, conf):
     """Launch a routine as indicated by `mode`."""
-    if mode == 'server':
-        from hive.server.serve import run_server
-        run_server(conf=conf)
-
-    elif mode == 'build_schema':
+    if mode == 'build_schema':
         # Calculation of number of maximum connection and closing a database
         # In next step the database will be opened with correct number of connections
         Db.set_max_connections(conf.db())
@@ -112,7 +108,7 @@ def launch_mode(mode, conf):
         print(DbState.status())
 
     else:
-        raise Exception(f"unknown run mode {mode}. Accepted run modes are: `build_schema', `sync', `server', `status'")
+        raise Exception(f"unknown run mode {mode}. Accepted run modes are: `build_schema', `sync', `status'")
 
 
 if __name__ == '__main__':

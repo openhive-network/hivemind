@@ -36,7 +36,6 @@ pushd $PATH_TO_TESTS_API_BENCHMARKS_DIR
 
     echo "preparing python benchmarking enviroment"
     pip install --upgrade pip
-    pip install -r "$PATH_TO_TESTS_API_BENCHMARKS_DIR/requirements.txt"
 
     echo "setting jmeter"
     $PATH_TO_TESTS_API_BENCHMARKS_DIR/setup_jmeter.bash

@@ -16,7 +16,7 @@ from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.server.common.payout_stats import PayoutStats
+from hive.utils.payout_stats import PayoutStats
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,

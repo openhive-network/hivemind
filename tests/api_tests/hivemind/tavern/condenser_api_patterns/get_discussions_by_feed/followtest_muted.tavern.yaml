@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # bridge_get_by_feed_with_reblog filters muted accounts by observer
+    - patterntest
     
     
   includes:
