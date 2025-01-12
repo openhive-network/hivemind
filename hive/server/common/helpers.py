@@ -1,7 +1,6 @@
 """Helpers for server/API functions."""
 
 import datetime
-import json
 from functools import wraps
 import logging
 import re
@@ -142,20 +141,6 @@ def valid_account(name, allow_empty=False):
     assert re.match(fr'^{name_segment}(?:\.{name_segment})*$', name), 'invalid account char'
     return name
 
-
-def valid_accounts(accounts):
-    """Validate multiple accounts and return valid ones or throw Assert with all errors."""
-    invalid_accounts = []
-    names = []
-
-    for account in accounts:
-        try:
-            names.append(valid_account(account))
-        except AssertionError as e:
-            invalid_accounts.append({"name": account, "error": str(e)})
-
-    assert not invalid_accounts, json.dumps({"invalid_accounts": invalid_accounts})
-    return names
 
 def valid_permlink(permlink, allow_empty=False):
     """Returns validated permlink or throws Assert."""

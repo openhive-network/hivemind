@@ -145,7 +145,7 @@ BEGIN
     WHEN __method_type = 'get_profile' THEN
       result := hivemind_endpoints.bridge_api_get_profile(__params);
     WHEN __method_type = 'get_accounts' THEN
-      result := hivemind_endpoints.bridge_api_get_profile(__params); -- not a typo, we use the same underlying function
+      result := hivemind_endpoints.bridge_api_get_accounts(__params);
     WHEN __method_type = 'list_muted_reasons_enum' THEN
       result := hivemind_postgrest_utilities.get_muted_reason_map();
     WHEN __method_type = 'does_user_follow_any_lists' THEN

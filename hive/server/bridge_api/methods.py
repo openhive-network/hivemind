@@ -37,27 +37,6 @@ async def get_profile(context, account, observer=None):
         await _follow_contexts(db, {ret[0]['id']: ret[0]}, observer_id, True)
     return ret[0]
 
-
-@return_error_info
-async def get_accounts(context, accounts, observer=None):
-    """Load accounts/profiles data."""
-    db = context['db']
-
-    accounts = valid_accounts(accounts)
-    observer = valid_account(observer, allow_empty=True)
-
-    ret = await load_profiles(db, accounts)
-    if len(ret) != len(accounts):
-        found_accounts = {account['name'] for account in ret}
-        missing_accounts = [account for account in accounts if account not in found_accounts]
-        assert len(ret) == len(accounts), f'Account(s) do not exist: {", ".join(missing_accounts)}'
-
-    observer_id = await get_account_id(db, observer) if observer else None
-    if observer_id:
-        await _follow_contexts(db, {account['id']: account for account in ret}, observer_id, True)
-    return ret
-
-
 @return_error_info
 async def get_trending_topics(context, limit: int = 10, observer: str = None):
     """Return top trending topics across pending posts."""
