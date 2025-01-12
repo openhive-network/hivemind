@@ -7,7 +7,6 @@ from hive.server.common.helpers import (
     json_date,
     return_error_info,
     valid_account,
-    valid_accounts,
     valid_limit,
     valid_permlink,
     valid_tag,
@@ -29,13 +28,14 @@ async def get_profile(context, account, observer=None):
     account = valid_account(account)
     observer = valid_account(observer, allow_empty=True)
 
-    ret = await load_profiles(db, [account])
+    ret = await load_profiles(db, [valid_account(account)])
     assert ret, f'Account \'{account}\' does not exist'  # should not be needed
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:
         await _follow_contexts(db, {ret[0]['id']: ret[0]}, observer_id, True)
     return ret[0]
+
 
 @return_error_info
 async def get_trending_topics(context, limit: int = 10, observer: str = None):

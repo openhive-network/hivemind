@@ -17,7 +17,6 @@ BEGIN
   FOREACH _name IN ARRAY _names
   LOOP
     BEGIN
-      -- Empty check
       IF _name IS NULL OR _name = '' THEN
         IF NOT _allow_empty THEN
           _errors := _errors || jsonb_build_object(_name, 'invalid account (not specified)');
@@ -25,19 +24,16 @@ BEGIN
         END IF;
       END IF;
 
-      -- Length check
       IF LENGTH(_name) NOT BETWEEN 3 AND 16 THEN
         _errors := _errors || jsonb_build_object(_name, 'invalid account name length: `' || _name || '`');
         CONTINUE;
       END IF;
 
-      -- @ check
       IF LEFT(_name, 1) = '@' THEN
         _errors := _errors || jsonb_build_object(_name, 'invalid account name char `@`');
         CONTINUE;
       END IF;
 
-      -- Regex check
       IF NOT _name ~ ('^'|| name_segment ||'(?:\.'|| name_segment ||')*$') THEN
         _errors := _errors || jsonb_build_object(_name, 'invalid account char');
         CONTINUE;
@@ -46,7 +42,6 @@ BEGIN
     END;
   END LOOP;
 
-  -- If we collected any errors, raise them all at once
   IF jsonb_array_length(_errors) > 0 THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception(_errors::TEXT);
   END IF;
