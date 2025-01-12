@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "{\"invalid_accounts\": [{\"name\": 789, \"error\": \"invalid account name type\"}, {\"name\": \"\", \"error\": \"invalid account (not specified)\"}, {\"name\": \"------\", \"error\": \"invalid account char\"}, {\"name\": \"421\", \"error\": \"invalid account char\"}, {\"name\": \"thisusernameistoolong\", \"error\": \"invalid account name length: `thisusernameistoolong`\"}]}",
+  "data": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
   "message": "Invalid parameters"
 }

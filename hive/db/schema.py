@@ -765,6 +765,8 @@ def setup_runtime_code(db):
         "postgrest/condenser_api/condenser_api_get_followers.sql",
         "postgrest/condenser_api/condenser_api_get_following.sql",
         "postgrest/utilities/find_subscription_id.sql",
+        "postgrest/bridge_api/bridge_api_get_accounts.sql",
+        "postgrest/utilities/valid_accounts.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

@@ -27,9 +27,7 @@ BEGIN
     _account_names = hivemind_postgrest_utilities.valid_accounts(_account_names, false);
 
     _observer_id = hivemind_postgrest_utilities.find_account_id(
-            hivemind_postgrest_utilities.valid_account(
-                    hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
-                    True),
+            hivemind_postgrest_utilities.valid_account(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
             True);
 
 
@@ -61,8 +59,7 @@ BEGIN
             INTO _missing_accounts
             FROM (SELECT unnest(_account_names) as name EXCEPT SELECT unnest(_found_accounts)) missing;
         END IF;
-
-        RAISE EXCEPTION '%', _missing_accounts::text;
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_missing_accounts::text);
     END IF;
 
 
