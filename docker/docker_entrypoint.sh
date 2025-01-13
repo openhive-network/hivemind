@@ -23,7 +23,6 @@ ADD_MOCKS=${ADD_MOCKS:-false}
 LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
-POSTGREST_SERVER=0
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
 WITH_REPTRACKER=0
@@ -92,22 +91,27 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    if [[ "$POSTGREST_SERVER" = 1 ]]; then
-      echo "Running postgrest setup..."
-      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
-    else
-      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
-    fi
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
-    if [[ "$POSTGREST_SERVER" = 1 ]]; then
-      echo "Running postgrest setup..."
-      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
-    else
-      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}"
-    fi
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}"
   fi
 }
+
+run_server() {
+  local db_url=${POSTGRES_URL}
+  # shellcheck source=/dev/null
+  if [[ -n "$LOG_PATH" ]]; then
+    log "run_hive" "Starting hivemind postgrest server with log $LOG_PATH"
+    echo "Running postgrest setup..."
+    exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
+  else
+    log "run_hive" "Starting hivemind postgrest server..."
+    echo "Running postgrest setup..."
+    exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+  fi
+}
+
 
 setup() {
   log "setup" "Setting up the database..."
@@ -177,14 +181,10 @@ case "$COMMAND" in
       run_hive
       ;;
     postgrest-server)
-      POSTGREST_SERVER=1
-      # HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
       HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]:1}")
       log "global" "Running Hivemind with arguments ${HIVEMIND_ARGS[*]}"
-      run_hive
+      run_server
       ;;
-    *)
-      run_hive
 esac
 
 log "global" "Exiting docker entrypoint..."
