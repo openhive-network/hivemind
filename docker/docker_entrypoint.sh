@@ -180,10 +180,13 @@ case "$COMMAND" in
       date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
       run_hive
       ;;
-    postgrest-server)
+    server)
       HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]:1}")
       log "global" "Running Hivemind with arguments ${HIVEMIND_ARGS[*]}"
       run_server
+      ;;
+    *)
+      log "global" "COMMAND - first argument is not valid. Available commands: setup, install_app, uninstall_app, sync, server"
       ;;
 esac
 
