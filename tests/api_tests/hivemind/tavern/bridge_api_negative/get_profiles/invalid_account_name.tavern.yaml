@@ -4,7 +4,7 @@
   marks:
     - patterntest
     - negative
-    
+
   includes:
     - !include ../../common.yaml
 
@@ -18,8 +18,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_accounts"
-          params: {"accounts":["gtg", "nonexisting"]}
+          method: "bridge.get_profiles"
+          params: {"accounts":[789, "", "------", "421", "thisusernameistoolong"]}
       response:
         status_code: 200
         verify_response_with:

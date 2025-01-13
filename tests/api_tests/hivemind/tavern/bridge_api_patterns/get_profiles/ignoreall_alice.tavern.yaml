@@ -3,8 +3,7 @@
 
   marks:
     - patterntest
-    - negative
-
+    
   includes:
     - !include ../../common.yaml
 
@@ -18,11 +17,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_accounts"
-          params: {"accounts":[789, "", "------", "421", "thisusernameistoolong"]}
+          method: "bridge.get_profiles"
+          params: {"accounts":["ignoreall"],"observer":"alice"}
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            error_response: true
+            ignore_tags: "<bridge profile>"

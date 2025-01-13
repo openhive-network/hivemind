@@ -1,6 +1,6 @@
 Gives basic information about given account list.
 
-method: "bridge.get_accounts"
+method: "bridge.get_profiles"
 params:
 {
   "accounts": "[{account}]",

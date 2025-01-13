@@ -1,35 +1,30 @@
-DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_accounts;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.bridge_api_get_accounts(IN _params JSONB)
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_profiles;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_profiles(IN   _accounts JSONB, IN  _observer TEXT)
 RETURNS JSONB
-LANGUAGE 'plpgsql'
-STABLE
+LANGUAGE 'plpgsql' STABLE
 AS
-$$
+$function$
 DECLARE
-  _accounts JSONB;
   _account_names TEXT[];
   _observer_id INT;
   _result JSONB;
-  _accounts_amount INT;
   _found_accounts_amount INT;
+  _accounts_amount INT;
   _found_accounts TEXT[];
   _missing_accounts JSONB;
 BEGIN
-    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"accounts": "array", "observer": "string"}', 1, '{"accounts": "invalid accounts type"}');
-    _accounts = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'accounts', True);
 
     _accounts_amount = jsonb_array_length(_accounts);
     IF _accounts_amount > 1000 THEN
-        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Accounts count is greather than max allowed (1000)');
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('accounts amount is greather than max allowed (1000)');
     END IF;
 
     SELECT array_agg(value) INTO _account_names FROM jsonb_array_elements_text(_accounts);
     _account_names = hivemind_postgrest_utilities.valid_accounts(_account_names, false);
 
     _observer_id = hivemind_postgrest_utilities.find_account_id(
-            hivemind_postgrest_utilities.valid_account(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
+            hivemind_postgrest_utilities.valid_account(_observer, True),
             True);
-
 
     SELECT jsonb_agg(jsonb_build_object(
             'id', row.id,
@@ -101,10 +96,9 @@ BEGIN
                                    )
                        )
                )
-    FROM jsonb_array_elements(_result) account_row
-    INTO _result;
+    FROM jsonb_array_elements(_result) account_row INTO _result;
 
     RETURN _result;
 END
-$$
+$function$
 ;
