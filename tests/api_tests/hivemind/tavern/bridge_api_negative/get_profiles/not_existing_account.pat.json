@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "[{\"nonexisting\": \"account does not exist\"}]",
+  "message": "Invalid parameters"
+}
