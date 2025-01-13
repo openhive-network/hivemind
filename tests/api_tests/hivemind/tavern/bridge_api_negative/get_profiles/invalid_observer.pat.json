@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "[{\"468\": \"invalid account char\"}]",
+  "data": "Account nonexisting does not exist",
   "message": "Invalid parameters"
 }

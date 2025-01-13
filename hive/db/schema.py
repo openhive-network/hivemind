@@ -752,6 +752,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_list_communities.sql",
         "postgrest/bridge_api/bridge_api_get_discussion.sql",
         "postgrest/bridge_api/bridge_api_get_post_header.sql",
+        "postgrest/utilities/get_profiles.sql",
         "postgrest/bridge_api/bridge_api_get_profile.sql",
         "postgrest/bridge_api/bridge_api_does_user_follow_any_lists.sql",
         "postgrest/utilities/extract_profile_metadata.sql",
@@ -765,6 +766,8 @@ def setup_runtime_code(db):
         "postgrest/condenser_api/condenser_api_get_followers.sql",
         "postgrest/condenser_api/condenser_api_get_following.sql",
         "postgrest/utilities/find_subscription_id.sql",
+        "postgrest/bridge_api/bridge_api_get_profiles.sql",
+        "postgrest/utilities/valid_accounts.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
