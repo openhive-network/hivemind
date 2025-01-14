@@ -1,7 +1,5 @@
 {
   "blacklists": false,
-  "block_num": 5000010,
-  "created_at": "2016-06-04T17:54:00",
   "follows": false,
   "follows_blacklists": true,
   "follows_muted": true,

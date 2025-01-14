@@ -1,7 +1,5 @@
 {
   "blacklists": false,
-  "block_num": null,
-  "created_at": null,
   "follows": false,
   "follows_blacklists": false,
   "follows_muted": false,
