@@ -4,9 +4,9 @@
 
 ARG POSTGREST_VERSION=v12.0.2
 
-FROM registry.gitlab.syncad.com/hive/common-ci-configuration/postgrest:${POSTGREST_VERSION} AS pure_postgrest
+FROM postgrest/postgrest:${POSTGREST_VERSION} AS pure_postgrest
 
-FROM --platform=$BUILDPLATFORM registry.gitlab.syncad.com/hive/common-ci-configuration/python:3.12.9-slim-bookworm as runtime
+FROM --platform=$BUILDPLATFORM python:3.8-slim as runtime
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -132,7 +132,6 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/co
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
 COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
-COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/hafah /home/hivemind/app/hafah
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}

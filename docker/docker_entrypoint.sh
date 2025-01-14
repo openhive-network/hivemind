@@ -109,11 +109,11 @@ run_server() {
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting hivemind postgrest server with log $LOG_PATH"
     echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
+    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting hivemind postgrest server..."
     echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
   fi
 }
 
