@@ -54,9 +54,13 @@ start_webserver() {
     export PGRST_SERVER_PORT=$WEBSERVER_PORT
     export PGRST_ADMIN_SERVER_PORT=$ADMIN_PORT
     export PGRST_LOG_LEVEL=$LOG_LEVEL
-    #export PGRST_DB_ROOT_SPEC="home"
+    export PGRST_DB_SCHEMAS="hivemind_endpoints"
+    export PGRST_DB_ANON_ROLE="hivemind"
+    export PGRST_DB_POOL=20
+    export PGRST_DB_POOL_ACQUISITION_TIMEOUT=10
+    #export PGRST_DB_ROOT_SPEC="home" #this may be need to be uncommented in local environment to let tests work, if empty jsons are 
 
-    postgrest postgrest.conf
+    postgrest
 }
 
 start_webserver
