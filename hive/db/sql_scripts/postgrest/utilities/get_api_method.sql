@@ -16,7 +16,7 @@ BEGIN
     WHEN __method_type = 'get_trending_tags' THEN
       result :=  hivemind_endpoints.condenser_api_get_trending_tags(__params);
     WHEN __method_type = 'get_state' THEN
-      result :=  hivemind_endpoints.condenser_api_get_state(__params);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('condenser_api get state is not supported');
     WHEN __method_type = 'get_account_reputations' THEN
       result := hivemind_endpoints.condenser_api_get_account_reputations(__params, /* _fat_node_style */ True);
     WHEN __method_type = 'get_blog' THEN
