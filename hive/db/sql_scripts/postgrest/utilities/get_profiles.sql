@@ -57,8 +57,6 @@ BEGIN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_missing_accounts::text);
     END IF;
 
-
-
     IF _observer_id IS NOT NULL AND _observer_id <> 0 THEN
         SELECT jsonb_agg(
                        jsonb_set(
@@ -86,17 +84,17 @@ BEGIN
     END IF;
 
 
-    SELECT jsonb_agg(
-                   jsonb_set(
-                               account_row - 'json_metadata' - 'posting_json_metadata',
-                               '{metadata}',
-                               hivemind_postgrest_utilities.extract_profile_metadata(
-                                           account_row->>'json_metadata',
-                                           account_row->>'posting_json_metadata'
-                                   )
-                       )
-               )
-    FROM jsonb_array_elements(_result) account_row INTO _result;
+SELECT jsonb_agg(
+               jsonb_set(
+                           account_row - 'json_metadata' - 'posting_json_metadata',
+                           '{metadata}',
+                           hivemind_postgrest_utilities.extract_profile_metadata(
+                                       account_row->>'posting_json_metadata',
+                                       account_row->>'json_metadata'
+                               )
+                   )
+           )
+FROM jsonb_array_elements(_result) account_row INTO _result;
 
     RETURN _result;
 END
