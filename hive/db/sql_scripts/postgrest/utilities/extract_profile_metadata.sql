@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.extract_profile_metadata;
-CREATE FUNCTION hivemind_postgrest_utilities.extract_profile_metadata(IN _json_metadata TEXT, IN _posting_json_metadata TEXT)
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.extract_profile_metadata(IN _json_metadata TEXT, IN _posting_json_metadata TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 IMMUTABLE
@@ -13,8 +13,8 @@ BEGIN
   IF _posting_json_metadata IS NOT NULL AND _posting_json_metadata <> '' THEN
     BEGIN
       _metadata = _posting_json_metadata::jsonb;
-      -- In python code, if posting_json_metadata has less then 3 elements, that we should use `json_metadata`, even before reading `profile` part.
-      IF (SELECT COUNT(*) FROM jsonb_object_keys(_metadata)) < 3 THEN
+      -- if posting_json_metadata has less then 3 chars, then we use `json_metadata`, without even reading the `profile`.
+      IF (SELECT LENGTH(_metadata::text)) < 3 THEN
         _metadata = NULL;
       ELSIF _metadata ? 'profile' THEN
         _metadata = _metadata->'profile';

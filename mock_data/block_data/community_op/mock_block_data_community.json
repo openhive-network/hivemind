@@ -878,7 +878,7 @@
             "value": {
               "account": "hive-186713",
               "json_metadata": "{\"profile\":{\"name\":\"from account\",\"about\":\"about from account\",\"cover_image\":\"\",\"profile_image\":\"https://images.ecency.com/DQmRmugfsA3arLWs2Fh3VncMo4VPsmWUWY9r5GaWKA2k1XN/images.jpeg\",\"website\":\"\",\"location\":\"\",\"version\":2}}",
-              "posting_json_metadata": "test-safari",
+              "posting_json_metadata": "{\"profile\":{\"name\":\"from account\",\"about\":\"about from account this is the correct data for get_profile endpoints\",\"cover_image\":\"\",\"profile_image\":\"https://images.ecency.com/DQmRmugfsA3arLWs2Fh3VncMo4VPsmWUWY9r5GaWKA2k1XN/images.jpeg\",\"website\":\"\",\"location\":\"\",\"version\":2}}",
               "extensions": []
             }
           },
