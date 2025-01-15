@@ -15,8 +15,6 @@ developers with a more flexible/extensible alternative to the raw hived API.
    - [Prerequisites](#prerequisites)
    - [Installing Hivemind](#install-the-hivemind-itself)
    - [Installation of dockerized version](#dockerized-setup)
-1. [Updating from an existing hivemind database](#updating-from-an-existing-hivemind-database)
-1. [Running](#running)
 1. [Tests](#tests)
 1. [Configuration](#configuration)
 1. [Requirements](#requirements)
@@ -38,7 +36,7 @@ developers with a more flexible/extensible alternative to the raw hived API.
 
 - Python 3.8+ required
 - Python dependencies: `pip >= 22.2.2` and `setuptools >= 63.1.0`
-- Postgres 12+ recommended
+- Postgres 17 recommended
 
 ### Dependencies
 
@@ -113,122 +111,88 @@ pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 
 ### Dockerized setup
 
-#### Building
-
-To build image holding Hivemind instance, please use [build_instance.sh](scripts/ci-helpers/build_instance.sh). This script requires several parameters:
-
-- a tag identifier to be set on the built image
-- directory where Hivemind source code is located
-- docker registry url to produce fully qualified image name and allow to correctly resolve its dependencies
-
-```bash
-# Assuming you are in workdir directory, to perform out of source build
-../hivemind/scripts/ci-helpers/build_instance.sh local ../hivemind registry.gitlab.syncad.com/hive/hivemind
+1. Firstly, we need a working HAF instance. Create some working directory (example workplace-haf on the same level as haf directory) and we can build it via docker:
+```
+../haf/scripts/ci-helpers/build_instance.sh local-haf-develop ../haf/ registry.gitlab.syncad.com/hive/haf/
 ```
 
-#### Running HAF instance container
-
-A Hivemind instance requires a HAF instance to process incoming blockchain data collected and to store its own data in fork-resistant manner (allows hivemind data to be reverted in case of a fork).
-The easiest way to setup a HAF instance is to use a dockerized instance.
-
-To start a HAF instance, we need to prepare a data directory containing:
-
-- a blockchain subdirectory (where can be put the block_log file used by hived)
-- optionally, but very useful, a copy of haf/doc/haf_postgresql_conf.d directory, which allows simple customization of Postgres database setup by modification of `custom_postgres.conf` and `custom_pg_hba.conf` files stored inside.
-
-Please take care to set correct file permissions in order to provide write access to the data directory for processes running inside the HAF container.
-
-```bash
-cd /storage1/haf-data-dir/
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
+2. For testing purposes we need a 5M block_log, so in order to avoid syncing in `workplace-haf` directory we create blockchain directory and copy there a block_log (split or monolit block_log). We can skip this step and go to 3rd step directly, but we need to remove `--replay` option in order to let hive download 5M blocks.
+```
+└── workplace-haf
+    ├── blockchain
+    │   └── block_log
 ```
 
-For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn a 5M block replay to prepare a HAF database for further quick testing:
-
-```bash
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-at-block=5000000
+3. Prepare HAF database - replay:
+```
+../haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:local-haf-develop --name=haf-instance --webserver-http-endpoint=8091 --webserver-ws-endpoint=8090  --data-dir=$(pwd) --docker-option="--shm-size=4294967296" --replay --stop-at-block=5000000
 ```
 
-By examining hived.log file or using docker logs haf-mainnet-instance, you can examine state of the started instance. Once replay will be finished, you can continue and start the Hivemind sync process.
-
-Example output of hived process stopped on 5,000,000th block:
-
-```bash
-2022-12-19T18:28:05.574637 chain_plugin.cpp:701          replay_blockchain    ] Stopped blockchain replaying on user request. Last applied block numbe
-r: 5000000.
-2022-12-19T18:28:05.574658 chain_plugin.cpp:966          plugin_startup       ] P2P enabling after replaying...
-2022-12-19T18:28:05.574670 chain_plugin.cpp:721          work                 ] Started on blockchain with 5000000 blocks, LIB: 4999980
-2022-12-19T18:28:05.574687 chain_plugin.cpp:727          work                 ] Started on blockchain with 5000000 blocks
-2022-12-19T18:28:05.574736 chain_plugin.cpp:993          plugin_startup       ] Chain plugin initialization finished...
-2022-12-19T18:28:05.574753 sql_serializer.cpp:712        plugin_startup       ] sql::plugin_startup()
-2022-12-19T18:28:05.574772 p2p_plugin.cpp:466            plugin_startup       ] P2P plugin startup...
-2022-12-19T18:28:05.574764 chain_plugin.cpp:339          operator()           ] Write processing thread started.
-2022-12-19T18:28:05.574782 p2p_plugin.cpp:470            plugin_startup       ] P2P plugin is not enabled...
-2022-12-19T18:28:05.574840 witness_plugin.cpp:648        plugin_startup       ] witness plugin:  plugin_startup() begin
-2022-12-19T18:28:05.574866 witness_plugin.cpp:655        plugin_startup       ] Witness plugin is not enabled, beause P2P plugin is disabled...
-2022-12-19T18:28:05.574885 wallet_bridge_api_plugin.cpp:20 plugin_startup       ] Wallet bridge api plugin initialization...
-2022-12-19T18:28:05.574905 wallet_bridge_api.cpp:169     api_startup          ] Wallet bridge api initialized. Missing plugins: database_api block_api
- account_history_api market_history_api network_broadcast_api rc_api_plugin
-2022-12-19T18:28:05.575624 webserver_plugin.cpp:240      operator()           ] start processing ws thread
-Entering application main loop...
-2022-12-19T18:28:05.575687 webserver_plugin.cpp:261      operator()           ] start listening for http requests on 0.0.0.0:8090
-2022-12-19T18:28:05.575716 webserver_plugin.cpp:263      operator()           ] start listening for ws requests on 0.0.0.0:8090
-2022-12-19T18:28:35.575535 chain_plugin.cpp:380          operator()           ] No P2P data (block/transaction) received in last 30 seconds... peer_count=0
+Replay will be finished when you see these logs:
+```
+2025-01-15T12:06:28.244946 livesync_data_dumper.cpp:85   livesync_data_dumper ] livesync dumper created
+2025-01-15T12:06:28.244960 data_processor.cpp:68         operator()           ] Account operations data writer_1 data processor connected successfully ...
+2025-01-15T12:06:28.244971 indexation_state.cpp:429      flush_all_data_to_re ] Flushing reversible blocks...
+2025-01-15T12:06:28.244976 data_processor.cpp:66         operator()           ] Applied hardforks data writer data processor is connecting ...
+2025-01-15T12:06:28.244991 indexation_state.cpp:445      flush_all_data_to_re ] Flushed all reversible blocks
+2025-01-15T12:06:28.245001 data_processor.cpp:68         operator()           ] Applied hardforks data writer data processor connected successfully ...
+2025-01-15T12:06:28.245016 indexation_state.cpp:379      update_state         ] PROFILE: Entered LIVE sync from start state: 606 s 5000000
+2025-01-15T12:06:28.245047 chain_plugin.cpp:485          operator()           ] entering API mode
 ```
 
-#### Running Hivemind instance container
+Everytime when you want to run tests or do anything with hivemind, you need to run above command and wait until above logs appear.
 
-The built Hivemind instance requires a preconfigured HAF database to store its data. You  can perform them with `install_app` command before starting the sync.
+4. Update haf docker in order to allow connecting to postgres DB. You can use for that case `lazydocker` for example - in that case run lazydocker, choose proper docker container and then press shift+e in order to enter container.
+Add to `/etc/postgresql/17/main/pg_hba.conf` these lines: (sudo may be needed)
+```
+host all all 0.0.0.0/0 trust
+local all all peer
+```
+then restart postgresql: `sudo /etc/init.d/postgresql restart` (if for some reason docker container shutdown, just repeat step 3 and this one)
 
-The commands below assume that the running HAF container has IP: 172.17.0.2
+Now HAF database is ready to apply hivemind part. You can explore DB inside container with: `PGOPTIONS='-c search_path=hafd' psql -U haf_admin -d haf_block_log`
 
-```bash
-# Set-up Database
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app \
-   --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
-
-# Run the sync
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync \
-   --database-url="postgresql://hivemind@172.17.0.2:5432/haf_block_log"
+5. Build hivemind image (assuming we run this cmd inside `workplace-hivemind` directory which is on the same level as `hivemind` directory):
+```
+../hivemind/scripts/ci-helpers/build_instance.sh local-hivemind-develop ../hivemind registry.gitlab.syncad.com/hive/hivemind
 ```
 
-## Updating from an existing hivemind database
-
-```bash
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app --upgrade-schema \
-   --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
+6. Install hivemind *with mocks* (test data):
+```
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop install_app --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" --with-reptracker --add-mocks="true"
 ```
 
-(where *user-name* is your database login name)
+you should see a lot of logs like: `INFO:hive.indexer.mocking.mock_block:OperationMock pushed successfully!` - it means mock data was applied.
 
-## Running
-
-Export the URL to your HAF database:
-
-```bash
-export DATABASE_URL=postgresql://hivemind_app:pass@localhost:5432/haf_block_log
+7. Install reputation tracker:
+```
+../hivemind/reputation_tracker/scripts/process_blocks.sh --stop-at-block=4999979 --postgres-url="postgresql://haf_admin@172.17.0.2/haf_block_log"
 ```
 
-### Start the hivemind indexer (aka synchronization process)
 
-```bash
-hive sync
+8. Begin sync process (it will take a while).
+Note - make sure that the mocks have been added correctly via: `SELECT num FROM hafd.blocks ORDER BY NUM DESC LIMIT 1;` - this query should return `5000024` - if you still have `5000000`, you need to repeat previous steps (uninstall hivemind app or remove db and recreate it).
+Start sync process with:
+```
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop sync --database-url="postgresql://hivemind@172.17.0.2:5432/haf_block_log" --community-start-block 4998000 --test-max-block=5000024
 ```
 
-```bash
-$ hive status
-{'db_head_block': 19930833, 'db_head_time': '2018-02-16 21:37:36', 'db_head_age': 10}
+9. Finish installing reputation tracker:
+```
+../hivemind/reputation_tracker/scripts/process_blocks.sh --stop-at-block=5000024 --postgres-url="postgresql://haf_admin@172.17.0.2/haf_block_log"
 ```
 
-### Start the hivemind API server
-
-```bash
-hive server
+After this 9 steps your local hivemind instance is ready for testing purposes.
+If you want to uninstall hivemind (you will need to repeat all hivemind install steps):
+```
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop uninstall_app --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log"
 ```
 
-```bash
-$ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}}' http://localhost:8080
-{"jsonrpc": "2.0", "result": {"db_head_block": 19930795, "db_head_time": "2018-02-16 21:35:42", "db_head_age": 10}, "id": 0}
+If you updated some sql files and want to reload sql queries etc:
+1. Build again hivemind docker image
+2. Run:
+```
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop install_app --upgrade-schema --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log"
 ```
 
 ## Tests
@@ -236,27 +200,37 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 To run api tests:
 
 1. Make sure that the current version of `hivemind` is installed,
-2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_024` blocks (including mocks).\
-   This means, you should have your HAF database replayed up to `5_000_000` mainnet blocks and run the mocking script with:
-
-    ```bash
-    cd hivemind/scripts/ci/
-    ./scripts/ci/add-mocks-to-db.sh --postgres-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL, assuming HAF is running on 172.17.0.2
-    ```
-
+2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_024` blocks (including mocks).
 3. Run `hivemind` in `server` mode
-4. Set env variables:
+  (you may need to uncomment `export PGRST_DB_ROOT_SPEC="home"` from `scripts/start_postgrest.sh`. Otherwise, empty jsons could be returned , because postgrest doesn't support jsonrpc and there must be a proxy which handles this problem)
+  We can launch postgrest server in two ways (from root directory of `hivemind` repo):
+  -via docker:
+  ```
+  ./scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop server --database-url="postgresql://hivemind@172.17.0.2:5432/haf_block_log" --http-server-port=8080
+  ```
+  - directly launching script:
+  `./scripts/start_postgrest.sh --host=172.17.0.2`
+4. Run test:
+While postgrest server is on, we can run all test cases from specific directory (again from root directory of `hivemind` repo):
+```
+./scripts/ci/start-api-smoketest.sh localhost 8080 follow_api_patterns result.xml 8
+```
+Which will launch all tests from `follow_api_patterns` directory.
 
-    ```bash
-    export HIVEMIND_PORT=8080
-    export HIVEMIND_ADDRESS=127.0.0.1
-    ```
+To run only one, specific test case:
+```
+./scripts/ci/start-api-smoketest.sh localhost 8080 condenser_api_patterns/get_blog/limit_0.tavern.yaml result.xml 8
+```
 
-5. Run tests using tox:
+You can also check response from database with:
+```
+select * from hivemind_endpoints.home('{"jsonrpc": "2.0", "id": 1, "method": "condenser_api.get_follow_count", "params": ["gtg"]}'::json);
+```
 
-    ```bash
-    tox -e tavern -- -n auto --durations=0
-    ```
+or via curl:
+```
+curl localhost:8080 --header "Content-Type: application/json" --data '{"id": "cagdbc1", "method": "condenser_api.get_follow_count", "params": ["gtg"], "jsonrpc": "2.0"}'
+```
 
 ## Configuration
 
