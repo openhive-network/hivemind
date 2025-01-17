@@ -115,10 +115,15 @@ class NewFollow(DbAdapterHolder):
 
         follower = op['follower']
         cls.unique_names.add(follower)
-        for following in op.get('following', []):
-            cls.items_to_flush.append((follower, following, op))
-            cls.unique_names.add(following)
+        action = op['action']
+        if action in [NewFollowAction.ResetBlacklist, NewFollowAction.ResetFollowingList, NewFollowAction.ResetMutedList, NewFollowAction.ResetFollowBlacklist, NewFollowAction.ResetFollowMutedList, NewFollowAction.ResetAllLists]:
+            cls.items_to_flush.append((follower, None, op))
             cls.idx += 1
+        else:
+            for following in op.get('following', []):
+                cls.items_to_flush.append((follower, following, op))
+                cls.unique_names.add(following)
+                cls.idx += 1
 
     @classmethod
     def flush(cls):
@@ -130,7 +135,7 @@ class NewFollow(DbAdapterHolder):
 
         cls.beginTx()
 
-        name_to_id_records = cls.db.query_all(f"""SELECT name, id FROM {SCHEMA_NAME}.hive_accounts WHERE name IN :names""", names=tuple(cls.unique_names))
+        name_to_id_records = cls.db.query_all(f"""SELECT name, id FROM {SCHEMA_NAME}.hive_accounts WHERE name IN :names""", names=tuple(cls.unique_names | set(['null'])))
         name_to_id = {record['name']: record['id'] for record in name_to_id_records}
 
         missing_accounts = cls.unique_names - set(name_to_id.keys())
@@ -141,6 +146,7 @@ class NewFollow(DbAdapterHolder):
             action = op['action']
             follower_id = name_to_id.get(follower)
             following_id = name_to_id.get(following)
+            null_id = name_to_id.get('null')
             if action == NewFollowAction.Follow:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
@@ -332,6 +338,17 @@ class NewFollow(DbAdapterHolder):
                     """,
                     follower_id=follower_id
                 )
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
+                    VALUES (:follower_id, :following_id, :block_num)
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """,
+                    follower_id=follower_id,
+                    following_id=null_id,
+                    block_num=op['block_num']
+                )
             elif action == NewFollowAction.ResetFollowBlacklist:
                 if not follower_id:
                     log.warning("Cannot reset follow blacklist records: missing ID for follower.")
@@ -342,6 +359,17 @@ class NewFollow(DbAdapterHolder):
                     WHERE follower=:follower_id
                     """,
                     follower_id=follower_id
+                )
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
+                    VALUES (:follower_id, :following_id, :block_num)
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """,
+                    follower_id=follower_id,
+                    following_id=null_id,
+                    block_num=op['block_num']
                 )
             elif action == NewFollowAction.ResetAllLists:
                 if not follower_id:
@@ -381,6 +409,28 @@ class NewFollow(DbAdapterHolder):
                     WHERE follower=:follower_id
                     """,
                     follower_id=follower_id
+                )
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
+                    VALUES (:follower_id, :following_id, :block_num)
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """,
+                    follower_id=follower_id,
+                    following_id=null_id,
+                    block_num=op['block_num']
+                )
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
+                    VALUES (:follower_id, :following_id, :block_num)
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """,
+                    follower_id=follower_id,
+                    following_id=null_id,
+                    block_num=op['block_num']
                 )
             else:
                 raise Exception(f"Invalid action {action}")
