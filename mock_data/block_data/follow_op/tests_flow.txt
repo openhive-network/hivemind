@@ -125,7 +125,6 @@ block 2050000, time 2016-06-04T17:54:00 and
 Tests for list resets. They first assign multiple flags/state to various pairs of accounts (x accounts as followers) - in the same or different packs of
 blocks - then they call list resets. Finally some tests set some flags again in the same block as reset to show that order of operations is preserved even
 though list reset and flag setting are executed in completely different ways.
-(3x, 8x and 9x already have relations to 'null' from previous tests, so they are not touched), X = 0x, 1x, 2x, 4x, 5x, 6x
     block 2070000, time 2016-06-05 10:37:48
 X0. 'blog' + 'follow_blacklist'
 X1. 'ignore' + 'blacklist'
