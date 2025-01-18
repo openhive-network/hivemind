@@ -28,4 +28,3 @@ WITH DATA
 ;
 
 CREATE UNIQUE INDEX IF NOT EXISTS payout_stats_view_ix1 ON hivemind_app.payout_stats_view (community_id, author );
-CREATE INDEX IF NOT EXISTS payout_stats_view_ix2 ON hivemind_app.payout_stats_view (community_id, author, payout);

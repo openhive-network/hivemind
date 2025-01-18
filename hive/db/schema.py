@@ -133,7 +133,6 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0")),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
-        sa.Index('hive_posts_payout_idx', 'payout'),
         sa.Index(
             'hive_posts_promoted_id_idx',
             'promoted',
@@ -160,8 +159,6 @@ def build_metadata():
 
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
-        sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
-        sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
         sa.Index(
             'hive_posts_payout_plus_pending_payout_id_idx',
             sa.text('(payout+pending_payout), id'),
@@ -279,7 +276,6 @@ def build_metadata():
         sa.Index('hive_follows_follower_state_idx', 'follower', 'state'),
         sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
-        sa.Index('hive_follows_created_at_idx', 'created_at'),
         sa.Index('hive_follows_follower_where_blacklisted_idx', 'follower', postgresql_where=sql_text('blacklisted')),
         sa.Index('hive_follows_follower_where_follow_muted_idx', 'follower', postgresql_where=sql_text('follow_muted')),
         sa.Index('hive_follows_follower_where_follow_blacklists_idx', 'follower', postgresql_where=sql_text('follow_blacklists')),
@@ -299,7 +295,6 @@ def build_metadata():
         sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'),  # core
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
-        sa.Index('hive_reblogs_created_at_idx', 'created_at'),
     )
 
     sa.Table(
@@ -319,7 +314,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3', deferrable=True, postgresql_not_valid=True),
         sa.Index('hive_payments_from', 'from_account'),
         sa.Index('hive_payments_to', 'to_account'),
-        sa.Index('hive_payments_post_id', 'post_id'),
     )
 
     sa.Table(
@@ -360,7 +354,6 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1', deferrable=True, postgresql_not_valid=True),
         sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.Index('hive_mentions_account_id_idx', 'account_id'),
         sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1'),
     )
 
@@ -445,11 +438,7 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('payload', sa.Text, nullable=True),
-        sa.Index('hive_notifs_ix1', 'dst_id', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")),
         sa.Index('hive_notifs_ix2', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")),
-        sa.Index(
-            'hive_notifs_ix3', 'community_id', 'type_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")
-        ),
         sa.Index(
             'hive_notifs_ix4',
             'community_id',
@@ -458,17 +447,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
             'id',
             postgresql_where=sql_text("community_id IS NOT NULL AND post_id IS NOT NULL"),
         ),
-        sa.Index(
-            'hive_notifs_ix5',
-            'post_id',
-            'type_id',
-            'dst_id',
-            'src_id',
-            postgresql_where=sql_text("post_id IS NOT NULL AND type_id IN (16,17)"),
-        ),  # filter: dedupe
-        sa.Index(
-            'hive_notifs_ix6', 'dst_id', 'created_at', 'score', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")
-        ),  # unread
     )
 
     sa.Table(
