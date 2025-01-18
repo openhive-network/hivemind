@@ -15,13 +15,12 @@ from hive.conf import (
   ,SCHEMA_OWNER_NAME
   ,ONE_WEEK_IN_BLOCKS
   ,REPTRACKER_SCHEMA_NAME
-  ,SWAGGER_URL
   )
 
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
-from hive.utils.payout_stats import PayoutStats
+from hive.server.common.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
 from hive.utils.stats import FinalOperationStatusManager as FOSM
@@ -69,7 +68,6 @@ class DbState:
             log.info("Database schema upgrade finished")
 
         db_setup_owner.query_no_return( f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}" )
-        db_setup_owner.query_no_return( f"SET custom.swagger_url = '{SWAGGER_URL}'" )
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()
@@ -111,6 +109,13 @@ class DbState:
             'hive_feed_cache_created_at_idx',
             'hive_feed_cache_post_id_idx',
             'hive_feed_cache_account_id_created_at_post_id_idx',
+            'hive_follows_following_state_id_idx',  # (following, state, id)
+            'hive_follows_follower_state_idx',  # (follower, state, created_at, following)
+            'hive_follows_follower_following_state_idx',
+            'hive_follows_block_num_idx',
+            'hive_follows_follower_where_blacklisted_idx',
+            'hive_follows_follower_where_follow_muted_idx',
+            'hive_follows_follower_where_follow_blacklists_idx',
             'hive_posts_parent_id_id_idx',
             'hive_posts_depth_idx',
             'hive_posts_root_id_id_idx',
@@ -119,8 +124,10 @@ class DbState:
             'hive_posts_community_id_not_is_pinned_idx',
             'hive_posts_community_id_not_is_paidout_idx',
             'hive_posts_payout_at_idx',
+            'hive_posts_promoted_id_idx',
             'hive_posts_sc_trend_id_idx',
             'hive_posts_sc_hot_id_idx',
+            'hive_posts_block_num_idx',
             'hive_posts_block_num_created_idx',
             'hive_posts_payout_plus_pending_payout_id_idx',
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
@@ -134,17 +141,6 @@ class DbState:
             'hive_votes_post_id_voter_id_idx',
             'hive_notification_cache_block_num_idx',
             'hive_notification_cache_dst_score_idx',
-            'follows_following_idx',
-            'muted_following_idx',
-            'blacklisted_following_idx',
-            'follow_muted_following_idx',
-            'follow_blacklisted_following_idx',
-            'follows_block_num_idx',
-            'muted_block_num_idx',
-            'blacklisted_block_num_idx',
-            'follow_muted_block_num_idx',
-            'follow_blacklisted_block_num_idx',
-            'hive_post_data_bm25_idx',
         ]
 
         to_return = {}
@@ -341,13 +337,10 @@ class DbState:
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled= False
-    @classmethod
-    def are_indexes_enabled(cls):
-        return cls._indexes_were_enabled
 
     @classmethod
     def ensure_indexes_are_enabled(cls):
-        if cls.are_indexes_enabled():
+        if cls._indexes_were_enabled:
             return
 
         start_time = perf_counter()
@@ -382,6 +375,12 @@ class DbState:
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
+            # UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.update_posts_rshares({last_imported_block}, {current_imported_block});"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql, explain=True)
+            log.info("[MASSIVE] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
+
             time_start = perf_counter()
 
             # UPDATE: `children`
@@ -412,6 +411,14 @@ class DbState:
             log.info("[MASSIVE] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
+        with AutoDbDisposer(db, "finish_hive_mentions") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            log.info("[MASSIVE] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def _finish_payout_stats_view(cls, db):
         with AutoDbDisposer(db, "finish_payout_stats_view") as db_mgr:
             time_start = perf_counter()
@@ -437,9 +444,17 @@ class DbState:
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
-            sql = f"CALL {SCHEMA_NAME}.clear_muted_notifications();"
+            sql = f"SELECT {SCHEMA_NAME}.update_notification_cache(NULL, NULL, False);"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_notification_cache executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
+    def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
+        with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.update_follow_count({last_imported_block}, {current_imported_block});"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            log.info("[MASSIVE] update_follow_count executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def time_collector(cls, func, args):
@@ -478,6 +493,7 @@ class DbState:
 
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
+            ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
             (
@@ -495,6 +511,7 @@ class DbState:
 
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
+            ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
@@ -515,7 +532,7 @@ class DbState:
         def vacuum_table(table, db):
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
-                if (table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data"):
+                if (table == f"{SCHEMA_NAME}.hive_posts"):
                     db_mgr.db.get_connection(0).execute("VACUUM (FULL, VERBOSE,ANALYZE) " + table)
                 else:
                     db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
@@ -558,7 +575,6 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
 
             if is_initial_massive:
                 cls.vacuum_tables_in_threads([
-                        f"{SCHEMA_NAME}.hive_posts",
                         f"{SCHEMA_NAME}.hive_feed_cache",
                         f"{SCHEMA_NAME}.hive_mentions",
                         f"{SCHEMA_NAME}.hive_communities",
