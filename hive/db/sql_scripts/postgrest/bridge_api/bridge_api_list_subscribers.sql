@@ -37,14 +37,13 @@ BEGIN
             COALESCE(hr.title, NULL) AS title,
             hivemind_postgrest_utilities.json_date(hs.created_at) AS created_at
           FROM hivemind_app.hive_subscriptions hs
+          LEFT JOIN hivemind_app.hive_roles hr ON hs.account_id = hr.account_id
+               AND hs.community_id = hr.community_id
           JOIN hivemind_app.hive_accounts ha ON hs.account_id = ha.id
-          LEFT JOIN hivemind_app.hive_roles hr ON hs.account_id = hr.account_id AND hs.community_id = hr.community_id
-          WHERE
-            hs.community_id = _community_id
-            AND NOT (_subscription_id <> 0 AND hs.id >= _subscription_id)
+          WHERE hs.community_id = _community_id AND (_subscription_id = 0 OR (hs.id < _subscription_id))
           ORDER BY ha.name ASC
           LIMIT _limit
-        ) row
+       ) row
       ),
       '[]'::JSONB
     );
