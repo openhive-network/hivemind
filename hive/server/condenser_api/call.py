@@ -19,7 +19,6 @@ from hive.server.condenser_api.methods import (
     get_discussions_by_created,
     get_discussions_by_feed,
     get_discussions_by_hot,
-    get_discussions_by_promoted,
     get_discussions_by_trending,
     get_follow_count,
     get_followers,
@@ -129,8 +128,6 @@ async def call(context, api, method, params):
         return await get_discussions_by_trending(context, **_strict_query(params))
     elif method == 'get_discussions_by_hot':
         return await get_discussions_by_hot(context, **_strict_query(params))
-    elif method == 'get_discussions_by_promoted':
-        return []
     elif method == 'get_discussions_by_created':
         return await get_discussions_by_created(context, **_strict_query(params))
     elif method == 'get_post_discussions_by_payout':

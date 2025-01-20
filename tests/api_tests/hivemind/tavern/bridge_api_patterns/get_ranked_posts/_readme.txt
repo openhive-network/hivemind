@@ -10,7 +10,6 @@ params:
        "trending" - [if tag is community pinned posts first], top posts with highest trending score first; paging cuts out given and more trending posts
        "hot" - top posts with highest hot score first; paging cuts out given and hotter posts
        "created" - [if tag is community pinned posts first], newest top posts first (grayed out not considered); paging cuts out given and newer posts
-       "promoted" - promoted posts with highest promotion fund first; paging cuts out given and more promoted posts
        "payout" - only posts that will cashout between 12 and 36 hours from head block are considered, posts with higher pending payout first; paging cuts out given and higher payout posts
        "payout_comments" - only replies are considered, posts with higher pending payout first; paging cuts out given and higher payout posts
        "muted" - grayed out posts that are to receive nonzero payout are considered, posts with higher pending payout first; paging cuts out given and higher payout posts

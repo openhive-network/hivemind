@@ -9,7 +9,6 @@ from hive.server.condenser_api.methods import (
     get_content_replies,
     get_discussions_by_trending,
     get_discussions_by_hot,
-    get_discussions_by_promoted,
     get_discussions_by_created,
     get_discussions_by_blog,
     get_discussions_by_feed,
@@ -65,12 +64,6 @@ async def test_get_discussions_by_trending():
 @pytest.mark.asyncio
 async def test_get_discussions_by_hot():
     assert await get_discussions_by_hot(start_author='', start_permlink='', limit=20, tag='', truncate_body=0)
-
-
-@pytest.mark.asyncio
-async def test_get_discussions_by_promoted():
-    assert await get_discussions_by_promoted(start_author='', start_permlink='', limit=20, tag='', truncate_body=0)
-
 
 @pytest.mark.asyncio
 async def test_get_discussions_by_created():

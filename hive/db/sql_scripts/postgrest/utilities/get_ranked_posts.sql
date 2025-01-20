@@ -1,5 +1,5 @@
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.ranked_post_sort_type CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'promoted', 'created', 'muted', 'payout', 'payout_comments');
+CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'created', 'muted', 'payout', 'payout_comments');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_ranked_posts_for_communities;
 CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type)
@@ -94,7 +94,6 @@ BEGIN
       WHEN 'trending' THEN _result = _result || hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
       WHEN 'hot' THEN _result = _result || hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
       WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'promoted' THEN _result = _result; -- promoted is deprecated but we still want to support the query
       WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
       WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
       WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);

@@ -314,13 +314,6 @@ async def get_discussions_by_hot(
         context, 'hot', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer
     )
 
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by_promoted():
-    return []
-
-
 @return_error_info
 @nested_query_compat
 async def get_post_discussions_by_payout(

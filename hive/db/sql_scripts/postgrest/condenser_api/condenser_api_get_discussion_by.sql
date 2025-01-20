@@ -72,8 +72,6 @@ BEGIN
       ELSE
         RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, _truncate_body, _tag, False);
       END IF;
-    WHEN _case = 'promoted' THEN
-      RETURN '[]'::jsonb; -- promoted is deprecated but we still want to support the api
     WHEN _case = 'payout' THEN
       IF _tag IS NULL OR _tag = '' THEN
         RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, _truncate_body, False);

@@ -159,7 +159,7 @@ def valid_sort(sort, allow_empty=False):
         return ""
     assert isinstance(sort, str), 'sort must be a string'
     # TODO: differentiate valid sorts on comm vs tag
-    valid_sorts = ['trending', 'promoted', 'hot', 'created', 'payout', 'payout_comments', 'muted']
+    valid_sorts = ['trending', 'hot', 'created', 'payout', 'payout_comments', 'muted']
     assert sort in valid_sorts, f'invalid sort `{sort}`'
     return sort
 
