@@ -52,7 +52,7 @@ BEGIN
       WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_all_trending_ranked_posts(_post_id, _observer_id, _limit, 0, True);
       WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_all_hot_ranked_posts(_post_id, _observer_id, _limit, 0, True);
       WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_all_created_ranked_posts(_post_id, _observer_id, _limit, 0, True);
-      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_all_promoted_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'promoted' THEN RETURN '[]'::jsonb; -- promoted is deprecated but we still want to support the api
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, 0, True);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit, 0, True);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_all_muted_ranked_posts(_post_id, _observer_id, _limit);
@@ -62,7 +62,7 @@ BEGIN
       WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
       WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
       WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
-      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_promoted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
+      WHEN 'promoted' THEN RETURN '[]'::jsonb; -- promoted is deprecated but we still want to support the api
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
@@ -74,7 +74,7 @@ BEGIN
       WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
       WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
       WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
-      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'promoted' THEN RETURN '[]'::jsonb; -- promoted is deprecated but we still want to support the api
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);

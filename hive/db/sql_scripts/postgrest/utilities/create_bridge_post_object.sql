@@ -66,7 +66,6 @@ BEGIN
               'flag_weight', ROUND(GREATEST((LENGTH(FLOOR((FLOOR((_row.rshares - _row.abs_rshares) / 2)) / 2)::TEXT) - 11), 0.0), 2)
             ),
     'payout', (_row.payout + _row.pending_payout),
-    'promoted', _row.promoted || ' HBD',
     'author_reputation', _tmp_amount,
     'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
                     'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),

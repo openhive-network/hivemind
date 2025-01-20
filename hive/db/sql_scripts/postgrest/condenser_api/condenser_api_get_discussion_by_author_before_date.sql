@@ -72,7 +72,7 @@ BEGIN
         hp.body,
         hp.category,
         hp.depth,
-          hp.payout,
+        hp.payout,
         hp.pending_payout,
         hp.payout_at,
         hp.is_paidout,

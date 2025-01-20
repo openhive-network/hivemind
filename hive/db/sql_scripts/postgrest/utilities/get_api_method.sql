@@ -48,7 +48,7 @@ BEGIN
     WHEN __method_type = 'get_discussions_by_hot' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'hot'::hivemind_postgrest_utilities.ranked_post_sort_type);
     WHEN __method_type = 'get_discussions_by_promoted' THEN
-      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'promoted'::hivemind_postgrest_utilities.ranked_post_sort_type);
+      result := '[]'::jsonb; -- promoted is deprecated but we still want to support the api
     WHEN __method_type = 'get_discussions_by_trending' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'trending'::hivemind_postgrest_utilities.ranked_post_sort_type);
     WHEN __method_type = 'get_post_discussions_by_payout' THEN
@@ -192,7 +192,7 @@ BEGIN
     WHEN __method_type = 'get_discussions_by_hot' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'hot'::hivemind_postgrest_utilities.ranked_post_sort_type);
     WHEN __method_type = 'get_discussions_by_promoted' THEN
-      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'promoted'::hivemind_postgrest_utilities.ranked_post_sort_type);
+      result := '[]'::jsonb; -- promoted is deprecated but we still want to support the api
     WHEN __method_type = 'get_discussions_by_trending' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by(__params, 'trending'::hivemind_postgrest_utilities.ranked_post_sort_type);
     WHEN __method_type = 'get_post_discussions_by_payout' THEN
