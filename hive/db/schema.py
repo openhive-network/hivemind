@@ -65,7 +65,6 @@ def build_metadata():
         sa.Column('is_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('muted_reasons', sa.Integer, nullable=False, server_default='0'),
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('children', sa.Integer, nullable=False, server_default='0'),
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
@@ -133,12 +132,6 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0")),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
-        sa.Index(
-            'hive_posts_promoted_id_idx',
-            'promoted',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        ),
         sa.Index(
             'hive_posts_sc_trend_id_idx',
             'sc_trend',

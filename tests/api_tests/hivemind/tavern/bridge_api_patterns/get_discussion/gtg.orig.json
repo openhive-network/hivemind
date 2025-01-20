@@ -28,8 +28,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-gtg-missing-rewards-while-mining-20160821t125207685z",
     "post_id": 693858,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -181,8 +180,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "missing-rewards-while-mining",
     "post_id": 693716,
-    "promoted": "0.000 HBD",
-    "replies": [
+        "replies": [
       "gary-smith/re-gtg-missing-rewards-while-mining-20160821t125207685z",
       "gtg/re-gtg-missing-rewards-while-mining-20160821t131242531z",
       "timcliff/re-gtg-missing-rewards-while-mining-20160827t141319137z"
@@ -230,8 +228,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-gtg-missing-rewards-while-mining-20160821t131242531z",
     "post_id": 693986,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -275,8 +272,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z",
     "post_id": 767496,
-    "promoted": "0.000 HBD",
-    "replies": [
+        "replies": [
       "timcliff/re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z"
     ],
     "reblogs": 0,
@@ -319,8 +315,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-timcliff-re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t183943508z",
     "post_id": 769396,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -361,8 +356,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-gtg-missing-rewards-while-mining-20160827t141319137z",
     "post_id": 766749,
-    "promoted": "0.000 HBD",
-    "replies": [
+        "replies": [
       "gtg/re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z"
     ],
     "reblogs": 0,
@@ -405,8 +399,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z",
     "post_id": 767624,
-    "promoted": "0.000 HBD",
-    "replies": [
+        "replies": [
       "gtg/re-timcliff-re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t183943508z"
     ],
     "reblogs": 0,

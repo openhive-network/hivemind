@@ -22,8 +22,7 @@
     "percent_hbd": 10000,
     "permlink": "ismember-hive-111119-changed-type-3",
     "post_id": 1258127,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
+        "reblogs": 0,
     "replies": [
       "ismember/re-ismember-hive-111119-changed-type-3",
       "notmember/re-2-ismember-hive-111119-changed-type-3"
@@ -63,8 +62,7 @@
     "percent_hbd": 10000,
     "permlink": "re-ismember-hive-111119-changed-type-3",
     "post_id": 1258129,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
+        "reblogs": 0,
     "replies": [
       "ismember/re-re-ismember-hive-111119-changed-type-3"
     ],
@@ -103,8 +101,7 @@
     "percent_hbd": 10000,
     "permlink": "re-re-ismember-hive-111119-changed-type-3",
     "post_id": 1258130,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
+        "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -141,8 +138,7 @@
     "percent_hbd": 10000,
     "permlink": "re-2-ismember-hive-111119-changed-type-3",
     "post_id": 1258131,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
+        "reblogs": 0,
     "replies": [
       "notmember/re-re-2-ismember-hive-111119-changed-type-3"
     ],
@@ -184,8 +180,7 @@
     "percent_hbd": 10000,
     "permlink": "re-re-2-ismember-hive-111119-changed-type-3",
     "post_id": 1258132,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
+        "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

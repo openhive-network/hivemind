@@ -50,7 +50,6 @@ BEGIN
     hp.body,
     hp.category,
     hp.depth,
-    hp.promoted,
     hp.payout,
     hp.pending_payout,
     hp.payout_at,
@@ -126,7 +125,6 @@ BEGIN
       hp.body,
       hp.category,
       hp.depth,
-      hp.promoted,
       hp.payout,
       hp.pending_payout,
       hp.payout_at,
@@ -205,7 +203,6 @@ SELECT
       hp.body,
       hp.category,
       hp.depth,
-      hp.promoted,
       hp.payout,
       hp.pending_payout,
       hp.payout_at,
@@ -287,7 +284,6 @@ BEGIN
       hp.body,
       hp.category,
       hp.depth,
-      hp.promoted,
       hp.payout,
       hp.pending_payout,
       hp.payout_at,
@@ -314,84 +310,6 @@ BEGIN
   FROM payout,
   LATERAL hivemind_app.get_full_post_view_by_id(payout.id, __observer_id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
-  LIMIT _limit;
-END
-$function$
-language plpgsql STABLE;
-
-DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_promoted_for_observer_communities;
-CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_promoted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF hivemind_app.bridge_api_post
-AS
-$function$
-DECLARE
-  __post_id INT;
-  __promoted_limit hivemind_app.hive_posts.promoted%TYPE;
-  __observer_id INT;
-BEGIN
-  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
-  IF __post_id <> 0 THEN
-      SELECT hp.promoted INTO __promoted_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
-  END IF;
-  __observer_id = hivemind_app.find_account_id( _observer, True );
-  RETURN QUERY
-  WITH promoted AS MATERIALIZED -- bridge_get_ranked_post_by_promoted_for_observer_communities
-  (
-    SELECT
-      hp.id
-    FROM hivemind_app.live_posts_view hp
-    JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-    WHERE hs.account_id = __observer_id
-      AND NOT hp.is_paidout
-      AND hp.promoted > 0
-      AND ( __post_id = 0 OR hp.promoted < __promoted_limit OR ( hp.promoted = __promoted_limit AND hp.id < __post_id ) )
-      AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
-    ORDER BY hp.promoted DESC, hp.id DESC
-    LIMIT _limit
-  )
-  SELECT
-      hp.id,
-      hp.author,
-      hp.parent_author,
-      hp.author_rep,
-      hp.root_title,
-      hp.beneficiaries,
-      hp.max_accepted_payout,
-      hp.percent_hbd,
-      hp.url,
-      hp.permlink,
-      hp.parent_permlink_or_category,
-      hp.title,
-      hp.body,
-      hp.category,
-      hp.depth,
-      hp.promoted,
-      hp.payout,
-      hp.pending_payout,
-      hp.payout_at,
-      hp.is_paidout,
-      hp.children,
-      hp.votes,
-      hp.created_at,
-      hp.updated_at,
-      hp.rshares,
-      hp.abs_rshares,
-      hp.json,
-      hp.is_hidden,
-      hp.is_grayed,
-      hp.total_votes,
-      hp.sc_trend,
-      hp.role_title,
-      hp.community_title,
-      hp.role_id,
-      hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted,
-      hp.source,
-      hp.muted_reasons
-  FROM promoted,
-  LATERAL hivemind_app.get_full_post_view_by_id(promoted.id, __observer_id) hp
-  ORDER BY hp.promoted DESC, hp.id DESC
   LIMIT _limit;
 END
 $function$
@@ -444,7 +362,6 @@ BEGIN
       hp.body,
       hp.category,
       hp.depth,
-      hp.promoted,
       hp.payout,
       hp.pending_payout,
       hp.payout_at,
@@ -525,7 +442,6 @@ BEGIN
       hp.body,
       hp.category,
       hp.depth,
-      hp.promoted,
       hp.payout,
       hp.pending_payout,
       hp.payout_at,

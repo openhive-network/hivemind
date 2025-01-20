@@ -79,7 +79,6 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
     post['curator_payout_value'] = _amount(0)
 
     post['pending_payout_value'] = _amount(0 if paid else full_payout)
-    post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
     post['body_length'] = len(row['body'])

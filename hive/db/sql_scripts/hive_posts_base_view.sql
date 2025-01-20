@@ -26,7 +26,6 @@ CREATE OR REPLACE VIEW hivemind_app.hive_posts_pp_view
     hp.author_id,
     hp.category_id,
     hp.depth,
-    hp.promoted,
     hp.payout,
     hp.pending_payout,
     hp.payout_at,

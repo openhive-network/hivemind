@@ -95,8 +95,7 @@ async def _get_ranked_posts_for_observer_communities(
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
-        return await execute_observer_community_query(db, sql, limit)
+        return []
 
     if sort == 'payout':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
@@ -138,8 +137,7 @@ async def _get_ranked_posts_for_communities(
         return result_with_pinned_posts
 
     if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_community_query(db, sql, limit)
+        return []
 
     if sort == 'created':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
@@ -176,8 +174,7 @@ async def _get_ranked_posts_for_tag(db, sort: str, tag, start_author: str, start
         return await execute_tags_query(db, sql)
 
     if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql)
+        return []
 
     if sort == 'payout':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
@@ -220,8 +217,7 @@ async def _get_ranked_posts_for_all(db, sort: str, start_author: str, start_perm
         return await execute_query(db, sql)
 
     if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql)
+        return []
 
     if sort == 'payout':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"

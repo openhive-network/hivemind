@@ -28,8 +28,7 @@
     "percent_hbd": 10000,
     "permlink": "after-member-comment-to-please-comment-hive1",
     "post_id": 1256964,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -70,8 +69,7 @@
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive1",
     "post_id": 1256914,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -112,8 +110,7 @@
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive1",
     "post_id": 1256871,
-    "promoted": "0.000 HBD",
-    "replies": [],
+        "replies": [],
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
@@ -152,8 +149,7 @@
     "percent_hbd": 10000,
     "permlink": "please-comment-hive1",
     "post_id": 1256855,
-    "promoted": "0.000 HBD",
-    "replies": [
+        "replies": [
       "alice/comment-to-please-comment-hive1",
       "alice/after-muted-comment-to-please-comment-hive1",
       "alice/after-member-comment-to-please-comment-hive1"

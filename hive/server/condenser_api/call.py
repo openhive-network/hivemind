@@ -130,7 +130,7 @@ async def call(context, api, method, params):
     elif method == 'get_discussions_by_hot':
         return await get_discussions_by_hot(context, **_strict_query(params))
     elif method == 'get_discussions_by_promoted':
-        return await get_discussions_by_promoted(context, **_strict_query(params))
+        return []
     elif method == 'get_discussions_by_created':
         return await get_discussions_by_created(context, **_strict_query(params))
     elif method == 'get_post_discussions_by_payout':
