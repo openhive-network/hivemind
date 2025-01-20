@@ -25,7 +25,7 @@
       "percent_hbd": 10000,
       "permlink": "test-116-05-8d",
       "post_id": 1252764,
-            "replies": [],
+    "replies": [
       "root_title": "Test post from test-116-05",
       "title": "Test post from test-116-05",
       "total_payout_value": "0.000 HBD",
@@ -60,7 +60,7 @@
       "percent_hbd": 10000,
       "permlink": "test-116-05-8c",
       "post_id": 1252763,
-            "replies": [],
+    "replies": [
       "root_title": "Test post from test-116-05",
       "title": "Test post from test-116-05",
       "total_payout_value": "0.000 HBD",
@@ -95,7 +95,7 @@
       "percent_hbd": 10000,
       "permlink": "test-116-04-6",
       "post_id": 1252758,
-            "replies": [],
+    "replies": [
       "root_title": "Test post from test-116-04",
       "title": "Test post from test-116-04",
       "total_payout_value": "0.000 HBD",
@@ -130,7 +130,7 @@
       "percent_hbd": 10000,
       "permlink": "test-116-04-2b",
       "post_id": 1252757,
-            "replies": [],
+      "replies": [],
       "root_title": "Test post from test-116-04",
       "title": "Test post from test-116-04",
       "total_payout_value": "0.000 HBD",
