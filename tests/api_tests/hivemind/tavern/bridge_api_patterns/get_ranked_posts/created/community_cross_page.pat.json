@@ -26,7 +26,7 @@
     "percent_hbd": 10000,
     "permlink": "pinpost2",
     "post_id": 1256939,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -71,7 +71,7 @@
     "percent_hbd": 10000,
     "permlink": "pinpost1",
     "post_id": 1256938,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -111,7 +111,7 @@
     "percent_hbd": 10000,
     "permlink": "pinned-post",
     "post_id": 1256937,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -156,7 +156,7 @@
     "percent_hbd": 10000,
     "permlink": "regular-post",
     "post_id": 1256969,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -200,7 +200,7 @@
     "percent_hbd": 10000,
     "permlink": "regular-post",
     "post_id": 1256964,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -244,7 +244,7 @@
     "percent_hbd": 10000,
     "permlink": "crocodile01",
     "post_id": 1256962,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -291,7 +291,7 @@
     "percent_hbd": 10000,
     "permlink": "nonpinpost3",
     "post_id": 1256952,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -330,7 +330,7 @@
     "percent_hbd": 10000,
     "permlink": "nonpinpost2",
     "post_id": 1256943,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -374,7 +374,7 @@
     "percent_hbd": 10000,
     "permlink": "nonpinpost1",
     "post_id": 1256940,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -413,7 +413,7 @@
     "percent_hbd": 10000,
     "permlink": "muted-post",
     "post_id": 1256936,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

@@ -31,7 +31,7 @@
     "percent_hbd": 10000,
     "permlink": "regular-post",
     "post_id": 1256964,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -70,7 +70,7 @@
     "percent_hbd": 10000,
     "permlink": "nonpinpost2",
     "post_id": 1256943,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -109,7 +109,7 @@
     "percent_hbd": 10000,
     "permlink": "muted-post",
     "post_id": 1256936,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -190,7 +190,7 @@
     "percent_hbd": 10000,
     "permlink": "first-post",
     "post_id": 1256934,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -229,7 +229,7 @@
     "percent_hbd": 10000,
     "permlink": "secrets2",
     "post_id": 1256845,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -268,7 +268,7 @@
     "percent_hbd": 10000,
     "permlink": "secrets1",
     "post_id": 1256844,
-        "reblogs": 0,
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
