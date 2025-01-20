@@ -65,7 +65,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "firstpost",
     "post_id": 2,
-        "replies": [
+    "replies": [
       "kingtylervvs/re-admin-firstpost-20160717t193811098z",
       "gopher/re-admin-firstpost-20160718t195306992z"
     ],
@@ -589,7 +589,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-steemit-firstpost-20160718t195806340z",
     "post_id": 125794,
-        "replies": [
+    "replies": [
       "steemuwe/re-gopher-re-steemit-firstpost-20160720t183548381z"
     ],
     "reblogs": 0,
@@ -691,7 +691,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t053330322z",
     "post_id": 173797,
-        "replies": [
+    "replies": [
       "kewpiedoll/re-intelliguy-re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t140220709z"
     ],
     "reblogs": 0,
@@ -734,7 +734,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-kewpiedoll-re-steemit-firstpost-20160720t215823622z",
     "post_id": 167552,
-        "replies": [
+    "replies": [
       "kewpiedoll/re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t052821990z"
     ],
     "reblogs": 0,
@@ -1105,7 +1105,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t052821990z",
     "post_id": 173754,
-        "replies": [
+    "replies": [
       "intelliguy/re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t053330322z"
     ],
     "reblogs": 0,
@@ -1164,7 +1164,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-steemit-firstpost-20160720t210201326z",
     "post_id": 166558,
-        "replies": [
+    "replies": [
       "intelliguy/re-kewpiedoll-re-steemit-firstpost-20160720t215823622z"
     ],
     "reblogs": 0,
@@ -1275,7 +1275,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "re-steemit-firstpost-20160720t121101482z",
     "post_id": 157998,
-        "replies": [
+    "replies": [
       "yonuts/re-kingtylervvs-re-steemit-firstpost-20160729t180621248z"
     ],
     "reblogs": 0,
@@ -1520,7 +1520,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "steemit-firstpost-2",
     "post_id": 4,
-        "replies": [
+    "replies": [
       "steem-id/re-red-steemit-firstpost-2",
       "business/re-red-steemit-firstpost-2-20160713t083846149z"
     ],
@@ -2153,7 +2153,7 @@
     "percent_steem_dollars": 10000,
     "permlink": "firstpost",
     "post_id": 1,
-        "replies": [
+    "replies": [
       "admin/firstpost",
       "proskynneo/steemit-firstpost-1",
       "red/steemit-firstpost-2",
