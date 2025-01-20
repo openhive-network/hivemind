@@ -297,25 +297,6 @@ def build_metadata():
     )
 
     sa.Table(
-        'hive_payments',
-        metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('tx_idx', SMALLINT, nullable=False),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('from_account', sa.Integer, nullable=False),
-        sa.Column('to_account', sa.Integer, nullable=False),
-        sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
-        sa.Column('token', VARCHAR(5), nullable=False),
-        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3', deferrable=True, postgresql_not_valid=True),
-        sa.Index('hive_payments_from', 'from_account'),
-        sa.Index('hive_payments_to', 'to_account'),
-    )
-
-    sa.Table(
         'hive_feed_cache',
         metadata,
         sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
@@ -826,7 +807,6 @@ def reset_autovac(db):
         'hive_follows': (5000, 5000),
         'hive_feed_cache': (5000, 5000),
         'hive_reblogs': (5000, 5000),
-        'hive_payments': (5000, 5000),
     }
 
     for table, (n_vacuum, n_analyze) in autovac_config.items():
