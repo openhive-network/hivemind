@@ -119,7 +119,7 @@ POST_2 = {
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "june-spam",
-        "reblogged_by": [],
+    "reblogged_by": [],
     "replies": [],
     "reblogs": 0,
     "reward_weight": 10000,

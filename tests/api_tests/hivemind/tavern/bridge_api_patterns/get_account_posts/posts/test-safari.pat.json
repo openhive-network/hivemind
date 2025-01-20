@@ -22,7 +22,7 @@
     "percent_hbd": 10000,
     "permlink": "reblogged-and-recreated",
     "post_id": 1256897,
-        "reblogs": 1,
+    "reblogs": 1,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -454,7 +454,7 @@
     "percent_hbd": 10000,
     "permlink": "reblogged-and-edited",
     "post_id": 1256859,
-        "reblogs": 1,
+    "reblogs": 1,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

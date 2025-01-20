@@ -465,7 +465,7 @@
     "percent_hbd": 10000,
     "permlink": "firstpost",
     "post_id": 1,
-        "reblogs": 1,
+    "reblogs": 1,
     "replies": [],
     "stats": {
       "flag_weight": 2.0,
