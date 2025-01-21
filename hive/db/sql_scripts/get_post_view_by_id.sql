@@ -181,25 +181,24 @@ BEGIN
         RETURN QUERY
         WITH blacklisters AS MATERIALIZED  --all blacklists followed by account
         (
-          SELECT following as id FROM hivemind_app.hive_follows WHERE follow_blacklists AND follower = _observer_id -- hive_follows_follower_where_follow_blacklists_idx
+          SELECT following AS id FROM hivemind_app.follow_blacklisted WHERE follower = _observer_id -- follows_follower_idx
         ),
         indirects AS MATERIALIZED             -- get all indirectly blacklisted accounts with the ids of their sources
         (
           SELECT blacklister_follows.following AS blacklisted_id,
                  blacklister_follows.follower AS blacklister_id
           FROM blacklisters
-          JOIN hivemind_app.hive_follows blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
-          WHERE blacklister_follows.blacklisted  --hive_follows_follower_where_blacklisted_idx
+          JOIN hivemind_app.blacklisted AS blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
         )
         SELECT following AS blacklisted_id,        -- directly blacklisted accounts
                'my blacklist'::text AS source
-        FROM hivemind_app.hive_follows
-        WHERE hive_follows.blacklisted AND hive_follows.follower = _observer_id  --hive_follows_follower_where_blacklisted_idx
+        FROM hivemind_app.blacklisted
+        WHERE blacklisted.follower = _observer_id  -- blacklisted_follower_idx
         UNION ALL
         SELECT indirects.blacklisted_id AS blacklisted_id,                       -- collapse duplicate indirectly blacklisted accounts and aggreagate their sources
                string_agg('blacklisted by '::text || blacklister_accounts.name::text, ','::text ORDER BY blacklister_accounts.name) AS source
         FROM indirects
-        JOIN hivemind_app.hive_accounts blacklister_accounts ON blacklister_accounts.id = indirects.blacklister_id    -- need this to get name of blacklister, use hive_accounts_ux1
+        JOIN hivemind_app.hive_accounts AS blacklister_accounts ON blacklister_accounts.id = indirects.blacklister_id    -- need this to get name of blacklister, use hive_accounts_ux1
         GROUP BY indirects.blacklisted_id;
     END IF;
 END;
