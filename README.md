@@ -195,6 +195,48 @@ If you updated some sql files and want to reload sql queries etc:
 ../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local-hivemind-develop install_app --upgrade-schema --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log"
 ```
 
+## Rewriter
+Nginx acts as a rewriter, redirecting all JSON-RPC 2.0 calls to the `/rpc/home` endpoint to maintain compatibility with 
+the previous system version. The recently introduced PostgREST supports REST API, while legacy JSON-RPC calls must still
+be handled. Nginx ensures that incoming JSON-RPC requests are rewritten as parameters to the REST `/rpc/home/` endpoint.
+There are plans to introduce a proper REST API for Hivemind in the future.
+
+Using the rule:
+
+```log
+rewrite ^/(.*)$ /rpc/home break;
+```
+All URLs are rewritten to `/rpc/home`, where further request processing takes place, including the conversion from
+JSON-RPC to SQL queries.
+
+This section describes how to build and run the Nginx container, which serves as a URL rewriter for JSON-RPC calls.
+
+1. Build the Docker image
+```bash
+  docker build -t hivemind-nginx-rewriter .
+````
+
+2. Run the container
+```bash
+  docker run -d --name hivemind-nginx-rewriter -p 80:80 hivemind-nginx
+```
+
+3. Configuration Files
+
+The container uses the following configuration files:
+```log
+    nginx.conf.template – the main Nginx configuration.
+    rewrite_rules.conf – contains the rewrite rules.
+    rewriter_entrypoint.sh – the entrypoint script executed when the container starts.
+```
+These files are copied into the container at build time.
+
+4. Stopping the container
+```bash
+  docker stop hivemind-nginx
+```
+
+
 ## Tests
 
 To run api tests:
