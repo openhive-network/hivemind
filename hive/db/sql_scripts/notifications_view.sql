@@ -48,7 +48,6 @@ AS $BODY$
 $BODY$;
 
 DROP FUNCTION IF EXISTS hivemind_app.notification_id CASCADE;
-;
 CREATE OR REPLACE FUNCTION hivemind_app.notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
 RETURNS BIGINT
 AS
@@ -117,22 +116,21 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
            FROM hivemind_app.hive_posts_pp_view hpv
                   WHERE hpv.depth > 0 AND
                         NOT EXISTS (SELECT NULL::text
-                                    FROM hivemind_app.hive_follows hf
-                                    WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
+                                    FROM hivemind_app.muted AS m
+                                    WHERE m.follower = hpv.parent_author_id AND m.following = hpv.author_id)
 UNION ALL
- SELECT hf.block_num,
-    hivemind_app.notification_id(hf.block_num, 15, hf.id) AS id,
+ SELECT f.block_num,
+    hivemind_app.notification_id(f.block_num, 15, f.hive_rowid::integer) AS id,
     0 AS post_id,
     15 AS type_id,
-    (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (hf.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
-    hf.follower AS src,
-    hf.following AS dst,
+    (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (f.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
+    f.follower AS src,
+    f.following AS dst,
     0 as dst_post_id,
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hivemind_app.hive_follows hf
-   WHERE hf.state = 1 --only follow blog
+   FROM hivemind_app.follows f
 
 UNION ALL
  SELECT hr.block_num,
