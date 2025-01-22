@@ -386,7 +386,7 @@ sync will create the database indexes necessary for hive server to efficiently p
 ### Cache layer
 
 Synchronizes the latest state of posts and users, allowing us to serve discussions and lists of posts with all expected
-information (title, preview, image, payout, votes, etc) without needing `hived`. This layer is first built once the
+information (title, image, payout, votes, etc) without needing `hived`. This layer is first built once the
 initial core indexing is complete. Incoming blocks trigger cache updates (including recalculation of trending score) for
 any posts referenced in `comment` or `vote` operations. There is a sweep to paid out posts to ensure they are updated in
 full with their final state.
