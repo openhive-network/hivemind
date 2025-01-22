@@ -62,21 +62,15 @@ BEGIN
                        jsonb_set(
                                account_row,
                                '{context}',
-                               COALESCE(
-                                       (SELECT
-                                            CASE
-                                                WHEN state = 2 THEN
-                                                    jsonb_build_object('followed', false, 'muted', true)
-                                                WHEN state = 1 THEN
-                                                    jsonb_build_object('followed', true)
-                                                ELSE
-                                                    jsonb_build_object('followed', false)
-                                                END
-                                        FROM hivemind_app.hive_follows
-                                        WHERE follower = _observer_id
-                                          AND following = (account_row->>'id')::INT),
-                                       jsonb_build_object('followed', false)
-                                   )
+                               jsonb_build_object(
+                                'followed', (SELECT EXISTS (SELECT NULL
+                                  FROM hivemind_app.follows
+                                  WHERE follower = _observer_id
+                                  AND following = (account_row->>'id')::INT)),
+                                'muted', (SELECT EXISTS (SELECT NULL
+                                  FROM hivemind_app.muted
+                                  WHERE follower = _observer_id
+                                  AND following = (account_row->>'id')::INT)))
                            )
                    )
         FROM jsonb_array_elements(_result) account_row

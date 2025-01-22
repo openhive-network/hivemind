@@ -3,7 +3,8 @@
     "active": "2016-09-15T19:46:21",
     "blacklists": [],
     "context": {
-      "followed": true
+      "followed": true,
+      "muted": false
     },
     "created": "2016-06-30T17:22:18",
     "id": 14028,
