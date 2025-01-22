@@ -23,7 +23,7 @@ BEGIN
     );
 
     IF _last_name IS NOT NULL THEN
-        select * from hivemind_postgrest_utilities.find_subscription_id(_last_name,  _community, True); -- pagination checks
+        PERFORM hivemind_postgrest_utilities.find_subscription_id(_last_name,  _community, True); -- pagination checks
     END IF;
 
     _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
