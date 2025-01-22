@@ -16,6 +16,7 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   category character varying(255) COLLATE pg_catalog."C",
   category_id integer,
   depth smallint,
+  promoted numeric(10,3),
   payout numeric(10,3),
   pending_payout numeric(10,3),
   payout_at timestamp without time zone,
@@ -65,89 +66,6 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   muted_reasons INTEGER
 );
 
-CREATE OR REPLACE FUNCTION hivemind_app.extract_img_url_from_json_metadata(json_metadata_as_string TEXT)
-RETURNS TEXT
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    json_data   jsonb;
-    images      jsonb;
-    first_image jsonb;
-    img_url     TEXT;
-BEGIN
-    -- Explicitly check if the input is NULL or empty after trimming
-    IF json_metadata_as_string IS NULL OR TRIM(json_metadata_as_string) = '' THEN
-        RETURN '';
-    END IF;
-    
-    -- Attempt to parse the input string as JSON
-    BEGIN
-        json_data := json_metadata_as_string::jsonb;
-    EXCEPTION WHEN others THEN
-        -- If parsing fails, return an empty string
-        RETURN '';
-    END;
-
-    -- Check if the JSON contains the "image" key
-    IF NOT json_data ? 'image' THEN
-        RETURN '';
-    END IF;
-
-    -- Extract the value associated with the "image" key
-    images := json_data->'image';
-
-    -- If "image" is null, return an empty string
-    IF images IS NULL THEN
-        RETURN '';
-    END IF;
-
-    -- Determine the type of the "images" value
-    IF jsonb_typeof(images) = 'string' THEN
-        -- If it's a string, assign its value to img_url
-        img_url := images #>> '{}';
-    ELSIF jsonb_typeof(images) = 'array' THEN
-        -- If it's an array, check if it's non-empty
-        IF jsonb_array_length(images) < 1 THEN
-            RETURN '';
-        END IF;
-
-        -- Extract the first element of the array
-        first_image := images->0;
-
-        -- Check if the first element is a string
-        IF jsonb_typeof(first_image) = 'string' THEN
-            img_url := first_image #>> '{}';
-        ELSE
-            RETURN '';
-        END IF;
-    ELSE
-        -- If "images" is neither a string nor an array, return an empty string
-        RETURN '';
-    END IF;
-
-    -- If img_url is empty after extraction, return empty string
-    IF img_url IS NULL OR img_url = '' THEN
-        RETURN '';
-    END IF;
-
-    -- Perform Validation Checks
-
-    -- Check if the URL length is >= 1024 characters
-    IF LENGTH(img_url) >= 1024 THEN
-        RETURN '';
-    END IF;
-
-    img_url := TRIM(BOTH E' \n\t\r\u00A0' FROM img_url);
-
-    -- Check if the URL starts with 'http'
-    IF LOWER(SUBSTRING(img_url FROM 1 FOR 4)) <> 'http' THEN
-        RETURN '';
-    END IF;
-
-    RETURN img_url;
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
 AS $function$
 BEGIN 
@@ -164,10 +82,11 @@ BEGIN
     hpd_p.permlink,
     hpd.title,
     hpd.body,
-    hivemind_app.extract_img_url_from_json_metadata(hpd.json)::character varying(1024) as img_url,
+    hpd.img_url,
     hcd.category,
     hp.category_id,
     hp.depth,
+    hp.promoted,
     hp.payout,
     hp.pending_payout,
     hp.payout_at,
@@ -260,24 +179,25 @@ BEGIN
         RETURN QUERY
         WITH blacklisters AS MATERIALIZED  --all blacklists followed by account
         (
-          SELECT following AS id FROM hivemind_app.follow_blacklisted WHERE follower = _observer_id -- follows_follower_idx
+          SELECT following as id FROM hivemind_app.hive_follows WHERE follow_blacklists AND follower = _observer_id -- hive_follows_follower_where_follow_blacklists_idx
         ),
         indirects AS MATERIALIZED             -- get all indirectly blacklisted accounts with the ids of their sources
         (
           SELECT blacklister_follows.following AS blacklisted_id,
                  blacklister_follows.follower AS blacklister_id
           FROM blacklisters
-          JOIN hivemind_app.blacklisted AS blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
+          JOIN hivemind_app.hive_follows blacklister_follows ON blacklister_follows.follower = blacklisters.id -- need this to get all accounts blacklisted by blacklister
+          WHERE blacklister_follows.blacklisted  --hive_follows_follower_where_blacklisted_idx
         )
         SELECT following AS blacklisted_id,        -- directly blacklisted accounts
                'my blacklist'::text AS source
-        FROM hivemind_app.blacklisted
-        WHERE blacklisted.follower = _observer_id  -- blacklisted_follower_idx
+        FROM hivemind_app.hive_follows
+        WHERE hive_follows.blacklisted AND hive_follows.follower = _observer_id  --hive_follows_follower_where_blacklisted_idx
         UNION ALL
         SELECT indirects.blacklisted_id AS blacklisted_id,                       -- collapse duplicate indirectly blacklisted accounts and aggreagate their sources
                string_agg('blacklisted by '::text || blacklister_accounts.name::text, ','::text ORDER BY blacklister_accounts.name) AS source
         FROM indirects
-        JOIN hivemind_app.hive_accounts AS blacklister_accounts ON blacklister_accounts.id = indirects.blacklister_id    -- need this to get name of blacklister, use hive_accounts_ux1
+        JOIN hivemind_app.hive_accounts blacklister_accounts ON blacklister_accounts.id = indirects.blacklister_id    -- need this to get name of blacklister, use hive_accounts_ux1
         GROUP BY indirects.blacklisted_id;
     END IF;
 END;
@@ -300,6 +220,7 @@ CREATE TYPE hivemind_app.get_full_post_view_by_id_return_t AS(
   category character varying(255) COLLATE pg_catalog."C",
   category_id integer,
   depth smallint,
+  promoted numeric(10,3),
   payout numeric(10,3),
   pending_payout numeric(10,3),
   payout_at timestamp without time zone,
@@ -366,10 +287,11 @@ BEGIN
     hpd_p.permlink,
     hpd.title,
     hpd.body,
-    hivemind_app.extract_img_url_from_json_metadata(hpd.json)::character varying(1024) as img_url,
+    hpd.img_url,
     hcd.category,
     hp.category_id,
     hp.depth,
+    hp.promoted,
     hp.payout,
     hp.pending_payout,
     hp.payout_at,
