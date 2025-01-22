@@ -26,12 +26,10 @@ log = logging.getLogger(__name__)
 def build_metadata():
     """Build schema def with SqlAlchemy"""
     metadata = sa.MetaData(schema=SCHEMA_NAME)
-    hive_rowid_seq = sa.Sequence('hive.hivemind_app_hive_rowid_seq', metadata=metadata)
 
     sa.Table(
         'hive_accounts',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True), # warning this ID does not match to hive.accounts::id
         sa.Column('haf_id', sa.Integer, nullable=True), # Account ID matching hive.accounts::id
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
@@ -50,7 +48,6 @@ def build_metadata():
     sa.Table(
         'hive_posts',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('root_id', sa.Integer, nullable=False),  # records having initially set 0 will be updated to their id
         sa.Column('parent_id', sa.Integer, nullable=False),
@@ -167,7 +164,6 @@ def build_metadata():
     sa.Table(
         'hive_post_data',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
         sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),  # first 'image' from 'json'
@@ -178,7 +174,6 @@ def build_metadata():
     sa.Table(
         'hive_permlink_data',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink'),
@@ -187,7 +182,6 @@ def build_metadata():
     sa.Table(
         'hive_category_data',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('category', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('category', name='hive_category_data_category'),
@@ -196,7 +190,6 @@ def build_metadata():
     sa.Table(
         'hive_votes',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.BigInteger, primary_key=True),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('voter_id', sa.Integer, nullable=False),
@@ -233,7 +226,6 @@ def build_metadata():
     sa.Table(
         'hive_post_tags',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1', deferrable=True, postgresql_not_valid=True),
@@ -244,7 +236,6 @@ def build_metadata():
     sa.Table(
         'hive_tag_data',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, nullable=False, primary_key=True),
         sa.Column('tag', VARCHAR(64, collation='C'), nullable=False, server_default=''),
         sa.UniqueConstraint('tag', name='hive_tag_data_ux1'),
@@ -253,7 +244,6 @@ def build_metadata():
     sa.Table(
         'hive_follows',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('follower', sa.Integer, nullable=False),
         sa.Column('following', sa.Integer, nullable=False),
@@ -276,7 +266,6 @@ def build_metadata():
     sa.Table(
         'hive_reblogs',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('blogger_id', sa.Integer, nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
@@ -292,7 +281,6 @@ def build_metadata():
     sa.Table(
         'hive_feed_cache',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
@@ -309,7 +297,6 @@ def build_metadata():
     sa.Table(
         'hive_state',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('last_completed_block_num', sa.Integer, nullable=False),
         sa.Column('db_version', sa.Integer, nullable=False),
         sa.Column('hivemind_version', sa.Text, nullable=False, server_default=''),
@@ -320,7 +307,6 @@ def build_metadata():
     sa.Table(
         'hive_mentions',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
@@ -330,12 +316,12 @@ def build_metadata():
         sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1'),
     )
 
-    metadata = build_metadata_community(hive_rowid_seq, metadata)
+    metadata = build_metadata_community(metadata)
 
     return metadata
 
 
-def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
+def build_metadata_community(metadata=None):
     """Build community schema defs"""
     if not metadata:
         metadata = sa.MetaData()
@@ -343,7 +329,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
     sa.Table(
         'hive_communities',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('type_id', SMALLINT, nullable=False),
         sa.Column('lang', CHAR(2), nullable=False, server_default='en'),
@@ -372,7 +357,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
     sa.Table(
         'hive_roles',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
@@ -385,7 +369,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
     sa.Table(
         'hive_subscriptions',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=False),
@@ -399,7 +382,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
     sa.Table(
         'hive_notifs',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('type_id', SMALLINT, nullable=False),
@@ -425,7 +407,6 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
     sa.Table(
         'hive_notification_cache',
         metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('id', sa.BigInteger, primary_key=True),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('type_id', sa.Integer, nullable=False),
@@ -487,14 +468,15 @@ def setup(db, admin_db):
     # sets FILLFACTOR:
     set_fillfactor(db)
 
-    # apply inheritance
-    for table in build_metadata().sorted_tables:
-        if table.name in ('hive_db_patch_level',):
-            continue
-
-        sql = f'ALTER TABLE {SCHEMA_NAME}.{table.name} INHERIT {SCHEMA_NAME}.{SCHEMA_NAME};'
-        db.query(sql)
-
+    # uncomment tables registration when hivemind becomes forking app
+    # HAF allows to make false registration - ignored when the app i non-forking
+    # but there is a problem with sqlalchemy which also need to add hive_rowid (sqlalchemy metadata must exact fits to real table shape)
+    #for table in build_metadata().sorted_tables:
+    #    if table.name in ('hive_db_patch_level',):
+    #        continue
+    #
+    #    sql = f'ALTER TABLE {SCHEMA_NAME}.{table.name} INHERIT {SCHEMA_NAME}.{SCHEMA_NAME};'
+    #    db.query(sql)
 
     # default rows
     sqls = [
