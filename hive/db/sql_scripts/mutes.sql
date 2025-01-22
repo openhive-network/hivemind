@@ -17,10 +17,10 @@ BEGIN
         _observer AS source,
         True
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.blacklisted AS b
+        JOIN hivemind_app.hive_accounts ha ON ha.id = b.following
     WHERE
-        hf.follower = __observer_id AND hf.blacklisted
+        b.follower = __observer_id
     ORDER BY account, source;
   END IF;
   IF (_flags & 2)::BOOLEAN THEN
@@ -29,12 +29,12 @@ BEGIN
         ha.name AS source,
         True
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_follows hf_i ON hf_i.follower = hf.following
-        JOIN hivemind_app.hive_accounts ha_i ON ha_i.id = hf_i.following
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.follow_blacklisted AS fb
+        JOIN hivemind_app.blacklisted AS b ON b.follower = fb.following
+        JOIN hivemind_app.hive_accounts AS ha_i ON ha_i.id = b.following
+        JOIN hivemind_app.hive_accounts AS ha ON ha.id = fb.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_blacklists AND hf_i.blacklisted
+        fb.follower = __observer_id
     ORDER BY account, source;
   END IF;
   IF (_flags & 4)::BOOLEAN THEN
@@ -43,10 +43,10 @@ BEGIN
         _observer AS source,
         False
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.muted AS m
+        JOIN hivemind_app.hive_accounts ha ON ha.id = m.following
     WHERE
-        hf.follower = __observer_id AND hf.state = 2
+        m.follower = __observer_id
     ORDER BY account, source;
   END IF;
   IF (_flags & 8)::BOOLEAN THEN
@@ -55,12 +55,12 @@ BEGIN
         ha.name AS source,
         False
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_follows hf_i ON hf_i.follower = hf.following
-        JOIN hivemind_app.hive_accounts ha_i ON ha_i.id = hf_i.following
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.follow_muted AS fm
+        JOIN hivemind_app.muted m ON m.follower = fm.following
+        JOIN hivemind_app.hive_accounts ha_i ON ha_i.id = m.following
+        JOIN hivemind_app.hive_accounts ha ON ha.id = fm.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_muted AND hf_i.state = 2
+        fm.follower = __observer_id
     ORDER BY account, source;
   END IF;
 END
@@ -88,10 +88,10 @@ BEGIN
         ha.json_metadata::varchar AS json_metadata,
         True as is_blacklist
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.follow_blacklisted AS fb
+        JOIN hivemind_app.hive_accounts ha ON ha.id = fb.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_blacklists
+        fb.follower = __observer_id
     ORDER BY list;
   END IF;
   IF _follow_muted THEN
@@ -101,10 +101,10 @@ BEGIN
         ha.json_metadata::VARCHAR AS json_metadata,
         False AS is_blacklist
     FROM
-        hivemind_app.hive_follows hf
-        JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+        hivemind_app.follow_muted fm
+        JOIN hivemind_app.hive_accounts ha ON ha.id = fm.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_muted
+        fm.follower = __observer_id
     ORDER BY list;
   END IF;
 END
