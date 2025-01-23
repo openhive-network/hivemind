@@ -20,7 +20,7 @@ BEGIN
   IF _extract_pinned_posts THEN
     _result = (
       SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
+        hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
         pinned_post AS -- get_ranked_posts_for_communities pinned
@@ -126,8 +126,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -221,8 +221,8 @@ BEGIN
     SELECT jsonb_agg (
     ( 
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -313,8 +313,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -405,8 +405,8 @@ BEGIN
     SELECT jsonb_agg (
     ( 
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -495,8 +495,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -593,7 +593,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_communities
       community_posts as
@@ -743,8 +743,8 @@ BEGIN
     )
     SELECT jsonb_agg (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, sd, _truncate_body, NULL, sd.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, sd, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(sd, _truncate_body, NULL, sd.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(sd, _truncate_body, False)
       END
       ORDER BY sd.sc_trend DESC, sd.id DESC
     )
@@ -836,8 +836,8 @@ BEGIN
     )
     SELECT jsonb_agg (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, sd, _truncate_body, NULL, sd.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, sd, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(sd, _truncate_body, NULL, sd.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(sd, _truncate_body, False)
       END
       ORDER BY sd.sc_hot DESC, sd.id DESC
     )
@@ -866,8 +866,8 @@ BEGIN
     SELECT jsonb_agg (
     ( 
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -962,8 +962,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -1057,8 +1057,8 @@ BEGIN
     SELECT jsonb_agg (
     ( 
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -1149,7 +1149,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_tag
       tag_posts as
@@ -1231,12 +1231,12 @@ _trending_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-      SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
+      SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
   END IF;
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_trending_ranked_posts_for_observer_communities
       observer_posts as
@@ -1245,9 +1245,9 @@ BEGIN
           hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        WHERE hs.account_id = _observer_id 
-          AND NOT hp.is_paidout
-          AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+        WHERE
+          hs.account_id = _observer_id AND NOT hp.is_paidout
+          AND (_post_id = 0 OR 0 < _trending_limit OR (0 = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -1322,7 +1322,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_hot_ranked_posts_for_observer_communities
       observer_posts as
@@ -1333,7 +1333,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR 0 < _hot_limit OR (0 = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
@@ -1403,7 +1403,7 @@ DECLARE
 BEGIN
   _result = (
     SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+        hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_created_ranked_posts_for_observer_communities
       observer_posts AS
@@ -1503,7 +1503,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_payout_ranked_posts_for_observer_communities
       observer_posts as
@@ -1591,7 +1591,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_payout_comments_ranked_posts_for_observer_communities
       observer_posts as
@@ -1678,7 +1678,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_observer_communities
       observer_posts as
@@ -1767,8 +1767,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -1856,8 +1856,8 @@ BEGIN
   _result = (
     SELECT jsonb_agg (
     ( CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -1941,8 +1941,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -2035,8 +2035,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -2127,8 +2127,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -2216,7 +2216,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH -- get_all_muted_ranked_posts
       all_posts as

@@ -114,6 +114,10 @@
         "voter": "kimziv"
       },
       {
+        "rshares": 377133557309,
+        "voter": "fyrstikken"
+      },
+      {
         "rshares": 14760800618,
         "voter": "furion"
       },
@@ -408,9 +412,9 @@
     "pending_payout_value": "20.756 HBD",
     "percent_hbd": 10000,
     "permlink": "the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown",
-    "post_id": 1254981,
-    "reblogs": 0,
+    "post_id": 1254979,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -809,9 +813,9 @@
     "pending_payout_value": "38.139 HBD",
     "percent_hbd": 10000,
     "permlink": "steemit-b-day-movie-review-contest-update",
-    "post_id": 1254277,
-    "reblogs": 0,
+    "post_id": 1254275,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1103,9 +1107,9 @@
     "pending_payout_value": "1.083 HBD",
     "percent_hbd": 10000,
     "permlink": "origami-flowers",
-    "post_id": 1256020,
-    "reblogs": 0,
+    "post_id": 1256018,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

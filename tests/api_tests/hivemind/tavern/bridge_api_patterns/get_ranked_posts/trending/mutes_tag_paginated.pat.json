@@ -446,6 +446,10 @@
         "voter": "yogi.artist"
       },
       {
+        "rshares": 14215545466,
+        "voter": "r4fken"
+      },
+      {
         "rshares": 1001850942,
         "voter": "steemswede"
       },
@@ -1566,8 +1570,8 @@
     "percent_hbd": 10000,
     "permlink": "the-art-of-maintaining-reputation-plan-your-battles-and-don-t-milk-it",
     "post_id": 1247819,
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2403,6 +2407,10 @@
       {
         "rshares": 18842523479,
         "voter": "hakise"
+      },
+      {
+        "rshares": 14215545466,
+        "voter": "r4fken"
       },
       {
         "rshares": 25052927517,
@@ -3707,8 +3715,8 @@
     "percent_hbd": 10000,
     "permlink": "who-should-we-find-responsible-for-the-subprime-mortgage-lending-crisis",
     "post_id": 1247718,
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3844,6 +3852,10 @@
       {
         "rshares": 58907877644,
         "voter": "lovelace"
+      },
+      {
+        "rshares": 1234583624335,
+        "voter": "gavvet"
       },
       {
         "rshares": 74895398010,
@@ -4512,6 +4524,10 @@
       {
         "rshares": 15354149755,
         "voter": "yogi.artist"
+      },
+      {
+        "rshares": 14213156438,
+        "voter": "r4fken"
       },
       {
         "rshares": 389458625,
@@ -5716,8 +5732,8 @@
     "percent_hbd": 10000,
     "permlink": "the-prison-of-depression",
     "post_id": 1245266,
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
