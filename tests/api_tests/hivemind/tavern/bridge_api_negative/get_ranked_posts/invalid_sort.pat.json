@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "Unsupported sort, valid sorts: trending, hot, created, promoted, payout, payout_comments, muted",
+  "data": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted",
   "message": "Invalid parameters"
 }

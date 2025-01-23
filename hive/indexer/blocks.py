@@ -18,7 +18,6 @@ from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
 from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
-from hive.indexer.payments import Payments
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
@@ -413,8 +412,6 @@ class Blocks:
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
-                elif op_type == OperationType.TRANSFER:
-                    Payments.op_transfer(op, transaction.get_id(), num, cls._head_block_date)
                 elif op_type == OperationType.CUSTOM_JSON:  # follow/reblog/community ops
                     CustomOp.process_op(op, num, cls._head_block_date)
 

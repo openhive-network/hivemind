@@ -117,7 +117,6 @@ BEGIN
           hp.body,
           hp.category,
           hp.depth,
-          hp.promoted,
           hp.payout,
           hp.pending_payout,
           hp.payout_at,

@@ -30,7 +30,6 @@ BEGIN
     'depth', _row.depth,
     'children', _row.children,
     'curator_payout_value', '0.000 HBD',
-    'promoted', _row.promoted || ' HBD',
     'replies', to_jsonb('{}'::INT[]),
     'body_length', LENGTH(_row.body),
     'author_reputation', _row.author_rep,
