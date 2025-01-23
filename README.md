@@ -319,7 +319,6 @@ condenser_api.get_trending_tags
 
 condenser_api.get_discussions_by_trending
 condenser_api.get_discussions_by_hot
-condenser_api.get_discussions_by_promoted
 condenser_api.get_discussions_by_created
 
 condenser_api.get_discussions_by_blog

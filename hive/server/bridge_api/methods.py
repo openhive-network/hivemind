@@ -94,10 +94,6 @@ async def _get_ranked_posts_for_observer_communities(
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
-    if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
-        return await execute_observer_community_query(db, sql, limit)
-
     if sort == 'payout':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
@@ -137,10 +133,6 @@ async def _get_ranked_posts_for_communities(
             result_with_pinned_posts += await execute_community_query(db, sql, limit)
         return result_with_pinned_posts
 
-    if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_community_query(db, sql, limit)
-
     if sort == 'created':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
@@ -173,10 +165,6 @@ async def _get_ranked_posts_for_tag(db, sort: str, tag, start_author: str, start
 
     if sort == 'hot':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql)
-
-    if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'payout':
@@ -219,10 +207,6 @@ async def _get_ranked_posts_for_all(db, sort: str, start_author: str, start_perm
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
-    if sort == 'promoted':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql)
-
     if sort == 'payout':
         sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
@@ -249,7 +233,7 @@ async def get_ranked_posts(
     observer: str = '',
 ):
     """Query posts, sorted by given method."""
-    supported_sort_list = ['trending', 'hot', 'created', 'promoted', 'payout', 'payout_comments', 'muted']
+    supported_sort_list = ['trending', 'hot', 'created', 'payout', 'payout_comments', 'muted']
     assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
 
     db = context['db']

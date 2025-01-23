@@ -26,12 +26,6 @@ echo "condenser_api.get_discussions_by_hot" >> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_hot", "params":{}}' $HOST ; } 2>> query_times.log
 echo "" >> query_times.log
 
-echo "condenser_api.get_discussions_by_promoted" >> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_promoted", "params":{}}' $HOST ; } 2>> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_promoted", "params":{}}' $HOST ; } 2>> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_promoted", "params":{}}' $HOST ; } 2>> query_times.log
-echo "" >> query_times.log
-
 echo "condenser_api.get_discussions_by_created" >> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_created", "params":{}}' $HOST ; } 2>> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"condenser_api.get_discussions_by_created", "params":{}}' $HOST ; } 2>> query_times.log
@@ -102,12 +96,6 @@ echo "bridge.get_ranked_posts (created)" >> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"created"}}' $HOST ; } 2>> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"created"}}' $HOST ; } 2>> query_times.log
 { time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"created"}}' $HOST ; } 2>> query_times.log
-echo "" >> query_times.log
-
-echo "bridge.get_ranked_posts (promoted)"  >> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"promoted"}}' $HOST ; } 2>> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"promoted"}}' $HOST ; } 2>> query_times.log
-{ time curl -s -d '{"jsonrpc":"2.0", "id":7, "method":"bridge.get_ranked_posts", "params":{"sort":"promoted"}}' $HOST ; } 2>> query_times.log
 echo "" >> query_times.log
 
 echo "bridge.get_ranked_posts (payout)" >> query_times.log

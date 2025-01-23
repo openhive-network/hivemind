@@ -1,5 +1,5 @@
 {
-    "code": -32602,
-    "data": "invalid account char",
-    "message": "Invalid parameters"
+  "code": -32602,
+  "data": "invalid account char",
+  "message": "Invalid parameters"
 }

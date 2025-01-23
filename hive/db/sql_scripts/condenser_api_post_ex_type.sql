@@ -9,7 +9,6 @@ CREATE TYPE hivemind_app.condenser_api_post_ex AS (
     body TEXT,
     category VARCHAR(255),
     depth SMALLINT,
-    promoted DECIMAL(10,3),
     payout DECIMAL(10,3),
     pending_payout DECIMAL(10,3),
     payout_at TIMESTAMP,

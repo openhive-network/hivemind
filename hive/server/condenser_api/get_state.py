@@ -44,7 +44,6 @@ CONDENSER_NOOP_URLS = [
 # post list sorts
 POST_LIST_SORTS = [
     'trending',
-    'promoted',
     'hot',
     'created',
     'payout',

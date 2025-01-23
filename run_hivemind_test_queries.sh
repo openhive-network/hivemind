@@ -42,13 +42,6 @@ cat old_result | jq . > old_pretty.json
 cat new_result | jq . > new_pretty.json
 diff old_pretty.json new_pretty.json
 
-echo "test get_discussions_by_promoted"
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_discussions_by_promoted","params":{} }' http://steem-3:8085 > old_result
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_discussions_by_promoted","params":{} }' http://127.0.0.1:8085 > new_result
-cat old_result | jq . > old_pretty.json
-cat new_result | jq . > new_pretty.json
-diff old_pretty.json new_pretty.json
-
 echo "test get_discussions_by_created"
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_discussions_by_created","params":{} }' http://steem-3:8085 > old_result
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_discussions_by_created","params":{} }' http://127.0.0.1:8085 > new_result
@@ -98,13 +91,6 @@ cat old_result | jq . > old_pretty.json
 cat new_result | jq . > new_pretty.json
 diff old_pretty.json new_pretty.json
 
-echo "test promoted"
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5} }' http://steem-3:8085 > old_result
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5} }' http://127.0.0.1:8085 > new_result
-cat old_result | jq . > old_pretty.json
-cat new_result | jq . > new_pretty.json
-diff old_pretty.json new_pretty.json
-
 echo "test payout"
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"payout", "limit":5} }' http://steem-3:8085 > old_result
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"payout", "limit":5} }' http://127.0.0.1:8085 > new_result
@@ -143,13 +129,6 @@ diff old_pretty.json new_pretty.json
 echo "test created with author and permlink"
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"created", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance"} }' http://steem-3:8085 > old_result
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"created", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance"} }' http://127.0.0.1:8085 > new_result
-cat old_result | jq . > old_pretty.json
-cat new_result | jq . > new_pretty.json
-diff old_pretty.json new_pretty.json
-
-echo "test promoted with author and permlink"
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance"} }' http://steem-3:8085 > old_result
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance"} }' http://127.0.0.1:8085 > new_result
 cat old_result | jq . > old_pretty.json
 cat new_result | jq . > new_pretty.json
 diff old_pretty.json new_pretty.json
@@ -196,13 +175,6 @@ cat old_result | jq . > old_pretty.json
 cat new_result | jq . > new_pretty.json
 diff old_pretty.json new_pretty.json
 
-echo "test promoted with author and permlink and tag of all"
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance", "tag":"all"} }' http://steem-3:8085 > old_result
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance", "tag":"all"} }' http://127.0.0.1:8085 > new_result
-cat old_result | jq . > old_pretty.json
-cat new_result | jq . > new_pretty.json
-diff old_pretty.json new_pretty.json
-
 echo "test payout with author and permlink and tag of all"
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"payout", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance", "tag":"all"} }' http://steem-3:8085 > old_result
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"payout", "limit":5, "author":"blocktrades", "permlink":"image-server-cluster-development-and-maintenance", "tag":"all"} }' http://127.0.0.1:8085 > new_result
@@ -245,13 +217,6 @@ diff old_pretty.json new_pretty.json
 echo "test created with no author/permlink but with tag"
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"created", "limit":5, "tag":"games"} }' http://steem-3:8085 > old_result
 curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"created", "limit":5, "tag":"games"} }' http://127.0.0.1:8085 > new_result
-cat old_result | jq . > old_pretty.json
-cat new_result | jq . > new_pretty.json
-diff old_pretty.json new_pretty.json
-
-echo "test promoted with  no author/permlink but with tag"
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "tag":"games"} }' http://steem-3:8085 > old_result
-curl -s -d '{"jsonrpc":"2.0","id":1,"method":"bridge.get_ranked_posts","params":{"sort":"promoted", "limit":5, "tag":"games"} }' http://127.0.0.1:8085 > new_result
 cat old_result | jq . > old_pretty.json
 cat new_result | jq . > new_pretty.json
 diff old_pretty.json new_pretty.json
