@@ -16,7 +16,7 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', True), True),
     True);
 
-  IF NOT EXISTS (SELECT ha.name FROM hivemind_app.hive_follows hf JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following WHERE hf.follower = _observer_id AND hf.follow_blacklists LIMIT 1) THEN
+  IF NOT EXISTS (SELECT ha.name FROM hivemind_app.follow_blacklisted fb JOIN hivemind_app.hive_accounts ha ON ha.id = fb.following WHERE fb.follower = _observer_id LIMIT 1) THEN
     RETURN 'false'::jsonb;
   ELSE
     RETURN 'true'::jsonb;
