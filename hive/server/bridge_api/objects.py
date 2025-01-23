@@ -130,7 +130,6 @@ def _bridge_post_object(row, truncate_body=0):
     post['pending_payout_value'] = _amount(0 if paid else post['payout'])
     post['author_payout_value'] = _amount(0)  # supplemented below
     post['curator_payout_value'] = _amount(0)  # supplemented below
-    post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
     post['reblogs'] = 0

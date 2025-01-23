@@ -11,7 +11,6 @@ async def test_get_state():
     assert 'discussion_idx' in ret
 
     assert await get_state('trending')
-    assert await get_state('promoted')
     assert await get_state('created')
     assert await get_state('hot')
 

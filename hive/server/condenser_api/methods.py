@@ -240,13 +240,6 @@ async def get_posts_by_given_sort(
             sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
             sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-    elif sort == 'promoted':
-        if is_community:
-            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        elif tag == '':
-            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        else:
-            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'post_by_payout':
         if tag == '':
             sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
@@ -320,24 +313,6 @@ async def get_discussions_by_hot(
     return await get_posts_by_given_sort(
         context, 'hot', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer
     )
-
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by_promoted(
-    context,
-    start_author: str = '',
-    start_permlink: str = '',
-    limit: int = 20,
-    tag: str = None,
-    truncate_body: int = 0,
-    filter_tags: list = None,
-    observer: str = None,
-):
-    return await get_posts_by_given_sort(
-        context, 'promoted', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer
-    )
-
 
 @return_error_info
 @nested_query_compat

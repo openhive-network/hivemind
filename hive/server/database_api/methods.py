@@ -27,7 +27,6 @@ async def find_comments(context, comments: list):
         pv.body,
         pv.category,
         pv.depth,
-        pv.promoted,
         pv.payout,
         pv.last_payout_at,
         pv.cashout_time,

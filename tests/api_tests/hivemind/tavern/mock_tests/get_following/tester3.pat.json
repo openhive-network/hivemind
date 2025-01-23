@@ -2,6 +2,8 @@
   {
     "follower": "tester3",
     "following": "tester4",
-    "what": [ "blog" ]
+    "what": [
+      "blog"
+    ]
   }
 ]
