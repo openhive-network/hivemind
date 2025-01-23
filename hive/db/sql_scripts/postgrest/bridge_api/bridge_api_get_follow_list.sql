@@ -42,16 +42,25 @@ BEGIN
   IF _get_blacklists THEN
     _result = (
       WITH np AS ( -- bridge_api_get_follow_list with _get_blacklists
-        SELECT 
+        SELECT
           ha.name,
           hivemind_postgrest_utilities.extract_profile_metadata(ha.json_metadata, ha.posting_json_metadata)->'profile' AS profile
         FROM
-          hivemind_app.hive_follows hf
+          hivemind_app.follow_muted AS fm
         JOIN
-          hivemind_app.hive_accounts ha ON ha.id = hf.following
+          hivemind_app.hive_accounts ha ON ha.id = fm.following
         WHERE
-          hf.follower = _observer_id AND
-          (CASE WHEN _follow_muted THEN hf.follow_muted ELSE hf.follow_blacklists END)
+          fm.follower = _observer_id AND _follow_muted
+        UNION ALL
+        SELECT
+          ha.name,
+          hivemind_postgrest_utilities.extract_profile_metadata(ha.json_metadata, ha.posting_json_metadata)->'profile' AS profile
+        FROM
+          hivemind_app.follow_blacklisted AS fb
+        JOIN
+          hivemind_app.hive_accounts ha ON ha.id = fb.following
+        WHERE
+          fb.follower = _observer_id AND NOT _follow_muted
         )
       SELECT jsonb_agg(
         jsonb_build_object(
@@ -70,16 +79,16 @@ BEGIN
           'muted_list_description', to_jsonb(''::TEXT)
         )
       ) FROM (
-          SELECT
-            ha.name
-          FROM
-            hivemind_app.hive_follows hf
-          JOIN
-            hivemind_app.hive_accounts ha ON ha.id = hf.following
-          WHERE
-            hf.follower = _observer_id AND
-            (CASE WHEN _follow_muted THEN hf.state = 2 ELSE hf.blacklisted END)
-          ORDER BY ha.name
+          SELECT ha.name
+          FROM hivemind_app.muted AS m
+          JOIN hivemind_app.hive_accounts ha ON ha.id = m.following
+          WHERE m.follower = _observer_id AND _follow_muted
+          UNION ALL
+          SELECT ha.name
+          FROM hivemind_app.blacklisted AS b
+          JOIN hivemind_app.hive_accounts ha ON ha.id = b.following
+          WHERE b.follower = _observer_id AND NOT _follow_muted
+          ORDER BY name
         ) row
   );
   END IF;
