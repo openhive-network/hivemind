@@ -13,15 +13,24 @@ DECLARE
 BEGIN
   _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_params, _called_from_condenser_api);
   _account_id = (_params->'account_id')::INT;
-  _state = (_params->'hive_follows_state')::SMALLINT;
   _limit = (_params->'limit')::INT;
 
   IF (_params->'start_id')::INT <> 0 THEN
-    _start_id = (
-      SELECT hf.id
-      FROM hivemind_app.hive_follows hf
-      WHERE hf.following = (_params->'account_id')::INT AND hf.follower = (_params->'start_id')::INT
-    );
+    IF (_params->'follows')::boolean THEN
+      _start_id = (
+        SELECT f.hive_rowid
+        FROM hivemind_app.follows AS f
+        WHERE f.following = _account_id
+        AND f.follower = (_params->'start_id')::INT
+      );
+    ELSIF (_params->'mutes')::boolean THEN
+      _start_id = (
+        SELECT m.hive_rowid
+        FROM hivemind_app.muted AS m
+        WHERE m.following = _account_id
+        AND m.follower = (_params->'start_id')::INT
+      );
+    END IF;
   END IF;
 
   RETURN COALESCE(
@@ -32,26 +41,35 @@ BEGIN
         'follower', row.name,
         'what', jsonb_build_array(_params->'follow_type')
       )
-      ORDER BY row.id DESC
-    ) 
+      ORDER BY row.hive_rowid DESC
+    )
     FROM (
       WITH followers AS MATERIALIZED
         (
         SELECT
-          hf.id,
-          hf.follower
-        FROM hivemind_app.hive_follows hf
-        WHERE hf.following = _account_id  AND hf.state = _state  -- hive_follows_following_state_id_idx
-              AND hf.id < _start_id
-        ORDER BY hf.id DESC
+          f.hive_rowid,
+          f.follower
+        FROM hivemind_app.follows AS f
+        WHERE f.following = _account_id
+              AND f.hive_rowid < _start_id
+              AND (_params->'follows')::boolean
+        UNION ALL
+        SELECT
+          m.hive_rowid,
+          m.follower
+        FROM hivemind_app.muted AS m
+        WHERE m.following = _account_id
+              AND m.hive_rowid < _start_id
+              AND (_params->'mutes')::boolean
+        ORDER BY hive_rowid DESC
         LIMIT _limit
-        )      
+        )
       SELECT
-        followers.id,
+        followers.hive_rowid,
         ha.name
       FROM followers
-      JOIN hivemind_app.hive_accounts ha ON followers.follower = ha.id
-      ORDER BY followers.id DESC
+      JOIN hivemind_app.hive_accounts AS ha ON followers.follower = ha.id
+      ORDER BY followers.hive_rowid DESC
       LIMIT _limit
     ) row
   ),
