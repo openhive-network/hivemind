@@ -1,12 +1,5 @@
 [
   {
-    "follower": "zebbra2014",
-    "following": "cheetah",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
     "follower": "mudassar",
     "following": "cheetah",
     "what": [
@@ -15,6 +8,13 @@
   },
   {
     "follower": "ktbaeohana",
+    "following": "cheetah",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "osho.philosophy",
     "following": "cheetah",
     "what": [
       "ignore"
