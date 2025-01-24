@@ -463,7 +463,7 @@ def setup(db, admin_db):
     build_metadata().create_all(db.engine())
 
     # tune auto vacuum/analyze
-    reset_autovac(db)
+    #disable individual table tuning reset_autovac(db)
 
     # sets FILLFACTOR:
     set_fillfactor(db)
