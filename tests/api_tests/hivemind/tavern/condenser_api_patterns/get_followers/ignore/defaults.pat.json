@@ -140,6 +140,13 @@
     ]
   },
   {
+    "follower": "elewarne",
+    "following": "cheetah",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
     "follower": "nudierudie",
     "following": "cheetah",
     "what": [
@@ -211,6 +218,13 @@
   },
   {
     "follower": "blogger.com",
+    "following": "cheetah",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "zebbra2014",
     "following": "cheetah",
     "what": [
       "ignore"
@@ -357,14 +371,14 @@
     ]
   },
   {
-    "follower": "alexa.com",
+    "follower": "kevbonneau",
     "following": "cheetah",
     "what": [
       "ignore"
     ]
   },
   {
-    "follower": "kevbonneau",
+    "follower": "alexa.com",
     "following": "cheetah",
     "what": [
       "ignore"
@@ -379,13 +393,6 @@
   },
   {
     "follower": "weibo.com",
-    "following": "cheetah",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "elewarne",
     "following": "cheetah",
     "what": [
       "ignore"
@@ -498,13 +505,6 @@
   },
   {
     "follower": "masoud",
-    "following": "cheetah",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "zebbra2014",
     "following": "cheetah",
     "what": [
       "ignore"

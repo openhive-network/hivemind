@@ -40,11 +40,7 @@ BEGIN
     _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'type', False), 'blog');
   END IF;
 
-  IF _follow_type = 'blog' THEN
-    _hive_follows_state = 1;
-  ELSIF _follow_type = 'ignore' THEN
-    _hive_follows_state = 2;
-  ELSE
+  IF _follow_type NOT IN ('blog', 'ignore') THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported follow type, valid types: blog, ignore');
   END IF;
 
@@ -59,7 +55,8 @@ BEGIN
     'start_id', _start_id,
     'limit', _limit,
     'follow_type', _follow_type,
-    'hive_follows_state', _hive_follows_state
+    'follows', _follow_type = 'blog',
+    'mutes', _follow_type = 'ignore'
   );
 END
 $$
