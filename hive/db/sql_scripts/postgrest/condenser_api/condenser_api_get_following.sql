@@ -6,10 +6,27 @@ STABLE
 AS
 $$
 DECLARE
-_start TEXT DEFAULT '';
+_start_id INT DEFAULT 0;
 BEGIN
   _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_params, _called_from_condenser_api);
-  _start = (_params->>'start')::TEXT;
+
+  IF (_params->'start_id')::INT <> 0 THEN
+    IF (_params->'follows')::boolean THEN
+      _start_id = (
+        SELECT f.hive_rowid
+        FROM hivemind_app.follows AS f
+        WHERE f.follower = (_params->'account_id')::INT
+        AND f.following = (_params->'start_id')::INT
+      );
+    ELSIF (_params->'mutes')::boolean THEN
+      _start_id = (
+        SELECT m.hive_rowid
+        FROM hivemind_app.muted AS m
+        WHERE m.follower = (_params->'account_id')::INT
+        AND m.following = (_params->'start_id')::INT
+      );
+    END IF;
+  END IF;
 
   RETURN COALESCE(
     (
@@ -19,12 +36,13 @@ BEGIN
           'follower', _params->>'account',
           'what', jsonb_build_array(_params->>'follow_type')
         )
-        ORDER BY row.name
+        ORDER BY row.hive_rowid DESC
       ) FROM (
         WITH
         max_10k_follows AS
         (
           SELECT
+            f.hive_rowid,
             f.following
           FROM hivemind_app.follows AS f
           WHERE
@@ -34,6 +52,7 @@ BEGIN
         max_10k_mutes AS
         (
           SELECT
+            m.hive_rowid,
             m.following
           FROM hivemind_app.muted AS m
           WHERE
@@ -42,21 +61,26 @@ BEGIN
         ),
         following_page AS -- condenser_api_get_following
         (
-          SELECT ha.name
+          SELECT
+            f.hive_rowid,
+            f.following
           FROM max_10k_follows AS f
-          JOIN hivemind_app.hive_accounts AS ha ON f.following = ha.id
-          WHERE (_start = '' OR ha.name > _start) AND (_params->'follows')::boolean
+          WHERE (_start_id = 0 OR f.hive_rowid < _start_id) AND (_params->'follows')::boolean
           UNION ALL
-          SELECT ha.name
+          SELECT
+            m.hive_rowid,
+            m.following
           FROM max_10k_mutes AS m
-          JOIN hivemind_app.hive_accounts AS ha ON m.following = ha.id
-          WHERE (_start = '' OR ha.name > _start) AND (_params->'mutes')::boolean
-          ORDER BY name
+          WHERE (_start_id = 0 OR hive_rowid < _start_id) AND (_params->'mutes')::boolean
+          ORDER BY hive_rowid DESC
           LIMIT (_params->'limit')::INT
         )
-        SELECT name
+        SELECT
+          fs.hive_rowid,
+          ha.name
         FROM following_page fs
-        ORDER BY name
+        JOIN hivemind_app.hive_accounts ha ON fs.following = ha.id
+        ORDER BY fs.hive_rowid DESC
         LIMIT (_params->'limit')::INT
       ) row
     ),
