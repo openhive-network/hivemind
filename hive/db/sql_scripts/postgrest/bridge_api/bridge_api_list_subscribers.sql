@@ -23,7 +23,7 @@ BEGIN
     );
 
     IF _last_name IS NOT NULL THEN
-        PERFORM hivemind_postgrest_utilities.find_subscription_id(_last_name,  _community, True); -- pagination checks
+        PERFORM hivemind_postgrest_utilities.find_subscription_id(_last_name,  _community, True); -- Check that account exists and is subscribed to the community
     END IF;
 
     _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
