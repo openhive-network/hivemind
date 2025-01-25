@@ -200,7 +200,7 @@ class DbState:
     def _execute_query_with_modified_work_mem(
         cls, db: Db, sql: str, explain: bool = False, value: Optional[str] = None, separate_transaction: bool = True
     ) -> None:
-        divide_factor = 64
+        divide_factor = 32
         _value = value or f'{int(get_memory_amount() / divide_factor)}MB'
 
         sql_show_work_mem = 'SHOW work_mem;'
