@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "slice indices must be integers or None or have an __index__ method",
-  "message": "Invalid parameters"
-}

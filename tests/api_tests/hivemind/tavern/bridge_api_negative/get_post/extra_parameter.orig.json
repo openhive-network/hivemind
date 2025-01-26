@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "too many keyword arguments {'estra_parameter': 'extra_value'}",
-  "message": "Invalid parameters"
-}

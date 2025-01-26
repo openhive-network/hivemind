@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "limit exceeds max (101 > 100)",
-  "message": "Invalid parameters"
-}

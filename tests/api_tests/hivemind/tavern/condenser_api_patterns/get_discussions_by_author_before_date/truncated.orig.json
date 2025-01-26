@@ -1,9 +1,0 @@
-{
-  "error": {
-    "code": -32602,
-    "data": "too many keyword arguments {'truncate_body': 10}",
-    "message": "Invalid parameters"
-  },
-  "id": 1,
-  "jsonrpc": "2.0"
-}

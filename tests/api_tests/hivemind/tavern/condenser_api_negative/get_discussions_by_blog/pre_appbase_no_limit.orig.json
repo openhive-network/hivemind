@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "missing query key {'limit'}",
-  "message": "Invalid parameters"
-}

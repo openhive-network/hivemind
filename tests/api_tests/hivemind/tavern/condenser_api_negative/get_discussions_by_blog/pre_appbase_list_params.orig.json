@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "query must be dict",
-  "message": "Invalid parameters"
-}

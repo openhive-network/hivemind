@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "invalid account name length: `too.long.account.name`",
-  "message": "Invalid parameters"
-}
