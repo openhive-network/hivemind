@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "data": "call() got multiple values for argument 'method'",
-  "message": "Invalid parameters"
-}

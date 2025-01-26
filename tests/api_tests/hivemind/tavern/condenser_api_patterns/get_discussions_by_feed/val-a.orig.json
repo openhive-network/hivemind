@@ -1,8 +1,0 @@
-Check `readme.txt` first
-
-post_id  author           permlink                                                                                        
--------  ---------------  ------------------------------------------------------------------------------------------------
-
-
-
-The result is empty, because the account `jamesc` hasn't any reblog. The result for `val-a` account consist of 5 records and every record is a reblog.

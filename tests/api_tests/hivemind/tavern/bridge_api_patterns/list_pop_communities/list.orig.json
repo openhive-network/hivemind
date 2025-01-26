@@ -1,5 +1,0 @@
-{
-  "code": -32000,
-  "data": "InvalidRequestError: A value is required for bind parameter 'cutoff' (Background on this error at: http://sqlalche.me/e/13/cd3x)",
-  "message": "Server error"
-}

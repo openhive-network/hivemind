@@ -1,5 +1,0 @@
-{
-  "code": -32000,
-  "data": "ApiError: get_account_votes is no longer supported, for details see https://steemit.com/steemit/@steemitdev/additional-public-api-change",
-  "message": "Server error"
-}

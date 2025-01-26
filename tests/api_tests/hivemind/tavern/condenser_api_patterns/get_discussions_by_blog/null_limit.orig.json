@@ -1,9 +1,0 @@
-{
-  "error": {
-    "code": -32602,
-    "data": "limit must be provided",
-    "message": "Invalid parameters"
-  },
-  "id": 1,
-  "jsonrpc": "2.0"
-}
