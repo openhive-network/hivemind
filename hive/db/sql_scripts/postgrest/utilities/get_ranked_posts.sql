@@ -1231,7 +1231,7 @@ _trending_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-      SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+      SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
   END IF;
 
   _result = (
@@ -1245,9 +1245,9 @@ BEGIN
           hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        WHERE
-          hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND (_post_id = 0 OR 0 < _trending_limit OR (0 = _trending_limit AND hp.id < _post_id))
+        WHERE hs.account_id = _observer_id 
+          AND NOT hp.is_paidout
+          AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
@@ -1333,7 +1333,7 @@ BEGIN
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
-          AND (_post_id = 0 OR 0 < _hot_limit OR (0 = _hot_limit AND hp.id < _post_id))
+          AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
