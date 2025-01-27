@@ -1,7 +1,7 @@
 [
   {
     "follower": "tester5",
-    "following": "tester3",
+    "following": "tester1",
     "what": [
       "blog"
     ]
@@ -15,7 +15,7 @@
   },
   {
     "follower": "tester5",
-    "following": "tester1",
+    "following": "tester3",
     "what": [
       "blog"
     ]

@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_following"
-          params: {"account":"shadowspub","start":"foxkoit","follow_type":"ignore","limit":2}
+          params: {"account":"shadowspub","start":"fintech-jesus","follow_type":"ignore","limit":2}
       response:
         status_code: 200
         verify_response_with:

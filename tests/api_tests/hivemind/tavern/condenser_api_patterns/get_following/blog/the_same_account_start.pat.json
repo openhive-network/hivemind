@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "follower": "robrigo",
+    "following": "roadscape",
+    "what": [
+      "blog"
+    ]
+  },
+  {
+    "follower": "roelandp",
+    "following": "roadscape",
+    "what": [
+      "blog"
+    ]
+  },
+  {
+    "follower": "romanskv",
+    "following": "roadscape",
+    "what": [
+      "blog"
+    ]
+  }
+]
