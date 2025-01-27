@@ -8,7 +8,7 @@ $$
 DECLARE
   _account TEXT;
   _account_id INT;
-  _start_id INT;
+  _start TEXT;
   _limit INT;
   _follow_type TEXT;
   _hive_follows_state INT;
@@ -27,12 +27,11 @@ BEGIN
 
   _account_id = hivemind_postgrest_utilities.find_account_id(_account, True);
 
-  _start_id =
-    hivemind_postgrest_utilities.find_account_id(
-      hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', False),
-        True),
+  _start =
+    hivemind_postgrest_utilities.valid_account(
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', False),
       True);
+  PERFORM hivemind_postgrest_utilities.find_account_id(_start, True); -- make sure account exists
 
   IF _called_from_condenser_api THEN
     _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'follow_type', False), 'blog');
@@ -52,7 +51,7 @@ BEGIN
   RETURN jsonb_build_object(
     'account', _account,
     'account_id', _account_id,
-    'start_id', _start_id,
+    'start', COALESCE(_start, ''),
     'limit', _limit,
     'follow_type', _follow_type,
     'follows', _follow_type = 'blog',
