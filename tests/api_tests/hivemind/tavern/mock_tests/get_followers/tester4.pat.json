@@ -1,13 +1,13 @@
 [
   {
-    "follower": "tester3",
+    "follower": "tester2",
     "following": "tester4",
     "what": [
       "blog"
     ]
   },
   {
-    "follower": "tester2",
+    "follower": "tester3",
     "following": "tester4",
     "what": [
       "blog"

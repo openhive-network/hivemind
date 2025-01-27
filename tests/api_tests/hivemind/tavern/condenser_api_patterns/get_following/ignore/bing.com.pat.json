@@ -1,35 +1,14 @@
 [
   {
     "follower": "bing.com",
-    "following": "cheetah79",
+    "following": "cheetah",
     "what": [
       "ignore"
     ]
   },
   {
     "follower": "bing.com",
-    "following": "cheetah93",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "bing.com",
-    "following": "cheetah95",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "bing.com",
-    "following": "cheetah46",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "bing.com",
-    "following": "cheetah94",
+    "following": "cheetah08",
     "what": [
       "ignore"
     ]
@@ -43,21 +22,7 @@
   },
   {
     "follower": "bing.com",
-    "following": "cheetah65",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "bing.com",
-    "following": "cheetah70",
-    "what": [
-      "ignore"
-    ]
-  },
-  {
-    "follower": "bing.com",
-    "following": "cheetah68",
+    "following": "cheetah16",
     "what": [
       "ignore"
     ]
@@ -65,6 +30,41 @@
   {
     "follower": "bing.com",
     "following": "cheetah17",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "bing.com",
+    "following": "cheetah18",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "bing.com",
+    "following": "cheetah20",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "bing.com",
+    "following": "cheetah22",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "bing.com",
+    "following": "cheetah23",
+    "what": [
+      "ignore"
+    ]
+  },
+  {
+    "follower": "bing.com",
+    "following": "cheetah46",
     "what": [
       "ignore"
     ]
