@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "condenser_api.get_followers"
-          params: {"account":"cheetah","follow_type":"ignore","start":"bithost99","limit":1000}
+          params: {"account":"cheetah","follow_type":"ignore","start":"zebbra2014","limit":1000}
       response:
         status_code: 200
         verify_response_with:
