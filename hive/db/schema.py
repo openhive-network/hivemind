@@ -166,7 +166,6 @@ def build_metadata():
         metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
-        sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),  # first 'image' from 'json'
         sa.Column('body', TEXT, nullable=False, server_default=''),
         sa.Column('json', TEXT, nullable=False, server_default=''),
     )

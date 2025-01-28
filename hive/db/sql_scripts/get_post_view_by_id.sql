@@ -65,6 +65,89 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   muted_reasons INTEGER
 );
 
+CREATE OR REPLACE FUNCTION hivemind_app.extract_img_url_from_json_metadata(json_metadata_as_string TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    json_data   jsonb;
+    images      jsonb;
+    first_image jsonb;
+    img_url     TEXT;
+BEGIN
+    -- Explicitly check if the input is NULL or empty after trimming
+    IF json_metadata_as_string IS NULL OR TRIM(json_metadata_as_string) = '' THEN
+        RETURN '';
+    END IF;
+    
+    -- Attempt to parse the input string as JSON
+    BEGIN
+        json_data := json_metadata_as_string::jsonb;
+    EXCEPTION WHEN others THEN
+        -- If parsing fails, return an empty string
+        RETURN '';
+    END;
+
+    -- Check if the JSON contains the "image" key
+    IF NOT json_data ? 'image' THEN
+        RETURN '';
+    END IF;
+
+    -- Extract the value associated with the "image" key
+    images := json_data->'image';
+
+    -- If "image" is null, return an empty string
+    IF images IS NULL THEN
+        RETURN '';
+    END IF;
+
+    -- Determine the type of the "images" value
+    IF jsonb_typeof(images) = 'string' THEN
+        -- If it's a string, assign its value to img_url
+        img_url := images #>> '{}';
+    ELSIF jsonb_typeof(images) = 'array' THEN
+        -- If it's an array, check if it's non-empty
+        IF jsonb_array_length(images) < 1 THEN
+            RETURN '';
+        END IF;
+
+        -- Extract the first element of the array
+        first_image := images->0;
+
+        -- Check if the first element is a string
+        IF jsonb_typeof(first_image) = 'string' THEN
+            img_url := first_image #>> '{}';
+        ELSE
+            RETURN '';
+        END IF;
+    ELSE
+        -- If "images" is neither a string nor an array, return an empty string
+        RETURN '';
+    END IF;
+
+    -- If img_url is empty after extraction, return empty string
+    IF img_url IS NULL OR img_url = '' THEN
+        RETURN '';
+    END IF;
+
+    -- Perform Validation Checks
+
+    -- Check if the URL length is >= 1024 characters
+    IF LENGTH(img_url) >= 1024 THEN
+        RETURN '';
+    END IF;
+
+    img_url := TRIM(BOTH E' \n\t\r\u00A0' FROM img_url);
+
+    -- Check if the URL starts with 'http'
+    IF LOWER(SUBSTRING(img_url FROM 1 FOR 4)) <> 'http' THEN
+        RETURN '';
+    END IF;
+
+    RETURN img_url;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
 AS $function$
 BEGIN 
@@ -81,7 +164,7 @@ BEGIN
     hpd_p.permlink,
     hpd.title,
     hpd.body,
-    hpd.img_url,
+    hivemind_app.extract_img_url_from_json_metadata(hpd.json) as img_url,
     hcd.category,
     hp.category_id,
     hp.depth,
@@ -284,7 +367,7 @@ BEGIN
     hpd_p.permlink,
     hpd.title,
     hpd.body,
-    hpd.img_url,
+    hivemind_app.extract_img_url_from_json_metadata(hpd.json) as img_url,
     hcd.category,
     hp.category_id,
     hp.depth,

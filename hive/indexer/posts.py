@@ -4,20 +4,17 @@ import logging
 
 from diff_match_patch import diff_match_patch
 from ujson import dumps, loads
-from collections import OrderedDict
 
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
-from hive.indexer import community
 from hive.indexer.block import VirtualOperationType
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
-from hive.indexer.notification_cache import NotificationCache
-from hive.utils.misc import chunks, UniqueCounter
+from hive.utils.misc import chunks
 from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 
 log = logging.getLogger(__name__)
@@ -26,9 +23,19 @@ log = logging.getLogger(__name__)
 class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
+    # LRU cache for (author-permlink -> id) lookup (~400mb per 1M entries)
+    CACHE_SIZE = 2000000
+    _hits = 0
+    _miss = 0
+
     comment_payout_ops = {}
     _comment_payout_ops = []
-    _counter = UniqueCounter()
+
+    @classmethod
+    def last_id(cls):
+        """Get the last indexed post id."""
+        sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0 ORDER BY id DESC LIMIT 1;"
+        return DbAdapterHolder.common_block_processing_db().query_one(sql) or 0
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -60,7 +67,7 @@ class Posts(DbAdapterHolder):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
         sql = f"""
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth, muted_reasons
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
@@ -84,14 +91,12 @@ class Posts(DbAdapterHolder):
         error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])
 
         is_new_post = result['is_new_post']
-        parent_author = op.get('parent_author')
         if is_new_post:
             # add content data to hive_post_data
             post_data = dict(
                 title=op['title'] if op['title'] else '',
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
-                is_root = 'true' if parent_author is None or parent_author == '' else 'false'
             )
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
@@ -99,64 +104,21 @@ class Posts(DbAdapterHolder):
             new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body']) if op['body'] else None
             new_title = op['title'] if op['title'] else None
             new_json = op['json_metadata'] if op['json_metadata'] else None
-            post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
+            post_data = dict(title=new_title, body=new_body, json=new_json)
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0:
-            type_id = 12 if row['depth'] == 1 else 13
-            key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
-            NotificationCache.comment_notifications[key] = {
-                "block_num": op['block_num'],
-                "type_id": type_id,
-                "created_at": block_date,
-                "src": row['author_id'],
-                "dst": row['parent_author_id'],
-                "dst_post_id": row['parent_id'],
-                "post_id": row['id'],
-                'counter': cls._counter.increment(op['block_num']),
-            }
-
-        # If muted_reasons is set here, it was caused by a post getting muted by a community type 2 or 3
-        # if it's not a new post we skip this step as a notification would already be sent
-        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post == True:
-            muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
-            reasons = []
-            if 1 in muted_reasons:
-                if row['depth'] > 0:
-                    reasons.append("community type does not allow non members to post or comment")
-                else:
-                    reasons.append("community type does not allow non members to post")
-            if 2 in muted_reasons:
-                reasons.append("parent post/comment is muted")
-
-            if len(reasons) == 1:
-                payload = f"Post is muted because {reasons[0]}"
-            else:
-                payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
-
-            Notify(
-                block_num=op['block_num'],
-                type_id='error',
-                dst_id=result['author_id'],
-                when=block_date,
-                post_id=result['id'],
-                payload=payload,
-                community_id=result['community_id'],
-                src_id=result['community_id'],
-            )
 
         if not DbState.is_massive_sync():
             if error:
+                author_id = result['author_id']
                 Notify(
                     block_num=op['block_num'],
                     type_id='error',
-                    dst_id=result['author_id'],
+                    dst_id=author_id,
                     when=block_date,
                     post_id=result['id'],
                     payload=error,
-                    community_id=result['community_id'],
-                    src_id=result['community_id'],
                 )
 
     @classmethod
@@ -220,7 +182,6 @@ class Posts(DbAdapterHolder):
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()
 
-            cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update_posts_rshares in votes
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
@@ -233,6 +194,8 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def comment_payout_op(cls):
+        values_limit = 1000
+
         """ Process comment payment operations """
         for k, v in cls.comment_payout_ops.items():
             author = None
@@ -417,9 +380,8 @@ class Posts(DbAdapterHolder):
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid):
         error = None
-        # is_valid is always set to true for now
         if community_id and is_valid and not Community.is_post_valid(community_id, op):
-            error = 'not allowed to post in this community (role is muted)'
+            error = 'not authorized'
             # is_valid = False # TODO: reserved for future blacklist status?
         return error
 
