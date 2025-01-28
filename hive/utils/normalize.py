@@ -250,13 +250,6 @@ def rep_to_raw(rep):
     return int(sign * pow(10, rep))
 
 
-def safe_img_url(url, max_size=1024):
-    """Given an image URL, strict enforce size and validity."""
-    if url and isinstance(url, str) and len(url) < max_size and url[0:4] == 'http':
-        return url.strip()
-    return None
-
-
 def strtobool(val):
     """Convert a booleany str to a bool.
 

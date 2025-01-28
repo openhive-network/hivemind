@@ -52,8 +52,7 @@ class PostDataCache(DbAdapterHolder):
                 title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
                 body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
                 json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
-                img_url = 'NULL' if data['img_url'] is None else f"{escape_characters(data['img_url'])}"
-                value = f"({k},{title},{img_url},{body},{json})"
+                value = f"({k},{title},{body},{json})"
                 if data['is_new_post']:
                     values_insert.append(value)
                 else:
@@ -63,7 +62,7 @@ class PostDataCache(DbAdapterHolder):
             if len(values_insert) > 0:
                 sql = f"""
                     INSERT INTO
-                        {SCHEMA_NAME}.hive_post_data (id, title, img_url, body, json)
+                        {SCHEMA_NAME}.hive_post_data (id, title, body, json)
                     VALUES
                 """
                 sql += ','.join(values_insert)
@@ -76,7 +75,6 @@ class PostDataCache(DbAdapterHolder):
                 sql = f"""
                     UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
                         title = COALESCE( data_source.title, hpd.title ),
-                        img_url = COALESCE( data_source.img_url, hpd.img_url ),
                         body = COALESCE( data_source.body, hpd.body ),
                         json = COALESCE( data_source.json, hpd.json )
                     FROM
@@ -85,7 +83,7 @@ class PostDataCache(DbAdapterHolder):
                 """
                 sql += ','.join(values_update)
                 sql += """
-                    ) AS T(id, title, img_url, body, json)
+                    ) AS T(id, title, body, json)
                     ) AS data_source
                     WHERE hpd.id = data_source.id
                 """
