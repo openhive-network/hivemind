@@ -60,7 +60,7 @@ start_webserver() {
     export PGRST_DB_POOL_ACQUISITION_TIMEOUT=10
     #export PGRST_DB_ROOT_SPEC="home" #this may be need to be uncommented in local environment to let tests work, if empty jsons are 
 
-    postgrest
+    exec postgrest
 }
 
 start_webserver
