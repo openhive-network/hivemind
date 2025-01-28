@@ -15,7 +15,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
 from hive.utils.misc import chunks
-from hive.utils.normalize import escape_characters, legacy_amount, safe_img_url, sbd_amount
+from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 
 log = logging.getLogger(__name__)
 
@@ -90,20 +90,11 @@ class Posts(DbAdapterHolder):
 
         error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])
 
-        img_url = None
-        if 'image' in md:
-            img_url = md['image']
-            if isinstance(img_url, list) and img_url:
-                img_url = img_url[0]
-        if img_url:
-            img_url = safe_img_url(img_url)
-
         is_new_post = result['is_new_post']
         if is_new_post:
             # add content data to hive_post_data
             post_data = dict(
                 title=op['title'] if op['title'] else '',
-                img_url=img_url if img_url else '',
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
             )
@@ -113,9 +104,7 @@ class Posts(DbAdapterHolder):
             new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body']) if op['body'] else None
             new_title = op['title'] if op['title'] else None
             new_json = op['json_metadata'] if op['json_metadata'] else None
-            # when 'new_json' is not empty, 'img_url' should be overwritten even if it is itself empty
-            new_img = img_url if img_url else '' if new_json else None
-            post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
+            post_data = dict(title=new_title, body=new_body, json=new_json)
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)

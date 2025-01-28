@@ -18,7 +18,6 @@ from hive.utils.normalize import (
     load_json_key,
     trunc,
     rep_log10,
-    safe_img_url,
     secs_to_str,
     strtobool,
     int_log_level,
@@ -97,13 +96,6 @@ def test_trunc():
 def test_rep_log10():
     assert rep_log10(0) == 25
     assert rep_log10('2321387987213') == 55.29
-
-
-def test_safe_img_url():
-    url = 'https://example.com/a.jpg'
-    max_size = len(url) + 1
-    assert safe_img_url(url, max_size) == url
-    assert safe_img_url(url + 'x', max_size) is None
 
 
 def test_strtobool():
