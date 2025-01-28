@@ -11,4 +11,4 @@ fi
 sed "s|\${REWRITE_LOG}|$REWRITE_LOG|g" /usr/local/openresty/nginx/conf/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf
 
 # Start nginx
-/usr/local/openresty/bin/openresty -g 'daemon off;'
+exec /usr/local/openresty/bin/openresty -g 'daemon off;'
