@@ -462,7 +462,7 @@ def setup(db, admin_db):
     build_metadata().create_all(db.engine())
 
     # tune auto vacuum/analyze
-    reset_autovac(db)
+    # Disable special autovacuum at least for massive sync      reset_autovac(db)
 
     # sets FILLFACTOR:
     set_fillfactor(db)
@@ -794,7 +794,7 @@ ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
 def set_fillfactor(db):
     """Initializes/resets FILLFACTOR for tables which are intesively updated"""
 
-    fillfactor_config = {'hive_posts': 70, 'hive_post_data': 70, 'hive_votes': 70}
+    fillfactor_config = {'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 100}
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
