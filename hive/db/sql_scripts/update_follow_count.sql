@@ -15,14 +15,14 @@ SET
 FROM
   (
     WITH data_cfe(user_id) AS (
-      SELECT DISTINCT following FROM hivemind_app.hive_follows WHERE block_num BETWEEN _first_block AND _last_block
-      UNION 
-      SELECT DISTINCT follower FROM hivemind_app.hive_follows WHERE block_num BETWEEN _first_block AND _last_block
+      SELECT DISTINCT following FROM hivemind_app.follows WHERE block_num BETWEEN _first_block AND _last_block
+      UNION
+      SELECT DISTINCT follower FROM hivemind_app.follows WHERE block_num BETWEEN _first_block AND _last_block
     )
     SELECT
         data_cfe.user_id AS user_id,
-        (SELECT COUNT(1) FROM hivemind_app.hive_follows hf1 WHERE hf1.following = data_cfe.user_id AND hf1.state = 1) AS followers_count,
-        (SELECT COUNT(1) FROM hivemind_app.hive_follows hf2 WHERE hf2.follower = data_cfe.user_id AND hf2.state = 1) AS following_count
+        (SELECT COUNT(1) FROM hivemind_app.follows AS hf1 WHERE hf1.following = data_cfe.user_id) AS followers_count,
+        (SELECT COUNT(1) FROM hivemind_app.follows AS hf2 WHERE hf2.follower = data_cfe.user_id) AS following_count
     FROM
         data_cfe
   ) AS data_set(user_id, followers_count, following_count)
