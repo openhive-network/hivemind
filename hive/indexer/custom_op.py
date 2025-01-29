@@ -10,7 +10,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.reblog import Reblog
 from hive.utils.json import valid_command, valid_date, valid_keys, valid_op_json
 from hive.utils.normalize import load_json_key
-from hive.indexer.new_follow import NewFollow  # Import NewFollow
+from hive.indexer.follow import Follow
 
 log = logging.getLogger(__name__)
 
@@ -111,6 +111,6 @@ class CustomOp:
 
         cmd, op_json = op_json  # ['follow', {data...}]
         if cmd == 'follow':
-            NewFollow.process_new_follow_op(account, op_json, block_num)
+            Follow.process_follow_op(account, op_json, block_num)
         elif cmd == 'reblog':
             Reblog.reblog_op(account, op_json, block_date, block_num)
