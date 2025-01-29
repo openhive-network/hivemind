@@ -10,7 +10,7 @@ from funcy.seqs import first  # Ensure 'first' is imported
 log = logging.getLogger(__name__)
 
 
-class NewFollowAction(enum.IntEnum):
+class FollowAction(enum.IntEnum):
     Nothing = 0
     Mute = 1
     Blacklist = 2
@@ -28,8 +28,8 @@ class NewFollowAction(enum.IntEnum):
     ResetAllLists = 16  # cancel all existing records of all types
 
 
-class NewFollow(DbAdapterHolder):
-    """Handles processing of new follow-related operations."""
+class Follow(DbAdapterHolder):
+    """Handles processing of follow-related operations."""
 
     items_to_flush = []
     unique_names = set()
@@ -51,7 +51,7 @@ class NewFollow(DbAdapterHolder):
 
     @classmethod
     def _validate_op(cls, account, op):
-        """Validate and normalize the new follow-related operation."""
+        """Validate and normalize the follow-related operation."""
         if 'what' not in op or not isinstance(op['what'], list) or 'follower' not in op or 'following' not in op:
             log.info("follow_op %s ignored due to basic errors", op)
             return None
@@ -59,22 +59,22 @@ class NewFollow(DbAdapterHolder):
         what = first(op['what']) or ''
         # the empty 'what' is used to clear existing 'blog' or 'ignore' state, however it can also be used to
         defs = {
-            '': NewFollowAction.Nothing,
-            'blog': NewFollowAction.Follow,
-            'follow': NewFollowAction.Follow,
-            'ignore': NewFollowAction.Mute,
-            'blacklist': NewFollowAction.Blacklist,
-            'follow_blacklist': NewFollowAction.FollowBlacklisted,
-            'unblacklist': NewFollowAction.Unblacklist,
-            'unfollow_blacklist': NewFollowAction.UnFollowBlacklisted,
-            'follow_muted': NewFollowAction.FollowMuted,
-            'unfollow_muted': NewFollowAction.UnfollowMuted,
-            'reset_blacklist': NewFollowAction.ResetBlacklist,
-            'reset_following_list': NewFollowAction.ResetFollowingList,
-            'reset_muted_list': NewFollowAction.ResetMutedList,
-            'reset_follow_blacklist': NewFollowAction.ResetFollowBlacklist,
-            'reset_follow_muted_list': NewFollowAction.ResetFollowMutedList,
-            'reset_all_lists': NewFollowAction.ResetAllLists,
+            '': FollowAction.Nothing,
+            'blog': FollowAction.Follow,
+            'follow': FollowAction.Follow,
+            'ignore': FollowAction.Mute,
+            'blacklist': FollowAction.Blacklist,
+            'follow_blacklist': FollowAction.FollowBlacklisted,
+            'unblacklist': FollowAction.Unblacklist,
+            'unfollow_blacklist': FollowAction.UnFollowBlacklisted,
+            'follow_muted': FollowAction.FollowMuted,
+            'unfollow_muted': FollowAction.UnfollowMuted,
+            'reset_blacklist': FollowAction.ResetBlacklist,
+            'reset_following_list': FollowAction.ResetFollowingList,
+            'reset_muted_list': FollowAction.ResetMutedList,
+            'reset_follow_blacklist': FollowAction.ResetFollowBlacklist,
+            'reset_follow_muted_list': FollowAction.ResetFollowMutedList,
+            'reset_all_lists': FollowAction.ResetAllLists,
         }
         if not isinstance(what, str) or what not in defs:
             log.info("follow_op %s ignored due to unknown type of follow", op)
@@ -103,8 +103,8 @@ class NewFollow(DbAdapterHolder):
         }
 
     @classmethod
-    def process_new_follow_op(cls, account, op_json, block_num):
-        """Process an incoming new follow-related operation."""
+    def process_follow_op(cls, account, op_json, block_num):
+        """Process an incoming follow-related operation."""
 
         op = cls._validate_op(account, op_json)
         if not op:
@@ -116,7 +116,7 @@ class NewFollow(DbAdapterHolder):
         follower = op['follower']
         cls.unique_names.add(follower)
         action = op['action']
-        if action in [NewFollowAction.ResetBlacklist, NewFollowAction.ResetFollowingList, NewFollowAction.ResetMutedList, NewFollowAction.ResetFollowBlacklist, NewFollowAction.ResetFollowMutedList, NewFollowAction.ResetAllLists]:
+        if action in [FollowAction.ResetBlacklist, FollowAction.ResetFollowingList, FollowAction.ResetMutedList, FollowAction.ResetFollowBlacklist, FollowAction.ResetFollowMutedList, FollowAction.ResetAllLists]:
             cls.items_to_flush.append((follower, None, op))
             cls.idx += 1
         else:
@@ -147,7 +147,7 @@ class NewFollow(DbAdapterHolder):
             follower_id = name_to_id.get(follower)
             following_id = name_to_id.get(following)
             null_id = name_to_id.get('null')
-            if action == NewFollowAction.Follow:
+            if action == FollowAction.Follow:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -170,7 +170,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=following_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.Mute:
+            elif action == FollowAction.Mute:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert mute record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -193,7 +193,7 @@ class NewFollow(DbAdapterHolder):
                     follower_id=follower_id,
                     following_id=following_id
                 )
-            elif action == NewFollowAction.Nothing:
+            elif action == FollowAction.Nothing:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot remove mute/follow record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -213,7 +213,7 @@ class NewFollow(DbAdapterHolder):
                     follower_id=follower_id,
                     following_id=following_id
                 )
-            elif action == NewFollowAction.Blacklist:
+            elif action == FollowAction.Blacklist:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert blacklist record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -228,7 +228,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=following_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.Unblacklist:
+            elif action == FollowAction.Unblacklist:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unblacklist record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -240,7 +240,7 @@ class NewFollow(DbAdapterHolder):
                     follower_id=follower_id,
                     following_id=following_id
                 )
-            elif action == NewFollowAction.FollowMuted:
+            elif action == FollowAction.FollowMuted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -255,7 +255,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=following_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.UnfollowMuted:
+            elif action == FollowAction.UnfollowMuted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unfollow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -267,7 +267,7 @@ class NewFollow(DbAdapterHolder):
                     follower_id=follower_id,
                     following_id=following_id
                 )
-            elif action == NewFollowAction.FollowBlacklisted:
+            elif action == FollowAction.FollowBlacklisted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -282,7 +282,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=following_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.UnFollowBlacklisted:
+            elif action == FollowAction.UnFollowBlacklisted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unfollow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
@@ -294,7 +294,7 @@ class NewFollow(DbAdapterHolder):
                     follower_id=follower_id,
                     following_id=following_id
                 )
-            elif action == NewFollowAction.ResetFollowingList:
+            elif action == FollowAction.ResetFollowingList:
                 if not follower_id:
                     log.warning("Cannot reset follow records: missing ID for follower.")
                     continue
@@ -305,7 +305,7 @@ class NewFollow(DbAdapterHolder):
                     """,
                     follower_id=follower_id
                 )
-            elif action == NewFollowAction.ResetMutedList:
+            elif action == FollowAction.ResetMutedList:
                 if not follower_id:
                     log.warning("Cannot reset muted list records: missing ID for follower.")
                     continue
@@ -316,7 +316,7 @@ class NewFollow(DbAdapterHolder):
                     """,
                     follower_id=follower_id
                 )
-            elif action == NewFollowAction.ResetBlacklist:
+            elif action == FollowAction.ResetBlacklist:
                 if not follower_id:
                     log.warning("Cannot reset blacklist records: missing ID for follower.")
                     continue
@@ -327,7 +327,7 @@ class NewFollow(DbAdapterHolder):
                     """,
                     follower_id=follower_id
                 )
-            elif action == NewFollowAction.ResetFollowMutedList:
+            elif action == FollowAction.ResetFollowMutedList:
                 if not follower_id:
                     log.warning("Cannot reset follow muted list records: missing ID for follower.")
                     continue
@@ -349,7 +349,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=null_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.ResetFollowBlacklist:
+            elif action == FollowAction.ResetFollowBlacklist:
                 if not follower_id:
                     log.warning("Cannot reset follow blacklist records: missing ID for follower.")
                     continue
@@ -371,7 +371,7 @@ class NewFollow(DbAdapterHolder):
                     following_id=null_id,
                     block_num=op['block_num']
                 )
-            elif action == NewFollowAction.ResetAllLists:
+            elif action == FollowAction.ResetAllLists:
                 if not follower_id:
                     log.warning("Cannot reset all follow list records: missing ID for follower.")
                     continue
