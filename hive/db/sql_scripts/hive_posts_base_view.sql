@@ -13,9 +13,9 @@ SELECT
 FROM hivemind_app.hive_posts hp
 ;
 
-DROP VIEW IF EXISTS hivemind_app.hive_posts_pp_view CASCADE;
+DROP VIEW IF EXISTS hivemind_app.hive_posts_parent_view CASCADE;
 
-CREATE OR REPLACE VIEW hivemind_app.hive_posts_pp_view
+CREATE OR REPLACE VIEW hivemind_app.hive_posts_parent_view
  AS
  SELECT hp.id,
     hp.community_id,
