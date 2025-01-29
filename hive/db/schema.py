@@ -660,7 +660,6 @@ def setup_runtime_code(db):
         "bridge_list_subscribers.sql",
         "update_follow_count.sql",
         "delete_reblog_feed_cache.sql",
-        "follows.sql",
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
         "postgrest/home.sql",
