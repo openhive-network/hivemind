@@ -118,7 +118,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
                                     WHERE m.follower = hpv.parent_author_id AND m.following = hpv.author_id)
 UNION ALL
  SELECT f.block_num,
-    hivemind_app.notification_id(f.block_num, 15, f.hive_rowid::integer) AS id,
+    hivemind_app.notification_id(f.block_num, 15, (row_number() OVER ())::INTEGER) AS id,
     0 AS post_id,
     15 AS type_id,
     (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (f.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
