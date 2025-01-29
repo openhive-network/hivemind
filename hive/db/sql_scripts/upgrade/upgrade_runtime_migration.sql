@@ -38,33 +38,6 @@ END
 $$
 ;
 
---- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/686/
-
-CREATE INDEX IF NOT EXISTS hive_follows_follower_where_blacklisted_idx
-    ON hivemind_app.hive_follows USING btree
-    (follower ASC NULLS LAST)
-    TABLESPACE haf_tablespace
-    WHERE blacklisted;
-
-CREATE INDEX IF NOT EXISTS hive_follows_follower_where_follow_blacklists_idx
-    ON hivemind_app.hive_follows USING btree
-    (follower ASC NULLS LAST)
-    TABLESPACE haf_tablespace
-    WHERE follow_blacklists;
-
-CREATE INDEX IF NOT EXISTS hive_follows_follower_where_follow_muted_idx
-    ON hivemind_app.hive_follows USING btree
-    (follower ASC NULLS LAST)
-    TABLESPACE haf_tablespace
-    WHERE follow_muted;
-
-CREATE INDEX IF NOT EXISTS hive_follows_following_state_id_idx
-    ON hivemind_app.hive_follows USING btree
-    (following ASC NULLS LAST, state ASC NULLS LAST, id ASC NULLS LAST)
-    TABLESPACE haf_tablespace;
-
-DROP INDEX IF EXISTS hivemind_app.hive_follows_following_state_idx;
-
 --- Must be at the end
 TRUNCATE TABLE hivemind_app.hive_db_data_migration;
 
