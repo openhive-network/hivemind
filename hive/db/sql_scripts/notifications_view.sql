@@ -81,11 +81,12 @@ $BODY$;
 
 -- View: hivemind_app.hive_raw_notifications_as_view
 
+-- hive_posts, hive_follows, hive_reblogs, hive_subscriptions, hive_mentions (these are scored by the src account's rank)
 DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_as_view CASCADE;
 CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
  AS
  SELECT notifs.block_num,
-    notifs.id,
+--    notifs.id,
     notifs.post_id,
     notifs.type_id,
     notifs.created_at,
@@ -97,11 +98,11 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
     notifs.payload,
     harv.score
    FROM ( SELECT hpv.block_num,
-            hivemind_app.notification_id(hpv.block_num,
-                CASE hpv.depth
-                    WHEN 1 THEN 12
-                    ELSE 13
-                END, hpv.id) AS id,
+            -- hivemind_app.notification_id(hpv.block_num,
+            --     CASE hpv.depth
+            --         WHEN 1 THEN 12
+            --         ELSE 13
+            --     END, hpv.id) AS id,
             hpv.id AS post_id,
                 CASE hpv.depth
                     WHEN 1 THEN 12
@@ -114,14 +115,14 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
             ''::character varying(16) AS community,
             ''::character varying AS community_title,
             ''::character varying AS payload
-           FROM hivemind_app.hive_posts_pp_view hpv
+           FROM hivemind_app.hive_posts_parent_view hpv
                   WHERE hpv.depth > 0 AND
                         NOT EXISTS (SELECT NULL::text
                                     FROM hivemind_app.hive_follows hf
-                                    WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
+                                    WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2) -- not muted replies
 UNION ALL
  SELECT hf.block_num,
-    hivemind_app.notification_id(hf.block_num, 15, hf.id) AS id,
+--    hivemind_app.notification_id(hf.block_num, 15, hf.id) AS id,
     0 AS post_id,
     15 AS type_id,
     (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (hf.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
@@ -136,7 +137,7 @@ UNION ALL
 
 UNION ALL
  SELECT hr.block_num,
-    hivemind_app.notification_id(hr.block_num, 14, hr.id) AS id,
+--    hivemind_app.notification_id(hr.block_num, 14, hr.id) AS id,
     hp.id AS post_id,
     14 AS type_id,
     hr.created_at,
@@ -146,11 +147,11 @@ UNION ALL
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hivemind_app.hive_reblogs hr
+   FROM hivemind_app.hive_reblogs hr -- reblogs
    JOIN hivemind_app.hive_posts hp ON hr.post_id = hp.id
 UNION ALL
  SELECT hs.block_num,
-    hivemind_app.notification_id(hs.block_num, 11, hs.id) AS id,
+--    hivemind_app.notification_id(hs.block_num, 11, hs.id) AS id,
     0 AS post_id,
     11 AS type_id,
     hs.created_at,
@@ -160,11 +161,11 @@ UNION ALL
     hc.name AS community,
     hc.title AS community_title,
     ''::character varying AS payload
-   FROM hivemind_app.hive_subscriptions hs
+   FROM hivemind_app.hive_subscriptions hs -- subscriptions
    JOIN hivemind_app.hive_communities hc ON hs.community_id = hc.id
 UNION ALL
  SELECT hm.block_num,
-    hivemind_app.notification_id(hm.block_num, 16, hm.id) AS id,
+--    hivemind_app.notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
     (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (hm.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
@@ -174,18 +175,19 @@ UNION ALL
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hivemind_app.hive_mentions hm
+   FROM hivemind_app.hive_mentions hm  -- mentions
    JOIN hivemind_app.hive_posts hp ON hm.post_id = hp.id
 ) notifs
 JOIN hivemind_app.hive_accounts_rank_view harv ON harv.id = notifs.src
 ;
 
-DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view_noas cascade;
-CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view_noas
+--vote has own score, new communities score as 35 (magic number), persistent notifications are already scored
+DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view_no_account_score cascade;
+CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view_no_account_score
 AS
 SELECT -- votes
       vn.block_num
-    , vn.id
+--    , vn.id
     , vn.post_id
     , vn.type_id
     , vn.created_at
@@ -203,7 +205,7 @@ FROM
   (
     SELECT
         hv1.block_num
-      , hivemind_app.notification_id(hv1.block_num, 17, hv1.id::integer) AS id
+--      , hivemind_app.notification_id(hv1.block_num, 17, hv1.id::integer) AS id
       , hpv.id AS post_id
       , 17 AS type_id
       , hv1.last_update AS created_at
@@ -233,7 +235,7 @@ FROM
 UNION ALL
   SELECT -- new community
       hc.block_num as block_num
-      , hivemind_app.notification_id(hc.block_num, 11, hc.id) as id
+--      , hivemind_app.notification_id(hc.block_num, 11, hc.id) as id
       , 0 as post_id
       , 1 as type_id
       , hc.created_at as created_at
@@ -249,7 +251,7 @@ UNION ALL
 UNION ALL
   SELECT --persistent notifs
        hn.block_num
-     , hivemind_app.notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
+--     , hivemind_app.notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
      , hn.post_id as post_id
      , hn.type_id as type_id
      , hn.created_at as created_at
@@ -272,6 +274,6 @@ FROM
   (
   SELECT * FROM hivemind_app.hive_raw_notifications_as_view
   UNION ALL
-  SELECT * FROM hivemind_app.hive_raw_notifications_view_noas
+  SELECT * FROM hivemind_app.hive_raw_notifications_view_no_account_score
   ) as notifs
 WHERE notifs.score >= 0 AND notifs.src IS DISTINCT FROM notifs.dst;
