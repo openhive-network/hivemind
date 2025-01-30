@@ -241,28 +241,6 @@ def build_metadata():
     )
 
     sa.Table(
-        'hive_follows',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('follower', sa.Integer, nullable=False),
-        sa.Column('following', sa.Integer, nullable=False),
-        sa.Column('state', SMALLINT, nullable=False, server_default='1'),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
-        sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
-        sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
-        sa.Index('hive_follows_following_state_id_idx', 'following', 'state', 'id'), # index used by condenser_get_followers
-        sa.Index('hive_follows_follower_state_idx', 'follower', 'state'),
-        sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
-        sa.Index('hive_follows_block_num_idx', 'block_num'),
-        sa.Index('hive_follows_follower_where_blacklisted_idx', 'follower', postgresql_where=sql_text('blacklisted')),
-        sa.Index('hive_follows_follower_where_follow_muted_idx', 'follower', postgresql_where=sql_text('follow_muted')),
-        sa.Index('hive_follows_follower_where_follow_blacklists_idx', 'follower', postgresql_where=sql_text('follow_blacklists')),
-    )
-
-    sa.Table(
         'hive_reblogs',
         metadata,
         sa.Column('id', sa.Integer, primary_key=True),
@@ -606,9 +584,7 @@ def setup_runtime_code(db):
         "hive_posts_base_view.sql",
         "hive_posts_view.sql",
         "hive_votes_view.sql",
-        "hive_muted_accounts_view.sql",
         "hive_muted_accounts_by_id_view.sql",
-        "hive_blacklisted_accounts_by_observer_view.sql",
         "get_post_view_by_id.sql",
         "hive_post_operations.sql",
         "head_block_time.sql",
@@ -638,7 +614,6 @@ def setup_runtime_code(db):
         "condenser_get_blog.sql",
         "condenser_get_content.sql",
         "condenser_tags.sql",
-        "condenser_follows.sql",
         "hot_and_trends.sql",
         "update_hive_posts_children_count.sql",
         "database_api_list_votes.sql",
@@ -646,7 +621,6 @@ def setup_runtime_code(db):
         "update_hive_post_root_id.sql",
         "condenser_get_by_account_comments.sql",
         "condenser_get_by_blog_without_reblog.sql",
-        "bridge_get_by_feed_with_reblog.sql",
         "condenser_get_by_blog.sql",
         "bridge_get_account_posts_by_blog.sql",
         "condenser_get_names_by_reblogged.sql",
@@ -826,7 +800,6 @@ def reset_autovac(db):
 #        'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
         'hive_post_tags': (5000, 10000),
-#        'hive_follows': (5000, 5000),
 #        'hive_feed_cache': (5000, 5000),
 #        'hive_reblogs': (5000, 5000),
     }
