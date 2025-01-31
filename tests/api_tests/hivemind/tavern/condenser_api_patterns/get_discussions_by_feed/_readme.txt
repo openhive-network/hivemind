@@ -45,25 +45,3 @@ b) Find post's id for given author and permlink
 SELECT id FROM hive_posts WHERE author = 'michelle.gent' AND permlink = 'dusty-the-demon-hunter-part-4'
 found: `711172`
 ------------
-Following query is taken from 0.23 version( for 5 million blocks ).
-c) Put calculated values instead of _ID_ACCOUNT, _POST_ID, _LIMIT.
------------
-select hpc.post_id, hpc.author, hpc.permlink
-FROM hive_posts_cache hpc
-JOIN
-(
-SELECT post_id
-FROM hive_feed_cache
-JOIN hive_follows ON account_id = hive_follows.following AND state = 1
-JOIN hive_accounts ON hive_follows.following = hive_accounts.id
-WHERE hive_follows.follower = _ID_ACCOUNT(here 441)
- AND hive_feed_cache.created_at > ( '2016-09-15 19:47:15.0'::timestamp - interval '1 month' )
-GROUP BY post_id 
-          HAVING MIN(hive_feed_cache.created_at) <= ( 
-                      SELECT MIN(created_at) FROM hive_feed_cache WHERE post_id = _POST_ID(here 711172)
-               AND account_id IN (SELECT following FROM hive_follows
-                                  WHERE follower = _ID_ACCOUNT(here 441) AND state = 1))
-ORDER BY MIN(hive_feed_cache.created_at) DESC
-) T ON hpc.post_id = T.post_id
-ORDER BY post_id DESC
-LIMIT _LIMIT(here 10)
