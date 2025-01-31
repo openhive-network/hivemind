@@ -1,6 +1,5 @@
 ---
   test_name: Hivemind condenser_api.get_followers most ignored
-  # SELECT COUNT(id) as record_count, following FROM hive_follows WHERE state=2 GROUP BY(following) ORDER BY record_count DESC LIMIT 10;
   marks:
     - fullsynctest
 
