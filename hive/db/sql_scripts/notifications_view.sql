@@ -78,7 +78,7 @@ $BODY$;
 
 -- View: hivemind_app.hive_raw_notifications_as_view
 
--- hive_posts, hive_follows, hive_reblogs, hive_subscriptions, hive_mentions (these are scored by the src account's rank)
+-- hive_posts, follows, hive_reblogs, hive_subscriptions, hive_mentions (these are scored by the src account's rank)
 DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_as_view CASCADE;
 CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
  AS
