@@ -462,7 +462,7 @@ def setup(db, admin_db):
     build_metadata().create_all(db.engine())
 
     # tune auto vacuum/analyze
-    # Disable special autovacuum at least for massive sync      reset_autovac(db)
+    reset_autovac(db)
 
     # sets FILLFACTOR:
     set_fillfactor(db)
@@ -773,12 +773,12 @@ def reset_autovac(db):
     per-table, in the format (autovacuum_threshold, autoanalyze_threshold)."""
 
     autovac_config = {  # vacuum  analyze
-        'hive_accounts': (50000, 100000),
+#        'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
         'hive_post_tags': (5000, 10000),
-        'hive_follows': (5000, 5000),
-        'hive_feed_cache': (5000, 5000),
-        'hive_reblogs': (5000, 5000),
+#        'hive_follows': (5000, 5000),
+#        'hive_feed_cache': (5000, 5000),
+#        'hive_reblogs': (5000, 5000),
     }
 
     for table, (n_vacuum, n_analyze) in autovac_config.items():
