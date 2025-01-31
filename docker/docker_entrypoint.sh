@@ -23,15 +23,13 @@ ADD_MOCKS=${ADD_MOCKS:-false}
 LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
+POSTGREST_SERVER=0
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
-WITH_APPS=0
+WITH_REPTRACKER=0
 REPTRACKER_SCHEMA=reptracker_app
-SWAGGER_URL="{hivemind-host}"
-STATEMENT_TIMEOUT=""
 reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
-hafah_dir="$SCRIPT_DIR/app/hafah"
-haf_dir="$SCRIPT_DIR/haf"
+
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -46,9 +44,6 @@ while [ $# -gt 0 ]; do
         export POSTGRES_URL="${1#*=}"
         export POSTGRES_ADMIN_URL="${1#*=}"
         ;;
-    --statement-timeout=*)
-        STATEMENT_TIMEOUT="${1#*=}"
-        ;;
     --add-mocks=*)
         ADD_MOCKS="${1#*=}"
         ;;
@@ -61,20 +56,16 @@ while [ $# -gt 0 ]; do
     --reptracker-schema=*)
         REPTRACKER_SCHEMA="${1#*=}"
         ;;
-    --swagger-url=*)
-        SWAGGER_URL="${1#*=}"
-        ;;
     --upgrade-schema)
         INSTALL_APP=1
         DO_SCHEMA_UPGRADE=1
         ;;
-    --with-apps)
-        WITH_APPS=1
+    --with-reptracker)
+        WITH_REPTRACKER=1
         ;;
     *)
         arg=$1
-        [[ -n "${arg}" ]] && HIVEMIND_ARGS+=("${arg}")
-        ;;
+        [[ -n "${arg}" ]] && HIVEMIND_ARGS+=("${arg}")  
   esac
   shift
 done
@@ -102,54 +93,38 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    if [[ "$POSTGREST_SERVER" = 1 ]]; then
+      echo "Running postgrest setup..."
+      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
+    else
+      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    fi
   else
     log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}"
+    if [[ "$POSTGREST_SERVER" = 1 ]]; then
+      echo "Running postgrest setup..."
+      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+    else
+      exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}"
+    fi
   fi
 }
-
-run_server() {
-  local db_url=${POSTGRES_URL}
-  # shellcheck source=/dev/null
-  if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting hivemind postgrest server with log $LOG_PATH"
-    echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
-  else
-    log "run_hive" "Starting hivemind postgrest server..."
-    echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
-  fi
-}
-
 
 setup() {
   log "setup" "Setting up the database..."
   cd /home/hivemind/app
-  # If STATEMENT_TIMEOUT was provided, pass it to setup_postgres.sh
-  if [[ -n "${STATEMENT_TIMEOUT}" ]]; then
-      ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}" --statement-timeout="${STATEMENT_TIMEOUT}"
-  else
-      ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
-  fi
+  ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
-  if [ "${WITH_APPS}" -eq 1 ]; then
+  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
     ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="${REPTRACKER_SCHEMA}" --is_forking="false"
     popd
-
-    # Install hafah application
-    pushd "$hafah_dir"
-    ./scripts/setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}" --path-to-haf="${haf_dir}"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
-    popd
   fi
 
   ./install_app.sh --reptracker-schema-name="${REPTRACKER_SCHEMA}" --postgres-url="${POSTGRES_ADMIN_URL}"
-
+  
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null
@@ -172,10 +147,10 @@ uninstall_app() {
   cd /home/hivemind/app
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
-  if [ "${WITH_APPS}" -eq 1 ]; then
+  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
     "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --schema=${REPTRACKER_SCHEMA} --postgres-url="${POSTGRES_ADMIN_URL}"
-    "${SCRIPT_DIR}/app/hafah/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
+
 }
 
 log "global" "Command: '${COMMAND}'"
@@ -203,14 +178,15 @@ case "$COMMAND" in
       date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
       run_hive
       ;;
-    server)
+    postgrest-server)
+      POSTGREST_SERVER=1
+      # HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
       HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]:1}")
       log "global" "Running Hivemind with arguments '${HIVEMIND_ARGS[*]}'"
-      run_server
+      run_hive
       ;;
     *)
-      log "global" "COMMAND - first argument is not valid. Available commands: setup, install_app, uninstall_app, sync, server"
-      ;;
+      run_hive
 esac
 
 log "global" "Exiting docker entrypoint..."
