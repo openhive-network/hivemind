@@ -13,7 +13,7 @@ function log () {
     echo "[Entrypoint] $timestamp INFO  [$category] (main) $message"
 }
 
-log "global" "Parameters passed directly to Hivemind docker entrypoint: $*"
+log "global" "Parameters passed directly to Hivemind docker entrypoint: '$*'"
 
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
@@ -64,21 +64,22 @@ while [ $# -gt 0 ]; do
         WITH_REPTRACKER=1
         ;;
     *)
-        HIVEMIND_ARGS+=("$1")
+        arg=$1
+        [[ -n "${arg}" ]] && HIVEMIND_ARGS+=("${arg}")  
   esac
   shift
 done
 
-log "global" "Collected Hivemind arguments: ${HIVEMIND_ARGS[*]}"
-log "global" "Using PostgreSQL instance: $POSTGRES_URL"
-log "global" "Using PostgreSQL Admin URL: $POSTGRES_ADMIN_URL"
+log "global" "Collected Hivemind arguments: '${HIVEMIND_ARGS[*]}'"
+log "global" "Using PostgreSQL instance: '$POSTGRES_URL'"
+log "global" "Using PostgreSQL Admin URL: '$POSTGRES_ADMIN_URL'"
 
 run_hive_no_exec() {
   local db_url=${1:-"${POSTGRES_URL}"}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting Hivemind with log $LOG_PATH"
+    log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
     hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
@@ -91,7 +92,7 @@ run_hive() {
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting Hivemind with log $LOG_PATH"
+    log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
     if [[ "$POSTGREST_SERVER" = 1 ]]; then
       echo "Running postgrest setup..."
       exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
@@ -152,6 +153,7 @@ uninstall_app() {
 
 }
 
+log "global" "Command: '${COMMAND}'"
 case "$COMMAND" in
     setup)
       setup
@@ -180,7 +182,7 @@ case "$COMMAND" in
       POSTGREST_SERVER=1
       # HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
       HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]:1}")
-      log "global" "Running Hivemind with arguments ${HIVEMIND_ARGS[*]}"
+      log "global" "Running Hivemind with arguments '${HIVEMIND_ARGS[*]}'"
       run_hive
       ;;
     *)
