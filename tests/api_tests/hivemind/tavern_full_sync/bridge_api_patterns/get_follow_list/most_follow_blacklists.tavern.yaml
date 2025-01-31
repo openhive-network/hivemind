@@ -1,7 +1,5 @@
 ---
   test_name: Hivemind bridge.get_follow_list most follow blacklists
-  # new function - SQL can be used to get freshest most follow blacklists
-  # SELECT  COUNT(id) as record_count, follower FROM hive_follows WHERE follow_blacklists GROUP BY(follower) ORDER BY record_count DESC LIMIT 3;
   marks:
     - fullsynctest
 
