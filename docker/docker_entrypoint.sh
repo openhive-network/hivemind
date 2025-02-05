@@ -28,8 +28,8 @@ INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
 WITH_REPTRACKER=0
 REPTRACKER_SCHEMA=reptracker_app
+STATEMENT_TIMEOUT=""
 reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
-
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -43,6 +43,9 @@ while [ $# -gt 0 ]; do
     --postgres-url=*)
         export POSTGRES_URL="${1#*=}"
         export POSTGRES_ADMIN_URL="${1#*=}"
+        ;;
+    --statement-timeout=*)
+        STATEMENT_TIMEOUT="${1#*=}"
         ;;
     --add-mocks=*)
         ADD_MOCKS="${1#*=}"
@@ -65,7 +68,8 @@ while [ $# -gt 0 ]; do
         ;;
     *)
         arg=$1
-        [[ -n "${arg}" ]] && HIVEMIND_ARGS+=("${arg}")  
+        [[ -n "${arg}" ]] && HIVEMIND_ARGS+=("${arg}")
+        ;;
   esac
   shift
 done
@@ -113,7 +117,12 @@ run_hive() {
 setup() {
   log "setup" "Setting up the database..."
   cd /home/hivemind/app
-  ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  # If STATEMENT_TIMEOUT was provided, pass it to setup_postgres.sh
+  if [[ -n "${STATEMENT_TIMEOUT}" ]]; then
+      ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}" --statement-timeout="${STATEMENT_TIMEOUT}"
+  else
+      ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  fi
 
   if [ "${WITH_REPTRACKER}" -eq 1 ]; then
     # if we force to install rep tracker then we setup it as non-forking app
@@ -124,7 +133,7 @@ setup() {
   fi
 
   ./install_app.sh --reptracker-schema-name="${REPTRACKER_SCHEMA}" --postgres-url="${POSTGRES_ADMIN_URL}"
-  
+
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null
