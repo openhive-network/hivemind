@@ -81,7 +81,7 @@ else
 fi
 
 "$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind"
-"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group"
+"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group" --public
 
 #psql "$POSTGRES_ACCESS" -c "GRANT SET ON PARAMETER log_min_messages TO hivemind;"
 
