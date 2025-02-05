@@ -11,7 +11,7 @@ source "$SCRIPTPATH/common.sh"
 
 log_exec_params "$@"
 
-# Script reponsible for setup of specified postgres instance.
+# Script responsible for setup of specified postgres instance.
 #
 # - creates all builtin hivemind roles on pointed PostgreSQL server instance
 
@@ -20,10 +20,11 @@ print_help () {
     echo
     echo "Allows to setup a database already filled by HAF instance, to work with hivemind application."
     echo "OPTIONS:"
-    echo "  --host=VALUE         Allows to specify a PostgreSQL host location (defaults to /var/run/postgresql)"
-    echo "  --port=NUMBER        Allows to specify a PostgreSQL operating port (defaults to 5432)"
-    echo "  --postgres-url=URL   Allows to specify a PostgreSQL URL (in opposite to separate --host and --port options)"
-    echo "  --help               Display this help screen and exit"
+    echo "  --host=VALUE               Allows to specify a PostgreSQL host location (defaults to /var/run/postgresql)"
+    echo "  --port=NUMBER              Allows to specify a PostgreSQL operating port (defaults to 5432)"
+    echo "  --postgres-url=URL         Allows to specify a PostgreSQL URL (in opposite to separate --host and --port options)"
+    echo "  --statement-timeout=VALUE  Set the statement_timeout for the hivemind_user role (e.g., 10s)"
+    echo "  --help                   Display this help screen and exit"
     echo
 }
 
@@ -37,6 +38,7 @@ supplement_builtin_roles() {
 POSTGRES_HOST="/var/run/postgresql"
 POSTGRES_PORT=5432
 POSTGRES_URL=""
+STATEMENT_TIMEOUT=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -48,6 +50,9 @@ while [ $# -gt 0 ]; do
         ;;
     --postgres-url=*)
         export POSTGRES_URL="${1#*=}"
+        ;;
+    --statement-timeout=*)
+        STATEMENT_TIMEOUT="${1#*=}"
         ;;
     --help)
         print_help
@@ -81,3 +86,8 @@ fi
 #psql "$POSTGRES_ACCESS" -c "GRANT SET ON PARAMETER log_min_messages TO hivemind;"
 
 supplement_builtin_roles "$POSTGRES_ACCESS"
+
+if [ -n "$STATEMENT_TIMEOUT" ]; then
+    echo "Setting statement timeout for hivemind_user role to ${STATEMENT_TIMEOUT}..."
+    psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "ALTER ROLE hivemind_user SET statement_timeout TO '${STATEMENT_TIMEOUT}';"
+fi
