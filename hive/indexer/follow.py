@@ -28,24 +28,16 @@ class FollowAction(enum.IntEnum):
     ResetAllLists = 16  # cancel all existing records of all types
 
 
+def chunk(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
 class Follow(DbAdapterHolder):
     """Handles processing of follow-related operations."""
 
     items_to_flush = []
     unique_names = set()
-    nothing_items_to_flush = {}
-    blacklisted_items_to_flush = {}
-    follow_muted_items_to_flush = {}
-    follow_blacklisted_items_to_flush = {}
-    unblacklist_items_to_flush = {}
-    unfollow_blacklisted_items_to_flush = {}
-    unfollow_muted_items_to_flush = {}
-    reset_blacklists_to_flush = {}
-    reset_followinglists_to_flush = {}
-    reset_mutedlists_to_flush = {}
-    reset_follow_blacklists_to_flush = {}
-    reset_follow_mutedlists_to_flush = {}
-    reset_all_lists_to_flush = {}
 
     idx = 0
 
@@ -142,6 +134,7 @@ class Follow(DbAdapterHolder):
         if missing_accounts:
             log.warning(f"Missing account IDs for names: {missing_accounts}")
 
+        queries = []
         for (follower, following, op) in cls.items_to_flush:
             action = op['action']
             follower_id = name_to_id.get(follower)
@@ -151,289 +144,93 @@ class Follow(DbAdapterHolder):
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follows({follower_id}, {following_id}, {op['block_num']})")
             elif action == FollowAction.Mute:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert mute record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id,
-                    block_num=op['block_num']
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.insert_muted({follower_id}, {following_id}, {op['block_num']})")
+                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
             elif action == FollowAction.Nothing:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot remove mute/follow record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
             elif action == FollowAction.Blacklist:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert blacklist record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.insert_blacklisted({follower_id}, {following_id}, {op['block_num']})")
             elif action == FollowAction.Unblacklist:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unblacklist record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.blacklisted
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.delete_blacklisted({follower_id}, {following_id})")
             elif action == FollowAction.FollowMuted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {following_id}, {op['block_num']})")
             elif action == FollowAction.UnfollowMuted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unfollow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_muted
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_muted({follower_id}, {following_id})")
             elif action == FollowAction.FollowBlacklisted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot insert follow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {following_id}, {op['block_num']})")
             elif action == FollowAction.UnFollowBlacklisted:
                 if not follower_id or not following_id:
                     log.warning(f"Cannot delete unfollow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted
-                    WHERE follower = :follower_id AND following = :following_id
-                    """,
-                    follower_id=follower_id,
-                    following_id=following_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_blacklisted({follower_id}, {following_id})")
             elif action == FollowAction.ResetFollowingList:
                 if not follower_id:
                     log.warning("Cannot reset follow records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
             elif action == FollowAction.ResetMutedList:
                 if not follower_id:
                     log.warning("Cannot reset muted list records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
             elif action == FollowAction.ResetBlacklist:
                 if not follower_id:
                     log.warning("Cannot reset blacklist records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.blacklisted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
             elif action == FollowAction.ResetFollowMutedList:
                 if not follower_id:
                     log.warning("Cannot reset follow muted list records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_muted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=null_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
             elif action == FollowAction.ResetFollowBlacklist:
                 if not follower_id:
                     log.warning("Cannot reset follow blacklist records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=null_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
             elif action == FollowAction.ResetAllLists:
                 if not follower_id:
                     log.warning("Cannot reset all follow list records: missing ID for follower.")
                     continue
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.blacklisted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_muted
-                    WHERE follower=:follower_id
-                    """,
-                    follower_id=follower_id
-                )
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=null_id,
-                    block_num=op['block_num']
-                )
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                    VALUES (:follower_id, :following_id, :block_num)
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """,
-                    follower_id=follower_id,
-                    following_id=null_id,
-                    block_num=op['block_num']
-                )
+                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
+                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
             else:
                 raise Exception(f"Invalid action {action}")
+
+        for q in chunk(queries, 1000):
+            cls.db.query_no_return(';\n'.join(q))
 
         cls.items_to_flush.clear()
         cls.unique_names.clear()
