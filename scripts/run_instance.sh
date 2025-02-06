@@ -107,5 +107,5 @@ CMD_ARGS+=("${HIVEMIND_ARGS[@]}")
 
 docker container rm -f -v "$CONTAINER_NAME" 2>/dev/null || true
 
-docker run --rm -it -e UID=$(id -u) -e GID=$(id -g) --name "$CONTAINER_NAME" --stop-timeout=180 ${DOCKER_ARGS[@]} -e POSTGRES_URL="${POSTGRES_ACCESS}" "${IMAGE_NAME}" "${CMD_ARGS[@]}"
+docker run --rm -it -e UID="$(id -u)" -e GID="$(id -g)" --name "$CONTAINER_NAME" --stop-timeout=180 ${DOCKER_ARGS[@]} -e POSTGRES_URL="${POSTGRES_ACCESS}" "${IMAGE_NAME}" "${CMD_ARGS[@]}"
 
