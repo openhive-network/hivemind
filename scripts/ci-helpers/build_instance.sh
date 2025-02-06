@@ -16,7 +16,7 @@ print_help () {
 cat <<EOF
 Usage: $0 <image_tag> <src_dir> <registry_url> [OPTION[=VALUE]]...
 Allows to build docker image containing Hivemind installation
-The image will be tagged with name '<registry_url>/instance:instance-<image_tag>'
+The image will be tagged with name '<registry_url>:<image_tag>'
 
 OPTIONS:
   -?,--help                        Display this help screen and exit
@@ -62,10 +62,6 @@ done
 [[ -z "$SRCROOTDIR" ]] && printf "Missing argument #2 - source directory path\n\n" && print_help && exit 1
 [[ -z "$REGISTRY" ]] && printf "Missing argument #3 - target container registry URL\n\n" && print_help && exit 1
 
-# Supplement a registry path by trailing slash (if needed)
-[[ "${REGISTRY}" != */ ]] && REGISTRY="${REGISTRY}/"
-REGISTRY_WITHOUT_SLASH="$(echo "$REGISTRY" | sed 's/\/$//')"
-
 printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
 pushd "$SRCROOTDIR"
@@ -75,10 +71,9 @@ pwd
 
 CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-6"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
-TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
-MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
-ALTERNATE_TAG="${REGISTRY_WITHOUT_SLASH}:$BUILD_IMAGE_TAG"
-REWRITER_IMAGE_NAME=${REGISTRY}postgrest-rewriter:$BUILD_IMAGE_TAG
+TAG="${REGISTRY}:$BUILD_IMAGE_TAG"
+MINIMAL_TAG="${REGISTRY}/minimal:$BUILD_IMAGE_TAG"
+REWRITER_IMAGE_NAME=${REGISTRY}/postgrest-rewriter:$BUILD_IMAGE_TAG
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -118,13 +113,13 @@ if [ -z "$GIT_LAST_COMMIT_DATE" ]; then
 fi
 
 REWRITER_TARGET=without_tag
-if [ ! -z "$BUILD_IMAGE_TAG" ]; then
+if [[ -n "$BUILD_IMAGE_TAG" ]]; then
   REWRITER_TARGET=with_tag
-  TAG_BUILD_ARGS="--build-arg GIT_COMMIT_TAG=$BUILD_IMAGE_TAG"
+  TAG_BUILD_ARGS=("--build-arg" "GIT_COMMIT_TAG=$BUILD_IMAGE_TAG")
 fi
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
-  --build-context "runtime=docker-image://${REGISTRY}runtime:${CI_IMAGE_TAG}" \
+  --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
   --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
   --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
@@ -142,7 +137,7 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
     --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
     --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
     --target=$REWRITER_TARGET \
-    $TAG_BUILD_ARGS \
+    "${TAG_BUILD_ARGS[@]}" \
     --tag "$REWRITER_IMAGE_NAME" \
     --load \
     --file Dockerfile.rewriter .
@@ -153,7 +148,6 @@ if [[ -n "${CI:-}" ]]; then
 fi
 
 docker tag "$TAG" "$MINIMAL_TAG"
-docker tag "$TAG" "$ALTERNATE_TAG"
 
 [[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
 

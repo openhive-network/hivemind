@@ -140,13 +140,13 @@ Please take care to set correct file permissions in order to provide write acces
 
 ```bash
 cd /storage1/haf-data-dir/
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
+../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf:<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
 ```
 
 For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn a 5M block replay to prepare a HAF database for further quick testing:
 
 ```bash
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-at-block=5000000
+../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf:1.27.5 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-at-block=5000000
 ```
 
 By examining hived.log file or using docker logs haf-mainnet-instance, you can examine state of the started instance. Once replay will be finished, you can continue and start the Hivemind sync process.
@@ -184,18 +184,18 @@ The commands below assume that the running HAF container has IP: 172.17.0.2
 
 ```bash
 # Set-up Database
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app \
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind:local install_app \
    --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
 
 # Run the sync
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync \
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind:local sync \
    --database-url="postgresql://hivemind@172.17.0.2:5432/haf_block_log"
 ```
 
 ## Updating from an existing hivemind database
 
 ```bash
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app --upgrade-schema \
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind:local install_app --upgrade-schema \
    --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
 ```
 
