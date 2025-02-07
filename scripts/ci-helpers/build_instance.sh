@@ -71,15 +71,18 @@ pwd
 
 CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-6"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
+TAG_BUILD_ARGS=("--platform=linux/amd64" "--progress=plain")
 TAG="${REGISTRY}:$BUILD_IMAGE_TAG"
 MINIMAL_TAG="${REGISTRY}/minimal:$BUILD_IMAGE_TAG"
-REWRITER_IMAGE_NAME=${REGISTRY}/postgrest-rewriter:$BUILD_IMAGE_TAG
+REWRITER_IMAGE_TAG=${REGISTRY}/postgrest-rewriter:$BUILD_IMAGE_TAG
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
   BUILD_OPTIONS+=("--push")
+  TAG_BUILD_ARGS+=("--push")
 else
   BUILD_OPTIONS+=("--load")
+  TAG_BUILD_ARGS+=("--load")
 fi
 
 BUILD_TIME="$(date -uIseconds)"
@@ -115,9 +118,10 @@ fi
 REWRITER_TARGET=without_tag
 if [[ -n "$BUILD_IMAGE_TAG" ]]; then
   REWRITER_TARGET=with_tag
-  TAG_BUILD_ARGS=("--build-arg" "GIT_COMMIT_TAG=$BUILD_IMAGE_TAG")
+  TAG_BUILD_ARGS+=("--build-arg" "GIT_COMMIT_TAG=$BUILD_IMAGE_TAG")
 fi
 
+echo "Building Hivemind full and minimal images..."
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
@@ -127,28 +131,44 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
   --tag "$TAG" \
+  --tag "$MINIMAL_TAG" \
   --file Dockerfile .
+echo "Done!"
 
-  docker buildx build \
-    --build-arg BUILD_TIME="$BUILD_TIME" \
-    --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
-    --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
-    --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
-    --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
-    --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
-    --target=$REWRITER_TARGET \
-    "${TAG_BUILD_ARGS[@]}" \
-    --tag "$REWRITER_IMAGE_NAME" \
-    --load \
-    --file Dockerfile.rewriter .
+echo "Building HYivemind rewriter image..."
+docker buildx build "${TAG_BUILD_ARGS[@]}" \
+  --build-arg BUILD_TIME="$BUILD_TIME" \
+  --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
+  --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
+  --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
+  --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
+  --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
+  --target=$REWRITER_TARGET \
+  --tag "$REWRITER_IMAGE_TAG" \
+  --file Dockerfile.rewriter .
+echo "Done!"
 
-# Since CI pushes the image directly to the registry, it needs to be pulled to be tagged
+# Since CI pushes the image directly to the registry, it needs to be pulled to be tagged for publishing job
 if [[ -n "${CI:-}" ]]; then
  docker pull "$TAG"
+ docker pull "$REWRITER_IMAGE_TAG"
 fi
 
-docker tag "$TAG" "$MINIMAL_TAG"
-
-[[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
+# Generate dotenv file if necessary
+if [[ -n "${DOT_ENV_FILENAME:-}" ]]; then
+  if [[ -n "${DOT_VAR_NAME:-}" ]]; then
+    {
+      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}"}=$TAG"
+      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}_MINIMAL_IMAGE"}=$MINIMAL_TAG"
+      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}_REWRITER_IMAGE"}=$REWRITER_IMAGE_NAME"
+    } > "$DOT_ENV_FILENAME"
+  else
+    { 
+      echo "IMAGE=$TAG"
+      echo "MINIMAL_IMAGE=$MINIMAL_TAG"
+      echo "REWRITER_IMAGE=$REWRITER_IMAGE_NAME" 
+    } > "$DOT_ENV_FILENAME"
+  fi
+fi
 
 popd
