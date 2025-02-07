@@ -19,9 +19,10 @@ Allows to build docker image containing Hivemind installation
 The image will be tagged with name '<registry_url>:<image_tag>'
 
 OPTIONS:
-  -?,--help                        Display this help screen and exit
-  --dot-env-filename=<filename>    File name of the dot env file to be generated
-  --dot-env-var-prefix=<var name>  Vaiable name prefix to be used in the generated file (default: '')
+  -?,--help                          Display this help screen and exit
+  --dot-env-filename=<filename>      File name of the dot env file to be generated
+  --dot-env-var-prefix=<var name>    Vaiable name prefix to be used in the generated file (default: '')
+  --additional-image-tag=<image_tag> Additional image tag (default: '')
 EOF
 }
 
@@ -34,9 +35,12 @@ while [ $# -gt 0 ]; do
     --dot-env-filename=*)
         DOT_ENV_FILENAME="${1#*=}"
         ;;
-    --dot-env-var-name=*)
+    --dot-env-var-prefix=*)
         DOTENV_VAR_NAME_PREFIX="${1#*=}"
         ;;
+    --additional-image-tag=*)
+        CI_COMMIT_TAG="${1#*=}"
+        ;;    
     *)
         if [ -z "$BUILD_IMAGE_TAG" ];
         then
@@ -161,6 +165,18 @@ if [[ -n "${DOT_ENV_FILENAME:-}" ]]; then
       echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}MINIMAL_IMAGE=$MINIMAL_TAG"
       echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}REWRITER_IMAGE=$REWRITER_IMAGE_TAG"
   } > "$DOT_ENV_FILENAME"
+fi
+
+# Tag with additional tag if specified.
+if [[ -n "$CI_COMMIT_TAG" ]]; then
+  docker tag "$TAG" "$REGISTRY:$CI_COMMIT_TAG"
+  docker tag "$REWRITER_IMAGE_TAG" "$REGISTRY/postgrest-rewriter:$CI_COMMIT_TAG"
+  
+  # On CI push new tags to registry.
+  if [[ -n "${CI:-}" ]]; then
+    docker push "$REGISTRY:$CI_COMMIT_TAG"
+    docker push "$REGISTRY/postgrest-rewriter:$CI_COMMIT_TAG"
+  fi
 fi
 
 popd

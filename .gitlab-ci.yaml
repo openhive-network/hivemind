@@ -84,14 +84,8 @@ include:
     "$CI_PROJECT_DIR" \
     "$CI_REGISTRY_IMAGE" \
     --dot-env-filename=hivemind_image.env \
-    --dot-env-var-name=HIVEMIND
-  if [[ -n "$CI_COMMIT_TAG" ]]; then
-    docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
-    docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
-
-    docker tag "$CI_REGISTRY_IMAGE/postgrest-rewriter:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE/postgrest-rewriter:$CI_COMMIT_TAG"
-    docker push "$CI_REGISTRY_IMAGE/postgrest-rewriter:$CI_COMMIT_TAG"
-  fi  
+    --dot-env-var-prefix=HIVEMIND \
+    --additional-image-tag=${CI_COMMIT_TAG}
   cat hivemind_image.env
   echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
 
