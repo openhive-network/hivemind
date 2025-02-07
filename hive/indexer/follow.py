@@ -1,3 +1,4 @@
+
 import logging
 import enum
 
@@ -33,11 +34,40 @@ def chunk(lst, n):
         yield lst[i:i + n]
 
 
+#  def insert_of_update(items, follower, following, op):
+    #  found = False
+    #  num = len(items)
+    #  for (n, (itfollower, itfollowing, itop)) in enumerate(reversed(items)):
+        #  if itop['action'] in [FollowAction.ResetBlacklist, FollowAction.ResetFollowingList, FollowAction.ResetMutedList, FollowAction.ResetFollowBlacklist, FollowAction.ResetFollowMutedList, FollowAction.ResetAllLists]:
+            #  break
+        #  if follower == itfollower and following == itfollowing:
+            #  items[num-n-1] = (follower, following, op)
+            #  found = True
+            #  break
+    #  if not found:
+        #  items.append((follower, following, op))
+
+
+def insert_of_update(items, follower, following, block_num):
+    for (n, (itfollower, itfollowing, itblock_num)) in enumerate(items):
+        if follower == itfollower and following == itfollowing:
+            items[n] = (follower, following, block_num)
+            break
+    else:
+        items.append((follower, following, block_num))
+
+
 class Follow(DbAdapterHolder):
     """Handles processing of follow-related operations."""
 
-    items_to_flush = []
+    #  items_to_flush = []
     unique_names = set()
+    follows_items_to_flush = []
+    muted_items_to_flush = []
+    blacklisted_items_to_flush = []
+    follow_muted_items_to_flush = []
+    follow_blacklisted_items_to_flush = []
+
 
     idx = 0
 
@@ -108,22 +138,89 @@ class Follow(DbAdapterHolder):
         follower = op['follower']
         cls.unique_names.add(follower)
         action = op['action']
-        if action in [FollowAction.ResetBlacklist, FollowAction.ResetFollowingList, FollowAction.ResetMutedList, FollowAction.ResetFollowBlacklist, FollowAction.ResetFollowMutedList, FollowAction.ResetAllLists]:
-            cls.items_to_flush.append((follower, None, op))
-            cls.idx += 1
-        else:
+        if action == FollowAction.Follow:
             for following in op.get('following', []):
-                cls.items_to_flush.append((follower, following, op))
+                insert_of_update(cls.follows_items_to_flush, follower, following, op['block_num'])
+                insert_of_update(cls.muted_items_to_flush, follower, following, 0)
                 cls.unique_names.add(following)
                 cls.idx += 1
+        elif action == FollowAction.Mute:
+            for following in op.get('following', []):
+                insert_of_update(cls.follows_items_to_flush, follower, following, 0)
+                insert_of_update(cls.muted_items_to_flush, follower, following, op['block_num'])
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.Nothing:
+            for following in op.get('following', []):
+                insert_of_update(cls.follows_items_to_flush, follower, following, 0)
+                insert_of_update(cls.muted_items_to_flush, follower, following, 0)
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.Blacklist:
+            for following in op.get('following', []):
+                insert_of_update(cls.blacklisted_items_to_flush, follower, following, op['block_num'])
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.Unblacklist:
+            for following in op.get('following', []):
+                insert_of_update(cls.blacklisted_items_to_flush, follower, following, 0)
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.FollowBlacklisted:
+            for following in op.get('following', []):
+                insert_of_update(cls.follow_blacklisted_items_to_flush, follower, following, op['block_num'])
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.UnFollowBlacklisted:
+            for following in op.get('following', []):
+                insert_of_update(cls.follow_blacklisted_items_to_flush, follower, following, 0)
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.FollowMuted:
+            for following in op.get('following', []):
+                insert_of_update(cls.follow_muted_items_to_flush, follower, following, op['block_num'])
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.UnfollowMuted:
+            for following in op.get('following', []):
+                insert_of_update(cls.follow_muted_items_to_flush, follower, following, 0)
+                cls.unique_names.add(following)
+                cls.idx += 1
+        elif action == FollowAction.ResetBlacklist:
+            insert_of_update(cls.blacklisted_items_to_flush, follower, 0, -1)
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowingList:
+            insert_of_update(cls.follows_items_to_flush, follower, 0, -1)
+            cls.idx += 1
+        elif action == FollowAction.ResetMutedList:
+            insert_of_update(cls.muted_items_to_flush, follower, 0, -1)
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowBlacklist:
+            insert_of_update(cls.follow_blacklisted_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.follow_muted_items_to_flush, follower, "null", op['block_num'])
+            cls.unique_names.add("null")
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowMutedList:
+            insert_of_update(cls.follow_muted_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.follow_muted_items_to_flush, follower, "null", op['block_num'])
+            cls.unique_names.add("null")
+            cls.idx += 1
+        elif action == FollowAction.ResetAllLists:
+            insert_of_update(cls.blacklisted_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.follows_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.muted_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.follow_blacklisted_items_to_flush, follower, 0, -1)
+            insert_of_update(cls.follow_muted_items_to_flush, follower, 0, -1)
+            cls.idx += 1
+        else:
+            raise Exception(f"Invalid action {action}")
 
     @classmethod
     def flush(cls):
         """Flush accumulated follow operations to the database in batches."""
-        if not cls.items_to_flush:
+        n = len(cls.follows_items_to_flush) + len(cls.muted_items_to_flush) + len(cls.blacklisted_items_to_flush) + len(cls.follow_muted_items_to_flush) + len(cls.follow_blacklisted_items_to_flush)
+        if n == 0:
             return 0
-
-        n = len(cls.items_to_flush)
 
         cls.beginTx()
 
@@ -134,105 +231,53 @@ class Follow(DbAdapterHolder):
         if missing_accounts:
             log.warning(f"Missing account IDs for names: {missing_accounts}")
 
-        queries = []
-        for (follower, following, op) in cls.items_to_flush:
-            action = op['action']
-            follower_id = name_to_id.get(follower)
-            following_id = name_to_id.get(following)
-            null_id = name_to_id.get('null')
-            if action == FollowAction.Follow:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follows({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.Mute:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert mute record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_muted({follower_id}, {following_id}, {op['block_num']})")
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
-            elif action == FollowAction.Nothing:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot remove mute/follow record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
-            elif action == FollowAction.Blacklist:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert blacklist record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_blacklisted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.Unblacklist:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unblacklist record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_blacklisted({follower_id}, {following_id})")
-            elif action == FollowAction.FollowMuted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.UnfollowMuted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unfollow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_muted({follower_id}, {following_id})")
-            elif action == FollowAction.FollowBlacklisted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.UnFollowBlacklisted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unfollow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_blacklisted({follower_id}, {following_id})")
-            elif action == FollowAction.ResetFollowingList:
-                if not follower_id:
-                    log.warning("Cannot reset follow records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
-            elif action == FollowAction.ResetMutedList:
-                if not follower_id:
-                    log.warning("Cannot reset muted list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
-            elif action == FollowAction.ResetBlacklist:
-                if not follower_id:
-                    log.warning("Cannot reset blacklist records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
-            elif action == FollowAction.ResetFollowMutedList:
-                if not follower_id:
-                    log.warning("Cannot reset follow muted list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
-            elif action == FollowAction.ResetFollowBlacklist:
-                if not follower_id:
-                    log.warning("Cannot reset follow blacklist records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
-            elif action == FollowAction.ResetAllLists:
-                if not follower_id:
-                    log.warning("Cannot reset all follow list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
-            else:
-                raise Exception(f"Invalid action {action}")
+        follows_items = [str((name_to_id.get(follower), name_to_id.get(following, following), block_num)) for (follower, following, block_num) in cls.follows_items_to_flush]
+        muted_items = [str((name_to_id.get(follower), name_to_id.get(following, following), block_num)) for (follower, following, block_num) in cls.muted_items_to_flush]
+        blacklisted_items = [str((name_to_id.get(follower), name_to_id.get(following, following), block_num)) for (follower, following, block_num) in cls.blacklisted_items_to_flush]
+        follow_muted_items = [str((name_to_id.get(follower), name_to_id.get(following, following), block_num)) for (follower, following, block_num) in cls.follow_muted_items_to_flush]
+        follow_blacklisted_items = [str((name_to_id.get(follower), name_to_id.get(following, following), block_num)) for (follower, following, block_num) in cls.follow_blacklisted_items_to_flush]
 
-        for q in chunk(queries, 1000):
-            cls.db.query_no_return(';\n'.join(q))
+        for items in chunk(follows_items, 1000):
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.insert_follows(ARRAY[{','.join(items)}]::hivemind_app.follows_tuple[])")
+        delete = any([block_num == 0 for (_, _, block_num) in cls.follows_items_to_flush])
+        reset = any([block_num == -1 for (_, _, block_num) in cls.follows_items_to_flush])
+        if delete or reset:
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.delete_follows({delete}, {reset})")
 
-        cls.items_to_flush.clear()
+        for items in chunk(muted_items, 1000):
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.insert_muted(ARRAY[{','.join(items)}]::hivemind_app.follows_tuple[])")
+        delete = any([block_num == 0 for (_, _, block_num) in cls.muted_items_to_flush])
+        reset = any([block_num == -1 for (_, _, block_num) in cls.muted_items_to_flush])
+        if delete or reset:
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.delete_muted({delete}, {reset})")
+
+        for items in chunk(blacklisted_items, 1000):
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.insert_blacklisted(ARRAY[{','.join(items)}]::hivemind_app.follows_tuple[])")
+        delete = any([block_num == 0 for (_, _, block_num) in cls.blacklisted_items_to_flush])
+        reset = any([block_num == -1 for (_, _, block_num) in cls.blacklisted_items_to_flush])
+        if delete or reset:
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.delete_blacklisted({delete}, {reset})")
+
+        for items in chunk(follow_muted_items, 1000):
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.insert_follow_muted(ARRAY[{','.join(items)}]::hivemind_app.follows_tuple[])")
+        delete = any([block_num == 0 for (_, _, block_num) in cls.follow_muted_items_to_flush])
+        reset = any([block_num == -1 for (_, _, block_num) in cls.follow_muted_items_to_flush])
+        if delete or reset:
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.delete_follow_muted({delete}, {reset})")
+
+        for items in chunk(follow_blacklisted_items, 1000):
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted(ARRAY[{','.join(items)}]::hivemind_app.follows_tuple[])")
+        delete = any([block_num == 0 for (_, _, block_num) in cls.follow_blacklisted_items_to_flush])
+        reset = any([block_num == -1 for (_, _, block_num) in cls.follow_blacklisted_items_to_flush])
+        if delete or reset:
+            cls.db.query_no_return(f"CALL {SCHEMA_NAME}.delete_follow_blacklisted({delete}, {reset})")
+
+        #  cls.items_to_flush.clear()
+        cls.follows_items_to_flush.clear()
+        cls.muted_items_to_flush.clear()
+        cls.blacklisted_items_to_flush.clear()
+        cls.follow_muted_items_to_flush.clear()
+        cls.follow_blacklisted_items_to_flush.clear()
         cls.unique_names.clear()
         cls.commitTx()
         return n
