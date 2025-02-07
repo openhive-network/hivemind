@@ -20,8 +20,8 @@ The image will be tagged with name '<registry_url>:<image_tag>'
 
 OPTIONS:
   -?,--help                        Display this help screen and exit
-  --dot-env-filename=<filename> File name of the dot env file to be generated
-  --dot-env-var-name=<var name> Vaiable name to be used in the generated file (default: 'IMAGE')
+  --dot-env-filename=<filename>    File name of the dot env file to be generated
+  --dot-env-var-prefix=<var name>  Vaiable name prefix to be used in the generated file (default: '')
 EOF
 }
 
@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
         DOT_ENV_FILENAME="${1#*=}"
         ;;
     --dot-env-var-name=*)
-        DOTENV_VAR_NAME="${1#*=}"
+        DOTENV_VAR_NAME_PREFIX="${1#*=}"
         ;;
     *)
         if [ -z "$BUILD_IMAGE_TAG" ];
@@ -156,19 +156,11 @@ fi
 
 # Generate dotenv file if necessary
 if [[ -n "${DOT_ENV_FILENAME:-}" ]]; then
-  if [[ -n "${DOT_VAR_NAME:-}" ]]; then
-    {
-      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}"}=$TAG"
-      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}_MINIMAL_IMAGE"}=$MINIMAL_TAG"
-      echo "${DOTENV_VAR_NAME:+"${DOTENV_VAR_NAME}_REWRITER_IMAGE"}=$REWRITER_IMAGE_NAME"
-    } > "$DOT_ENV_FILENAME"
-  else
-    { 
-      echo "IMAGE=$TAG"
-      echo "MINIMAL_IMAGE=$MINIMAL_TAG"
-      echo "REWRITER_IMAGE=$REWRITER_IMAGE_NAME" 
-    } > "$DOT_ENV_FILENAME"
-  fi
+  {
+      echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}IMAGE=$TAG"
+      echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}MINIMAL_IMAGE=$MINIMAL_TAG"
+      echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}REWRITER_IMAGE=$REWRITER_IMAGE_TAG"
+  } > "$DOT_ENV_FILENAME"
 fi
 
 popd
