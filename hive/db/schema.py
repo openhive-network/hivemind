@@ -580,7 +580,6 @@ def setup(db, admin_db):
 def setup_runtime_code(db):
     sql_scripts = [
         "utility_functions.sql",
-        "follow_ops.sql",
         "hive_accounts_view.sql",
         "hive_accounts_info_view.sql",
         "hive_posts_base_view.sql",
