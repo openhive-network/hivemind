@@ -143,6 +143,11 @@ class DbState:
             'follow_muted_following_idx',
             'follow_blacklisted_follower_idx',
             'follow_blacklisted_following_idx',
+            'follows_block_num_idx',
+            'muted_block_num_idx',
+            'blacklisted_block_num_idx',
+            'follow_muted_block_num_idx',
+            'follow_blacklisted_block_num_idx',
         ]
 
         to_return = {}
