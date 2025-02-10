@@ -1,5 +1,7 @@
 import logging
 import enum
+import time
+import sys
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -28,16 +30,61 @@ class FollowAction(enum.IntEnum):
     ResetAllLists = 16  # cancel all existing records of all types
 
 
-def chunk(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+def insert_or_update(items, follower, following, block_num):
+    for (n, (itfollower, itfollowing, itblock_num)) in enumerate(items):
+        if follower == itfollower and following == itfollowing:
+            items[n] = (follower, following, block_num)
+            break
+    else:
+        items.append((follower, following, block_num))
+
+
+class Batch():
+
+    def __init__(self):
+        self.data = [('', [])]
+
+    def iter(self):
+        return iter(self.data)
+
+    def new(self, mode):
+        self.data.append((mode, []))
+
+    def mode(self):
+        (mode, _) = self.data[-1]
+        return mode
+
+    def add_insert(self, follower, following, block_num):
+        if self.mode() != 'insert':
+            self.new('insert')
+        insert_or_update(self.data[-1][1], follower, following, block_num)
+
+    def add_delete(self, follower, following, block_num):
+        if self.mode() != 'delete':
+            self.new('delete')
+        insert_or_update(self.data[-1][1], follower, following, block_num)
+
+    def add_reset(self, follower, following, block_num):
+        if self.mode() != 'reset':
+            self.new('reset')
+        insert_or_update(self.data[-1][1], follower, following, block_num)
+
+    def len(self):
+        return len(self.data)
+
+    def clear(self):
+        self.data.clear()
+        self.new('')
 
 
 class Follow(DbAdapterHolder):
     """Handles processing of follow-related operations."""
 
-    items_to_flush = []
-    unique_names = set()
+    follows_batches_to_flush = Batch()
+    muted_batches_to_flush = Batch()
+    blacklisted_batches_to_flush = Batch()
+    follow_muted_batches_to_flush = Batch()
+    follow_blacklisted_batches_to_flush = Batch()
 
     idx = 0
 
@@ -89,8 +136,8 @@ class Follow(DbAdapterHolder):
         ]
 
         return {
-            'follower': op['follower'],  # Removed escape_characters
-            'following': [following for following in op['following']],  # Removed escape_characters
+            'follower': escape_characters(op['follower']),
+            'following': [escape_characters(following) for following in op['following']],
             'action': defs[what]
         }
 
@@ -103,136 +150,321 @@ class Follow(DbAdapterHolder):
             log.warning("Invalid operation: %s", op_json)
             return
 
-        op['block_num'] = block_num
-
         follower = op['follower']
-        cls.unique_names.add(follower)
         action = op['action']
-        if action in [FollowAction.ResetBlacklist, FollowAction.ResetFollowingList, FollowAction.ResetMutedList, FollowAction.ResetFollowBlacklist, FollowAction.ResetFollowMutedList, FollowAction.ResetAllLists]:
-            cls.items_to_flush.append((follower, None, op))
-            cls.idx += 1
-        else:
+        if action == FollowAction.Nothing:
             for following in op.get('following', []):
-                cls.items_to_flush.append((follower, following, op))
-                cls.unique_names.add(following)
+                cls.follows_batches_to_flush.add_delete(follower, following, block_num)
+                cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.idx += 1
+        elif action == FollowAction.Follow:
+            for following in op.get('following', []):
+                cls.follows_batches_to_flush.add_insert(follower, following, block_num)
+                cls.muted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.Mute:
+            for following in op.get('following', []):
+                cls.muted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.follows_batches_to_flush.add_delete(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.Blacklist:
+            for following in op.get('following', []):
+                cls.blacklisted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.Unblacklist:
+            for following in op.get('following', []):
+                cls.blacklisted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.FollowBlacklisted:
+            for following in op.get('following', []):
+                cls.follow_blacklisted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.UnFollowBlacklisted:
+            for following in op.get('following', []):
+                cls.follow_blacklisted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.FollowMuted:
+            for following in op.get('following', []):
+                cls.follow_muted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.UnfollowMuted:
+            for following in op.get('following', []):
+                cls.follow_muted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.idx += 1
+        elif action == FollowAction.ResetBlacklist:
+            cls.blacklisted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowingList:
+            cls.follows_batches_to_flush.add_reset(follower, None, block_num)
+            cls.idx += 1
+        elif action == FollowAction.ResetMutedList:
+            cls.muted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowBlacklist:
+            cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.idx += 1
+        elif action == FollowAction.ResetFollowMutedList:
+            cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.idx += 1
+        elif action == FollowAction.ResetAllLists:
+            cls.blacklisted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follows_batches_to_flush.add_reset(follower, None, block_num)
+            cls.muted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
+            cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.idx += 1
 
     @classmethod
     def flush(cls):
         """Flush accumulated follow operations to the database in batches."""
-        if not cls.items_to_flush:
+        n = (
+            cls.follows_batches_to_flush.len() +
+            cls.muted_batches_to_flush.len() +
+            cls.blacklisted_batches_to_flush.len() +
+            cls.follow_muted_batches_to_flush.len() +
+            cls.follow_blacklisted_batches_to_flush.len()
+            )
+        if n == 0:
             return 0
-
-        n = len(cls.items_to_flush)
 
         cls.beginTx()
 
-        name_to_id_records = cls.db.query_all(f"""SELECT name, id FROM {SCHEMA_NAME}.hive_accounts WHERE name IN :names""", names=tuple(cls.unique_names | set(['null'])))
-        name_to_id = {record['name']: record['id'] for record in name_to_id_records}
+        t0f = time.time()
+        for (mode, batch) in cls.follows_batches_to_flush.iter():
+            if mode == 'insert':
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
+                    SELECT r.id, g.id, v.block_num
+                    FROM (
+                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+                    )
+                    AS v(follower, following, block_num)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """
+                )
+            elif mode == 'delete':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follows f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          {SCHEMA_NAME}.hive_accounts following_acc,
+                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
+                              AS v(follower_name, following_name)
+                    WHERE f.follower = follower_acc.id
+                      AND f.following = following_acc.id
+                      AND follower_acc.name = v.follower_name
+                      AND following_acc.name = v.following_name;
+                    """
+                )
+            elif mode == 'reset':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follows f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
+                              AS v(follower_name)
+                    WHERE f.follower = follower_acc.id
+                      AND follower_acc.name = v.follower_name
+                    """
+                )
+        t1f = time.time()
+        print(f"follows flush time: {t1f-t0f} seconds", file=sys.stderr)
 
-        missing_accounts = cls.unique_names - set(name_to_id.keys())
-        if missing_accounts:
-            log.warning(f"Missing account IDs for names: {missing_accounts}")
+        t0m = time.time()
+        for (mode, batch) in cls.muted_batches_to_flush.iter():
+            if mode == 'insert':
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
+                    SELECT r.id, g.id, v.block_num
+                    FROM (
+                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+                    )
+                    AS v(follower, following, block_num)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """
+                )
+            elif mode == 'delete':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.muted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          {SCHEMA_NAME}.hive_accounts following_acc,
+                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
+                              AS v(follower_name, following_name)
+                    WHERE f.follower = follower_acc.id
+                      AND f.following = following_acc.id
+                      AND follower_acc.name = v.follower_name
+                      AND following_acc.name = v.following_name;
+                    """
+                )
+            elif mode == 'reset':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.muted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
+                              AS v(follower_name)
+                    WHERE f.follower = follower_acc.id
+                      AND follower_acc.name = v.follower_name
+                    """
+                )
+        t1m = time.time()
+        print(f"muted flush time: {t1m-t0m} seconds", file=sys.stderr)
 
-        queries = []
-        for (follower, following, op) in cls.items_to_flush:
-            action = op['action']
-            follower_id = name_to_id.get(follower)
-            following_id = name_to_id.get(following)
-            null_id = name_to_id.get('null')
-            if action == FollowAction.Follow:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follows({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.Mute:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert mute record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_muted({follower_id}, {following_id}, {op['block_num']})")
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
-            elif action == FollowAction.Nothing:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot remove mute/follow record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follows({follower_id}, {following_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.delete_muted({follower_id}, {following_id})")
-            elif action == FollowAction.Blacklist:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert blacklist record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_blacklisted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.Unblacklist:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unblacklist record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_blacklisted({follower_id}, {following_id})")
-            elif action == FollowAction.FollowMuted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.UnfollowMuted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unfollow_muted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_muted({follower_id}, {following_id})")
-            elif action == FollowAction.FollowBlacklisted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot insert follow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {following_id}, {op['block_num']})")
-            elif action == FollowAction.UnFollowBlacklisted:
-                if not follower_id or not following_id:
-                    log.warning(f"Cannot delete unfollow_blacklisted record: missing IDs for follower '{follower}' or following '{following}'.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.delete_follow_blacklisted({follower_id}, {following_id})")
-            elif action == FollowAction.ResetFollowingList:
-                if not follower_id:
-                    log.warning("Cannot reset follow records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
-            elif action == FollowAction.ResetMutedList:
-                if not follower_id:
-                    log.warning("Cannot reset muted list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
-            elif action == FollowAction.ResetBlacklist:
-                if not follower_id:
-                    log.warning("Cannot reset blacklist records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
-            elif action == FollowAction.ResetFollowMutedList:
-                if not follower_id:
-                    log.warning("Cannot reset follow muted list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
-            elif action == FollowAction.ResetFollowBlacklist:
-                if not follower_id:
-                    log.warning("Cannot reset follow blacklist records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
-            elif action == FollowAction.ResetAllLists:
-                if not follower_id:
-                    log.warning("Cannot reset all follow list records: missing ID for follower.")
-                    continue
-                queries.append(f"CALL {SCHEMA_NAME}.reset_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follows({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_blacklisted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.reset_follow_muted({follower_id})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_muted({follower_id}, {null_id}, {op['block_num']})")
-                queries.append(f"CALL {SCHEMA_NAME}.insert_follow_blacklisted({follower_id}, {null_id}, {op['block_num']})")
-            else:
-                raise Exception(f"Invalid action {action}")
+        t0b = time.time()
+        for (mode, batch) in cls.blacklisted_batches_to_flush.iter():
+            if mode == 'insert':
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
+                    SELECT r.id, g.id, v.block_num
+                    FROM (
+                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+                    )
+                    AS v(follower, following, block_num)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """
+                )
+            elif mode == 'delete':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.blacklisted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          {SCHEMA_NAME}.hive_accounts following_acc,
+                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
+                              AS v(follower_name, following_name)
+                    WHERE f.follower = follower_acc.id
+                      AND f.following = following_acc.id
+                      AND follower_acc.name = v.follower_name
+                      AND following_acc.name = v.following_name;
+                    """
+                )
+            elif mode == 'reset':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.blacklisted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
+                              AS v(follower_name)
+                    WHERE f.follower = follower_acc.id
+                      AND follower_acc.name = v.follower_name
+                    """
+                )
+        t1b = time.time()
+        print(f"blacklisted flush time: {t1b-t0b} seconds", file=sys.stderr)
 
-        for q in chunk(queries, 1000):
-            cls.db.query_no_return(';\n'.join(q))
+        t0fm = time.time()
+        for (mode, batch) in cls.follow_muted_batches_to_flush.iter():
+            if mode == 'insert':
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
+                    SELECT r.id, g.id, v.block_num
+                    FROM (
+                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+                    )
+                    AS v(follower, following, block_num)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """
+                )
+            elif mode == 'delete':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follow_muted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          {SCHEMA_NAME}.hive_accounts following_acc,
+                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
+                              AS v(follower_name, following_name)
+                    WHERE f.follower = follower_acc.id
+                      AND f.following = following_acc.id
+                      AND follower_acc.name = v.follower_name
+                      AND following_acc.name = v.following_name;
+                    """
+                )
+            elif mode == 'reset':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follow_muted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
+                              AS v(follower_name)
+                    WHERE f.follower = follower_acc.id
+                      AND follower_acc.name = v.follower_name
+                    """
+                )
+        t1fm = time.time()
+        print(f"follow_muted flush time: {t1fm-t0fm} seconds", file=sys.stderr)
 
-        cls.items_to_flush.clear()
-        cls.unique_names.clear()
+        t0fb = time.time()
+        for (mode, batch) in cls.follow_blacklisted_batches_to_flush.iter():
+            if mode == 'insert':
+                cls.db.query_no_return(
+                    f"""
+                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
+                    SELECT r.id, g.id, v.block_num
+                    FROM (
+                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+                    )
+                    AS v(follower, following, block_num)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
+                    ON CONFLICT (follower, following) DO UPDATE
+                    SET block_num = EXCLUDED.block_num
+                    """
+                )
+            elif mode == 'delete':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          {SCHEMA_NAME}.hive_accounts following_acc,
+                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
+                              AS v(follower_name, following_name)
+                    WHERE f.follower = follower_acc.id
+                      AND f.following = following_acc.id
+                      AND follower_acc.name = v.follower_name
+                      AND following_acc.name = v.following_name;
+                    """
+                )
+            elif mode == 'reset':
+                cls.db.query_no_return(
+                    f"""
+                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted f
+                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
+                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
+                              AS v(follower_name)
+                    WHERE f.follower = follower_acc.id
+                      AND follower_acc.name = v.follower_name
+                    """
+                )
+        t1fb = time.time()
+        print(f"follow_blacklisted flush time: {t1fb-t0fb} seconds", file=sys.stderr)
+
+        t0 = time.time()
+        cls.follows_batches_to_flush.clear()
+        cls.muted_batches_to_flush.clear()
+        cls.blacklisted_batches_to_flush.clear()
+        cls.follow_muted_batches_to_flush.clear()
+        cls.follow_blacklisted_batches_to_flush.clear()
         cls.commitTx()
+        t1 = time.time()
+        print(f"clear_and_commit time: {t1-t0:.2f} seconds")
         return n
