@@ -302,6 +302,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follows_follower_idx', 'follower'),
         sa.Index('follows_following_idx', 'following'),
+        sa.Index('follows_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
     )
 
@@ -312,6 +313,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('muted_follower_idx', 'follower'),
         sa.Index('muted_following_idx', 'following'),
+        sa.Index('muted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
     )
 
@@ -322,6 +324,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('blacklisted_follower_idx', 'follower'),
         sa.Index('blacklisted_following_idx', 'following'),
+        sa.Index('blacklisted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
     )
 
@@ -332,6 +335,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follow_muted_follower_idx', 'follower'),
         sa.Index('follow_muted_following_idx', 'following'),
+        sa.Index('follow_muted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
     )
 
@@ -342,6 +346,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follow_blacklisted_follower_idx', 'follower'),
         sa.Index('follow_blacklisted_following_idx', 'following'),
+        sa.Index('follow_blacklisted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
     )
 
