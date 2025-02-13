@@ -28,6 +28,9 @@ from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
+from hive.utils.normalize import escape_characters
+
+import json
 
 
 
@@ -161,6 +164,13 @@ class Blocks:
             completed_threads = completed_threads + 1
             try:
                 (n, elapsedTime) = future.result()
+                #print("flush_data_in_n_threads checking ", description, " with result ", n)
+                if description == 'Follow':
+                    # follow returns a tuple with the count and a list of delta follows
+                    # discard the list, keep the count
+                    (op_count, deltas) = n
+                    log.info(f"EMF: deltas are {json.dumps(deltas)}")
+                    n = op_count
                 assert n is not None
                 assert not c.sync_tx_active()
 
@@ -177,12 +187,19 @@ class Blocks:
 
     @classmethod
     def flush_data_in_1_thread(cls) -> None:
+        follow_deltas = None
         for description, f, c in cls._concurrent_flush:
             try:
-                f()
+                if description == 'Follow':
+                    (_, follow_deltas) = f()
+                    log.info(f"EMF: follow deltas are {json.dumps(follow_deltas)}")
+                else:
+                    f()
+
             except Exception as exc:
                 log.error(f'{description!r} generated an exception: {exc}')
                 raise exc
+        return follow_deltas
 
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
@@ -222,10 +239,10 @@ class Blocks:
 
         if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
-            cls.flush_data_in_1_thread()
+            follow_deltas = cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
-                cls.on_live_blocks_processed(first_block)
+                cls.on_live_blocks_processed(first_block, follow_deltas)
                 cls._periodic_actions(blocks[0])
 
         if is_massive_sync:
@@ -423,10 +440,11 @@ class Blocks:
 
     @staticmethod
     @time_it
-    def on_live_blocks_processed(block_number: int) -> None:
+    def on_live_blocks_processed(block_number: int, aggregated_deltas: dict) -> None:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
+        log.info(f"EMF: aggregated_deltas={json.dumps(aggregated_deltas)}")
         is_hour_action = block_number % 1200 == 0
 
         queries = [
@@ -436,14 +454,40 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
-            f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
+        db = DbAdapterHolder.common_block_processing_db()
         for query in queries:
             time_start = perf_counter()
-            DbAdapterHolder.common_block_processing_db().query_no_return(query)
+            db.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
+
+        # Now apply the aggregated deltas to the hive_accounts table.
+        # aggregated_deltas is expected to be a dictionary:
+        #    { account_name: (delta_followers, delta_following), ... }
+        if aggregated_deltas:
+            # Build a VALUES clause like:
+            #   ('alice', -3, 7), ('bob', 2, -1), ...
+            values_clause = ', '.join(
+                f"({escape_characters(user)}, {deltas[0]}, {deltas[1]})" for user, deltas in aggregated_deltas.items()
+            )
+            update_query = f"""
+            WITH deltas(user_name, delta_followers, delta_following) AS (
+              VALUES {values_clause}
+            )
+            UPDATE {SCHEMA_NAME}.hive_accounts ha
+            SET
+              followers = ha.followers + d.delta_followers,
+              following = ha.following + d.delta_following
+            FROM deltas d
+            WHERE ha.name = d.user_name;
+            """
+            time_start = perf_counter()
+            db.query_no_return(update_query)
+            log.info("Updating follow counts query executed in: %.4f s", perf_counter() - time_start)
+        else:
+            log.info("No follow counts changed in this block")
 
     @staticmethod
     def is_consistency() -> bool:
