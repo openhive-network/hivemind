@@ -441,7 +441,6 @@ class Follow(DbAdapterHolder):
     @classmethod
     def flush(cls):
         """Flush accumulated follow operations to the database in batches."""
-        log.info("EMF: in class flush")
         if (cls.follows_batches_to_flush.is_empty() and
             cls.muted_batches_to_flush.is_empty() and
             cls.blacklisted_batches_to_flush.is_empty() and
@@ -463,6 +462,5 @@ class Follow(DbAdapterHolder):
         print(f"commit time: {after_commit - before_commit:.2f} seconds")
 
         total_op_count = follow_op_count + muted_op_count +  blacklisted_op_count + follow_muted_op_count + follow_blacklisted_op_count
-        log.info("EMF: in flush")
-        log.info(f"follow_op_count was {follow_op_count}")
+        # log.info(f"follow_op_count was {follow_op_count}")
         return (total_op_count, follow_count_deltas)

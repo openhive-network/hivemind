@@ -164,12 +164,12 @@ class Blocks:
             completed_threads = completed_threads + 1
             try:
                 (n, elapsedTime) = future.result()
-                #print("flush_data_in_n_threads checking ", description, " with result ", n)
                 if description == 'Follow':
-                    # follow returns a tuple with the count and a list of delta follows
-                    # discard the list, keep the count
-                    (op_count, deltas) = n
-                    log.info(f"EMF: deltas are {json.dumps(deltas)}")
+                    # follow returns a tuple with the count and a list of delta follows.
+                    # since this is only called in massive sync, we discard the delta
+                    # follows; we'll do a single `update_follow_count()` call when we
+                    # leave massive sync.
+                    (op_count, _) = n
                     n = op_count
                 assert n is not None
                 assert not c.sync_tx_active()
@@ -192,7 +192,7 @@ class Blocks:
             try:
                 if description == 'Follow':
                     (_, follow_deltas) = f()
-                    log.info(f"EMF: follow deltas are {json.dumps(follow_deltas)}")
+                    # log.info(f"EMF: follow deltas are {json.dumps(follow_deltas)}")
                 else:
                     f()
 
@@ -444,7 +444,7 @@ class Blocks:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
-        log.info(f"EMF: aggregated_deltas={json.dumps(aggregated_deltas)}")
+        # log.info(f"EMF: aggregated_deltas={json.dumps(aggregated_deltas)}")
         is_hour_action = block_number % 1200 == 0
 
         queries = [
@@ -463,7 +463,7 @@ class Blocks:
             db.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
-        # Now apply the aggregated deltas to the hive_accounts table.
+        # Now apply the aggregated follows deltas to the hive_accounts table.
         # aggregated_deltas is expected to be a dictionary:
         #    { account_name: (delta_followers, delta_following), ... }
         if aggregated_deltas:
