@@ -169,7 +169,7 @@ After **reputation_tracker** and **hivemind indexer** reach the head block and s
 You can use released containers from docker registry or You can build them from sources. Hivemind sources
 contains all dependant elements -HAF and reputation_tracker as submodule.
 ```bash
-git clone --recurse-submodules registry.gitlab.syncad.com/hive/hivemind
+git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
 cd hivemind
 ```
 All the examples below starts in hivemind sources root folder.
@@ -183,7 +183,7 @@ All the examples below starts in hivemind sources root folder.
    Build docker image, in the example below it will be named 'local'
       ```bash
       cd reputation_tracker
-      ./scripts/ci-helpers/build_instance.sh local  $(pwd) registry.gitlab.syncad.com/hive/reputation_tracker
+      docker build -t registry.gitlab.syncad.com/hive/reputation_tracker:local .
       ```
 4. **Hivemind**
     - Build **hivemind** docker image, in the example below it will be named 'local'
