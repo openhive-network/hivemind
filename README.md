@@ -277,7 +277,7 @@ For example:
    If you want to stop HAF synchronization at a specific block (e.g., block 5,000,000),
    add the option `--stop-at-block=5000000` to the command below.
    ```bash
-   docker run -d -e PG_ACCESS="host haf_block_log all 0.0.0.0/0 trust" --network=haf --name=haf registry.gitlab.syncad.com/hive/haf/instance:local; 
+   docker run -d -e PG_ACCESS="host haf_block_log all 0.0.0.0/0 trust" --network=haf --name=haf registry.gitlab.syncad.com/hive/haf/minimal-instance:local; 
    ```
 3. Install and start **reputation_tracker**. The example below use default configuration, if you want to stop reputation_tracker
    synchronization at a specific block (e.g., block 5,000,000), add the option --stop-at-block=5000000 to the command process_blocks.
