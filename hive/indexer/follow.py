@@ -142,10 +142,8 @@ class NetEffectTracker:
         raw_deltas = []
         if mode == FlushMode.INSERT:
             # Separate pure INSERT from UPSERT events.
-            # ins_entries = [e for e in entries if e[3] == NetOp.INSERT]
-            # upsert_entries = [e for e in entries if e[3] == NetOp.UPSERT]
-            ins_entries = []
-            upsert_entries = [e for e in entries if e[3] == NetOp.UPSERT or e[3] == NetOp.INSERT]
+            ins_entries = [e for e in entries if e[3] == NetOp.INSERT]
+            upsert_entries = [e for e in entries if e[3] == NetOp.UPSERT]
             if ins_entries:
                 # Build a VALUES clause like:
                 #   ('alice', 'bob', 1234), ('charlie', 'dave', 1235), ...
