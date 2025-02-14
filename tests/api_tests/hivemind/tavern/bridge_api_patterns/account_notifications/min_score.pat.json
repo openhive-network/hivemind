@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T19:41:33",
-    "id": 2010374,
+    "id": 2010367,
     "msg": "@nippel66 voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-15T18:57:51",
-    "id": 2009431,
+    "id": 2009426,
     "msg": "@edgeland voted on your post ($0.28)",
     "score": 50,
     "type": "vote",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-15T18:56:00",
-    "id": 2009404,
+    "id": 2009399,
     "msg": "@kurtbeil replied to your post",
     "score": 50,
     "type": "reply",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-15T18:36:15",
-    "id": 2008663,
+    "id": 2008658,
     "msg": "@pjheinz followed you",
     "score": 60,
     "type": "follow",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T18:09:45",
-    "id": 2007946,
+    "id": 2007941,
     "msg": "@honeyscribe replied to your comment",
     "score": 70,
     "type": "reply_comment",
@@ -41,7 +41,7 @@
   },
   {
     "date": "2016-09-15T17:53:48",
-    "id": 2007341,
+    "id": 2007336,
     "msg": "@curie mentioned you and 150 others",
     "score": 60,
     "type": "mention",
@@ -49,7 +49,7 @@
   },
   {
     "date": "2016-09-15T17:38:42",
-    "id": 2006986,
+    "id": 2006981,
     "msg": "@danknugs voted on your post ($0.02)",
     "score": 25,
     "type": "vote",
@@ -57,7 +57,7 @@
   },
   {
     "date": "2016-09-15T17:26:21",
-    "id": 2006703,
+    "id": 2006698,
     "msg": "@burmik123 replied to your comment",
     "score": 50,
     "type": "reply_comment",
@@ -65,7 +65,7 @@
   },
   {
     "date": "2016-09-15T17:07:33",
-    "id": 2006362,
+    "id": 2006357,
     "msg": "@thecurator voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -73,7 +73,7 @@
   },
   {
     "date": "2016-09-15T17:06:42",
-    "id": 2006339,
+    "id": 2006334,
     "msg": "@honeyscribe replied to your post",
     "score": 70,
     "type": "reply",
@@ -81,7 +81,7 @@
   },
   {
     "date": "2016-09-15T17:06:03",
-    "id": 2006314,
+    "id": 2006309,
     "msg": "@honeyscribe voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -89,7 +89,7 @@
   },
   {
     "date": "2016-09-15T16:45:03",
-    "id": 2005897,
+    "id": 2005892,
     "msg": "@ozchartart voted on your post ($0.48)",
     "score": 50,
     "type": "vote",
@@ -97,7 +97,7 @@
   },
   {
     "date": "2016-09-15T16:44:36",
-    "id": 2005892,
+    "id": 2005887,
     "msg": "@ozmaster voted on your post ($0.31)",
     "score": 50,
     "type": "vote",
@@ -105,7 +105,7 @@
   },
   {
     "date": "2016-09-15T16:22:12",
-    "id": 2005385,
+    "id": 2005379,
     "msg": "@nextgenwitness voted on your post ($0.14)",
     "score": 50,
     "type": "vote",
@@ -113,7 +113,7 @@
   },
   {
     "date": "2016-09-15T16:22:09",
-    "id": 2005384,
+    "id": 2005378,
     "msg": "@steemservices voted on your post ($0.32)",
     "score": 50,
     "type": "vote",
@@ -121,7 +121,7 @@
   },
   {
     "date": "2016-09-15T16:22:06",
-    "id": 2005382,
+    "id": 2005376,
     "msg": "@justin voted on your post ($0.46)",
     "score": 50,
     "type": "vote",
@@ -129,7 +129,7 @@
   },
   {
     "date": "2016-09-15T16:22:03",
-    "id": 2005380,
+    "id": 2005374,
     "msg": "@berniesanders voted on your post ($18.73)",
     "score": 100,
     "type": "vote",
@@ -137,7 +137,7 @@
   },
   {
     "date": "2016-09-15T16:22:00",
-    "id": 2005377,
+    "id": 2005371,
     "msg": "@nextgencrypto voted on your post ($3.64)",
     "score": 75,
     "type": "vote",
@@ -145,7 +145,7 @@
   },
   {
     "date": "2016-09-15T16:21:57",
-    "id": 2005375,
+    "id": 2005369,
     "msg": "@thedarkestplum voted on your post ($0.06)",
     "score": 25,
     "type": "vote",
@@ -153,7 +153,7 @@
   },
   {
     "date": "2016-09-15T16:21:57",
-    "id": 2005374,
+    "id": 2005368,
     "msg": "@silversteem voted on your post ($3.09)",
     "score": 75,
     "type": "vote",
