@@ -210,13 +210,9 @@ class Follow(DbAdapterHolder):
             cls.idx += 1
         elif action == FollowAction.ResetFollowBlacklist:
             cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
-            cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
-            cls.affected_accounts.add('null')
             cls.idx += 1
         elif action == FollowAction.ResetFollowMutedList:
             cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
-            cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
-            cls.affected_accounts.add('null')
             cls.idx += 1
         elif action == FollowAction.ResetAllLists:
             cls.blacklisted_batches_to_flush.add_reset(follower, None, block_num)
@@ -224,9 +220,6 @@ class Follow(DbAdapterHolder):
             cls.muted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
-            cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
-            cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
-            cls.affected_accounts.add('null')
             cls.idx += 1
 
     @classmethod
@@ -251,19 +244,19 @@ class Follow(DbAdapterHolder):
         follow_blacklisted = []
         for (n, (mode, batch)) in enumerate(cls.follows_batches_to_flush.iter()):
             if mode!= '':
-                follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
+                follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
         for (n, (mode, batch)) in enumerate(cls.muted_batches_to_flush.iter()):
             if mode!= '':
-                muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
+                muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
         for (n, (mode, batch)) in enumerate(cls.blacklisted_batches_to_flush.iter()):
             if mode!= '':
-                blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
+                blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
         for (n, (mode, batch)) in enumerate(cls.follow_muted_batches_to_flush.iter()):
             if mode!= '':
-                follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
+                follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
         for (n, (mode, batch)) in enumerate(cls.follow_blacklisted_batches_to_flush.iter()):
             if mode!= '':
-                follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
+                follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
         if follows or muted or blacklisted or follow_muted or follow_blacklisted:
             cls.db.query_no_return(
                 f"""
