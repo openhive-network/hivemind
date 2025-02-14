@@ -83,7 +83,7 @@ class Follow(DbAdapterHolder):
     blacklisted_batches_to_flush = Batch()
     follow_muted_batches_to_flush = Batch()
     follow_blacklisted_batches_to_flush = Batch()
-
+    affected_accounts = set()
     idx = 0
 
     @classmethod
@@ -150,44 +150,54 @@ class Follow(DbAdapterHolder):
 
         follower = op['follower']
         action = op['action']
+        cls.affected_accounts.add(follower)
         if action == FollowAction.Nothing:
             for following in op.get('following', []):
                 cls.follows_batches_to_flush.add_delete(follower, following, block_num)
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.Follow:
             for following in op.get('following', []):
                 cls.follows_batches_to_flush.add_insert(follower, following, block_num)
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)
                 cls.follows_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.Blacklist:
             for following in op.get('following', []):
                 cls.blacklisted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.Unblacklist:
             for following in op.get('following', []):
                 cls.blacklisted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.FollowBlacklisted:
             for following in op.get('following', []):
                 cls.follow_blacklisted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.UnFollowBlacklisted:
             for following in op.get('following', []):
                 cls.follow_blacklisted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.FollowMuted:
             for following in op.get('following', []):
                 cls.follow_muted_batches_to_flush.add_insert(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.UnfollowMuted:
             for following in op.get('following', []):
                 cls.follow_muted_batches_to_flush.add_delete(follower, following, block_num)
+                cls.affected_accounts.add(following)
                 cls.idx += 1
         elif action == FollowAction.ResetBlacklist:
             cls.blacklisted_batches_to_flush.add_reset(follower, None, block_num)
@@ -201,10 +211,12 @@ class Follow(DbAdapterHolder):
         elif action == FollowAction.ResetFollowBlacklist:
             cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.affected_accounts.add('null')
             cls.idx += 1
         elif action == FollowAction.ResetFollowMutedList:
             cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.affected_accounts.add('null')
             cls.idx += 1
         elif action == FollowAction.ResetAllLists:
             cls.blacklisted_batches_to_flush.add_reset(follower, None, block_num)
@@ -214,6 +226,7 @@ class Follow(DbAdapterHolder):
             cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_blacklisted_batches_to_flush.add_insert(follower, "'null'", block_num)
             cls.follow_muted_batches_to_flush.add_insert(follower, "'null'", block_num)
+            cls.affected_accounts.add('null')
             cls.idx += 1
 
     @classmethod
@@ -231,216 +244,41 @@ class Follow(DbAdapterHolder):
 
         cls.beginTx()
 
-        for (mode, batch) in cls.follows_batches_to_flush.iter():
-            if mode == 'insert':
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follows (follower, following, block_num)
-                    SELECT r.id, g.id, v.block_num
-                    FROM (
-                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
+        follows = []
+        muted = []
+        blacklisted = []
+        follow_muted = []
+        follow_blacklisted = []
+        for (n, (mode, batch)) in enumerate(cls.follows_batches_to_flush.iter()):
+            if mode!= '':
+                follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
+        for (n, (mode, batch)) in enumerate(cls.muted_batches_to_flush.iter()):
+            if mode!= '':
+                muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
+        for (n, (mode, batch)) in enumerate(cls.blacklisted_batches_to_flush.iter()):
+            if mode!= '':
+                blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
+        for (n, (mode, batch)) in enumerate(cls.follow_muted_batches_to_flush.iter()):
+            if mode!= '':
+                follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
+        for (n, (mode, batch)) in enumerate(cls.follow_blacklisted_batches_to_flush.iter()):
+            if mode!= '':
+                follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'null'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
+        if follows or muted or blacklisted or follow_muted or follow_blacklisted:
+            cls.db.query_no_return(
+                f"""
+                CALL hivemind_app.flush_follows(
+                    array[{','.join(follows)}]::hivemind_app.follow_updates[],
+                    array[{','.join(muted)}]::hivemind_app.mute_updates[],
+                    array[{','.join(blacklisted)}]::hivemind_app.blacklist_updates[],
+                    array[{','.join(follow_muted)}]::hivemind_app.follow_mute_updates[],
+                    array[{','.join(follow_blacklisted)}]::hivemind_app.follow_blacklist_updates[],
+                    array[{','.join(cls.affected_accounts)}]
                     )
-                    AS v(follower, following, block_num)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
-                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """
-                )
-            elif mode == 'delete':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          {SCHEMA_NAME}.hive_accounts following_acc,
-                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
-                              AS v(follower_name, following_name)
-                    WHERE f.follower = follower_acc.id
-                      AND f.following = following_acc.id
-                      AND follower_acc.name = v.follower_name
-                      AND following_acc.name = v.following_name;
-                    """
-                )
-            elif mode == 'reset':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follows f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
-                              AS v(follower_name)
-                    WHERE f.follower = follower_acc.id
-                      AND follower_acc.name = v.follower_name
-                    """
-                )
+                """
+            )
 
-        for (mode, batch) in cls.muted_batches_to_flush.iter():
-            if mode == 'insert':
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.muted (follower, following, block_num)
-                    SELECT r.id, g.id, v.block_num
-                    FROM (
-                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
-                    )
-                    AS v(follower, following, block_num)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
-                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """
-                )
-            elif mode == 'delete':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          {SCHEMA_NAME}.hive_accounts following_acc,
-                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
-                              AS v(follower_name, following_name)
-                    WHERE f.follower = follower_acc.id
-                      AND f.following = following_acc.id
-                      AND follower_acc.name = v.follower_name
-                      AND following_acc.name = v.following_name;
-                    """
-                )
-            elif mode == 'reset':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.muted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
-                              AS v(follower_name)
-                    WHERE f.follower = follower_acc.id
-                      AND follower_acc.name = v.follower_name
-                    """
-                )
-
-        for (mode, batch) in cls.blacklisted_batches_to_flush.iter():
-            if mode == 'insert':
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.blacklisted (follower, following, block_num)
-                    SELECT r.id, g.id, v.block_num
-                    FROM (
-                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
-                    )
-                    AS v(follower, following, block_num)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
-                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """
-                )
-            elif mode == 'delete':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.blacklisted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          {SCHEMA_NAME}.hive_accounts following_acc,
-                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
-                              AS v(follower_name, following_name)
-                    WHERE f.follower = follower_acc.id
-                      AND f.following = following_acc.id
-                      AND follower_acc.name = v.follower_name
-                      AND following_acc.name = v.following_name;
-                    """
-                )
-            elif mode == 'reset':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.blacklisted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
-                              AS v(follower_name)
-                    WHERE f.follower = follower_acc.id
-                      AND follower_acc.name = v.follower_name
-                    """
-                )
-
-        for (mode, batch) in cls.follow_muted_batches_to_flush.iter():
-            if mode == 'insert':
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_muted (follower, following, block_num)
-                    SELECT r.id, g.id, v.block_num
-                    FROM (
-                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
-                    )
-                    AS v(follower, following, block_num)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
-                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """
-                )
-            elif mode == 'delete':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_muted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          {SCHEMA_NAME}.hive_accounts following_acc,
-                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
-                              AS v(follower_name, following_name)
-                    WHERE f.follower = follower_acc.id
-                      AND f.following = following_acc.id
-                      AND follower_acc.name = v.follower_name
-                      AND following_acc.name = v.following_name;
-                    """
-                )
-            elif mode == 'reset':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_muted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
-                              AS v(follower_name)
-                    WHERE f.follower = follower_acc.id
-                      AND follower_acc.name = v.follower_name
-                    """
-                )
-
-        for (mode, batch) in cls.follow_blacklisted_batches_to_flush.iter():
-            if mode == 'insert':
-                cls.db.query_no_return(
-                    f"""
-                    INSERT INTO {SCHEMA_NAME}.follow_blacklisted (follower, following, block_num)
-                    SELECT r.id, g.id, v.block_num
-                    FROM (
-                        VALUES {', '.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in batch)}
-                    )
-                    AS v(follower, following, block_num)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS r ON v.follower = r.name
-                    JOIN {SCHEMA_NAME}.hive_accounts AS g ON v.following = g.name
-                    ON CONFLICT (follower, following) DO UPDATE
-                    SET block_num = EXCLUDED.block_num
-                    """
-                )
-            elif mode == 'delete':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          {SCHEMA_NAME}.hive_accounts following_acc,
-                          (VALUES {', '.join(f"({follower}, {following})" for (follower, following, _) in batch)})
-                              AS v(follower_name, following_name)
-                    WHERE f.follower = follower_acc.id
-                      AND f.following = following_acc.id
-                      AND follower_acc.name = v.follower_name
-                      AND following_acc.name = v.following_name;
-                    """
-                )
-            elif mode == 'reset':
-                cls.db.query_no_return(
-                    f"""
-                    DELETE FROM {SCHEMA_NAME}.follow_blacklisted f
-                    USING {SCHEMA_NAME}.hive_accounts follower_acc,
-                          (VALUES {', '.join(f"({follower})" for (follower, _, _) in batch)})
-                              AS v(follower_name)
-                    WHERE f.follower = follower_acc.id
-                      AND follower_acc.name = v.follower_name
-                    """
-                )
-
+        cls.affected_accounts.clear()
         cls.follows_batches_to_flush.clear()
         cls.muted_batches_to_flush.clear()
         cls.blacklisted_batches_to_flush.clear()
