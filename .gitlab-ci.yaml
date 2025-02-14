@@ -33,7 +33,7 @@ variables:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 2905eef51a89ec286137cb77958377703803e551   # develop
+  ref: 041d6eb899948ec9adfadfca83e4ce12a0157e14   # master
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 - project: hive/common-ci-configuration
   ref: e74d7109838ff05fdc239bced6a726aa7ad46a9b
