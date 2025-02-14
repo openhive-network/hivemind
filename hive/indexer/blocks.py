@@ -454,7 +454,6 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
-            f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
         db = DbAdapterHolder.common_block_processing_db()
@@ -488,6 +487,15 @@ class Blocks:
             log.info("Updating follow counts query executed in: %.4f s", perf_counter() - time_start)
         else:
             log.info("No follow counts changed in this block")
+
+        queries = [
+            f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
+        ]
+
+        for query in queries:
+            time_start = perf_counter()
+            db.query_no_return(query)
+            log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
     @staticmethod
     def is_consistency() -> bool:
