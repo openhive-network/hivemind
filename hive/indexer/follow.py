@@ -72,19 +72,15 @@ class NetEffectTracker:
         treated as an UPSERT.
         """
         key = (follower, following)
-        # new, believed good code
-        #if key not in self.current:
-        #    self.current[key] = (NetOp.INSERT, block_num)
-        #else:
-        #    current_op, current_blk = self.current[key]
-        #    if current_op in (NetOp.INSERT, NetOp.UPSERT):
-        #        # Already in a following state; ignore duplicate follow.
-        #        return
-        #    elif current_op == NetOp.DELETE:
-        #        self.current[key] = (NetOp.UPSERT, block_num)
-
-        # attempting to replicate old block numbering behavior
-        self.current[key] = (NetOp.UPSERT, block_num)
+        if key not in self.current:
+            self.current[key] = (NetOp.INSERT, block_num)
+        else:
+            current_op, current_blk = self.current[key]
+            if current_op in (NetOp.INSERT, NetOp.UPSERT):
+                # Already in a following state; ignore duplicate follow.
+                return
+            elif current_op == NetOp.DELETE:
+                self.current[key] = (NetOp.UPSERT, block_num)
 
     def add_delete(self, follower, following, block_num=None):
         """
