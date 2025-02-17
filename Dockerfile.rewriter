@@ -1,4 +1,4 @@
-FROM openresty/openresty:alpine AS without_tag
+FROM registry.gitlab.syncad.com/hive/hivemind/openresty:1.27.1.1-1-alpine AS without_tag
 
 COPY docker/hivemind_nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf.template
 COPY rewrite_rules.conf /usr/local/openresty/nginx/conf/rewrite_rules.conf
