@@ -4,17 +4,30 @@ CREATE TYPE hivemind_app.follow AS (
   following TEXT,
   block_num INT
 );
+DROP TYPE IF EXISTS hivemind_app.follow_ids CASCADE;
+CREATE TYPE hivemind_app.follow_ids AS (
+  follower_id INTEGER,
+  following_id INTEGER,
+  block_num INTEGER
+);
 DROP TYPE IF EXISTS hivemind_app.follow_updates CASCADE;
 CREATE TYPE hivemind_app.follow_updates AS (
   id INTEGER,
   mode TEXT,
   changes hivemind_app.follow[]
 );
+
 DROP TYPE IF EXISTS hivemind_app.mute CASCADE;
 CREATE TYPE hivemind_app.mute AS (
   follower TEXT,
   following TEXT,
   block_num INT
+);
+DROP TYPE IF EXISTS hivemind_app.mute_ids CASCADE;
+CREATE TYPE hivemind_app.mute_ids AS (
+  follower_id INTEGER,
+  following_id INTEGER,
+  block_num INTEGER
 );
 DROP TYPE IF EXISTS hivemind_app.mute_updates CASCADE;
 CREATE TYPE hivemind_app.mute_updates AS (
@@ -22,11 +35,18 @@ CREATE TYPE hivemind_app.mute_updates AS (
   mode TEXT,
   changes hivemind_app.mute[]
 );
+
 DROP TYPE IF EXISTS hivemind_app.blacklist CASCADE;
 CREATE TYPE hivemind_app.blacklist AS (
   follower TEXT,
   following TEXT,
   block_num INT
+);
+DROP TYPE IF EXISTS hivemind_app.blacklist_ids CASCADE;
+CREATE TYPE hivemind_app.blacklist_ids AS (
+  follower_id INTEGER,
+  following_id INTEGER,
+  block_num INTEGER
 );
 DROP TYPE IF EXISTS hivemind_app.blacklist_updates CASCADE;
 CREATE TYPE hivemind_app.blacklist_updates AS (
@@ -34,11 +54,18 @@ CREATE TYPE hivemind_app.blacklist_updates AS (
   mode TEXT,
   changes hivemind_app.blacklist[]
 );
+
 DROP TYPE IF EXISTS hivemind_app.follow_mute CASCADE;
 CREATE TYPE hivemind_app.follow_mute AS (
   follower TEXT,
   following TEXT,
   block_num INT
+);
+DROP TYPE IF EXISTS hivemind_app.follow_mute_ids CASCADE;
+CREATE TYPE hivemind_app.follow_mute_ids AS (
+  follower_id INTEGER,
+  following_id INTEGER,
+  block_num INTEGER
 );
 DROP TYPE IF EXISTS hivemind_app.follow_mute_updates CASCADE;
 CREATE TYPE hivemind_app.follow_mute_updates AS (
@@ -46,11 +73,18 @@ CREATE TYPE hivemind_app.follow_mute_updates AS (
   mode TEXT,
   changes hivemind_app.follow_mute[]
 );
+
 DROP TYPE IF EXISTS hivemind_app.follow_blacklist CASCADE;
 CREATE TYPE hivemind_app.follow_blacklist AS (
   follower TEXT,
   following TEXT,
   block_num INT
+);
+DROP TYPE IF EXISTS hivemind_app.follow_blacklist_ids CASCADE;
+CREATE TYPE hivemind_app.follow_blacklist_ids AS (
+  follower_id INTEGER,
+  following_id INTEGER,
+  block_num INTEGER
 );
 DROP TYPE IF EXISTS hivemind_app.follow_blacklist_updates CASCADE;
 CREATE TYPE hivemind_app.follow_blacklist_updates AS (
@@ -60,192 +94,151 @@ CREATE TYPE hivemind_app.follow_blacklist_updates AS (
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.insert_follows;
-CREATE OR REPLACE FUNCTION hivemind_app.insert_follows(_changes hivemind_app.follow[])
+CREATE OR REPLACE FUNCTION hivemind_app.insert_follows(_changes hivemind_app.follow_ids[])
 RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follows (follower, following, block_num)
-  SELECT r.id, g.id, v.block_num
-  FROM UNNEST(_changes) AS v(follower, following, block_num)
-  JOIN hivemind_app.hive_accounts AS r ON v.follower = r.name
-  JOIN hivemind_app.hive_accounts AS g ON v.following = g.name
+  SELECT v.follower_id, v.following_id, v.block_num
+  FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_follows;
-CREATE OR REPLACE FUNCTION hivemind_app.delete_follows(_changes hivemind_app.follow[])
+CREATE OR REPLACE FUNCTION hivemind_app.delete_follows(_changes hivemind_app.follow_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follows f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        hivemind_app.hive_accounts AS following_acc,
-        UNNEST(_changes) AS v(follower_name, following_name)
-  WHERE f.follower = follower_acc.id
-    AND f.following = following_acc.id
-    AND follower_acc.name = v.follower_name
-    AND following_acc.name = v.following_name
+  USING UNNEST(_changes) AS v(follower_id, following_id)
+  WHERE f.follower = v.follower_id
+    AND f.following = v.following_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follows;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follows(_changes TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follows(_changes INTEGER[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follows f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        UNNEST(_changes) AS v(follower_name)
-  WHERE f.follower = follower_acc.id
-    AND follower_acc.name = v.follower_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.insert_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.insert_muted(_changes hivemind_app.mute[])
+CREATE OR REPLACE FUNCTION hivemind_app.insert_muted(_changes hivemind_app.mute_ids[])
 RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.muted (follower, following, block_num)
-  SELECT r.id, g.id, v.block_num
-  FROM UNNEST(_changes) AS v(follower, following, block_num)
-  JOIN hivemind_app.hive_accounts AS r ON v.follower = r.name
-  JOIN hivemind_app.hive_accounts AS g ON v.following = g.name
+  SELECT v.follower_id, v.following_id, v.block_num
+  FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.delete_muted(_changes hivemind_app.mute[])
+CREATE OR REPLACE FUNCTION hivemind_app.delete_muted(_changes hivemind_app.mute_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.muted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        hivemind_app.hive_accounts AS following_acc,
-        UNNEST(_changes) AS v(follower_name, following_name)
-  WHERE f.follower = follower_acc.id
-    AND f.following = following_acc.id
-    AND follower_acc.name = v.follower_name
-    AND following_acc.name = v.following_name
+  USING UNNEST(_changes) AS v(follower_id, following_id)
+  WHERE f.follower = v.follower_id
+    AND f.following = v.following_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_muted(_changes TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_muted(_changes INTEGER[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.muted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        UNNEST(_changes) AS v(follower_name)
-  WHERE f.follower = follower_acc.id
-    AND follower_acc.name = v.follower_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.insert_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.insert_blacklisted(_changes hivemind_app.blacklist[])
+CREATE OR REPLACE FUNCTION hivemind_app.insert_blacklisted(_changes hivemind_app.blacklist_ids[])
 RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.blacklisted (follower, following, block_num)
-  SELECT r.id, g.id, v.block_num
-  FROM UNNEST(_changes) AS v(follower, following, block_num)
-  JOIN hivemind_app.hive_accounts AS r ON v.follower = r.name
-  JOIN hivemind_app.hive_accounts AS g ON v.following = g.name
+  SELECT v.follower_id, v.following_id, v.block_num
+  FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.delete_blacklisted(_changes hivemind_app.blacklist[])
+CREATE OR REPLACE FUNCTION hivemind_app.delete_blacklisted(_changes hivemind_app.blacklist_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.blacklisted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        hivemind_app.hive_accounts AS following_acc,
-        UNNEST(_changes) AS v(follower_name, following_name)
-  WHERE f.follower = follower_acc.id
-    AND f.following = following_acc.id
-    AND follower_acc.name = v.follower_name
-    AND following_acc.name = v.following_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_blacklisted(_changes TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_blacklisted(_changes INTEGER[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.blacklisted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        UNNEST(_changes) AS v(follower_name)
-  WHERE f.follower = follower_acc.id
-    AND follower_acc.name = v.follower_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.insert_follow_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.insert_follow_muted(_changes hivemind_app.follow_mute[])
+CREATE OR REPLACE FUNCTION hivemind_app.insert_follow_muted(_changes hivemind_app.follow_mute_ids[])
 RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follow_muted (follower, following, block_num)
-  SELECT r.id, g.id, v.block_num
-  FROM UNNEST(_changes) AS v(follower, following, block_num)
-  JOIN hivemind_app.hive_accounts AS r ON v.follower = r.name
-  JOIN hivemind_app.hive_accounts AS g ON v.following = g.name
+  SELECT v.follower_id, v.following_id, v.block_num
+  FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_follow_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.delete_follow_muted(_changes hivemind_app.follow_mute[])
+CREATE OR REPLACE FUNCTION hivemind_app.delete_follow_muted(_changes hivemind_app.follow_mute_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_muted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        hivemind_app.hive_accounts AS following_acc,
-        UNNEST(_changes) AS v(follower_name, following_name)
-  WHERE f.follower = follower_acc.id
-    AND f.following = following_acc.id
-    AND follower_acc.name = v.follower_name
-    AND following_acc.name = v.following_name
+  USING UNNEST(_changes) AS v(follower_id, following_id)
+  WHERE f.follower = v.follower_id
+    AND f.following = v.following_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follow_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_muted(_changes TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_muted(_changes INTEGER[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_muted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        UNNEST(_changes) AS v(follower_name)
-  WHERE f.follower = follower_acc.id
-    AND follower_acc.name = v.follower_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.insert_follow_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.insert_follow_blacklisted(_changes hivemind_app.follow_blacklist[])
+CREATE OR REPLACE FUNCTION hivemind_app.insert_follow_blacklisted(_changes hivemind_app.follow_blacklist_ids[])
 RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follow_blacklisted (follower, following, block_num)
-  SELECT r.id, g.id, v.block_num
-  FROM UNNEST(_changes) AS v(follower, following, block_num)
-  JOIN hivemind_app.hive_accounts AS r ON v.follower = r.name
-  JOIN hivemind_app.hive_accounts AS g ON v.following = g.name
+  SELECT v.follower_id, v.following_id, v.block_num
+  FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_follow_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.delete_follow_blacklisted(_changes hivemind_app.follow_blacklist[])
+CREATE OR REPLACE FUNCTION hivemind_app.delete_follow_blacklisted(_changes hivemind_app.follow_blacklist_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_blacklisted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        hivemind_app.hive_accounts AS following_acc,
-        UNNEST(_changes) AS v(follower_name, following_name)
-  WHERE f.follower = follower_acc.id
-    AND f.following = following_acc.id
-    AND follower_acc.name = v.follower_name
-    AND following_acc.name = v.following_name
+  USING UNNEST(_changes) AS v(follower_id, following_id)
+  WHERE f.follower = v.follower_id
+    AND f.following = v.following_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follow_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_blacklisted(_changes TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_blacklisted(_changes INTEGER[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_blacklisted f
-  USING hivemind_app.hive_accounts AS follower_acc,
-        UNNEST(_changes) AS v(follower_name)
-  WHERE f.follower = follower_acc.id
-    AND follower_acc.name = v.follower_name
+  USING UNNEST(_changes) AS v(follower_id)
+  WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
@@ -263,96 +256,151 @@ BEGIN
   ),
   change_follows AS (
     SELECT
-      CASE upd.mode
+      CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follows(upd.changes)
+          SELECT hivemind_app.insert_follows(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follows(upd.changes)
+          SELECT hivemind_app.delete_follows(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follows(ARRAY(SELECT v.follower FROM UNNEST(upd.changes) AS v(follower, following, block_num)))
+          SELECT hivemind_app.reset_follows(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
         )
       END
-    FROM unnest(_follow_updates) AS upd
-    ORDER BY upd.id
+    FROM (
+      SELECT
+        upd.id,
+        upd.mode,
+        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_ids) AS changes
+      FROM UNNEST(_follow_updates) AS upd
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
+      JOIN accounts_id AS r ON ch.follower = r.name
+      JOIN accounts_id AS g ON ch.following = g.name
+      GROUP BY upd.id, upd.mode
+      ORDER BY upd.id
+    ) AS upd_with_ids
+    ORDER BY upd_with_ids.id
   ),
   change_muted AS (
     SELECT
-      CASE upd.mode
+      CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_muted(upd.changes)
+          SELECT hivemind_app.insert_muted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_muted(upd.changes)
+          SELECT hivemind_app.delete_muted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_muted(ARRAY(SELECT v.follower FROM UNNEST(upd.changes) AS v(follower, following, block_num)))
+          SELECT hivemind_app.reset_muted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
         )
       END
-    FROM unnest(_muted_updates) AS upd
-    ORDER BY upd.id
+    FROM (
+      SELECT
+        upd.id,
+        upd.mode,
+        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.mute_ids) AS changes
+      FROM UNNEST(_muted_updates) AS upd
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
+      JOIN accounts_id AS r ON ch.follower = r.name
+      JOIN accounts_id AS g ON ch.following = g.name
+      GROUP BY upd.id, upd.mode
+      ORDER BY upd.id
+    ) AS upd_with_ids
+    ORDER BY upd_with_ids.id
   ),
   change_blacklisted AS (
     SELECT
-      CASE upd.mode
+      CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_blacklisted(upd.changes)
+          SELECT hivemind_app.insert_blacklisted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_blacklisted(upd.changes)
+          SELECT hivemind_app.delete_blacklisted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd.changes) AS v(follower, following, block_num)))
+          SELECT hivemind_app.reset_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
         )
       END
-    FROM unnest(_blacklisted_updates) AS upd
-    ORDER BY upd.id
+    FROM (
+      SELECT
+        upd.id,
+        upd.mode,
+        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.blacklist_ids) AS changes
+      FROM UNNEST(_blacklisted_updates) AS upd
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
+      JOIN accounts_id AS r ON ch.follower = r.name
+      JOIN accounts_id AS g ON ch.following = g.name
+      GROUP BY upd.id, upd.mode
+      ORDER BY upd.id
+    ) AS upd_with_ids
+    ORDER BY upd_with_ids.id
   ),
   change_follow_muted AS (
     SELECT
-      CASE upd.mode
+      CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follow_muted(upd.changes)
+          SELECT hivemind_app.insert_follow_muted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follow_muted(upd.changes)
+          SELECT hivemind_app.delete_follow_muted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follow_muted(ARRAY(SELECT v.follower FROM UNNEST(upd.changes) AS v(follower, following, block_num)))
+          SELECT hivemind_app.reset_follow_muted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
         )
       END
-    FROM unnest(_follow_muted_updates) AS upd
-    ORDER BY upd.id
+    FROM (
+      SELECT
+        upd.id,
+        upd.mode,
+        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_mute_ids) AS changes
+      FROM UNNEST(_follow_muted_updates) AS upd
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
+      JOIN accounts_id AS r ON ch.follower = r.name
+      JOIN accounts_id AS g ON ch.following = g.name
+      GROUP BY upd.id, upd.mode
+      ORDER BY upd.id
+    ) AS upd_with_ids
+    ORDER BY upd_with_ids.id
   ),
   change_follow_blacklisted AS (
     SELECT
-      CASE upd.mode
+      CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follow_blacklisted(upd.changes)
+          SELECT hivemind_app.insert_follow_blacklisted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follow_blacklisted(upd.changes)
+          SELECT hivemind_app.delete_follow_blacklisted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follow_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd.changes) AS v(follower, following, block_num)))
+          SELECT hivemind_app.reset_follow_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
         )
       END
-    FROM unnest(_follow_blacklisted_updates) AS upd
-    ORDER BY upd.id
-  )
-  SELECT COUNT(1) INTO _dummy
-  FROM (
-    SELECT * FROM change_follows
-    UNION ALL
-    SELECT * FROM change_muted
-    UNION ALL
-    SELECT * FROM change_blacklisted
-    UNION ALL
-    SELECT * FROM change_follow_muted
-    UNION ALL
-    SELECT * FROM change_follow_blacklisted
-  ) AS x(val)
-  GROUP BY val;
+    FROM (
+      SELECT
+        upd.id,
+        upd.mode,
+        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_blacklist_ids) AS changes
+      FROM UNNEST(_follow_blacklisted_updates) AS upd
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
+      JOIN accounts_id AS r ON ch.follower = r.name
+      JOIN accounts_id AS g ON ch.following = g.name
+      GROUP BY upd.id, upd.mode
+      ORDER BY upd.id
+    ) AS upd_with_ids
+    ORDER BY upd_with_ids.id
+)
+SELECT COUNT(1) INTO _dummy
+FROM (
+  SELECT * FROM change_follows
+  UNION ALL
+  SELECT * FROM change_muted
+  UNION ALL
+  SELECT * FROM change_blacklisted
+  UNION ALL
+  SELECT * FROM change_follow_muted
+  UNION ALL
+  SELECT * FROM change_follow_blacklisted
+) AS x(val)
+GROUP BY val;
 END
 $BODY$;
