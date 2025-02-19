@@ -589,7 +589,7 @@ using docker containers and second run on host with using hivemind virtual envir
    as a variable DATADIR.
     ```bash
     docker network create haf;
-    docker run -d -e PG_ACCESS="host haf_block_log all 0.0.0.0/0 trust" -e DATADIR=/home/hived/datadir -v ./workplace-haf:/home/hived/datadir --shm-size=4294967296 --network=haf --name=haf registry.gitlab.syncad.com/hive/haf/instance:local --replay --stop-at-block=5000000
+    docker run -d -e PG_ACCESS="host haf_block_log all 0.0.0.0/0 trust" -e DATADIR=/home/hived/datadir -v /path/to/workpace-haf:/home/hived/datadir --shm-size=4294967296 --network=haf --name=haf registry.gitlab.syncad.com/hive/haf/minimal-instance:local --replay --stop-at-block=5000000
     ```
 
    You can observe the progress of synchronization with the command: `docker logs -n 100 -f haf`. Because the HAF must stay running
