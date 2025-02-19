@@ -1,0 +1,23 @@
+[
+  {
+    "what": [
+      "ignore"
+    ],
+    "follower": "ignore-test1",
+    "following": "follow-fake-b1"
+  },
+  {
+    "what": [
+      "ignore"
+    ],
+    "follower": "ignore-test1",
+    "following": "follow-fake-b3"
+  },
+  {
+    "what": [
+      "ignore"
+    ],
+    "follower": "ignore-test1",
+    "following": "follow-fake-b5"
+  }
+]

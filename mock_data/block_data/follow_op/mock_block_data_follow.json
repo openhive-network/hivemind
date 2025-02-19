@@ -1464,5 +1464,3286 @@
         ]
       }
     ]
+  },
+  "5000015": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-a1",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-a2",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-a3",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-a4",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-a5",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-b1",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-b2",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-b3",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-b4",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-b5",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-c1",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-c2",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-c3",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-c4",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follow-fake-c5",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow, mutes and blacklist mechanism\"}}",
+							"extensions": []
+						}
+					},
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follows-test1",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow mechanism, scenario 1, he follows 5 accounts and 4 accounts follows him\"}}",
+							"extensions": []
+						}
+					},
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b2\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b3\"],\"what\":[\"\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b5\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b3\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b1\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[\"follow-fake-b5\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"follows-test1\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"follows-test1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"follows-test1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"follows-test1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a5\",\"following\":[\"follows-test1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[],\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test1\",\"following\":[],\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          },
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follows-test2",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow mechanism, scenario 2, he followed 5 accounts, but canceled follows on 2 accounts and 4 accounts followed him but 2 cancelled.\"}}",
+							"extensions": []
+						}
+					},
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test2\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\", \"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test2\",\"following\":[\"follow-fake-b1\", \"follow-fake-b4\"],\"what\":[]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"follows-test2\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"follows-test2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"follows-test2\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"follows-test2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"follows-test2\"],\"what\":[\"\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"follows-test2\"],\"what\":[\"\"]}]"
+            }
+          },
+          {
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "follows-test3",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "{\"profile\":{\"about\":\"Account for testing follow mechanism, scenario 3, reseting following list.\"}}",
+							"extensions": []
+						}
+					},
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":[\"follow-fake-b4\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":[\"follow-fake-b5\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"follows-test3\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"follows-test3\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"follows-test3\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"follows-test3\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"follows-test3\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"follows-test3\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":[\"follow-fake-c3\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":[\"follow-fake-c4\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follows-test3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follows-test3\",\"following\":\"\",\"what\":[\"reset_following_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "ignore-test1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing mute mechanism, scenario 1, muting 5 accounts, cancel one mute, 2 accounts mutes him and one cancel,\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[\"follow-fake-b3\"],\"what\":[\"\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\", \"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[\"follow-fake-b4\", \"follow-fake-b2\"],\"what\":[]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"ignore-test1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"ignore-test1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"ignore-test1\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"ignore-test1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"ignore-test1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a5\",\"following\":[\"ignore-test1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[],\"what\":[\"reset_following_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[],\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test1\",\"following\":[],\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "ignore-test2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing mute mechanism, scenario 2, reset mutes list,\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-b1\", \"follow-fake-b3\", \"follow-fake-b5\" ],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-b2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-b4\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-b4\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"ignore-test2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"ignore-test2\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"ignore-test2\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"ignore-test2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a5\",\"following\":[\"ignore-test2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-c3\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-c4\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignore-test2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignore-test2\",\"following\":[\"follow-fake-b5\"],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "blacklisttest1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing blacklist mechanism, scenario 1, blacklist 5 accounts, remove 2 accounts from blacklist,\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\", \"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"blacklisttest1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"blacklisttest1\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"blacklisttest1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"blacklisttest1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a5\",\"following\":[\"blacklisttest1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[\"follow-fake-b3\"],\"what\":[]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[\"follow-fake-b2\"],\"what\":[\"unblacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[],\"what\":[\"reset_following_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[],\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest1\",\"following\":[],\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "blacklisttest2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing blacklist mechanism, scenario 2, reset blacklist,\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-b5\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-b4\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a1\",\"following\":[\"blacklisttest2\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a2\",\"following\":[\"blacklisttest2\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a3\",\"following\":[\"blacklisttest2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a4\",\"following\":[\"blacklisttest2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-a5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-a5\",\"following\":[\"blacklisttest2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-c1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-c2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttest2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttest2\",\"following\":[\"follow-fake-b3\",\"w23qer342ar\"],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fb-test-1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing follow_blacklist mechanism, scenario 1\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fb-fake-1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake Account for testing follow_blacklist mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fb-fake-2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake Account for testing follow_blacklist mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-fake-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-fake-1\",\"following\":[\"follow-fake-b1\",\"follow-fake-b2\", \"follow-fake-b3\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-fake-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-fake-2\",\"following\":[\"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-1\",\"following\":[\"fb-fake-1\",\"fb-fake-2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-fake-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-fake-1\",\"following\":[\"follow-fake-b2\"],\"what\":[\"unblacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"fb-test-1\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"fb-test-1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"fb-test-1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"fb-test-1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"fb-test-1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-1\",\"following\":[],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-1\",\"following\":[],\"what\":[\"reset_following_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-1\",\"following\":[],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-1\",\"following\":[],\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fb-test-2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing follow_blacklist mechanism, scenario 2\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"fb-fake-1\",\"fb-fake-2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"follow-fake-a1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"follow-fake-a2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"follow-fake-a3\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"follow-fake-a4\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"fb-test-2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"fb-test-2\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"fb-test-2\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"fb-test-2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"fb-test-2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fb-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fb-test-2\",\"following\":[\"fb-fake-1\"],\"what\":[\"unfollow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fm-fake-1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake account for testing follow_muted mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fm-fake-2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake account for testing follow_muted mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fm-test-1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing follow_muted mechanism, scenario 1\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-fake-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-fake-1\",\"following\":[\"follow-fake-b1\",\"follow-fake-b2\", \"follow-fake-b3\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-fake-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-fake-2\",\"following\":[\"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-1\",\"following\":[\"fm-fake-1\",\"fm-fake-2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-fake-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-fake-1\",\"following\":[\"follow-fake-b2\"],\"what\":[]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"fm-test-1\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"fm-test-1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"fm-test-1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"fm-test-1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"fm-test-1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-1\",\"following\":[],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-1\",\"following\":[],\"what\":[\"reset_following_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-1\",\"following\":[],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-1\",\"following\":[],\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "fm-test-2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing follow_muted mechanism, scenario 2\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"fm-fake-1\",\"fm-fake-2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"follow-fake-a1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"follow-fake-a2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"follow-fake-a3\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"follow-fake-a4\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"fm-test-2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"fm-test-2\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"fm-test-2\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"fm-test-2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"fm-test-2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "fm-test-2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"fm-test-2\",\"following\":[\"fm-fake-1\"],\"what\":[\"unfollow_muted\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "rfb-test",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing reset_follow_blacklist mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":[\"fb-fake-1\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":[\"fm-fake-2\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":[\"follow-fake-a1\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":[\"follow-fake-a2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":[\"follow-fake-a3\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"rfb-test\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"rfb-test\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"rfb-test\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"rfb-test\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"rfb-test\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfb-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfb-test\",\"following\":\"\",\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "rfm-test",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing reset_follow_muted mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\":[\"fm-fake-1\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\":[\"fb-fake-2\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\":[\"follow-fake-a1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\":[\"follow-fake-a2\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\":[\"follow-fake-a3\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":\"rfm-test\",\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":\"rfm-test\",\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":\"rfm-test\",\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":\"rfm-test\",\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":\"rfm-test\",\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "rfm-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"rfm-test\",\"following\": null,\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "ral-test",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Account for testing reset_all_lists mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "ral-fake-m",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake account for testing reset_all_lists mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "gtg",
+              "new_account_name": "ral-fake-b",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"Fake account for testing reset_all_lists mechanism\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-fake-m"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-fake-m\",\"following\":[\"follow-fake-b1\", \"follow-fake-b2\", \"follow-fake-b3\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-fake-b"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-fake-b\",\"following\":[\"follow-fake-b4\", \"follow-fake-b5\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[\"follow-fake-a1\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[\"follow-fake-a2\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[\"follow-fake-a3\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[\"ral-fake-m\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[\"ral-fake-b\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c1\",\"following\":[\"ral-test\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c2\",\"following\":[\"ral-test\"],\"what\":[\"follow\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c3\",\"following\":[\"ral-test\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c4\",\"following\":[\"ral-test\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "follow-fake-c5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"follow-fake-c5\",\"following\":[\"ral-test\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ral-test"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ral-test\",\"following\":[],\"what\":[\"reset_all_lists\"]}]"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

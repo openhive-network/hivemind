@@ -1,0 +1,16 @@
+[
+  {
+    "what": [
+      "blog"
+    ],
+    "follower": "follow-fake-a3",
+    "following": "follows-test2"
+  },
+  {
+    "what": [
+      "blog"
+    ],
+    "follower": "follow-fake-a4",
+    "following": "follows-test2"
+  }
+]
