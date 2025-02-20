@@ -171,8 +171,9 @@ DROP FUNCTION IF EXISTS hivemind_app.delete_blacklisted;
 CREATE OR REPLACE FUNCTION hivemind_app.delete_blacklisted(_changes hivemind_app.blacklist_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.blacklisted f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id)
   WHERE f.follower = v.follower_id
+    AND f.following = v.following_id
   RETURNING 1;
 $$ LANGUAGE sql;
 
