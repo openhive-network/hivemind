@@ -99,6 +99,7 @@ RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follows (follower, following, block_num)
   SELECT v.follower_id, v.following_id, v.block_num
   FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+  ORDER BY v.block_num
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
@@ -129,6 +130,7 @@ RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.muted (follower, following, block_num)
   SELECT v.follower_id, v.following_id, v.block_num
   FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+  ORDER BY v.block_num
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
@@ -159,6 +161,7 @@ RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.blacklisted (follower, following, block_num)
   SELECT v.follower_id, v.following_id, v.block_num
   FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+  ORDER BY v.block_num
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
@@ -188,6 +191,7 @@ RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follow_muted (follower, following, block_num)
   SELECT v.follower_id, v.following_id, v.block_num
   FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+  ORDER BY v.block_num
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
@@ -218,6 +222,7 @@ RETURNS INTEGER AS $$
   INSERT INTO hivemind_app.follow_blacklisted (follower, following, block_num)
   SELECT v.follower_id, v.following_id, v.block_num
   FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+  ORDER BY v.block_num
   ON CONFLICT (follower, following) DO UPDATE
   SET block_num = EXCLUDED.block_num
   RETURNING 1;
