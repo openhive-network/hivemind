@@ -116,10 +116,10 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follows;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follows(_changes INTEGER[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follows(_changes hivemind_app.follow_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follows f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id, block_num)
   WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
@@ -147,10 +147,10 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_muted(_changes INTEGER[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_muted(_changes hivemind_app.mute_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.muted f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id, block_num)
   WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
@@ -177,10 +177,10 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_blacklisted(_changes INTEGER[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_blacklisted(_changes hivemind_app.blacklist_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.blacklisted f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id, block_num)
   WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
@@ -208,10 +208,10 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follow_muted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_muted(_changes INTEGER[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_muted(_changes hivemind_app.follow_mute_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_muted f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id, block_num)
   WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
@@ -239,10 +239,10 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP FUNCTION IF EXISTS hivemind_app.reset_follow_blacklisted;
-CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_blacklisted(_changes INTEGER[])
+CREATE OR REPLACE FUNCTION hivemind_app.reset_follow_blacklisted(_changes hivemind_app.follow_blacklist_ids[])
 RETURNS INTEGER AS $$
   DELETE FROM hivemind_app.follow_blacklisted f
-  USING UNNEST(_changes) AS v(follower_id)
+  USING UNNEST(_changes) AS v(follower_id, following_id, block_num)
   WHERE f.follower = v.follower_id
   RETURNING 1;
 $$ LANGUAGE sql;
@@ -263,13 +263,13 @@ BEGIN
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follows(upd_with_ids.changes)
+          hivemind_app.insert_follows(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follows(upd_with_ids.changes)
+          hivemind_app.delete_follows(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follows(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
+          hivemind_app.reset_follows(upd_with_ids.changes)
         )
       END
     FROM (
@@ -290,13 +290,13 @@ BEGIN
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_muted(upd_with_ids.changes)
+          hivemind_app.insert_muted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_muted(upd_with_ids.changes)
+          hivemind_app.delete_muted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_muted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
+          hivemind_app.reset_muted(upd_with_ids.changes)
         )
       END
     FROM (
@@ -317,13 +317,13 @@ BEGIN
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_blacklisted(upd_with_ids.changes)
+          hivemind_app.insert_blacklisted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_blacklisted(upd_with_ids.changes)
+          hivemind_app.delete_blacklisted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
+          hivemind_app.reset_blacklisted(upd_with_ids.changes)
         )
       END
     FROM (
@@ -344,13 +344,13 @@ BEGIN
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follow_muted(upd_with_ids.changes)
+          hivemind_app.insert_follow_muted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follow_muted(upd_with_ids.changes)
+          hivemind_app.delete_follow_muted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follow_muted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
+          hivemind_app.reset_follow_muted(upd_with_ids.changes)
         )
       END
     FROM (
@@ -371,13 +371,13 @@ BEGIN
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
-          SELECT hivemind_app.insert_follow_blacklisted(upd_with_ids.changes)
+          hivemind_app.insert_follow_blacklisted(upd_with_ids.changes)
         )
         WHEN 'delete' THEN (
-          SELECT hivemind_app.delete_follow_blacklisted(upd_with_ids.changes)
+          hivemind_app.delete_follow_blacklisted(upd_with_ids.changes)
         )
         WHEN 'reset' THEN (
-          SELECT hivemind_app.reset_follow_blacklisted(ARRAY(SELECT v.follower FROM UNNEST(upd_with_ids.changes) AS v(follower, following, block_num)))
+          hivemind_app.reset_follow_blacklisted(upd_with_ids.changes)
         )
       END
     FROM (
