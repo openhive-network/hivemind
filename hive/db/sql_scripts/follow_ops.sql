@@ -257,7 +257,7 @@ AS $BODY$
     FROM hivemind_app.hive_accounts ha
     JOIN ( SELECT UNNEST( _impacted_accounts ) AS name ) AS im ON im.name = ha.name
   ),
-  change_follows AS (
+  change_follows AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
@@ -284,7 +284,7 @@ AS $BODY$
     ) AS upd_with_ids
     ORDER BY upd_with_ids.id
   ),
-  change_muted AS (
+  change_muted AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
@@ -311,7 +311,7 @@ AS $BODY$
     ) AS upd_with_ids
     ORDER BY upd_with_ids.id
   ),
-  change_blacklisted AS (
+  change_blacklisted AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
@@ -338,7 +338,7 @@ AS $BODY$
     ) AS upd_with_ids
     ORDER BY upd_with_ids.id
   ),
-  change_follow_muted AS (
+  change_follow_muted AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
@@ -365,7 +365,7 @@ AS $BODY$
     ) AS upd_with_ids
     ORDER BY upd_with_ids.id
   ),
-  change_follow_blacklisted AS (
+  change_follow_blacklisted AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
         WHEN 'insert' THEN (
