@@ -278,7 +278,7 @@ AS $BODY$
       FROM UNNEST(_follow_updates) AS upd
       CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
       JOIN accounts_id AS r ON ch.follower = r.name
-      JOIN accounts_id AS g ON ch.following = g.name
+      LEFT JOIN accounts_id AS g ON ch.following = g.name
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -305,7 +305,7 @@ AS $BODY$
       FROM UNNEST(_muted_updates) AS upd
       CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
       JOIN accounts_id AS r ON ch.follower = r.name
-      JOIN accounts_id AS g ON ch.following = g.name
+      LEFT JOIN accounts_id AS g ON ch.following = g.name
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -332,7 +332,7 @@ AS $BODY$
       FROM UNNEST(_blacklisted_updates) AS upd
       CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
       JOIN accounts_id AS r ON ch.follower = r.name
-      JOIN accounts_id AS g ON ch.following = g.name
+      LEFT JOIN accounts_id AS g ON ch.following = g.name
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -359,7 +359,7 @@ AS $BODY$
       FROM UNNEST(_follow_muted_updates) AS upd
       CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
       JOIN accounts_id AS r ON ch.follower = r.name
-      JOIN accounts_id AS g ON ch.following = g.name
+      LEFT JOIN accounts_id AS g ON ch.following = g.name
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -386,7 +386,7 @@ AS $BODY$
       FROM UNNEST(_follow_blacklisted_updates) AS upd
       CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
       JOIN accounts_id AS r ON ch.follower = r.name
-      JOIN accounts_id AS g ON ch.following = g.name
+      LEFT JOIN accounts_id AS g ON ch.following = g.name
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
