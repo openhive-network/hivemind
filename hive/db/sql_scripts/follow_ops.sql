@@ -250,11 +250,8 @@ $$ LANGUAGE sql;
 
 DROP PROCEDURE IF EXISTS hivemind_app.flush_follows CASCADE;
 CREATE OR REPLACE PROCEDURE hivemind_app.flush_follows(_follow_updates hivemind_app.follow_updates[], _muted_updates hivemind_app.mute_updates[], _blacklisted_updates hivemind_app.blacklist_updates[], _follow_muted_updates hivemind_app.follow_mute_updates[], _follow_blacklisted_updates hivemind_app.follow_blacklist_updates[], _impacted_accounts TEXT[])
-LANGUAGE 'plpgsql'
+LANGUAGE sql
 AS $BODY$
-DECLARE
-  _dummy INTEGER;
-BEGIN
   WITH accounts_id AS MATERIALIZED (
     SELECT ha.name, ha.id
     FROM hivemind_app.hive_accounts ha
@@ -395,7 +392,7 @@ BEGIN
     ) AS upd_with_ids
     ORDER BY upd_with_ids.id
 )
-SELECT COUNT(1) INTO _dummy
+SELECT COUNT(*)
 FROM (
   SELECT * FROM change_follows
   UNION ALL
@@ -408,5 +405,4 @@ FROM (
   SELECT * FROM change_follow_blacklisted
 ) AS x(val)
 GROUP BY val;
-END
 $BODY$;
