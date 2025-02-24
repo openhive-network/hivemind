@@ -1,5 +1,6 @@
 DROP TYPE IF EXISTS hivemind_app.follow CASCADE;
 CREATE TYPE hivemind_app.follow AS (
+  id INTEGER,
   follower TEXT,
   following TEXT,
   block_num INT
@@ -19,6 +20,7 @@ CREATE TYPE hivemind_app.follow_updates AS (
 
 DROP TYPE IF EXISTS hivemind_app.mute CASCADE;
 CREATE TYPE hivemind_app.mute AS (
+  id INTEGER,
   follower TEXT,
   following TEXT,
   block_num INT
@@ -38,6 +40,7 @@ CREATE TYPE hivemind_app.mute_updates AS (
 
 DROP TYPE IF EXISTS hivemind_app.blacklist CASCADE;
 CREATE TYPE hivemind_app.blacklist AS (
+  id INTEGER,
   follower TEXT,
   following TEXT,
   block_num INT
@@ -57,6 +60,7 @@ CREATE TYPE hivemind_app.blacklist_updates AS (
 
 DROP TYPE IF EXISTS hivemind_app.follow_mute CASCADE;
 CREATE TYPE hivemind_app.follow_mute AS (
+  id INTEGER,
   follower TEXT,
   following TEXT,
   block_num INT
@@ -76,6 +80,7 @@ CREATE TYPE hivemind_app.follow_mute_updates AS (
 
 DROP TYPE IF EXISTS hivemind_app.follow_blacklist CASCADE;
 CREATE TYPE hivemind_app.follow_blacklist AS (
+  id INTEGER,
   follower TEXT,
   following TEXT,
   block_num INT
@@ -249,14 +254,77 @@ RETURNS INTEGER AS $$
 $$ LANGUAGE sql;
 
 DROP PROCEDURE IF EXISTS hivemind_app.flush_follows CASCADE;
-CREATE OR REPLACE PROCEDURE hivemind_app.flush_follows(_follow_updates hivemind_app.follow_updates[], _muted_updates hivemind_app.mute_updates[], _blacklisted_updates hivemind_app.blacklist_updates[], _follow_muted_updates hivemind_app.follow_mute_updates[], _follow_blacklisted_updates hivemind_app.follow_blacklist_updates[], _impacted_accounts TEXT[])
+CREATE OR REPLACE PROCEDURE hivemind_app.flush_follows(_follow_updates hivemind_app.follow_updates[], _muted_updates hivemind_app.mute_updates[], _blacklisted_updates hivemind_app.blacklist_updates[], _follow_muted_updates hivemind_app.follow_mute_updates[], _follow_blacklisted_updates hivemind_app.follow_blacklist_updates[])
 LANGUAGE sql
 AS $BODY$
   WITH accounts_id AS MATERIALIZED (
-    SELECT ha.name, ha.id
-    FROM hivemind_app.hive_accounts ha
-    JOIN ( SELECT UNNEST( _impacted_accounts ) AS name ) AS im ON im.name = ha.name
+    SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+    FROM unnest(_follow_updates) AS fu
+    CROSS JOIN LATERAL unnest(fu.changes) AS c
+    JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+    LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+    UNION ALL
+    SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+    FROM unnest(_muted_updates) AS mu
+    CROSS JOIN LATERAL unnest(mu.changes) AS c
+    JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+    LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+    UNION ALL
+    SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+    FROM unnest(_blacklisted_updates) AS bu
+    CROSS JOIN LATERAL unnest(bu.changes) AS c
+    JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+    LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+    UNION ALL
+    SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+    FROM unnest(_follow_muted_updates) AS fmu
+    CROSS JOIN LATERAL unnest(fmu.changes) AS c
+    JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+    LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+    UNION ALL
+    SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+    FROM unnest(_follow_blacklisted_updates) AS fbu
+    CROSS JOIN LATERAL unnest(fbu.changes) AS c
+    JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+    LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
   ),
+  /*
+   * WITH follows_accounts_id AS MATERIALIZED (
+   *   SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+   *   FROM unnest(_follow_updates) AS fu
+   *   CROSS JOIN LATERAL unnest(fu.changes) AS c
+   *   JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+   *   LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+   * ),
+   * muted_accounts_id AS MATERIALIZED (
+   *   SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+   *   FROM unnest(_muted_updates) AS mu
+   *   CROSS JOIN LATERAL unnest(mu.changes) AS c
+   *   JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+   *   LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+   * ),
+   * blacklisted_accounts_id AS MATERIALIZED (
+   *   SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+   *   FROM unnest(_blacklisted_updates) AS bu
+   *   CROSS JOIN LATERAL unnest(bu.changes) AS c
+   *   JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+   *   LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+   * ),
+   * follow_muted_accounts_id AS MATERIALIZED (
+   *   SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+   *   FROM unnest(_follow_muted_updates) AS fmu
+   *   CROSS JOIN LATERAL unnest(fmu.changes) AS c
+   *   JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+   *   LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+   * ),
+   * follow_blacklisted_accounts_id AS MATERIALIZED (
+   *   SELECT c.id AS change_id, r.id AS follower_id, g.id AS following_id
+   *   FROM unnest(_follow_blacklisted_updates) AS fbu
+   *   CROSS JOIN LATERAL unnest(fbu.changes) AS c
+   *   JOIN hivemind_app.hive_accounts AS r ON c.follower=r.name
+   *   LEFT JOIN hivemind_app.hive_accounts AS g ON c.following=g.name
+   * ),
+   */
   change_follows AS MATERIALIZED (
     SELECT
       CASE upd_with_ids.mode
@@ -274,11 +342,11 @@ AS $BODY$
       SELECT
         upd.id,
         upd.mode,
-        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_ids) AS changes
+        ARRAY_AGG( ROW(a.follower_id, a.following_id, ch.block_num)::hivemind_app.follow_ids) AS changes
       FROM UNNEST(_follow_updates) AS upd
-      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
-      JOIN accounts_id AS r ON ch.follower = r.name
-      LEFT JOIN accounts_id AS g ON ch.following = g.name
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(id, follower, following, block_num)
+      --  JOIN follows_accounts_id AS a ON ch.id = a.change_id
+      JOIN accounts_id AS a ON ch.id = a.change_id
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -301,11 +369,11 @@ AS $BODY$
       SELECT
         upd.id,
         upd.mode,
-        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.mute_ids) AS changes
+        ARRAY_AGG( ROW(a.follower_id, a.following_id, ch.block_num)::hivemind_app.mute_ids) AS changes
       FROM UNNEST(_muted_updates) AS upd
-      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
-      JOIN accounts_id AS r ON ch.follower = r.name
-      LEFT JOIN accounts_id AS g ON ch.following = g.name
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(id, follower, following, block_num)
+      --  JOIN muted_accounts_id AS a ON ch.id = a.change_id
+      JOIN accounts_id AS a ON ch.id = a.change_id
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -328,11 +396,11 @@ AS $BODY$
       SELECT
         upd.id,
         upd.mode,
-        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.blacklist_ids) AS changes
+        ARRAY_AGG( ROW(a.follower_id, a.following_id, ch.block_num)::hivemind_app.blacklist_ids) AS changes
       FROM UNNEST(_blacklisted_updates) AS upd
-      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
-      JOIN accounts_id AS r ON ch.follower = r.name
-      LEFT JOIN accounts_id AS g ON ch.following = g.name
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(id, follower, following, block_num)
+      --  JOIN blacklisted_accounts_id AS a ON ch.id = a.change_id
+      JOIN accounts_id AS a ON ch.id = a.change_id
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -355,11 +423,11 @@ AS $BODY$
       SELECT
         upd.id,
         upd.mode,
-        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_mute_ids) AS changes
+        ARRAY_AGG( ROW(a.follower_id, a.following_id, ch.block_num)::hivemind_app.follow_mute_ids) AS changes
       FROM UNNEST(_follow_muted_updates) AS upd
-      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
-      JOIN accounts_id AS r ON ch.follower = r.name
-      LEFT JOIN accounts_id AS g ON ch.following = g.name
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(id, follower, following, block_num)
+      --  JOIN follow_muted_accounts_id AS a ON ch.id = a.change_id
+      JOIN accounts_id AS a ON ch.id = a.change_id
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
@@ -382,11 +450,11 @@ AS $BODY$
       SELECT
         upd.id,
         upd.mode,
-        ARRAY_AGG( ROW(r.id, g.id, ch.block_num)::hivemind_app.follow_blacklist_ids) AS changes
+        ARRAY_AGG( ROW(a.follower_id, a.following_id, ch.block_num)::hivemind_app.follow_blacklist_ids) AS changes
       FROM UNNEST(_follow_blacklisted_updates) AS upd
-      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(follower, following, block_num)
-      JOIN accounts_id AS r ON ch.follower = r.name
-      LEFT JOIN accounts_id AS g ON ch.following = g.name
+      CROSS JOIN LATERAL UNNEST(upd.changes) AS ch(id, follower, following, block_num)
+      --  JOIN follow_blacklisted_accounts_id AS a ON ch.id = a.change_id
+      JOIN accounts_id AS a ON ch.id = a.change_id
       GROUP BY upd.id, upd.mode
       ORDER BY upd.id
     ) AS upd_with_ids
