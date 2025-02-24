@@ -40,7 +40,7 @@ def insert_or_update(items, follower, following, block_num):
 class Batch():
 
     def __init__(self):
-        self.data = [('', [])]
+        self.data = []
 
     def iter(self):
         return iter(self.data)
@@ -49,8 +49,11 @@ class Batch():
         self.data.append((mode, []))
 
     def mode(self):
-        (mode, _) = self.data[-1]
-        return mode
+        if len(self.data) > 0:
+            (mode, _) = self.data[-1]
+            return mode
+        else:
+            return ''
 
     def add_insert(self, follower, following, block_num):
         if self.mode() != 'insert':
@@ -72,7 +75,6 @@ class Batch():
 
     def clear(self):
         self.data.clear()
-        self.new('')
 
 
 class Follow(DbAdapterHolder):
@@ -243,20 +245,15 @@ class Follow(DbAdapterHolder):
         follow_muted = []
         follow_blacklisted = []
         for (n, (mode, batch)) in enumerate(cls.follows_batches_to_flush.iter()):
-            if mode!= '':
-                follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
+            follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
         for (n, (mode, batch)) in enumerate(cls.muted_batches_to_flush.iter()):
-            if mode!= '':
-                muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
+            muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
         for (n, (mode, batch)) in enumerate(cls.blacklisted_batches_to_flush.iter()):
-            if mode!= '':
-                blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
+            blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
         for (n, (mode, batch)) in enumerate(cls.follow_muted_batches_to_flush.iter()):
-            if mode!= '':
-                follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
+            follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
         for (n, (mode, batch)) in enumerate(cls.follow_blacklisted_batches_to_flush.iter()):
-            if mode!= '':
-                follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
+            follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
         if follows or muted or blacklisted or follow_muted or follow_blacklisted:
             cls.db.query_no_return(
                 f"""
