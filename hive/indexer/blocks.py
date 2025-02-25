@@ -346,7 +346,12 @@ class Blocks:
             Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block
         )
 
-        json_ops = []
+        def try_register_account(account_name, op, op_details):
+            if not Accounts.register(
+                account_name, op_details, cls._head_block_date, num
+            ):
+                log.error(f"Failed to register account {account_name} from operation: {op}")
+
         for transaction in block.get_next_transaction():
             assert issubclass(type(transaction), Transaction)
             for operation in transaction.get_next_operation():
@@ -365,36 +370,20 @@ class Blocks:
                 assert 'block_num' not in op
                 op['block_num'] = num
 
-                account_name = None
-                op_details = None
-                potentially_new_account = False
                 # account ops
                 if op_type == OperationType.POW:
-                    account_name = op['worker_account']
-                    potentially_new_account = True
+                    try_register_account(op['worker_account'], op, None)
                 elif op_type == OperationType.POW_2:
-                    account_name = op['work']['value']['input']['worker_account']
-                    potentially_new_account = True
+                    try_register_account(op['work']['value']['input']['worker_account'], op, None)
                 elif op_type == OperationType.ACCOUNT_CREATE:
-                    account_name = op['new_account_name']
-                    op_details = op
-                    potentially_new_account = True
+                    try_register_account(op['new_account_name'], op, op)
                 elif op_type == OperationType.ACCOUNT_CREATE_WITH_DELEGATION:
-                    account_name = op['new_account_name']
-                    op_details = op
-                    potentially_new_account = True
+                    try_register_account(op['new_account_name'], op, op)
                 elif op_type == OperationType.CREATE_CLAIMED_ACCOUNT:
-                    account_name = op['new_account_name']
-                    op_details = op
-                    potentially_new_account = True
-
-                if potentially_new_account and not Accounts.register(
-                    account_name, op_details, cls._head_block_date, num
-                ):
-                    log.error(f"Failed to register account {account_name} from operation: {op}")
+                    try_register_account(op['new_account_name'], op, op)
 
                 # account metadata updates
-                if op_type == OperationType.ACCOUNT_UPDATE:
+                elif op_type == OperationType.ACCOUNT_UPDATE:
                     Accounts.update_op(op, False)
                 elif op_type == OperationType.ACCOUNT_UPDATE_2:
                     Accounts.update_op(op, True)
