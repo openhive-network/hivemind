@@ -574,6 +574,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
 
             if is_initial_massive:
                 cls.vacuum_tables_in_threads([
+                        f"{SCHEMA_NAME}.hive_posts",
                         f"{SCHEMA_NAME}.hive_feed_cache",
                         f"{SCHEMA_NAME}.hive_mentions",
                         f"{SCHEMA_NAME}.hive_communities",

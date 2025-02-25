@@ -734,10 +734,10 @@ def reset_autovac(db):
     per-table, in the format (autovacuum_threshold, autoanalyze_threshold)."""
 
     autovac_config = {  # vacuum  analyze
-#        'hive_accounts': (50000, 100000),
+        'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
         'hive_post_tags': (5000, 10000),
-#        'hive_follows': (5000, 5000),
+        'hive_follows': (5000, 5000),
 #        'hive_feed_cache': (5000, 5000),
 #        'hive_reblogs': (5000, 5000),
     }
@@ -753,9 +753,10 @@ ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
 
 
 def set_fillfactor(db):
-    """Initializes/resets FILLFACTOR for tables which are intesively updated"""
+    """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
-    fillfactor_config = {'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 100}
+    # Lowered fillfactor for hive_votes table in attempt to speed up update_posts_rshares procedure
+    fillfactor_config = { 'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 90 }
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
