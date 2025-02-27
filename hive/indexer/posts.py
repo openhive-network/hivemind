@@ -67,7 +67,7 @@ class Posts(DbAdapterHolder):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
         sql = f"""
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_post_muted, depth, is_author_muted
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
