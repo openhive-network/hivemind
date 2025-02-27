@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _block_num hivemind_app.hive_posts.block_num%TYPE,
     in _metadata_tags VARCHAR[])
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
-                   post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
+                   post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, parent_author_id hivemind_app.hive_posts.author_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
                    is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, is_author_muted BOOLEAN)
     LANGUAGE plpgsql
 AS
@@ -222,9 +222,9 @@ BEGIN
                 updated_at = _date,
                 active = _date,
                 block_num = _block_num
-          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT NOT EXISTS (SELECT NULL::text
+          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT EXISTS (SELECT NULL::text
               FROM hivemind_app.muted AS m
-              WHERE m.follower = (SELECT parent_author_id FROM selected_posts) AND m.following = hp.author_id))
+              WHERE m.follower = (SELECT s.parent_author_id FROM selected_posts AS s) AND m.following = hp.author_id))
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -339,6 +339,7 @@ BEGIN
                 ip.permlink_id,
                 ip.post_category,
                 ip.parent_id,
+                0 AS parent_author_id,
                 ip.community_id,
                 ip.is_valid,
                 ip.is_muted,
