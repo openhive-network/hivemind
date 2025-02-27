@@ -1,5 +1,4 @@
 DROP FUNCTION IF EXISTS hivemind_app.update_notification_cache;
-;
 CREATE OR REPLACE FUNCTION hivemind_app.update_notification_cache(in _first_block_num INT, in _last_block_num INT, in _prune_old BOOLEAN)
 RETURNS VOID
 AS
@@ -7,11 +6,7 @@ $function$
 DECLARE
   __limit_block hivemind_app.blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
-  SET LOCAL work_mem='256MB';
-  IF _first_block_num IS NULL THEN
-    TRUNCATE TABLE hivemind_app.hive_notification_cache;
-      ALTER SEQUENCE hivemind_app.hive_notification_cache_id_seq RESTART WITH 1;
-  ELSE
+  IF _first_block_num IS NOT NULL THEN
     DELETE FROM hivemind_app.hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
   END IF;
 
