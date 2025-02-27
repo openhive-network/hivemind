@@ -121,8 +121,8 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _block_num hivemind_app.hive_posts.block_num%TYPE,
     in _metadata_tags VARCHAR[])
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
-                   post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, parent_author_id hivemind_app.hive_posts.author_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
-                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, muted_reasons hivemind_app.hive_posts.muted_reasons%TYPE)
+                   post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
+                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, is_author_muted BOOLEAN)
     LANGUAGE plpgsql
 AS
 $function$
@@ -222,7 +222,9 @@ BEGIN
                 updated_at = _date,
                 active = _date,
                 block_num = _block_num
-          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, hp.muted_reasons
+          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT NOT EXISTS (SELECT NULL::text
+              FROM hivemind_app.muted AS m
+              WHERE m.follower = (SELECT parent_author_id FROM selected_posts) AND m.following = hp.author_id))
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -309,7 +311,7 @@ BEGIN
                             updated_at = _date,
                             active = _date,
                             block_num = _block_num
-                        RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, hp.muted_reasons
+                        RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
                 ) -- WITH inserted_post
             , tagsid_and_posts AS MATERIALIZED (
                 SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
@@ -337,141 +339,16 @@ BEGIN
                 ip.permlink_id,
                 ip.post_category,
                 ip.parent_id,
-                0 AS parent_author_id,
                 ip.community_id,
                 ip.is_valid,
                 ip.is_muted,
                 ip.depth,
-                ip.muted_reasons
+                FALSE AS is_author_muted
             FROM inserted_post as ip;
     END IF;
 END
 $function$
 ;
-
-DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
-CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
-RETURNS SETOF BIGINT
-LANGUAGE plpgsql
-AS
-$function$
-BEGIN
-  -- With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
-  -- Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
-  -- In case of reputation being 0, the score is set to 25 rather than 0.
-  RETURN query
-      WITH mentions AS MATERIALIZED
-          (
-          SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num, T.block_num-1 as prev_block
-          FROM
-              hivemind_app.hive_accounts ha
-                  INNER JOIN
-              (
-                  SELECT T.id AS post_id, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
-                  FROM
-                      (
-                          SELECT
-                              hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
-                          FROM hivemind_app.hive_posts AS hp
-                          INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
-                          WHERE hp.id = ANY(_post_ids)
-                            AND hp.counter_deleted = 0
-                      ) AS T
-              ) AS T ON ha.name = T.mention
-          WHERE ha.id != T.author_id
-          ORDER BY T.block_num, ha.id
-          ),
-          delete_old_mentions AS
-              (
-              DELETE FROM hivemind_app.hive_mentions hm
-                  WHERE post_id = ANY(_post_ids)
-                      AND NOT EXISTS (
-                          SELECT 1 FROM mentions AS m
-                          WHERE m.post_id = hm.post_id AND m.account_id = hm.account_id
-                      )
-                  RETURNING id
-              ),
-          insert_mentions AS
-              (
-              INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
-                  SELECT DISTINCT m.post_id, m.account_id, m.block_num
-                  FROM mentions AS m
-                  LEFT JOIN delete_old_mentions AS dom ON dom.id = 0 -- force evaluation
-                  WHERE NOT EXISTS (
-                      SELECT 1 FROM
-                      hivemind_app.hive_mentions AS hm
-                      WHERE hm.post_id = m.post_id
-                        AND hm.account_id = m.account_id
-                  )
-                  RETURNING id
-              ),
-          delete_old_cache AS
-              (
-              DELETE FROM hivemind_app.hive_notification_cache AS hnc
-                  WHERE post_id = ANY(_post_ids)
-                      AND type_id = 16
-                      AND NOT EXISTS (
-                          SELECT 1
-                          FROM mentions AS m
-                          WHERE m.post_id = hnc.post_id
-                            AND m.author_id = hnc.src
-                            AND m.account_id = hnc.dst
-                      )
-                  RETURNING id
-              ),
-          mentions_data AS (
-              SELECT
-                  hm.*,
-                  hb.created_at AS created_at,
-                  (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
-              FROM mentions hm
-              JOIN hivemind_app.blocks_view AS hb ON hb.num = hm.prev_block
-              ),
-          author_data AS (
-              SELECT DISTINCT
-                  hm.author_id,
-                  a.haf_id
-              FROM mentions_data hm
-                       LEFT JOIN hivemind_app.hive_accounts a ON a.id = hm.author_id
-              ),
-          author_rep AS (
-              SELECT
-                  ad.author_id,
-                  (GREATEST(LOG(10, ABS(nullif(r.reputation, 0))) - 9, 0) *
-                   CASE WHEN r.reputation < 0 THEN -1 ELSE 1 END * 7.5 + 25)::INT AS rep
-              FROM author_data ad
-                       LEFT JOIN reptracker_app.account_reputations r ON r.account_id = ad.haf_id
-              )
-          INSERT INTO hivemind_app.hive_notification_cache
-              (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-              SELECT
-                  hivemind_app.notification_id(hm.created_at, 16, hm.counter) AS id,
-                  hm.block_num,
-                  16,
-                  hm.created_at,
-                  hm.author_id,
-                  hm.account_id,
-                  hm.post_id,
-                  hm.post_id,
-                  COALESCE(rep.rep, 25),
-                  '', '', ''
-              FROM mentions_data AS hm
-              LEFT JOIN author_rep AS rep ON rep.author_id = hm.author_id
-              LEFT JOIN insert_mentions AS im ON im.id = 0 -- force evaluation
-              LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- force evaluation
-              LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
-              LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
-              LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
-              WHERE hm.block_num > hivemind_app.block_before_irreversible('90 days')
-                AND COALESCE(rep.rep, 25) > 0
-                AND hm.author_id IS DISTINCT FROM hm.account_id
-                AND m.follower IS NULL
-                AND mi.following IS NULL
-              ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
-              ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
-              RETURNING id;
-END;
-$function$;
 
 DROP FUNCTION IF EXISTS hivemind_app.delete_hive_post(character varying,character varying,character varying, integer, timestamp)
 ;
