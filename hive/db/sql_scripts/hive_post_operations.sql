@@ -26,13 +26,13 @@ END
 $function$;
 
 DROP FUNCTION IF EXISTS hivemind_app.encode_bitwise_mask;
-CREATE OR REPLACE FUNCTION hivemind_app.encode_bitwise_mask(muted_reasons INT[])
+CREATE OR REPLACE FUNCTION hivemind_app.encode_bitwise_mask(post_muted_reasons INT[])
     RETURNS INT AS $$
 DECLARE
     mask INT := 0;
     number INT;
 BEGIN
-    FOREACH number IN ARRAY muted_reasons
+    FOREACH number IN ARRAY post_muted_reasons
         LOOP
             mask := mask | (1 << number);
         END LOOP;
@@ -42,13 +42,13 @@ $$ LANGUAGE plpgsql;
 
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result CASCADE;
 CREATE TYPE hivemind_app.process_community_post_result AS (
-    is_muted bool,
+    is_post_muted bool,
     community_id integer, -- hivemind_app.hive_posts.community_id%TYPE
-    muted_reasons INTEGER
+    post_muted_reasons INTEGER
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
-CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, _is_comment bool, _is_parent_muted bool, _community_id hivemind_app.hive_posts.community_id%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, _is_comment bool, _is_parent_post_muted bool, _community_id hivemind_app.hive_posts.community_id%TYPE)
 RETURNS hivemind_app.process_community_post_result
 LANGUAGE plpgsql
 as
@@ -60,12 +60,12 @@ declare
         __community_type_topic CONSTANT SMALLINT := 1;
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
-        __is_muted BOOL := TRUE;
+        __is_post_muted BOOL := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
-        __muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
+        __post_muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
 BEGIN
         IF _block_num < _community_support_start_block THEN
-            __is_muted := FALSE;
+            __is_post_muted := FALSE;
             __community_id := NULL;
         ELSE
             IF _is_comment = TRUE THEN
@@ -76,36 +76,36 @@ BEGIN
 
             IF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
-                    __is_muted := FALSE;
+                    __is_post_muted := FALSE;
                 ELSE
                     IF __community_type_id = __community_type_journal AND _is_comment = TRUE THEN
-                        __is_muted := FALSE;
+                        __is_post_muted := FALSE;
                     ELSE
                         select role_id into __role_id from hivemind_app.hive_roles where hivemind_app.hive_roles.community_id = __community_id AND account_id = _author_id;
                         IF __community_type_id = __community_type_journal AND _is_comment = FALSE AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
-                            __is_muted := FALSE;
+                            __is_post_muted := FALSE;
                         ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
-                            __is_muted := FALSE;
+                            __is_post_muted := FALSE;
                         ELSE
                             -- This means the post was muted because of community reasons, 1 is MUTED_COMMUNITY_TYPE see community.py for the ENUM definition
-                            __muted_reasons := ARRAY[1];
+                            __post_muted_reasons := ARRAY[1];
                         END IF;
                     END IF;
                 END IF;
             ELSE
-                __is_muted := FALSE;
+                __is_post_muted := FALSE;
             END IF;
 
-            -- __is_muted can be TRUE here if it's a comment and its parent is muted
-            IF _is_parent_muted = TRUE THEN
-                __is_muted := TRUE;
+            -- __is_post_muted can be TRUE here if it's a comment and its parent is muted
+            IF _is_parent_post_muted = TRUE THEN
+                __is_post_muted := TRUE;
                 -- 2 is MUTED_PARENT, see community.py for the ENUM definition
-                __muted_reasons := array_append(__muted_reasons, 2);
+                __post_muted_reasons := array_append(__post_muted_reasons, 2);
             END IF;
 
         END IF;
 
-        RETURN (__is_muted, __community_id, hivemind_app.encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
+        RETURN (__is_post_muted, __community_id, hivemind_app.encode_bitwise_mask(__post_muted_reasons))::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 
@@ -122,7 +122,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _metadata_tags VARCHAR[])
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
                    post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
-                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE)
+                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, is_author_muted BOOLEAN)
     LANGUAGE plpgsql
 AS
 $function$
@@ -137,64 +137,94 @@ BEGIN
     ON CONFLICT DO NOTHING
     ;
     IF _parent_author != '' THEN
-        RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
+      RETURN QUERY
+        WITH selected_posts AS (
+          SELECT
+            s.parent_id,
+            s.parent_author_id,
+            s.depth,
+            (s.composite).community_id,
+            s.category_id,
+            s.root_id,
+            (s.composite).is_post_muted,
+            s.is_valid,
+            s.author_id,
+            s.permlink_id,
+            s.created_at,
+            s.updated_at,
+            s.sc_hot,
+            s.sc_trend,
+            s.active,
+            s.payout_at,
+            s.cashout_time,
+            s.counter_deleted,
+            s.block_num,
+            s.block_num_created,
+            (s.composite).post_muted_reasons
+          FROM (
+            SELECT
+                hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) as composite,
+                php.id AS parent_id,
+                php.author_id AS parent_author_id,
+                php.depth + 1 AS depth,
+                COALESCE(php.category_id, (select hcg.id from hivemind_app.hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
+                (CASE(php.root_id)
+                     WHEN 0 THEN php.id
+                     ELSE php.root_id
+                    END) AS root_id,
+                php.is_valid AS is_valid,
+                ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
+                _date AS updated_at,
+                hivemind_app.calculate_time_part_of_hot(_date) AS sc_hot,
+                hivemind_app.calculate_time_part_of_trending(_date) AS sc_trend,
+                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time,
+                0 AS counter_deleted,
+                _block_num as block_num, _block_num as block_num_created
+            FROM hivemind_app.hive_accounts ha,
+                 hivemind_app.hive_permlink_data hpd,
+                 hivemind_app.hive_posts php
+                     INNER JOIN hivemind_app.hive_accounts pha ON pha.id = php.author_id
+                     INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.id = php.permlink_id
+            WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
+                ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
+          ) AS s
+        )
+        INSERT INTO hivemind_app.hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
-            SELECT
-                s.parent_id,
-                s.depth,
-                (s.composite).community_id,
-                s.category_id,
-                s.root_id,
-                (s.composite).is_muted,
-                s.is_valid,
-                s.author_id,
-                s.permlink_id,
-                s.created_at,
-                s.updated_at,
-                s.sc_hot,
-                s.sc_trend,
-                s.active,
-                s.payout_at,
-                s.cashout_time,
-                s.counter_deleted,
-                s.block_num,
-                s.block_num_created,
-                (s.composite).muted_reasons
-            FROM (
-                     SELECT
-                         hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) as composite,
-                         php.id AS parent_id, php.depth + 1 AS depth,
-                         COALESCE(php.category_id, (select hcg.id from hivemind_app.hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
-                         (CASE(php.root_id)
-                              WHEN 0 THEN php.id
-                              ELSE php.root_id
-                             END) AS root_id,
-                         php.is_valid AS is_valid,
-                         ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
-                         _date AS updated_at,
-                         hivemind_app.calculate_time_part_of_hot(_date) AS sc_hot,
-                         hivemind_app.calculate_time_part_of_trending(_date) AS sc_trend,
-                         _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time,
-                         0 AS counter_deleted,
-                         _block_num as block_num, _block_num as block_num_created
-                     FROM hivemind_app.hive_accounts ha,
-                          hivemind_app.hive_permlink_data hpd,
-                          hivemind_app.hive_posts php
-                              INNER JOIN hivemind_app.hive_accounts pha ON pha.id = php.author_id
-                              INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.id = php.permlink_id
-                     WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
-                         ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
-                 ) s
+          SELECT
+            s.parent_id,
+            s.depth,
+            s.community_id,
+            s.category_id,
+            s.root_id,
+            s.is_post_muted,
+            s.is_valid,
+            s.author_id,
+            s.permlink_id,
+            s.created_at,
+            s.updated_at,
+            s.sc_hot,
+            s.sc_trend,
+            s.active,
+            s.payout_at,
+            s.cashout_time,
+            s.counter_deleted,
+            s.block_num,
+            s.block_num_created,
+            s.post_muted_reasons
+          FROM selected_posts AS s
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
                 --- During post update it is disallowed to change: parent-post, category, community-id
-                --- then also depth, is_valid and is_muted is impossible to change
+                --- then also depth, is_valid and is_post_muted is impossible to change
                 --- post edit part
                 updated_at = _date,
                 active = _date,
                 block_num = _block_num
-            RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
+          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT NOT EXISTS (SELECT NULL::text
+              FROM hivemind_app.muted AS m
+              WHERE m.follower = (SELECT parent_author_id FROM selected_posts) AND m.following = hp.author_id))
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -211,7 +241,7 @@ BEGIN
                     (s.composite).community_id,
                     s.category_id,
                     s.root_id,
-                    (s.composite).is_muted,
+                    (s.composite).is_post_muted,
                     s.is_valid,
                     s.author_id,
                     s.permlink_id,
@@ -225,7 +255,7 @@ BEGIN
                     s.counter_deleted,
                     s.block_num,
                     s.block_num_created,
-                    (s.composite).muted_reasons
+                    (s.composite).post_muted_reasons
                 FROM (
                          SELECT
                              hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,
@@ -258,7 +288,7 @@ BEGIN
                             pdi.community_id,
                             pdi.category_id,
                             pdi.root_id,
-                            pdi.is_muted,
+                            pdi.is_post_muted,
                             pdi.is_valid,
                             pdi.author_id,
                             pdi.permlink_id,
@@ -272,11 +302,11 @@ BEGIN
                             pdi.counter_deleted,
                             pdi.block_num,
                             pdi.block_num_created,
-                            pdi.muted_reasons
+                            pdi.post_muted_reasons
                         FROM posts_data_to_insert as pdi
                         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
                             --- During post update it is disallowed to change: parent-post, category, community-id
-                            --- then also depth, is_valid and is_muted is impossible to change
+                            --- then also depth, is_valid and is_post_muted is impossible to change
                             --- post edit part
                             updated_at = _date,
                             active = _date,
@@ -312,7 +342,8 @@ BEGIN
                 ip.community_id,
                 ip.is_valid,
                 ip.is_muted,
-                ip.depth
+                ip.depth,
+                FALSE AS is_author_muted
             FROM inserted_post as ip;
     END IF;
 END
