@@ -23,11 +23,6 @@ log = logging.getLogger(__name__)
 class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
-    # LRU cache for (author-permlink -> id) lookup (~400mb per 1M entries)
-    CACHE_SIZE = 2000000
-    _hits = 0
-    _miss = 0
-
     comment_payout_ops = {}
     _comment_payout_ops = []
 
@@ -194,8 +189,6 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def comment_payout_op(cls):
-        values_limit = 1000
-
         """ Process comment payment operations """
         for k, v in cls.comment_payout_ops.items():
             author = None
