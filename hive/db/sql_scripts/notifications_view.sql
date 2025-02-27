@@ -93,25 +93,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
     notifs.community_title,
     notifs.payload,
     harv.score
-   FROM ( SELECT hpv.block_num,
-            hpv.id AS post_id,
-                CASE hpv.depth
-                    WHEN 1 THEN 12
-                    ELSE 13
-                END AS type_id,
-            hpv.created_at,
-            hpv.author_id AS src,
-            hpv.parent_author_id AS dst,
-            hpv.parent_id as dst_post_id,
-            ''::character varying(16) AS community,
-            ''::character varying AS community_title,
-            ''::character varying AS payload
-           FROM hivemind_app.hive_posts_parent_view hpv
-                  WHERE hpv.depth > 0 AND
-                        NOT EXISTS (SELECT NULL::text
-                                    FROM hivemind_app.muted AS m
-                                    WHERE m.follower = hpv.parent_author_id AND m.following = hpv.author_id)
-UNION ALL
+   FROM (
  SELECT f.block_num,
     0 AS post_id,
     15 AS type_id,
