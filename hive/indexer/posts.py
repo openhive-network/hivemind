@@ -25,6 +25,7 @@ class Posts(DbAdapterHolder):
 
     comment_payout_ops = {}
     _comment_payout_ops = []
+    _comment_notifications = []
 
     @classmethod
     def last_id(cls):
@@ -93,6 +94,9 @@ class Posts(DbAdapterHolder):
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
             )
+            if row['depth'] > 0 and not row['is_author_muted']:
+                type_id = 12 if row['depth'] == 1 else 13
+                cls._comment_notifications.append({"block_num": op['block_num'], "type_id": type_id, "created_at": block_date, "src": row['author_id'], "dst": row['parent_author_id'], "dst_post_id": row['parent_id'], "post_id": row['id'], "payload": "", "community": "", "community_title": ""})
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
             # empty new body means no body edit, not clear (same with other data)
@@ -185,6 +189,30 @@ class Posts(DbAdapterHolder):
 
         n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()
+        return n
+
+    @classmethod
+    def flush_notifications(cls):
+        n = len(cls._comment_notifications)
+        if n > 0:
+            sql = f"""
+            INSERT INTO {SCHEMA_NAME}.hive_notification_cache
+            (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, harv.score, '', '', ''
+            FROM
+            (VALUES {{}})
+            AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
+            JOIN {SCHEMA_NAME}.hive_accounts_rank_view AS harv ON harv.id = n.src
+            WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+            ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
+            """
+            for chunk in chunks(cls._comment_notifications, 1000):
+                cls.beginTx()
+                values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for n in chunk)
+                cls.db.query_prepared(sql.format(values_str))
+                cls.commitTx()
+
+            cls._comment_notifications.clear()
         return n
 
     @classmethod
@@ -408,4 +436,4 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.comment_payout_op() + cls.flush_into_db()
+        return cls.comment_payout_op() + cls.flush_into_db() + cls.flush_notifications()
