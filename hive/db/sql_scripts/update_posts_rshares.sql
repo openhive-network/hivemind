@@ -10,7 +10,7 @@ AS
 $BODY$
 BEGIN
 SET LOCAL work_mem='4GB';
-SET LOCAL enable_seqscan = off;`
+SET LOCAL enable_seqscan = off;
 IF (_last_block - _first_block) > 10000 THEN
   WITH votes_rshares_view AS MATERIALIZED
   (
