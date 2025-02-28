@@ -10,7 +10,7 @@ AS
 $BODY$
 BEGIN
 SET LOCAL work_mem='4GB';
-SET enable_seqscan = off; -- Try disabling sequential scans (use with caution)
+SET LOCAL enable_seqscan = off; -- Try disabling sequential scans (use with caution)
 WITH votes_rshares_view AS (
   SELECT
       hv.post_id
@@ -44,7 +44,7 @@ AND (
     hp.total_votes != votes_rshares.total_votes OR
     hp.net_votes != votes_rshares.net_votes
 );
-
+RESET enable_seqscan; 
 RESET work_mem;
 
 END;
