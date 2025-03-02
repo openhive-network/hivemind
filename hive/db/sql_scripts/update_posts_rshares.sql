@@ -9,8 +9,8 @@ VOLATILE
 AS
 $BODY$
 BEGIN
-SET LOCAL work_mem='2GB';
-
+SET LOCAL work_mem='4GB';
+SET LOCAL enable_seqscan = off;
 IF (_last_block - _first_block) > 10000 THEN
   WITH votes_rshares_view AS MATERIALIZED
   (
@@ -78,6 +78,7 @@ ELSE
   );
 END IF;
 
+RESET enable_seqscan;
 RESET work_mem;
 
 END;
