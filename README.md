@@ -27,7 +27,7 @@ communities, providing a consensus interpretation layer for Hive applications.
 - *communities:* mod roles/actions, members, feeds (in
   1.5; [spec](https://gitlab.syncad.com/hive/hivemind/-/blob/master/docs/communities.md))
 - *accounts:* normalized profile data, reputation
-- *feeds:* un/follows and un/reblogs
+- *feeds:* un/follows and un/reblogs: [spec](https://gitlab.syncad.com/hive/hivemind/-/blob/master/docs/follows.md)
 
 ### Hivemind does not track most blockchain operations
 
