@@ -16,16 +16,14 @@ LEFT JOIN
 (
   WITH base_rank_data AS
   (
-  SELECT ha3.account_id, rank() OVER (ORDER BY ha3.reputation DESC) AS account_rank
-  FROM account_reputations ha3
-	ORDER BY ha3.reputation DESC
-	LIMIT 150000
+    SELECT ha.id, COALESCE(ha3.reputation,0) as reputation
+    FROM hivemind_app.hive_accounts ha
+    LEFT JOIN account_reputations ha3 ON ha.haf_id = ha3.account_id
   )
-  SELECT ha.id,
-         brd.account_rank
+  SELECT brd.id, rank() OVER (ORDER BY brd.reputation DESC) AS account_rank
   FROM base_rank_data brd
-  JOIN hivemind_app.hive_accounts ha on ha.haf_id = brd.account_id
-
+  ORDER BY brd.reputation DESC
+	LIMIT 150000
   -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
   -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
   -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
