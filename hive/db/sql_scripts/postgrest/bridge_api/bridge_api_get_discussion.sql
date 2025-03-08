@@ -9,7 +9,6 @@ DECLARE
   _post_id  INT;
   _observer_id INT;
 BEGIN
-  SET LOCAL work_mem='256MB';
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer":"string"}', 2, NULL);
 
   _post_id =
