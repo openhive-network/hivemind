@@ -26,12 +26,7 @@ class Posts(DbAdapterHolder):
     comment_payout_ops = {}
     _comment_payout_ops = []
     _comment_notifications = []
-
-    @classmethod
-    def last_id(cls):
-        """Get the last indexed post id."""
-        sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0 ORDER BY id DESC LIMIT 1;"
-        return DbAdapterHolder.common_block_processing_db().query_one(sql) or 0
+    _notification_first_block = None
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -193,8 +188,11 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush_notifications(cls):
+        if cls._notification_first_block is None:
+            cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls._comment_notifications)
-        if n > 0:
+        max_block_num = max(n['block_num'] for n in cls._comment_notifications or [{'block_num': 0}])
+        if n > 0 and max_block_num > cls._notification_first_block:
             sql = f"""
             INSERT INTO {SCHEMA_NAME}.hive_notification_cache
             (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -211,8 +209,10 @@ class Posts(DbAdapterHolder):
                 values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for n in chunk)
                 cls.db.query_prepared(sql.format(values_str))
                 cls.commitTx()
+        else:
+            n = 0
+        cls._comment_notifications.clear()
 
-            cls._comment_notifications.clear()
         return n
 
     @classmethod
