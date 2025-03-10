@@ -91,7 +91,15 @@ class Posts(DbAdapterHolder):
             )
             if row['depth'] > 0 and not row['is_author_muted']:
                 type_id = 12 if row['depth'] == 1 else 13
-                cls._comment_notifications.append({"block_num": op['block_num'], "type_id": type_id, "created_at": block_date, "src": row['author_id'], "dst": row['parent_author_id'], "dst_post_id": row['parent_id'], "post_id": row['id'], "payload": "", "community": "", "community_title": ""})
+                cls._comment_notifications.append({
+                    "block_num": op['block_num'],
+                    "type_id": type_id,
+                    "created_at": block_date,
+                    "src": row['author_id'],
+                    "dst": row['parent_author_id'],
+                    "dst_post_id": row['parent_id'],
+                    "post_id": row['id'],
+                })
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
             # empty new body means no body edit, not clear (same with other data)
@@ -193,14 +201,37 @@ class Posts(DbAdapterHolder):
         n = len(cls._comment_notifications)
         max_block_num = max(n['block_num'] for n in cls._comment_notifications or [{'block_num': 0}])
         if n > 0 and max_block_num > cls._notification_first_block:
+            # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
+            # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
+            # In case of reputation being 0, the score is set to 25 rather than 0.
             sql = f"""
+            WITH log_account_rep AS
+            (
+                SELECT
+                    account_id,
+                    LOG(10, ABS(nullif(reputation, 0))) AS rep,
+                    (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
+                FROM reptracker_app.account_reputations
+            ),
+            calculate_rep AS
+            (
+                SELECT
+                    account_id,
+                    GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
+                FROM log_account_rep lar
+            ),
+            final_rep AS
+            (
+                SELECT account_id, coalesce(cr.rep * 7.5 + 25, 25)::INT AS rep FROM calculate_rep AS cr
+            )
             INSERT INTO {SCHEMA_NAME}.hive_notification_cache
             (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, harv.score, '', '', ''
+            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, r.rep, '', '', ''
             FROM
             (VALUES {{}})
             AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
-            JOIN {SCHEMA_NAME}.hive_accounts_rank_view AS harv ON harv.id = n.src
+            JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
+            JOIN final_rep AS r ON ha.haf_id = r.account_id
             WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             """
