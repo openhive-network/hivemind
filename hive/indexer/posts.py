@@ -233,6 +233,8 @@ class Posts(DbAdapterHolder):
             JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
             LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
             WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                AND COALESCE(r.rep, 25) > 0
+                AND n.src IS DISTINCT FROM n.dst
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             """
             for chunk in chunks(cls._comment_notifications, 1000):
