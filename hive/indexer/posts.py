@@ -222,16 +222,16 @@ class Posts(DbAdapterHolder):
             ),
             final_rep AS
             (
-                SELECT account_id, coalesce(cr.rep * 7.5 + 25, 25)::INT AS rep FROM calculate_rep AS cr
+                SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
             )
             INSERT INTO {SCHEMA_NAME}.hive_notification_cache
             (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, r.rep, '', '', ''
+            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
             FROM
             (VALUES {{}})
             AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
             JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
-            JOIN final_rep AS r ON ha.haf_id = r.account_id
+            LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
             WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             """
