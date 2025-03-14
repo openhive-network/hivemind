@@ -7,6 +7,7 @@ $function$
 DECLARE
   __limit_block hivemind_app.blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
+  SET LOCAL work_mem='256MB';
   IF _first_block_num IS NULL THEN
     TRUNCATE TABLE hivemind_app.hive_notification_cache;
       ALTER SEQUENCE hivemind_app.hive_notification_cache_id_seq RESTART WITH 1;
