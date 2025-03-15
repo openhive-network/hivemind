@@ -81,7 +81,7 @@ else
 fi
 
 "$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind"
-"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group" --public
+"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group"
 
 #psql "$POSTGRES_ACCESS" -c "GRANT SET ON PARAMETER log_min_messages TO hivemind;"
 
@@ -91,3 +91,4 @@ if [ -n "$STATEMENT_TIMEOUT" ]; then
     echo "Setting statement timeout for hivemind_user role to ${STATEMENT_TIMEOUT}..."
     psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "ALTER ROLE hivemind_user SET statement_timeout TO '${STATEMENT_TIMEOUT}';"
 fi
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "ALTER ROLE hivemind_user RESET query_supervisor.limits_enabled;"
