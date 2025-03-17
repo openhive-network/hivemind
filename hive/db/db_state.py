@@ -455,6 +455,11 @@ class DbState:
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_notification_cache executed in %.4fs", perf_counter() - time_start)
 
+            time_start = perf_counter()
+            sql = f"CALL {SCHEMA_NAME}.clear_muted_notifications();"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
+
     @classmethod
     def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
