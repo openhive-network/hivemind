@@ -601,6 +601,7 @@ def setup_runtime_code(db):
         "delete_hive_posts_mentions.sql",
         "notifications_view.sql",
         "update_notification_cache.sql",
+        "clear_muted_notifications.sql",
         "hot_and_trends.sql",
         "update_hive_posts_children_count.sql",
         "update_posts_rshares.sql",
