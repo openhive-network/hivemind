@@ -5,6 +5,7 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import chunks
 from funcy.seqs import first  # Ensure 'first' is imported
 
 log = logging.getLogger(__name__)
@@ -86,6 +87,7 @@ class Follow(DbAdapterHolder):
     follow_muted_batches_to_flush = Batch()
     follow_blacklisted_batches_to_flush = Batch()
     affected_accounts = set()
+    follow_notifications_to_flush = []
     idx = 0
 
     @classmethod
@@ -165,6 +167,7 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
+                cls.follow_notifications_to_flush.append((follower, following, block_num))
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)
@@ -225,7 +228,7 @@ class Follow(DbAdapterHolder):
             cls.idx += 1
 
     @classmethod
-    def flush(cls):
+    def flush_follows(cls):
         """Flush accumulated follow operations to the database in batches."""
         n = (
             cls.follows_batches_to_flush.len() +
@@ -276,3 +279,53 @@ class Follow(DbAdapterHolder):
         cls.follow_blacklisted_batches_to_flush.clear()
         cls.commitTx()
         return n
+
+    @classmethod
+    def flush_notifications(cls):
+        n = len(cls.follow_notifications_to_flush)
+        if n > 0:
+            sql = f"""
+                WITH log_account_rep AS
+                (
+                    SELECT
+                        account_id,
+                        LOG(10, ABS(nullif(reputation, 0))) AS rep,
+                        (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
+                    FROM reptracker_app.account_reputations
+                ),
+                calculate_rep AS
+                (
+                    SELECT
+                        account_id,
+                        GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
+                    FROM log_account_rep lar
+                ),
+                final_rep AS
+                (
+                    SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
+                )
+                INSERT INTO {SCHEMA_NAME}.hive_notification_cache
+                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT n.block_num, 15, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, 0, 0, COALESCE(rep.rep, 25), '', '', ''
+                FROM
+                (VALUES {{}})
+                AS n(src, dst, block_num)
+                JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
+                JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
+                LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
+                WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                    AND COALESCE(rep.rep, 25) > 0
+                    AND n.src IS DISTINCT FROM n.dst
+                ORDER BY n.block_num, created_at, r.id, r.id
+            """
+            for chunk in chunks(cls.follow_notifications_to_flush, 1000):
+                cls.beginTx()
+                values_str = ','.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in chunk)
+                cls.db.query_prepared(sql.format(values_str))
+                cls.commitTx()
+            cls.follow_notifications_to_flush.clear()
+        return n
+
+    @classmethod
+    def flush(cls):
+        return cls.flush_follows() + cls.flush_notifications()
