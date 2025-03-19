@@ -94,19 +94,6 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
     notifs.payload,
     harv.score
    FROM (
- SELECT f.block_num,
-    0 AS post_id,
-    15 AS type_id,
-    (select hb.created_at from hivemind_app.blocks_view hb where hb.num = (f.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
-    f.follower AS src,
-    f.following AS dst,
-    0 as dst_post_id,
-    ''::character varying(16) AS community,
-    ''::character varying AS community_title,
-    ''::character varying AS payload
-   FROM hivemind_app.follows f
-
-UNION ALL
  SELECT hr.block_num,
     hp.id AS post_id,
     14 AS type_id,
