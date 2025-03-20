@@ -89,6 +89,8 @@ class Follow(DbAdapterHolder):
     affected_accounts = set()
     follow_notifications_to_flush = []
     idx = 0
+    _notification_first_block = None
+
 
     @classmethod
     def _validate_op(cls, account, op):
@@ -282,8 +284,11 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def flush_notifications(cls):
+        if cls._notification_first_block is None:
+            cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls.follow_notifications_to_flush)
-        if n > 0:
+        max_block_num = max(block_num for r,g,block_num in cls.follow_notifications_to_flush or [("","",0)])
+        if n > 0 and max_block_num > cls._notification_first_block:
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
@@ -326,7 +331,10 @@ class Follow(DbAdapterHolder):
                 values_str = ','.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in chunk)
                 cls.db.query_prepared(sql.format(values_str))
                 cls.commitTx()
-            cls.follow_notifications_to_flush.clear()
+        else:
+            n = 0
+        cls.follow_notifications_to_flush.clear()
+
         return n
 
     @classmethod
