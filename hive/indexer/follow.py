@@ -284,6 +284,9 @@ class Follow(DbAdapterHolder):
     def flush_notifications(cls):
         n = len(cls.follow_notifications_to_flush)
         if n > 0:
+            # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
+            # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
+            # In case of reputation being 0, the score is set to 25 rather than 0.
             sql = f"""
                 WITH log_account_rep AS
                 (
