@@ -94,19 +94,6 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
     notifs.payload,
     harv.score
    FROM (
- SELECT hr.block_num,
-    hp.id AS post_id,
-    14 AS type_id,
-    hr.created_at,
-    hr.blogger_id AS src,
-    hp.author_id AS dst,
-    hr.post_id as dst_post_id,
-    ''::character varying(16) AS community,
-    ''::character varying AS community_title,
-    ''::character varying AS payload
-   FROM hivemind_app.hive_reblogs hr -- reblogs
-   JOIN hivemind_app.hive_posts hp ON hr.post_id = hp.id
-UNION ALL
  SELECT hs.block_num,
     0 AS post_id,
     11 AS type_id,
