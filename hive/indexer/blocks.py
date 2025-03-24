@@ -179,7 +179,8 @@ class Blocks:
     def flush_data_in_1_thread(cls) -> None:
         for description, f, c in cls._concurrent_flush:
             try:
-                f()
+                (n, elapsedTime) = time_collector(f)
+                log.info("%s flush executed in: %.4f s", description, elapsedTime)
             except Exception as exc:
                 log.error(f'{description!r} generated an exception: {exc}')
                 raise exc
