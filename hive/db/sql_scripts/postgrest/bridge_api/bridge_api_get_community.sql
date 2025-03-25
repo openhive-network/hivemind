@@ -43,7 +43,7 @@ BEGIN
         hc.avatar_url,
         hc.description,
         hc.flag_text,
-        hc.settings::JSONB,
+        hc.settings,
         (
           CASE
             WHEN _observer_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_observer_id, _community_id)

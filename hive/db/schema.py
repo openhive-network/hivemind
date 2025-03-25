@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import text as sql_text
 from sqlalchemy.types import BOOLEAN
 from sqlalchemy.types import CHAR
@@ -346,7 +347,7 @@ def build_metadata_community(metadata=None):
         sa.Column('avatar_url', sa.String(1024), nullable=False, server_default=''),
         sa.Column('description', sa.String(5000), nullable=False, server_default=''),
         sa.Column('flag_text', sa.String(5000), nullable=False, server_default=''),
-        sa.Column('settings', TEXT, nullable=False, server_default='{}'),
+        sa.Column('settings', JSONB, nullable=False, server_default='{}'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('name', name='hive_communities_ux1'),
         sa.Index('hive_communities_ix1', 'rank', 'id'),
