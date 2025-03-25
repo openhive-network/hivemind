@@ -716,7 +716,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-135485\",\"props\":{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\"}}]"
+              "json": "[\"updateProps\",{\"community\":\"hive-135485\",\"props\":{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http://example.com\"}}}]"
             }
           },
           {
