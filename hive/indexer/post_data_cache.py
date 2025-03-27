@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class PostDataCache(DbAdapterHolder):
-    """Procides cache for DB operations on post data table in order to speed up massive sync"""
+    """Provides cache for DB operations on post data table in order to speed up massive sync"""
 
     _data = {}
 
@@ -61,11 +61,13 @@ class PostDataCache(DbAdapterHolder):
             cls.beginTx()
             if len(values_insert) > 0:
                 sql = f"""
-                    INSERT INTO
-                        {SCHEMA_NAME}.hive_post_data (id, title, body, json)
-                    VALUES
+                    WITH inserted AS (
+                        INSERT INTO {SCHEMA_NAME}.hive_post_data (id, title, body, json)
+                        VALUES {','.join(values_insert)}
+                        RETURNING id
+                    )
+                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(id) FROM inserted
                 """
-                sql += ','.join(values_insert)
                 if print_query:
                     log.info(f"Executing query:\n{sql}")
                 cls.db.query_prepared(sql)
@@ -73,19 +75,20 @@ class PostDataCache(DbAdapterHolder):
 
             if len(values_update) > 0:
                 sql = f"""
-                    UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
-                        title = COALESCE( data_source.title, hpd.title ),
-                        body = COALESCE( data_source.body, hpd.body ),
-                        json = COALESCE( data_source.json, hpd.json )
-                    FROM
-                    ( SELECT * FROM
-                    ( VALUES
-                """
-                sql += ','.join(values_update)
-                sql += """
-                    ) AS T(id, title, body, json)
-                    ) AS data_source
-                    WHERE hpd.id = data_source.id
+                    WITH updated AS (
+                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
+                            title = COALESCE( data_source.title, hpd.title ),
+                            body = COALESCE( data_source.body, hpd.body ),
+                            json = COALESCE( data_source.json, hpd.json )
+                        FROM (
+                            SELECT *
+                            FROM (VALUES {','.join(values_update)})
+                            AS T(id, title, body, json)
+                        ) AS data_source
+                        WHERE hpd.id = data_source.id
+                        RETURNING hpd.id
+                    )
+                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(id) FROM updated
                 """
                 if print_query:
                     log.info(f"Executing query:\n{sql}")
