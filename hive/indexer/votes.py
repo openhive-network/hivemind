@@ -6,6 +6,7 @@ import logging
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import chunks
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ class Votes(DbAdapterHolder):
 
     _votes_data = collections.OrderedDict()
     _votes_per_post = {}
+    _vote_notifications = collections.OrderedDict()
+    _notification_first_block = None
 
     inside_flush = False
 
@@ -38,6 +41,8 @@ class Votes(DbAdapterHolder):
             vote_data = cls._votes_data[key]
             vote_data["vote_percent"] = weight
             vote_data["last_update"] = date
+            n = cls._vote_notifications[key]
+            n['last_update'] = date
             # only effective vote edits increase num_changes counter
         else:
             if not post_key in cls._votes_per_post:
@@ -55,6 +60,14 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=block_num,
             )
+            cls._vote_notifications[key] = {
+                'block_num': block_num,
+                'voter': voter,
+                'author': author,
+                'permlink': permlink,
+                'last_update': date,
+                'rshares': 0,
+                }
 
     @classmethod
     def drop_votes_of_deleted_comment(cls, comment_delete_operation):
@@ -69,6 +82,7 @@ class Votes(DbAdapterHolder):
             for voter in cls._votes_per_post[post_key]:
                 key = f"{voter}/{post_key}"
                 del cls._votes_data[key]
+                del cls._vote_notifications[key]
             del cls._votes_per_post[post_key]
 
     @classmethod
@@ -85,6 +99,9 @@ class Votes(DbAdapterHolder):
             vote_data["is_effective"] = True
             vote_data["num_changes"] += 1
             vote_data["block_num"] = vop["block_num"]
+            n = cls._vote_notifications[key]
+            n['rshares'] = vop["rshares"]
+            n['block_num'] = vop["block_num"]
         else:
             if not post_key in cls._votes_per_post:
                 cls._votes_per_post[post_key] = []
@@ -101,9 +118,63 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=vop["block_num"],
             )
+            cls._vote_notifications[key] = {
+                'block_num': vop["block_num"],
+                'voter': vop["voter"],
+                'author': vop["author"],
+                'permlink': vop["permlink"],
+                'last_update': "1970-01-01 00:00:00",
+                'rshares': vop["rshares"],
+                }
 
     @classmethod
-    def flush(cls):
+    def flush_notifications(cls):
+        if cls._notification_first_block is None:
+            cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
+        n = len(cls._vote_notifications)
+        max_block_num = max(n['block_num'] for k,n in (cls._vote_notifications or {'': {'block_num': 0} }).items())
+        if n > 0 and max_block_num > cls._notification_first_block:
+            sql = f"""
+                INSERT INTO {SCHEMA_NAME}.hive_notification_cache
+                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id, hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
+                FROM (
+                    SELECT n.*,
+                      ha.id AS src,
+                      hpv.author_id AS dst,
+                      hpv.id AS post_id,
+                      hivemind_app.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
+                      hivemind_app.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
+                    FROM
+                    (VALUES {{}})
+                    AS n(block_num, voter, author, permlink, last_update, rshares)
+                    JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.voter = ha.name
+                    JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = n.permlink
+                    JOIN (
+                        SELECT hpvi.id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
+                        FROM {SCHEMA_NAME}.hive_posts hpvi
+                        WHERE hpvi.block_num > hivemind_app.block_before_head('97 days'::interval)
+                    ) hpv ON p.id = hpv.id
+                ) AS hn
+                WHERE hn.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                    AND score > 0
+                    AND hn.src IS DISTINCT FROM hn.dst
+                    AND hn.rshares >= 10e9
+                    AND hn.vote_value >= 0.02
+                ORDER BY hn.block_num, created_at, hn.src, hn.dst
+            """
+            for chunk in chunks(cls._vote_notifications, 1000):
+                cls.beginTx()
+                values_str = ','.join(f"({n['block_num']}, {escape_characters(n['voter'])}, {escape_characters(n['author'])}, {escape_characters(n['permlink'])}, {escape_characters(n['last_update'])}::timestamp, {n['rshares']})" for k,n in chunk.items())
+                cls.db.query_prepared(sql.format(values_str))
+                cls.commitTx()
+        else:
+            n = 0
+        cls._vote_notifications.clear()
+        return n
+
+    @classmethod
+    def flush_votes(cls):
         """Flush vote data from cache to database"""
 
         cls.inside_flush = True
@@ -182,3 +253,7 @@ class Votes(DbAdapterHolder):
         cls.inside_flush = False
 
         return n
+
+    @classmethod
+    def flush(cls):
+        return cls.flush_votes() + cls.flush_notifications()
