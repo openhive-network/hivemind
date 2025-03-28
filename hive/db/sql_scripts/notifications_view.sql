@@ -5,10 +5,13 @@ RETURNS INT
 LANGUAGE 'sql'
 IMMUTABLE
 AS $BODY$
-    SELECT CASE
+  SELECT CASE _abs_rshares = 0
+    WHEN TRUE THEN CAST(0 AS INT)
+    ELSE CASE
         WHEN ((( _payout )/_abs_rshares) * 1000 * _rshares < 20 ) THEN -1
-            ELSE LEAST(100, (LENGTH(CAST( CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as BIGINT) as text)) - 1) * 25)
-    END;
+        ELSE LEAST(100, (LENGTH(CAST( CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as BIGINT) as text)) - 1) * 25)
+      END
+  END;
 $BODY$;
 
 DROP FUNCTION IF EXISTS hivemind_app.notification_id CASCADE;
@@ -41,56 +44,24 @@ AS $BODY$
            END
 $BODY$;
 
+DROP FUNCTION IF EXISTS hivemind_app.format_vote_value_payload CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.format_vote_value_payload(
+    _vote_value FLOAT
+)
+RETURNS VARCHAR
+LANGUAGE 'sql'
+IMMUTABLE
+AS $BODY$
+    SELECT CASE
+        WHEN _vote_value < 0.01 THEN ''::VARCHAR
+        ELSE CAST( to_char(_vote_value, '($FM99990.00)') AS VARCHAR )
+    END
+$BODY$;
+
 --vote has own score, new communities score as 35 (magic number), persistent notifications are already scored
 DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view_no_account_score cascade;
 CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view_no_account_score
 AS
-SELECT -- votes
-      vn.block_num
-    , vn.post_id
-    , vn.type_id
-    , vn.created_at
-    , vn.src
-    , vn.dst
-    , vn.dst_post_id
-    , vn.community
-    , vn.community_title
-    , CASE
-        WHEN vn.vote_value < 0.01 THEN ''::VARCHAR
-        ELSE CAST( to_char(vn.vote_value, '($FM99990.00)') AS VARCHAR )
-      END as payload
-    , vn.score
-FROM
-  (
-    SELECT
-        hv1.block_num
-      , hpv.id AS post_id
-      , 17 AS type_id
-      , hv1.last_update AS created_at
-      , hv1.voter_id AS src
-      , hpv.author_id AS dst
-      , hpv.id AS dst_post_id
-      , ''::VARCHAR(16) AS community
-      , ''::VARCHAR AS community_title
-      , hivemind_app.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, hv1.rshares) AS vote_value
-      , hivemind_app.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, hv1.rshares) AS score
-    FROM hivemind_app.hive_votes hv1
-    JOIN
-      (
-        SELECT
-            hpvi.id
-          , hpvi.author_id
-          , hpvi.payout
-          , hpvi.pending_payout
-          , hpvi.abs_rshares
-          , hpvi.vote_rshares as rshares
-         FROM hivemind_app.hive_posts hpvi
-         WHERE hpvi.block_num > hivemind_app.block_before_head('97 days'::interval)
-       ) hpv ON hv1.post_id = hpv.id
-    WHERE hv1.rshares >= 10e9
-  ) as vn
-  WHERE vn.vote_value >= 0.02
-UNION ALL
   SELECT -- new community
       hc.block_num as block_num
       , 0 as post_id

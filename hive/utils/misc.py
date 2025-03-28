@@ -37,9 +37,14 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
 
 
 def chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+    """Yield successive n-sized chunks from list or dict o."""
+    if isinstance(lst, dict):
+        items = list(lst.items())
+        for i in range(0, len(items), n):
+            yield dict(items[i:i + n])
+    else:
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
 
 
 def get_memory_amount() -> float:
