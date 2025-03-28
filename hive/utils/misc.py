@@ -37,15 +37,11 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
 
 
 def chunks(lst, n):
-    """Yield successive n-sized chunks from list, dict, or set o."""
+    """Yield successive n-sized chunks from list or dict o."""
     if isinstance(lst, dict):
         items = list(lst.items())
         for i in range(0, len(items), n):
             yield dict(items[i:i + n])
-    elif isinstance(lst, set):
-        items = list(lst)
-        for i in range(0, len(items), n):
-            yield set(items[i:i + n])
     else:
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
@@ -68,20 +64,6 @@ class PatchLevelInfo:
     level: int
     patch_date: datetime
     patched_to_revision: str
-
-
-class UniqueCounter:
-    def __init__(self):
-        self.counter = 0
-        self.last_value = None
-
-    def increment(self, value) -> int:
-        if value == self.last_value:
-            self.counter += 1
-        else:
-            self.counter = 1
-            self.last_value = value
-        return self.counter
 
 
 def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):
