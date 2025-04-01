@@ -163,6 +163,10 @@ class Db:
     def query_prepared(self, sql, **kwargs):
         self._query(sql, True, **kwargs)
 
+    def query_prepared_all(self, sql, **kwargs):
+        res = self._query(sql, True, **kwargs)
+        return res.fetchall()
+
     def query_no_return(self, sql, **kwargs):
         self._query(sql, **kwargs)
 
