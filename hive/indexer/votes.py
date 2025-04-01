@@ -2,6 +2,7 @@
 
 import collections
 import logging
+from itertools import count
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -157,7 +158,7 @@ class Votes(DbAdapterHolder):
                     ) hpv ON p.id = hpv.id
                 ) AS hn
                 WHERE hn.block_num > hivemind_app.block_before_irreversible( '90 days' )
-                    AND score > 0
+                    AND score >= 0
                     AND hn.src IS DISTINCT FROM hn.dst
                     AND hn.rshares >= 10e9
                     AND hn.vote_value >= 0.02
@@ -180,8 +181,6 @@ class Votes(DbAdapterHolder):
         cls.inside_flush = True
         n = 0
         if cls._votes_data:
-            cls.beginTx()
-
             sql = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
@@ -209,17 +208,17 @@ class Votes(DbAdapterHolder):
                     last_update = EXCLUDED.last_update,
                     num_changes = {SCHEMA_NAME}.hive_votes.num_changes + EXCLUDED.num_changes + 1,
                     block_num = EXCLUDED.block_num
-                  WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id and {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id and {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id;
+                  WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id and {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id and {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id
+                RETURNING post_id
                 """
             # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
-            values = []
-            values_limit = 1000
-
-            for _, vd in cls._votes_data.items():
-                values.append(
+            cnt = count()
+            for chunk in chunks(cls._votes_data, 1000):
+                cls.beginTx()
+                values_str = ','.join(
                     "({}, '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
-                        len(values),  # for ordering
+                        next(cnt),  # for ordering
                         vd['voter'],
                         vd['author'],
                         vd['permlink'],
@@ -230,25 +229,17 @@ class Votes(DbAdapterHolder):
                         vd['num_changes'],
                         vd['block_num'],
                         vd['is_effective'],
-                    )
+                    ) for k,vd in chunk.items()
                 )
-
-                if len(values) >= values_limit:
-                    values_str = ','.join(values)
-                    actual_query = sql.format(values_str)
-                    cls.db.query_prepared(actual_query)
-                    values.clear()
-
-            if len(values) > 0:
-                values_str = ','.join(values)
                 actual_query = sql.format(values_str)
-                cls.db.query_prepared(actual_query)
-                values.clear()
+                post_ids = cls.db.query_prepared_all(actual_query)
+                cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update hive_posts in posts
+                cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids])
+                cls.commitTx()
 
             n = len(cls._votes_data)
             cls._votes_data.clear()
             cls._votes_per_post.clear()
-            cls.commitTx()
 
         cls.inside_flush = False
 

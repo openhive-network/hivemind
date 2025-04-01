@@ -381,12 +381,6 @@ class DbState:
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
-            # UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_posts_rshares({last_imported_block}, {current_imported_block});"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql, explain=True)
-            log.info("[MASSIVE] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
-
             time_start = perf_counter()
 
             # UPDATE: `children`
