@@ -420,7 +420,6 @@ class Blocks:
         is_hour_action = block_number % 1200 == 0
 
         queries = [
-            f"SELECT {SCHEMA_NAME}.update_posts_rshares({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
