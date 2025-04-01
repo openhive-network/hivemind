@@ -4,9 +4,9 @@
 
 ARG POSTGREST_VERSION=v12.0.2
 
-FROM postgrest/postgrest:${POSTGREST_VERSION} AS pure_postgrest
+FROM registry.gitlab.syncad.com/hive/common-ci-configuration/postgrest:${POSTGREST_VERSION} AS pure_postgrest
 
-FROM --platform=$BUILDPLATFORM python:3.8-slim as runtime
+FROM --platform=$BUILDPLATFORM registry.gitlab.syncad.com/hive/common-ci-configuration/python:3.8-slim as runtime
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
