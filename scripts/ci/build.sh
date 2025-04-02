@@ -11,6 +11,10 @@ source .hivemind-venv/bin/activate
 python3 -m pip install -U pip setuptools wheel build
 pip3 install pyyaml
 
+pushd "$SRCROOT/reputation_tracker"
+./scripts/generate_version_sql.sh "$SRCROOT/reputation_tracker" "$SRCROOT/.git/modules/reputation_tracker"
+popd
+
 # Do actual installation in the source directory
 pushd "$SRCROOT"
 git status
