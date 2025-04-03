@@ -62,21 +62,6 @@ $BODY$;
 DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view_no_account_score cascade;
 CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view_no_account_score
 AS
-  SELECT -- new community
-      hc.block_num as block_num
-      , 0 as post_id
-      , 1 as type_id
-      , hc.created_at as created_at
-      , 0 as src
-      , hc.id as dst
-      , 0 as dst_post_id
-      , hc.name as community
-      , ''::VARCHAR as community_title
-      , ''::VARCHAR as payload
-      , 35 as score
-  FROM
-      hivemind_app.hive_communities hc
-UNION ALL
   SELECT --persistent notifs
        hn.block_num
      , hn.post_id as post_id
