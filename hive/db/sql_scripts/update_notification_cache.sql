@@ -9,14 +9,6 @@ BEGIN
   IF _first_block_num IS NOT NULL THEN
     DELETE FROM hivemind_app.hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
   END IF;
-
-  INSERT INTO hivemind_app.hive_notification_cache
-  (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-  SELECT nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
-  FROM hivemind_app.hive_raw_notifications_view nv
-  WHERE nv.block_num > __limit_block AND (_first_block_num IS NULL OR nv.block_num BETWEEN _first_block_num AND _last_block_num)
-  ORDER BY nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id
-  ;
 END
 $function$
 LANGUAGE plpgsql VOLATILE
