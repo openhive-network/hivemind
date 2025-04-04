@@ -3,7 +3,6 @@ DROP VIEW IF EXISTS hivemind_app.hive_votes_view
 CREATE OR REPLACE VIEW hivemind_app.hive_votes_view
 AS
 SELECT
-    hv.id,
     hv.voter_id as voter_id,
     ha_a.name as author,
     hpd.permlink as permlink,
