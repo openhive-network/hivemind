@@ -30,7 +30,7 @@ STARTUP_TIME="$(cat /tmp/block_processing_startup_time.txt)"
 CHECK="SET TIME ZONE 'UTC'; \
        SELECT ((now() - (SELECT last_active_at FROM hafd.contexts WHERE name = 'hivemind_app')) < interval '1 minute' \
                AND (SELECT last_active_at FROM hafd.contexts WHERE name = 'hivemind_app') > '${STARTUP_TIME}'::timestamp) OR \
-              ((SELECT current_block_num FROM hafd.contexts WHERE name = 'hivemind_app') >= (SELECT consistent_block FROM hafd.irreversible_data))"
+              ((SELECT current_block_num FROM hafd.contexts WHERE name = 'hivemind_app') >= (SELECT consistent_block FROM hafd.hive_state))"
 
 # the docker container probably won't have a locale set, do this to suppress the warning
 export LC_ALL=C
