@@ -57,33 +57,3 @@ AS $BODY$
         ELSE CAST( to_char(_vote_value, '($FM99990.00)') AS VARCHAR )
     END
 $BODY$;
-
---vote has own score, new communities score as 35 (magic number), persistent notifications are already scored
-DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view_no_account_score cascade;
-CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view_no_account_score
-AS
-  SELECT --persistent notifs
-       hn.block_num
-     , hn.post_id as post_id
-     , hn.type_id as type_id
-     , hn.created_at as created_at
-     , hn.src_id as src
-     , hn.dst_id as dst
-     , hn.post_id as dst_post_id
-     , hc.name as community
-     , hc.title as community_title
-     , hn.payload as payload
-     , hn.score as score
-  FROM hivemind_app.hive_notifs hn
-  JOIN hivemind_app.hive_communities hc ON hn.community_id = hc.id
-;
-
-DROP VIEW IF EXISTS hivemind_app.hive_raw_notifications_view CASCADE;
-CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_view
-AS
-SELECT *
-FROM
-  (
-  SELECT * FROM hivemind_app.hive_raw_notifications_view_no_account_score
-  ) as notifs
-WHERE notifs.score >= 0 AND notifs.src IS DISTINCT FROM notifs.dst;
