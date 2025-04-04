@@ -14,20 +14,6 @@ AS $BODY$
   END;
 $BODY$;
 
-DROP FUNCTION IF EXISTS hivemind_app.notification_id CASCADE;
-CREATE OR REPLACE FUNCTION hivemind_app.notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
-RETURNS BIGINT
-AS
-$function$
-BEGIN
-RETURN CAST( _block_number as BIGINT ) << 36
-       | ( _notifyType << 28 )
-       | ( _id & CAST( x'0FFFFFFF' as BIGINT) );
-END
-$function$
-LANGUAGE plpgsql IMMUTABLE
-;
-
 DROP FUNCTION IF EXISTS hivemind_app.calculate_value_of_vote_on_post CASCADE;
 CREATE OR REPLACE FUNCTION hivemind_app.calculate_value_of_vote_on_post(
     _post_payout hivemind_app.hive_posts.payout%TYPE
