@@ -417,16 +417,14 @@ class Blocks:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
-        is_hour_action = block_number % 1200 == 0
-
         queries = [
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
-            f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
+            f"SELECT {SCHEMA_NAME}.prune_notification_cache({block_number})",
         ]
 
         for query in queries:

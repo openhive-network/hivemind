@@ -444,11 +444,6 @@ class DbState:
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_notification_cache(NULL, NULL, False);"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_notification_cache executed in %.4fs", perf_counter() - time_start)
-
-            time_start = perf_counter()
             sql = f"CALL {SCHEMA_NAME}.clear_muted_notifications();"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
