@@ -314,7 +314,7 @@ class Follow(DbAdapterHolder):
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 15, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, 0, 0, COALESCE(rep.rep, 25), '', '', ''
+                SELECT n.block_num, 15, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
                 FROM
                 (VALUES {{}})
                 AS n(src, dst, block_num)
@@ -325,6 +325,8 @@ class Follow(DbAdapterHolder):
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, created_at, r.id, r.id
+                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
             """
             for chunk in chunks(cls.follow_notifications_to_flush, 1000):
                 cls.beginTx()

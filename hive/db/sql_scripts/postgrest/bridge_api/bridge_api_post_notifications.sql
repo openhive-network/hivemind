@@ -59,12 +59,12 @@ BEGIN
             nv.created_at,
             nv.src,
             nv.dst,
-            nv.dst_post_id,
+            COALESCE(nv.dst_post_id, 0) AS dst_post_id,
             nv.score,
             nv.community,
             nv.community_title,
             nv.payload,
-            nv.post_id
+            COALESCE(nv.post_id, 0) AS post_id
           FROM hivemind_app.hive_notification_cache nv
           WHERE
             nv.dst_post_id = _post_id

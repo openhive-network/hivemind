@@ -69,7 +69,7 @@ BEGIN
             nv.score,
             nv.community,
             nv.community_title,
-            nv.post_id,
+            COALESCE(nv.post_id, 0) AS post_id,
             nv.src,
             nv.dst,
             nv.payload

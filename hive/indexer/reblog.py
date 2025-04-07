@@ -1,6 +1,7 @@
 """ Class for reblog operations """
 
 import logging
+from collections import OrderedDict
 
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
@@ -15,7 +16,7 @@ class Reblog(DbAdapterHolder):
     """Class for reblog operations"""
 
     reblog_items_to_flush = {}
-    reblog_notifications_to_flush = []
+    reblog_notifications_to_flush = OrderedDict()
     _notification_first_block = None
 
     @classmethod
@@ -57,13 +58,13 @@ class Reblog(DbAdapterHolder):
             cls.delete(op['author'], op['permlink'], op['account'])
         else:
             cls.reblog_items_to_flush[key] = {'op': op}
-            cls.reblog_notifications_to_flush.append({
+            cls.reblog_notifications_to_flush[key] = {
                     "block_num": block_num,
                     "created_at": block_date,
                     "src": op['account'],
                     "dst": op['author'],
                     "permlink": op['permlink'],
-                })
+                }
 
     @classmethod
     def delete(cls, author, permlink, account):
@@ -139,7 +140,7 @@ class Reblog(DbAdapterHolder):
         if cls._notification_first_block is None:
             cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls.reblog_notifications_to_flush)
-        max_block_num = max(n['block_num'] for n in cls.reblog_notifications_to_flush or [{"block_num": 0}])
+        max_block_num = max(n['block_num'] for _,n in cls.reblog_notifications_to_flush.items() or [('', {"block_num": 0})])
         if n > 0 and max_block_num > cls._notification_first_block:
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -179,10 +180,12 @@ class Reblog(DbAdapterHolder):
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, p.id
+                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
             """
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
                 cls.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {escape_characters(n['created_at'])}::timestamp, {escape_characters(n['src'])}, {escape_characters(n['dst'])}, {escape_characters(n['permlink'])})" for n in chunk)
+                values_str = ','.join(f"({n['block_num']}, {escape_characters(n['created_at'])}::timestamp, {escape_characters(n['src'])}, {escape_characters(n['dst'])}, {escape_characters(n['permlink'])})" for _,n in chunk.items())
                 cls.db.query_prepared(sql.format(values_str))
                 cls.commitTx()
         else:
