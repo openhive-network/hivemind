@@ -429,6 +429,8 @@ class CommunityOp:
                         AND COALESCE(rep.rep, 25) > 0
                         AND n.src IS DISTINCT FROM n.dst
                     ORDER BY n.block_num, n.created_at, r.id, hc.id
+                    ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+                    SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
                 """
                 DbAdapterHolder.common_block_processing_db().query_no_return(sql, **params)
         elif action == 'unsubscribe':

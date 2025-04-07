@@ -453,7 +453,7 @@ def build_metadata_community(metadata=None):
         sa.Column('community', sa.String(16), nullable=True),
         sa.Column('payload', sa.String, nullable=True),
         sa.Index('hive_notification_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_notification_cache_src_dst_post_id', 'src', 'dst', 'post_id', unique=True, postgresql_where=sql_text("type_id = 16")),  # mentions type
+        sa.Index('hive_notification_cache_src_dst_post_id', 'src', 'dst', 'type_id', 'post_id', unique=True),
         sa.Index('hive_notification_cache_dst_score_idx', 'dst', 'score', postgresql_where=sql_text("dst IS NOT NULL")),
     )
 

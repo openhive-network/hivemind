@@ -44,6 +44,7 @@ class Votes(DbAdapterHolder):
             vote_data["last_update"] = date
             n = cls._vote_notifications[key]
             n['last_update'] = date
+            n['block_num'] = block_num
             # only effective vote edits increase num_changes counter
         else:
             if not post_key in cls._votes_per_post:
@@ -141,7 +142,7 @@ class Votes(DbAdapterHolder):
                 SELECT hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id, hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
                 FROM (
                     SELECT n.*,
-                      ha.id AS src,
+                      hv.id AS src,
                       hpv.author_id AS dst,
                       hpv.id AS post_id,
                       hivemind_app.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
@@ -149,13 +150,14 @@ class Votes(DbAdapterHolder):
                     FROM
                     (VALUES {{}})
                     AS n(block_num, voter, author, permlink, last_update, rshares)
-                    JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.voter = ha.name
-                    JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
+                    JOIN {SCHEMA_NAME}.hive_accounts AS hv ON n.voter = hv.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
+                    JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
                     JOIN (
                         SELECT hpvi.id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
                         WHERE hpvi.block_num > hivemind_app.block_before_head('97 days'::interval)
-                    ) hpv ON p.id = hpv.id
+                    ) hpv ON pd.id = hpv.id AND ha.id = hpv.author_id
                 ) AS hn
                 WHERE hn.block_num > hivemind_app.block_before_irreversible( '90 days' )
                     AND score >= 0
@@ -163,6 +165,8 @@ class Votes(DbAdapterHolder):
                     AND hn.rshares >= 10e9
                     AND hn.vote_value >= 0.02
                 ORDER BY hn.block_num, created_at, hn.src, hn.dst
+                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
             """
             for chunk in chunks(cls._vote_notifications, 1000):
                 cls.beginTx()
