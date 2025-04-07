@@ -410,7 +410,7 @@ BEGIN
     WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
         AND COALESCE(rep.rep, 25) > 0
     ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
-    ON CONFLICT (src, dst, post_id) WHERE type_id=16 DO UPDATE
+    ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
     SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
     RETURNING id;
 END;

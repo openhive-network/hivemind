@@ -4,6 +4,7 @@ import logging
 
 from diff_match_patch import diff_match_patch
 from ujson import dumps, loads
+from collections import OrderedDict
 
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
@@ -25,7 +26,7 @@ class Posts(DbAdapterHolder):
 
     comment_payout_ops = {}
     _comment_payout_ops = []
-    _comment_notifications = []
+    _comment_notifications = OrderedDict()
     _notification_first_block = None
 
     @classmethod
@@ -89,17 +90,6 @@ class Posts(DbAdapterHolder):
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
             )
-            if row['depth'] > 0 and not row['is_author_muted']:
-                type_id = 12 if row['depth'] == 1 else 13
-                cls._comment_notifications.append({
-                    "block_num": op['block_num'],
-                    "type_id": type_id,
-                    "created_at": block_date,
-                    "src": row['author_id'],
-                    "dst": row['parent_author_id'],
-                    "dst_post_id": row['parent_id'],
-                    "post_id": row['id'],
-                })
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
             # empty new body means no body edit, not clear (same with other data)
@@ -110,6 +100,18 @@ class Posts(DbAdapterHolder):
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
+        if row['depth'] > 0 and not row['is_author_muted']:
+            type_id = 12 if row['depth'] == 1 else 13
+            key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
+            cls._comment_notifications[key] = {
+                "block_num": op['block_num'],
+                "type_id": type_id,
+                "created_at": block_date,
+                "src": row['author_id'],
+                "dst": row['parent_author_id'],
+                "dst_post_id": row['parent_id'],
+                "post_id": row['id'],
+            }
 
         if not DbState.is_massive_sync():
             if error:
@@ -200,7 +202,7 @@ class Posts(DbAdapterHolder):
         if cls._notification_first_block is None:
             cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls._comment_notifications)
-        max_block_num = max(n['block_num'] for n in cls._comment_notifications or [{'block_num': 0}])
+        max_block_num = max(n['block_num'] for _,n in cls._comment_notifications.items() or [('', {'block_num': 0})])
         if n > 0 and max_block_num > cls._notification_first_block:
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -237,10 +239,12 @@ class Posts(DbAdapterHolder):
                 AND COALESCE(r.rep, 25) > 0
                 AND n.src IS DISTINCT FROM n.dst
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
+            ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+            SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
             """
             for chunk in chunks(cls._comment_notifications, 1000):
                 cls.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for n in chunk)
+                values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for _,n in chunk.items())
                 cls.db.query_prepared(sql.format(values_str))
                 cls.commitTx()
         else:
