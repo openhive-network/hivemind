@@ -421,7 +421,6 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
             f"SELECT {SCHEMA_NAME}.prune_notification_cache({block_number})",
