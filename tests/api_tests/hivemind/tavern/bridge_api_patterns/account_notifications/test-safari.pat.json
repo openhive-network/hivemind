@@ -1,23 +1,7 @@
 [
   {
-    "date": "2016-09-15T19:47:48",
-    "id": "4062413112475650",
-    "msg": "error: post does not belong to community",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-198723"
-  },
-  {
-    "date": "2016-09-15T19:47:48",
-    "id": "4062413112475649",
-    "msg": "error: post does not exists blocktrades/elephant01",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-135485"
-  },
-  {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895946",
+    "id": 2077905,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -25,7 +9,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895945",
+    "id": 2077904,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -33,7 +17,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895944",
+    "id": 2077903,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -41,7 +25,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895943",
+    "id": 2077902,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -49,7 +33,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895942",
+    "id": 2077901,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -57,7 +41,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895941",
+    "id": 2077900,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -65,7 +49,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895940",
+    "id": 2077899,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -73,7 +57,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895939",
+    "id": 2077898,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -81,7 +65,7 @@
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895938",
+    "id": 2077897,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -89,7 +73,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670474",
+    "id": 2077894,
     "msg": "@test-creator replied to your post",
     "score": 25,
     "type": "reply",
@@ -97,7 +81,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670473",
+    "id": 2077893,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -105,7 +89,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670472",
+    "id": 2077892,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -113,7 +97,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670471",
+    "id": 2077891,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -121,7 +105,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670470",
+    "id": 2077890,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -129,7 +113,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670469",
+    "id": 2077889,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -137,7 +121,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670468",
+    "id": 2077888,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -145,7 +129,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670467",
+    "id": 2077887,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -153,7 +137,7 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670466",
+    "id": 2077886,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -161,31 +145,15 @@
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670465",
+    "id": 2077885,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
     "url": "@alice/after-muted-comment-to-please-comment-hive1"
   },
   {
-    "date": "2016-09-15T18:01:42",
-    "id": "4060704269139970",
-    "msg": "@agartha reblogged your post",
-    "score": 25,
-    "type": "reblog",
-    "url": "@test-safari/reblogged-and-edited"
-  },
-  {
-    "date": "2016-09-15T18:01:42",
-    "id": "4060704269139969",
-    "msg": "@agartha reblogged your post",
-    "score": 25,
-    "type": "reblog",
-    "url": "@test-safari/reblogged-and-recreated"
-  },
-  {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445002",
+    "id": 2077877,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -193,7 +161,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445001",
+    "id": 2077876,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -201,7 +169,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445000",
+    "id": 2077875,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -209,7 +177,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444999",
+    "id": 2077874,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -217,7 +185,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444998",
+    "id": 2077873,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -225,7 +193,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444997",
+    "id": 2077872,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -233,7 +201,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444996",
+    "id": 2077871,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -241,7 +209,7 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444995",
+    "id": 2077870,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
@@ -249,47 +217,39 @@
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444994",
-    "msg": "@steemit replied to your post",
-    "score": 33,
-    "type": "reply",
-    "url": "@steemit/comment-to-post-in-community-muted"
-  },
-  {
-    "date": "2016-09-15T18:01:39",
-    "id": "4060703455444993",
+    "id": 2077869,
     "msg": "@alice replied to your post",
     "score": 25,
     "type": "reply",
     "url": "@alice/comment-to-please-comment-hive1"
   },
   {
-    "date": "2016-09-15T18:01:33",
-    "id": "4060701836443664",
-    "msg": "error: only mods and up can alter roles",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-167892"
+    "date": "2016-09-15T18:01:39",
+    "id": 2077868,
+    "msg": "@steemit replied to your post",
+    "score": 33,
+    "type": "reply",
+    "url": "@steemit/comment-to-post-in-community-muted"
   },
   {
-    "date": "2016-09-15T18:01:33",
-    "id": "4060701836443663",
-    "msg": "error: cannot promote to or above own rank",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-198723"
+    "date": "2016-09-15T18:01:42",
+    "id": 2077426,
+    "msg": "@agartha reblogged your post",
+    "score": 25,
+    "type": "reblog",
+    "url": "@test-safari/reblogged-and-edited"
   },
   {
-    "date": "2016-09-15T18:01:33",
-    "id": "4060701836443662",
-    "msg": "error: cannot promote to or above own rank",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-157439"
+    "date": "2016-09-15T18:01:42",
+    "id": 2077425,
+    "msg": "@agartha reblogged your post",
+    "score": 25,
+    "type": "reblog",
+    "url": "@test-safari/reblogged-and-recreated"
   },
   {
     "date": "2016-09-13T18:57:24",
-    "id": "4015215729442817",
+    "id": 2025526,
     "msg": "@mikerano replied to your comment",
     "score": 47,
     "type": "reply_comment",
@@ -297,7 +257,7 @@
   },
   {
     "date": "2016-09-13T18:46:15",
-    "id": "4015036146122753",
+    "id": 2025468,
     "msg": "@mikerano replied to your comment",
     "score": 47,
     "type": "reply_comment",
@@ -305,7 +265,7 @@
   },
   {
     "date": "2016-08-31T18:55:36",
-    "id": "3713680042622977",
+    "id": 1626921,
     "msg": "@roadscape followed you",
     "score": 55,
     "type": "follow",
