@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T19:41:33",
-    "id": 2010374,
+    "id": 2080160,
     "msg": "@nippel66 voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -9,47 +9,39 @@
   },
   {
     "date": "2016-09-15T18:57:51",
-    "id": 2009431,
+    "id": 2079764,
     "msg": "@edgeland voted on your post ($0.28)",
     "score": 50,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
-    "date": "2016-09-15T18:56:00",
-    "id": 2009404,
+    "date": "2016-09-15T18:56:51",
+    "id": 2079377,
     "msg": "@kurtbeil replied to your post",
     "score": 50,
     "type": "reply",
     "url": "@kurtbeil/re-richman-if-you-want-to-lose-a-friend-lend-him-money-my-life-story-20160915t185552409z"
   },
   {
-    "date": "2016-09-15T18:36:15",
-    "id": 2008663,
-    "msg": "@pjheinz followed you",
-    "score": 60,
-    "type": "follow",
-    "url": "@pjheinz"
-  },
-  {
     "date": "2016-09-15T18:09:45",
-    "id": 2007946,
+    "id": 2077959,
     "msg": "@honeyscribe replied to your comment",
-    "score": 70,
+    "score": 58,
     "type": "reply_comment",
     "url": "@honeyscribe/re-richman-re-honeyscribe-persisting-in-the-face-of-adversity-20160915t180944939z"
   },
   {
-    "date": "2016-09-15T17:53:48",
-    "id": 2007341,
-    "msg": "@curie mentioned you and 150 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@curie/the-daily-curie-14th-sept-15th-sept-2016"
+    "date": "2016-09-15T18:36:15",
+    "id": 2077528,
+    "msg": "@pjheinz followed you",
+    "score": 54,
+    "type": "follow",
+    "url": "@pjheinz"
   },
   {
     "date": "2016-09-15T17:38:42",
-    "id": 2006986,
+    "id": 2077214,
     "msg": "@danknugs voted on your post ($0.02)",
     "score": 25,
     "type": "vote",
@@ -57,31 +49,31 @@
   },
   {
     "date": "2016-09-15T17:26:21",
-    "id": 2006703,
+    "id": 2076705,
     "msg": "@burmik123 replied to your comment",
-    "score": 50,
+    "score": 48,
     "type": "reply_comment",
     "url": "@burmik123/re-richman-re-gavvet-title-steel-monsters-tank-destroyers-of-ww-ii-eng-ua-featuring-burmik123-as-author-20160915t172620045z"
   },
   {
+    "date": "2016-09-15T17:53:48",
+    "id": 2076424,
+    "msg": "@curie mentioned you and 150 others",
+    "score": 57,
+    "type": "mention",
+    "url": "@curie/the-daily-curie-14th-sept-15th-sept-2016"
+  },
+  {
     "date": "2016-09-15T17:07:33",
-    "id": 2006362,
+    "id": 2076148,
     "msg": "@thecurator voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
-    "date": "2016-09-15T17:06:42",
-    "id": 2006339,
-    "msg": "@honeyscribe replied to your post",
-    "score": 70,
-    "type": "reply",
-    "url": "@honeyscribe/re-richman-if-you-want-to-lose-a-friend-lend-him-money-my-life-story-20160915t170643586z"
-  },
-  {
     "date": "2016-09-15T17:06:03",
-    "id": 2006314,
+    "id": 2076133,
     "msg": "@honeyscribe voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -89,15 +81,15 @@
   },
   {
     "date": "2016-09-15T16:45:03",
-    "id": 2005897,
-    "msg": "@ozchartart voted on your post ($0.48)",
+    "id": 2075979,
+    "msg": "@ozchartart voted on your post ($0.49)",
     "score": 50,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
     "date": "2016-09-15T16:44:36",
-    "id": 2005892,
+    "id": 2075978,
     "msg": "@ozmaster voted on your post ($0.31)",
     "score": 50,
     "type": "vote",
@@ -105,7 +97,7 @@
   },
   {
     "date": "2016-09-15T16:22:12",
-    "id": 2005385,
+    "id": 2075722,
     "msg": "@nextgenwitness voted on your post ($0.14)",
     "score": 50,
     "type": "vote",
@@ -113,7 +105,7 @@
   },
   {
     "date": "2016-09-15T16:22:09",
-    "id": 2005384,
+    "id": 2075721,
     "msg": "@steemservices voted on your post ($0.32)",
     "score": 50,
     "type": "vote",
@@ -121,31 +113,31 @@
   },
   {
     "date": "2016-09-15T16:22:06",
-    "id": 2005382,
-    "msg": "@justin voted on your post ($0.46)",
+    "id": 2075719,
+    "msg": "@justin voted on your post ($0.47)",
     "score": 50,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
     "date": "2016-09-15T16:22:03",
-    "id": 2005380,
-    "msg": "@berniesanders voted on your post ($18.73)",
+    "id": 2075717,
+    "msg": "@berniesanders voted on your post ($18.88)",
     "score": 100,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
     "date": "2016-09-15T16:22:00",
-    "id": 2005377,
-    "msg": "@nextgencrypto voted on your post ($3.64)",
+    "id": 2075715,
+    "msg": "@nextgencrypto voted on your post ($3.67)",
     "score": 75,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
   },
   {
     "date": "2016-09-15T16:21:57",
-    "id": 2005375,
+    "id": 2075714,
     "msg": "@thedarkestplum voted on your post ($0.06)",
     "score": 25,
     "type": "vote",
@@ -153,8 +145,16 @@
   },
   {
     "date": "2016-09-15T16:21:57",
-    "id": 2005374,
-    "msg": "@silversteem voted on your post ($3.09)",
+    "id": 2075713,
+    "msg": "@silversteem voted on your post ($3.11)",
+    "score": 75,
+    "type": "vote",
+    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+  },
+  {
+    "date": "2016-09-15T16:21:54",
+    "id": 2075712,
+    "msg": "@silver voted on your post ($1.28)",
     "score": 75,
     "type": "vote",
     "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"

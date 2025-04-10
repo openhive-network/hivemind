@@ -1,34 +1,5 @@
-[
-  {
-    "date": "2016-08-12T01:07:30",
-    "id": 887541,
-    "msg": "@venuspcs mentioned you and 4 others",
-    "score": 70,
-    "type": "mention",
-    "url": "@venuspcs/re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z"
-  },
-  {
-    "date": "2016-08-12T01:07:30",
-    "id": 887540,
-    "msg": "@venuspcs mentioned you and 4 others",
-    "score": 70,
-    "type": "mention",
-    "url": "@venuspcs/re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z"
-  },
-  {
-    "date": "2016-08-12T01:07:30",
-    "id": 887539,
-    "msg": "@venuspcs mentioned you and 4 others",
-    "score": 70,
-    "type": "mention",
-    "url": "@venuspcs/re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z"
-  },
-  {
-    "date": "2016-08-12T01:07:30",
-    "id": 887538,
-    "msg": "@venuspcs mentioned you and 4 others",
-    "score": 70,
-    "type": "mention",
-    "url": "@venuspcs/re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z"
-  }
-]
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": null
+}

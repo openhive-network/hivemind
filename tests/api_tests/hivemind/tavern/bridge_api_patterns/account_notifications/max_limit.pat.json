@@ -1,463 +1,479 @@
 [
   {
     "date": "2016-09-15T18:01:30",
-    "id": 2007656,
+    "id": 2077415,
     "msg": "@funny reblogged your post",
-    "score": 60,
+    "score": 55,
     "type": "reblog",
     "url": "@steemit/firstpost"
   },
   {
     "date": "2016-09-15T17:51:15",
-    "id": 2007285,
+    "id": 2076405,
     "msg": "@steempowerwhale mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@steempowerwhale/for-steemit-authors-how-likely-do-posts-receive-a-reward-on-steemit-look-at-the-stats"
   },
   {
     "date": "2016-09-15T17:17:36",
-    "id": 2006559,
+    "id": 2076283,
     "msg": "@macartem mentioned you and 4 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@macartem/5-most-important-whales"
   },
   {
     "date": "2016-09-15T05:25:03",
-    "id": 1993994,
+    "id": 2063505,
     "msg": "@therajmahal followed you",
-    "score": 50,
+    "score": 46,
     "type": "follow",
     "url": "@therajmahal"
   },
   {
     "date": "2016-09-14T21:33:36",
-    "id": 1985875,
+    "id": 2056049,
     "msg": "@twitterbot mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@twitterbot/re-app-store-accepts-steemit-20160914t213336"
   },
   {
-    "date": "2016-09-14T18:10:21",
-    "id": 1980742,
-    "msg": "@hisnameisolllie mentioned you and 6 others",
-    "score": 70,
-    "type": "mention",
-    "url": "@hisnameisolllie/is-steemit-the-ultimate-cryptocurrency-onboarding-tool"
-  },
-  {
     "date": "2016-09-14T12:20:42",
-    "id": 1972864,
+    "id": 2042943,
     "msg": "@mgibson followed you",
-    "score": 50,
+    "score": 42,
     "type": "follow",
     "url": "@mgibson"
   },
   {
+    "date": "2016-09-14T18:10:21",
+    "id": 2040049,
+    "msg": "@hisnameisolllie mentioned you and 6 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@hisnameisolllie/is-steemit-the-ultimate-cryptocurrency-onboarding-tool"
+  },
+  {
     "date": "2016-09-14T07:27:48",
-    "id": 1969190,
+    "id": 2038782,
     "msg": "@felixxx mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@felixxx/re-miserableoracle-re-felixxx-re-miserableoracle-re-l0k1-the-power-down-delay-ned-and-dan-you-got-us-hooked-we-can-t-jump-out-what-s-happening-20160914t072747788z"
   },
   {
     "date": "2016-09-14T06:57:00",
-    "id": 1968653,
+    "id": 2038768,
     "msg": "@svamiva mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@svamiva/re-smolalit-re-antizvuk-re-svamiva-re-smolalit-re-svamiva-nemnogo-soli-na-ranu-20160914t065520261z"
   },
   {
-    "date": "2016-09-14T05:53:51",
-    "id": 1968008,
-    "msg": "@karenb54 mentioned you and 0 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@karenb54/mobile-covers-for-all-ranks"
-  },
-  {
     "date": "2016-09-14T05:50:36",
-    "id": 1967976,
+    "id": 2037576,
     "msg": "@good-karma followed you",
-    "score": 70,
+    "score": 56,
     "type": "follow",
     "url": "@good-karma"
   },
   {
+    "date": "2016-09-14T05:53:51",
+    "id": 2037515,
+    "msg": "@karenb54 mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@karenb54/mobile-covers-for-all-ranks"
+  },
+  {
     "date": "2016-09-13T21:43:03",
-    "id": 1959341,
+    "id": 2029473,
     "msg": "@biophil mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@biophil/it-would-be-neat-to-know-why-steemit-starts-pushing-the-market-around-when-it-does"
   },
   {
     "date": "2016-09-13T20:23:00",
-    "id": 1957947,
+    "id": 2027834,
     "msg": "@blockcodes followed you",
-    "score": 50,
+    "score": 48,
     "type": "follow",
     "url": "@blockcodes"
   },
   {
     "date": "2016-09-13T19:26:45",
-    "id": 1956871,
+    "id": 2026625,
     "msg": "@pjheinz followed you",
-    "score": 60,
+    "score": 54,
     "type": "follow",
     "url": "@pjheinz"
   },
   {
     "date": "2016-09-13T14:04:21",
-    "id": 1949132,
+    "id": 2018420,
     "msg": "@steemitguide mentioned you and 2 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@steemitguide/steemit-s-top-10-forbes-list-edition-1-13th-september-2016"
   },
   {
     "date": "2016-09-13T12:23:27",
-    "id": 1947028,
+    "id": 2016554,
     "msg": "@twitterbot mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@twitterbot/re-appstore-whitelists-steem-now-waiting-for-bithshares-people-20160913t122326"
   },
   {
     "date": "2016-09-13T09:58:18",
-    "id": 1944834,
+    "id": 2014806,
     "msg": "@poseidon mentioned you and 3 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@poseidon/re-venuspcs-why-hardfork-14-will-reduce-daily-votes-from-40-to-5-my-opinion-which-i-haven-t-seen-anyone-else-state-20160913t095819591z"
   },
   {
     "date": "2016-09-13T01:58:21",
-    "id": 1938133,
+    "id": 2006847,
     "msg": "@leesunmoo mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@leesunmoo/leesunmoo-3"
   },
   {
     "date": "2016-09-13T00:20:09",
-    "id": 1936331,
+    "id": 2006051,
     "msg": "@buckland mentioned you and 1 others",
-    "score": 40,
+    "score": 33,
     "type": "mention",
     "url": "@buckland/re-abol-r-i-p-all-innocent-victims-on-septembre-11-20160913t002010694z"
   },
   {
     "date": "2016-09-12T23:29:06",
-    "id": 1935578,
+    "id": 2005222,
     "msg": "@buckland mentioned you and 1 others",
-    "score": 40,
+    "score": 33,
     "type": "mention",
     "url": "@buckland/re-abol-re-buckland-this-was-the-so-called-nano-thermite-that-was-found-everywhere-people-need-the-truth-but-can-they-swallow-it-20160912t232044338z"
   },
   {
     "date": "2016-09-12T08:49:06",
-    "id": 1914101,
+    "id": 1982785,
     "msg": "@peterz mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@peterz/re-aleco-zakon-cipfa-rabotaet-li-on-v-steemit-20160912t084906549z"
   },
   {
-    "date": "2016-09-12T01:29:39",
-    "id": 1907122,
-    "msg": "@fat-like-buddha mentioned you and 0 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@fat-like-buddha/a-letter-to-my-sons-preparing-for-lifes-journey"
-  },
-  {
     "date": "2016-09-11T23:36:00",
-    "id": 1905625,
+    "id": 1973754,
     "msg": "@marco-delsalto mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@marco-delsalto/its-1994-again-on-the-internet-again-love-it"
   },
   {
     "date": "2016-09-11T18:04:48",
-    "id": 1897802,
+    "id": 1962748,
     "msg": "@richman mentioned you and 1 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@richman/one-man-s-war-the-incredible-story-of-lieutenant-hiroo-onoda-featuring-andrewawerdna-as-author"
   },
   {
+    "date": "2016-09-12T01:29:39",
+    "id": 1961812,
+    "msg": "@fat-like-buddha mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@fat-like-buddha/a-letter-to-my-sons-preparing-for-lifes-journey"
+  },
+  {
     "date": "2016-09-11T15:44:39",
-    "id": 1895159,
+    "id": 1960023,
     "msg": "@hisnameisolllie mentioned you and 2 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@hisnameisolllie/steemit-statistics-week-7"
   },
   {
     "date": "2016-09-11T00:09:24",
-    "id": 1877538,
+    "id": 1945661,
     "msg": "@linkback-bot-v0 mentioned you and 3 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@linkback-bot-v0/re-laonie-robinhoodwhale-27-08-2016-linkbacks"
   },
   {
     "date": "2016-09-10T23:03:06",
-    "id": 1876017,
+    "id": 1944391,
     "msg": "@linkback-bot-v0 mentioned you and 4 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@linkback-bot-v0/re-magnebit-steem-price-is-being-pushed-down-by-1-person-speculation-on-why-and-where-it-may-end-up-linkbacks"
   },
   {
     "date": "2016-09-10T16:13:54",
-    "id": 1865156,
+    "id": 1932740,
     "msg": "@sergey44 followed you",
-    "score": 50,
+    "score": 46,
     "type": "follow",
     "url": "@sergey44"
   },
   {
     "date": "2016-09-10T06:56:45",
-    "id": 1854247,
+    "id": 1921337,
     "msg": "@littlescribe mentioned you and 6 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@littlescribe/re-smooth-re-timcliff-re-laonie-my-proposal-reduce-the-withdraw-channel-from-104-weeks-to-104-days-or-even-104-hours-to-make-steemit-less-like-a-ponzi-scheme-20160910t065353260z"
   },
   {
     "date": "2016-09-09T20:05:51",
-    "id": 1842786,
+    "id": 1909772,
     "msg": "@afsane followed you",
-    "score": 40,
+    "score": 26,
+    "type": "follow",
+    "url": "@afsane"
+  },
+  {
+    "date": "2016-09-09T20:05:33",
+    "id": 1909765,
+    "msg": "@afsane followed you",
+    "score": 26,
+    "type": "follow",
+    "url": "@afsane"
+  },
+  {
+    "date": "2016-09-09T20:04:06",
+    "id": 1909749,
+    "msg": "@afsane followed you",
+    "score": 26,
     "type": "follow",
     "url": "@afsane"
   },
   {
     "date": "2016-09-09T14:10:15",
-    "id": 1833572,
+    "id": 1900544,
     "msg": "@twitterbot mentioned you and 3 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@twitterbot/re-is-steemit-buying-let-s-talk-bitcoin-ltbcoin-up-500-20160909t141016"
   },
   {
     "date": "2016-09-09T14:09:15",
-    "id": 1833540,
+    "id": 1900539,
     "msg": "@valerian mentioned you and 3 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@valerian/is-steemit-buying-let-s-talk-bitcoin-ltbcoin-up-500"
   },
   {
     "date": "2016-09-09T10:47:09",
-    "id": 1826260,
+    "id": 1892014,
     "msg": "@spartanza mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@spartanza/9-11-suspects-series-by-corbettreport-part-1"
   },
   {
     "date": "2016-09-08T22:19:48",
-    "id": 1815209,
+    "id": 1880770,
     "msg": "@pawel-krawczyk followed you",
-    "score": 40,
+    "score": 34,
     "type": "follow",
     "url": "@pawel-krawczyk"
   },
   {
     "date": "2016-09-08T21:09:06",
-    "id": 1813284,
+    "id": 1879100,
     "msg": "@williamdevine mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@williamdevine/re-rawni-say-hello-to-the-newbie-20160908t210910852z"
   },
   {
     "date": "2016-09-08T14:29:57",
-    "id": 1803413,
+    "id": 1868888,
     "msg": "@buckland followed you",
-    "score": 40,
+    "score": 25,
     "type": "follow",
     "url": "@buckland"
   },
   {
     "date": "2016-09-08T12:16:27",
-    "id": 1801312,
+    "id": 1866823,
     "msg": "@svamiva mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@svamiva/re-smolalit-re-svamiva-re-peterz-re-svamiva-russkii-stim-osmyslennyi-i-dobryi-20160906t142752521z"
   },
   {
     "date": "2016-09-08T09:13:30",
-    "id": 1798440,
+    "id": 1862958,
     "msg": "@svamiva mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@svamiva/re-james-show-market-based-curation-pools-to-increasing-curation-demand-for-steem-power-20160908t091328200z"
   },
   {
     "date": "2016-09-08T04:51:51",
-    "id": 1794813,
+    "id": 1845821,
     "msg": "@steembriefing mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@steembriefing/steemit-make-it-rain"
   },
   {
-    "date": "2016-09-08T02:20:12",
-    "id": 1791788,
-    "msg": "@deanliu mentioned you and 6 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@deanliu/let-s-keep-feeding-our-robinhoodwhale"
-  },
-  {
-    "date": "2016-09-07T19:38:27",
-    "id": 1782023,
-    "msg": "@thelord mentioned you and 0 others",
-    "score": 50,
-    "type": "mention",
-    "url": "@thelord/empower-vs-steemit-a-discussion"
-  },
-  {
-    "date": "2016-09-07T19:37:24",
-    "id": 1781998,
-    "msg": "@ausbitbank mentioned you and 0 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@ausbitbank/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t160039874z"
-  },
-  {
     "date": "2016-09-07T18:57:15",
-    "id": 1780800,
+    "id": 1844383,
     "msg": "@steembriefing mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@steembriefing/re-bacchist-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t185614085z"
   },
   {
-    "date": "2016-09-07T18:05:42",
-    "id": 1779006,
-    "msg": "@sparkeddev mentioned you and 0 others",
-    "score": 50,
-    "type": "mention",
-    "url": "@sparkeddev/where-can-i-post-steemit-links-to-get-more-view-and-likes-answer-and-guide"
-  },
-  {
     "date": "2016-09-07T17:04:39",
-    "id": 1776859,
+    "id": 1840550,
     "msg": "@bacchist mentioned you and 0 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@bacchist/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t170437163z"
   },
   {
     "date": "2016-09-07T16:52:36",
-    "id": 1776354,
+    "id": 1840537,
     "msg": "@complexring mentioned you and 0 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@complexring/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t165235502z"
   },
   {
     "date": "2016-09-07T16:35:18",
-    "id": 1775546,
+    "id": 1838894,
     "msg": "@mscleverclocks mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@mscleverclocks/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163519974z"
   },
   {
+    "date": "2016-09-07T19:37:24",
+    "id": 1838831,
+    "msg": "@ausbitbank mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@ausbitbank/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t160039874z"
+  },
+  {
     "date": "2016-09-07T15:50:51",
-    "id": 1774424,
+    "id": 1837437,
     "msg": "@ned mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@ned/increasing-curation-demand-for-steem-power-and-community-interaction"
   },
   {
     "date": "2016-09-07T13:35:45",
-    "id": 1770907,
+    "id": 1834613,
     "msg": "@johnson.lukose followed you",
-    "score": 40,
+    "score": 30,
     "type": "follow",
     "url": "@johnson.lukose"
   },
   {
     "date": "2016-09-07T13:09:21",
-    "id": 1770397,
+    "id": 1833249,
     "msg": "@aksel mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@aksel/this-is-the-first-post-on-steemit"
   },
   {
     "date": "2016-09-07T11:49:15",
-    "id": 1768737,
+    "id": 1832122,
     "msg": "@expedition followed you",
-    "score": 50,
+    "score": 44,
     "type": "follow",
     "url": "@expedition"
   },
   {
+    "date": "2016-09-08T02:20:12",
+    "id": 1830692,
+    "msg": "@deanliu mentioned you and 6 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@deanliu/let-s-keep-feeding-our-robinhoodwhale"
+  },
+  {
     "date": "2016-09-07T08:59:54",
-    "id": 1766499,
+    "id": 1829328,
     "msg": "@peterz mentioned you and 3 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@peterz/trendy-stim-za-nedelyu-lyudi-dengi-vlast"
   },
   {
+    "date": "2016-09-07T19:38:27",
+    "id": 1828534,
+    "msg": "@thelord mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@thelord/empower-vs-steemit-a-discussion"
+  },
+  {
     "date": "2016-09-06T23:49:54",
-    "id": 1752337,
+    "id": 1815178,
     "msg": "@l0k1 followed you",
-    "score": 60,
+    "score": 52,
     "type": "follow",
     "url": "@l0k1"
   },
   {
+    "date": "2016-09-07T18:05:42",
+    "id": 1815012,
+    "msg": "@sparkeddev mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@sparkeddev/where-can-i-post-steemit-links-to-get-more-view-and-likes-answer-and-guide"
+  },
+  {
     "date": "2016-09-06T21:24:45",
-    "id": 1749252,
+    "id": 1811809,
     "msg": "@standfan followed you",
-    "score": 50,
+    "score": 46,
     "type": "follow",
     "url": "@standfan"
   },
   {
-    "date": "2016-09-06T16:14:12",
-    "id": 1741241,
-    "msg": "@samether mentioned you and 0 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@samether/re-tuck-fheman-just-downvote-it-mute-it-and-walk-away-is-that-a-reasonable-solution-20160906t160522544z"
-  },
-  {
     "date": "2016-09-06T15:51:48",
-    "id": 1740086,
+    "id": 1803395,
     "msg": "@wastedsoul followed you",
-    "score": 40,
+    "score": 28,
     "type": "follow",
     "url": "@wastedsoul"
   },
   {
+    "date": "2016-09-06T16:14:12",
+    "id": 1803008,
+    "msg": "@samether mentioned you and 0 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@samether/re-tuck-fheman-just-downvote-it-mute-it-and-walk-away-is-that-a-reasonable-solution-20160906t160522544z"
+  },
+  {
     "date": "2016-09-06T14:11:27",
-    "id": 1737172,
+    "id": 1800010,
     "msg": "@liberosist mentioned you and 2 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@liberosist/steem-power-distribution-trends-september-update"
   },
   {
     "date": "2016-09-06T05:54:48",
-    "id": 1729487,
+    "id": 1792139,
     "msg": "@goose followed you",
     "score": 50,
     "type": "follow",
@@ -465,151 +481,159 @@
   },
   {
     "date": "2016-09-06T00:27:57",
-    "id": 1724382,
+    "id": 1783817,
     "msg": "@robyneggs mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@robyneggs/failed-amazon-self-publish-attempt-one-year-later"
   },
   {
-    "date": "2016-09-05T18:48:15",
-    "id": 1717207,
-    "msg": "@robyneggs mentioned you and 1 others",
-    "score": 50,
-    "type": "mention",
-    "url": "@robyneggs/robyn-eggs-an-introduction-as-poet-and-artist"
-  },
-  {
     "date": "2016-09-05T16:59:24",
-    "id": 1714531,
+    "id": 1776583,
     "msg": "@robyneggs mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@robyneggs/re-nebcat-the-frugal-photographer-know-your-value-20160905t165924469z"
   },
   {
     "date": "2016-09-05T16:54:15",
-    "id": 1714393,
+    "id": 1776576,
     "msg": "@robyneggs mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@robyneggs/re-everittmickey-re-micahspiller-the-great-migration-20160905t165417222z"
   },
   {
+    "date": "2016-09-05T18:48:15",
+    "id": 1776528,
+    "msg": "@robyneggs mentioned you and 1 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@robyneggs/robyn-eggs-an-introduction-as-poet-and-artist"
+  },
+  {
     "date": "2016-09-05T14:38:18",
-    "id": 1711118,
+    "id": 1773825,
     "msg": "@twitterbot mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@twitterbot/re-cross-promoting-sharing-steemit-on-my-twitter-page-20160905t143818"
   },
   {
+    "date": "2016-09-05T14:44:15",
+    "id": 1773295,
+    "msg": "@airmike followed you",
+    "score": 41,
+    "type": "follow",
+    "url": "@airmike"
+  },
+  {
     "date": "2016-09-05T14:27:27",
-    "id": 1710916,
+    "id": 1772455,
     "msg": "@xanoxt mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@xanoxt/re-minion-re-xanoxt-re-minion-the-big-picture-20160905t142629608z"
   },
   {
     "date": "2016-09-05T12:11:18",
-    "id": 1708000,
+    "id": 1770090,
     "msg": "@tobythecat mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@tobythecat/re-r4fken-hi-i-probably-flagged-your-post-muhahahaaaa-20160905t121118401z"
   },
   {
     "date": "2016-09-05T11:43:09",
-    "id": 1707492,
+    "id": 1769367,
     "msg": "@holgerlippmann mentioned you and 0 others",
-    "score": 40,
+    "score": 33,
     "type": "mention",
     "url": "@holgerlippmann/6tjvyx-my-name-is-holger-lippmann"
   },
   {
     "date": "2016-09-05T11:29:51",
-    "id": 1707317,
+    "id": 1769351,
     "msg": "@holgerlippmann mentioned you and 0 others",
-    "score": 40,
+    "score": 33,
     "type": "mention",
     "url": "@holgerlippmann/my-name-is-holger-lippmann"
   },
   {
     "date": "2016-09-05T07:58:48",
-    "id": 1702635,
+    "id": 1764519,
     "msg": "@svamiva mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@svamiva/russkii-stim-osmyslennyi-i-dobryi"
   },
   {
     "date": "2016-09-05T01:20:12",
-    "id": 1696645,
+    "id": 1758514,
     "msg": "@danbar followed you",
-    "score": 40,
+    "score": 25,
     "type": "follow",
     "url": "@danbar"
   },
   {
     "date": "2016-09-04T19:17:54",
-    "id": 1690635,
+    "id": 1751853,
     "msg": "@acidyo mentioned you and 1 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@acidyo/re-stellabelle-someone-has-set-up-a-fake-ned-scott-twitter-account-for-phishing-and-scams-20160904t191754133z"
   },
   {
     "date": "2016-09-04T16:11:57",
-    "id": 1686043,
+    "id": 1746546,
     "msg": "@matrixdweller mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@matrixdweller/the-price-of-steem-is-about-to-rise-i-think"
   },
   {
     "date": "2016-09-04T14:30:42",
-    "id": 1683820,
+    "id": 1745537,
     "msg": "@aschatria followed you",
-    "score": 50,
+    "score": 44,
     "type": "follow",
     "url": "@aschatria"
   },
   {
     "date": "2016-09-04T10:55:12",
-    "id": 1678738,
+    "id": 1740227,
     "msg": "@q1248 followed you",
-    "score": 50,
+    "score": 35,
     "type": "follow",
     "url": "@q1248"
   },
   {
     "date": "2016-09-04T03:32:21",
-    "id": 1671647,
+    "id": 1732923,
     "msg": "@ltm followed you",
-    "score": 60,
+    "score": 52,
     "type": "follow",
     "url": "@ltm"
   },
   {
     "date": "2016-09-04T02:42:15",
-    "id": 1670743,
+    "id": 1731848,
     "msg": "@carlidos mentioned you and 2 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@carlidos/re-orcish-introducing-steemit-man-original-art-20160904t024217154z"
   },
   {
     "date": "2016-09-04T02:05:42",
-    "id": 1670096,
+    "id": 1731116,
     "msg": "@twitterbot mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@twitterbot/re-re-ausbitbank-re-kurtrohlandt-steemit-image-tools-pimp-your-posts-20160904t020510081z-20160904t020540"
   },
   {
     "date": "2016-09-03T23:04:00",
-    "id": 1667472,
+    "id": 1727909,
     "msg": "@achim86 followed you",
     "score": 50,
     "type": "follow",
@@ -617,186 +641,162 @@
   },
   {
     "date": "2016-09-03T21:25:30",
-    "id": 1665606,
+    "id": 1726081,
     "msg": "@matrixdweller mentioned you and 3 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@matrixdweller/re-egjoshslim-ned-and-dantheman-took-the-money-from-the-null-account-20160903t212457753z"
   },
   {
     "date": "2016-09-03T19:35:57",
-    "id": 1663548,
+    "id": 1723835,
     "msg": "@hisnameisolllie mentioned you and 1 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@hisnameisolllie/steemit-statistics-week-6-0-14-0-update-and-more"
   },
   {
-    "date": "2016-09-03T16:52:21",
-    "id": 1659404,
-    "msg": "@bitminter mentioned you and 2 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@bitminter/my-first-month-on-steemit-earning-a-full-time-living-and-loving-it"
-  },
-  {
     "date": "2016-09-03T15:21:03",
-    "id": 1657043,
+    "id": 1717204,
     "msg": "@litrbooh mentioned you and 1 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@litrbooh/here-are-some-steemit-usage-stats-for-the-last-month-and-my-thoughts-on-them"
   },
   {
     "date": "2016-09-03T07:06:51",
-    "id": 1649986,
+    "id": 1709970,
     "msg": "@svamiva mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@svamiva/re-litrbooh-re-xanoxt-re-litrbooh-nemnogo-statistiki-steemit-za-mesyac-i-mysli-po-etomu-povodu-20160903t070646703z"
   },
   {
     "date": "2016-09-02T21:33:42",
-    "id": 1640279,
+    "id": 1700191,
     "msg": "@carlidos mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@carlidos/re-ned-re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t213249002z"
   },
   {
-    "date": "2016-09-02T20:22:27",
-    "id": 1638963,
-    "msg": "@venuspcs mentioned you and 6 others",
-    "score": 70,
+    "date": "2016-09-03T16:52:21",
+    "id": 1691539,
+    "msg": "@bitminter mentioned you and 2 others",
+    "score": 33,
     "type": "mention",
-    "url": "@venuspcs/distribution-of-steem-power-via-gifting-to-create-a-more-level-playing-field-my-2-cents"
+    "url": "@bitminter/my-first-month-on-steemit-earning-a-full-time-living-and-loving-it"
   },
   {
     "date": "2016-09-02T09:23:06",
-    "id": 1623879,
+    "id": 1682715,
     "msg": "@kopasi mentioned you and 0 others",
-    "score": 50,
+    "score": 33,
     "type": "mention",
     "url": "@kopasi/re-lighthil-re-kopasi-steemd-com-20160902t092303265z"
   },
   {
     "date": "2016-09-02T09:05:12",
-    "id": 1623623,
+    "id": 1682704,
     "msg": "@hisnameisolllie mentioned you and 1 others",
-    "score": 70,
+    "score": 33,
     "type": "mention",
     "url": "@hisnameisolllie/bitcoin-etf-s-why-this-could-be-the-game-changer-for-cryptocurrency-adoption"
   },
   {
     "date": "2016-09-01T20:19:27",
-    "id": 1609036,
+    "id": 1666812,
     "msg": "@puffin followed you",
-    "score": 60,
+    "score": 51,
     "type": "follow",
     "url": "@puffin"
   },
   {
     "date": "2016-09-01T17:13:36",
-    "id": 1602737,
+    "id": 1661053,
     "msg": "@ratidor followed you",
-    "score": 50,
+    "score": 45,
     "type": "follow",
     "url": "@ratidor"
   },
   {
     "date": "2016-09-01T13:50:57",
-    "id": 1594590,
+    "id": 1652525,
     "msg": "@gilang-ramadhan mentioned you and 3 others",
-    "score": 30,
+    "score": 33,
     "type": "mention",
     "url": "@gilang-ramadhan/this-is-my-real-account-and-this-account-is-not-plagian-or-spamer"
   },
   {
+    "date": "2016-09-02T20:22:27",
+    "id": 1649909,
+    "msg": "@venuspcs mentioned you and 6 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@venuspcs/distribution-of-steem-power-via-gifting-to-create-a-more-level-playing-field-my-2-cents"
+  },
+  {
     "date": "2016-09-01T11:51:39",
-    "id": 1591522,
+    "id": 1648495,
     "msg": "@mariandavp mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@mariandavp/the-chicken-costume-original-story-and-artwork-by-mariandavp"
   },
   {
     "date": "2016-09-01T11:10:27",
-    "id": 1590652,
+    "id": 1648305,
     "msg": "@virtashare mentioned you and 0 others",
-    "score": 60,
+    "score": 33,
     "type": "mention",
     "url": "@virtashare/sugestion-box-focus-on-the-steemit-search-feature"
   },
   {
     "date": "2016-09-01T07:48:24",
-    "id": 1587847,
+    "id": 1645509,
     "msg": "@hms818 followed you",
-    "score": 50,
+    "score": 41,
     "type": "follow",
     "url": "@hms818"
   },
   {
-    "date": "2016-08-31T20:59:21",
-    "id": 1573915,
-    "msg": "@virtashare mentioned you and 10 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@virtashare/feature-request-let-s-focus-on-the-steemit-search-feature"
-  },
-  {
     "date": "2016-08-31T20:31:57",
-    "id": 1573208,
+    "id": 1630276,
     "msg": "@flyboyzombie followed you",
-    "score": 50,
+    "score": 40,
     "type": "follow",
     "url": "@flyboyzombie"
   },
   {
     "date": "2016-08-31T19:58:03",
-    "id": 1572451,
+    "id": 1629777,
     "msg": "@romel followed you",
-    "score": 50,
+    "score": 49,
     "type": "follow",
     "url": "@romel"
   },
   {
-    "date": "2016-08-31T19:10:36",
-    "id": 1570166,
-    "msg": "@twitterbot mentioned you and 1 others",
-    "score": 50,
-    "type": "mention",
-    "url": "@twitterbot/re-re-rossulbricht-lyn-ulbricht-mother-of-silk-road-political-prisoner-ross-ulbricht-is-now-on-steemit-20160831t190955687z-20160831t191034"
-  },
-  {
     "date": "2016-08-31T19:02:18",
-    "id": 1569847,
+    "id": 1626937,
     "msg": "@bitcoinparadise followed you",
-    "score": 50,
+    "score": 46,
     "type": "follow",
     "url": "@bitcoinparadise"
   },
   {
+    "date": "2016-08-31T19:10:36",
+    "id": 1626305,
+    "msg": "@twitterbot mentioned you and 1 others",
+    "score": 33,
+    "type": "mention",
+    "url": "@twitterbot/re-re-rossulbricht-lyn-ulbricht-mother-of-silk-road-political-prisoner-ross-ulbricht-is-now-on-steemit-20160831t190955687z-20160831t191034"
+  },
+  {
     "date": "2016-08-31T14:37:00",
-    "id": 1562923,
+    "id": 1619641,
     "msg": "@michelle.gent followed you",
-    "score": 60,
+    "score": 51,
     "type": "follow",
     "url": "@michelle.gent"
-  },
-  {
-    "date": "2016-08-31T14:24:54",
-    "id": 1562644,
-    "msg": "@penguinpablo mentioned you and 35 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@penguinpablo/steem-price-update-steem-power-stats-most-followers-august-31"
-  },
-  {
-    "date": "2016-08-31T13:36:24",
-    "id": 1561560,
-    "msg": "@twitterbot mentioned you and 0 others",
-    "score": 50,
-    "type": "mention",
-    "url": "@twitterbot/re-asteria-the-world-s-first-ai-companion-20160831t133624"
   }
 ]
