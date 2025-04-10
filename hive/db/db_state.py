@@ -411,14 +411,6 @@ class DbState:
             log.info("[MASSIVE] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
-        with AutoDbDisposer(db, "finish_hive_mentions") as db_mgr:
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
-
-    @classmethod
     def _finish_payout_stats_view(cls, db):
         with AutoDbDisposer(db, "finish_payout_stats_view") as db_mgr:
             time_start = perf_counter()
@@ -493,7 +485,6 @@ class DbState:
 
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
-            ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
             (

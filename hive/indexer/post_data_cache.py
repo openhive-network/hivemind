@@ -66,7 +66,7 @@ class PostDataCache(DbAdapterHolder):
                         VALUES {','.join(values_insert)}
                         RETURNING id
                     )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(id) FROM inserted
+                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM inserted
                 """
                 if print_query:
                     log.info(f"Executing query:\n{sql}")
@@ -88,7 +88,7 @@ class PostDataCache(DbAdapterHolder):
                         WHERE hpd.id = data_source.id
                         RETURNING hpd.id
                     )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(id) FROM updated
+                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM updated
                 """
                 if print_query:
                     log.info(f"Executing query:\n{sql}")

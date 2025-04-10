@@ -598,7 +598,6 @@ def setup_runtime_code(db):
         "head_block_time.sql",
         "update_feed_cache.sql",
         "payout_stats_view.sql",
-        "update_hive_posts_mentions.sql",
         "update_communities_rank.sql",
         "delete_hive_posts_mentions.sql",
         "notifications_view.sql",

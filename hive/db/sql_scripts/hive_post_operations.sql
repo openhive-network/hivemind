@@ -352,7 +352,7 @@ $function$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
-CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_id hivemind_app.hive_posts.id%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
 RETURNS SETOF BIGINT
 LANGUAGE plpgsql
 AS
@@ -383,23 +383,59 @@ BEGIN
     ),
     mentions AS
     (
-        SELECT DISTINCT _post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
+        SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
         FROM
           hivemind_app.hive_accounts ha
         INNER JOIN
         (
-          SELECT LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
+          SELECT T.id AS post_id, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
           FROM
           (
             SELECT
               hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
             FROM hivemind_app.hive_posts hp
             INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
-            WHERE hp.id = _post_id
+            WHERE hp.id = ANY(_post_ids)
           ) AS T
         ) AS T ON ha.name = T.mention
         WHERE ha.id != T.author_id
         ORDER BY T.block_num, ha.id
+    ),
+    delete_old_mentions AS
+    (
+      DELETE FROM hivemind_app.hive_mentions hm
+      WHERE post_id = ANY(_post_ids)
+      AND NOT EXISTS (
+        SELECT 1
+        FROM mentions AS m
+        WHERE m.post_id = hm.post_id
+          AND m.account_id = hm.account_id
+      )
+    ),
+    insert_mentions AS
+    (
+      INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
+      SELECT DISTINCT m.post_id, m.account_id, m.block_num
+      FROM mentions AS m
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM hivemind_app.hive_mentions AS hm
+        WHERE hm.post_id = m.post_id
+          AND hm.account_id = m.account_id
+      )
+    ),
+    delete_old_cache AS
+    (
+      DELETE FROM hivemind_app.hive_notification_cache AS hnc
+      WHERE post_id = ANY(_post_ids)
+        AND type_id = 16
+        AND NOT EXISTS (
+          SELECT 1
+          FROM mentions AS m
+          WHERE m.post_id = hnc.post_id
+            AND m.author_id = hnc.src
+            AND m.account_id = hnc.dst
+        )
     )
     INSERT INTO hivemind_app.hive_notification_cache
     (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
