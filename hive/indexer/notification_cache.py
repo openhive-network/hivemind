@@ -1,6 +1,7 @@
 """Handle notification cache"""
 import logging
 import collections
+import threading
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -15,6 +16,7 @@ log = logging.getLogger(__name__)
 class NotificationCache(DbAdapterHolder):
     """Handles writing to notification cache."""
 
+    _lock = threading.Lock()
     _notification_first_block = None
     vote_notifications = collections.OrderedDict()
     comment_notifications = collections.OrderedDict()
@@ -22,12 +24,20 @@ class NotificationCache(DbAdapterHolder):
     reblog_notifications_to_flush = collections.OrderedDict()
 
     @classmethod
-    def flush_vote_notifications(cls, flusher):
+    def notification_first_block(cls, db):
         if cls._notification_first_block is None:
-            cls._notification_first_block = flusher.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
+            with cls._lock:
+                if cls._notification_first_block is None:
+                    cls._notification_first_block = db.query_row(
+                        "select hivemind_app.block_before_irreversible( '90 days' ) AS num"
+                    )['num']
+        return cls._notification_first_block
+
+    @classmethod
+    def flush_vote_notifications(cls, flusher):
         n = len(cls.vote_notifications)
         max_block_num = max(n['block_num'] for k, n in (cls.vote_notifications or {'': {'block_num': 0}}).items())
-        if n > 0 and max_block_num > cls._notification_first_block:
+        if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             sql = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -72,11 +82,9 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def flush_post_notifications(cls, flusher):
-        if cls._notification_first_block is None:
-            cls._notification_first_block = flusher.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls.comment_notifications)
         max_block_num = max(n['block_num'] for _, n in cls.comment_notifications.items() or [('', {'block_num': 0})])
-        if n > 0 and max_block_num > cls._notification_first_block:
+        if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
@@ -128,11 +136,9 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def flush_follow_notifications(cls, flusher):
-        if cls._notification_first_block is None:
-            cls._notification_first_block = flusher.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls.follow_notifications_to_flush)
         max_block_num = max(block_num for r, g, block_num in cls.follow_notifications_to_flush or [("", "", 0)])
-        if n > 0 and max_block_num > cls._notification_first_block:
+        if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
@@ -185,11 +191,9 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def flush_reblog_notifications(cls, flusher):
-        if cls._notification_first_block is None:
-            cls._notification_first_block = flusher.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
         n = len(cls.reblog_notifications_to_flush)
         max_block_num = max(n['block_num'] for _, n in cls.reblog_notifications_to_flush.items() or [('', {"block_num": 0})])
-        if n > 0 and max_block_num > cls._notification_first_block:
+        if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
@@ -243,9 +247,7 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def push_subscribe_notification(cls, params):
-        if cls._notification_first_block is None:
-            cls._notification_first_block = DbAdapterHolder.common_block_processing_db().query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
-        if params['block_num'] > cls._notification_first_block:
+        if params['block_num'] > cls.notification_first_block(DbAdapterHolder.common_block_processing_db()):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
