@@ -15,6 +15,7 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
+from hive.indexer.notification_cache import NotificationCache
 from hive.utils.misc import chunks
 from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 
@@ -26,8 +27,6 @@ class Posts(DbAdapterHolder):
 
     comment_payout_ops = {}
     _comment_payout_ops = []
-    _comment_notifications = OrderedDict()
-    _notification_first_block = None
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -103,7 +102,7 @@ class Posts(DbAdapterHolder):
         if row['depth'] > 0 and not row['is_author_muted']:
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
-            cls._comment_notifications[key] = {
+            NotificationCache.comment_notifications[key] = {
                 "block_num": op['block_num'],
                 "type_id": type_id,
                 "created_at": block_date,
@@ -195,62 +194,6 @@ class Posts(DbAdapterHolder):
 
         n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()
-        return n
-
-    @classmethod
-    def flush_notifications(cls):
-        if cls._notification_first_block is None:
-            cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
-        n = len(cls._comment_notifications)
-        max_block_num = max(n['block_num'] for _,n in cls._comment_notifications.items() or [('', {'block_num': 0})])
-        if n > 0 and max_block_num > cls._notification_first_block:
-            # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
-            # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
-            # In case of reputation being 0, the score is set to 25 rather than 0.
-            sql = f"""
-            WITH log_account_rep AS
-            (
-                SELECT
-                    account_id,
-                    LOG(10, ABS(nullif(reputation, 0))) AS rep,
-                    (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-                FROM reptracker_app.account_reputations
-            ),
-            calculate_rep AS
-            (
-                SELECT
-                    account_id,
-                    GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-                FROM log_account_rep lar
-            ),
-            final_rep AS
-            (
-                SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
-            )
-            INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-            (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
-            FROM
-            (VALUES {{}})
-            AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
-            JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
-            LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
-            WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
-                AND COALESCE(r.rep, 25) > 0
-                AND n.src IS DISTINCT FROM n.dst
-            ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
-            ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-            SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
-            """
-            for chunk in chunks(cls._comment_notifications, 1000):
-                cls.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for _,n in chunk.items())
-                cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
-        else:
-            n = 0
-        cls._comment_notifications.clear()
-
         return n
 
     @classmethod
@@ -474,4 +417,4 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.comment_payout_op() + cls.flush_into_db() + cls.flush_notifications()
+        return cls.comment_payout_op() + cls.flush_into_db() + NotificationCache.flush_post_notifications(cls)
