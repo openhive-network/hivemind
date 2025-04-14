@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T18:55:30",
-    "id": 2079755,
+    "id": 2077289,
     "msg": "@liondani voted on your post ($0.27)",
     "score": 50,
     "type": "vote",
@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-15T18:52:09",
-    "id": 2078256,
+    "id": 2075675,
     "msg": "@chitty replied to your comment",
     "score": 59,
     "type": "reply_comment",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-15T15:38:45",
-    "id": 2074148,
+    "id": 2071682,
     "msg": "@nate-atkins followed you",
     "score": 49,
     "type": "follow",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-15T15:04:09",
-    "id": 2072654,
+    "id": 2070188,
     "msg": "@woman-onthe-wing replied to your comment",
     "score": 46,
     "type": "reply_comment",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T14:21:09",
-    "id": 2071482,
+    "id": 2069014,
     "msg": "@chitty replied to your comment",
     "score": 59,
     "type": "reply_comment",
@@ -41,15 +41,23 @@
   },
   {
     "date": "2016-09-15T14:30:54",
-    "id": 2071157,
+    "id": 2068689,
     "msg": "@neoxian followed you",
     "score": 54,
     "type": "follow",
     "url": "@neoxian"
   },
   {
+    "date": "2016-09-15T13:24:39",
+    "id": 2067730,
+    "msg": "@arcange followed you",
+    "score": 51,
+    "type": "follow",
+    "url": "@arcange"
+  },
+  {
     "date": "2016-09-15T13:24:15",
-    "id": 2070431,
+    "id": 2067499,
     "msg": "@arcange replied to your comment",
     "score": 51,
     "type": "reply_comment",
@@ -57,23 +65,15 @@
   },
   {
     "date": "2016-09-15T13:06:18",
-    "id": 2070319,
+    "id": 2067387,
     "msg": "@arcange replied to your comment",
     "score": 51,
     "type": "reply_comment",
     "url": "@arcange/re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z"
   },
   {
-    "date": "2016-09-15T13:24:39",
-    "id": 2069925,
-    "msg": "@arcange followed you",
-    "score": 51,
-    "type": "follow",
-    "url": "@arcange"
-  },
-  {
     "date": "2016-09-15T07:54:42",
-    "id": 2065255,
+    "id": 2062782,
     "msg": "@gamer00 replied to your comment",
     "score": 40,
     "type": "reply_comment",
@@ -81,7 +81,7 @@
   },
   {
     "date": "2016-09-14T10:02:09",
-    "id": 2041092,
+    "id": 2038617,
     "msg": "@rizkypramudyacj followed you",
     "score": 25,
     "type": "follow",
@@ -89,15 +89,15 @@
   },
   {
     "date": "2016-09-14T07:23:30",
-    "id": 2038780,
+    "id": 2036305,
     "msg": "@someguy123 mentioned you and 6 others",
-    "score": 52,
+    "score": 57,
     "type": "mention",
     "url": "@someguy123/seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer"
   },
   {
     "date": "2016-09-13T23:33:03",
-    "id": 2031604,
+    "id": 2029192,
     "msg": "@allgoodthings followed you",
     "score": 35,
     "type": "follow",
@@ -105,7 +105,7 @@
   },
   {
     "date": "2016-09-13T17:38:42",
-    "id": 2024377,
+    "id": 2021909,
     "msg": "@daedalusbuilt followed you",
     "score": 27,
     "type": "follow",
@@ -113,7 +113,7 @@
   },
   {
     "date": "2016-09-11T21:45:18",
-    "id": 1972100,
+    "id": 1969614,
     "msg": "@soraya followed you",
     "score": 44,
     "type": "follow",
@@ -121,15 +121,15 @@
   },
   {
     "date": "2016-09-10T23:50:48",
-    "id": 1945546,
+    "id": 1943050,
     "msg": "@linkback-bot-v0 mentioned you and 2 others",
-    "score": 52,
+    "score": 42,
     "type": "mention",
     "url": "@linkback-bot-v0/re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-linkbacks"
   },
   {
     "date": "2016-09-10T07:32:42",
-    "id": 1922319,
+    "id": 1920001,
     "msg": "@sergey44 followed you",
     "score": 46,
     "type": "follow",
@@ -137,7 +137,7 @@
   },
   {
     "date": "2016-09-07T18:45:36",
-    "id": 1844064,
+    "id": 1841552,
     "msg": "@dan-wilson followed you",
     "score": 44,
     "type": "follow",
@@ -145,7 +145,7 @@
   },
   {
     "date": "2016-09-06T22:30:15",
-    "id": 1813848,
+    "id": 1811512,
     "msg": "@mnviking followed you",
     "score": 34,
     "type": "follow",
@@ -153,7 +153,7 @@
   },
   {
     "date": "2016-09-06T13:12:06",
-    "id": 1798955,
+    "id": 1796377,
     "msg": "@swtcamito followed you",
     "score": 25,
     "type": "follow",
@@ -161,7 +161,7 @@
   },
   {
     "date": "2016-09-04T10:02:15",
-    "id": 1737760,
+    "id": 1735325,
     "msg": "@q1248 followed you",
     "score": 35,
     "type": "follow",
@@ -169,7 +169,7 @@
   },
   {
     "date": "2016-09-02T05:02:18",
-    "id": 1679195,
+    "id": 1676572,
     "msg": "@bonapartist voted on your post ($1.32)",
     "score": 75,
     "type": "vote",
@@ -177,7 +177,7 @@
   },
   {
     "date": "2016-09-01T23:09:42",
-    "id": 1671873,
+    "id": 1669249,
     "msg": "@steemswede followed you",
     "score": 53,
     "type": "follow",
@@ -185,7 +185,7 @@
   },
   {
     "date": "2016-09-01T16:36:36",
-    "id": 1659748,
+    "id": 1656896,
     "msg": "@ratidor followed you",
     "score": 45,
     "type": "follow",
@@ -193,7 +193,7 @@
   },
   {
     "date": "2016-09-01T16:07:12",
-    "id": 1656348,
+    "id": 1654244,
     "msg": "@puffin followed you",
     "score": 51,
     "type": "follow",
@@ -201,7 +201,7 @@
   },
   {
     "date": "2016-09-01T14:18:48",
-    "id": 1652892,
+    "id": 1650272,
     "msg": "@lilmisjenn replied to your comment",
     "score": 50,
     "type": "reply_comment",
@@ -209,7 +209,7 @@
   },
   {
     "date": "2016-09-01T12:15:42",
-    "id": 1650308,
+    "id": 1647688,
     "msg": "@gvargas123 followed you",
     "score": 34,
     "type": "follow",
@@ -217,7 +217,7 @@
   },
   {
     "date": "2016-08-31T19:52:15",
-    "id": 1629908,
+    "id": 1627283,
     "msg": "@picokernel voted on your post ($0.25)",
     "score": 50,
     "type": "vote",
@@ -225,7 +225,7 @@
   },
   {
     "date": "2016-08-31T19:52:15",
-    "id": 1629755,
+    "id": 1627130,
     "msg": "@skypilot followed you",
     "score": 54,
     "type": "follow",
@@ -233,7 +233,7 @@
   },
   {
     "date": "2016-08-31T17:05:27",
-    "id": 1624063,
+    "id": 1621439,
     "msg": "@juanf followed you",
     "score": 27,
     "type": "follow",
@@ -241,7 +241,7 @@
   },
   {
     "date": "2016-08-31T17:00:21",
-    "id": 1623720,
+    "id": 1621096,
     "msg": "@itay replied to your post",
     "score": 52,
     "type": "reply",
@@ -249,7 +249,7 @@
   },
   {
     "date": "2016-08-31T15:04:51",
-    "id": 1620847,
+    "id": 1618225,
     "msg": "@benadapt followed you",
     "score": 51,
     "type": "follow",
@@ -257,7 +257,7 @@
   },
   {
     "date": "2016-08-31T02:16:54",
-    "id": 1605450,
+    "id": 1603536,
     "msg": "@melissarhiann replied to your comment",
     "score": 25,
     "type": "reply_comment",
@@ -265,7 +265,7 @@
   },
   {
     "date": "2016-08-30T18:53:15",
-    "id": 1593220,
+    "id": 1591011,
     "msg": "@picokernel followed you",
     "score": 54,
     "type": "follow",
@@ -273,7 +273,7 @@
   },
   {
     "date": "2016-08-30T18:52:57",
-    "id": 1593211,
+    "id": 1591002,
     "msg": "@picokernel followed you",
     "score": 54,
     "type": "follow",
@@ -281,7 +281,7 @@
   },
   {
     "date": "2016-08-30T17:07:15",
-    "id": 1589515,
+    "id": 1586887,
     "msg": "@djm34 replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -289,7 +289,7 @@
   },
   {
     "date": "2016-08-30T16:40:03",
-    "id": 1589301,
+    "id": 1586673,
     "msg": "@complexring replied to your comment",
     "score": 61,
     "type": "reply_comment",
@@ -297,7 +297,7 @@
   },
   {
     "date": "2016-08-30T16:17:09",
-    "id": 1589013,
+    "id": 1586385,
     "msg": "@derekareith voted on your post ($0.04)",
     "score": 25,
     "type": "vote",
@@ -305,7 +305,7 @@
   },
   {
     "date": "2016-08-29T22:45:33",
-    "id": 1564935,
+    "id": 1562300,
     "msg": "@emsenn replied to your comment",
     "score": 44,
     "type": "reply_comment",
@@ -313,7 +313,7 @@
   },
   {
     "date": "2016-08-28T18:54:36",
-    "id": 1524053,
+    "id": 1521511,
     "msg": "@mrabdo followed you",
     "score": 46,
     "type": "follow",
@@ -321,7 +321,7 @@
   },
   {
     "date": "2016-08-28T11:46:00",
-    "id": 1512149,
+    "id": 1509494,
     "msg": "@lilmisjenn replied to your comment",
     "score": 50,
     "type": "reply_comment",
@@ -329,7 +329,7 @@
   },
   {
     "date": "2016-08-27T15:51:15",
-    "id": 1483487,
+    "id": 1480833,
     "msg": "@timcliff replied to your comment",
     "score": 52,
     "type": "reply_comment",
@@ -337,7 +337,7 @@
   },
   {
     "date": "2016-08-27T14:13:18",
-    "id": 1480801,
+    "id": 1478143,
     "msg": "@timcliff replied to your post",
     "score": 52,
     "type": "reply",
@@ -345,7 +345,7 @@
   },
   {
     "date": "2016-08-27T04:15:48",
-    "id": 1470314,
+    "id": 1467617,
     "msg": "@eternalmoon replied to your comment",
     "score": 25,
     "type": "reply_comment",
@@ -353,7 +353,7 @@
   },
   {
     "date": "2016-08-27T13:14:42",
-    "id": 1460229,
+    "id": 1457561,
     "msg": "@betamusic mentioned you and 37 others",
     "score": 52,
     "type": "mention",
@@ -361,7 +361,7 @@
   },
   {
     "date": "2016-08-26T21:16:45",
-    "id": 1460199,
+    "id": 1457531,
     "msg": "@ania replied to your comment",
     "score": 28,
     "type": "reply_comment",
@@ -369,31 +369,31 @@
   },
   {
     "date": "2016-08-26T18:58:27",
-    "id": 1455874,
+    "id": 1453714,
     "msg": "@orcish replied to your comment",
     "score": 53,
     "type": "reply_comment",
     "url": "@orcish/re-gtg-re-orcish-my-introduction-20160826t185829224z"
   },
   {
-    "date": "2016-08-26T18:20:12",
-    "id": 1454927,
-    "msg": "@bumblebrii replied to your comment",
-    "score": 25,
-    "type": "reply_comment",
-    "url": "@bumblebrii/re-gtg-re-bumblebrii-about-me-20160826t182001959z"
-  },
-  {
     "date": "2016-08-26T18:27:48",
-    "id": 1454252,
+    "id": 1452025,
     "msg": "@mynameisricky followed you",
     "score": 34,
     "type": "follow",
     "url": "@mynameisricky"
   },
   {
+    "date": "2016-08-26T18:20:12",
+    "id": 1451690,
+    "msg": "@bumblebrii replied to your comment",
+    "score": 25,
+    "type": "reply_comment",
+    "url": "@bumblebrii/re-gtg-re-bumblebrii-about-me-20160826t182001959z"
+  },
+  {
     "date": "2016-08-26T13:29:27",
-    "id": 1445972,
+    "id": 1443304,
     "msg": "@mynomadicyear replied to your comment",
     "score": 45,
     "type": "reply_comment",
@@ -401,7 +401,7 @@
   },
   {
     "date": "2016-08-26T11:37:33",
-    "id": 1443579,
+    "id": 1440891,
     "msg": "@seasoul replied to your comment",
     "score": 41,
     "type": "reply_comment",
@@ -409,7 +409,7 @@
   },
   {
     "date": "2016-08-26T11:37:21",
-    "id": 1443191,
+    "id": 1440546,
     "msg": "@seasoul followed you",
     "score": 41,
     "type": "follow",
@@ -417,7 +417,7 @@
   },
   {
     "date": "2016-08-26T05:27:15",
-    "id": 1436705,
+    "id": 1433998,
     "msg": "@mammasitta replied to your post",
     "score": 53,
     "type": "reply",
@@ -425,7 +425,7 @@
   },
   {
     "date": "2016-08-26T01:16:06",
-    "id": 1431096,
+    "id": 1428400,
     "msg": "@pfunk voted on your post ($9.46)",
     "score": 75,
     "type": "vote",
@@ -433,7 +433,7 @@
   },
   {
     "date": "2016-08-25T22:26:48",
-    "id": 1425183,
+    "id": 1422486,
     "msg": "@nixonnox voted on your post ($0.23)",
     "score": 50,
     "type": "vote",
@@ -441,7 +441,7 @@
   },
   {
     "date": "2016-08-25T16:51:57",
-    "id": 1409942,
+    "id": 1407212,
     "msg": "@takemyfive followed you",
     "score": 38,
     "type": "follow",
@@ -449,7 +449,7 @@
   },
   {
     "date": "2016-08-25T15:05:06",
-    "id": 1406609,
+    "id": 1403898,
     "msg": "@instructor2121 followed you",
     "score": 45,
     "type": "follow",
@@ -457,7 +457,7 @@
   },
   {
     "date": "2016-08-25T04:59:03",
-    "id": 1397277,
+    "id": 1394555,
     "msg": "@agussudaryanto followed you",
     "score": 41,
     "type": "follow",
@@ -465,7 +465,7 @@
   },
   {
     "date": "2016-08-25T04:42:03",
-    "id": 1396524,
+    "id": 1393764,
     "msg": "@alexgr followed you",
     "score": 57,
     "type": "follow",
@@ -473,7 +473,7 @@
   },
   {
     "date": "2016-08-23T23:15:54",
-    "id": 1353071,
+    "id": 1350312,
     "msg": "@always1success followed you",
     "score": 37,
     "type": "follow",
@@ -481,7 +481,7 @@
   },
   {
     "date": "2016-08-23T07:36:09",
-    "id": 1326924,
+    "id": 1324147,
     "msg": "@dbutkovic followed you",
     "score": 39,
     "type": "follow",
@@ -489,7 +489,7 @@
   },
   {
     "date": "2016-08-23T07:00:39",
-    "id": 1325983,
+    "id": 1323214,
     "msg": "@ania followed you",
     "score": 28,
     "type": "follow",
@@ -497,7 +497,7 @@
   },
   {
     "date": "2016-08-22T23:04:03",
-    "id": 1313042,
+    "id": 1310279,
     "msg": "@englishtchrivy followed you",
     "score": 53,
     "type": "follow",
@@ -505,7 +505,7 @@
   },
   {
     "date": "2016-08-22T20:53:12",
-    "id": 1307868,
+    "id": 1305110,
     "msg": "@thinkngrow followed you",
     "score": 39,
     "type": "follow",
@@ -513,7 +513,7 @@
   },
   {
     "date": "2016-08-22T20:10:21",
-    "id": 1305939,
+    "id": 1303175,
     "msg": "@yongyoon followed you",
     "score": 49,
     "type": "follow",
@@ -521,7 +521,7 @@
   },
   {
     "date": "2016-08-22T17:19:36",
-    "id": 1300871,
+    "id": 1298566,
     "msg": "@ivanba12 followed you",
     "score": 41,
     "type": "follow",
@@ -529,7 +529,7 @@
   },
   {
     "date": "2016-08-22T12:29:45",
-    "id": 1291166,
+    "id": 1288402,
     "msg": "@royaltiffany followed you",
     "score": 55,
     "type": "follow",
@@ -537,15 +537,15 @@
   },
   {
     "date": "2016-08-22T09:17:18",
-    "id": 1270256,
+    "id": 1267483,
     "msg": "@dr2073 mentioned you and 0 others",
-    "score": 52,
+    "score": 42,
     "type": "mention",
     "url": "@dr2073/witness-thread-dr2073"
   },
   {
     "date": "2016-08-21T22:26:57",
-    "id": 1266370,
+    "id": 1263596,
     "msg": "@arnoldwish followed you",
     "score": 47,
     "type": "follow",
@@ -553,7 +553,7 @@
   },
   {
     "date": "2016-08-21T17:47:15",
-    "id": 1256799,
+    "id": 1254026,
     "msg": "@pipertomcat followed you",
     "score": 48,
     "type": "follow",
@@ -561,7 +561,7 @@
   },
   {
     "date": "2016-08-21T16:33:15",
-    "id": 1253486,
+    "id": 1251052,
     "msg": "@ivanba12 followed you",
     "score": 41,
     "type": "follow",
@@ -569,7 +569,7 @@
   },
   {
     "date": "2016-08-21T16:22:54",
-    "id": 1253236,
+    "id": 1250802,
     "msg": "@ivanba12 followed you",
     "score": 41,
     "type": "follow",
@@ -577,7 +577,7 @@
   },
   {
     "date": "2016-08-21T14:39:39",
-    "id": 1251351,
+    "id": 1248577,
     "msg": "@ash voted on your post ($0.22)",
     "score": 50,
     "type": "vote",
@@ -585,7 +585,7 @@
   },
   {
     "date": "2016-08-21T14:41:48",
-    "id": 1250749,
+    "id": 1247975,
     "msg": "@ivanba12 followed you",
     "score": 41,
     "type": "follow",
@@ -593,7 +593,7 @@
   },
   {
     "date": "2016-08-21T13:00:12",
-    "id": 1248559,
+    "id": 1245784,
     "msg": "@taoteh1221 voted on your post ($0.25)",
     "score": 50,
     "type": "vote",
@@ -601,7 +601,7 @@
   },
   {
     "date": "2016-08-21T12:52:06",
-    "id": 1248067,
+    "id": 1245314,
     "msg": "@gary-smith replied to your post",
     "score": 48,
     "type": "reply",
@@ -609,7 +609,7 @@
   },
   {
     "date": "2016-08-20T19:29:51",
-    "id": 1228991,
+    "id": 1226214,
     "msg": "@team101 followed you",
     "score": 46,
     "type": "follow",
@@ -617,7 +617,7 @@
   },
   {
     "date": "2016-08-19T20:16:03",
-    "id": 1198741,
+    "id": 1196185,
     "msg": "@brains followed you",
     "score": 25,
     "type": "follow",
@@ -625,7 +625,7 @@
   },
   {
     "date": "2016-08-19T18:33:03",
-    "id": 1193281,
+    "id": 1190412,
     "msg": "@skyefox followed you",
     "score": 42,
     "type": "follow",
@@ -633,7 +633,7 @@
   },
   {
     "date": "2016-08-19T16:57:57",
-    "id": 1191032,
+    "id": 1188232,
     "msg": "@cryptojoy.com followed you",
     "score": 52,
     "type": "follow",
@@ -641,7 +641,7 @@
   },
   {
     "date": "2016-08-19T11:40:30",
-    "id": 1181482,
+    "id": 1178697,
     "msg": "@aizensou voted on your post ($0.46)",
     "score": 50,
     "type": "vote",
@@ -649,7 +649,7 @@
   },
   {
     "date": "2016-08-19T07:52:42",
-    "id": 1177244,
+    "id": 1174415,
     "msg": "@darknet followed you",
     "score": 51,
     "type": "follow",
@@ -657,7 +657,7 @@
   },
   {
     "date": "2016-08-19T06:07:45",
-    "id": 1173619,
+    "id": 1170829,
     "msg": "@rook followed you",
     "score": 37,
     "type": "follow",
@@ -665,7 +665,7 @@
   },
   {
     "date": "2016-08-18T13:59:21",
-    "id": 1140787,
+    "id": 1137751,
     "msg": "@jonnyrevolution followed you",
     "score": 52,
     "type": "follow",
@@ -673,7 +673,7 @@
   },
   {
     "date": "2016-08-18T03:32:12",
-    "id": 1127342,
+    "id": 1124519,
     "msg": "@abit replied to your post",
     "score": 57,
     "type": "reply",
@@ -681,7 +681,7 @@
   },
   {
     "date": "2016-08-18T02:09:42",
-    "id": 1124436,
+    "id": 1121598,
     "msg": "@digitalhound followed you",
     "score": 49,
     "type": "follow",
@@ -689,7 +689,7 @@
   },
   {
     "date": "2016-08-18T00:55:51",
-    "id": 1122919,
+    "id": 1120535,
     "msg": "@quinneaker followed you",
     "score": 55,
     "type": "follow",
@@ -697,7 +697,7 @@
   },
   {
     "date": "2016-08-18T00:37:33",
-    "id": 1122813,
+    "id": 1120429,
     "msg": "@allmonitors followed you",
     "score": 54,
     "type": "follow",
@@ -705,7 +705,7 @@
   },
   {
     "date": "2016-08-18T00:35:12",
-    "id": 1122789,
+    "id": 1120405,
     "msg": "@riscadox followed you",
     "score": 50,
     "type": "follow",
@@ -713,15 +713,15 @@
   },
   {
     "date": "2016-08-18T00:25:12",
-    "id": 1120725,
+    "id": 1117883,
     "msg": "@masteryoda mentioned you and 63 others",
-    "score": 52,
+    "score": 63,
     "type": "mention",
     "url": "@masteryoda/daily-payouts-leaderboards-august-17"
   },
   {
     "date": "2016-08-17T20:19:00",
-    "id": 1112929,
+    "id": 1110043,
     "msg": "@valtr followed you",
     "score": 51,
     "type": "follow",
@@ -729,7 +729,7 @@
   },
   {
     "date": "2016-08-17T19:34:00",
-    "id": 1112427,
+    "id": 1109541,
     "msg": "@jerome-colley followed you",
     "score": 45,
     "type": "follow",
@@ -737,7 +737,7 @@
   },
   {
     "date": "2016-08-17T19:26:39",
-    "id": 1112340,
+    "id": 1109495,
     "msg": "@asmolokalo voted on your post ($3.22)",
     "score": 75,
     "type": "vote",
@@ -745,7 +745,7 @@
   },
   {
     "date": "2016-08-17T17:59:39",
-    "id": 1109532,
+    "id": 1106650,
     "msg": "@ullikume followed you",
     "score": 25,
     "type": "follow",
@@ -753,7 +753,7 @@
   },
   {
     "date": "2016-08-17T16:59:42",
-    "id": 1107595,
+    "id": 1104749,
     "msg": "@taoteh1221 followed you",
     "score": 55,
     "type": "follow",
@@ -761,7 +761,7 @@
   },
   {
     "date": "2016-08-17T15:19:21",
-    "id": 1104575,
+    "id": 1101723,
     "msg": "@ihash voted on your post ($0.42)",
     "score": 50,
     "type": "vote",
@@ -769,7 +769,7 @@
   },
   {
     "date": "2016-08-17T14:15:06",
-    "id": 1102235,
+    "id": 1099380,
     "msg": "@modprobe voted on your post ($4.27)",
     "score": 75,
     "type": "vote",
@@ -777,7 +777,7 @@
   },
   {
     "date": "2016-08-17T13:29:48",
-    "id": 1099207,
+    "id": 1096351,
     "msg": "@jackkang followed you",
     "score": 44,
     "type": "follow",
@@ -785,7 +785,7 @@
   },
   {
     "date": "2016-08-17T12:31:57",
-    "id": 1098672,
+    "id": 1095816,
     "msg": "@ausbitbank voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -793,7 +793,7 @@
   },
   {
     "date": "2016-08-17T12:27:48",
-    "id": 1098630,
+    "id": 1095774,
     "msg": "@ausbitbank voted on your post ($0.26)",
     "score": 50,
     "type": "vote",
