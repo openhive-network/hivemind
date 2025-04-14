@@ -29,7 +29,7 @@ class NotificationCache(DbAdapterHolder):
             with cls._lock:
                 if cls._notification_first_block is None:
                     cls._notification_first_block = db.query_row(
-                        "select hivemind_app.block_before_irreversible( '90 days' ) AS num"
+                        f"select {SCHEMA_NAME}.block_before_irreversible( '90 days' ) AS num"
                     )['num']
         return cls._notification_first_block
 
@@ -47,8 +47,8 @@ class NotificationCache(DbAdapterHolder):
                       hv.id AS src,
                       hpv.author_id AS dst,
                       hpv.id AS post_id,
-                      hivemind_app.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
-                      hivemind_app.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
+                      {SCHEMA_NAME}.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
+                      {SCHEMA_NAME}.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
                     FROM
                     (VALUES {{}})
                     AS n(block_num, voter, author, permlink, last_update, rshares)
@@ -58,10 +58,10 @@ class NotificationCache(DbAdapterHolder):
                     JOIN (
                         SELECT hpvi.id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
-                        WHERE hpvi.block_num > hivemind_app.block_before_head('97 days'::interval)
+                        WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
                     ) hpv ON pd.id = hpv.id AND ha.id = hpv.author_id
                 ) AS hn
-                WHERE hn.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND score >= 0
                     AND hn.src IS DISTINCT FROM hn.dst
                     AND hn.rshares >= 10e9
@@ -116,7 +116,7 @@ class NotificationCache(DbAdapterHolder):
             AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
             JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
             LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
-            WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+            WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                 AND COALESCE(r.rep, 25) > 0
                 AND n.src IS DISTINCT FROM n.dst
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
@@ -164,14 +164,14 @@ class NotificationCache(DbAdapterHolder):
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 15, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
+                SELECT n.block_num, 15, (SELECT hb.created_at FROM {SCHEMA_NAME}.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
                 FROM
                 (VALUES {{}})
                 AS n(src, dst, block_num)
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
                 JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
-                WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, created_at, r.id, r.id
@@ -228,7 +228,7 @@ class NotificationCache(DbAdapterHolder):
                 JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
                 JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.id = p.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
-                WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, p.id
@@ -279,7 +279,7 @@ class NotificationCache(DbAdapterHolder):
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.id
                 JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.dst = hc.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
-                WHERE n.block_num > hivemind_app.block_before_irreversible( '90 days' )
+                WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, n.created_at, r.id, hc.id
