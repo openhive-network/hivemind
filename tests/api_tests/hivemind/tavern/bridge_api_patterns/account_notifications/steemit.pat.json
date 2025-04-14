@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T18:01:30",
-    "id": 2077415,
+    "id": 2074949,
     "msg": "@funny reblogged your post",
     "score": 55,
     "type": "reblog",
@@ -9,23 +9,23 @@
   },
   {
     "date": "2016-09-15T17:51:15",
-    "id": 2076405,
+    "id": 2073939,
     "msg": "@steempowerwhale mentioned you and 0 others",
-    "score": 33,
+    "score": 46,
     "type": "mention",
     "url": "@steempowerwhale/for-steemit-authors-how-likely-do-posts-receive-a-reward-on-steemit-look-at-the-stats"
   },
   {
     "date": "2016-09-15T17:17:36",
-    "id": 2076283,
+    "id": 2073817,
     "msg": "@macartem mentioned you and 4 others",
-    "score": 33,
+    "score": 42,
     "type": "mention",
     "url": "@macartem/5-most-important-whales"
   },
   {
     "date": "2016-09-15T05:25:03",
-    "id": 2063505,
+    "id": 2061032,
     "msg": "@therajmahal followed you",
     "score": 46,
     "type": "follow",
@@ -33,15 +33,15 @@
   },
   {
     "date": "2016-09-14T21:33:36",
-    "id": 2056049,
+    "id": 2053264,
     "msg": "@twitterbot mentioned you and 0 others",
-    "score": 33,
+    "score": 41,
     "type": "mention",
     "url": "@twitterbot/re-app-store-accepts-steemit-20160914t213336"
   },
   {
     "date": "2016-09-14T12:20:42",
-    "id": 2042943,
+    "id": 2040666,
     "msg": "@mgibson followed you",
     "score": 42,
     "type": "follow",
@@ -49,55 +49,55 @@
   },
   {
     "date": "2016-09-14T18:10:21",
-    "id": 2040049,
+    "id": 2037574,
     "msg": "@hisnameisolllie mentioned you and 6 others",
-    "score": 33,
+    "score": 61,
     "type": "mention",
     "url": "@hisnameisolllie/is-steemit-the-ultimate-cryptocurrency-onboarding-tool"
   },
   {
     "date": "2016-09-14T07:27:48",
-    "id": 2038782,
+    "id": 2036307,
     "msg": "@felixxx mentioned you and 0 others",
-    "score": 33,
+    "score": 52,
     "type": "mention",
     "url": "@felixxx/re-miserableoracle-re-felixxx-re-miserableoracle-re-l0k1-the-power-down-delay-ned-and-dan-you-got-us-hooked-we-can-t-jump-out-what-s-happening-20160914t072747788z"
   },
   {
     "date": "2016-09-14T06:57:00",
-    "id": 2038768,
+    "id": 2036293,
     "msg": "@svamiva mentioned you and 0 others",
-    "score": 33,
+    "score": 47,
     "type": "mention",
     "url": "@svamiva/re-smolalit-re-antizvuk-re-svamiva-re-smolalit-re-svamiva-nemnogo-soli-na-ranu-20160914t065520261z"
   },
   {
+    "date": "2016-09-14T05:53:51",
+    "id": 2035113,
+    "msg": "@karenb54 mentioned you and 0 others",
+    "score": 51,
+    "type": "mention",
+    "url": "@karenb54/mobile-covers-for-all-ranks"
+  },
+  {
     "date": "2016-09-14T05:50:36",
-    "id": 2037576,
+    "id": 2035086,
     "msg": "@good-karma followed you",
     "score": 56,
     "type": "follow",
     "url": "@good-karma"
   },
   {
-    "date": "2016-09-14T05:53:51",
-    "id": 2037515,
-    "msg": "@karenb54 mentioned you and 0 others",
-    "score": 33,
-    "type": "mention",
-    "url": "@karenb54/mobile-covers-for-all-ranks"
-  },
-  {
     "date": "2016-09-13T21:43:03",
-    "id": 2029473,
+    "id": 2027189,
     "msg": "@biophil mentioned you and 0 others",
-    "score": 33,
+    "score": 55,
     "type": "mention",
     "url": "@biophil/it-would-be-neat-to-know-why-steemit-starts-pushing-the-market-around-when-it-does"
   },
   {
     "date": "2016-09-13T20:23:00",
-    "id": 2027834,
+    "id": 2025358,
     "msg": "@blockcodes followed you",
     "score": 48,
     "type": "follow",
@@ -105,7 +105,7 @@
   },
   {
     "date": "2016-09-13T19:26:45",
-    "id": 2026625,
+    "id": 2024149,
     "msg": "@pjheinz followed you",
     "score": 54,
     "type": "follow",
@@ -113,49 +113,49 @@
   },
   {
     "date": "2016-09-13T14:04:21",
-    "id": 2018420,
+    "id": 2015946,
     "msg": "@steemitguide mentioned you and 2 others",
-    "score": 33,
+    "score": 49,
     "type": "mention",
     "url": "@steemitguide/steemit-s-top-10-forbes-list-edition-1-13th-september-2016"
   },
   {
     "date": "2016-09-13T12:23:27",
-    "id": 2016554,
+    "id": 2014413,
     "msg": "@twitterbot mentioned you and 1 others",
-    "score": 33,
+    "score": 41,
     "type": "mention",
     "url": "@twitterbot/re-appstore-whitelists-steem-now-waiting-for-bithshares-people-20160913t122326"
   },
   {
     "date": "2016-09-13T09:58:18",
-    "id": 2014806,
+    "id": 2012328,
     "msg": "@poseidon mentioned you and 3 others",
-    "score": 33,
+    "score": 47,
     "type": "mention",
     "url": "@poseidon/re-venuspcs-why-hardfork-14-will-reduce-daily-votes-from-40-to-5-my-opinion-which-i-haven-t-seen-anyone-else-state-20160913t095819591z"
   },
   {
     "date": "2016-09-13T01:58:21",
-    "id": 2006847,
+    "id": 2004376,
     "msg": "@leesunmoo mentioned you and 0 others",
-    "score": 33,
+    "score": 48,
     "type": "mention",
     "url": "@leesunmoo/leesunmoo-3"
   },
   {
     "date": "2016-09-13T00:20:09",
-    "id": 2006051,
+    "id": 2003457,
     "msg": "@buckland mentioned you and 1 others",
-    "score": 33,
+    "score": 25,
     "type": "mention",
     "url": "@buckland/re-abol-r-i-p-all-innocent-victims-on-septembre-11-20160913t002010694z"
   },
   {
     "date": "2016-09-12T23:29:06",
-    "id": 2005222,
+    "id": 2002748,
     "msg": "@buckland mentioned you and 1 others",
-    "score": 33,
+    "score": 25,
     "type": "mention",
     "url": "@buckland/re-abol-re-buckland-this-was-the-so-called-nano-thermite-that-was-found-everywhere-people-need-the-truth-but-can-they-swallow-it-20160912t232044338z"
   }
