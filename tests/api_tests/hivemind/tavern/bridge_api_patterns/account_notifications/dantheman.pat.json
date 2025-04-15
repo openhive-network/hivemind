@@ -1,39 +1,47 @@
 [
   {
     "date": "2016-09-15T19:23:54",
-    "id": 2076720,
+    "id": 2076693,
     "msg": "@rusla followed you",
     "score": 47,
     "type": "follow",
     "url": "@rusla"
   },
   {
-    "date": "2016-09-15T18:18:54",
-    "id": 2075396,
-    "msg": "@linkback-bot-v0 replied to your post",
-    "score": 42,
-    "type": "reply",
-    "url": "@linkback-bot-v0/re-dantheman-scalability-of-individual-responsibility-in-anarchy-linkbacks"
+    "date": "2016-09-15T18:41:03",
+    "id": 2049476,
+    "msg": "@dolphindigest mentioned you and 10 others",
+    "score": 43,
+    "type": "mention",
+    "url": "@dolphindigest/learn-the-secrets-of-how-liberosist-got-15-000-steem-power-and-you-can-too"
+  },
+  {
+    "date": "2016-09-15T18:37:45",
+    "id": 2049505,
+    "msg": "@dolphindigest mentioned you and 12 others",
+    "score": 43,
+    "type": "mention",
+    "url": "@dolphindigest/learn-the-secrets-of-how-kaylinart-got-27-000-steem-power-and-you-can-too"
   },
   {
     "date": "2016-09-15T18:18:54",
-    "id": 2075215,
+    "id": 2075188,
     "msg": "@linkback-bot-v0 mentioned you and 3 others",
     "score": 42,
     "type": "mention",
     "url": "@linkback-bot-v0/re-dantheman-scalability-of-individual-responsibility-in-anarchy-linkbacks"
   },
   {
-    "date": "2016-09-15T16:25:21",
-    "id": 2073301,
-    "msg": "@bacchist voted on your post ($0.03)",
-    "score": 25,
-    "type": "vote",
-    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
+    "date": "2016-09-15T18:18:54",
+    "id": 2075336,
+    "msg": "@linkback-bot-v0 replied to your post",
+    "score": 42,
+    "type": "reply",
+    "url": "@linkback-bot-v0/re-dantheman-scalability-of-individual-responsibility-in-anarchy-linkbacks"
   },
   {
     "date": "2016-09-15T17:09:24",
-    "id": 2073188,
+    "id": 2073161,
     "msg": "@dwinblood replied to your comment",
     "score": 57,
     "type": "reply_comment",
@@ -41,47 +49,63 @@
   },
   {
     "date": "2016-09-15T16:41:24",
-    "id": 2072791,
+    "id": 2072764,
     "msg": "@merej99 mentioned you and 0 others",
     "score": 53,
     "type": "mention",
     "url": "@merej99/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t164144582z"
   },
   {
-    "date": "2016-09-15T15:40:15",
-    "id": 2072144,
-    "msg": "@stellabelle voted on your post ($0.99)",
-    "score": 50,
-    "type": "vote",
-    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
-  },
-  {
-    "date": "2016-09-15T16:16:36",
-    "id": 2071558,
-    "msg": "@craig-grant replied to your comment",
-    "score": 61,
-    "type": "reply_comment",
-    "url": "@craig-grant/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t161635818z"
-  },
-  {
-    "date": "2016-09-15T15:38:30",
-    "id": 2071266,
-    "msg": "@stellabelle replied to your comment",
-    "score": 65,
-    "type": "reply_comment",
-    "url": "@stellabelle/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t153249723z"
-  },
-  {
     "date": "2016-09-15T16:32:06",
-    "id": 2071200,
+    "id": 2071173,
     "msg": "@crok mentioned you and 0 others",
     "score": 48,
     "type": "mention",
     "url": "@crok/what-is-the-point-of-the-voting-slider-whales-versus-dolphins-versus-minnows"
   },
   {
+    "date": "2016-09-15T16:25:21",
+    "id": 2073274,
+    "msg": "@bacchist voted on your post ($0.03)",
+    "score": 25,
+    "type": "vote",
+    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
+  },
+  {
+    "date": "2016-09-15T16:16:36",
+    "id": 2071531,
+    "msg": "@craig-grant replied to your comment",
+    "score": 61,
+    "type": "reply_comment",
+    "url": "@craig-grant/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t161635818z"
+  },
+  {
+    "date": "2016-09-15T15:40:15",
+    "id": 2072117,
+    "msg": "@stellabelle voted on your post ($0.99)",
+    "score": 50,
+    "type": "vote",
+    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
+  },
+  {
+    "date": "2016-09-15T15:38:30",
+    "id": 2071239,
+    "msg": "@stellabelle replied to your comment",
+    "score": 65,
+    "type": "reply_comment",
+    "url": "@stellabelle/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t153249723z"
+  },
+  {
+    "date": "2016-09-15T14:44:42",
+    "id": 2069635,
+    "msg": "@argsolver mentioned you and 12 others",
+    "score": 40,
+    "type": "mention",
+    "url": "@argsolver/steemit-com-a-much-needed-upgrade"
+  },
+  {
     "date": "2016-09-15T14:44:15",
-    "id": 2070477,
+    "id": 2070450,
     "msg": "@schro voted on your post ($0.04)",
     "score": 25,
     "type": "vote",
@@ -89,71 +113,63 @@
   },
   {
     "date": "2016-09-15T14:40:12",
-    "id": 2069737,
+    "id": 2069919,
     "msg": "@firehorse followed you",
     "score": 25,
     "type": "follow",
     "url": "@firehorse"
   },
   {
-    "date": "2016-09-15T14:44:42",
-    "id": 2069662,
-    "msg": "@argsolver mentioned you and 12 others",
-    "score": 40,
-    "type": "mention",
-    "url": "@argsolver/steemit-com-a-much-needed-upgrade"
-  },
-  {
-    "date": "2016-09-15T14:15:09",
-    "id": 2069412,
-    "msg": "@pfunk voted on your post ($0.22)",
-    "score": 50,
-    "type": "vote",
-    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
-  },
-  {
-    "date": "2016-09-15T13:57:42",
-    "id": 2069232,
-    "msg": "@demotruk voted on your post ($0.04)",
-    "score": 25,
-    "type": "vote",
-    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
-  },
-  {
     "date": "2016-09-15T14:17:30",
-    "id": 2068985,
+    "id": 2068958,
     "msg": "@halo replied to your comment",
     "score": 58,
     "type": "reply_comment",
     "url": "@halo/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t141729210z"
   },
   {
-    "date": "2016-09-15T13:58:03",
-    "id": 2068842,
-    "msg": "@beanz replied to your comment",
-    "score": 53,
-    "type": "reply_comment",
-    "url": "@beanz/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135801159z"
-  },
-  {
-    "date": "2016-09-15T13:58:03",
-    "id": 2068711,
-    "msg": "@beanz mentioned you and 0 others",
-    "score": 53,
-    "type": "mention",
-    "url": "@beanz/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135801159z"
+    "date": "2016-09-15T14:15:09",
+    "id": 2069385,
+    "msg": "@pfunk voted on your post ($0.22)",
+    "score": 50,
+    "type": "vote",
+    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
   },
   {
     "date": "2016-09-15T14:02:48",
-    "id": 2066584,
+    "id": 2066431,
     "msg": "@beanz mentioned you and 16 others",
     "score": 53,
     "type": "mention",
     "url": "@beanz/petition-to-take-down-earnest-fao-dan-and-ned"
   },
   {
+    "date": "2016-09-15T13:58:03",
+    "id": 2068684,
+    "msg": "@beanz mentioned you and 0 others",
+    "score": 53,
+    "type": "mention",
+    "url": "@beanz/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135801159z"
+  },
+  {
+    "date": "2016-09-15T13:58:03",
+    "id": 2068815,
+    "msg": "@beanz replied to your comment",
+    "score": 53,
+    "type": "reply_comment",
+    "url": "@beanz/re-dantheman-re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135801159z"
+  },
+  {
+    "date": "2016-09-15T13:57:42",
+    "id": 2069205,
+    "msg": "@demotruk voted on your post ($0.04)",
+    "score": 25,
+    "type": "vote",
+    "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
+  },
+  {
     "date": "2016-09-15T12:28:06",
-    "id": 2066567,
+    "id": 2066414,
     "msg": "@hisnameisolllie mentioned you and 0 others",
     "score": 61,
     "type": "mention",
@@ -161,7 +177,7 @@
   },
   {
     "date": "2016-09-15T11:46:33",
-    "id": 2065835,
+    "id": 2065861,
     "msg": "@antaja followed you",
     "score": 41,
     "type": "follow",
@@ -169,7 +185,7 @@
   },
   {
     "date": "2016-09-15T10:10:06",
-    "id": 2064751,
+    "id": 2064724,
     "msg": "@masteryoda mentioned you and 120 others",
     "score": 63,
     "type": "mention",
@@ -177,7 +193,7 @@
   },
   {
     "date": "2016-09-15T08:34:45",
-    "id": 2063259,
+    "id": 2063286,
     "msg": "@a48 followed you",
     "score": 29,
     "type": "follow",
@@ -185,7 +201,7 @@
   },
   {
     "date": "2016-09-15T07:18:24",
-    "id": 2062529,
+    "id": 2062502,
     "msg": "@vkrasheninnikov followed you",
     "score": 25,
     "type": "follow",
@@ -193,7 +209,7 @@
   },
   {
     "date": "2016-09-15T05:32:45",
-    "id": 2061448,
+    "id": 2061421,
     "msg": "@therajmahal followed you",
     "score": 46,
     "type": "follow",
@@ -201,7 +217,7 @@
   },
   {
     "date": "2016-09-15T03:37:39",
-    "id": 2059557,
+    "id": 2059530,
     "msg": "@patrice mentioned you and 0 others",
     "score": 54,
     "type": "mention",
@@ -209,7 +225,7 @@
   },
   {
     "date": "2016-09-15T03:17:30",
-    "id": 2059538,
+    "id": 2059511,
     "msg": "@faddat mentioned you and 0 others",
     "score": 56,
     "type": "mention",
@@ -217,7 +233,7 @@
   },
   {
     "date": "2016-09-15T03:08:27",
-    "id": 2059470,
+    "id": 2059443,
     "msg": "@masteryoda mentioned you and 63 others",
     "score": 63,
     "type": "mention",
@@ -225,7 +241,7 @@
   },
   {
     "date": "2016-09-15T02:46:39",
-    "id": 2059173,
+    "id": 2059146,
     "msg": "@theprophet followed you",
     "score": 48,
     "type": "follow",
@@ -233,7 +249,7 @@
   },
   {
     "date": "2016-09-15T02:26:54",
-    "id": 2059038,
+    "id": 2059011,
     "msg": "@mgibson followed you",
     "score": 42,
     "type": "follow",
@@ -241,7 +257,7 @@
   },
   {
     "date": "2016-09-15T01:44:15",
-    "id": 2057258,
+    "id": 2057349,
     "msg": "@arhag mentioned you and 0 others",
     "score": 60,
     "type": "mention",
@@ -249,7 +265,7 @@
   },
   {
     "date": "2016-09-15T01:00:54",
-    "id": 2057246,
+    "id": 2057337,
     "msg": "@kaylinart mentioned you and 3 others",
     "score": 62,
     "type": "mention",
@@ -257,7 +273,7 @@
   },
   {
     "date": "2016-09-14T23:42:42",
-    "id": 2056358,
+    "id": 2056331,
     "msg": "@exploretraveler followed you",
     "score": 34,
     "type": "follow",
@@ -265,7 +281,7 @@
   },
   {
     "date": "2016-09-14T22:40:00",
-    "id": 2054792,
+    "id": 2054765,
     "msg": "@james-show replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -273,7 +289,7 @@
   },
   {
     "date": "2016-09-14T21:19:39",
-    "id": 2053046,
+    "id": 2053019,
     "msg": "@ricardoguthrie followed you",
     "score": 45,
     "type": "follow",
@@ -281,7 +297,7 @@
   },
   {
     "date": "2016-09-14T20:59:03",
-    "id": 2052492,
+    "id": 2052423,
     "msg": "@blendplayz followed you",
     "score": 27,
     "type": "follow",
@@ -289,7 +305,7 @@
   },
   {
     "date": "2016-09-14T20:21:57",
-    "id": 2051833,
+    "id": 2051806,
     "msg": "@geke replied to your post",
     "score": 51,
     "type": "reply",
@@ -297,7 +313,7 @@
   },
   {
     "date": "2016-09-14T20:15:48",
-    "id": 2051173,
+    "id": 2051146,
     "msg": "@james-show replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -305,31 +321,23 @@
   },
   {
     "date": "2016-09-14T18:46:39",
-    "id": 2049579,
+    "id": 2049733,
     "msg": "@majes followed you",
     "score": 35,
     "type": "follow",
     "url": "@majes"
   },
   {
-    "date": "2016-09-15T18:37:45",
-    "id": 2049532,
-    "msg": "@dolphindigest mentioned you and 12 others",
-    "score": 43,
+    "date": "2016-09-14T16:52:24",
+    "id": 2040342,
+    "msg": "@timcliff mentioned you and 2 others",
+    "score": 52,
     "type": "mention",
-    "url": "@dolphindigest/learn-the-secrets-of-how-kaylinart-got-27-000-steem-power-and-you-can-too"
-  },
-  {
-    "date": "2016-09-15T18:41:03",
-    "id": 2049503,
-    "msg": "@dolphindigest mentioned you and 10 others",
-    "score": 43,
-    "type": "mention",
-    "url": "@dolphindigest/learn-the-secrets-of-how-liberosist-got-15-000-steem-power-and-you-can-too"
+    "url": "@timcliff/20-questions-for-dan-and-ned-community-participation-game"
   },
   {
     "date": "2016-09-14T16:50:00",
-    "id": 2045656,
+    "id": 2045629,
     "msg": "@james-show mentioned you and 0 others",
     "score": 53,
     "type": "mention",
@@ -337,7 +345,7 @@
   },
   {
     "date": "2016-09-14T15:50:45",
-    "id": 2045143,
+    "id": 2044843,
     "msg": "@krnel replied to your comment",
     "score": 57,
     "type": "reply_comment",
@@ -345,23 +353,23 @@
   },
   {
     "date": "2016-09-14T15:09:21",
-    "id": 2043352,
+    "id": 2043325,
     "msg": "@biophil mentioned you and 0 others",
     "score": 55,
     "type": "mention",
     "url": "@biophil/re-someguy123-seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer-20160914t150919762z"
   },
   {
-    "date": "2016-09-14T16:52:24",
-    "id": 2040369,
-    "msg": "@timcliff mentioned you and 2 others",
-    "score": 52,
-    "type": "mention",
-    "url": "@timcliff/20-questions-for-dan-and-ned-community-participation-game"
+    "date": "2016-09-14T11:16:33",
+    "id": 2032428,
+    "msg": "@beanz replied to your comment",
+    "score": 53,
+    "type": "reply_comment",
+    "url": "@beanz/re-dantheman-re-arcange-the-end-of-steem-cpu-mining-update-2-20160914t022436008z"
   },
   {
     "date": "2016-09-14T09:12:51",
-    "id": 2038342,
+    "id": 2038315,
     "msg": "@senseiteekay voted on your post ($0.15)",
     "score": 50,
     "type": "vote",
@@ -369,7 +377,7 @@
   },
   {
     "date": "2016-09-14T09:11:12",
-    "id": 2038337,
+    "id": 2038310,
     "msg": "@senseiteekay voted on your post ($0.17)",
     "score": 50,
     "type": "vote",
@@ -377,7 +385,7 @@
   },
   {
     "date": "2016-09-14T09:10:18",
-    "id": 2038334,
+    "id": 2038307,
     "msg": "@senseiteekay voted on your post ($0.18)",
     "score": 50,
     "type": "vote",
@@ -385,7 +393,7 @@
   },
   {
     "date": "2016-09-14T09:10:12",
-    "id": 2038333,
+    "id": 2038306,
     "msg": "@senseiteekay voted on your post ($0.14)",
     "score": 50,
     "type": "vote",
@@ -393,7 +401,7 @@
   },
   {
     "date": "2016-09-14T09:09:06",
-    "id": 2037762,
+    "id": 2037913,
     "msg": "@jako followed you",
     "score": 53,
     "type": "follow",
@@ -401,7 +409,7 @@
   },
   {
     "date": "2016-09-14T09:00:09",
-    "id": 2037681,
+    "id": 2037832,
     "msg": "@strictlybusiness followed you",
     "score": 39,
     "type": "follow",
@@ -409,7 +417,7 @@
   },
   {
     "date": "2016-09-14T07:23:30",
-    "id": 2036300,
+    "id": 2036273,
     "msg": "@someguy123 mentioned you and 6 others",
     "score": 57,
     "type": "mention",
@@ -417,7 +425,7 @@
   },
   {
     "date": "2016-09-14T04:05:33",
-    "id": 2033569,
+    "id": 2033542,
     "msg": "@blakemiles84 mentioned you and 4 others",
     "score": 59,
     "type": "mention",
@@ -425,23 +433,15 @@
   },
   {
     "date": "2016-09-14T04:03:39",
-    "id": 2033565,
+    "id": 2033538,
     "msg": "@chadcrypto mentioned you and 0 others",
     "score": 44,
     "type": "mention",
     "url": "@chadcrypto/re-james1987-calling-out-for-new-curators-20160914t040322190z"
   },
   {
-    "date": "2016-09-14T11:16:33",
-    "id": 2032455,
-    "msg": "@beanz replied to your comment",
-    "score": 53,
-    "type": "reply_comment",
-    "url": "@beanz/re-dantheman-re-arcange-the-end-of-steem-cpu-mining-update-2-20160914t022436008z"
-  },
-  {
     "date": "2016-09-14T01:45:18",
-    "id": 2031643,
+    "id": 2031616,
     "msg": "@bitcoinbridge replied to your post",
     "score": 25,
     "type": "reply",
@@ -449,7 +449,7 @@
   },
   {
     "date": "2016-09-14T01:17:33",
-    "id": 2031343,
+    "id": 2031336,
     "msg": "@yuli7376 followed you",
     "score": 25,
     "type": "follow",
@@ -457,7 +457,7 @@
   },
   {
     "date": "2016-09-14T00:33:24",
-    "id": 2030970,
+    "id": 2030621,
     "msg": "@cjclaro mentioned you and 0 others",
     "score": 52,
     "type": "mention",
@@ -465,7 +465,7 @@
   },
   {
     "date": "2016-09-14T00:28:15",
-    "id": 2030967,
+    "id": 2030618,
     "msg": "@egjoshslim mentioned you and 1 others",
     "score": 52,
     "type": "mention",
@@ -473,15 +473,23 @@
   },
   {
     "date": "2016-09-14T00:25:57",
-    "id": 2030904,
+    "id": 2030252,
     "msg": "@masteryoda mentioned you and 61 others",
     "score": 63,
     "type": "mention",
     "url": "@masteryoda/daily-payouts-leaderboards-september-13"
   },
   {
+    "date": "2016-09-13T23:56:15",
+    "id": 2028721,
+    "msg": "@heimindanger mentioned you and 0 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@heimindanger/re-biophil-it-would-be-neat-to-know-why-steemit-starts-pushing-the-market-around-when-it-does-20160913t235615784z"
+  },
+  {
     "date": "2016-09-13T23:51:06",
-    "id": 2030100,
+    "id": 2030073,
     "msg": "@albensilverberg voted on your post ($0.38)",
     "score": 50,
     "type": "vote",
@@ -489,55 +497,55 @@
   },
   {
     "date": "2016-09-13T23:33:00",
-    "id": 2029191,
+    "id": 2029100,
     "msg": "@allgoodthings followed you",
     "score": 35,
     "type": "follow",
     "url": "@allgoodthings"
   },
   {
-    "date": "2016-09-13T23:56:15",
-    "id": 2028748,
-    "msg": "@heimindanger mentioned you and 0 others",
-    "score": 52,
-    "type": "mention",
-    "url": "@heimindanger/re-biophil-it-would-be-neat-to-know-why-steemit-starts-pushing-the-market-around-when-it-does-20160913t235615784z"
-  },
-  {
     "date": "2016-09-13T23:30:42",
-    "id": 2028285,
-    "msg": "@smooth replied to your comment",
-    "score": 59,
-    "type": "reply_comment",
-    "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
-  },
-  {
-    "date": "2016-09-13T23:30:42",
-    "id": 2028070,
+    "id": 2028367,
     "msg": "@smooth mentioned you and 1 others",
     "score": 59,
     "type": "mention",
     "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
   },
   {
-    "date": "2016-09-13T20:09:33",
-    "id": 2025582,
-    "msg": "@thinkngrow replied to your comment",
-    "score": 39,
+    "date": "2016-09-13T23:30:42",
+    "id": 2028212,
+    "msg": "@smooth replied to your comment",
+    "score": 59,
     "type": "reply_comment",
-    "url": "@thinkngrow/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t200925387z"
+    "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
+  },
+  {
+    "date": "2016-09-13T20:13:39",
+    "id": 2016967,
+    "msg": "@rusteemitblog mentioned you and 3 others",
+    "score": 46,
+    "type": "mention",
+    "url": "@rusteemitblog/anons-proekta-rusteemitblog-rusteemitblog-project-announcement"
   },
   {
     "date": "2016-09-13T20:09:33",
-    "id": 2025475,
+    "id": 2025448,
     "msg": "@thinkngrow mentioned you and 0 others",
     "score": 39,
     "type": "mention",
     "url": "@thinkngrow/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t200925387z"
   },
   {
+    "date": "2016-09-13T20:09:33",
+    "id": 2025545,
+    "msg": "@thinkngrow replied to your comment",
+    "score": 39,
+    "type": "reply_comment",
+    "url": "@thinkngrow/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t200925387z"
+  },
+  {
     "date": "2016-09-13T19:28:15",
-    "id": 2024161,
+    "id": 2024184,
     "msg": "@pjheinz followed you",
     "score": 54,
     "type": "follow",
@@ -545,47 +553,55 @@
   },
   {
     "date": "2016-09-13T18:35:51",
-    "id": 2023212,
+    "id": 2022889,
     "msg": "@pathtomydream followed you",
     "score": 40,
     "type": "follow",
     "url": "@pathtomydream"
   },
   {
-    "date": "2016-09-13T17:44:54",
-    "id": 2022523,
-    "msg": "@samether voted on your post ($0.03)",
-    "score": 25,
-    "type": "vote",
-    "url": "@dantheman/re-arcange-the-end-of-steem-cpu-mining-update-2-20160913t161730780z"
-  },
-  {
     "date": "2016-09-13T17:49:54",
-    "id": 2022217,
+    "id": 2022190,
     "msg": "@arcange replied to your comment",
     "score": 51,
     "type": "reply_comment",
     "url": "@arcange/re-dantheman-re-arcange-the-end-of-steem-cpu-mining-update-2-20160913t174955846z"
   },
   {
-    "date": "2016-09-13T16:50:27",
-    "id": 2021384,
-    "msg": "@masteryoda voted on your post ($0.17)",
-    "score": 50,
+    "date": "2016-09-13T17:44:54",
+    "id": 2022496,
+    "msg": "@samether voted on your post ($0.03)",
+    "score": 25,
     "type": "vote",
-    "url": "@dantheman/re-masteryoda-steem-blocksize-report-2-20160913t155438893z"
+    "url": "@dantheman/re-arcange-the-end-of-steem-cpu-mining-update-2-20160913t161730780z"
   },
   {
     "date": "2016-09-13T17:25:48",
-    "id": 2020663,
+    "id": 2020636,
     "msg": "@nobreku replied to your comment",
     "score": 47,
     "type": "reply_comment",
     "url": "@nobreku/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t172545988z"
   },
   {
+    "date": "2016-09-13T16:50:27",
+    "id": 2021357,
+    "msg": "@masteryoda voted on your post ($0.17)",
+    "score": 50,
+    "type": "vote",
+    "url": "@dantheman/re-masteryoda-steem-blocksize-report-2-20160913t155438893z"
+  },
+  {
     "date": "2016-09-13T16:50:18",
-    "id": 2020422,
+    "id": 2020233,
+    "msg": "@masteryoda mentioned you and 0 others",
+    "score": 63,
+    "type": "mention",
+    "url": "@masteryoda/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t165008420z"
+  },
+  {
+    "date": "2016-09-13T16:50:18",
+    "id": 2020395,
     "msg": "@masteryoda replied to your comment",
     "score": 63,
     "type": "reply_comment",
@@ -593,47 +609,31 @@
   },
   {
     "date": "2016-09-13T16:40:27",
-    "id": 2020369,
+    "id": 2020342,
     "msg": "@shenanigator replied to your comment",
     "score": 53,
     "type": "reply_comment",
     "url": "@shenanigator/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t163845836z"
   },
   {
-    "date": "2016-09-13T16:50:18",
-    "id": 2020260,
-    "msg": "@masteryoda mentioned you and 0 others",
-    "score": 63,
-    "type": "mention",
-    "url": "@masteryoda/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t165008420z"
-  },
-  {
-    "date": "2016-09-13T15:52:45",
-    "id": 2019797,
-    "msg": "@will-zewe voted on your post ($0.05)",
-    "score": 25,
-    "type": "vote",
-    "url": "@dantheman/re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t154250511z"
-  },
-  {
-    "date": "2016-09-13T16:24:36",
-    "id": 2019506,
-    "msg": "@james1987 followed you",
-    "score": 44,
-    "type": "follow",
-    "url": "@james1987"
-  },
-  {
     "date": "2016-09-13T16:25:27",
-    "id": 2019404,
+    "id": 2019623,
     "msg": "@candy49 replied to your comment",
     "score": 47,
     "type": "reply_comment",
     "url": "@candy49/re-dantheman-re-cryptomental-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t162427103z"
   },
   {
+    "date": "2016-09-13T16:24:36",
+    "id": 2019162,
+    "msg": "@james1987 followed you",
+    "score": 44,
+    "type": "follow",
+    "url": "@james1987"
+  },
+  {
     "date": "2016-09-13T16:10:30",
-    "id": 2019206,
+    "id": 2019528,
     "msg": "@clevecross replied to your comment",
     "score": 54,
     "type": "reply_comment",
@@ -641,31 +641,31 @@
   },
   {
     "date": "2016-09-13T15:55:12",
-    "id": 2019095,
+    "id": 2019417,
     "msg": "@sigmajin replied to your comment",
     "score": 55,
     "type": "reply_comment",
     "url": "@sigmajin/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t155248698z"
   },
   {
+    "date": "2016-09-13T15:52:45",
+    "id": 2019770,
+    "msg": "@will-zewe voted on your post ($0.05)",
+    "score": 25,
+    "type": "vote",
+    "url": "@dantheman/re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t154250511z"
+  },
+  {
     "date": "2016-09-13T15:52:27",
-    "id": 2019069,
+    "id": 2019391,
     "msg": "@cryptomental replied to your comment",
     "score": 50,
     "type": "reply_comment",
     "url": "@cryptomental/re-dantheman-re-cryptomental-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t155227770z"
   },
   {
-    "date": "2016-09-13T15:02:21",
-    "id": 2018277,
-    "msg": "@frol replied to your comment",
-    "score": 42,
-    "type": "reply_comment",
-    "url": "@frol/re-dantheman-re-cherryleaf-re-dantheman-censorship-is-impossible-in-a-free-society-20160913t145815191z"
-  },
-  {
     "date": "2016-09-13T15:28:42",
-    "id": 2018239,
+    "id": 2018182,
     "msg": "@arcange mentioned you and 1 others",
     "score": 51,
     "type": "mention",
@@ -673,39 +673,39 @@
   },
   {
     "date": "2016-09-13T15:27:30",
-    "id": 2018233,
+    "id": 2018024,
     "msg": "@kus-knee mentioned you and 5 others",
     "score": 56,
     "type": "mention",
     "url": "@kus-knee/the-old-dog-asks-why-does-this-grasshopper-make-me-thankful-for-the-steemit-platform"
   },
   {
-    "date": "2016-09-13T20:13:39",
-    "id": 2016994,
-    "msg": "@rusteemitblog mentioned you and 3 others",
-    "score": 46,
-    "type": "mention",
-    "url": "@rusteemitblog/anons-proekta-rusteemitblog-rusteemitblog-project-announcement"
-  },
-  {
-    "date": "2016-09-13T12:59:48",
-    "id": 2014853,
-    "msg": "@wadepaterson mentioned you and 19 others",
-    "score": 55,
-    "type": "mention",
-    "url": "@wadepaterson/20-questions-with-andrarchy"
+    "date": "2016-09-13T15:02:21",
+    "id": 2017885,
+    "msg": "@frol replied to your comment",
+    "score": 42,
+    "type": "reply_comment",
+    "url": "@frol/re-dantheman-re-cherryleaf-re-dantheman-censorship-is-impossible-in-a-free-society-20160913t145815191z"
   },
   {
     "date": "2016-09-13T13:45:57",
-    "id": 2014390,
+    "id": 2014177,
     "msg": "@strangerarray mentioned you and 21 others",
     "score": 52,
     "type": "mention",
     "url": "@strangerarray/steemit-time-of-death-scheduled-tue-13-sep-2016-15-00-00-ut"
   },
   {
+    "date": "2016-09-13T12:59:48",
+    "id": 2014826,
+    "msg": "@wadepaterson mentioned you and 19 others",
+    "score": 55,
+    "type": "mention",
+    "url": "@wadepaterson/20-questions-with-andrarchy"
+  },
+  {
     "date": "2016-09-13T08:36:54",
-    "id": 2011253,
+    "id": 2011226,
     "msg": "@summonerrk followed you",
     "score": 52,
     "type": "follow",
@@ -713,7 +713,7 @@
   },
   {
     "date": "2016-09-13T05:09:24",
-    "id": 2008700,
+    "id": 2008673,
     "msg": "@timcliff replied to your post",
     "score": 52,
     "type": "reply",
@@ -721,7 +721,7 @@
   },
   {
     "date": "2016-09-13T03:36:39",
-    "id": 2006964,
+    "id": 2006937,
     "msg": "@williambanks mentioned you and 1 others",
     "score": 56,
     "type": "mention",
@@ -729,7 +729,7 @@
   },
   {
     "date": "2016-09-13T01:41:33",
-    "id": 2005291,
+    "id": 2005264,
     "msg": "@btcshare7 followed you",
     "score": 34,
     "type": "follow",
@@ -737,31 +737,47 @@
   },
   {
     "date": "2016-09-13T01:31:33",
-    "id": 2004505,
+    "id": 2004478,
     "msg": "@zapply followed you",
     "score": 25,
     "type": "follow",
     "url": "@zapply"
   },
   {
-    "date": "2016-09-13T00:21:33",
-    "id": 2003590,
-    "msg": "@robyneggs followed you",
-    "score": 40,
-    "type": "follow",
-    "url": "@robyneggs"
+    "date": "2016-09-13T00:49:00",
+    "id": 1981737,
+    "msg": "@rusteemitblog mentioned you and 4 others",
+    "score": 46,
+    "type": "mention",
+    "url": "@rusteemitblog/novye-rasshirennye-vozmozhnosti-formatirovaniya-new-advanced-formatting-features-perevod-stati-steemitblog"
+  },
+  {
+    "date": "2016-09-13T00:35:39",
+    "id": 1995474,
+    "msg": "@kingscrown mentioned you and 1 others",
+    "score": 56,
+    "type": "mention",
+    "url": "@kingscrown/is-the-sky-falling-steem-btc-chart-and-scenarios-do-not-read-if-you-have-panic-attacks-or-anxiety-issues"
   },
   {
     "date": "2016-09-13T00:25:18",
-    "id": 2003474,
+    "id": 2003558,
     "msg": "@masteryoda mentioned you and 61 others",
     "score": 63,
     "type": "mention",
     "url": "@masteryoda/daily-payouts-leaderboards-september-12"
   },
   {
+    "date": "2016-09-13T00:21:33",
+    "id": 2003484,
+    "msg": "@robyneggs followed you",
+    "score": 40,
+    "type": "follow",
+    "url": "@robyneggs"
+  },
+  {
     "date": "2016-09-12T23:44:48",
-    "id": 2002943,
+    "id": 2003100,
     "msg": "@antithesis followed you",
     "score": 25,
     "type": "follow",
@@ -769,7 +785,7 @@
   },
   {
     "date": "2016-09-12T23:41:57",
-    "id": 2002916,
+    "id": 2003084,
     "msg": "@fabien followed you",
     "score": 51,
     "type": "follow",
@@ -777,26 +793,10 @@
   },
   {
     "date": "2016-09-12T20:04:00",
-    "id": 1998693,
+    "id": 1998256,
     "msg": "@aleco followed you",
     "score": 47,
     "type": "follow",
     "url": "@aleco"
-  },
-  {
-    "date": "2016-09-12T19:47:15",
-    "id": 1998583,
-    "msg": "@dikanevroman followed you",
-    "score": 33,
-    "type": "follow",
-    "url": "@dikanevroman"
-  },
-  {
-    "date": "2016-09-12T19:43:57",
-    "id": 1998578,
-    "msg": "@steemitpolonia followed you",
-    "score": 28,
-    "type": "follow",
-    "url": "@steemitpolonia"
   }
 ]
