@@ -40,20 +40,20 @@
     "url": "@twitterbot/re-app-store-accepts-steemit-20160914t213336"
   },
   {
-    "date": "2016-09-14T12:20:42",
-    "id": 2040666,
-    "msg": "@mgibson followed you",
-    "score": 42,
-    "type": "follow",
-    "url": "@mgibson"
-  },
-  {
     "date": "2016-09-14T18:10:21",
     "id": 2037574,
     "msg": "@hisnameisolllie mentioned you and 6 others",
     "score": 61,
     "type": "mention",
     "url": "@hisnameisolllie/is-steemit-the-ultimate-cryptocurrency-onboarding-tool"
+  },
+  {
+    "date": "2016-09-14T12:20:42",
+    "id": 2040666,
+    "msg": "@mgibson followed you",
+    "score": 42,
+    "type": "follow",
+    "url": "@mgibson"
   },
   {
     "date": "2016-09-14T07:27:48",
