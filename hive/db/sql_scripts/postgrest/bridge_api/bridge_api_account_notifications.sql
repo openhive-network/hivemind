@@ -78,8 +78,8 @@ BEGIN
             nv.dst = _account_id
             AND nv.block_num > _oldest_block
             AND nv.score >= _min_score
-            AND NOT( _last_id <> 0 AND nv.id >= _last_id )
-          ORDER BY nv.id DESC
+            AND NOT( _last_id <> 0 AND nv.block_num >= _last_id )
+          ORDER BY nv.block_num DESC, nv.type_id DESC, nv.id DESC
           LIMIT _limit
         ) hnv
         JOIN hivemind_app.hive_posts hp on hnv.post_id = hp.id
