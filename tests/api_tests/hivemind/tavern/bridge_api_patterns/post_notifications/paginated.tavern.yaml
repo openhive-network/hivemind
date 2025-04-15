@@ -21,7 +21,7 @@
           method: "bridge.post_notifications"
           params: {"author":"steve-walschot",
                    "permlink": "steeming-around-the-clock-bye-bye-regular-job",
-                   "last_id": 1550341
+                   "last_id": 4548924
                    }
       response:
         status_code: 200
