@@ -445,6 +445,7 @@ BEGIN
     LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
     WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
         AND COALESCE(rep.rep, 25) > 0
+        AND hm.author_id IS DISTINCT FROM hm.account_id
     ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
     ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
     SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
