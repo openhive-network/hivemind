@@ -70,8 +70,8 @@ BEGIN
             nv.dst_post_id = _post_id
             AND nv.block_num > hivemind_app.block_before_head( '90 days' )
             AND nv.score >= _min_score
-            AND NOT (_last_id <> 0 AND nv.id >= _last_id )
-          ORDER BY nv.id DESC
+            AND NOT (_last_id <> 0 AND nv.block_num >= _last_id )
+          ORDER BY nv.block_num DESC, nv.type_id DESC, nv.id DESC
           LIMIT _limit
         ) hnv
         JOIN hivemind_app.hive_posts hp ON hnv.post_id = hp.id
