@@ -301,7 +301,6 @@ def build_metadata():
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('follows_follower_idx', 'follower'),
         sa.Index('follows_following_idx', 'following'),
         sa.Index('follows_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
@@ -312,7 +311,6 @@ def build_metadata():
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('muted_follower_idx', 'follower'),
         sa.Index('muted_following_idx', 'following'),
         sa.Index('muted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
@@ -323,7 +321,6 @@ def build_metadata():
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('blacklisted_follower_idx', 'follower'),
         sa.Index('blacklisted_following_idx', 'following'),
         sa.Index('blacklisted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
@@ -334,7 +331,6 @@ def build_metadata():
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('follow_muted_follower_idx', 'follower'),
         sa.Index('follow_muted_following_idx', 'following'),
         sa.Index('follow_muted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
@@ -345,7 +341,6 @@ def build_metadata():
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('follow_blacklisted_follower_idx', 'follower'),
         sa.Index('follow_blacklisted_following_idx', 'following'),
         sa.Index('follow_blacklisted_block_num_idx', 'block_num'),
         schema=SCHEMA_NAME
@@ -424,7 +419,6 @@ def build_metadata_community(metadata=None):
         sa.Column('dst_id', sa.Integer, nullable=True),
         sa.Column('post_id', sa.Integer, nullable=True),
         sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('payload', sa.Text, nullable=True),
         sa.Index('hive_notifs_ix2', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")),
         sa.Index(
