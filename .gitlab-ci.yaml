@@ -18,6 +18,8 @@ variables:
   DATA_CACHE_HAF_PREFIX: "/cache/replay_data_haf"
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
   DATA_CACHE_HIVEMIND: "/cache/replay_data_hivemind_$CI_PIPELINE_ID"
+  DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
+  DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
   # FF:
   FF_NETWORK_PER_BUILD: 1
   # GIT:
@@ -255,8 +257,8 @@ include:
 
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
-  ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
-  ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" 2>&1 | tee -a -i "$AWAIT_LOG_PATH" && \
+  ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
+  ${DATA_CACHE_HIVEMIND}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" 2>&1 | tee -a -i "$AWAIT_LOG_PATH" && \
   ${WORKING_DIR}/docker_entrypoint.sh server --webserver-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} --log-level=${LOG_LEVEL}
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -296,6 +298,37 @@ prepare_haf_data:
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
   - data-cache-storage
+
+# Creates a temporary copy of replay data for the exclusive use of current pipeline
+replay_data_copy:
+  extends: .job-defaults
+  image: 
+    name: "$HAF_IMAGE_NAME"
+    entrypoint: [ "" ]
+  stage: build
+  needs:
+    - prepare_haf_data
+    - prepare_haf_image
+  variables:
+    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    DATA_SOURCE: $DATA_CACHE_HAF
+    DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
+    SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
+  script:
+    - |
+      set -e
+      haf/hive/scripts/copy_datadir.sh
+      sudo chmod 777 $DATA_CACHE_HIVEMIND
+      sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
+      cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
+  artifacts:
+    reports:
+      dotenv:
+        - hived_uid.env
+    paths:
+      - hived_uid.env
+  tags:
+    - data-cache-storage
 
 prepare_hivemind_image:
   stage: build
@@ -337,8 +370,10 @@ cleanup_haf_cache_manual:
 # this cache
 cleanup_pipeline_cache:
   needs:
-  - sync
-  - e2e_benchmark_on_postgrest
+    - replay_data_copy
+    - download_await
+    - sync
+    - e2e_benchmark_on_postgrest
   extends:
   - .cleanup_cache_manual_template
   stage: cleanup
@@ -350,24 +385,25 @@ cleanup_pipeline_cache:
 
 download_await:
   extends: .job-defaults
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
+  image: 
+    name: "$HAF_IMAGE_NAME"
+    entrypoint: [ "" ]
   stage: prepare
   variables:
     GIT_STRATEGY: none
     AWAIT_PACKAGE_URL: $CI_API_V4_URL/projects/440/packages/generic/await/v1.3.2.1/await
-    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
   needs:
-  - job: prepare_haf_data
+  - job: replay_data_copy
     artifacts: true
   script:
   - |
-    if [[ -e "${DATA_CACHE_HAF}/await" ]]; then
-      echo "Await is already present in ${DATA_CACHE_HAF}"
-      ls -lAh "${DATA_CACHE_HAF}"
+    if [[ -e "${DATA_CACHE_HIVEMIND}/await" ]]; then
+      echo "Await is already present in ${DATA_CACHE_HIVEMIND}"
+      ls -lAh "${DATA_CACHE_HIVEMIND}"
     else
       echo "Downloading await..."
-      wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O "${DATA_CACHE_HAF}/await"
-      chmod +x ${DATA_CACHE_HAF}/await
+      wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O "${DATA_CACHE_HIVEMIND}/await"
+      chmod +x ${DATA_CACHE_HIVEMIND}/await
     fi
   tags:
   - data-cache-storage
@@ -380,9 +416,11 @@ sync:
   stage: sync
   interruptible: true
   needs:
-  - job: prepare_haf_data
+  - job: replay_data_copy
     artifacts: true
   - job: prepare_hivemind_image
+    artifacts: true
+  - job: prepare_haf_image
     artifacts: true
   - job: download_await
     artifacts: false
@@ -393,7 +431,6 @@ sync:
     variables:
       PG_ACCESS: " host    haf_block_log    hivemind         all    trust\n host \
         \   haf_block_log    haf_admin        all    trust\n "
-      DATA_SOURCE: $DATA_CACHE_HAF
       DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
       SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
       LOG_FILE: $CI_JOB_NAME.log
@@ -407,16 +444,13 @@ sync:
     WORKING_DIR: /home/hivemind
     LOG_PATH: $CI_PROJECT_DIR/hivemind-sync.log
     ADD_MOCKS: "true"
-    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
-    DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
     USE_POSTGREST: 1
   script:
   - |
     sleep 20s
     cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
     pushd ${WORKING_DIR}/app
-    ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
+    ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
     ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
@@ -458,9 +492,11 @@ e2e_benchmark_on_postgrest:
   stage: benchmark
   interruptible: true
   needs:
-  - job: prepare_haf_data
+  - job: replay_data_copy
     artifacts: true
   - job: prepare_hivemind_image
+    artifacts: true
+  - job: prepare_haf_image
     artifacts: true
   - job: download_await
     artifacts: false
@@ -507,9 +543,6 @@ e2e_benchmark_on_postgrest:
     JOB_TOKEN: $CI_JOB_TOKEN
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
-    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
-    DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
@@ -520,7 +553,7 @@ e2e_benchmark_on_postgrest:
     echo "Hivemind image name $HIVEMIND_IMAGE"
     SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
     echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
-    "${DATA_CACHE_HAF}/await" -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
+    "${DATA_CACHE_HIVEMIND}/await" -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
   - *condenser_api_smoketest-script
   - *condenser_api_smoketest_negative-script
   - *follow_api_smoketest-script
@@ -537,7 +570,7 @@ e2e_benchmark_on_postgrest:
   - |
     BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
     echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
-    "${DATA_CACHE_HAF}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
+    "${DATA_CACHE_HIVEMIND}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
    # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
     # - *api-benchmark-script
   after_script:
