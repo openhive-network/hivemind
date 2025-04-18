@@ -1,4 +1,5 @@
 """Handle notification cache"""
+
 import logging
 import collections
 import threading
@@ -56,10 +57,10 @@ class NotificationCache(DbAdapterHolder):
                     JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
                     JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
                     JOIN (
-                        SELECT hpvi.id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
+                        SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
                         WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
-                    ) hpv ON pd.id = hpv.id AND ha.id = hpv.author_id
+                    ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
                 ) AS hn
                 WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND score >= 0
@@ -219,14 +220,14 @@ class NotificationCache(DbAdapterHolder):
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, p.id, COALESCE(rep.rep, 25), '', '', ''
+                SELECT n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, pp.id, COALESCE(rep.rep, 25), '', '', ''
                 FROM
                 (VALUES {{}})
                 AS n(block_num, created_at, src, dst, permlink)
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
                 JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
                 JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
-                JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.id = p.id
+                JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.permlink_id = p.id AND pp.author_id = g.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
                 WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
