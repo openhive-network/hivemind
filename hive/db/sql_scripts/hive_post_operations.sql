@@ -393,9 +393,10 @@ BEGIN
           (
             SELECT
               hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
-            FROM hivemind_app.hive_posts hp
+            FROM hivemind_app.hive_posts AS hp
             INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
             WHERE hp.id = ANY(_post_ids)
+              AND hp.counter_deleted = 0
           ) AS T
         ) AS T ON ha.name = T.mention
         WHERE ha.id != T.author_id

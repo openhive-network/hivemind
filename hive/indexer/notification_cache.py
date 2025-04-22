@@ -60,6 +60,7 @@ class NotificationCache(DbAdapterHolder):
                         SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
                         WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
+                            AND hpvi.counter_deleted = 0
                     ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
                 ) AS hn
                 WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
@@ -227,7 +228,7 @@ class NotificationCache(DbAdapterHolder):
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
                 JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
                 JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
-                JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.permlink_id = p.id AND pp.author_id = g.id
+                JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.permlink_id = p.id AND pp.author_id = g.id AND pp.counter_deleted = 0
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
                 WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
