@@ -352,14 +352,6 @@
     "url": "@ausbitbank/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t160039874z"
   },
   {
-    "date": "2016-09-07T18:57:15",
-    "id": 1841486,
-    "msg": "@steembriefing mentioned you and 0 others",
-    "score": 38,
-    "type": "mention",
-    "url": "@steembriefing/re-bacchist-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t185614085z"
-  },
-  {
     "date": "2016-09-07T18:05:42",
     "id": 1812445,
     "msg": "@sparkeddev mentioned you and 0 others",
@@ -798,5 +790,13 @@
     "score": 51,
     "type": "follow",
     "url": "@michelle.gent"
+  },
+  {
+    "date": "2016-08-31T14:24:54",
+    "id": 1623536,
+    "msg": "@penguinpablo mentioned you and 35 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@penguinpablo/steem-price-update-steem-power-stats-most-followers-august-31"
   }
 ]
