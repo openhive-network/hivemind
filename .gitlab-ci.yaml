@@ -411,6 +411,7 @@ sync:
     entrypoint: [""]
   stage: sync
   interruptible: true
+  timeout: 1.5h
   needs:
   - job: replay_data_copy
     artifacts: true
