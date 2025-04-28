@@ -381,7 +381,7 @@ BEGIN
     (
         SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
     ),
-    mentions AS
+    mentions AS MATERIALIZED
     (
         SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
         FROM
@@ -412,18 +412,21 @@ BEGIN
         WHERE m.post_id = hm.post_id
           AND m.account_id = hm.account_id
       )
+      RETURNING id
     ),
     insert_mentions AS
     (
       INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
       SELECT DISTINCT m.post_id, m.account_id, m.block_num
       FROM mentions AS m
+      LEFT JOIN delete_old_mentions AS dom ON dom.id = 0 -- just to force evaluation
       WHERE NOT EXISTS (
         SELECT 1
         FROM hivemind_app.hive_mentions AS hm
         WHERE hm.post_id = m.post_id
           AND hm.account_id = m.account_id
       )
+      RETURNING id
     ),
     delete_old_cache AS
     (
@@ -437,6 +440,7 @@ BEGIN
             AND m.author_id = hnc.src
             AND m.account_id = hnc.dst
         )
+      RETURNING id
     )
     INSERT INTO hivemind_app.hive_notification_cache
     (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -444,6 +448,8 @@ BEGIN
     FROM mentions AS hm
     JOIN hivemind_app.hive_accounts AS a ON hm.author_id = a.id
     LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
+    LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation
+    LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- just to force evaluation
     WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
         AND COALESCE(rep.rep, 25) > 0
         AND hm.author_id IS DISTINCT FROM hm.account_id
