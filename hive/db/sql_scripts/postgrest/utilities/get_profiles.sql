@@ -37,7 +37,9 @@ BEGIN
             'stats', jsonb_build_object('rank', row.rank, 'following', row.following, 'followers', row.followers),
             'json_metadata', row.json_metadata,
             'posting_json_metadata', row.posting_json_metadata
-        )) FROM (SELECT * FROM hivemind_app.hive_accounts_info_view WHERE name = ANY(_account_names)) row INTO _result;
+        ) ORDER BY row.name ASC)
+      FROM (SELECT * FROM hivemind_app.hive_accounts_info_view WHERE name = ANY(_account_names)) AS row
+      INTO _result;
 
 
     SELECT array_agg(value#>>'{name}') INTO _found_accounts FROM jsonb_array_elements(_result);
