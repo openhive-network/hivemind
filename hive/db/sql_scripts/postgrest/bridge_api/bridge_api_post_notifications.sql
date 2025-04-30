@@ -54,6 +54,7 @@ BEGIN
         FROM
         (
           SELECT
+            nv.block_num,
             nv.id,
             nv.type_id,
             nv.created_at,
@@ -87,7 +88,7 @@ BEGIN
               ELSE hivemind_postgrest_utilities.get_number_of_mentions_in_post( hnv.post_id )
             END as mentions
         ) as hm
-        ORDER BY hnv.id DESC
+        ORDER BY hnv.block_num DESC, hnv.type_id DESC, hnv.id DESC
         LIMIT _limit
       )
       SELECT

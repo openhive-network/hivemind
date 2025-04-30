@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-12T20:56:57",
-    "id": 1999986,
+    "id": 2007172,
     "msg": "@barrycooper voted on your post ($1.65)",
     "score": 75,
     "type": "vote",
@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-11T00:58:18",
-    "id": 1944140,
+    "id": 1951210,
     "msg": "@linkback-bot-v0 replied to your post",
     "score": 42,
     "type": "reply",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-01T13:17:30",
-    "id": 1649517,
+    "id": 1655766,
     "msg": "@steempower voted on your post ($26.18)",
     "score": 100,
     "type": "vote",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-01T11:59:54",
-    "id": 1646995,
+    "id": 1654045,
     "msg": "@queenmountain replied to your post",
     "score": 56,
     "type": "reply",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-08-31T21:30:33",
-    "id": 1629228,
+    "id": 1635414,
     "msg": "@future24 replied to your post",
     "score": 52,
     "type": "reply",
@@ -41,7 +41,7 @@
   },
   {
     "date": "2016-08-31T20:16:21",
-    "id": 1628252,
+    "id": 1634404,
     "msg": "@queenmountain voted on your post ($0.28)",
     "score": 50,
     "type": "vote",
@@ -49,7 +49,7 @@
   },
   {
     "date": "2016-08-31T20:15:48",
-    "id": 1627882,
+    "id": 1634048,
     "msg": "@you-know-nothing replied to your post",
     "score": 34,
     "type": "reply",
@@ -57,31 +57,31 @@
   },
   {
     "date": "2016-08-31T20:10:09",
-    "id": 1627837,
+    "id": 1634003,
     "msg": "@ban485 replied to your post",
     "score": 38,
     "type": "reply",
     "url": "@ban485/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t201003268z"
   },
   {
-    "date": "2016-08-31T19:28:12",
-    "id": 1626796,
-    "msg": "@churdtzu voted on your post ($5.09)",
-    "score": 75,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
     "date": "2016-08-31T20:03:33",
-    "id": 1625631,
+    "id": 1633119,
     "msg": "@biervibes replied to your post",
     "score": 35,
     "type": "reply",
     "url": "@biervibes/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t200331272z"
   },
   {
+    "date": "2016-08-31T19:28:12",
+    "id": 1633227,
+    "msg": "@churdtzu voted on your post ($5.09)",
+    "score": 75,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T18:41:45",
-    "id": 1624807,
+    "id": 1630951,
     "msg": "@onceuponatime voted on your post ($62.17)",
     "score": 100,
     "type": "vote",
@@ -89,7 +89,7 @@
   },
   {
     "date": "2016-08-31T18:39:18",
-    "id": 1624785,
+    "id": 1630929,
     "msg": "@krishtopa voted on your post ($1.18)",
     "score": 75,
     "type": "vote",
@@ -97,7 +97,7 @@
   },
   {
     "date": "2016-08-31T18:32:03",
-    "id": 1624720,
+    "id": 1630863,
     "msg": "@igster voted on your post ($0.48)",
     "score": 50,
     "type": "vote",
@@ -105,7 +105,7 @@
   },
   {
     "date": "2016-08-31T18:29:21",
-    "id": 1624695,
+    "id": 1630838,
     "msg": "@indominon voted on your post ($5.33)",
     "score": 75,
     "type": "vote",
@@ -113,7 +113,7 @@
   },
   {
     "date": "2016-08-31T18:21:00",
-    "id": 1623577,
+    "id": 1629720,
     "msg": "@gord0b voted on your post ($0.56)",
     "score": 50,
     "type": "vote",
@@ -121,7 +121,7 @@
   },
   {
     "date": "2016-08-31T17:56:36",
-    "id": 1623350,
+    "id": 1629492,
     "msg": "@samupaha voted on your post ($43.50)",
     "score": 100,
     "type": "vote",
@@ -129,7 +129,7 @@
   },
   {
     "date": "2016-08-31T17:47:09",
-    "id": 1622785,
+    "id": 1628967,
     "msg": "@rmach replied to your post",
     "score": 34,
     "type": "reply",
@@ -137,7 +137,7 @@
   },
   {
     "date": "2016-08-31T17:20:54",
-    "id": 1621240,
+    "id": 1627943,
     "msg": "@elpablopino replied to your post",
     "score": 35,
     "type": "reply",
@@ -145,7 +145,7 @@
   },
   {
     "date": "2016-08-31T16:50:27",
-    "id": 1620999,
+    "id": 1627702,
     "msg": "@bluehorseshoe replied to your post",
     "score": 48,
     "type": "reply",
@@ -153,7 +153,7 @@
   },
   {
     "date": "2016-08-31T16:44:21",
-    "id": 1620900,
+    "id": 1627043,
     "msg": "@bluehorseshoe voted on your post ($0.27)",
     "score": 50,
     "type": "vote",
@@ -161,7 +161,7 @@
   },
   {
     "date": "2016-08-31T16:22:48",
-    "id": 1619939,
+    "id": 1626118,
     "msg": "@angeldettmar replied to your post",
     "score": 25,
     "type": "reply",
@@ -169,7 +169,7 @@
   },
   {
     "date": "2016-08-31T16:13:39",
-    "id": 1619868,
+    "id": 1626047,
     "msg": "@nobreku replied to your post",
     "score": 47,
     "type": "reply",
@@ -177,7 +177,7 @@
   },
   {
     "date": "2016-08-31T16:03:39",
-    "id": 1619790,
+    "id": 1625969,
     "msg": "@moonguy replied to your post",
     "score": 44,
     "type": "reply",
@@ -185,39 +185,15 @@
   },
   {
     "date": "2016-08-31T15:51:33",
-    "id": 1618944,
+    "id": 1625080,
     "msg": "@lookie-here replied to your post",
     "score": 25,
     "type": "reply",
     "url": "@lookie-here/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t155134531z"
   },
   {
-    "date": "2016-08-31T14:35:12",
-    "id": 1617774,
-    "msg": "@derekareith voted on your post ($1.67)",
-    "score": 75,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
-    "date": "2016-08-31T14:29:27",
-    "id": 1617731,
-    "msg": "@martin-wichmann voted on your post ($1.08)",
-    "score": 75,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
-    "date": "2016-08-31T14:20:48",
-    "id": 1617659,
-    "msg": "@oaldamster voted on your post ($1.10)",
-    "score": 75,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
     "date": "2016-08-31T14:49:45",
-    "id": 1617493,
+    "id": 1623641,
     "msg": "@tl1210 replied to your post",
     "score": 25,
     "type": "reply",
@@ -225,15 +201,39 @@
   },
   {
     "date": "2016-08-31T14:37:24",
-    "id": 1617414,
+    "id": 1623562,
     "msg": "@derekareith replied to your post",
     "score": 57,
     "type": "reply",
     "url": "@derekareith/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t143716470z"
   },
   {
+    "date": "2016-08-31T14:35:12",
+    "id": 1623904,
+    "msg": "@derekareith voted on your post ($1.67)",
+    "score": 75,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
+    "date": "2016-08-31T14:29:27",
+    "id": 1623861,
+    "msg": "@martin-wichmann voted on your post ($1.08)",
+    "score": 75,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
+    "date": "2016-08-31T14:20:48",
+    "id": 1623789,
+    "msg": "@oaldamster voted on your post ($1.10)",
+    "score": 75,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T13:57:42",
-    "id": 1616730,
+    "id": 1622858,
     "msg": "@bitshares101 voted on your post ($0.31)",
     "score": 50,
     "type": "vote",
@@ -241,31 +241,39 @@
   },
   {
     "date": "2016-08-31T13:45:12",
-    "id": 1616628,
+    "id": 1622753,
     "msg": "@picokernel voted on your post ($0.25)",
     "score": 50,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T13:32:24",
-    "id": 1616513,
-    "msg": "@kus-knee voted on your post ($1.00)",
-    "score": 50,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
     "date": "2016-08-31T13:43:36",
-    "id": 1616195,
+    "id": 1622331,
     "msg": "@kus-knee replied to your post",
     "score": 56,
     "type": "reply",
     "url": "@kus-knee/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t134334569z"
   },
   {
+    "date": "2016-08-31T13:32:24",
+    "id": 1622637,
+    "msg": "@kus-knee voted on your post ($1.00)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
+    "date": "2016-08-31T13:17:06",
+    "id": 1621527,
+    "msg": "@ash replied to your post",
+    "score": 62,
+    "type": "reply",
+    "url": "@ash/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t131707387z"
+  },
+  {
     "date": "2016-08-31T13:13:27",
-    "id": 1615730,
+    "id": 1621851,
     "msg": "@vip voted on your post ($1.60)",
     "score": 75,
     "type": "vote",
@@ -273,39 +281,31 @@
   },
   {
     "date": "2016-08-31T13:08:51",
-    "id": 1615688,
+    "id": 1621807,
     "msg": "@chainreaction voted on your post ($2.18)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T12:41:27",
-    "id": 1615504,
-    "msg": "@halo voted on your post ($0.47)",
-    "score": 50,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
-    "date": "2016-08-31T13:17:06",
-    "id": 1615401,
-    "msg": "@ash replied to your post",
-    "score": 62,
-    "type": "reply",
-    "url": "@ash/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t131707387z"
-  },
-  {
     "date": "2016-08-31T12:45:33",
-    "id": 1615196,
+    "id": 1621322,
     "msg": "@maytons replied to your post",
     "score": 39,
     "type": "reply",
     "url": "@maytons/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t124412967z"
   },
   {
+    "date": "2016-08-31T12:41:27",
+    "id": 1621620,
+    "msg": "@halo voted on your post ($0.47)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T12:04:24",
-    "id": 1614650,
+    "id": 1620762,
     "msg": "@sandra voted on your post ($2.47)",
     "score": 75,
     "type": "vote",
@@ -313,7 +313,7 @@
   },
   {
     "date": "2016-08-31T12:04:09",
-    "id": 1614646,
+    "id": 1620758,
     "msg": "@ihashfury voted on your post ($19.33)",
     "score": 100,
     "type": "vote",
@@ -321,7 +321,7 @@
   },
   {
     "date": "2016-08-31T11:44:09",
-    "id": 1614164,
+    "id": 1620297,
     "msg": "@meteor78 replied to your post",
     "score": 42,
     "type": "reply",
@@ -329,15 +329,23 @@
   },
   {
     "date": "2016-08-31T11:20:51",
-    "id": 1613755,
+    "id": 1619860,
     "msg": "@dragonanarchist voted on your post ($0.84)",
     "score": 50,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
+    "date": "2016-08-31T11:05:06",
+    "id": 1619413,
+    "msg": "@cryptogee replied to your post",
+    "score": 62,
+    "type": "reply",
+    "url": "@cryptogee/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t110501475z"
+  },
+  {
     "date": "2016-08-31T11:04:18",
-    "id": 1613658,
+    "id": 1619761,
     "msg": "@cryptogee voted on your post ($16.85)",
     "score": 100,
     "type": "vote",
@@ -345,31 +353,31 @@
   },
   {
     "date": "2016-08-31T11:02:24",
-    "id": 1613645,
+    "id": 1619748,
     "msg": "@spiz0r voted on your post ($0.21)",
     "score": 50,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T11:05:06",
-    "id": 1613307,
-    "msg": "@cryptogee replied to your post",
-    "score": 62,
-    "type": "reply",
-    "url": "@cryptogee/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t110501475z"
-  },
-  {
     "date": "2016-08-31T10:51:57",
-    "id": 1612982,
+    "id": 1619084,
     "msg": "@magicmonk voted on your post ($0.32)",
     "score": 50,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
+    "date": "2016-08-31T10:42:30",
+    "id": 1618630,
+    "msg": "@stea90 replied to your post",
+    "score": 44,
+    "type": "reply",
+    "url": "@stea90/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t104228498z"
+  },
+  {
     "date": "2016-08-31T10:40:33",
-    "id": 1612907,
+    "id": 1619009,
     "msg": "@bravenewcoin voted on your post ($2.53)",
     "score": 75,
     "type": "vote",
@@ -377,7 +385,7 @@
   },
   {
     "date": "2016-08-31T10:40:21",
-    "id": 1612905,
+    "id": 1619007,
     "msg": "@thecryptodrive voted on your post ($1.26)",
     "score": 75,
     "type": "vote",
@@ -385,31 +393,15 @@
   },
   {
     "date": "2016-08-31T10:40:00",
-    "id": 1612902,
+    "id": 1619004,
     "msg": "@steemdrive voted on your post ($2.91)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T10:04:39",
-    "id": 1612603,
-    "msg": "@ashold882015 voted on your post ($0.32)",
-    "score": 50,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
-    "date": "2016-08-31T10:42:30",
-    "id": 1612527,
-    "msg": "@stea90 replied to your post",
-    "score": 44,
-    "type": "reply",
-    "url": "@stea90/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t104228498z"
-  },
-  {
     "date": "2016-08-31T10:32:06",
-    "id": 1612484,
+    "id": 1618587,
     "msg": "@thelocal replied to your post",
     "score": 30,
     "type": "reply",
@@ -417,15 +409,23 @@
   },
   {
     "date": "2016-08-31T10:09:15",
-    "id": 1612402,
+    "id": 1618505,
     "msg": "@ba-boo replied to your post",
     "score": 41,
     "type": "reply",
     "url": "@ba-boo/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t100912831z"
   },
   {
+    "date": "2016-08-31T10:04:39",
+    "id": 1618690,
+    "msg": "@ashold882015 voted on your post ($0.32)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T09:43:45",
-    "id": 1612142,
+    "id": 1618228,
     "msg": "@stephencurry voted on your post ($1.85)",
     "score": 75,
     "type": "vote",
@@ -433,7 +433,7 @@
   },
   {
     "date": "2016-08-31T09:41:15",
-    "id": 1611909,
+    "id": 1617987,
     "msg": "@nataliadobrick replied to your post",
     "score": 47,
     "type": "reply",
@@ -441,7 +441,7 @@
   },
   {
     "date": "2016-08-31T09:26:09",
-    "id": 1611845,
+    "id": 1617923,
     "msg": "@pytin replied to your post",
     "score": 25,
     "type": "reply",
@@ -449,15 +449,23 @@
   },
   {
     "date": "2016-08-31T09:16:12",
-    "id": 1611791,
+    "id": 1617869,
     "msg": "@runridefly replied to your post",
     "score": 51,
     "type": "reply",
     "url": "@runridefly/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t091608927z"
   },
   {
+    "date": "2016-08-31T09:08:06",
+    "id": 1617473,
+    "msg": "@gregoryschneider replied to your post",
+    "score": 43,
+    "type": "reply",
+    "url": "@gregoryschneider/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t090808003z"
+  },
+  {
     "date": "2016-08-31T08:54:39",
-    "id": 1611577,
+    "id": 1617651,
     "msg": "@tarekadam voted on your post ($0.51)",
     "score": 50,
     "type": "vote",
@@ -465,23 +473,15 @@
   },
   {
     "date": "2016-08-31T08:52:18",
-    "id": 1611574,
+    "id": 1617648,
     "msg": "@tim-johnston voted on your post ($1.51)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T09:08:06",
-    "id": 1611401,
-    "msg": "@gregoryschneider replied to your post",
-    "score": 43,
-    "type": "reply",
-    "url": "@gregoryschneider/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t090808003z"
-  },
-  {
     "date": "2016-08-31T08:43:33",
-    "id": 1611263,
+    "id": 1617335,
     "msg": "@sky.max replied to your post",
     "score": 31,
     "type": "reply",
@@ -489,7 +489,7 @@
   },
   {
     "date": "2016-08-31T08:04:33",
-    "id": 1610605,
+    "id": 1616663,
     "msg": "@radioactivities replied to your post",
     "score": 50,
     "type": "reply",
@@ -497,7 +497,7 @@
   },
   {
     "date": "2016-08-31T07:39:54",
-    "id": 1610451,
+    "id": 1616509,
     "msg": "@hms818 replied to your post",
     "score": 41,
     "type": "reply",
@@ -505,7 +505,7 @@
   },
   {
     "date": "2016-08-31T07:39:00",
-    "id": 1610448,
+    "id": 1616506,
     "msg": "@fleetinuance replied to your post",
     "score": 48,
     "type": "reply",
@@ -513,7 +513,7 @@
   },
   {
     "date": "2016-08-31T07:31:18",
-    "id": 1610135,
+    "id": 1616192,
     "msg": "@fuzzyvest voted on your post ($119.20)",
     "score": 100,
     "type": "vote",
@@ -521,7 +521,7 @@
   },
   {
     "date": "2016-08-31T07:30:48",
-    "id": 1610132,
+    "id": 1616189,
     "msg": "@officialfuzzy voted on your post ($6.82)",
     "score": 75,
     "type": "vote",
@@ -529,7 +529,7 @@
   },
   {
     "date": "2016-08-31T07:27:57",
-    "id": 1610105,
+    "id": 1616162,
     "msg": "@all-of-us voted on your post ($0.27)",
     "score": 50,
     "type": "vote",
@@ -537,7 +537,7 @@
   },
   {
     "date": "2016-08-31T07:13:54",
-    "id": 1610040,
+    "id": 1616092,
     "msg": "@berkah voted on your post ($7.16)",
     "score": 75,
     "type": "vote",
@@ -545,31 +545,15 @@
   },
   {
     "date": "2016-08-31T06:52:03",
-    "id": 1609896,
+    "id": 1615945,
     "msg": "@darrantrute voted on your post ($0.22)",
     "score": 50,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T06:29:06",
-    "id": 1608805,
-    "msg": "@avarice voted on your post ($1.08)",
-    "score": 75,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
-    "date": "2016-08-31T06:26:54",
-    "id": 1608799,
-    "msg": "@marketingmonk voted on your post ($0.55)",
-    "score": 50,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
     "date": "2016-08-31T06:39:36",
-    "id": 1608075,
+    "id": 1614565,
     "msg": "@steven1980 replied to your post",
     "score": 48,
     "type": "reply",
@@ -577,23 +561,31 @@
   },
   {
     "date": "2016-08-31T06:39:27",
-    "id": 1608073,
+    "id": 1614563,
     "msg": "@bontonstory replied to your post",
     "score": 42,
     "type": "reply",
     "url": "@bontonstory/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t063924506z"
   },
   {
-    "date": "2016-08-31T05:07:27",
-    "id": 1607475,
-    "msg": "@kenny-crane voted on your post ($1.83)",
+    "date": "2016-08-31T06:29:06",
+    "id": 1614853,
+    "msg": "@avarice voted on your post ($1.08)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
+    "date": "2016-08-31T06:26:54",
+    "id": 1614847,
+    "msg": "@marketingmonk voted on your post ($0.55)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T05:26:03",
-    "id": 1607333,
+    "id": 1613365,
     "msg": "@steemrocket replied to your post",
     "score": 41,
     "type": "reply",
@@ -601,23 +593,23 @@
   },
   {
     "date": "2016-08-31T05:21:03",
-    "id": 1607306,
+    "id": 1613338,
     "msg": "@bigedude replied to your post",
     "score": 44,
     "type": "reply",
     "url": "@bigedude/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t052059558z"
   },
   {
-    "date": "2016-08-31T04:59:39",
-    "id": 1606896,
-    "msg": "@markrmorrisjr voted on your post ($0.37)",
-    "score": 50,
+    "date": "2016-08-31T05:07:27",
+    "id": 1613504,
+    "msg": "@kenny-crane voted on your post ($1.83)",
+    "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
     "date": "2016-08-31T05:02:27",
-    "id": 1606550,
+    "id": 1612567,
     "msg": "@markrmorrisjr replied to your post",
     "score": 59,
     "type": "reply",
@@ -625,15 +617,23 @@
   },
   {
     "date": "2016-08-31T05:02:06",
-    "id": 1606547,
+    "id": 1612564,
     "msg": "@heroic15397 replied to your post",
     "score": 44,
     "type": "reply",
     "url": "@heroic15397/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t050208187z"
   },
   {
+    "date": "2016-08-31T04:59:39",
+    "id": 1612925,
+    "msg": "@markrmorrisjr voted on your post ($0.37)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T04:56:00",
-    "id": 1606512,
+    "id": 1612529,
     "msg": "@internets replied to your post",
     "score": 42,
     "type": "reply",
@@ -641,7 +641,7 @@
   },
   {
     "date": "2016-08-31T04:44:48",
-    "id": 1606437,
+    "id": 1612454,
     "msg": "@azurejasper replied to your post",
     "score": 49,
     "type": "reply",
@@ -649,7 +649,7 @@
   },
   {
     "date": "2016-08-31T04:10:27",
-    "id": 1605906,
+    "id": 1611922,
     "msg": "@sigmajin voted on your post ($1.34)",
     "score": 75,
     "type": "vote",
@@ -657,7 +657,7 @@
   },
   {
     "date": "2016-08-31T04:10:24",
-    "id": 1605903,
+    "id": 1611919,
     "msg": "@tombstone voted on your post ($367.35)",
     "score": 100,
     "type": "vote",
@@ -665,15 +665,23 @@
   },
   {
     "date": "2016-08-31T04:09:15",
-    "id": 1605884,
+    "id": 1611899,
     "msg": "@sterlinluxan voted on your post ($1.66)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
+    "date": "2016-08-31T04:06:06",
+    "id": 1611462,
+    "msg": "@klye replied to your post",
+    "score": 57,
+    "type": "reply",
+    "url": "@klye/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t040620573z"
+  },
+  {
     "date": "2016-08-31T04:05:06",
-    "id": 1605830,
+    "id": 1611839,
     "msg": "@klye voted on your post ($0.39)",
     "score": 50,
     "type": "vote",
@@ -681,7 +689,7 @@
   },
   {
     "date": "2016-08-31T04:00:51",
-    "id": 1605762,
+    "id": 1611768,
     "msg": "@nixonnox voted on your post ($0.37)",
     "score": 50,
     "type": "vote",
@@ -689,15 +697,23 @@
   },
   {
     "date": "2016-08-31T03:59:15",
-    "id": 1605740,
+    "id": 1611745,
     "msg": "@jchch voted on your post ($1.67)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
+    "date": "2016-08-31T03:41:48",
+    "id": 1611310,
+    "msg": "@timbot606 replied to your post",
+    "score": 44,
+    "type": "reply",
+    "url": "@timbot606/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t034142495z"
+  },
+  {
     "date": "2016-08-31T03:34:24",
-    "id": 1605598,
+    "id": 1611601,
     "msg": "@ausbitbank voted on your post ($0.24)",
     "score": 50,
     "type": "vote",
@@ -705,47 +721,31 @@
   },
   {
     "date": "2016-08-31T03:33:00",
-    "id": 1605588,
+    "id": 1611591,
     "msg": "@thedashguy voted on your post ($2.43)",
     "score": 75,
     "type": "vote",
     "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
   },
   {
-    "date": "2016-08-31T04:06:06",
-    "id": 1605461,
-    "msg": "@klye replied to your post",
-    "score": 57,
-    "type": "reply",
-    "url": "@klye/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t040620573z"
-  },
-  {
-    "date": "2016-08-31T03:41:48",
-    "id": 1605309,
-    "msg": "@timbot606 replied to your post",
-    "score": 44,
-    "type": "reply",
-    "url": "@timbot606/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t034142495z"
-  },
-  {
-    "date": "2016-08-31T02:58:36",
-    "id": 1604617,
-    "msg": "@team-leibniz voted on your post ($0.38)",
-    "score": 50,
-    "type": "vote",
-    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
-  },
-  {
     "date": "2016-08-31T03:01:45",
-    "id": 1604371,
+    "id": 1610366,
     "msg": "@wiser replied to your post",
     "score": 46,
     "type": "reply",
     "url": "@wiser/re-steve-walschot-steeming-around-the-clock-bye-bye-regular-job-20160831t030140507z"
   },
   {
+    "date": "2016-08-31T02:58:36",
+    "id": 1610615,
+    "msg": "@team-leibniz voted on your post ($0.38)",
+    "score": 50,
+    "type": "vote",
+    "url": "@steve-walschot/steeming-around-the-clock-bye-bye-regular-job"
+  },
+  {
     "date": "2016-08-31T02:55:18",
-    "id": 1604345,
+    "id": 1610340,
     "msg": "@comealong replied to your post",
     "score": 48,
     "type": "reply",
@@ -753,7 +753,7 @@
   },
   {
     "date": "2016-08-31T02:41:48",
-    "id": 1604263,
+    "id": 1610258,
     "msg": "@jhermanbeans replied to your post",
     "score": 52,
     "type": "reply",
@@ -761,7 +761,7 @@
   },
   {
     "date": "2016-08-31T02:41:03",
-    "id": 1604260,
+    "id": 1610255,
     "msg": "@luup replied to your post",
     "score": 29,
     "type": "reply",
@@ -769,7 +769,7 @@
   },
   {
     "date": "2016-08-31T02:40:33",
-    "id": 1604258,
+    "id": 1610253,
     "msg": "@uniwhisp replied to your post",
     "score": 48,
     "type": "reply",
@@ -777,7 +777,7 @@
   },
   {
     "date": "2016-08-31T02:29:15",
-    "id": 1603874,
+    "id": 1609869,
     "msg": "@xeldal voted on your post ($105.72)",
     "score": 100,
     "type": "vote",
@@ -785,7 +785,7 @@
   },
   {
     "date": "2016-08-31T02:29:09",
-    "id": 1603873,
+    "id": 1609868,
     "msg": "@chris-bell voted on your post ($0.31)",
     "score": 50,
     "type": "vote",
@@ -793,7 +793,7 @@
   },
   {
     "date": "2016-08-31T02:26:45",
-    "id": 1603592,
+    "id": 1609578,
     "msg": "@mctiller replied to your post",
     "score": 58,
     "type": "reply",
