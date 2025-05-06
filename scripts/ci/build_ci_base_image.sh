@@ -10,7 +10,7 @@ cat <<EOF
   
   Options:
     --registry=URL Registry to use as a part of image names (default: registry.gitlab.syncad.com/hive/hivemind)
-    --tag=TAG      Image tag (default: python-3.8-slim-6)
+    --tag=TAG      Image tag (default: python-3.12-slim-1)
 EOF
 }
 
@@ -21,7 +21,7 @@ function image-exists() {
 }
 
 REGISTRY=${REGISTRY:-"registry.gitlab.syncad.com/hive/hivemind"}
-CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-6"}
+CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.12-slim-1"}
 
 while [ $# -gt 0 ]; do
   case "$1" in
