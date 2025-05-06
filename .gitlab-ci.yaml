@@ -485,7 +485,7 @@ sync:
   - data-cache-storage
 
 e2e_benchmark_on_postgrest:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
   stage: benchmark
   interruptible: true
   needs:
