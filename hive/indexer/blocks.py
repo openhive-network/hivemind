@@ -29,15 +29,9 @@ from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
+from hive.indexer.flusher import time_collector, process_flush_items, process_flush_items_threaded
 
 log = logging.getLogger(__name__)
-
-
-def time_collector(func, *args, **kwargs):
-    start_time = FSM.start()
-    result = func(*args, **kwargs)
-    elapsed_time = FSM.stop(start_time)
-    return result, elapsed_time
 
 
 class Blocks:
@@ -59,10 +53,10 @@ class Blocks:
         ('Accounts', Accounts.flush, Accounts),
     ]
     _concurrent_notifications = [
-        ("VoteNotifications", NotificationCache.flush_vote_notifications, Votes),
-        ("PostNotifications", NotificationCache.flush_post_notifications, Posts),
-        ("FollowNotifications", NotificationCache.flush_follow_notifications, Follow),
-        ("ReblogNotifications", NotificationCache.flush_reblog_notifications, Reblog),
+        ("VoteNotifications", NotificationCache.flush_vote_notifications, Votes, Votes),
+        ("PostNotifications", NotificationCache.flush_post_notifications, Posts, Posts),
+        ("FollowNotifications", NotificationCache.flush_follow_notifications, Follow, Follow),
+        ("ReblogNotifications", NotificationCache.flush_reblog_notifications, Reblog, Reblog),
     ]
 
     def __init__(self):
@@ -155,75 +149,13 @@ class Blocks:
 
     @classmethod
     def flush_data_in_n_threads(cls) -> None:
-        completed_threads = 0
-
-        pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_flush))
-
-        flush_futures = {
-            pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush
-        }
-        for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completed_threads = completed_threads + 1
-            try:
-                (n, elapsedTime) = future.result()
-                assert n is not None
-                assert not c.sync_tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
-
-            #                if n > 0:
-            #                    log.info('%r flush generated %d records' % (description, n))
-            except Exception as exc:
-                log.error(f'{description!r} generated an exception: {exc}')
-                raise exc
-        pool.shutdown()
-
-        assert completed_threads == len(cls._concurrent_flush)
-
-        completed_threads = 0
-
-        pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_notifications))
-
-        flush_futures = {
-            pool.submit(time_collector, f, c): (description, c) for (description, f, c) in cls._concurrent_notifications
-        }
-        for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completed_threads = completed_threads + 1
-            try:
-                (n, elapsedTime) = future.result()
-                assert n is not None
-                assert not c.sync_tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
-
-            #                if n > 0:
-            #                    log.info('%r flush generated %d records' % (description, n))
-            except Exception as exc:
-                log.error(f'{description!r} generated an exception: {exc}')
-                raise exc
-        pool.shutdown()
-
-        assert completed_threads == len(cls._concurrent_notifications)
+        process_flush_items_threaded(cls._concurrent_flush)
+        process_flush_items_threaded(cls._concurrent_notifications)
 
     @classmethod
     def flush_data_in_1_thread(cls) -> None:
-        for description, f, c in cls._concurrent_flush:
-            try:
-                (n, elapsedTime) = time_collector(f)
-                log.info("%s flush executed in: %.4f s", description, elapsedTime)
-            except Exception as exc:
-                log.error(f'{description!r} generated an exception: {exc}')
-                raise exc
-
-        for description, f, c in cls._concurrent_notifications:
-            try:
-                (n, elapsedTime) = time_collector(f, c)
-                log.info("%s notifications flush executed in: %.4f s", description, elapsedTime)
-            except Exception as exc:
-                log.error(f'{description!r} generated an exception: {exc}')
-                raise exc
+        process_flush_items(cls._concurrent_flush)
+        process_flush_items(cls._concurrent_notifications)
 
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
