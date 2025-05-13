@@ -283,4 +283,4 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.flush_follows() + NotificationCache.flush_follow_notifications(cls)
+        return cls.flush_follows()

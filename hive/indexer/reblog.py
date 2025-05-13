@@ -76,7 +76,7 @@ class Reblog(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.flush_reblogs() + NotificationCache.flush_reblog_notifications(cls)
+        return cls.flush_reblogs()
 
     @classmethod
     def flush_reblogs(cls):
