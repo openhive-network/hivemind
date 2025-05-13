@@ -3,11 +3,13 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
 import logging
-from typing import Callable, List, Tuple, Any
+from typing import Callable, List, Tuple, Any, TypeVar, Sequence
 
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
+
+T = TypeVar('T')
 
 
 def time_collector(func: Callable, *args, **kwargs) -> Tuple[Any, float]:
@@ -19,7 +21,7 @@ def time_collector(func: Callable, *args, **kwargs) -> Tuple[Any, float]:
 
 
 def process_flush_items(
-    items: List[Tuple[str, Callable, Any, ...]]
+    items: List[Tuple[str, Callable, T, Sequence[Any]]]
 ) -> None:
     """Process a list of flush items, measuring their execution time.
 
@@ -42,7 +44,7 @@ def process_flush_items(
 
 
 def process_flush_items_threaded(
-    items: List[Tuple[str, Callable, Any, ...]]
+    items: List[Tuple[str, Callable, T, Sequence[Any]]]
 ) -> None:
     """Process a list of flush items in parallel using a thread pool.
 
