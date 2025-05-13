@@ -417,4 +417,4 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.comment_payout_op() + cls.flush_into_db() + NotificationCache.flush_post_notifications(cls)
+        return cls.comment_payout_op() + cls.flush_into_db()

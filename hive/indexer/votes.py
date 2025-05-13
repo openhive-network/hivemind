@@ -183,7 +183,7 @@ class Votes(DbAdapterHolder):
                         vd['num_changes'],
                         vd['block_num'],
                         vd['is_effective'],
-                    ) for k,vd in chunk.items()
+                    ) for k, vd in chunk.items()
                 )
                 actual_query = sql.format(values_str)
                 post_ids = cls.db.query_prepared_all(actual_query)
@@ -201,4 +201,4 @@ class Votes(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        return cls.flush_votes() + NotificationCache.flush_vote_notifications(cls)
+        return cls.flush_votes()
