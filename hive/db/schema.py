@@ -478,6 +478,22 @@ def create_fk(db):
         for fk in table.foreign_keys:
             db.query_no_return(AddConstraint(fk.constraint), is_prepared=True)
 
+def create_statistics(db):
+    """Create extended statistics dependencies for various tables."""
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_accounts_stats (dependencies) ON id, haf_id, name, created_at FROM hive_accounts;"
+    db.query_no_return(sql)
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_tag_data_stats (dependencies) ON id, tag FROM hive_tag_data;"
+    db.query_no_return(sql)
+    db.query_no_return(sql)
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_posts_stats (dependencies) ON created_at, block_num_created FROM hive_posts;"
+    db.query_no_return(sql)
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_reblogs_stats (dependencies) ON created_at, block_num FROM hive_reblogs;"
+    db.query_no_return(sql)
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_communities_stats (dependencies) ON id, name FROM hive_communities;"
+    db.query_no_return(sql)
+    sql = f"CREATE STATISTICS IF NOT EXISTS hive_subscriptions_stats (dependencies) ON created_at, block_num FROM hive_subscriptions;"
+    db.query_no_return(sql)
+
 
 def setup(db, admin_db):
     """Creates all tables and seed data"""
@@ -489,11 +505,10 @@ def setup(db, admin_db):
 
     prepare_app_context(db=db)
     build_metadata().create_all(db.engine())
+    
+    create_statistics(db)
 
-    # tune auto vacuum/analyze
-    reset_autovac(db)
-
-    # sets FILLFACTOR:
+    reset_autovac(db) # tune auto vacuum/analyze
     set_fillfactor(db)
 
     # Uncomment tables registration when hivemind becomes forking application
