@@ -484,7 +484,6 @@ def create_statistics(db):
     db.query_no_return(sql)
     sql = f"CREATE STATISTICS IF NOT EXISTS hive_tag_data_stats (dependencies) ON id, tag FROM {SCHEMA_NAME}.hive_tag_data;"
     db.query_no_return(sql)
-    db.query_no_return(sql)
     sql = f"CREATE STATISTICS IF NOT EXISTS hive_posts_stats (dependencies) ON created_at, block_num_created FROM {SCHEMA_NAME}.hive_posts;"
     db.query_no_return(sql)
     sql = f"CREATE STATISTICS IF NOT EXISTS hive_reblogs_stats (dependencies) ON created_at, block_num FROM {SCHEMA_NAME}.hive_reblogs;"
