@@ -7,8 +7,10 @@ from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.account import get_profile_str
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import chunks
 
 log = logging.getLogger(__name__)
+
 
 class Accounts(DbAdapterHolder):
     """Manages account id map, dirty queue, and `hive_accounts` table."""
@@ -161,7 +163,7 @@ class Accounts(DbAdapterHolder):
             sql = f"""
                     UPDATE {SCHEMA_NAME}.hive_accounts ha
                     SET
-                    posting_json_metadata = 
+                    posting_json_metadata =
                             (
                                 CASE T2.allow_change_posting
                                     WHEN True THEN T2.posting_json_metadata
@@ -186,25 +188,12 @@ class Accounts(DbAdapterHolder):
                     WHERE ha.name = T2.name
                 """
 
-            values = []
-            values_limit = 1000
-
-            for name, data in cls._updates_data.items():
-                values.append(
+            for chunk in chunks(cls._updates_data, 1000):
+                values = [
                     f"({data['allow_change_posting']}, {cls.get_json_data(data['posting_json_metadata'])}, {cls.get_json_data(data['json_metadata'])}, '{name}')"
-                )
-
-                if len(values) >= values_limit:
-                    values_str = ','.join(values)
-                    actual_query = sql.format(values_str)
-                    cls.db.query_prepared(actual_query)
-                    values.clear()
-
-            if len(values) > 0:
-                values_str = ','.join(values)
-                actual_query = sql.format(values_str)
-                cls.db.query_prepared(actual_query)
-                values.clear()
+                    for name, data in chunk.items()
+                ]
+                cls.db.query_prepared(sql.format(','.join(values)))
 
             n = len(cls._updates_data)
             cls._updates_data.clear()
