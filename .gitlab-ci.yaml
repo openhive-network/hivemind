@@ -40,7 +40,7 @@ variables:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 0e2bd7c69cc26928665281435165fd3288940db9
+  ref: 9776a3727dda2eed4c1b6142bfe8d45d5e6379bc # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -298,33 +298,33 @@ prepare_haf_data:
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
   extends: .job-defaults
-  image:
+  image: 
     name: "$HAF_IMAGE_NAME"
-    entrypoint: [""]
+    entrypoint: [ "" ]
   stage: build
   needs:
-  - prepare_haf_data
-  - prepare_haf_image
+    - prepare_haf_data
+    - prepare_haf_image
   variables:
     DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
     DATA_SOURCE: $DATA_CACHE_HAF
     DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
   script:
-  - |
-    set -e
-    haf/hive/scripts/copy_datadir.sh
-    sudo chmod 777 $DATA_CACHE_HIVEMIND
-    sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
-    cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
+    - |
+      set -e
+      haf/hive/scripts/copy_datadir.sh
+      sudo chmod 777 $DATA_CACHE_HIVEMIND
+      sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
+      cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
   artifacts:
     reports:
       dotenv:
-      - hived_uid.env
+        - hived_uid.env
     paths:
-    - hived_uid.env
+      - hived_uid.env
   tags:
-  - data-cache-storage
+    - data-cache-storage
 
 prepare_hivemind_image:
   stage: build
@@ -366,10 +366,10 @@ cleanup_haf_cache_manual:
 # this cache
 cleanup_pipeline_cache:
   needs:
-  - replay_data_copy
-  - download_await
-  - sync
-  - e2e_benchmark_on_postgrest
+    - replay_data_copy
+    - download_await
+    - sync
+    - e2e_benchmark_on_postgrest
   extends:
   - .cleanup_cache_manual_template
   stage: cleanup
@@ -381,9 +381,9 @@ cleanup_pipeline_cache:
 
 download_await:
   extends: .job-defaults
-  image:
+  image: 
     name: "$HAF_IMAGE_NAME"
-    entrypoint: [""]
+    entrypoint: [ "" ]
   stage: prepare
   variables:
     GIT_STRATEGY: none
