@@ -4,6 +4,7 @@ import enum
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
+from hive.indexer.follow_count import FollowCount
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.normalize import escape_characters
 from hive.utils.misc import chunks
@@ -122,7 +123,6 @@ class Follow(DbAdapterHolder):
             log.info("follow_op %s ignored due to unknown type of follow", op)
             return None
 
-
         # follower is empty or follower account does not exist, or it wasn't that account that authorized operation
         if not op['follower'] or not Accounts.exists(op['follower']) or op['follower'] != account:
             log.info("follow_op %s ignored due to invalid follower", op)
@@ -161,12 +161,14 @@ class Follow(DbAdapterHolder):
                 cls.follows_batches_to_flush.add_delete(follower, following, block_num)
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
+                FollowCount.add_accounts([follower, following])
                 cls.idx += 1
         elif action == FollowAction.Follow:
             for following in op.get('following', []):
                 cls.follows_batches_to_flush.add_insert(follower, following, block_num)
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
+                FollowCount.add_accounts([follower, following])
                 cls.idx += 1
                 NotificationCache.follow_notifications_to_flush.append((follower, following, block_num))
         elif action == FollowAction.Mute:
@@ -174,6 +176,7 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)
                 cls.follows_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
+                FollowCount.add_accounts([follower, following])
                 cls.idx += 1
         elif action == FollowAction.Blacklist:
             for following in op.get('following', []):
@@ -210,6 +213,7 @@ class Follow(DbAdapterHolder):
             cls.idx += 1
         elif action == FollowAction.ResetFollowingList:
             cls.follows_batches_to_flush.add_reset(follower, None, block_num)
+            FollowCount.add_accounts([follower])
             cls.idx += 1
         elif action == FollowAction.ResetMutedList:
             cls.muted_batches_to_flush.add_reset(follower, None, block_num)
@@ -226,12 +230,13 @@ class Follow(DbAdapterHolder):
             cls.muted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_blacklisted_batches_to_flush.add_reset(follower, None, block_num)
             cls.follow_muted_batches_to_flush.add_reset(follower, None, block_num)
+            FollowCount.add_accounts([follower])
             cls.idx += 1
 
     @classmethod
     def on_process_done(cls):
         """Called when current batch processing is complete"""
-        Accounts.follow_recalc_accounts = cls.affected_accounts.copy()
+        pass
 
     @classmethod
     def flush_follows(cls):
@@ -242,7 +247,7 @@ class Follow(DbAdapterHolder):
             cls.blacklisted_batches_to_flush.len() +
             cls.follow_muted_batches_to_flush.len() +
             cls.follow_blacklisted_batches_to_flush.len()
-            )
+        )
         if n == 0:
             return 0
 
