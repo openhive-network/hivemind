@@ -229,6 +229,11 @@ class Follow(DbAdapterHolder):
             cls.idx += 1
 
     @classmethod
+    def on_process_done(cls):
+        """Called when current batch processing is complete"""
+        Accounts.follow_recalc_accounts = cls.affected_accounts.copy()
+
+    @classmethod
     def flush_follows(cls):
         """Flush accumulated follow operations to the database in batches."""
         n = (

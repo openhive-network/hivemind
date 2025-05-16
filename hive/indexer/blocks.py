@@ -380,6 +380,14 @@ class Blocks:
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
+        PostDataCache.on_process_done()
+        Votes.on_process_done()
+        Follow.on_process_done()
+        Posts.on_process_done()
+        Reblog.on_process_done()
+        Notify.on_process_done()
+        Accounts.on_process_done()
+        Mentions.on_process_done()
 
         return num
 
@@ -393,7 +401,6 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
             f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
-            f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
             f"SELECT {SCHEMA_NAME}.prune_notification_cache({block_number})",
         ]

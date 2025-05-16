@@ -436,14 +436,6 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
-        with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_follow_count({last_imported_block}, {current_imported_block});"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_follow_count executed in %.4fs", perf_counter() - time_start)
-
-    @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
         result = func(*args)
@@ -497,7 +489,6 @@ class DbState:
 
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
-            ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
