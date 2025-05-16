@@ -12,8 +12,8 @@ def prepare_app_context(db: Db) -> None:
     if not ctx_present:
         LIMIT_FOR_PROCESSED_BLOCKS = 1000
         synchronization_stages = f"""ARRAY[
-              ( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS} )
-            , ( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS} )
+              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
+            , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
             , hive.live_stage()
         ]::hive.application_stages"""
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
