@@ -151,6 +151,11 @@ class Accounts(DbAdapterHolder):
         return True
 
     @classmethod
+    def on_process_done(cls):
+        """Called when current batch processing is complete"""
+        pass
+
+    @classmethod
     def flush(cls):
         """Flush json_metadatafrom cache to database"""
 
@@ -195,9 +200,17 @@ class Accounts(DbAdapterHolder):
                 ]
                 cls.db.query_prepared(sql.format(','.join(values)))
 
-            n = len(cls._updates_data)
-            cls._updates_data.clear()
             cls.commitTx()
+            n += len(cls._updates_data)
+            cls._updates_data.clear()
+
+        if cls.follow_recalc_accounts:
+            cls.beginTx()
+            for chunk in chunks(cls.follow_recalc_accounts, 1000):
+                cls.db.query_prepared(f"SELECT {SCHEMA_NAME}.update_follow_count(ARRAY[{','.join(chunk)}])")
+            cls.commitTx()
+            n += len(cls.follow_recalc_accounts)
+            cls.follow_recalc_accounts.clear()
 
         cls.inside_flush = False
 
