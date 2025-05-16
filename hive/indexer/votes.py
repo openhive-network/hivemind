@@ -129,6 +129,11 @@ class Votes(DbAdapterHolder):
             }
 
     @classmethod
+    def on_process_done(cls):
+        """Called when current batch processing is complete"""
+        pass
+
+    @classmethod
     def flush_votes(cls):
         """Flush vote data from cache to database"""
 
