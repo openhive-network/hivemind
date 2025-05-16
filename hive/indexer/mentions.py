@@ -16,3 +16,8 @@ class Mentions(DbAdapterHolder):
         log.warning("Deleting too old mentions")
 
         cls.db.query_no_return(f"SELECT {SCHEMA_NAME}.delete_hive_posts_mentions();")
+
+    @classmethod
+    def on_process_done(cls):
+        """Called when current batch processing is complete"""
+        pass

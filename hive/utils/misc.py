@@ -37,11 +37,15 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
 
 
 def chunks(lst, n):
-    """Yield successive n-sized chunks from list or dict o."""
+    """Yield successive n-sized chunks from list, dict, or set o."""
     if isinstance(lst, dict):
         items = list(lst.items())
         for i in range(0, len(items), n):
             yield dict(items[i:i + n])
+    elif isinstance(lst, set):
+        items = list(lst)
+        for i in range(0, len(items), n):
+            yield set(items[i:i + n])
     else:
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
