@@ -16,7 +16,6 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
-from hive.indexer.follow_count import FollowCount
 from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
@@ -51,14 +50,13 @@ class Blocks:
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
         ('Notify', Notify.flush, Notify),
-        ('Accounts', Accounts.flush, Accounts),
     ]
     _concurrent_notifications = [
+        ('Accounts', Accounts.flush, Accounts),
         ("VoteNotifications", NotificationCache.flush_vote_notifications, Votes, Votes),
         ("PostNotifications", NotificationCache.flush_post_notifications, Posts, Posts),
         ("FollowNotifications", NotificationCache.flush_follow_notifications, Follow, Follow),
         ("ReblogNotifications", NotificationCache.flush_reblog_notifications, Reblog, Reblog),
-        ("FollowCount", FollowCount.flush, FollowCount),
     ]
 
     def __init__(self):
@@ -82,7 +80,6 @@ class Blocks:
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
-        FollowCount.setup_own_db_access(shared_db_adapter, "FollowCount")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
