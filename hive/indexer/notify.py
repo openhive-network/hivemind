@@ -80,11 +80,6 @@ class Notify(DbAdapterHolder):
         )
 
     @classmethod
-    def on_process_done(cls):
-        """Called when current batch processing is complete"""
-        pass
-
-    @classmethod
     def flush(cls):
         """Store buffered notifs"""
 

@@ -125,11 +125,6 @@ class Posts(DbAdapterHolder):
                 )
 
     @classmethod
-    def on_process_done(cls):
-        """Called when current batch processing is complete"""
-        pass
-
-    @classmethod
     def flush_into_db(cls):
         sql = f"""
               UPDATE {SCHEMA_NAME}.hive_posts AS ihp SET

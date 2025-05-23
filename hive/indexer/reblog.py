@@ -75,11 +75,6 @@ class Reblog(DbAdapterHolder):
             log.debug("reblog: post not found: %s/%s", author, permlink)
 
     @classmethod
-    def on_process_done(cls):
-        """Called when current batch processing is complete"""
-        pass
-
-    @classmethod
     def flush(cls):
         return cls.flush_reblogs()
 

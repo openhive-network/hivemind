@@ -43,11 +43,6 @@ class PostDataCache(DbAdapterHolder):
         return post_data['body']
 
     @classmethod
-    def on_process_done(cls):
-        """Called when current batch processing is complete"""
-        pass
-
-    @classmethod
     def flush(cls, print_query=False):
         """Flush data from cache to db"""
         if cls._data:
