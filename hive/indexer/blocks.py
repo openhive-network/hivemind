@@ -43,7 +43,7 @@ class Blocks:
     _last_safe_cashout_block = 0
     _is_initial_sync = False
 
-    _concurrent_flush = [
+    _concurrent_flush_1 = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
         ('Votes', Votes.flush, Votes),
@@ -51,7 +51,7 @@ class Blocks:
         ('Reblog', Reblog.flush, Reblog),
         ('Notify', Notify.flush, Notify),
     ]
-    _concurrent_notifications = [
+    _concurrent_flush_2 = [
         ('Accounts', Accounts.flush, Accounts),
         ("VoteNotifications", NotificationCache.flush_vote_notifications, Votes, Votes),
         ("PostNotifications", NotificationCache.flush_post_notifications, Posts, Posts),
@@ -149,13 +149,13 @@ class Blocks:
 
     @classmethod
     def flush_data_in_n_threads(cls) -> None:
-        process_flush_items_threaded(cls._concurrent_flush)
-        process_flush_items_threaded(cls._concurrent_notifications)
+        process_flush_items_threaded(cls._concurrent_flush_1)
+        process_flush_items_threaded(cls._concurrent_flush_2)
 
     @classmethod
     def flush_data_in_1_thread(cls) -> None:
-        process_flush_items(cls._concurrent_flush)
-        process_flush_items(cls._concurrent_notifications)
+        process_flush_items(cls._concurrent_flush_1)
+        process_flush_items(cls._concurrent_flush_2)
 
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
