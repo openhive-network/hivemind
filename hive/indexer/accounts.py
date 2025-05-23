@@ -151,11 +151,6 @@ class Accounts(DbAdapterHolder):
         return True
 
     @classmethod
-    def on_process_done(cls):
-        """Called when current batch processing is complete"""
-        pass
-
-    @classmethod
     def flush(cls):
         """Flush json_metadatafrom cache to database"""
 

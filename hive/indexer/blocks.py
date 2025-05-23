@@ -380,15 +380,6 @@ class Blocks:
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
-        PostDataCache.on_process_done()
-        Votes.on_process_done()
-        Follow.on_process_done()
-        Posts.on_process_done()
-        Reblog.on_process_done()
-        Notify.on_process_done()
-        Accounts.on_process_done()
-        Mentions.on_process_done()
-
         return num
 
     @staticmethod
