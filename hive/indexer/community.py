@@ -470,22 +470,22 @@ class CommunityOp:
         dst_id = None
         score = 35
 
-        if self.account_id and not self.post_id:
+        if self.account_id:
             dst_id = self.account_id
             if not self._subscribed(self.account_id):
                 score = 15
 
-        Notify(
-            block_num=self.block_num,
-            type_id=op,
-            src_id=self.actor_id,
-            dst_id=dst_id,
-            post_id=self.post_id,
-            when=self.date,
-            community_id=self.community_id,
-            score=score,
-            **kwargs,
-        )
+            Notify(
+                block_num=self.block_num,
+                type_id=op,
+                src_id=self.actor_id,
+                dst_id=dst_id,
+                post_id=self.post_id,
+                when=self.date,
+                community_id=self.community_id,
+                score=score,
+                **kwargs,
+            )
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
