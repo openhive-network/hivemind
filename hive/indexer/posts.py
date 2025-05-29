@@ -83,12 +83,14 @@ class Posts(DbAdapterHolder):
         error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])
 
         is_new_post = result['is_new_post']
+        parent_author = op.get('parent_author')
         if is_new_post:
             # add content data to hive_post_data
             post_data = dict(
                 title=op['title'] if op['title'] else '',
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
+                is_root = 'true' if parent_author is None or parent_author == '' else 'false'
             )
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
@@ -96,7 +98,7 @@ class Posts(DbAdapterHolder):
             new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body']) if op['body'] else None
             new_title = op['title'] if op['title'] else None
             new_json = op['json_metadata'] if op['json_metadata'] else None
-            post_data = dict(title=new_title, body=new_body, json=new_json)
+            post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
