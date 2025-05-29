@@ -45,57 +45,80 @@ class PostDataCache(DbAdapterHolder):
     @classmethod
     def flush(cls, print_query=False):
         """Flush data from cache to db"""
-        if cls._data:
-            values_insert = []
-            values_update = []
-            for k, data in cls._data.items():
-                title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
-                body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
-                json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
-                value = f"({k},{title},{body},{json})"
-                if data['is_new_post']:
-                    values_insert.append(value)
-                else:
-                    values_update.append(value)
+        if not cls._data:
+            return 0
 
-            cls.beginTx()
-            if len(values_insert) > 0:
-                sql = f"""
-                    WITH inserted AS (
-                        INSERT INTO {SCHEMA_NAME}.hive_post_data (id, title, body, json)
-                        VALUES {','.join(values_insert)}
-                        RETURNING id
-                    )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM inserted
-                """
-                if print_query:
-                    log.info(f"Executing query:\n{sql}")
-                cls.db.query_prepared(sql)
-                values_insert.clear()
+        values_insert = []
+        values_update = []
+        for k, data in cls._data.items():
+            title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
+            body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
+            json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
+            is_root= data['is_root']
+            value = f"({k},{is_root},{title},{body},{json})"
+            if data['is_new_post']:
+                values_insert.append(value)
+            else:
+                values_update.append(value)
 
-            if len(values_update) > 0:
-                sql = f"""
-                    WITH updated AS (
-                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
-                            title = COALESCE( data_source.title, hpd.title ),
-                            body = COALESCE( data_source.body, hpd.body ),
-                            json = COALESCE( data_source.json, hpd.json )
-                        FROM (
-                            SELECT *
-                            FROM (VALUES {','.join(values_update)})
-                            AS T(id, title, body, json)
-                        ) AS data_source
-                        WHERE hpd.id = data_source.id
-                        RETURNING hpd.id
-                    )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM updated
-                """
-                if print_query:
-                    log.info(f"Executing query:\n{sql}")
-                cls.db.query_prepared(sql)
-                values_update.clear()
+        cls.beginTx()
+        if values_insert:
+            sql = f"""
+                        WITH input_values(id, is_root, title, body, json) AS (
+                            VALUES {','.join(values_insert)}
+                        ),
+                        insert_post_data AS (
+                            INSERT INTO {SCHEMA_NAME}.hive_post_data 
+                            SELECT id, title, body, json FROM input_values
+                            RETURNING id
+                        ),
+                        insert_search_text AS (
+                            INSERT INTO {SCHEMA_NAME}.hive_text_search_data (id, body_tsv)
+                            SELECT iv.id, to_tsvector('simple', COALESCE(iv.title, '') || ' ' || COALESCE(iv.body, ''))
+                            FROM input_values iv
+                            WHERE iv.is_root = true
+                            RETURNING id
+                        )
+                        SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM insert_post_data
+                        UNION
+                        SELECT id FROM insert_search_text;
+            """
+            if print_query:
+                log.info(f"Executing query:\n{sql}")
+            cls.db.query_prepared(sql)
+            values_insert.clear()
 
-            cls.commitTx()
+        if values_update:
+            sql = f"""
+                WITH input_values(id, is_root, title, body, json) AS (
+                    VALUES {','.join(values_update)}
+                ),
+                update_post_data AS (
+                    UPDATE {SCHEMA_NAME}.hive_post_data AS hpd 
+                    SET title = COALESCE( i.title, hpd.title ),
+                        body = COALESCE( i.body, hpd.body ), 
+                        json = COALESCE( i.json, hpd.json )
+                    FROM input_values i
+                    WHERE hpd.id = i.id
+                    RETURNING hpd.id
+                ),
+                update_search_text AS (
+                    UPDATE {SCHEMA_NAME}.hive_text_search_data 
+                    SET body_tsv = to_tsvector('simple', COALESCE(i.title, '') || ' ' || COALESCE(body, '')) --TODO(mickiewicz@syncad.com) title or body could be null
+                    FROM input_values i
+                    WHERE hive_text_search_data.id = i.id
+                    RETURNING hive_text_search_data.id
+                )
+                SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM update_post_data
+                UNION
+                SELECT id FROM update_search_text;
+        """
+            if print_query:
+                log.info(f"Executing query:\n{sql}")
+            cls.db.query_prepared(sql)
+            values_update.clear()
+
+        cls.commitTx()
 
         n = len(cls._data.keys())
         cls._data.clear()

@@ -11,6 +11,8 @@ from sqlalchemy.types import CHAR
 from sqlalchemy.types import SMALLINT
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
+from sqlalchemy.dialects.postgresql import TSVECTOR
+
 
 from hive.conf import SCHEMA_NAME
 from hive.conf import SCHEMA_OWNER_NAME
@@ -177,6 +179,14 @@ def build_metadata():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink'),
+    )
+
+    sa.Table(
+        'hive_text_search_data',
+        metadata,
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
+        sa.Column('body_tsv', TSVECTOR, nullable=False, server_default=''),
+        sa.Index('hive_text_search_data_body_tsv_idx', 'body_tsv', postgresql_using='gin')
     )
 
     sa.Table(
@@ -702,6 +712,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_subscription_id.sql",
         "postgrest/bridge_api/bridge_api_get_profiles.sql",
         "postgrest/utilities/valid_accounts.sql",
+        "postgrest/find_api/find_text.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
