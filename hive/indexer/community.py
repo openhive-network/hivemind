@@ -377,7 +377,7 @@ class CommunityOp:
             DbAdapterHolder.common_block_processing_db().query(
                 f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
             )
-            self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            #self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             DbAdapterHolder.common_block_processing_db().query(
@@ -461,7 +461,8 @@ class CommunityOp:
             )
             self._notify('unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            self._notify('flag_post', payload=self.notes)
+            log.info("flagPost is disabled until https://gitlab.syncad.com/hive/hivemind/-/issues/290 is implemented")
+            # self._notify('flag_post', payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -475,17 +476,17 @@ class CommunityOp:
             if not self._subscribed(self.account_id):
                 score = 15
 
-            Notify(
-                block_num=self.block_num,
-                type_id=op,
-                src_id=self.actor_id,
-                dst_id=dst_id,
-                post_id=self.post_id,
-                when=self.date,
-                community_id=self.community_id,
-                score=score,
-                **kwargs,
-            )
+        Notify(
+            block_num=self.block_num,
+            type_id=op,
+            src_id=self.actor_id,
+            dst_id=dst_id,
+            post_id=self.post_id,
+            when=self.date,
+            community_id=self.community_id,
+            score=score,
+            **kwargs,
+        )
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
