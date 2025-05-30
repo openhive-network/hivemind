@@ -119,7 +119,6 @@ class DbState:
             'hive_posts_payout_at_idx',
             'hive_posts_sc_trend_id_idx',
             'hive_posts_sc_hot_id_idx',
-            'hive_posts_block_num_created_idx',
             'hive_posts_payout_plus_pending_payout_id_idx',
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_author_id_created_at_id_idx',
