@@ -427,7 +427,7 @@ class CommunityOp:
                             DO UPDATE SET title = :title""",
                 **params,
             )
-            self._notify('set_label', payload=self.title)
+            self._notify('set_title', payload=self.title)
 
         # Post-level actions
         elif action == 'mutePost':

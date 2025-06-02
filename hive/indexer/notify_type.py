@@ -6,7 +6,7 @@ class NotifyType(IntEnum):
     new_community = 1
     set_role = 2
     set_props = 3
-    set_label = 4
+    set_title = 4
     mute_post = 5
     unmute_post = 6
     pin_post = 7
