@@ -441,11 +441,19 @@ BEGIN
             AND m.account_id = hnc.dst
         )
       RETURNING id
+    ),
+    mentions_data AS (
+        SELECT
+          hm.*,
+          hb.created_at AS created_at,
+          (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
+        FROM hivemind_app.blocks_view AS hb, mentions AS hm
+        WHERE hb.num = (hm.block_num - 1)
     )
     INSERT INTO hivemind_app.hive_notification_cache
-    (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-    SELECT hm.block_num, 16, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (hm.block_num - 1)) AS created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
-    FROM mentions AS hm
+    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+    SELECT hivemind_app.notification_id(hm.created_at, 16, hm.counter) AS id, hm.block_num, 16, hm.created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
+    FROM mentions_data AS hm
     JOIN hivemind_app.hive_accounts AS a ON hm.author_id = a.id
     LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
     LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation

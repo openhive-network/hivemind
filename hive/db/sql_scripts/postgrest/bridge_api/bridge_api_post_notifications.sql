@@ -8,7 +8,7 @@ $$
 DECLARE
   _post_id INT;
   _min_score SMALLINT := 25;
-  _last_id INTEGER;
+  _last_id BIGINT;
   _limit INTEGER := 100;
   _notifications JSONB;
 BEGIN
@@ -27,8 +27,8 @@ BEGIN
   _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'min_score', False);
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
-  _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'last_id', False);
-  _last_id = hivemind_postgrest_utilities.valid_number(_last_id, 0, NULL, NULL, 'last_id');
+  _last_id = hivemind_postgrest_utilities.parse_bigint_argument_from_json(_params, 'last_id', False);
+  _last_id = hivemind_postgrest_utilities.valid_bigint(_last_id, 0, NULL, NULL, 'last_id');
 
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
@@ -71,8 +71,8 @@ BEGIN
             nv.dst_post_id = _post_id
             AND nv.block_num > hivemind_app.block_before_head( '90 days' )
             AND nv.score >= _min_score
-            AND NOT (_last_id <> 0 AND nv.block_num >= _last_id )
-          ORDER BY nv.block_num DESC, nv.type_id DESC, nv.id DESC
+            AND NOT (_last_id <> 0 AND nv.id >= _last_id )
+          ORDER BY nv.id DESC
           LIMIT _limit
         ) hnv
         JOIN hivemind_app.hive_posts hp ON hnv.post_id = hp.id

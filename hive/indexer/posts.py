@@ -16,7 +16,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
 from hive.indexer.notification_cache import NotificationCache
-from hive.utils.misc import chunks
+from hive.utils.misc import chunks, UniqueCounter
 from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 
 log = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ class Posts(DbAdapterHolder):
 
     comment_payout_ops = {}
     _comment_payout_ops = []
+    _counter = UniqueCounter()
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -110,6 +111,7 @@ class Posts(DbAdapterHolder):
                 "dst": row['parent_author_id'],
                 "dst_post_id": row['parent_id'],
                 "post_id": row['id'],
+                'counter': cls._counter.increment(op['block_num']),
             }
 
         if not DbState.is_massive_sync():
