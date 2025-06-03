@@ -59,40 +59,41 @@ class PostDataCache(DbAdapterHolder):
                     values_update.append(value)
 
             cls.beginTx()
-            if len(values_insert) > 0:
+            if len(values_insert) > 0 or len(values_update) > 0:
                 sql = f"""
                     WITH inserted AS (
                         INSERT INTO {SCHEMA_NAME}.hive_post_data (id, title, body, json)
-                        VALUES {','.join(values_insert)}
+                        SELECT * FROM
+                        (VALUES {','.join(values_insert) if values_insert else '(NULL::int,NULL::text,NULL::text,NULL::text)'}) AS v(id, title, body, json)
+                        WHERE v.id IS NOT NULL
                         RETURNING id
-                    )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM inserted
-                """
-                if print_query:
-                    log.info(f"Executing query:\n{sql}")
-                cls.db.query_prepared(sql)
-                values_insert.clear()
-
-            if len(values_update) > 0:
-                sql = f"""
-                    WITH updated AS (
-                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
+                    ),
+                    updated AS (
+                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd
+                        SET
                             title = COALESCE( data_source.title, hpd.title ),
                             body = COALESCE( data_source.body, hpd.body ),
                             json = COALESCE( data_source.json, hpd.json )
                         FROM (
                             SELECT *
-                            FROM (VALUES {','.join(values_update)})
-                            AS T(id, title, body, json)
+                            FROM (VALUES {','.join(values_update) if values_update else '(NULL::int,NULL::text,NULL::text,NULL::text)'})
+                            AS v(id, title, body, json)
                         ) AS data_source
-                        WHERE hpd.id = data_source.id
+                        WHERE hpd.id = data_source.id AND data_source.id IS NOT NULL
                         RETURNING hpd.id
+                    ),
+                    combined AS (
+                        SELECT id FROM inserted
+                        UNION ALL
+                        SELECT id FROM updated
                     )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM updated
+                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id))
+                    FROM combined
                 """
                 if print_query:
                     log.info(f"Executing query:\n{sql}")
                 cls.db.query_prepared(sql)
+                values_insert.clear()
                 values_update.clear()
 
             cls.commitTx()

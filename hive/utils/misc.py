@@ -70,6 +70,20 @@ class PatchLevelInfo:
     patched_to_revision: str
 
 
+class UniqueCounter:
+    def __init__(self):
+        self.counter = 0
+        self.last_value = None
+
+    def increment(self, value) -> int:
+        if value == self.last_value:
+            self.counter += 1
+        else:
+            self.counter = 1
+            self.last_value = value
+        return self.counter
+
+
 def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):
     from hive.version import VERSION, GIT_REVISION, GIT_DATE
 
