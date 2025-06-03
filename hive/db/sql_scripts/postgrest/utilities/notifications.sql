@@ -54,10 +54,10 @@ BEGIN
         WHEN _notify_type = 'set_role' THEN '<src> set your role to <payload>'
         WHEN _notify_type = 'set_props' THEN '<src> set properties <payload>'
         WHEN _notify_type = 'set_title' THEN '<src> set your title to <payload>'
-        WHEN _notify_type = 'mute_post' THEN '<src> muted <post> - <payload>'
-        WHEN _notify_type = 'unmute_post' THEN '<src> unmuted <post> - <payload>'
-        WHEN _notify_type = 'pin_post' THEN '<src> pinned <post>'
-        WHEN _notify_type = 'unpin_post' THEN '<src> unpinned <post>'
+        WHEN _notify_type = 'mute_post' THEN '<src> muted your post - <payload>'
+        WHEN _notify_type = 'unmute_post' THEN '<src> unmuted your post - <payload>'
+        WHEN _notify_type = 'pin_post' THEN '<src> pinned your post'
+        WHEN _notify_type = 'unpin_post' THEN '<src> unpinned your post'
         WHEN _notify_type = 'flag_post' THEN '<src> flagged <post> - <payload>'
         WHEN _notify_type = 'subscribe' THEN '<src> subscribed to <comm>'
         WHEN _notify_type = 'error' THEN 'error: <payload>'
@@ -81,6 +81,7 @@ BEGIN
         _msg := replace(_msg, '<src>', '@' || coalesce(_row.src, ''));
     END IF;
 
+    -- needs to be fixed as "post" is not propagated from outer queries maybe we should just be left to the front ends to do with the "url" field
     IF position('<post>' IN _msg) > 0 THEN
         _msg := replace(_msg, '<post>', coalesce(_row.post, ''));
     END IF;
