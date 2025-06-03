@@ -150,7 +150,6 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        # if not re.match(r'^hive-[123]\d{4,6}$', name):
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
@@ -167,6 +166,7 @@ class Community:
         DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
 
         # insert community notification
+        # Howo: Maybe we should change this to set dst as the account creator instead
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
                         SELECT n.*
                         FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
