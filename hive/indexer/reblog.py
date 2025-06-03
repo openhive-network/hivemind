@@ -9,14 +9,16 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks
+from hive.utils.misc import UniqueCounter
 
 log = logging.getLogger(__name__)
+
 
 class Reblog(DbAdapterHolder):
     """Class for reblog operations"""
 
     reblog_items_to_flush = {}
+    _counter = UniqueCounter()
 
     @classmethod
     def _validated_op(cls, actor, op, block_date, block_num):
@@ -58,12 +60,13 @@ class Reblog(DbAdapterHolder):
         else:
             cls.reblog_items_to_flush[key] = {'op': op}
             NotificationCache.reblog_notifications_to_flush[key] = {
-                    "block_num": block_num,
-                    "created_at": block_date,
-                    "src": op['account'],
-                    "dst": op['author'],
-                    "permlink": op['permlink'],
-                }
+                "block_num": block_num,
+                "created_at": block_date,
+                "src": op['account'],
+                "dst": op['author'],
+                "permlink": op['permlink'],
+                'counter': cls._counter.increment(block_num),
+            }
 
     @classmethod
     def delete(cls, author, permlink, account):
@@ -83,12 +86,12 @@ class Reblog(DbAdapterHolder):
         """Flush collected data to database"""
         sql_prefix = f"""
             INSERT INTO {SCHEMA_NAME}.hive_reblogs (blogger_id, post_id, created_at, block_num)
-            SELECT 
+            SELECT
                 data_source.blogger_id, data_source.post_id, data_source.created_at, data_source.block_num
             FROM
             (
-                SELECT 
-                    ha_b.id as blogger_id, hp.id as post_id, t.block_date as created_at, t.block_num 
+                SELECT
+                    ha_b.id as blogger_id, hp.id as post_id, t.block_date as created_at, t.block_num
                 FROM
                     (VALUES
                         {{}}

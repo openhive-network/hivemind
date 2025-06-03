@@ -97,3 +97,34 @@ BEGIN
 END
 $$
 ;
+
+CREATE OR REPLACE FUNCTION hivemind_app.notification_id(created_at TIMESTAMP, type_id INT, counter INT)
+  RETURNS BIGINT
+  LANGUAGE 'plpgsql'
+AS $$
+DECLARE
+  id BIGINT;
+BEGIN
+  SELECT (extract(epoch FROM (created_at - '2016-03-24T16:00:00'::timestamp))::bigint << 6 | type_id) << 22 | counter INTO id;
+  RETURN id;
+END;
+$$;
+
+DROP FUNCTION IF EXISTS hivemind_app.extract_from_notification_id;
+CREATE OR REPLACE FUNCTION hivemind_app.extract_from_notification_id(id BIGINT)
+RETURNS TABLE (
+    created_at TIMESTAMP,
+    type_id INTEGER,
+    counter INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        TO_TIMESTAMP(id>>28) - TO_TIMESTAMP(0) + '2016-03-24T16:00:00'::TIMESTAMP AS created_at,
+        id >> 22 & 0b111111 AS type_id,
+        id & 0b1111111111111111111111 AS counter;
+END;
+$$;
+

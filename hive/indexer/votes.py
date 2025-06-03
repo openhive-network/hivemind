@@ -8,7 +8,7 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks
+from hive.utils.misc import chunks, UniqueCounter
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ class Votes(DbAdapterHolder):
 
     _votes_data = collections.OrderedDict()
     _votes_per_post = {}
+    _counter = UniqueCounter()
 
     inside_flush = False
 
@@ -44,9 +45,10 @@ class Votes(DbAdapterHolder):
             n = NotificationCache.vote_notifications[key]
             n['last_update'] = date
             n['block_num'] = block_num
+            n['counter'] = cls._counter.increment(block_num)
             # only effective vote edits increase num_changes counter
         else:
-            if not post_key in cls._votes_per_post:
+            if post_key not in cls._votes_per_post:
                 cls._votes_per_post[post_key] = []
             cls._votes_per_post[post_key].append(voter)
             cls._votes_data[key] = dict(
@@ -68,6 +70,7 @@ class Votes(DbAdapterHolder):
                 'permlink': permlink,
                 'last_update': date,
                 'rshares': 0,
+                'counter': cls._counter.increment(block_num),
             }
 
     @classmethod
@@ -90,6 +93,7 @@ class Votes(DbAdapterHolder):
     def effective_comment_vote_op(cls, vop):
         """Process effective_comment_vote_operation"""
 
+        block_num = vop["block_num"]
         post_key = f"{vop['author']}/{vop['permlink']}"
         key = f"{vop['voter']}/{post_key}"
 
@@ -99,12 +103,13 @@ class Votes(DbAdapterHolder):
             vote_data["rshares"] = vop["rshares"]
             vote_data["is_effective"] = True
             vote_data["num_changes"] += 1
-            vote_data["block_num"] = vop["block_num"]
+            vote_data["block_num"] = block_num
             n = NotificationCache.vote_notifications[key]
             n['rshares'] = vop["rshares"]
-            n['block_num'] = vop["block_num"]
+            n['block_num'] = block_num
+            n['counter'] = cls._counter.increment(block_num)
         else:
-            if not post_key in cls._votes_per_post:
+            if post_key not in cls._votes_per_post:
                 cls._votes_per_post[post_key] = []
             cls._votes_per_post[post_key].append(vop['voter'])
             cls._votes_data[key] = dict(
@@ -117,15 +122,16 @@ class Votes(DbAdapterHolder):
                 last_update="1970-01-01 00:00:00",
                 is_effective=True,
                 num_changes=0,
-                block_num=vop["block_num"],
+                block_num=block_num,
             )
             NotificationCache.vote_notifications[key] = {
-                'block_num': vop["block_num"],
+                'block_num': block_num,
                 'voter': vop["voter"],
                 'author': vop["author"],
                 'permlink': vop["permlink"],
                 'last_update': "1970-01-01 00:00:00",
                 'rshares': vop["rshares"],
+                'counter': cls._counter.increment(block_num),
             }
 
     @classmethod

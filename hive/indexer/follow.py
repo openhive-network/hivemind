@@ -6,8 +6,8 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks
-from funcy.seqs import first  # Ensure 'first' is imported
+from hive.utils.misc import UniqueCounter
+from funcy.seqs import first
 
 log = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class Follow(DbAdapterHolder):
     follow_blacklisted_batches_to_flush = Batch()
     affected_accounts = set()
     idx = 0
-
+    _counter = UniqueCounter()
 
     @classmethod
     def _validate_op(cls, account, op):
@@ -167,7 +167,7 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
-                NotificationCache.follow_notifications_to_flush.append((follower, following, block_num))
+                NotificationCache.follow_notifications_to_flush.append((follower, following, block_num, cls._counter.increment(block_num)))
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)

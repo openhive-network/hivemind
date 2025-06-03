@@ -37,14 +37,19 @@ class NotificationCache(DbAdapterHolder):
     @classmethod
     def flush_vote_notifications(cls, flusher):
         n = len(cls.vote_notifications)
-        max_block_num = max(n['block_num'] for k, n in (cls.vote_notifications or {'': {'block_num': 0}}).items())
+        max_block_num = max(
+            n["block_num"]
+            for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items()
+        )
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             sql = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id, hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT hn.id, hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id, hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
                 FROM (
-                    SELECT n.*,
+                    SELECT
+                      {SCHEMA_NAME}.notification_id(n.last_update, 17, n.counter) AS id,
+                      n.*,
                       hv.id AS src,
                       hpv.author_id AS dst,
                       hpv.id AS post_id,
@@ -52,7 +57,7 @@ class NotificationCache(DbAdapterHolder):
                       {SCHEMA_NAME}.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
                     FROM
                     (VALUES {{}})
-                    AS n(block_num, voter, author, permlink, last_update, rshares)
+                    AS n(block_num, voter, author, permlink, last_update, rshares, counter)
                     JOIN {SCHEMA_NAME}.hive_accounts AS hv ON n.voter = hv.name
                     JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
                     JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
@@ -73,7 +78,10 @@ class NotificationCache(DbAdapterHolder):
             """
             for chunk in chunks(cls.vote_notifications, 1000):
                 flusher.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {escape_characters(n['voter'])}, {escape_characters(n['author'])}, {escape_characters(n['permlink'])}, {escape_characters(n['last_update'])}::timestamp, {n['rshares']})" for k, n in chunk.items())
+                values_str = ",".join(
+                    f"({n['block_num']}, {escape_characters(n['voter'])}, {escape_characters(n['author'])}, {escape_characters(n['permlink'])}, {escape_characters(n['last_update'])}::timestamp, {n['rshares']}, {n['counter']})"
+                    for k, n in chunk.items()
+                )
                 flusher.db.query_prepared(sql.format(values_str))
                 flusher.commitTx()
         else:
@@ -84,7 +92,10 @@ class NotificationCache(DbAdapterHolder):
     @classmethod
     def flush_post_notifications(cls, flusher):
         n = len(cls.comment_notifications)
-        max_block_num = max(n['block_num'] for _, n in cls.comment_notifications.items() or [('', {'block_num': 0})])
+        max_block_num = max(
+            n["block_num"]
+            for _, n in cls.comment_notifications.items() or [("", {"block_num": 0})]
+        )
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -110,11 +121,11 @@ class NotificationCache(DbAdapterHolder):
                 SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
             )
             INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-            (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
+            (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            SELECT {SCHEMA_NAME}.notification_id(n.created_at, n.type_id, n.counter) AS id, n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
             FROM
             (VALUES {{}})
-            AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id)
+            AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, counter)
             JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
             LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
             WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
@@ -125,7 +136,10 @@ class NotificationCache(DbAdapterHolder):
             """
             for chunk in chunks(cls.comment_notifications, 1000):
                 flusher.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']})" for _, n in chunk.items())
+                values_str = ",".join(
+                    f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']}, {n['counter']})"
+                    for _, n in chunk.items()
+                )
                 flusher.db.query_prepared(sql.format(values_str))
                 flusher.commitTx()
         else:
@@ -137,7 +151,10 @@ class NotificationCache(DbAdapterHolder):
     @classmethod
     def flush_follow_notifications(cls, flusher):
         n = len(cls.follow_notifications_to_flush)
-        max_block_num = max(block_num for r, g, block_num in cls.follow_notifications_to_flush or [("", "", 0)])
+        max_block_num = max(
+            block_num
+            for r, g, block_num, counter in cls.follow_notifications_to_flush or [("", "", 0, 0)]
+        )
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -161,25 +178,35 @@ class NotificationCache(DbAdapterHolder):
                 final_rep AS
                 (
                     SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
+                ),
+                notification_data AS (
+                    SELECT
+                        n.src,
+                        n.dst,
+                        n.block_num,
+                        n.counter,
+                        (SELECT hb.created_at FROM {SCHEMA_NAME}.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at
+                    FROM (VALUES {{}}) AS n(src, dst, block_num, counter)
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 15, (SELECT hb.created_at FROM {SCHEMA_NAME}.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
-                FROM
-                (VALUES {{}})
-                AS n(src, dst, block_num)
-                JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
-                JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT {SCHEMA_NAME}.notification_id(nd.created_at, 15, nd.counter) AS id, nd.block_num, 15, nd.created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
+                FROM notification_data AS nd
+                JOIN {SCHEMA_NAME}.hive_accounts AS r ON nd.src = r.name
+                JOIN {SCHEMA_NAME}.hive_accounts AS g ON nd.dst = g.name
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
-                WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
+                WHERE nd.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
-                    AND n.src IS DISTINCT FROM n.dst
-                ORDER BY n.block_num, created_at, r.id, r.id
+                    AND nd.src IS DISTINCT FROM nd.dst
+                ORDER BY nd.block_num, created_at, r.id, r.id
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.follow_notifications_to_flush, 1000):
                 flusher.beginTx()
-                values_str = ','.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in chunk)
+                values_str = ",".join(
+                    f"({follower}, {following}, {block_num}, {counter})"
+                    for (follower, following, block_num, counter) in chunk
+                )
                 flusher.db.query_prepared(sql.format(values_str))
                 flusher.commitTx()
         else:
@@ -191,7 +218,10 @@ class NotificationCache(DbAdapterHolder):
     @classmethod
     def flush_reblog_notifications(cls, flusher):
         n = len(cls.reblog_notifications_to_flush)
-        max_block_num = max(n['block_num'] for _, n in cls.reblog_notifications_to_flush.items() or [('', {"block_num": 0})])
+        max_block_num = max(
+            n["block_num"]
+            for _, n in cls.reblog_notifications_to_flush.items() or [("", {"block_num": 0})]
+        )
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -217,11 +247,11 @@ class NotificationCache(DbAdapterHolder):
                     SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, pp.id, COALESCE(rep.rep, 25), '', '', ''
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT {SCHEMA_NAME}.notification_id(n.created_at, 14, n.counter) AS id, n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, pp.id, COALESCE(rep.rep, 25), '', '', ''
                 FROM
                 (VALUES {{}})
-                AS n(block_num, created_at, src, dst, permlink)
+                AS n(block_num, created_at, src, dst, permlink, counter)
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.name
                 JOIN {SCHEMA_NAME}.hive_accounts AS g ON n.dst = g.name
                 JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
@@ -235,7 +265,10 @@ class NotificationCache(DbAdapterHolder):
             """
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
                 flusher.beginTx()
-                values_str = ','.join(f"({n['block_num']}, {escape_characters(n['created_at'])}::timestamp, {escape_characters(n['src'])}, {escape_characters(n['dst'])}, {escape_characters(n['permlink'])})" for _, n in chunk.items())
+                values_str = ",".join(
+                    f"({n['block_num']}, {escape_characters(n['created_at'])}::timestamp, {escape_characters(n['src'])}, {escape_characters(n['dst'])}, {escape_characters(n['permlink'])}, {n['counter']})"
+                    for _, n in chunk.items()
+                )
                 flusher.db.query_prepared(sql.format(values_str))
                 flusher.commitTx()
         else:
@@ -245,7 +278,9 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def push_subscribe_notification(cls, params):
-        if params['block_num'] > cls.notification_first_block(DbAdapterHolder.common_block_processing_db()):
+        if params["block_num"] > cls.notification_first_block(
+            DbAdapterHolder.common_block_processing_db()
+        ):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.

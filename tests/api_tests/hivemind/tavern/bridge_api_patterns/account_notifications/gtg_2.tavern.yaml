@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.account_notifications"
-          params: {"account":"gtg", "min_score": 15, "last_id": 1095774}
+          params: {"account":"gtg", "min_score": 15, "last_id": 3382734567243782}
       response:
         status_code: 200
         verify_response_with:
