@@ -1,18 +1,18 @@
 [
   {
     "date": "2016-09-15T19:47:15",
-    "id": 2080211,
-    "msg": "@awhite replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@awhite/test-2"
-  },
-  {
-    "date": "2016-09-15T19:47:15",
-    "id": 2080210,
+    "id": 4062404262494211,
     "msg": "@gavvet replied to your post",
     "score": 65,
     "type": "reply",
     "url": "@gavvet/test-3"
+  },
+  {
+    "date": "2016-09-15T19:47:15",
+    "id": 4062404262494210,
+    "msg": "@awhite replied to your post",
+    "score": 25,
+    "type": "reply",
+    "url": "@awhite/test-2"
   }
 ]
