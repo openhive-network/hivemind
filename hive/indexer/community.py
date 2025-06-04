@@ -150,7 +150,6 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        # if not re.match(r'^hive-[123]\d{4,6}$', name):
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
@@ -167,6 +166,7 @@ class Community:
         DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
 
         # insert community notification
+        # Howo: Maybe we should change this to set dst as the account creator instead
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
                         SELECT n.*
                         FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
@@ -377,7 +377,7 @@ class CommunityOp:
             DbAdapterHolder.common_block_processing_db().query(
                 f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
             )
-            self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            #self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             DbAdapterHolder.common_block_processing_db().query(
@@ -427,7 +427,7 @@ class CommunityOp:
                             DO UPDATE SET title = :title""",
                 **params,
             )
-            self._notify('set_label', payload=self.title)
+            self._notify('set_title', payload=self.title)
 
         # Post-level actions
         elif action == 'mutePost':
@@ -461,7 +461,8 @@ class CommunityOp:
             )
             self._notify('unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            self._notify('flag_post', payload=self.notes)
+            log.info("flagPost is disabled until https://gitlab.syncad.com/hive/hivemind/-/issues/290 is implemented")
+            # self._notify('flag_post', payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -470,7 +471,7 @@ class CommunityOp:
         dst_id = None
         score = 35
 
-        if self.account_id and not self.post_id:
+        if self.account_id:
             dst_id = self.account_id
             if not self._subscribed(self.account_id):
                 score = 15

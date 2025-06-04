@@ -1,15 +1,15 @@
 [
   {
     "date": "2016-09-15T18:01:33",
-    "id": 2083328,
-    "msg": "@hive-198723 set @steemit muted",
+    "id": 2083321,
+    "msg": "@hive-198723 set your role to muted",
     "score": 15,
     "type": "set_role",
     "url": "trending/hive-198723"
   },
   {
     "date": "2016-09-15T18:01:30",
-    "id": 2083790,
+    "id": 2083757,
     "msg": "@funny reblogged your post",
     "score": 55,
     "type": "reblog",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T05:25:03",
-    "id": 2069386,
+    "id": 2069586,
     "msg": "@therajmahal followed you",
     "score": 46,
     "type": "follow",
@@ -105,7 +105,7 @@
   },
   {
     "date": "2016-09-13T20:23:00",
-    "id": 2033974,
+    "id": 2034083,
     "msg": "@blockcodes followed you",
     "score": 48,
     "type": "follow",
@@ -289,7 +289,7 @@
   },
   {
     "date": "2016-09-08T22:19:48",
-    "id": 1886836,
+    "id": 1886622,
     "msg": "@pawel-krawczyk followed you",
     "score": 34,
     "type": "follow",
@@ -305,7 +305,7 @@
   },
   {
     "date": "2016-09-08T14:29:57",
-    "id": 1874474,
+    "id": 1874411,
     "msg": "@buckland followed you",
     "score": 25,
     "type": "follow",
@@ -401,7 +401,7 @@
   },
   {
     "date": "2016-09-07T13:35:45",
-    "id": 1839914,
+    "id": 1840188,
     "msg": "@johnson.lukose followed you",
     "score": 30,
     "type": "follow",
@@ -457,7 +457,7 @@
   },
   {
     "date": "2016-09-06T15:51:48",
-    "id": 1808931,
+    "id": 1808645,
     "msg": "@wastedsoul followed you",
     "score": 28,
     "type": "follow",
@@ -569,7 +569,7 @@
   },
   {
     "date": "2016-09-05T01:20:12",
-    "id": 1763448,
+    "id": 1763685,
     "msg": "@danbar followed you",
     "score": 25,
     "type": "follow",
@@ -633,7 +633,7 @@
   },
   {
     "date": "2016-09-03T23:04:00",
-    "id": 1733133,
+    "id": 1732811,
     "msg": "@achim86 followed you",
     "score": 50,
     "type": "follow",
@@ -713,7 +713,7 @@
   },
   {
     "date": "2016-09-01T20:19:27",
-    "id": 1671855,
+    "id": 1671982,
     "msg": "@puffin followed you",
     "score": 51,
     "type": "follow",
@@ -745,7 +745,7 @@
   },
   {
     "date": "2016-09-01T07:48:24",
-    "id": 1650151,
+    "id": 1650221,
     "msg": "@hms818 followed you",
     "score": 41,
     "type": "follow",
@@ -761,7 +761,7 @@
   },
   {
     "date": "2016-08-31T20:31:57",
-    "id": 1634771,
+    "id": 1635129,
     "msg": "@flyboyzombie followed you",
     "score": 40,
     "type": "follow",
@@ -785,7 +785,7 @@
   },
   {
     "date": "2016-08-31T19:02:18",
-    "id": 1630980,
+    "id": 1631431,
     "msg": "@bitcoinparadise followed you",
     "score": 46,
     "type": "follow",
