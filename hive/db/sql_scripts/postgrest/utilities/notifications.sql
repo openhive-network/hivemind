@@ -11,7 +11,7 @@ BEGIN
         WHEN 1 THEN 'new_community'
         WHEN 2 THEN 'set_role'
         WHEN 3 THEN 'set_props'
-        WHEN 4 THEN 'set_label'
+        WHEN 4 THEN 'set_title'
         WHEN 5 THEN 'mute_post'
         WHEN 6 THEN 'unmute_post'
         WHEN 7 THEN 'pin_post'
@@ -51,14 +51,14 @@ BEGIN
 
     _msg := CASE
         WHEN _notify_type = 'new_community' THEN '<dst> was created'
-        WHEN _notify_type = 'set_role' THEN '<src> set <dst> <payload>'
+        WHEN _notify_type = 'set_role' THEN '<src> set your role to <payload>'
         WHEN _notify_type = 'set_props' THEN '<src> set properties <payload>'
-        WHEN _notify_type = 'set_label' THEN '<src> label <dst> <payload>'
-        WHEN _notify_type = 'mute_post' THEN '<src> mute <post> - <payload>'
-        WHEN _notify_type = 'unmute_post' THEN '<src> unmute <post> - <payload>'
-        WHEN _notify_type = 'pin_post' THEN '<src> pin <post>'
-        WHEN _notify_type = 'unpin_post' THEN '<src> unpin <post>'
-        WHEN _notify_type = 'flag_post' THEN '<src> flag <post> - <payload>'
+        WHEN _notify_type = 'set_title' THEN '<src> set your title to <payload>'
+        WHEN _notify_type = 'mute_post' THEN '<src> muted your post - <payload>'
+        WHEN _notify_type = 'unmute_post' THEN '<src> unmuted your post - <payload>'
+        WHEN _notify_type = 'pin_post' THEN '<src> pinned your post'
+        WHEN _notify_type = 'unpin_post' THEN '<src> unpinned your post'
+        WHEN _notify_type = 'flag_post' THEN '<src> flagged <post> - <payload>'
         WHEN _notify_type = 'subscribe' THEN '<src> subscribed to <comm>'
         WHEN _notify_type = 'error' THEN 'error: <payload>'
         WHEN _notify_type = 'reblog' THEN '<src> reblogged your post'
@@ -81,6 +81,7 @@ BEGIN
         _msg := replace(_msg, '<src>', '@' || coalesce(_row.src, ''));
     END IF;
 
+    -- needs to be fixed as "post" is not propagated from outer queries maybe we should just be left to the front ends to do with the "url" field
     IF position('<post>' IN _msg) > 0 THEN
         _msg := replace(_msg, '<post>', coalesce(_row.post, ''));
     END IF;
