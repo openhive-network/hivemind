@@ -1,10 +1,10 @@
 [
   {
-    "date": "2016-09-15T18:01:30",
-    "id": 2077415,
-    "msg": "@funny reblogged your post",
-    "score": 55,
-    "type": "reblog",
-    "url": "@steemit/firstpost"
+    "date": "2016-09-15T18:01:33",
+    "id": 2083328,
+    "msg": "@hive-198723 set @steemit muted",
+    "score": 15,
+    "type": "set_role",
+    "url": "trending/hive-198723"
   }
 ]
