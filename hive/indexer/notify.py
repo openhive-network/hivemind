@@ -34,6 +34,7 @@ class Notify(DbAdapterHolder):
         **kwargs,
     ):
         """Create a notification."""
+        from hive.indexer.community import Community
 
         assert type_id, 'op is blank :('
         if isinstance(type_id, str):
@@ -54,9 +55,8 @@ class Notify(DbAdapterHolder):
         self.payload = payload
         self._id = kwargs.get('id')
 
-        # for HF24 we started save notifications from block 44300000
-        # about 90 days before release day
-        if block_num > 44300000:
+        # This class is now only used for community logic, so we don't need to store notifications before
+        if block_num >= Community.start_block:
             Notify._notifies.append(self)
 
     @classmethod
