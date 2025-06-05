@@ -92,7 +92,7 @@ BEGIN
         LIMIT _limit
       )
       SELECT
-        notifications.id,
+        notifications.id::TEXT,
         hivemind_postgrest_utilities.get_notify_type_from_id(notifications.type_id) AS type,
         notifications.score,
         hivemind_postgrest_utilities.json_date(notifications.created_at) AS date,
