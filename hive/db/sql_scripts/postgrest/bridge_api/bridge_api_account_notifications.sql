@@ -34,7 +34,7 @@ BEGIN
   RETURN(
     SELECT jsonb_agg( -- bridge_api_account_notifications
       jsonb_build_object(
-        'id', hive_notification_cache.id,
+        'id', hive_notification_cache.id::TEXT,
         'type', hivemind_postgrest_utilities.get_notify_type_from_id(hive_notification_cache.type_id),
         'score', hive_notification_cache.score,
         'date', hivemind_postgrest_utilities.json_date(hive_notification_cache.created_at),
