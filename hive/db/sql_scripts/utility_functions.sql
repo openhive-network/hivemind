@@ -98,14 +98,26 @@ END
 $$
 ;
 
+CREATE OR REPLACE FUNCTION hivemind_app.hive_genesis_time()
+    RETURNS timestamp
+    LANGUAGE plpgsql
+    IMMUTABLE
+AS
+$BODY$
+BEGIN
+    RETURN '2016-03-24T16:00:00'::timestamp;
+END;
+$BODY$;
+
 CREATE OR REPLACE FUNCTION hivemind_app.notification_id(created_at TIMESTAMP, type_id INT, counter INT)
   RETURNS BIGINT
   LANGUAGE 'plpgsql'
+  IMMUTABLE
 AS $$
 DECLARE
   id BIGINT;
 BEGIN
-  SELECT (extract(epoch FROM (created_at - '2016-03-24T16:00:00'::timestamp))::bigint << 6 | type_id) << 22 | counter INTO id;
+  SELECT (extract(epoch FROM (created_at - hivemind_app.hive_genesis_time()))::bigint << 6 | type_id) << 22 | counter INTO id;
   RETURN id;
 END;
 $$;
@@ -118,11 +130,12 @@ RETURNS TABLE (
     counter INTEGER
 )
 LANGUAGE plpgsql
+IMMUTABLE
 AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        TO_TIMESTAMP(id>>28) - TO_TIMESTAMP(0) + '2016-03-24T16:00:00'::TIMESTAMP AS created_at,
+        TO_TIMESTAMP(id>>28) - TO_TIMESTAMP(0) + hivemind_app.hive_genesis_time() AS created_at,
         id >> 22 & 0b111111 AS type_id,
         id & 0b1111111111111111111111 AS counter;
 END;
