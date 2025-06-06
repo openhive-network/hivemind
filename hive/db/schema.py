@@ -434,7 +434,7 @@ def build_metadata_community(metadata=None):
     sa.Table(
         'hive_notification_cache',
         metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('id', sa.BigInteger, primary_key=True, autoincrement=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('type_id', sa.Integer, nullable=False),
         sa.Column('dst', sa.Integer, nullable=True),  # dst account id except persistent notifs from hive_notifs
