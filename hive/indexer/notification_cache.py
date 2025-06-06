@@ -7,7 +7,7 @@ import threading
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks
+from hive.utils.misc import chunks, UniqueCounter
 
 # pylint: disable=too-many-lines,line-too-long
 
@@ -19,10 +19,12 @@ class NotificationCache(DbAdapterHolder):
 
     _lock = threading.Lock()
     _notification_first_block = None
+    _counter = UniqueCounter()
     vote_notifications = collections.OrderedDict()
     comment_notifications = collections.OrderedDict()
     follow_notifications_to_flush = []
     reblog_notifications_to_flush = collections.OrderedDict()
+
 
     @classmethod
     def notification_first_block(cls, db):
@@ -281,6 +283,7 @@ class NotificationCache(DbAdapterHolder):
         if params["block_num"] > cls.notification_first_block(
             DbAdapterHolder.common_block_processing_db()
         ):
+            params['counter'] = cls._counter.increment(params["block_num"])
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
             # In case of reputation being 0, the score is set to 25 rather than 0.
@@ -305,10 +308,10 @@ class NotificationCache(DbAdapterHolder):
                     SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-                (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT n.block_num, 11, n.created_at, r.id, hc.id, 0, 0, COALESCE(rep.rep, 25), '', hc.name, hc.title
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT {SCHEMA_NAME}.notification_id(n.created_at, 11, n.counter), n.block_num, 11, n.created_at, r.id, hc.id, 0, 0, COALESCE(rep.rep, 25), '', hc.name, hc.title
                 FROM
-                (VALUES (:block_num, (:date)::timestamp, :actor_id, :community_id)) AS n(block_num, created_at, src, dst)
+                (VALUES (:block_num, (:date)::timestamp, :actor_id, :community_id, :counter)) AS n(block_num, created_at, src, dst, counter)
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.id
                 JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.dst = hc.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id

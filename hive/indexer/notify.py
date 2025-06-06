@@ -6,7 +6,7 @@ from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 from hive.indexer.notify_type import NotifyType
-from hive.utils.misc import chunks
+from hive.utils.misc import chunks, UniqueCounter
 
 # pylint: disable=too-many-lines,line-too-long
 
@@ -19,6 +19,8 @@ class Notify(DbAdapterHolder):
     DEFAULT_SCORE = 35
     _notifies = []
     _notification_first_block = None
+    _counter = UniqueCounter()
+
 
     def __init__(
         self,
@@ -54,6 +56,7 @@ class Notify(DbAdapterHolder):
         self.community_id = community_id
         self.payload = payload
         self._id = kwargs.get('id')
+        self.counter = self._counter.increment(block_num)
 
         # This class is now only used for community logic, so we don't need to store notifications before
         if block_num >= Community.start_block:
@@ -67,7 +70,7 @@ class Notify(DbAdapterHolder):
 
     def to_db_values(self):
         """Generate a db row."""
-        return "( {}, {}, {}, '{}'::timestamp, {}::int, {}::int, {}::int, {}::int, {} )".format(
+        return "( {}, {}, {}, '{}'::timestamp, {}::int, {}::int, {}::int, {}::int, {}, {}::int )".format(
             self.block_num,
             self.enum.value,
             self.score,
@@ -77,6 +80,7 @@ class Notify(DbAdapterHolder):
             self.post_id if self.post_id else "NULL",
             self.community_id if self.community_id else "NULL",
             escape_characters(str(self.payload)) if self.payload else "NULL",
+            self.counter
         )
 
     @classmethod
@@ -93,16 +97,18 @@ class Notify(DbAdapterHolder):
             sql_notifs = f"""INSERT INTO {SCHEMA_NAME}.hive_notifs (block_num, type_id, score, created_at, src_id,
                                               dst_id, post_id, community_id,
                                               payload)
-                          VALUES
-                          -- block_num, type_id, score, created_at, src_id, dst_id, post_id, community_id, payload
-                          {{}}"""
+                          SELECT n.block_num, n.type_id, n.score, n.created_at, n.src, n.dst, n.post_id, n.community_id, n.payload
+                          FROM (VALUES {{}})
+                          AS n(block_num, type_id, score, created_at, src, dst, post_id, community_id, payload, counter)
+                          """
 
-            sql_cache = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (block_num, type_id, score, created_at,
-                                              src, dst, post_id, dst_post_id, community, community_title, payload)
-                          SELECT n.block_num, n.type_id, n.score, n.created_at, n.src, n.dst, n.post_id, n.post_id, hc.name, hc.title, n.payload
+            sql_cache = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache(
+                            id, block_num, type_id, score, created_at,
+                            src, dst, post_id, dst_post_id, community, community_title, payload)
+                          SELECT {SCHEMA_NAME}.notification_id(n.created_at, n.type_id, n.counter), n.block_num, n.type_id, n.score, n.created_at, n.src, n.dst, n.post_id, n.post_id, hc.name, hc.title, n.payload
                           FROM
                           (VALUES {{}})
-                          AS n(block_num, type_id, score, created_at, src, dst, post_id, community_id, payload)
+                          AS n(block_num, type_id, score, created_at, src, dst, post_id, community_id, payload, counter)
                           JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.community_id = hc.id
                           WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
                                 AND n.block_num > hivemind_app.block_before_irreversible('90 days')
