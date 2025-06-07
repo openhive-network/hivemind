@@ -5272,6 +5272,39 @@
               "id": "community",
               "json": "[\"unpinPost\",{\"community\":\"hive-111119\",\"account\":\"ismember\",\"permlink\":\"ismember-hive-111119-changed-type-3\"}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-111119"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-111119\",\"account\":\"ismember\",\"permlink\":\"ismember-hive-111119-changed-type-3\"}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "5000013": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-111119"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-111119\",\"account\":\"ismember\",\"permlink\":\"ismember-hive-111119-changed-type-3\"}]"
+            }
           }
         ]
       }
