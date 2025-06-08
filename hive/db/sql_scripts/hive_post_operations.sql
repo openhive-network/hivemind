@@ -454,8 +454,7 @@ BEGIN
         AND COALESCE(rep.rep, 25) > 0
         AND hm.author_id IS DISTINCT FROM hm.account_id
     ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
-    ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-    SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+    ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
     RETURNING id;
 END;
 $function$;

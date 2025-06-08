@@ -106,8 +106,7 @@ class Notify(DbAdapterHolder):
                           JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.community_id = hc.id
                           WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
                                 AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                          ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-                            SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+                          ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
                           """
 
             values = [notify.to_db_values() for notify in Notify._notifies]

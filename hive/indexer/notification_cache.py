@@ -69,8 +69,7 @@ class NotificationCache(DbAdapterHolder):
                     AND hn.rshares >= 10e9
                     AND hn.vote_value >= 0.02
                 ORDER BY hn.block_num, created_at, hn.src, hn.dst
-                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.vote_notifications, 1000):
                 flusher.beginTx()
@@ -122,8 +121,7 @@ class NotificationCache(DbAdapterHolder):
                 AND COALESCE(r.rep, 25) > 0
                 AND n.src IS DISTINCT FROM n.dst
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
-            ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-            SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+            ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.comment_notifications, 1000):
                 flusher.beginTx()
@@ -177,8 +175,7 @@ class NotificationCache(DbAdapterHolder):
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, created_at, r.id, r.id
-                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.follow_notifications_to_flush, 1000):
                 flusher.beginTx()
@@ -234,8 +231,7 @@ class NotificationCache(DbAdapterHolder):
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, p.id
-                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
                 flusher.beginTx()
@@ -285,7 +281,6 @@ class NotificationCache(DbAdapterHolder):
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
                 ORDER BY n.block_num, n.created_at, r.id, hc.id
-                ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-                SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             DbAdapterHolder.common_block_processing_db().query_no_return(sql, **params)
