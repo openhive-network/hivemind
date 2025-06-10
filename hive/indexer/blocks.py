@@ -20,6 +20,7 @@ from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
+from hive.indexer.post_rshares import PostRshares
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
 from hive.indexer.mentions import Mentions
@@ -57,6 +58,7 @@ class Blocks:
         ("PostNotifications", NotificationCache.flush_post_notifications, Posts, Posts),
         ("FollowNotifications", NotificationCache.flush_follow_notifications, Follow, Follow),
         ("ReblogNotifications", NotificationCache.flush_reblog_notifications, Reblog, Reblog),
+        ('PostRshares', PostRshares.flush, PostRshares),
     ]
 
     def __init__(self):
@@ -81,6 +83,7 @@ class Blocks:
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
+        PostRshares.setup_own_db_access(shared_db_adapter, "Posts")
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
@@ -94,6 +97,7 @@ class Blocks:
         Votes.close_own_db_access()
         Follow.close_own_db_access()
         Posts.close_own_db_access()
+        PostRshares.close_own_db_access()
         Reblog.close_own_db_access()
         Notify.close_own_db_access()
         Accounts.close_own_db_access()
