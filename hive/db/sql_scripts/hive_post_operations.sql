@@ -361,102 +361,103 @@ BEGIN
   -- With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
   -- Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
   -- In case of reputation being 0, the score is set to 25 rather than 0.
-  RETURN query
-    WITH log_account_rep AS
-    (
-        SELECT
-            account_id,
-            LOG(10, ABS(nullif(reputation, 0))) AS rep,
-            (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-        FROM reptracker_app.account_reputations
-    ),
-    calculate_rep AS
-    (
-        SELECT
-            account_id,
-            GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-        FROM log_account_rep lar
-    ),
-    final_rep AS
-    (
-        SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
-    ),
-    mentions AS MATERIALIZED
-    (
-        SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
-        FROM
-          hivemind_app.hive_accounts ha
-        INNER JOIN
-        (
-          SELECT T.id AS post_id, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
-          FROM
-          (
-            SELECT
-              hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
-            FROM hivemind_app.hive_posts AS hp
-            INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
-            WHERE hp.id = ANY(_post_ids)
-              AND hp.counter_deleted = 0
-          ) AS T
-        ) AS T ON ha.name = T.mention
-        WHERE ha.id != T.author_id
-        ORDER BY T.block_num, ha.id
-    ),
-    delete_old_mentions AS
-    (
-      DELETE FROM hivemind_app.hive_mentions hm
-      WHERE post_id = ANY(_post_ids)
-      AND NOT EXISTS (
-        SELECT 1
-        FROM mentions AS m
-        WHERE m.post_id = hm.post_id
-          AND m.account_id = hm.account_id
-      )
-      RETURNING id
-    ),
-    insert_mentions AS
-    (
-      INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
-      SELECT DISTINCT m.post_id, m.account_id, m.block_num
-      FROM mentions AS m
-      LEFT JOIN delete_old_mentions AS dom ON dom.id = 0 -- just to force evaluation
-      WHERE NOT EXISTS (
-        SELECT 1
-        FROM hivemind_app.hive_mentions AS hm
-        WHERE hm.post_id = m.post_id
-          AND hm.account_id = m.account_id
-      )
-      RETURNING id
-    ),
-    delete_old_cache AS
-    (
-      DELETE FROM hivemind_app.hive_notification_cache AS hnc
-      WHERE post_id = ANY(_post_ids)
-        AND type_id = 16
-        AND NOT EXISTS (
-          SELECT 1
-          FROM mentions AS m
-          WHERE m.post_id = hnc.post_id
-            AND m.author_id = hnc.src
-            AND m.account_id = hnc.dst
-        )
-      RETURNING id
-    )
-    INSERT INTO hivemind_app.hive_notification_cache
-    (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-    SELECT hm.block_num, 16, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (hm.block_num - 1)) AS created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
-    FROM mentions AS hm
-    JOIN hivemind_app.hive_accounts AS a ON hm.author_id = a.id
-    LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
-    LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation
-    LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- just to force evaluation
-    WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
-        AND COALESCE(rep.rep, 25) > 0
-        AND hm.author_id IS DISTINCT FROM hm.account_id
-    ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
-    ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
-    SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
-    RETURNING id;
+  RETURN QUERY SELECT 1::BIGINT;
+  --RETURN query
+  --  WITH log_account_rep AS
+  --  (
+  --      SELECT
+  --          account_id,
+  --          LOG(10, ABS(nullif(reputation, 0))) AS rep,
+  --          (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
+  --      FROM reptracker_app.account_reputations
+  --  ),
+  --  calculate_rep AS
+  --  (
+  --      SELECT
+  --          account_id,
+  --          GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
+  --      FROM log_account_rep lar
+  --  ),
+  --  final_rep AS
+  --  (
+  --      SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
+  --  ),
+  --  mentions AS MATERIALIZED
+  --  (
+  --      SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
+  --      FROM
+  --        hivemind_app.hive_accounts ha
+  --      INNER JOIN
+  --      (
+  --        SELECT T.id AS post_id, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
+  --        FROM
+  --        (
+  --          SELECT
+  --            hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
+  --          FROM hivemind_app.hive_posts AS hp
+  --          INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
+  --          WHERE hp.id = ANY(_post_ids)
+  --            AND hp.counter_deleted = 0
+  --        ) AS T
+  --      ) AS T ON ha.name = T.mention
+  --      WHERE ha.id != T.author_id
+  --      ORDER BY T.block_num, ha.id
+  --  ),
+  --  delete_old_mentions AS
+  --  (
+  --    DELETE FROM hivemind_app.hive_mentions hm
+  --    WHERE post_id = ANY(_post_ids)
+  --    AND NOT EXISTS (
+  --      SELECT 1
+  --      FROM mentions AS m
+  --      WHERE m.post_id = hm.post_id
+  --        AND m.account_id = hm.account_id
+  --    )
+  --    RETURNING id
+  --  ),
+  --  insert_mentions AS
+  --  (
+  --    INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
+  --    SELECT DISTINCT m.post_id, m.account_id, m.block_num
+  --    FROM mentions AS m
+  --    LEFT JOIN delete_old_mentions AS dom ON dom.id = 0 -- just to force evaluation
+  --    WHERE NOT EXISTS (
+  --      SELECT 1
+  --      FROM hivemind_app.hive_mentions AS hm
+  --      WHERE hm.post_id = m.post_id
+  --        AND hm.account_id = m.account_id
+  --    )
+  --    RETURNING id
+  --  ),
+  --  delete_old_cache AS
+  --  (
+  --    DELETE FROM hivemind_app.hive_notification_cache AS hnc
+  --    WHERE post_id = ANY(_post_ids)
+  --      AND type_id = 16
+  --      AND NOT EXISTS (
+  --        SELECT 1
+  --        FROM mentions AS m
+  --        WHERE m.post_id = hnc.post_id
+  --          AND m.author_id = hnc.src
+  --          AND m.account_id = hnc.dst
+  --      )
+  --    RETURNING id
+  --  )
+  --  INSERT INTO hivemind_app.hive_notification_cache
+  --  (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+  --  SELECT hm.block_num, 16, (SELECT hb.created_at FROM hivemind_app.blocks_view hb WHERE hb.num = (hm.block_num - 1)) AS created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
+  --  FROM mentions AS hm
+  --  JOIN hivemind_app.hive_accounts AS a ON hm.author_id = a.id
+  --  LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
+  --  LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation
+  --  LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- just to force evaluation
+  --  WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
+  --      AND COALESCE(rep.rep, 25) > 0
+  --      AND hm.author_id IS DISTINCT FROM hm.account_id
+  --  ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
+  --  ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
+  --  SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
+  --  RETURNING id;
 END;
 $function$;
 

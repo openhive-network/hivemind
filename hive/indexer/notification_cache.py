@@ -36,6 +36,7 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def flush_vote_notifications(cls, flusher):
+        return 0
         n = len(cls.vote_notifications)
         max_block_num = max(n['block_num'] for k, n in (cls.vote_notifications or {'': {'block_num': 0}}).items())
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
@@ -84,6 +85,7 @@ class NotificationCache(DbAdapterHolder):
 
     @classmethod
     def flush_post_notifications(cls, flusher):
+        return 0
         n = len(cls.comment_notifications)
         max_block_num = max(n['block_num'] for _, n in cls.comment_notifications.items() or [('', {'block_num': 0})])
         if n > 0 and max_block_num > cls.notification_first_block(flusher.db):
@@ -180,11 +182,11 @@ class NotificationCache(DbAdapterHolder):
                 ON CONFLICT (src, dst, type_id, post_id) DO UPDATE
                 SET block_num=EXCLUDED.block_num, created_at=EXCLUDED.created_at
             """
-            for chunk in chunks(cls.follow_notifications_to_flush, 1000):
-                flusher.beginTx()
-                values_str = ','.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in chunk)
-                flusher.db.query_prepared(sql.format(values_str))
-                flusher.commitTx()
+            #for chunk in chunks(cls.follow_notifications_to_flush, 1000):
+            #    flusher.beginTx()
+            #    values_str = ','.join(f"({follower}, {following}, {block_num})" for (follower, following, block_num) in chunk)
+            #    flusher.db.query_prepared(sql.format(values_str))
+            #    flusher.commitTx()
         else:
             n = 0
         cls.follow_notifications_to_flush.clear()
