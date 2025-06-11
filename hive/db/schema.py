@@ -77,18 +77,12 @@ def build_metadata():
         sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
         # important indexes
-        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('total_payout_value', sa.String(30), nullable=False, server_default='0.000 HBD'),
         sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('abs_rshares', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('vote_rshares', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('total_votes', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('net_votes', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
@@ -130,24 +124,9 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0")),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
-        sa.Index(
-            'hive_posts_sc_trend_id_idx',
-            'sc_trend',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0"),
-        ),
-        sa.Index(
-            'hive_posts_sc_hot_id_idx',
-            'sc_hot',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0"),
-        ),
         sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
-        # bridge_get_account_posts_by_comments, bridge_get_account_posts_by_posts
-
         sa.Index('hive_posts_author_id_id_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('counter_deleted = 0')),
         sa.Index('hive_posts_author_id_id_depth0_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('depth = 0 AND counter_deleted = 0')),
-
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index(
@@ -160,6 +139,21 @@ def build_metadata():
             sa.text('category_id, (payout+pending_payout), depth'),
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
         )
+    )
+
+    sa.Table(
+        'hive_posts_rshares',
+        metadata,
+        sa.Column('post_id', sa.Integer, primary_key=True),
+        sa.Column('abs_rshares', sa.Numeric, nullable=False, server_default='0'),
+        sa.Column('vote_rshares', sa.Numeric, nullable=False, server_default='0'),
+        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('total_votes', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('net_votes', sa.BigInteger, nullable=False, server_default='0'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_posts_rshares_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.Index('hive_posts_rshares_sc_trend_idx', 'sc_trend', 'post_id'),
+        sa.Index('hive_posts_rshares_sc_hot_idx', 'sc_hot', 'post_id'),
     )
 
     sa.Table(
@@ -798,7 +792,12 @@ def set_fillfactor(db):
     """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
     # Lowered fillfactor for hive_votes table in attempt to speed up update_posts_rshares procedure
-    fillfactor_config = { 'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 90 }
+    fillfactor_config = {
+        'hive_posts': 90,
+        'hive_post_data': 100,
+        'hive_votes': 90,
+        'hive_posts_rshares': 100  # Can use higher fillfactor since it's just for updates
+    }
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"

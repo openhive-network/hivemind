@@ -188,11 +188,11 @@ BEGIN
             WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
                 ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
           ) AS s
-        )
+        ), inserted_post AS (
         INSERT INTO hivemind_app.hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
+             author_id, permlink_id, created_at, updated_at, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
           SELECT
             s.parent_id,
             s.depth,
@@ -205,8 +205,6 @@ BEGIN
             s.permlink_id,
             s.created_at,
             s.updated_at,
-            s.sc_hot,
-            s.sc_trend,
             s.active,
             s.payout_at,
             s.cashout_time,
@@ -224,7 +222,19 @@ BEGIN
                 block_num = _block_num
           RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT EXISTS (SELECT NULL::text
               FROM hivemind_app.muted AS m
-              WHERE m.follower = (SELECT s.parent_author_id FROM selected_posts AS s) AND m.following = hp.author_id))
+              WHERE m.follower = (SELECT s.parent_author_id FROM selected_posts AS s) AND m.following = hp.author_id)) AS is_author_muted
+         ), rshares_insert AS (
+             INSERT INTO hivemind_app.hive_posts_rshares as hpr (post_id, sc_hot, sc_trend)
+             SELECT ip.id, s.sc_hot, s.sc_trend
+             FROM inserted_post as ip, selected_posts as s
+             ON CONFLICT (post_id) DO UPDATE SET
+                 sc_hot = EXCLUDED.sc_hot,
+                 sc_trend = EXCLUDED.sc_trend
+             RETURNING post_id
+         )
+         SELECT ip.is_new_post, ip.id, ip.author_id, ip.permlink_id, ip.post_category, ip.parent_id, ip.parent_author_id, ip.community_id, ip.is_valid, ip.is_muted, ip.depth, ip.is_author_muted
+         FROM inserted_post ip
+         LEFT JOIN rshares_insert as ri ON ri.post_id = 0 -- force execute the rshares_insert CTE
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -280,7 +290,7 @@ BEGIN
                     INSERT INTO hivemind_app.hive_posts as hp
                         (parent_id, depth, community_id, category_id,
                          root_id, is_muted, is_valid,
-                         author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+                         author_id, permlink_id, created_at, updated_at,
                          active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons) -- removed tagsids
                         SELECT
                             pdi.parent_id,
@@ -294,8 +304,6 @@ BEGIN
                             pdi.permlink_id,
                             pdi.created_at,
                             pdi.updated_at,
-                            pdi.sc_hot,
-                            pdi.sc_trend,
                             pdi.active,
                             pdi.payout_at,
                             pdi.cashout_time,
@@ -324,11 +332,21 @@ BEGIN
                     WHERE hpt.post_id = hp.post_id AND tap.prepare_tags IS NULL
                     RETURNING hpt.post_id
             ) -- WITH deleted_post_tags
+               , rshares_insert AS (
+                INSERT INTO hivemind_app.hive_posts_rshares as hpr (post_id, sc_hot, sc_trend)
+                SELECT ip.id, pdi.sc_hot, pdi.sc_trend
+                FROM inserted_post as ip, posts_data_to_insert as pdi
+                ON CONFLICT (post_id) DO UPDATE SET
+                    sc_hot = EXCLUDED.sc_hot,
+                    sc_trend = EXCLUDED.sc_trend
+                RETURNING post_id
+            ) -- WITH rshares_insert
                , inserts_to_posts_and_tags AS MATERIALIZED (
                 INSERT INTO hivemind_app.hive_post_tags(post_id, tag_id)
                     SELECT ip.id, tags.prepare_tags
                     FROM inserted_post as ip
                     LEFT JOIN deleted_post_tags as dpt ON dpt.post_id = 0 -- there is no post 0, this is only to force execute the deleted_post_tags CTE
+                    LEFT JOIN rshares_insert as ri ON ri.post_id = 0 -- force execute the rshares_insert CTE
                     JOIN tagsid_and_posts as tags ON TRUE
                 ON CONFLICT DO NOTHING
             )

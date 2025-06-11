@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE) CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts_rshares.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE) CASCADE
 ;
-CREATE OR REPLACE FUNCTION hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts_rshares.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE)
 RETURNS INT
 LANGUAGE 'sql'
 IMMUTABLE
@@ -17,7 +17,7 @@ $BODY$;
 DROP FUNCTION IF EXISTS hivemind_app.calculate_value_of_vote_on_post CASCADE;
 CREATE OR REPLACE FUNCTION hivemind_app.calculate_value_of_vote_on_post(
     _post_payout hivemind_app.hive_posts.payout%TYPE
-  , _post_rshares hivemind_app.hive_posts.vote_rshares%TYPE
+  , _post_rshares hivemind_app.hive_posts_rshares.vote_rshares%TYPE
   , _vote_rshares hivemind_app.hive_votes.rshares%TYPE)
 RETURNS FLOAT
 LANGUAGE 'sql'

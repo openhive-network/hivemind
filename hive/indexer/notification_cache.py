@@ -64,8 +64,11 @@ class NotificationCache(DbAdapterHolder):
                     JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
                     JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
                     JOIN (
-                        SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
+                        SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, 
+                               COALESCE(hpr.abs_rshares, 0) as abs_rshares, 
+                               COALESCE(hpr.vote_rshares, 0) as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
+                        LEFT JOIN {SCHEMA_NAME}.hive_posts_rshares hpr ON hpr.post_id = hpvi.id
                         WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
                             AND hpvi.counter_deleted = 0
                     ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id

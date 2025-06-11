@@ -11,14 +11,15 @@ BEGIN
 SET LOCAL work_mem='4GB';
 SET LOCAL enable_seqscan = off;
 
-  UPDATE hivemind_app.hive_posts hp
-  SET
-      abs_rshares = votes_rshares.abs_rshares
-     ,vote_rshares = votes_rshares.rshares
-     ,sc_hot = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
-     ,sc_trend = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
-     ,total_votes = votes_rshares.total_votes
-     ,net_votes = votes_rshares.net_votes
+  INSERT INTO hivemind_app.hive_posts_rshares (post_id, abs_rshares, vote_rshares, sc_hot, sc_trend, total_votes, net_votes)
+  SELECT
+      votes_rshares.post_id,
+      votes_rshares.abs_rshares,
+      votes_rshares.rshares,
+      CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END,
+      CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END,
+      votes_rshares.total_votes,
+      votes_rshares.net_votes
   FROM
     (
       SELECT
@@ -35,14 +36,20 @@ SET LOCAL enable_seqscan = off;
       WHERE hv.post_id = ANY(_post_ids)
       GROUP BY hv.post_id
     ) as votes_rshares
-  WHERE hp.id = votes_rshares.post_id
-  AND hp.counter_deleted = 0
-  AND (
-    hp.abs_rshares != votes_rshares.abs_rshares
-    OR hp.vote_rshares != votes_rshares.rshares
-    OR hp.total_votes != votes_rshares.total_votes
-    OR hp.net_votes != votes_rshares.net_votes
-  );
+  JOIN hivemind_app.hive_posts hp ON hp.id = votes_rshares.post_id
+  WHERE hp.counter_deleted = 0
+  ON CONFLICT (post_id) DO UPDATE SET
+      abs_rshares = EXCLUDED.abs_rshares,
+      vote_rshares = EXCLUDED.vote_rshares,
+      sc_hot = EXCLUDED.sc_hot,
+      sc_trend = EXCLUDED.sc_trend,
+      total_votes = EXCLUDED.total_votes,
+      net_votes = EXCLUDED.net_votes
+  WHERE
+      hive_posts_rshares.abs_rshares != EXCLUDED.abs_rshares
+      OR hive_posts_rshares.vote_rshares != EXCLUDED.vote_rshares
+      OR hive_posts_rshares.total_votes != EXCLUDED.total_votes
+      OR hive_posts_rshares.net_votes != EXCLUDED.net_votes;
 
 RESET enable_seqscan;
 RESET work_mem;

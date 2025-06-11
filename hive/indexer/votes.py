@@ -7,7 +7,6 @@ from itertools import count
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
-from hive.indexer.post_rshares import PostRshares
 from hive.utils.normalize import escape_characters
 from hive.utils.misc import chunks, UniqueCounter
 
@@ -193,8 +192,8 @@ class Votes(DbAdapterHolder):
                     ) for k, vd in chunk.items()
                 )
                 actual_query = sql.format(values_str)
-                post_ids = [id[0] for id in cls.db.query_prepared_all(actual_query)]
-                PostRshares.add_post_ids(post_ids)
+                post_ids = cls.db.query_prepared_all(actual_query)
+                cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids])
                 cls.commitTx()
 
             n = len(cls._votes_data)

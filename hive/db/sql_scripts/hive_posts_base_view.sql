@@ -8,9 +8,14 @@ SELECT
     , hp.permlink_id
     , hp.payout
     , hp.pending_payout
-    , hp.abs_rshares
-    , hp.vote_rshares AS rshares
+    , COALESCE(hpr.abs_rshares, 0) AS abs_rshares
+    , COALESCE(hpr.vote_rshares, 0) AS rshares
+    , COALESCE(hpr.sc_trend, 0) AS sc_trend
+    , COALESCE(hpr.sc_hot, 0) AS sc_hot
+    , COALESCE(hpr.total_votes, 0) AS total_votes
+    , COALESCE(hpr.net_votes, 0) AS net_votes
 FROM hivemind_app.hive_posts hp
+LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
 ;
 
 DROP VIEW IF EXISTS hivemind_app.hive_posts_parent_view CASCADE;
@@ -38,7 +43,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_posts_parent_view
     hp.created_at,
     hp.updated_at,
     hp.is_hidden,
-    hp.total_vote_weight,
+    COALESCE(hpr.total_votes, 0) AS total_vote_weight,
     pp.author_id AS parent_author_id,
         CASE hp.depth > 0
             WHEN true THEN hpd_pp.permlink
@@ -51,8 +56,8 @@ CREATE OR REPLACE VIEW hivemind_app.hive_posts_parent_view
     hp.allow_votes,
     hp.allow_curation_rewards,
     hp.beneficiaries,
-    hp.sc_trend,
-    hp.sc_hot,
+    COALESCE(hpr.sc_trend, 0) AS sc_trend,
+    COALESCE(hpr.sc_hot, 0) AS sc_hot,
     hp.is_pinned,
     hp.is_muted,
     hp.is_nsfw,
@@ -62,5 +67,6 @@ CREATE OR REPLACE VIEW hivemind_app.hive_posts_parent_view
      JOIN hivemind_app.hive_posts pp ON pp.id = hp.parent_id
      JOIN hivemind_app.hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
      JOIN hivemind_app.hive_category_data hcd ON hcd.id = hp.category_id
+     LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
   WHERE hp.counter_deleted = 0 AND hp.id <> 0
   ;
