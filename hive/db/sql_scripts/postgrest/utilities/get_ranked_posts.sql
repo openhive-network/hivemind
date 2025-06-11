@@ -9,7 +9,7 @@ STABLE
 AS
 $$
 DECLARE
-_extract_pinned_posts BOOLEAN DEFAULT False; 
+_extract_pinned_posts BOOLEAN DEFAULT False;
 _result JSONB;
 BEGIN
   IF _called_from_bridge_api AND _sort_type = ANY(ARRAY['trending'::hivemind_postgrest_utilities.ranked_post_sort_type, 'created'::hivemind_postgrest_utilities.ranked_post_sort_type])
@@ -25,7 +25,7 @@ BEGIN
         WITH
         pinned_post AS -- get_ranked_posts_for_communities pinned
         (
-          SELECT 
+          SELECT
             hp.id
           FROM hivemind_app.live_posts_view hp
           WHERE
@@ -123,9 +123,12 @@ BEGIN
   IF _post_id <> 0 AND (SELECT is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id LIMIT 1) THEN
     _post_id = 0;
   ELSE
-    SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
+    SELECT COALESCE(hpr.sc_trend, 0) INTO _trending_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
-  
+
   _result = (
     SELECT jsonb_agg (
     (
@@ -136,9 +139,9 @@ BEGIN
     )
     ) FROM (
       WITH -- get_trending_ranked_posts_for_communities
-      ranked_community_posts as 
+      ranked_community_posts as
       (
-        SELECT hp.id 
+        SELECT hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
         WHERE
@@ -227,7 +230,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-    ( 
+    (
       CASE
         WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
@@ -414,12 +417,15 @@ _hot_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-    SELECT sc_hot INTO _hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT hpr.sc_hot INTO _hot_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
     SELECT jsonb_agg (
-    ( 
+    (
       CASE
         WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
@@ -709,7 +715,10 @@ BEGIN
   _tag_id = hivemind_postgrest_utilities.find_tag_id( _tag, True );
 
   IF _post_id <> 0 THEN
-    SELECT sc_trend INTO __trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT COALESCE(hpr.sc_trend, 0) INTO __trending_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
@@ -806,7 +815,10 @@ BEGIN
   _tag_id = hivemind_postgrest_utilities.find_tag_id( _tag, True );
 
   IF _post_id <> 0 THEN
-    SELECT sc_hot INTO _hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT COALESCE(hpr.sc_hot, 0) INTO _hot_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
@@ -902,7 +914,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-    ( 
+    (
       CASE
         WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
@@ -1099,7 +1111,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-    ( 
+    (
       CASE
         WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
@@ -1283,7 +1295,10 @@ _trending_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-      SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
+    SELECT COALESCE(hpr.sc_trend, 0) INTO _trending_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
@@ -1297,7 +1312,7 @@ BEGIN
           hp.id
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
-        WHERE hs.account_id = _observer_id 
+        WHERE hs.account_id = _observer_id
           AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
@@ -1373,7 +1388,10 @@ _hot_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-      SELECT sc_hot INTO _hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT COALESCE(hpr.sc_hot, 0) INTO _hot_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
@@ -1834,7 +1852,10 @@ _trending_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-    SELECT sc_trend INTO _trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT COALESCE(hpr.sc_trend, 0) INTO _trending_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (
@@ -1928,7 +1949,10 @@ _hot_limit FLOAT;
 _result JSONB;
 BEGIN
   IF _post_id <> 0 THEN
-    SELECT sc_hot INTO _hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    SELECT COALESCE(hpr.sc_hot, 0) INTO _hot_limit
+    FROM hivemind_app.hive_posts hp
+    LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+    WHERE hp.id = _post_id;
   END IF;
 
   _result = (

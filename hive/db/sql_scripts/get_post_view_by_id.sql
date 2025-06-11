@@ -79,7 +79,7 @@ BEGIN
     IF json_metadata_as_string IS NULL OR TRIM(json_metadata_as_string) = '' THEN
         RETURN '';
     END IF;
-    
+
     -- Attempt to parse the input string as JSON
     BEGIN
         json_data := json_metadata_as_string::jsonb;
@@ -150,7 +150,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
 AS $function$
-BEGIN 
+BEGIN
   RETURN QUERY
   SELECT -- get_post_view_by_id
     hp.id,
@@ -179,10 +179,10 @@ BEGIN
     0 AS active_votes,
     hp.created_at,
     hp.updated_at,
-    hp.vote_rshares AS rshares,
-    hp.abs_rshares,
-    hp.total_votes,
-    hp.net_votes,
+    COALESCE(hpr.vote_rshares, 0) AS rshares,
+    COALESCE(hpr.abs_rshares, 0) AS abs_rshares,
+    COALESCE(hpr.total_votes, 0) AS total_votes,
+    COALESCE(hpr.net_votes, 0) AS net_votes,
     hpd.json,
     ha_a.reputation AS author_rep,
     hp.is_hidden,
@@ -210,8 +210,8 @@ BEGIN
             ELSE concat('#@', ha_a.name, '/', hpd_p.permlink)
         END) AS url,
     rpd.title AS root_title,
-    hp.sc_trend,
-    hp.sc_hot,
+    COALESCE(hpr.sc_trend, 0) AS sc_trend,
+    COALESCE(hpr.sc_hot, 0) AS sc_hot,
     hp.is_pinned,
     hp.is_muted,
     hp.is_nsfw,
@@ -229,7 +229,8 @@ BEGIN
      JOIN hivemind_app.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
      LEFT JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
      LEFT JOIN hivemind_app.hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
-     -- parent post data 
+     LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+     -- parent post data
      JOIN hivemind_app.hive_posts pp ON pp.id = hp.parent_id -- parent post (0 or 1 parent)
      JOIN hivemind_app.hive_accounts ha_pp ON ha_pp.id = pp.author_id
      JOIN hivemind_app.hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
@@ -244,7 +245,7 @@ BEGIN
   WHERE hp.id = _id AND hp.counter_deleted = 0;
 END;
 $function$ LANGUAGE plpgsql STABLE SET join_collapse_limit = 6;
---Changed join_collapse_limit from 1 to 6. Testing on a node with 5 million blocks showed a significant 
+--Changed join_collapse_limit from 1 to 6. Testing on a node with 5 million blocks showed a significant
 --improvement in performance for joins between hive.accounts_view and reptracker_app.account_reputations,
 --reducing query time from 200ms to 12ms
 
@@ -352,7 +353,7 @@ CREATE TYPE hivemind_app.get_full_post_view_by_id_return_t AS(
 
 CREATE OR REPLACE FUNCTION hivemind_app.get_full_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE, _observer_id INTEGER) RETURNS SETOF hivemind_app.get_full_post_view_by_id_return_t
 AS $function$
-BEGIN 
+BEGIN
   RETURN QUERY
   SELECT -- get_full_post_view_by_id
     hp.id,
@@ -381,10 +382,10 @@ BEGIN
     0 AS active_votes,
     hp.created_at,
     hp.updated_at,
-    hp.vote_rshares AS rshares,
-    hp.abs_rshares,
-    hp.total_votes,
-    hp.net_votes,
+    COALESCE(hpr.vote_rshares, 0) AS rshares,
+    COALESCE(hpr.abs_rshares, 0) AS abs_rshares,
+    COALESCE(hpr.total_votes, 0) AS total_votes,
+    COALESCE(hpr.net_votes, 0) AS net_votes,
     hpd.json,
     ha_a.reputation AS author_rep,
     hp.is_hidden,
@@ -412,8 +413,8 @@ BEGIN
             ELSE concat('#@', ha_a.name, '/', hpd_p.permlink)
         END) AS url,
     rpd.title AS root_title,
-    hp.sc_trend,
-    hp.sc_hot,
+    COALESCE(hpr.sc_trend, 0) AS sc_trend,
+    COALESCE(hpr.sc_hot, 0) AS sc_hot,
     hp.is_pinned,
     hp.is_muted,
     hp.is_nsfw,
@@ -432,7 +433,8 @@ BEGIN
      JOIN hivemind_app.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
      LEFT JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
      LEFT JOIN hivemind_app.hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
-     -- parent post data 
+     LEFT JOIN hivemind_app.hive_posts_rshares hpr ON hpr.post_id = hp.id
+     -- parent post data
      JOIN hivemind_app.hive_posts pp ON pp.id = hp.parent_id -- parent post (0 or 1 parent)
      JOIN hivemind_app.hive_accounts ha_pp ON ha_pp.id = pp.author_id
      JOIN hivemind_app.hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
@@ -442,12 +444,12 @@ BEGIN
      JOIN hivemind_app.hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
      JOIN hivemind_app.hive_category_data rcd ON rcd.id = rp.category_id
      JOIN hivemind_app.hive_post_data rpd ON rpd.id = rp.id
-     LEFT JOIN hivemind_app.get_blacklisted_by_observer(_observer_id) blacklist ON (blacklist.blacklisted_id = hp.author_id) 
+     LEFT JOIN hivemind_app.get_blacklisted_by_observer(_observer_id) blacklist ON (blacklist.blacklisted_id = hp.author_id)
      -- largest joined data
      JOIN hivemind_app.hive_post_data hpd ON hpd.id = hp.id
   WHERE hp.id = _id AND hp.counter_deleted = 0;
 END;
 $function$ LANGUAGE plpgsql STABLE SET join_collapse_limit = 6;
---Changed join_collapse_limit from 1 to 6. Testing on a node with 5 million blocks showed a significant 
+--Changed join_collapse_limit from 1 to 6. Testing on a node with 5 million blocks showed a significant
 --improvement in performance for joins between hive.accounts_view and reptracker_app.account_reputations,
 --reducing query time from 200ms to 12ms

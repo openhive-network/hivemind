@@ -364,7 +364,12 @@ def set_fillfactor(db):
     """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
     # Lowered fillfactor for hive_votes table in attempt to speed up update_posts_rshares procedure
-    fillfactor_config = {'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 90}
+    fillfactor_config = {
+        'hive_posts': 90,
+        'hive_post_data': 100,
+        'hive_votes': 90,
+        'hive_posts_rshares': 100,
+    }
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
