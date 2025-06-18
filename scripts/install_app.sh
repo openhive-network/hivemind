@@ -76,3 +76,7 @@ psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA="${REPTRACKER_S
 echo "Grant permissions to reptracker schema."
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_owner TO hivemind;"
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_user TO hivemind;"
+
+echo "Grant permissions to hafah schema."
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT hafah_owner TO hivemind;"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT hafah_user TO hivemind;"

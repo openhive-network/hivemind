@@ -25,10 +25,12 @@ POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
-WITH_REPTRACKER=0
+WITH_APPS=0
 REPTRACKER_SCHEMA=reptracker_app
 STATEMENT_TIMEOUT=""
 reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
+hafah_dir="$SCRIPT_DIR/app/hafah"
+haf_dir="$SCRIPT_DIR/haf"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -62,8 +64,8 @@ while [ $# -gt 0 ]; do
         INSTALL_APP=1
         DO_SCHEMA_UPGRADE=1
         ;;
-    --with-reptracker)
-        WITH_REPTRACKER=1
+    --with-apps)
+        WITH_APPS=1
         ;;
     *)
         arg=$1
@@ -128,11 +130,17 @@ setup() {
       ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
 
-  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
+  if [ "${WITH_APPS}" -eq 1 ]; then
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
     ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="${REPTRACKER_SCHEMA}" --is_forking="false"
+    popd
+
+    # Install hafah application
+    pushd "$hafah_dir"
+    ./scripts/setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}" --path-to-haf="${haf_dir}"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
     popd
   fi
 
@@ -160,10 +168,10 @@ uninstall_app() {
   cd /home/hivemind/app
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
-  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
+  if [ "${WITH_APPS}" -eq 1 ]; then
     "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --schema=${REPTRACKER_SCHEMA} --postgres-url="${POSTGRES_ADMIN_URL}"
+    "${SCRIPT_DIR}/app/hafah/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
-
 }
 
 log "global" "Command: '${COMMAND}'"
