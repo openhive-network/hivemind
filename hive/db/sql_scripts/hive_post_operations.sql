@@ -122,7 +122,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _metadata_tags VARCHAR[])
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
                    post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, parent_author_id hivemind_app.hive_posts.author_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
-                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, is_author_muted BOOLEAN)
+                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE)
     LANGUAGE plpgsql
 AS
 $function$
@@ -222,9 +222,7 @@ BEGIN
                 updated_at = _date,
                 active = _date,
                 block_num = _block_num
-          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (SELECT EXISTS (SELECT NULL::text
-              FROM hivemind_app.muted AS m
-              WHERE m.follower = (SELECT s.parent_author_id FROM selected_posts AS s) AND m.following = hp.author_id))
+          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -343,8 +341,7 @@ BEGIN
                 ip.community_id,
                 ip.is_valid,
                 ip.is_muted,
-                ip.depth,
-                FALSE AS is_author_muted
+                ip.depth
             FROM inserted_post as ip;
     END IF;
 END
@@ -458,9 +455,11 @@ BEGIN
     LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
     LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation
     LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- just to force evaluation
+    LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
     WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
         AND COALESCE(rep.rep, 25) > 0
         AND hm.author_id IS DISTINCT FROM hm.account_id
+        AND m.follower IS NULL
     ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
     ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
     RETURNING id;
