@@ -1,0 +1,29 @@
+# Test that notifications from muted users do not reach the muting account.
+# guest4test1 has muted geekgirl account, so should not receive any notifications from that account.
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.account_notifications"
+          params: {"account":"guest4test1", "min_score": 0}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            allow_null_response: True
