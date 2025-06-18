@@ -604,9 +604,9 @@ using docker containers and second run on host with using hivemind virtual envir
    Prepared scripts are available in the [mock_data folder](./mock_data) folder, which inject new virtual
    operations and blocks into the HAF database.
    
-   - Preferred method to inject new data into HAF is to use dockerized hivemind setup together with *reputation_tracker*
+   - Preferred method to inject new data into HAF is to use dockerized hivemind setup together with *reputation_tracker* and *hafah*
       ```bash
-      docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:local setup --database-admin-url=postgresql://haf_admin@haf:5432/haf_block_log --with-reptracker --add-mocks="true"
+      docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:local setup --database-admin-url=postgresql://haf_admin@haf:5432/haf_block_log --with-apps --add-mocks="true"
       ```
    - working in hivemind virtual environment on host:
      ```bash

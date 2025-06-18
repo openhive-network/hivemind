@@ -461,7 +461,7 @@ sync:
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
-          --with-reptracker \
+          --with-apps \
           --add-mocks=${ADD_MOCKS}
     ${WORKING_DIR}/app/reputation_tracker/scripts/process_blocks.sh \
       --stop-at-block="${RUNNER_HIVEMIND_SYNC_IRREVERSIBLE_MAX_BLOCK}" \
