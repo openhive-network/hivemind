@@ -59,7 +59,7 @@ class Posts(DbAdapterHolder):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
         sql = f"""
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth, is_author_muted
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
@@ -102,7 +102,7 @@ class Posts(DbAdapterHolder):
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0 and not row['is_author_muted']:
+        if row['depth'] > 0:
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
             NotificationCache.comment_notifications[key] = {
