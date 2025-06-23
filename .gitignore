@@ -5,6 +5,9 @@ docs/hive
 grep
 lint
 
+# openapi files
+endpoints_openapi
+
 # OSX
 .DS_Store
 
