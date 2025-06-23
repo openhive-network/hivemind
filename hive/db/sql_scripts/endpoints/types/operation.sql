@@ -1,19 +1,4 @@
-/** openapi:components:schemas
-hivemind_endpoints.block_range_type:
-  type: object
-  properties:
-    from:
-      type: integer
-    to:
-      type: integer
- */
--- openapi-generated-code-begin
-DROP TYPE IF EXISTS hivemind_endpoints.block_range_type CASCADE;
-CREATE TYPE hivemind_endpoints.block_range_type AS (
-    "from" INT,
-    "to" INT
-);
--- openapi-generated-code-end
+SET ROLE hafah_owner;
 
 /** openapi:components:schemas
 hivemind_endpoints.operation_body:
@@ -97,9 +82,6 @@ hivemind_endpoints.operation_history:
     total_pages:
       type: integer
       description: Total number of pages
-    block_range:
-      $ref: '#/components/schemas/hivemind_endpoints.block_range_type'
-      description: Range of blocks that contains the returned pages  
     operations_result:
       type: array
       items:
@@ -111,7 +93,8 @@ DROP TYPE IF EXISTS hivemind_endpoints.operation_history CASCADE;
 CREATE TYPE hivemind_endpoints.operation_history AS (
     "total_operations" INT,
     "total_pages" INT,
-    "block_range" hivemind_endpoints.block_range_type,
     "operations_result" hivemind_endpoints.operation[]
 );
 -- openapi-generated-code-end
+
+RESET ROLE;
