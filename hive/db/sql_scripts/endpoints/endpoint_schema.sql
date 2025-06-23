@@ -30,7 +30,7 @@ BEGIN
   __swagger_url := current_setting('custom.swagger_url')::TEXT;
 
 EXECUTE FORMAT(
-'create or replace function hivemind_endpoints.root() returns json as $_$
+'create or replace function hivemind_endpoints.home() returns json as $_$
 declare
 -- openapi-spec
 -- openapi-generated-code-begin

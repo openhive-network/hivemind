@@ -1,4 +1,4 @@
-DROP FUNCTION IF EXISTS hivemind_endpoints.home;
+DROP FUNCTION IF EXISTS hivemind_endpoints.home(JSON);
 CREATE FUNCTION hivemind_endpoints.home(JSON)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
