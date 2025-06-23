@@ -5,7 +5,7 @@
       - blog_api
     summary: Get operations for an account by recency.
     description: |
-      List the non-virtual operations in reversed order (first page is the oldest) for given account. 
+      List the operations in reversed order (first page is the oldest) for given account. 
       The page size determines the number of operations per page.
 
       SQL example
@@ -22,20 +22,13 @@
           type: string
         description: Account to get operations for.
       - in: query
-        name: observer-name
-        required: false
-        schema:
-          type: string
-          default: NULL
-        description: Account name of the observer 
-      - in: query
         name: operation-types
         required: false
         schema:
           type: string
           default: NULL
         description: |
-          List of operation types to get. If NULL, gets all non-virtual operation types.
+          List of operation types to get. If NULL, gets all operation types.
           example: `18,12`
       - in: query
         name: page
@@ -111,10 +104,6 @@
             example: {
                   "total_operations": 219867,
                   "total_pages": 73289,
-                  "block_range": {
-                    "from": 1,
-                    "to": 5000000
-                  },
                   "operations_result": [
                     {
                       "op": {
@@ -138,6 +127,48 @@
                       "virtual_op": false,
                       "operation_id": "21474823595099394",
                       "trx_in_block": 3
+                    },
+                    {
+                      "op": {
+                        "type": "producer_reward_operation",
+                        "value": {
+                          "producer": "blocktrades",
+                          "vesting_shares": {
+                            "nai": "@@000000037",
+                            "amount": "3003850165",
+                            "precision": 6
+                          }
+                        }
+                      },
+                      "block": 4999992,
+                      "trx_id": null,
+                      "op_pos": 1,
+                      "op_type_id": 64,
+                      "timestamp": "2016-09-15T19:46:57",
+                      "virtual_op": true,
+                      "operation_id": "21474802120262208",
+                      "trx_in_block": -1
+                    },
+                    {
+                      "op": {
+                        "type": "producer_reward_operation",
+                        "value": {
+                          "producer": "blocktrades",
+                          "vesting_shares": {
+                            "nai": "@@000000037",
+                            "amount": "3003868105",
+                            "precision": 6
+                          }
+                        }
+                      },
+                      "block": 4999959,
+                      "trx_id": null,
+                      "op_pos": 1,
+                      "op_type_id": 64,
+                      "timestamp": "2016-09-15T19:45:12",
+                      "virtual_op": true,
+                      "operation_id": "21474660386343488",
+                      "trx_in_block": -1
                     }
                   ]
                 }
@@ -148,7 +179,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_ops_by_account;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_ops_by_account(
     "account-name" TEXT,
-    "observer-name" TEXT = NULL,
     "operation-types" TEXT = NULL,
     "page" INT = NULL,
     "page-size" INT = 100,
@@ -167,38 +197,68 @@ AS
 $$
 DECLARE 
   _block_range hive.blocks_range := hive.convert_to_blocks_range("from-block","to-block");
-  _account_id INT                := hafah_backend.get_account_id("account-name", TRUE);
-  _observer_id INT               := hafah_backend.get_account_id("observer-name", FALSE);
-  _operation_types INT[]         := hafah_backend.get_operation_types("operation-types", TRUE);
-  _muted_account_ids INT[] := NULL;
+  _account_id INT = (SELECT av.id FROM hive.accounts_view av WHERE av.name = "account-name");
+  _ops_count INT;
+  _from INT;
+  _to INT;
+  _operation_types INT[] := (SELECT string_to_array("operation-types", ',')::INT[]);
+  _result hivemind_endpoints.operation[];
 
-  _result hivemind_endpoints.operation_history;
+  __total_pages INT;
+  __offset INT;
+  __limit INT;
 BEGIN
+  IF _account_id IS NULL THEN
+    PERFORM hafah_backend.rest_raise_missing_account("account-name");
+  END IF;
+
   PERFORM hafah_python.validate_limit("page-size", 1000, 'page-size');
   PERFORM hafah_python.validate_negative_limit("page-size", 'page-size');
   PERFORM hafah_python.validate_negative_page("page");
 
-  IF (_block_range.last_block <= hive.app_get_irreversible_block() AND _block_range.last_block IS NOT NULL) THEN
+  -----------PAGING LOGIC----------------
+  SELECT count, from_seq, to_seq
+  INTO _ops_count, _from, _to
+  FROM hafah_backend.account_range(_operation_types, _account_id, _block_range.first_block, _block_range.last_block);
+
+  SELECT total_pages, offset_filter, limit_filter
+  INTO __total_pages, __offset, __limit
+  FROM hafah_backend.calculate_pages(_ops_count, "page", 'desc', "page-size");
+
+  IF (_block_range.last_block <= hive.app_get_irreversible_block() AND _block_range.last_block IS NOT NULL) OR ("page" IS NOT NULL AND __total_pages != "page") THEN
     PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=31536000"}]', true);
   ELSE
     PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=2"}]', true);
   END IF;
 
-  _muted_account_ids := hivemind_postgrest_utilities.get_muted_accounts_list(_observer_id);
+  _result := array_agg(row ORDER BY row.operation_id::BIGINT DESC) FROM (
+    SELECT 
+      ba.op,
+      ba.block,
+      ba.trx_id,
+      ba.op_pos,
+      ba.op_type_id,
+      ba.timestamp,
+      ba.virtual_op,
+      ba.operation_id,
+      ba.trx_in_block
+    FROM hafah_backend.get_ops_by_account(
+      _account_id,
+      _operation_types,
+      _from,
+      _to,
+      "data-size-limit",
+      __offset,
+      __limit
+    ) ba
+  ) row;
 
-  _result := hafah_backend.get_ops_by_account(
-    _account_id,
-    COALESCE(_muted_account_ids, ARRAY[NULL]::INT[]),
-    _operation_types,
-    _block_range.first_block,
-    _block_range.last_block,
-    "page",
-    "data-size-limit",
-    "page-size",
-    'exclude'
-  );
+  RETURN (
+    COALESCE(_ops_count,0),
+    COALESCE(__total_pages,0),
+    COALESCE(_result, '{}'::hivemind_endpoints.operation[])
+  )::hivemind_endpoints.operation_history;
 
-  RETURN _result;
 -- ops_count returns number of operations found with current filter
 -- to count total_pages we need to check if there was a rest from division by "page-size", if there was the page count is +1 
 -- there is two diffrent page_nums, internal and external, internal page_num is ascending (first page with the newest operation is number 1)

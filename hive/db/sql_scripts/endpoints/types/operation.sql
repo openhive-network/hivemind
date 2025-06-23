@@ -1,5 +1,3 @@
-SET ROLE hafah_owner;
-
 /** openapi:components:schemas
 hivemind_endpoints.operation_body:
   type: object
@@ -96,5 +94,3 @@ CREATE TYPE hivemind_endpoints.operation_history AS (
     "operations_result" hivemind_endpoints.operation[]
 );
 -- openapi-generated-code-end
-
-RESET ROLE;
