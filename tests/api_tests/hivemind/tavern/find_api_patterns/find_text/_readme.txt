@@ -11,6 +11,7 @@ params:
        "relevant" - gives posts n order defined by postgres ts_rank algorithm https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-RANKING
        "created" - newest top posts first (grayed out not considered); paging cuts out given and newer posts
 
+  "author": {optional hive account name}; if specified, search will be limited to posts by this author
   "start_author":"{start_author}", "start_permlink":"{start_permlink}",
 
      start_author + start_permlink : optional (can be skipped or given empty), when given have to point to valid post; paging mechanism
