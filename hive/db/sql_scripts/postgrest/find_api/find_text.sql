@@ -14,8 +14,9 @@ DECLARE
     _sort_type TEXT;
     _truncate_body INT;
     _result JSONB;
+    _author_id INT;
 BEGIN
-    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"pattern": "string", "sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}', 1, '{"start_permlink": "permlink must be string"}');
+    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"pattern": "string", "sort": "string", "author": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}', 1, '{"start_permlink": "permlink must be string"}');
 
     _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
                                                        least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
@@ -34,6 +35,11 @@ BEGIN
     _observer_id = hivemind_postgrest_utilities.find_account_id(
             hivemind_postgrest_utilities.valid_account(
                     hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
+                /* allow_empty */ True ), True);
+
+    _author_id = hivemind_postgrest_utilities.find_account_id(
+            hivemind_postgrest_utilities.valid_account(
+                    hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', False),
                 /* allow_empty */ True ), True);
 
     _truncate_body =
@@ -71,6 +77,7 @@ BEGIN
                                        SELECT 1
                                        FROM   hivemind_app.muted_accounts_by_id_view
                                        WHERE  observer_id = _observer_id AND muted_id = hp.author_id))
+                                   AND (_author_id = 0 OR hp.author_id = _author_id)
                                ),
                                ordered_posts as (
                                    SELECT nmp.id,
