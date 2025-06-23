@@ -714,6 +714,9 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_get_profiles.sql",
         "postgrest/utilities/valid_accounts.sql",
         "postgrest/search-api/find_text.sql",
+        "endpoints/endpoint_schema.sql",
+        "endpoints/types/operation.sql",
+        "endpoints/accounts/get_ops_by_account.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
