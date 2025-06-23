@@ -15,6 +15,7 @@ from hive.conf import (
   ,SCHEMA_OWNER_NAME
   ,ONE_WEEK_IN_BLOCKS
   ,REPTRACKER_SCHEMA_NAME
+  ,SWAGGER_URL
   )
 
 from hive.db.adapter import Db
@@ -68,6 +69,7 @@ class DbState:
             log.info("Database schema upgrade finished")
 
         db_setup_owner.query_no_return( f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}" )
+        db_setup_owner.query_no_return( f"SET custom.swagger_url = '{SWAGGER_URL}'" )
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()

@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 SCHEMA_NAME: Final[str] = 'hivemind_app'
 REPTRACKER_SCHEMA_NAME = 'reptracker_app'
+SWAGGER_URL = '{hivemind-host}'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
 ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 
@@ -152,6 +153,14 @@ class Conf:
             env_var='REPTRACKER_SCHEMA_NAME',
             help='reputation tracker schema name',
             default='reptracker_app',
+        )
+
+        add(
+            '--swagger-url',
+            type=str,
+            env_var='SWAGGER_URL',
+            help='host for swagger UI, e.g. http://localhost:8080',
+            default='{hivemind-host}',
         )
 
         # needed for e.g. tests - other args may be present

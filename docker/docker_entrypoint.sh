@@ -27,6 +27,7 @@ INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
 WITH_APPS=0
 REPTRACKER_SCHEMA=reptracker_app
+SWAGGER_URL="{hivemind-host}"
 STATEMENT_TIMEOUT=""
 reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
 hafah_dir="$SCRIPT_DIR/app/hafah"
@@ -59,6 +60,9 @@ while [ $# -gt 0 ]; do
         ;;
     --reptracker-schema=*)
         REPTRACKER_SCHEMA="${1#*=}"
+        ;;
+    --swagger-url=*)
+        SWAGGER_URL="${1#*=}"
         ;;
     --upgrade-schema)
         INSTALL_APP=1
@@ -98,10 +102,10 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --database-url="${db_url}"
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}"
   fi
 }
 
