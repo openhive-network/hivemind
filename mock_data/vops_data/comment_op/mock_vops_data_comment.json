@@ -50,5 +50,25 @@
         }
       }
     ]
+  },
+  "5000021": {
+    "virtual_operations": [
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "risman",
+          "author": "guest4test1",
+          "permlink": "test-post-1",
+          "weight": 10000,
+          "rshares": 2000000000,
+          "total_vote_weight": 10000,
+          "pending_payout": {
+            "amount": "2",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
   }
 }

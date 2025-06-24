@@ -1,5 +1,6 @@
 # Test that notifications from muted users do not reach the muting account.
 # guest4test1 has muted geekgirl account, so should not receive any notifications from that account.
+# guest4test1 follows muted list of dantheman, who ignored risman account, so notifications from that account should also be ignored.
 ---
   test_name: Hivemind
 
