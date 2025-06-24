@@ -449,17 +449,20 @@ BEGIN
     )
     INSERT INTO hivemind_app.hive_notification_cache
     (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-    SELECT hivemind_app.notification_id(hm.created_at, 16, hm.counter) AS id, hm.block_num, 16, hm.created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
+    SELECT DISTINCT hivemind_app.notification_id(hm.created_at, 16, hm.counter) AS id, hm.block_num, 16, hm.created_at, hm.author_id, hm.account_id, hm.post_id, hm.post_id, COALESCE(rep.rep, 25), '', '', ''
     FROM mentions_data AS hm
     JOIN hivemind_app.hive_accounts AS a ON hm.author_id = a.id
     LEFT JOIN final_rep AS rep ON a.haf_id = rep.account_id
     LEFT JOIN insert_mentions AS im ON im.id = 0 -- just to force evaluation
     LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- just to force evaluation
     LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
+    LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
+    LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
     WHERE hm.block_num > hivemind_app.block_before_irreversible( '90 days' )
         AND COALESCE(rep.rep, 25) > 0
         AND hm.author_id IS DISTINCT FROM hm.account_id
         AND m.follower IS NULL
+        AND mi.FOLLOWING IS NULL
     ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
     ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
     RETURNING id;
