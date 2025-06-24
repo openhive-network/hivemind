@@ -49,7 +49,7 @@ class NotificationCache(DbAdapterHolder):
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
                 SELECT hn.id, hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id, hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
                 FROM (
-                    SELECT
+                    SELECT DISTINCT
                       {SCHEMA_NAME}.notification_id(n.last_update, 17, n.counter) AS id,
                       n.*,
                       hv.id AS src,
@@ -64,13 +64,15 @@ class NotificationCache(DbAdapterHolder):
                     JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
                     JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
                     LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = ha.id AND m.following = hv.id
+                    LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = ha.id
+                    LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = hv.id
                     JOIN (
                         SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
                         FROM {SCHEMA_NAME}.hive_posts hpvi
                         WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
                             AND hpvi.counter_deleted = 0
                     ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
-                    WHERE m.follower IS NULL
+                    WHERE m.follower IS NULL AND mi.following IS NULL
                 ) AS hn
                 WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND score >= 0
@@ -126,17 +128,19 @@ class NotificationCache(DbAdapterHolder):
             )
             INSERT INTO {SCHEMA_NAME}.hive_notification_cache
             (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT {SCHEMA_NAME}.notification_id(n.created_at, n.type_id, n.counter) AS id, n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
+            SELECT DISTINCT {SCHEMA_NAME}.notification_id(n.created_at, n.type_id, n.counter) AS id, n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id, COALESCE(r.rep, 25), '', '', ''
             FROM
             (VALUES {{}})
             AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, counter)
             JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.src = ha.id
             LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = n.dst AND m.following = n.src
+            LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = n.dst
+            LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = n.src
             LEFT JOIN final_rep AS r ON ha.haf_id = r.account_id
             WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                 AND COALESCE(r.rep, 25) > 0
                 AND n.src IS DISTINCT FROM n.dst
-                AND m.follower IS NULL
+                AND m.follower IS NULL AND mi.following IS NULL
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
@@ -196,16 +200,18 @@ class NotificationCache(DbAdapterHolder):
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT {SCHEMA_NAME}.notification_id(nd.created_at, 15, nd.counter) AS id, nd.block_num, 15, nd.created_at, r.id, g.id, NULL, NULL, COALESCE(rep.rep, 25), '', '', ''
+                SELECT DISTINCT {SCHEMA_NAME}.notification_id(nd.created_at, 15, nd.counter) AS id, nd.block_num, 15, nd.created_at, r.id, g.id, NULL::integer, NULL::integer, COALESCE(rep.rep, 25), '', '', ''
                 FROM notification_data AS nd
                 JOIN {SCHEMA_NAME}.hive_accounts AS r ON nd.src = r.name
                 JOIN {SCHEMA_NAME}.hive_accounts AS g ON nd.dst = g.name
                 LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = g.id AND m.following = r.id
+                LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = g.id
+                LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = r.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
                 WHERE nd.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
                     AND nd.src IS DISTINCT FROM nd.dst
-                    AND m.follower IS NULL
+                    AND m.follower IS NULL AND mi.following IS NULL
                 ORDER BY nd.block_num, created_at, r.id, r.id
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
@@ -256,7 +262,7 @@ class NotificationCache(DbAdapterHolder):
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT {SCHEMA_NAME}.notification_id(n.created_at, 14, n.counter) AS id, n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, pp.id, COALESCE(rep.rep, 25), '', '', ''
+                SELECT DISTINCT {SCHEMA_NAME}.notification_id(n.created_at, 14, n.counter) AS id, n.block_num, 14, n.created_at, r.id, g.id, pp.parent_id, pp.id, COALESCE(rep.rep, 25), '', '', ''
                 FROM
                 (VALUES {{}})
                 AS n(block_num, created_at, src, dst, permlink, counter)
@@ -265,12 +271,14 @@ class NotificationCache(DbAdapterHolder):
                 JOIN {SCHEMA_NAME}.hive_permlink_data AS p ON n.permlink = p.permlink
                 JOIN {SCHEMA_NAME}.hive_posts AS pp ON pp.permlink_id = p.id AND pp.author_id = g.id AND pp.counter_deleted = 0
                 LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = g.id AND m.following = r.id
+                LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = g.id
+                LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = r.id
                 LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
                 WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
                     AND COALESCE(rep.rep, 25) > 0
                     AND n.src IS DISTINCT FROM n.dst
-                    AND m.follower IS NULL
-                ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, p.id
+                    AND m.follower IS NULL AND mi.following IS NULL
+                ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, pp.id
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
