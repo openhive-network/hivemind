@@ -293,6 +293,10 @@
     "active_votes": [
       {
         "rshares": 2000000000,
+        "voter": "risman"
+      },
+      {
+        "rshares": 2000000000,
         "voter": "geekgirl"
       }
     ],
@@ -303,7 +307,7 @@
     "blacklists": [],
     "body": "This is a test post by guest4test1",
     "category": "",
-    "children": 1,
+    "children": 2,
     "created": "2016-09-15T19:47:48",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
@@ -315,20 +319,20 @@
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 2000000000,
+    "net_rshares": 4000000000,
     "payout": 0.002,
     "payout_at": "2016-09-22T19:47:48",
     "pending_payout_value": "0.002 HBD",
     "percent_hbd": 10000,
     "permlink": "test-post-1",
     "post_id": 1258111,
-    "reblogs": 1,
+    "reblogs": 2,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "total_votes": 1
+      "total_votes": 2
     },
     "title": "Test Post",
     "updated": "2016-09-15T19:47:48",
