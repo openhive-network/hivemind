@@ -79,4 +79,4 @@ psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_user TO hivemin
 
 echo "Grant permissions to hafah schema."
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT hafah_owner TO hivemind;"
-psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT hafah_user TO hivemind;"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT hafah_user TO hivemind_user;"
