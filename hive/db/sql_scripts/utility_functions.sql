@@ -137,8 +137,8 @@ DROP FUNCTION IF EXISTS hivemind_app.extract_from_notification_id;
 CREATE OR REPLACE FUNCTION hivemind_app.extract_from_notification_id(id BIGINT)
 RETURNS TABLE (
     created_at TIMESTAMP,
-    type_id INTEGER,
-    counter INTEGER
+    type_id BIGINT,
+    counter BIGINT
 )
 LANGUAGE plpgsql
 IMMUTABLE STRICT
