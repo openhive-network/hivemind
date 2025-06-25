@@ -23,7 +23,13 @@ from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
 from hive.indexer.mentions import Mentions
-from hive.indexer.notification_cache import NotificationCache
+from hive.indexer.notification_cache import (
+    NotificationCache,
+    VoteNotificationCache,
+    PostNotificationCache,
+    FollowNotificationCache,
+    ReblogNotificationCache
+)
 from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
@@ -53,10 +59,10 @@ class Blocks:
     ]
     _concurrent_flush_2 = [
         ('Accounts', Accounts.flush, Accounts),
-        ("VoteNotifications", NotificationCache.flush_vote_notifications, Votes, Votes),
-        ("PostNotifications", NotificationCache.flush_post_notifications, Posts, Posts),
-        ("FollowNotifications", NotificationCache.flush_follow_notifications, Follow, Follow),
-        ("ReblogNotifications", NotificationCache.flush_reblog_notifications, Reblog, Reblog),
+        ("VoteNotifications", VoteNotificationCache.flush_vote_notifications, VoteNotificationCache),
+        ("PostNotifications", PostNotificationCache.flush_post_notifications, PostNotificationCache),
+        ("FollowNotifications", FollowNotificationCache.flush_follow_notifications, FollowNotificationCache),
+        ("ReblogNotifications", ReblogNotificationCache.flush_reblog_notifications, ReblogNotificationCache),
     ]
 
     def __init__(self):
@@ -85,6 +91,11 @@ class Blocks:
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
         Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
+        NotificationCache.setup_own_db_access(shared_db_adapter, "NotificationCache")
+        VoteNotificationCache.setup_own_db_access(shared_db_adapter, "VoteNotificationCache")
+        PostNotificationCache.setup_own_db_access(shared_db_adapter, "PostNotificationCache")
+        FollowNotificationCache.setup_own_db_access(shared_db_adapter, "FollowNotificationCache")
+        ReblogNotificationCache.setup_own_db_access(shared_db_adapter, "ReblogNotificationCache")
 
     @staticmethod
     def close_own_db_access() -> None:
@@ -98,6 +109,11 @@ class Blocks:
         Notify.close_own_db_access()
         Accounts.close_own_db_access()
         Mentions.close_own_db_access()
+        NotificationCache.close_own_db_access()
+        VoteNotificationCache.close_own_db_access()
+        PostNotificationCache.close_own_db_access()
+        FollowNotificationCache.close_own_db_access()
+        ReblogNotificationCache.close_own_db_access()
 
     @staticmethod
     def head_num() -> int:
