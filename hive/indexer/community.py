@@ -171,14 +171,14 @@ class Community:
 
         # insert community notification
         # Howo: Maybe we should change this to set dst as the account creator instead
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        SELECT {SCHEMA_NAME}.notification_id((:created_at)::timestamp, 1, :counter), n.*
-                        FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
-                        AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
-                              AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                        """
-        DbAdapterHolder.common_block_processing_db().query(sql, block_num=block_num, created_at=block_date, dst=_id, community=name, counter=counter)
+        # sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+        #                 SELECT {SCHEMA_NAME}.notification_id((:created_at)::timestamp, 1, :counter), n.*
+        #                 FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
+        #                 AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+        #                 WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
+        #                       AND n.block_num > hivemind_app.block_before_irreversible('90 days')
+        #                 """
+        # DbAdapterHolder.common_block_processing_db().query(sql, block_num=block_num, created_at=block_date, dst=_id, community=name, counter=counter)
 
     @classmethod
     def validated_id(cls, name):
