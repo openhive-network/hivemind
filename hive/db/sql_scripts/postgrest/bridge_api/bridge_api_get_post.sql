@@ -8,21 +8,26 @@ $$
 DECLARE
 _author TEXT;
 _permlink TEXT;
-
+_observer TEXT;
+_observer_id INTEGER;
 _post_id INT;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer": "string"}', 2, '{"permlink": "permlink must be string"}');
   _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
   _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
-  
+
   _author = hivemind_postgrest_utilities.valid_account(_author, False);
   _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink, False);
-  PERFORM hivemind_postgrest_utilities.valid_account(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True);
+
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    True);
 
   _post_id =  hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True);
 
   RETURN (
-    SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True) FROM ( -- bridge_api_get_post
+    SELECT hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, False, True) FROM ( -- bridge_api_get_post
       SELECT
         hp.id,
         hp.author,
