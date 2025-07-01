@@ -11,7 +11,7 @@ import sqlalchemy
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 log = logging.getLogger(__name__)
 
@@ -75,9 +75,9 @@ class Db:
         self._basic_connection = self.get_connection(0)
         self._basic_connection.execute(sqlalchemy.text("COMMIT"))
 
-        self.__autoexplain = None
-        if enable_autoexplain:
-            self.__autoexplain = AutoExplainWrapper(self)
+        #self.__autoexplain = None
+        #if enable_autoexplain:
+        self.__autoexplain = AutoExplainWrapper(self)
 
     def clone(self, name):
         cloned = Db(self._url, name, self.__autoexplain)

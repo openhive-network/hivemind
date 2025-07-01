@@ -62,6 +62,12 @@ class PostDataCache(DbAdapterHolder):
                 values_update.append(value)
 
         cls.beginTx()
+        cls.db.query_no_return("LOAD 'auto_explain'")
+        cls.db.query_no_return("SET auto_explain.log_nested_statements=on")
+        cls.db.query_no_return("SET auto_explain.log_min_duration=0")
+        cls.db.query_no_return("SET auto_explain.log_analyze=on")
+        cls.db.query_no_return("SET auto_explain.log_buffers=on")
+        cls.db.query_no_return("SET auto_explain.log_verbose=on")
         sql = f"""
                     WITH insert_values(id, is_root, title, body, json) AS (
                         SELECT * FROM
@@ -116,8 +122,10 @@ class PostDataCache(DbAdapterHolder):
                     UNION ALL
                     SELECT id FROM combined_text_search
         """
-        log.info(f"Executing query:\n{sql}")
+        if print_query:
+            log.info(f"Executing query:\n{sql}")
         cls.db.query_prepared(sql)
+        cls.db.query_no_return("SET auto_explain.log_min_duration=1000")
         values_insert.clear()
         values_update.clear()
 

@@ -123,7 +123,7 @@ class Conf:
             type=strtobool,
             env_var='LOG_EXPLAIN_QUERIES',
             help='(debug) Adds to log output of EXPLAIN ANALYZE for specific queries - only for db super user',
-            default=False,
+            default=True,
         )
 
         # logging
