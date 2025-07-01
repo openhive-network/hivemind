@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_bridge_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN, IN _replies JSONB DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _observer_id INTEGER, IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN, IN _replies JSONB DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -67,7 +67,7 @@ BEGIN
             ),
     'payout', (_row.payout + _row.pending_payout),
     'author_reputation', _tmp_amount,
-    'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
+    'active_votes', hivemind_postgrest_utilities.list_votes(_observer_id, _row.id, /* in python code it was hardcoded */ 1000,
                     'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
                     WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN to_jsonb(string_to_array(_row.blacklists, ',')) 

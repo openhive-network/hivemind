@@ -29,7 +29,7 @@ BEGIN
   RETURN COALESCE(
   (
     SELECT     -- bridge_api_get_discussion
-      jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True, row.replies))
+      jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, row.replies))
       FROM (
         SELECT
           hpv.id,

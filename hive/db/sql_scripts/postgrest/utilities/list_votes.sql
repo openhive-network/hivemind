@@ -53,7 +53,7 @@ DROP TYPE IF EXISTS hivemind_postgrest_utilities.list_votes_case CASCADE;
 CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_votes;
-CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER, IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
@@ -70,7 +70,7 @@ BEGIN
     SELECT jsonb_agg( -- list_votes
         hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode)
       ) FROM (
-      SELECT 
+      SELECT
         v.id,
         v.voter,
         v.author,
@@ -82,7 +82,7 @@ BEGIN
         v.num_changes,
         v.reputation
       FROM
-        hivemind_app.hive_votes_view v
+        hivemind_app.hive_votes_view AS v
       WHERE
       ( CASE
           WHEN _case = 'get_votes_for_posts' THEN v.post_id = _post_id
@@ -90,6 +90,7 @@ BEGIN
           WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
         END
       )
+      AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY
       ( CASE
           WHEN _case = 'get_votes_for_posts' THEN v.voter_id

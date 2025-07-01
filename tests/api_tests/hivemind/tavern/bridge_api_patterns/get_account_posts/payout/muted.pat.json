@@ -242,10 +242,6 @@
         "voter": "mammasitta"
       },
       {
-        "rshares": 39092198167,
-        "voter": "gtg"
-      },
-      {
         "rshares": 3985585444,
         "voter": "fuck.off"
       },
@@ -777,10 +773,6 @@
         "voter": "johnerminer"
       },
       {
-        "rshares": 39201460134,
-        "voter": "gtg"
-      },
-      {
         "rshares": 19467531428,
         "voter": "ausbitbank"
       },
@@ -872,16 +864,8 @@
         "voter": "gary-smith"
       },
       {
-        "rshares": 49812626493,
-        "voter": "gtg"
-      },
-      {
         "rshares": 7921157988,
         "voter": "dasha"
-      },
-      {
-        "rshares": 30256483332,
-        "voter": "r4fken"
       },
       {
         "rshares": 4368322380,
@@ -1060,10 +1044,6 @@
         "voter": "johnerminer"
       },
       {
-        "rshares": 48992052363,
-        "voter": "gtg"
-      },
-      {
         "rshares": 23149067557,
         "voter": "firepower"
       }
@@ -1122,10 +1102,6 @@
       {
         "rshares": 848238359,
         "voter": "johnerminer"
-      },
-      {
-        "rshares": 48835908327,
-        "voter": "gtg"
       }
     ],
     "author": "gtg",
@@ -1236,12 +1212,7 @@
     "url": "/steem/@picokernel/bounty-community-bounty-for-open-source-gpu-miner#@gtg/re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z"
   },
   {
-    "active_votes": [
-      {
-        "rshares": 56150216349,
-        "voter": "gtg"
-      }
-    ],
+    "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,

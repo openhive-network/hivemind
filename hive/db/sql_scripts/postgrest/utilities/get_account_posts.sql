@@ -26,8 +26,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, (CASE WHEN row.author <> _account THEN ARRAY[_account] ELSE NULL END), False, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, (CASE WHEN row.author <> _account THEN ARRAY[_account] ELSE NULL END), False, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
       END
     ) 
     ) FROM (
@@ -123,8 +123,8 @@ BEGIN
     SELECT jsonb_agg (
     (
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, False, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, False, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
       END
     )
     ) FROM (
@@ -215,8 +215,8 @@ BEGIN
     ( 
       CASE
         WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(
-            row, 0, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END), False, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END))
+            _observer_id, row, 0, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END), False, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END))
       END
     )
     ) FROM (
@@ -308,7 +308,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, False, True)
     ) FROM (
       WITH posts AS MATERIALIZED -- get_account_posts_by_posts
       (
@@ -396,8 +396,8 @@ BEGIN
         -- in python code i saw in that case is_pinned should be set, but I couldn't find an example in db to do a test case.
     ( 
       CASE
-        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, True, True)
-        ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, True, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
       END
     )
     ) FROM (      -- get_account_posts_by_replies
@@ -501,7 +501,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, False, True)
     ) FROM (
       WITH payouts AS -- get_account_posts_by_payout
       (  

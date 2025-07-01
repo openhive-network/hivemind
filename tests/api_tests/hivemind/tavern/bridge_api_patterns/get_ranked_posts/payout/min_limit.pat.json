@@ -214,10 +214,6 @@
         "voter": "lovelace"
       },
       {
-        "rshares": 1155012084233,
-        "voter": "gavvet"
-      },
-      {
         "rshares": 538016209942,
         "voter": "eeks"
       },
@@ -1562,8 +1558,8 @@
     "percent_hbd": 10000,
     "permlink": "steemmag-steemit-s-weekend-digest-9-of-community-curation-and-reputation-chats-with-a-whale-steemit-chat-lead-moderators-a-day",
     "post_id": 1192096,
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

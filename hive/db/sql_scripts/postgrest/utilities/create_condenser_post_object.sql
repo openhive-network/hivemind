@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_condenser_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_condenser_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _content_additions BOOLEAN, IN _reblogged_by TEXT[] DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.create_condenser_post_object(IN _observer_id INTEGER, IN _row RECORD, IN _truncate_body_len INT, IN _content_additions BOOLEAN, IN _reblogged_by TEXT[] DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -40,7 +40,7 @@ BEGIN
     'beneficiaries', _row.beneficiaries,
     'max_accepted_payout', _row.max_accepted_payout,
     'percent_hbd', _row.percent_hbd,
-    'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
+    'active_votes', hivemind_postgrest_utilities.list_votes(_observer_id, _row.id, /* in python code it was hardcoded */ 1000,
                     'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, (SELECT CASE
                                                                                     WHEN _content_additions THEN 'active_votes'::hivemind_postgrest_utilities.vote_presentation
                                                                                     ELSE 'condenser_api'::hivemind_postgrest_utilities.vote_presentation END))

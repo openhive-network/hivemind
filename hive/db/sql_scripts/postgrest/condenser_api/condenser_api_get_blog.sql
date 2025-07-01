@@ -10,14 +10,20 @@ DECLARE
   _offset INT;
   _limit INT;
   _max_allowed_limit INT;
-
+  _observer TEXT;
+  _observer_id INTEGER;
   _account_id INT;
   _result JSONB;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "start_entry_id": "number", "limit": "number"}', 1, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "start_entry_id": "number", "limit": "number", "observer": "string"}', 1, NULL);
   _account = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True);
   _offset = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'start_entry_id', False);
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
+
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    False);
 
   _account = hivemind_postgrest_utilities.valid_account(_account, False);
 
@@ -103,7 +109,7 @@ BEGIN
         jsonb_build_object(
           'blog', _account,
           'entry_id', row.entry_id,
-          'comment', hivemind_postgrest_utilities.create_condenser_post_object(row, 0, False),
+          'comment', hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, 0, False),
           'reblogged_on', row.reblogged_at
         )
       ) FROM (

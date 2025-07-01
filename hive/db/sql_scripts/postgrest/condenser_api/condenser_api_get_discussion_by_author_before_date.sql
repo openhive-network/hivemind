@@ -9,12 +9,14 @@ DECLARE
 _author TEXT;
 _permlink TEXT;
 _author_id INT;
+_observer TEXT;
+_observer_id INTEGER;
 _post_id INT;
 _limit INT;
 _truncate_body INT;
 _result JSONB;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "start_permlink": "string","before_date": "string", "limit": "number", "truncate_body":"number"}', 1, '{"start_permlink": "permlink must be string"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "start_permlink": "string","before_date": "string", "limit": "number", "truncate_body":"number", "observer": "string"}', 1, '{"start_permlink": "permlink must be string"}');
 
   -- BEFORE DATE IS IGNORED BECAUSE IN PYTHON CODE IT IS ALSO IGNORED
 
@@ -22,6 +24,11 @@ BEGIN
     hivemind_postgrest_utilities.valid_account(
         hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
       False);
+
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    False);
 
   _author_id = hivemind_postgrest_utilities.find_account_id(_author, True);
 
@@ -43,7 +50,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+      hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
     ) FROM (
       WITH blog_posts AS -- condenser_api_get_discussions_by_author_before_date
       (

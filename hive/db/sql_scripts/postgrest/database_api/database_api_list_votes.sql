@@ -13,15 +13,21 @@ DECLARE
   _order_by_comment_voter BOOLEAN;
   _voter TEXT;
   _author TEXT;
+  _observer TEXT;
   _permlink TEXT;
-  
+
   _voter_id INT;
+  _observer_id INT;
   _post_id INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start": "array", "limit": "number", "order": "string"}', 3, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start": "array", "limit": "number", "order": "string", "observer": "string"}', 3, NULL);
   _start = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', True);
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _order = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'order', True);
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    False);
 
   _order = lower(_order);
 
@@ -55,9 +61,9 @@ BEGIN
   _voter_id = hivemind_postgrest_utilities.find_account_id(_voter, True);
 
   IF _order_by_comment_voter THEN
-    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_post_id, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_observer_id, _post_id, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
   ELSE
-    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_post_id, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_observer_id, _post_id, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
   END IF;
 END;
 $$

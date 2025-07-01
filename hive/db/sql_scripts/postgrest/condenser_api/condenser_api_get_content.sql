@@ -8,26 +8,30 @@ $$
 DECLARE
 _author TEXT;
 _permlink TEXT;
+_observer TEXT;
+_observer_id INTEGER;
 _post_id INT;
-
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer": "string"}', 2, NULL);
-  -- observer is ignored in python, so it is ignored here as well
   _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
   _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
-  _author = hivemind_postgrest_utilities.valid_account(_author);
+  _observer = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False);
+  _observer_id = hivemind_postgrest_utilities.find_account_id(
+    hivemind_postgrest_utilities.valid_account(_observer, True),
+    False);
   _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink);
   _post_id = hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True );
+
   IF _get_replies THEN
     RETURN COALESCE((
       SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions)
+        hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, 0, _content_additions)
       ) FROM (
         WITH replies AS -- condenser_api_get_content with replies
         (
-          SELECT id 
+          SELECT id
           FROM hivemind_app.live_posts_comments_view hp
-          WHERE hp.parent_id = _post_id 
+          WHERE hp.parent_id = _post_id
           ORDER BY hp.id
           LIMIT 5000
         )
@@ -80,7 +84,7 @@ BEGIN
     RETURN COALESCE(_result, '[]'::jsonb);
   ELSE
     RETURN (
-      SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (       -- condenser_api_get_content without replies
+      SELECT hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, 0, _content_additions) FROM (       -- condenser_api_get_content without replies
         SELECT
           hp.id,
           hp.author,
