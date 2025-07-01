@@ -58,7 +58,7 @@ BEGIN
 
     _result = (
         SELECT jsonb_agg (
-                       hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+                       hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
                ) FROM (
                           WITH -- find posts with a given pattern
                                all_posts as

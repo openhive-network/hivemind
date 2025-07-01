@@ -241,10 +241,6 @@
       "voter": "mammasitta"
     },
     {
-      "rshares": 39092198167,
-      "voter": "gtg"
-    },
-    {
       "rshares": 3985585444,
       "voter": "fuck.off"
     },
@@ -740,8 +736,8 @@
   "percent_hbd": 10000,
   "permlink": "heavy-duty-witness-node-infrastructure",
   "post_id": 838527,
-  "replies": [],
   "reblogs": 0,
+  "replies": [],
   "stats": {
     "flag_weight": 0.0,
     "gray": false,

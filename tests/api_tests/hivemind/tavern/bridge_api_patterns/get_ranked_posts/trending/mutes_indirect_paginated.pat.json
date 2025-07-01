@@ -182,10 +182,6 @@
         "voter": "jademont"
       },
       {
-        "rshares": 1231622449650,
-        "voter": "gavvet"
-      },
-      {
         "rshares": 44936016583,
         "voter": "eeks"
       },
@@ -1355,8 +1351,8 @@
     "percent_hbd": 10000,
     "permlink": "special-edition-major-updates-and-project-curie-month-1-roundup-12-august-11-september-2016",
     "post_id": 1243456,
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2330,9 +2326,9 @@
     "pending_payout_value": "259.423 HBD",
     "percent_hbd": 10000,
     "permlink": "captured-by-time-an-original-novel-chapter-1",
-    "post_id": 1256447,
-    "replies": [],
+    "post_id": 1256449,
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2772,10 +2768,6 @@
       {
         "rshares": 103519364,
         "voter": "strawhat"
-      },
-      {
-        "rshares": 16242543792,
-        "voter": "r4fken"
       },
       {
         "rshares": 102589641,
@@ -3943,8 +3935,8 @@
     "percent_hbd": 10000,
     "permlink": "steemfest-follow-up-poster-designs-sbd-rewards-will-donated-to-the-project",
     "post_id": 1243379,
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

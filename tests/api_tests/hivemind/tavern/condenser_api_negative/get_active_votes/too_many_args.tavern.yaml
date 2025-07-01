@@ -3,7 +3,7 @@
 
   marks:
     - patterntest
-    
+    - negative
 
   includes:
     - !include ../../common.yaml
@@ -18,11 +18,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "search-api.find_text"
-          params: {"pattern":"hive", "sort":"relevance", "author":"jed78","limit":2}
+          method: "condenser_api.get_active_votes"
+          params: ["ciao", "re-the-amazing-mr-hydde-20160811t213650", "", ""]
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            ignore_tags: "<bridge post>"
+            error_response: true

@@ -161,10 +161,6 @@
       "voter": "herethengone"
     },
     {
-      "rshares": 79833977,
-      "voter": "gtg"
-    },
-    {
       "rshares": 258707067,
       "voter": "merciesmay"
     },
@@ -222,8 +218,8 @@
   "percent_hbd": 10000,
   "permlink": "hello-world",
   "post_id": 51402,
-  "replies": [],
   "reblogs": 0,
+  "replies": [],
   "stats": {
     "flag_weight": 0.0,
     "gray": false,
