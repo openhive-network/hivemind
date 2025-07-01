@@ -116,8 +116,7 @@ class PostDataCache(DbAdapterHolder):
                     UNION ALL
                     SELECT id FROM combined_text_search
         """
-        if print_query:
-            log.info(f"Executing query:\n{sql}")
+        log.info(f"Executing query:\n{sql}")
         cls.db.query_prepared(sql)
         values_insert.clear()
         values_update.clear()
