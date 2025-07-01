@@ -7,6 +7,12 @@ stages:
 - collector
 - cleanup
 
+include:
+- template: Workflows/Branch-Pipelines.gitlab-ci.yml
+- project: hive/haf
+  ref: f77f308210a2b051517dc08a986bab9fc1afe98d # develop
+  file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
+
 variables:
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
@@ -28,20 +34,11 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_SUBMODULE_DEPTH: 1
   GIT_SUBMODULE_UPDATE_FLAGS: --jobs 4
-  # Variables required by Common CI jobs
-  CI_COMMON_JOB_VERSION: "e74d7109838ff05fdc239bced6a726aa7ad46a9b"
-  DOCKER_BUILDER_TAG: "$CI_COMMON_JOB_VERSION"
-  DOCKER_DIND_TAG: "$CI_COMMON_JOB_VERSION"
   IMAGE_REMOVER_TAG: "$CI_COMMON_JOB_VERSION"
 
   # Other
   CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
 
-include:
-- template: Workflows/Branch-Pipelines.gitlab-ci.yml
-- project: hive/haf
-  ref: 9776a3727dda2eed4c1b6142bfe8d45d5e6379bc # develop
-  file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
