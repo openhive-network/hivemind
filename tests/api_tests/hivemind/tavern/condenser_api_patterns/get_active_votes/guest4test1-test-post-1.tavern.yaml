@@ -3,10 +3,10 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # more votes than hardcoded limit
 
   includes:
-   - !include ../../common.yaml
+    - !include ../../common.yaml
 
   stages:
     - name: test
@@ -18,11 +18,9 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "tags_api.get_discussion"
-          params: {"author":"guest4test1", "permlink":"test-post-1", "observer":"guest4test1"}
+          method: "condenser_api.get_active_votes"
+          params: ["guest4test1", "test-post-1", "guest4test1"]
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
-          extra_kwargs:
-            ignore_tags: "<tags post>"
