@@ -352,6 +352,7 @@ DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
 CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
 RETURNS SETOF BIGINT
 LANGUAGE plpgsql
+SET plan_cache_mode = force_generic_plan
 AS
 $function$
 BEGIN
