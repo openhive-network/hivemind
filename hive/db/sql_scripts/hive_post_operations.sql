@@ -352,7 +352,6 @@ DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
 CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
 RETURNS SETOF BIGINT
 LANGUAGE plpgsql
-SET plan_cache_mode = force_generic_plan
 AS
 $function$
 BEGIN
@@ -362,7 +361,7 @@ BEGIN
   RETURN query
       WITH mentions AS MATERIALIZED
           (
-          SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num
+          SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num, T.block_num-1 as prev_block
           FROM
               hivemind_app.hive_accounts ha
                   INNER JOIN
@@ -425,7 +424,7 @@ BEGIN
                   hb.created_at AS created_at,
                   (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
               FROM mentions hm
-              JOIN hivemind_app.blocks_view AS hb ON hb.num = (hm.block_num - 1)
+              JOIN hivemind_app.blocks_view AS hb ON hb.num = hm.prev_block
               ),
           author_data AS (
               SELECT DISTINCT
