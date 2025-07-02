@@ -424,7 +424,7 @@ BEGIN
                   hb.created_at AS created_at,
                   (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
               FROM mentions hm
-              JOIN hafd.blocks AS hb ON hb.num = (hm.block_num - 1) -- it uses only irreversible blocks !
+              JOIN hivemind_app.blocks_view AS hb ON hb.num = (hm.block_num - 1)
               ),
           author_data AS (
               SELECT DISTINCT
