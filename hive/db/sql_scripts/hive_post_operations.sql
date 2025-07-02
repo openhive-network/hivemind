@@ -372,7 +372,7 @@ BEGIN
                           SELECT
                               hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
                           FROM hivemind_app.hive_posts AS hp
-                                   INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
+                          INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
                           WHERE hp.id = ANY(_post_ids)
                             AND hp.counter_deleted = 0
                       ) AS T
@@ -423,8 +423,8 @@ BEGIN
                   hm.*,
                   hb.created_at AS created_at,
                   (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
-              FROM hivemind_app.blocks_view AS hb, mentions AS hm
-              WHERE hb.num = (hm.block_num - 1)
+              FROM mentions hm
+              JOIN hivemind_app.blocks_view AS hb ON hb.num = (hm.block_num - 1)
               ),
           author_data AS (
               SELECT DISTINCT
