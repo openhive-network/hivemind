@@ -416,7 +416,7 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            result = DbAdapterHolder.common_block_processing_db().query(
+            result = DbAdapterHolder.common_block_processing_db().query_all(
                 f"""SELECT * FROM {SCHEMA_NAME}.set_community_role(
                     :account_id, :community_id, :role_id, :date, 
                     :max_mod_nb, :mod_role_threshold
