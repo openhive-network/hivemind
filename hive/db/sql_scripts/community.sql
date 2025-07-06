@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
     p_date TIMESTAMP,
     p_max_mod_nb INTEGER,
     p_mod_role_threshold INTEGER
-) RETURNS TABLE(status TEXT, mod_count INTEGER) AS $$
+) RETURNS TABLE(status TEXT, mod_count BIGINT) AS $
 BEGIN
     RETURN QUERY
     WITH mod_check AS (
