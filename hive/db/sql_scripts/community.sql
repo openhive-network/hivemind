@@ -1,4 +1,4 @@
-DROP FUNCTION hivemind_app.set_community_role;
+DROP FUNCTION IF EXISTS hivemind_app.set_community_role;
 CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
     p_account_id INTEGER,
     p_community_id INTEGER,
