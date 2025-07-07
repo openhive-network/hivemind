@@ -633,6 +633,7 @@ def setup_runtime_code(db):
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
         "grant_hivemind_user.sql",
+        "community.sql",
         "postgrest/utilities/exceptions.sql",
         "postgrest/utilities/validate_json_arguments.sql",
         "postgrest/utilities/api_limits.sql",
