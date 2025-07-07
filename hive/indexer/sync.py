@@ -66,10 +66,10 @@ class SyncHiveDb:
 
         set_custom_signal_handlers()
 
-        Blocks.setup(conf=self._conf)
-
         Community.start_block = self._conf.get("community_start_block")
         DbState.initialize(self._enter_sync, self._upgrade_schema)
+
+        Blocks.setup(conf=self._conf)
 
         self._show_info(self._db)
 
