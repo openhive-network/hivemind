@@ -65,18 +65,16 @@ class Blocks:
         ("ReblogNotifications", ReblogNotificationCache.flush_reblog_notifications, ReblogNotificationCache),
     ]
 
-    def __init__(self):
-        head_date = self.head_date()
-        if head_date == '':
-            self.__class__._head_block_date = None
-            self.__class__._current_block_date = None
-        else:
-            self.__class__._head_block_date = head_date
-            self.__class__._current_block_date = head_date
-
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
+        head_date = cls.head_date()
+        if head_date == '':
+            cls._head_block_date = None
+            cls._current_block_date = None
+        else:
+            cls._head_block_date = head_date
+            cls._current_block_date = head_date
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
@@ -142,7 +140,7 @@ class Blocks:
     @staticmethod
     def head_date() -> str:
         """Get hive's head block date."""
-        sql = "SELECT head_block_time()"
+        sql = f"SELECT {SCHEMA_NAME}.head_block_time()"
         return str(Db.instance().query_one(sql) or '')
 
     @classmethod
