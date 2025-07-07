@@ -35,6 +35,9 @@ TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 
+# Includes also admin and owner, limit is set to prevent spam
+MAX_MOD_NB = 100
+
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
     "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
@@ -413,15 +416,26 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
-                               (account_id, community_id, role_id, created_at)
-                        VALUES (:account_id, :community_id, :role_id, :date)
-                            ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET role_id = :role_id """,
-                **params,
+            result = DbAdapterHolder.common_block_processing_db().query_all(
+                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role(
+                    :account_id, :community_id, :role_id, :date, 
+                    :max_mod_nb, :mod_role_threshold
+                )""",
+                max_mod_nb=MAX_MOD_NB,
+                mod_role_threshold=Role.mod,
+                **params
             )
-            self._notify('set_role', payload=Role(self.role_id).name)
+
+            if result[0]['status'] == 'success':
+                self._notify('set_role', payload=Role(self.role_id).name)
+            else:
+                Notify(
+                    block_num=self.block_num,
+                    type_id='error',
+                    dst_id=self.actor_id,
+                    when=self.date,
+                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
+                )
         elif action == 'setUserTitle':
             DbAdapterHolder.common_block_processing_db().query(
                 f"""INSERT INTO {SCHEMA_NAME}.hive_roles
