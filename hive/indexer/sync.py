@@ -223,6 +223,7 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
+        self._wait_for_massive_consume()
         result = self._db.query_one( "CALL hive.app_next_iteration( _contexts => ARRAY['{}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
                                      .format(SCHEMA_NAME, limit, batch)
                                     )
