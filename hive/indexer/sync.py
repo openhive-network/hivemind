@@ -167,7 +167,6 @@ class SyncHiveDb:
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
-                self._wait_for_massive_consume()  # wait for flushing massive data in thread
                 DbState.set_massive_sync( False )
                 report_enter_to_stage(application_stage)
 
@@ -262,13 +261,9 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
-        self._wait_for_massive_consume()  # wait for finish previous consumption
-
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
-
-        #self._consume_massive_blocks(blocks, lbound, ubound)
 
         self._massive_consume_blocks_futures =\
             self._massive_consume_blocks_thread_pool.submit(self._consume_massive_blocks, blocks)
