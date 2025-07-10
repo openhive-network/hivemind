@@ -99,7 +99,7 @@ class SyncHiveDb:
 
     def run(self) -> None:
         start_time = perf()
-        Blocks.set_head_date()
+
         def report_enter_to_stage(current_stage) -> bool:
             if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
                 last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
@@ -163,9 +163,7 @@ class SyncHiveDb:
                 DbState.ensure_off_synchronous_commit()
 
                 DbState.ensure_fk_are_disabled()
-                if not DbState.are_indexes_enabled():
-                    self._wait_for_massive_consume()
-                    DbState.ensure_indexes_are_enabled()
+                DbState.ensure_indexes_are_enabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
@@ -198,15 +196,15 @@ class SyncHiveDb:
 
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
-            self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            self._db.query_no_return("ROLLBACK")
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
 
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
-            self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            self._db.query_no_return("ROLLBACK")
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
