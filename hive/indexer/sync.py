@@ -167,6 +167,7 @@ class SyncHiveDb:
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
+                self._wait_for_massive_consume()  # wait for flushing massive data in thread
                 DbState.set_massive_sync( False )
                 report_enter_to_stage(application_stage)
 
@@ -195,15 +196,15 @@ class SyncHiveDb:
 
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
-            self._wait_for_massive_consume()
             self._db.query_no_return("ROLLBACK")
+            self._wait_for_massive_consume()
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
 
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
-            self._wait_for_massive_consume()
             self._db.query_no_return("ROLLBACK")
+            self._wait_for_massive_consume()
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
@@ -220,7 +221,6 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
-        self._wait_for_massive_consume()
         result = self._db.query_one( "CALL hive.app_next_iteration( _contexts => ARRAY['{}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
                                      .format(SCHEMA_NAME, limit, batch)
                                     )
@@ -261,9 +261,13 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
+        self._wait_for_massive_consume()  # wait for finish previous consumption
+
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
+
+        #self._consume_massive_blocks(blocks, lbound, ubound)
 
         self._massive_consume_blocks_futures =\
             self._massive_consume_blocks_thread_pool.submit(self._consume_massive_blocks, blocks)
