@@ -32,8 +32,6 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.timer import Timer
 
-from concurrent.futures import as_completed, ThreadPoolExecutor
-
 import ast
 
 log = logging.getLogger(__name__)
@@ -62,7 +60,7 @@ class SyncHiveDb:
 
     def __enter__(self):
         if self._enter_sync:
-          log.info("Entering HAF mode synchronization")
+            log.info("Entering HAF mode synchronization")
 
         set_custom_signal_handlers()
 
@@ -84,7 +82,7 @@ class SyncHiveDb:
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
 
-            PayoutStats.generate(self._db,separate_transaction=True)
+            PayoutStats.generate(self._db, separate_transaction=True)
 
             last_imported_block = Blocks.last_imported()
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
@@ -101,10 +99,11 @@ class SyncHiveDb:
 
     def run(self) -> None:
         start_time = perf()
+
         def report_enter_to_stage(current_stage) -> bool:
             if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
                 last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
-                log.info( f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}")
+                log.info(f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}")
                 report_enter_to_stage.prev_application_stage = current_stage
                 return True
             report_enter_to_stage.prev_application_stage = current_stage
@@ -143,7 +142,6 @@ class SyncHiveDb:
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
 
-
             # this  commit is added here only to prevent error idle-in-transaction timeout
             # it should be removed, but it requires to check any possible long-lasting actions
             # so as quic workaround this COMMIT stays
@@ -157,7 +155,7 @@ class SyncHiveDb:
                 DbState.ensure_indexes_are_disabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
-            elif  application_stage == "MASSIVE_WITH_INDEXES":
+            elif application_stage == "MASSIVE_WITH_INDEXES":
                 DbState.set_massive_sync( True )
                 if report_enter_to_stage(application_stage):
                     self.print_summary()
@@ -168,8 +166,8 @@ class SyncHiveDb:
                 DbState.ensure_indexes_are_enabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
-            elif  application_stage ==  "live":
-                self._wait_for_massive_consume() # wait for flushing massive data in thread
+            elif application_stage == "live":
+                self._wait_for_massive_consume()  # wait for flushing massive data in thread
                 DbState.set_massive_sync( False )
                 report_enter_to_stage(application_stage)
 
@@ -204,7 +202,7 @@ class SyncHiveDb:
             self._on_stop_synchronization(active_connections_before)
             return True
 
-        if self._last_block_to_process and ( last_imported_block >= self._last_block_to_process):
+        if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
             self._wait_for_massive_consume()
             self._db.query_no_return("ROLLBACK")
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
@@ -228,14 +226,14 @@ class SyncHiveDb:
                                      .format(SCHEMA_NAME, limit, batch)
                                     )
 
-        self._db._trx_active=True
+        self._db._trx_active = True
         (lbound, ubound) = None, None
         if result is None:
             return lbound, ubound
 
         try:
             blocks_range = ast.literal_eval(result)
-        except SyntaxError: #SqlAlchemy return (,) when OUT _blocks_range == NULL
+        except SyntaxError:  # SqlAlchemy return (,) when OUT _blocks_range == NULL
             return lbound, ubound
 
         (lbound, ubound) = blocks_range
@@ -264,7 +262,7 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
-        self._wait_for_massive_consume() # wait for finish previous consumption
+        self._wait_for_massive_consume()  # wait for finish previous consumption
 
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
@@ -273,8 +271,7 @@ class SyncHiveDb:
         #self._consume_massive_blocks(blocks, lbound, ubound)
 
         self._massive_consume_blocks_futures =\
-            self._massive_consume_blocks_thread_pool.submit( self._consume_massive_blocks, blocks )
-
+            self._massive_consume_blocks_thread_pool.submit(self._consume_massive_blocks, blocks)
 
     def _on_stop_synchronization(self, active_connections_before):
         self.print_summary()
@@ -320,7 +317,6 @@ class SyncHiveDb:
         except:
             log.exception("Exception caught during fetching blocks data")
             raise
-
 
     def print_summary(self):
         if SyncHiveDb.time_start is None:
@@ -429,7 +425,7 @@ class SyncHiveDb:
 
     def _wait_for_connections_closed(self, connections_before: Iterable) -> None:
         active_connections = []
-        for it in range(1,11):
+        for it in range(1, 11):
             active_connections = self._get_active_db_connections()
             if set(connections_before) == set(active_connections):
                 return
