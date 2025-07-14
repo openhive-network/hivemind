@@ -1,6 +1,6 @@
 Gives a list of root posts which contains words
 
-method: "find_api.find_text"
+method: "search_api.find_text"
 params:
 {
   "pattern" : words to find
