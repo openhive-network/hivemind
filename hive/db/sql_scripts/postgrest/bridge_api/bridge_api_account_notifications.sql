@@ -38,7 +38,9 @@ BEGIN
         'type', hivemind_postgrest_utilities.get_notify_type_from_id(hive_notification_cache.type_id),
         'score', hive_notification_cache.score,
         'date', hivemind_postgrest_utilities.json_date(hive_notification_cache.created_at),
-        'msg', hivemind_postgrest_utilities.get_notify_message(hive_notification_cache),
+        'msg', hivemind_postgrest_utilities.get_notify_message(
+          (hive_notification_cache.id, hive_notification_cache.type_id, hive_notification_cache.src, hive_notification_cache.dst, hive_notification_cache.author, hive_notification_cache.permlink, hive_notification_cache.community, hive_notification_cache.community_title, hive_notification_cache.payload, hive_notification_cache.number_of_mentions)::hivemind_postgrest_utilities.notify_message_params
+        ),
         'url',  CASE
                   WHEN hive_notification_cache.permlink <> '' THEN '@' || hive_notification_cache.author || '/' || hive_notification_cache.permlink
                   WHEN hive_notification_cache.community <> '' THEN 'trending/' || hive_notification_cache.community

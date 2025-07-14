@@ -37,8 +37,22 @@ END;
 $$
 ;
 
+DROP TYPE IF EXISTS hivemind_postgrest_utilities.notify_message_params CASCADE;
+CREATE TYPE hivemind_postgrest_utilities.notify_message_params AS (
+    id BIGINT,
+    type_id INT,
+    src TEXT,
+    dst TEXT,
+    author TEXT,
+    permlink TEXT,
+    community TEXT,
+    community_title TEXT,
+    payload TEXT,
+    number_of_mentions INT
+);
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_message;
-CREATE FUNCTION hivemind_postgrest_utilities.get_notify_message(_row RECORD)
+CREATE FUNCTION hivemind_postgrest_utilities.get_notify_message(_row hivemind_postgrest_utilities.notify_message_params)
 RETURNS TEXT
 LANGUAGE plpgsql
 IMMUTABLE
