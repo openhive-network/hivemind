@@ -18,7 +18,7 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "find_api.find_text"
+          method: "search_api.find_text"
           params: {"pattern":"thailand", "sort":"created"}
       response:
         status_code: 200

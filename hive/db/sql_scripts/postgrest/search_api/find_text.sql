@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS hivemind_endpoints.find_api_find_text;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.find_api_find_text(
+DROP FUNCTION IF EXISTS hivemind_endpoints.search_api_find_text;
+CREATE OR REPLACE FUNCTION hivemind_endpoints.search_api_find_text(
     _params jsonb)
     RETURNS jsonb
     LANGUAGE 'plpgsql'

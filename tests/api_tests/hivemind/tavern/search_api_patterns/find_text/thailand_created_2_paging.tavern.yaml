@@ -18,8 +18,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "find_api.find_text"
-          params: {"pattern":"thailand beach boat", "sort":"relevance", "limit":1}
+          method: "search_api.find_text"
+          params: {"pattern":"thailand", "sort":"created", "limit":2, "start_author":"gustavopasquini","start_permlink":"pork-rib-with-barbucue-sauce"}
       response:
         status_code: 200
         verify_response_with:

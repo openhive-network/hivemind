@@ -253,8 +253,8 @@ END;
 $$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_find_api_method;
-CREATE FUNCTION hivemind_postgrest_utilities.get_find_api_method(IN __method_type TEXT, IN __params JSONB)
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_search_api_method;
+CREATE FUNCTION hivemind_postgrest_utilities.get_search_api_method(IN __method_type TEXT, IN __params JSONB)
     RETURNS JSONB
     LANGUAGE 'plpgsql'
     STABLE
@@ -265,9 +265,9 @@ DECLARE
 BEGIN
     CASE
         WHEN __method_type = 'find_text' THEN
-            result := hivemind_endpoints.find_api_find_text(__params);
+            result := hivemind_endpoints.search_api_find_text(__params);
         ELSE
-            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('find_api' || __method_type);
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search_api' || __method_type);
         END CASE;
     RETURN result;
 END;
