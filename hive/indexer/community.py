@@ -720,14 +720,14 @@ class CommunityOp:
         from hive.indexer.notify import NotifyType
 
         sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
-                  WHERE community_id = :community_id
+                  WHERE community = :community
                     AND post_id = :post_id
                     AND type_id = :type_id
                     AND src_id = :src_id"""
         return bool(
             DbAdapterHolder.common_block_processing_db().query_one(
                 sql,
-                community_id=self.community_id,
+                community=self.community,
                 post_id=self.post_id,
                 type_id=NotifyType['flag_post'],
                 src_id=self.actor_id,
