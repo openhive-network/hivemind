@@ -518,7 +518,7 @@ class CommunityOp:
         )
 
         for member_id in team_members:
-            # Skip sending notification to the source user (the one flagging)
+            # Skip sending notification to the source user (the one triggering the notification)
             if member_id == self.actor_id:
                 continue
 
@@ -716,10 +716,10 @@ class CommunityOp:
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _flagged(self):
-        """Check user's flag status."""
+        """Check user's flag status. Note that because hive_notification_cache gets flushed every 90 days, this means you can re-flag every 90 days"""
         from hive.indexer.notify import NotifyType
 
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notifs
+        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
                   WHERE community_id = :community_id
                     AND post_id = :post_id
                     AND type_id = :type_id

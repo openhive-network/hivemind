@@ -5354,7 +5354,7 @@
                 "hive-171744"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-171744\",\"account\":\"miners\",\"role\":\"mod\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-171744\",\"account\":\"miners\",\"role\":\"admin\"}]"
             }
           },
           {
@@ -6444,6 +6444,62 @@
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-171744\",\"account\":\"brown\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-171744"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-171744\",\"account\":\"emily\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-171744",
+              "author": "lauranova",
+              "permlink": "flagtest",
+              "title": "This post will be flagged",
+              "body": "flagflag",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "miners"
+              ],
+              "id": "community",
+              "json": "[\"flagPost\",{\"community\":\"hive-171744\",\"account\":\"lauranova\",\"permlink\":\"flagtest\",\"notes\":\"This is a bad post\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "emily"
+              ],
+              "id": "community",
+              "json": "[\"flagPost\",{\"community\":\"hive-171744\",\"account\":\"lauranova\",\"permlink\":\"flagtest\",\"notes\":\"This is won't trigger a notification because I am muted\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-171744"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test big team\",\"about\":\"this is will send a big notif\"}}]"
             }
           }
         ]
