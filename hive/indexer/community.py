@@ -723,7 +723,7 @@ class CommunityOp:
                   WHERE community = :community
                     AND post_id = :post_id
                     AND type_id = :type_id
-                    AND src_id = :src_id"""
+                    AND src = :src"""
         return bool(
             DbAdapterHolder.common_block_processing_db().query_one(
                 sql,
