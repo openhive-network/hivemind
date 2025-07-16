@@ -730,6 +730,6 @@ class CommunityOp:
                 community=self.community,
                 post_id=self.post_id,
                 type_id=NotifyType['flag_post'],
-                src_id=self.actor_id,
+                src=self.actor_id,
             )
         )
