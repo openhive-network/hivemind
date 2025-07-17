@@ -58,7 +58,7 @@ BEGIN
         WHEN _notify_type = 'unmute_post' THEN '<src> unmuted your post - <payload>'
         WHEN _notify_type = 'pin_post' THEN '<src> pinned your post'
         WHEN _notify_type = 'unpin_post' THEN '<src> unpinned your post'
-        WHEN _notify_type = 'flag_post' THEN '<src> flagged <post> - <payload>'
+        WHEN _notify_type = 'flag_post' THEN '<src> flagged your post - <payload>'
         WHEN _notify_type = 'subscribe' THEN '<src> subscribed to <comm>'
         WHEN _notify_type = 'error' THEN 'error: <payload>'
         WHEN _notify_type = 'reblog' THEN '<src> reblogged your post'
