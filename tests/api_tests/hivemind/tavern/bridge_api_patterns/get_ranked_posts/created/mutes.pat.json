@@ -1,6 +1,45 @@
 [
   {
     "active_votes": [],
+    "author": "lauranova",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 25,
+    "author_role": "mod",
+    "author_title": "",
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "flagflag",
+    "category": "hive-171744",
+    "children": 0,
+    "community": "hive-171744",
+    "community_title": "Test big team",
+    "created": "2016-09-15T19:47:57",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "payout": 0.0,
+    "payout_at": "2016-09-22T19:47:57",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "flagtest",
+    "post_id": 1258138,
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "This post will be flagged",
+    "updated": "2016-09-15T19:47:57",
+    "url": "/hive-171744/@lauranova/flagtest"
+  },
+  {
+    "active_votes": [],
     "author": "notmember",
     "author_payout_value": "0.000 HBD",
     "author_reputation": 25,
@@ -1857,77 +1896,5 @@
     "title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
     "updated": "2016-09-15T19:39:15",
     "url": "/story/@charlieshrem/mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 2041184971,
-        "voter": "profitgenerator"
-      }
-    ],
-    "author": "profitgenerator",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 55.62,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Let's analyze more deeply the relationship between USD and Oil. This is a continuation of this 3 part series, and in this part I will describe my opinions how to trade Oil, despite it's unpredictability. Here is the previous part:\n\n<center>https://steemit.com/money/@profitgenerator/the-Oil-market-1-3</center>\n\n------------------------------------\n<br/>\n<center>[![oilfield-643836_1920.jpg](https://s16.postimg.org/j6asrkj79/oilfield_643836_1920.jpg)](https://postimg.org/image/5cmg2iqlt/)</center>\n\n<center><h1>Oil and Dollar</h1></center>\n\nBefore we go into strategies, I have to explain more thoroughly what relationship I was talking about in the past article.\n\nSo we know that the Oil is denominated by the US Dollar, and we know that a cheap Oil is good for the US Economy, but I wasn't very precise here, this is not entirely true, there is something more here.\n\nFirst of all the commodity market is the only thing that keeps the US Dollar stable, since the Nixon lifting of the Gold standard. The USD is printed at will and the commodities are the only thing that give it some residual value.\n\nSo the commodity market has to be as liquid as possible in order to keep the USD stable, because every ounce of Gold, gram of grain or drop of Oil bought gives value to the USD, because it goes through the USD market.\n\nBut also the commodity market cannot be high in price, because that is bad for the USD. So you have to have a very liquid commodity market, but one that has low price. It sounds very contradictory (the velocity of money theory forbids this), so how you do you achieve this?\n\nWith a Paper Ponzi Scheme: https://en.wikipedia.org/wiki/Gold_certificate\n\nBy issuing commodities on paper, that are not backed by real commodities, or in other words extremely leveraged instruments. You can read more about this popular scam here:\n\n<center>http://www.silverdoctors.com/Gold/Gold-news/comex-Gold-leverage-skyrockets-to-a-shocking-5421/\nhttp://www.zerohedge.com/news/2016-06-25/comex-registered-silver-now-more-leveraged-Gold</center>\n\n<center>[![Leverage-Of-COMEX-Registered-Silver-Contracts.png](https://s17.postimg.org/bgdwcshn3/Leverage_Of_COMEX_Registered_Silver_Contracts.png)](https://postimg.org/image/vnrc53f4b/)</center>\n<center>*(Source: https://srsroccoreport.com)*</center>\n\nNow I am not sure if the same phenomena is happening to Oil as well, but it could be possible. The entire commodity market is undervalued while derivatives and over-leveraged scams are the popular choice of investment for investors.\n\nSo if this is true, then Oil, and the whole commodity market would be into a bullish run possibly. But what about the USD? Yes, the USD itself is in trouble too. The US national debt and outstanding liabilities are too big, and I think the FED will just do QE any minute now, printing up Dollars and perhaps pumping up the commodity market too.\n\nAlright so now it is very confusing, in the past article I established a bearish trend, and now I am saying a bullish scenario could happen? So which one is it. Well let's take them 1 by 1:\n\n* Venezuela economic collapse and Middle East wars = **Bullish**\n* Big Oil price not good for US so they will suppress it with any tool available = `Bearish`\n* OPEC increased Oil production together with [Iran's lifted embargo](http://www.nytimes.com/2016/03/08/world/middleeast/embargo-lifted-iranian-Oil-reaches-europe.html) = `Bearish` \n* Russia building Oil pipeline in South Europe =  `Bearish`\n* China investing in Africa and importing Oil =  **Bullish** (since the growing Chinese economy is a big Oil demand)\n* Rising Green Energy markets = `Bearish`\n* Paper ponzi scheme could collapse anytime = **Bullish**\n* New rounds of quantitative easing to erode global debts = **Bullish**\n\nSo it looks to me like a whipsaw, again it could be quantified to have more accurate numbers, but it looks like the risk is big in the market. I would certainly not go long or short on it, since it's pretty unpredictable based on these macroeconomic trends. Whatever monopoly controls the price of Oil has made sure to make the price unpredictable, so that people will be wiped out on both sides.\n\nSo then how to trade this, if long and short positions are too risky, what to do?\n\n----------------------\n<br/>\n<center>[![money-finance-bills-500.jpg](https://s17.postimg.org/simy7jp3j/money_finance_bills_500.jpg)](https://postimg.org/image/kd4w9e0uj/)</center>\n\n\n<center><h1>Trading the Oil Market</h1></center>\n\nIf long and short positions are too risky, then hedging is the only strategy left in my opinion. I would not trade Oil naked, but if we hedge it with the right instrument, it could be profitable.\n\n<center><h2>[Hedging](https://en.wikipedia.org/wiki/Hedge_%28finance%29)</h2></center>\n\nBut what to hedge, what pairs to hedge and how? Well there are many combinations, and you have to find the pairs that will make you money nontheless.\n\nBut let's cut the crap, I have found a setup that is ultra profitable, and I will share it with you, in exchange you can donate me some SBD and upvote my post and follow me, that is the least you can do for showing you this ultra profitable trading strategy.\n\nSo here are the pairs:\n* Oil / USD\n* XAU / USD\n* USD / JPY\n* DJI / USD\n\nWe will construct our `artificial index` from these, I will call it `ProfitGenerator`:\n\n<center>[![profitgenerator.png](https://s12.postimg.org/421peh5v1/profitgenerator.png)](https://postimg.org/image/feeaw9ejt/)</center>\n\nThis is how `ProfitGenerator` looks like, it is really a @profitgenerator, going up and up since 2009. The formula is the following:\n`BUY   Oil / USD`\n`SELL   XAU / USD`\n`SELL   USD / JPY`\n`BUY   DJI / USD`\n\nSo basically by buying the DOW 30  and Oil, and selling Gold and the USD/JPY, we get this artificial index that always makes our profits go up since 2009. Of course it has dips and volatility, but the trend line looks to go up:\n\n<center>[![trend.png](https://s13.postimg.org/7c4281afb/trend.png)](https://postimg.org/image/mktzlt43n/)</center>\n\nI have extrapolated it linearly in the future, and it could be a profitable investment.Looks like easy money to me, I might check it out as well, and look for even better hedging strategies.\n\n---------------------------\n\nBasically this is how I would trade Oil at the moment, not naked, but put inside this nice hedging strategy. So if you decide to try it out, you should reward me after you made some profits!\n\n\n---------------------------\n\n*Data sources: http://www.investing.com*\n\n***Disclaimer: The information provided on this page might be incorrect. I am not responsible if you lose money using the information on this page! This is not an investment advice, just my opinion and analysis for educational purposes.***\n\n\n-------------------------------------------\n\n\n<CENTER><H1>Upvote & Follow Me: @profitgenerator</H1></CENTER>",
-    "category": "money",
-    "children": 0,
-    "created": "2016-09-15T19:39:15",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "is_paidout": false,
-    "json_metadata": {
-      "image": [
-        "https://s16.postimg.org/j6asrkj79/oilfield_643836_1920.jpg",
-        "https://s17.postimg.org/bgdwcshn3/Leverage_Of_COMEX_Registered_Silver_Contracts.png",
-        "https://s17.postimg.org/simy7jp3j/money_finance_bills_500.jpg",
-        "https://s12.postimg.org/421peh5v1/profitgenerator.png",
-        "https://s13.postimg.org/7c4281afb/trend.png"
-      ],
-      "links": [
-        "https://steemit.com/money/@profitgenerator/the-Oil-market-1-3",
-        "https://postimg.org/image/5cmg2iqlt/",
-        "https://en.wikipedia.org/wiki/Gold_certificate",
-        "http://www.silverdoctors.com/Gold/Gold-news/comex-Gold-leverage-skyrockets-to-a-shocking-5421/",
-        "https://postimg.org/image/vnrc53f4b/",
-        "https://srsroccoreport.com",
-        "http://www.nytimes.com/2016/03/08/world/middleeast/embargo-lifted-iranian-Oil-reaches-europe.html",
-        "https://postimg.org/image/kd4w9e0uj/",
-        "https://en.wikipedia.org/wiki/Hedge_%28finance%29",
-        "https://postimg.org/image/feeaw9ejt/",
-        "https://postimg.org/image/mktzlt43n/",
-        "http://www.investing.com"
-      ],
-      "tags": [
-        "money",
-        "investing",
-        "oil",
-        "trading",
-        "economics"
-      ],
-      "users": [
-        "profitgenerator"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 2041184971,
-    "payout": 0.0,
-    "payout_at": "2016-09-22T19:39:15",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "the-oil-market-2-3",
-    "post_id": 1258026,
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "The Oil Market [2/3]",
-    "updated": "2016-09-15T19:39:15",
-    "url": "/money/@profitgenerator/the-oil-market-2-3"
   }
 ]
