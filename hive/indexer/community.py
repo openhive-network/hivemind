@@ -384,7 +384,7 @@ class CommunityOp:
             DbAdapterHolder.common_block_processing_db().query(
                 f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
             )
-            #self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             DbAdapterHolder.common_block_processing_db().query(
@@ -479,8 +479,7 @@ class CommunityOp:
             )
             self._notify('unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            log.info("flagPost is disabled until https://gitlab.syncad.com/hive/hivemind/-/issues/290 is implemented")
-            # self._notify('flag_post', payload=self.notes)
+            self._notify_team('flag_post', payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -505,6 +504,34 @@ class CommunityOp:
             score=score,
             **kwargs,
         )
+
+    def _notify_team(self, op, **kwargs):
+        """Send notifications to all team members (mod, admin, owner) in a community."""
+
+        team_members = DbAdapterHolder.common_block_processing_db().query_col(
+            f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
+                WHERE community_id = :community_id
+                  AND role_id >= :min_role_id""",
+            community_id=self.community_id,
+            min_role_id=Role.mod.value  # 4
+        )
+
+        for member_id in team_members:
+            # Skip sending notification to the source user (the one triggering the notification)
+            if member_id == self.actor_id:
+                continue
+
+            Notify(
+                block_num=self.block_num,
+                type_id=op,
+                src_id=self.actor_id,
+                dst_id=member_id,
+                post_id=self.post_id,
+                when=self.date,
+                community_id=self.community_id,
+                score=35,
+                **kwargs,
+            )
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
@@ -688,20 +715,20 @@ class CommunityOp:
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _flagged(self):
-        """Check user's flag status."""
+        """Check user's flag status. Note that because hive_notification_cache gets flushed every 90 days, this means you can re-flag every 90 days"""
         from hive.indexer.notify import NotifyType
 
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notifs
-                  WHERE community_id = :community_id
+        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
+                  WHERE community = :community
                     AND post_id = :post_id
                     AND type_id = :type_id
-                    AND src_id = :src_id"""
+                    AND src = :src"""
         return bool(
             DbAdapterHolder.common_block_processing_db().query_one(
                 sql,
-                community_id=self.community_id,
+                community=self.community,
                 post_id=self.post_id,
                 type_id=NotifyType['flag_post'],
-                src_id=self.actor_id,
+                src=self.actor_id,
             )
         )
