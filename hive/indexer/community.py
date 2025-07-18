@@ -508,7 +508,6 @@ class CommunityOp:
     def _notify_team(self, op, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
 
-        # Fetch all team members with role >= mod (role_id >= 4)
         team_members = DbAdapterHolder.common_block_processing_db().query_col(
             f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
                 WHERE community_id = :community_id
