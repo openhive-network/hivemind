@@ -67,6 +67,17 @@ declare
   ],
   "components": {
     "schemas": {
+      "hivemind_endpoints.block_range_type": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "integer"
+          },
+          "to": {
+            "type": "integer"
+          }
+        }
+      },
       "hivemind_endpoints.operation_body": {
         "type": "object",
         "x-sql-datatype": "JSON",
@@ -140,6 +151,10 @@ declare
             "type": "integer",
             "description": "Total number of pages"
           },
+          "block_range": {
+            "$ref": "#/components/schemas/hivemind_endpoints.block_range_type",
+            "description": "Range of blocks that contains the returned pages"
+          },
           "operations_result": {
             "type": "array",
             "items": {
@@ -158,7 +173,7 @@ declare
           "blog_api"
         ],
         "summary": "Get operations for an account by recency.",
-        "description": "List the operations in reversed order (first page is the oldest) for given account. \nThe page size determines the number of operations per page.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_ops_by_account(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/operations?page-size=3''`\n",
+        "description": "List the non-virtual operations in reversed order (first page is the oldest) for given account. \nThe page size determines the number of operations per page.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_ops_by_account(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/operations?page-size=3''`\n",
         "operationId": "hivemind_endpoints.get_ops_by_account",
         "parameters": [
           {
@@ -172,13 +187,23 @@ declare
           },
           {
             "in": "query",
+            "name": "observer-name",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account name of the observer"
+          },
+          {
+            "in": "query",
             "name": "operation-types",
             "required": false,
             "schema": {
               "type": "string",
               "default": null
             },
-            "description": "List of operation types to get. If NULL, gets all operation types.\nexample: `18,12`\n"
+            "description": "List of operation types to get. If NULL, gets all non-virtual operation types.\nexample: `18,12`\n"
           },
           {
             "in": "query",
@@ -242,6 +267,10 @@ declare
                 "example": {
                   "total_operations": 219867,
                   "total_pages": 73289,
+                  "block_range": {
+                    "from": 1,
+                    "to": 5000000
+                  },
                   "operations_result": [
                     {
                       "op": {
@@ -265,48 +294,6 @@ declare
                       "virtual_op": false,
                       "operation_id": "21474823595099394",
                       "trx_in_block": 3
-                    },
-                    {
-                      "op": {
-                        "type": "producer_reward_operation",
-                        "value": {
-                          "producer": "blocktrades",
-                          "vesting_shares": {
-                            "nai": "@@000000037",
-                            "amount": "3003850165",
-                            "precision": 6
-                          }
-                        }
-                      },
-                      "block": 4999992,
-                      "trx_id": null,
-                      "op_pos": 1,
-                      "op_type_id": 64,
-                      "timestamp": "2016-09-15T19:46:57",
-                      "virtual_op": true,
-                      "operation_id": "21474802120262208",
-                      "trx_in_block": -1
-                    },
-                    {
-                      "op": {
-                        "type": "producer_reward_operation",
-                        "value": {
-                          "producer": "blocktrades",
-                          "vesting_shares": {
-                            "nai": "@@000000037",
-                            "amount": "3003868105",
-                            "precision": 6
-                          }
-                        }
-                      },
-                      "block": 4999959,
-                      "trx_id": null,
-                      "op_pos": 1,
-                      "op_type_id": 64,
-                      "timestamp": "2016-09-15T19:45:12",
-                      "virtual_op": true,
-                      "operation_id": "21474660386343488",
-                      "trx_in_block": -1
                     }
                   ]
                 }
