@@ -19,7 +19,7 @@ BEGIN
       result := hivemind_postgrest_utilities.get_tags_api_method(__method_type, __params);
     WHEN __api_type = 'database_api' THEN
       result := hivemind_postgrest_utilities.get_database_api_method(__method_type, __params);
-    WHEN __api_type = 'search_api' THEN
+    WHEN __api_type = 'search-api' THEN
         result := hivemind_postgrest_utilities.get_search_api_method(__method_type, __params);
     WHEN __api_type = 'hive' THEN
       result := hivemind_postgrest_utilities.get_hive_api_method(__method_type, __params);

@@ -225,14 +225,14 @@ variables:
       "auto"
   echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
-.search_api_smoketest-script: &search_api_smoketest-script
+.search-api_smoketest-script: &search-api_smoketest-script
   - |
-    echo -e "\e[0Ksection_start:$(date +%s):search_api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest negative..."
+    echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        search_api_patterns/ \
-        api_smoketest_search_api.xml \
+        search-api_patterns/ \
+        api_smoketest_search-api.xml \
         $RUNNER_PYTEST_WORKERS \
         "auto"
     echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
@@ -571,7 +571,7 @@ e2e_benchmark_on_postgrest:
   - *database_api_smoketest-script
   - *database_api_smoketest_negative-script
   - *hive_api_smoketest-script
-  - *search_api_smoketest-script
+  - *search-api_smoketest-script
   - *postgrest_negative-script
   - *mock_tests-script
   - |

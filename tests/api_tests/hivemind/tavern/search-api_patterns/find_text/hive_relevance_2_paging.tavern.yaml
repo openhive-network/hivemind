@@ -18,8 +18,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "search_api.find_text"
-          params: {"pattern":"thailand", "sort":"created"}
+          method: "search-api.find_text"
+          params: {"pattern":"hive", "sort":"relevance", "limit":2, "start_author":"joshglen", "start_permlink":"what-is-beekeeping-all-about"}
       response:
         status_code: 200
         verify_response_with:
