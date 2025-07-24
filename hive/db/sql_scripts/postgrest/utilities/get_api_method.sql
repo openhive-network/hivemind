@@ -267,7 +267,7 @@ BEGIN
         WHEN __method_type = 'find_text' THEN
             result := hivemind_endpoints.search_api_find_text(__params);
         ELSE
-            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search_api' || __method_type);
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search-api' || __method_type);
         END CASE;
     RETURN result;
 END;

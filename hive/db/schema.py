@@ -713,7 +713,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_subscription_id.sql",
         "postgrest/bridge_api/bridge_api_get_profiles.sql",
         "postgrest/utilities/valid_accounts.sql",
-        "postgrest/search_api/find_text.sql",
+        "postgrest/search-api/find_text.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
