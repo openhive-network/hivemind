@@ -1,0 +1,6 @@
+{
+  "code": "P0001",
+  "details": null,
+  "hint": null,
+  "message": "Assert Exception:args.page-size <= 1000: page-size of 1001 is greater than maxmimum allowed"
+}
