@@ -18,7 +18,7 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "search_api.find_text"
+          method: "search-api.find_text"
           params: {"pattern":"hive", "sort":"relevance", "limit":2}
       response:
         status_code: 200

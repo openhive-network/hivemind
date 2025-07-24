@@ -18,8 +18,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "search_api.find_text"
-          params: {"pattern":"Nyunya", "sort":"relevance", "limit":1, "observer":"alice"}
+          method: "search-api.find_text"
+          params: {"pattern":"thailand", "sort":"created", "limit":2}
       response:
         status_code: 200
         verify_response_with:
