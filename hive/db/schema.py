@@ -698,6 +698,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_get_discussion.sql",
         "postgrest/bridge_api/bridge_api_get_post_header.sql",
         "postgrest/utilities/get_profiles.sql",
+        "postgrest/utilities/get_muted_accounts_list.sql",
         "postgrest/bridge_api/bridge_api_get_profile.sql",
         "postgrest/bridge_api/bridge_api_does_user_follow_any_lists.sql",
         "postgrest/utilities/extract_profile_metadata.sql",
