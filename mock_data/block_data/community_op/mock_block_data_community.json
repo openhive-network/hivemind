@@ -6502,6 +6502,17 @@
               "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test big team\",\"about\":\"this is will send a big notif\"}}]"
             }
           }
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test not authorized to change title\",\"about\":\"this is will send a big notif\"}}]"
+            }
+          }
         ]
       }
     ]
