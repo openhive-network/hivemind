@@ -6501,7 +6501,7 @@
               "id": "community",
               "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test big team\",\"about\":\"this is will send a big notif\"}}]"
             }
-          }
+          },
           {
             "type": "custom_json_operation",
             "value": {
