@@ -351,7 +351,7 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             log.info("validation failed with message: '%s'", payload)
-            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload)
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload, community_id=self.community_id)
 
         return self.valid
 

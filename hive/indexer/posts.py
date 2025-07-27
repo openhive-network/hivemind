@@ -126,6 +126,7 @@ class Posts(DbAdapterHolder):
                     when=block_date,
                     post_id=result['id'],
                     payload=error,
+                    community_id=result['community_id'],
                 )
 
     @classmethod
@@ -386,8 +387,9 @@ class Posts(DbAdapterHolder):
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid):
         error = None
+        # is_valid is always set to true for now
         if community_id and is_valid and not Community.is_post_valid(community_id, op):
-            error = 'not authorized'
+            error = 'not allowed to post in this community (role is muted)'
             # is_valid = False # TODO: reserved for future blacklist status?
         return error
 

@@ -94,6 +94,14 @@ class Notify(DbAdapterHolder):
             max_block_num = max(n.block_num for n in Notify._notifies)
             cls.beginTx()
 
+            sql_notifs = f"""INSERT INTO {SCHEMA_NAME}.hive_notifs (block_num, type_id, score, created_at, src_id,
+                                              dst_id, post_id, community_id,
+                                              payload)
+                          SELECT n.block_num, n.type_id, n.score, n.created_at, n.src, n.dst, n.post_id, n.community_id, n.payload
+                          FROM (VALUES {{}})
+                          AS n(block_num, type_id, score, created_at, src, dst, post_id, community_id, payload, counter)
+                          """
+
             sql_cache = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache(
                             id, block_num, type_id, score, created_at,
                             src, dst, post_id, dst_post_id, community, community_title, payload)
@@ -110,6 +118,7 @@ class Notify(DbAdapterHolder):
             values = [notify.to_db_values() for notify in Notify._notifies]
             for chunk in chunks(values, 1000):
                 joined_values = ','.join(chunk)
+                cls.db.query_prepared(sql_notifs.format(joined_values))
                 if max_block_num > cls._notification_first_block:
                     cls.db.query_prepared(sql_cache.format(joined_values))
 
