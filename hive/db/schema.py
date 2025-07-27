@@ -418,36 +418,12 @@ def build_metadata_community(metadata=None):
     )
 
     sa.Table(
-        'hive_notifs',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('type_id', SMALLINT, nullable=False),
-        sa.Column('score', SMALLINT, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('src_id', sa.Integer, nullable=True),
-        sa.Column('dst_id', sa.Integer, nullable=True),
-        sa.Column('post_id', sa.Integer, nullable=True),
-        sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('payload', sa.Text, nullable=True),
-        sa.Index('hive_notifs_ix2', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")),
-        sa.Index(
-            'hive_notifs_ix4',
-            'community_id',
-            'post_id',
-            'type_id',
-            'id',
-            postgresql_where=sql_text("community_id IS NOT NULL AND post_id IS NOT NULL"),
-        ),
-    )
-
-    sa.Table(
         'hive_notification_cache',
         metadata,
         sa.Column('id', sa.BigInteger, primary_key=True, autoincrement=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('type_id', sa.Integer, nullable=False),
-        sa.Column('dst', sa.Integer, nullable=True),  # dst account id except persistent notifs from hive_notifs
+        sa.Column('dst', sa.Integer, nullable=True),  # dst account id
         sa.Column('src', sa.Integer, nullable=True),  # src account id
         sa.Column('dst_post_id', sa.Integer, nullable=True),  # destination post id
         sa.Column('post_id', sa.Integer, nullable=True),
