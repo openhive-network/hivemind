@@ -6,7 +6,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  _hivemind_id INT := (SELECT ha.id FROM hivemind_app.hive_accounts ha WHERE haf_id = _observer_id); -- already validated by hafah
+  _hivemind_id INT := (SELECT ha.id FROM hivemind_app.hive_accounts ha WHERE haf_id = _haf_id); -- already validated by hafah
   _muted_accounts INT[];
 BEGIN
   _muted_accounts := (
