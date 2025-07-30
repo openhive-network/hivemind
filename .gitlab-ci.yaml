@@ -227,7 +227,7 @@ variables:
 
 .search-api_smoketest-script: &search-api_smoketest-script
   - |
-    echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest negative..."
+    echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
@@ -260,6 +260,29 @@ variables:
       "auto"
   echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
 
+.rest_api_smoketest-script: &rest_api_smoketest-script
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):rest_api_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest..."
+    ./scripts/ci/start-api-smoketest.sh \
+        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+        rest_api_patterns/ \
+        api_smoketest_rest_api_patterns.xml \
+        $RUNNER_PYTEST_WORKERS \
+        "auto"
+    echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
+
+.rest_api_negative_smoketest-script: &rest_api_negative_smoketest-script
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):rest_api_negative_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest negative..."
+    ./scripts/ci/start-api-smoketest.sh \
+        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+        rest_api_negative/ \
+        api_smoketest_rest_api_negative.xml \
+        $RUNNER_PYTEST_WORKERS \
+        "auto"
+    echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
   ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
@@ -570,6 +593,8 @@ e2e_benchmark_on_postgrest:
   - *tags_api_smoketest_negative-script
   - *database_api_smoketest-script
   - *database_api_smoketest_negative-script
+  - *rest_api_smoketest-script
+  - *rest_api_negative_smoketest-script
   - *hive_api_smoketest-script
   - *search-api_smoketest-script
   - *postgrest_negative-script
