@@ -1,0 +1,2163 @@
+{
+  "block_range": {
+    "from": 4630594,
+    "to": 5000024
+  },
+  "operations_result": [
+    {
+      "block": 4999982,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "skypilot",
+          "pending_payout": {
+            "amount": "14120",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "sunset-at-point-sur-california",
+          "rshares": 87895502383,
+          "total_vote_weight": "14379148533547713492",
+          "voter": "gtg",
+          "weight": "19804864940707296"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21474759170589000",
+      "timestamp": "2016-09-15T19:46:24",
+      "trx_id": "fa7c8ac738b4c1fdafd4e20ee6ca6e431b641de3",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4999982,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "skypilot",
+          "permlink": "sunset-at-point-sur-california",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21474759170588672",
+      "timestamp": "2016-09-15T19:46:24",
+      "trx_id": "fa7c8ac738b4c1fdafd4e20ee6ca6e431b641de3",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4999861,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3003923204",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21474239479547200",
+      "timestamp": "2016-09-15T19:40:00",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4999330,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3004219504",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21471958851913024",
+      "timestamp": "2016-09-15T19:12:12",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4999237,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "stellabelle",
+          "pending_payout": {
+            "amount": "14286",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "artificial-intelligence-has-made-usd21-307-in-blogging-rewards-what-is-the-future-of-ai-on-steemit",
+          "rshares": 87865461670,
+          "total_vote_weight": "14414629464205606742",
+          "voter": "gtg",
+          "weight": "19453353463253147"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21471559419953480",
+      "timestamp": "2016-09-15T19:07:18",
+      "trx_id": "332a2cf96d84be584ccda48d8b18d4752d23684f",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4999237,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "stellabelle",
+          "permlink": "artificial-intelligence-has-made-usd21-307-in-blogging-rewards-what-is-the-future-of-ai-on-steemit",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21471559419953152",
+      "timestamp": "2016-09-15T19:07:18",
+      "trx_id": "332a2cf96d84be584ccda48d8b18d4752d23684f",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4999167,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "asdes",
+          "pending_payout": {
+            "amount": "27",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "what-word-can-characterize-my-life-improvisation-kakoe-slovo-mozhet-okharakterizovat-moyu-zhizn-improvizaciya",
+          "rshares": 89622770903,
+          "total_vote_weight": "540006378169555103",
+          "voter": "gtg",
+          "weight": "398127015784015920"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21471258772243272",
+      "timestamp": "2016-09-15T19:03:36",
+      "trx_id": "b6eab82028db9c77c2ee15b3a01f4e125f85058f",
+      "trx_in_block": 1,
+      "virtual_op": true
+    },
+    {
+      "block": 4999167,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "asdes",
+          "permlink": "what-word-can-characterize-my-life-improvisation-kakoe-slovo-mozhet-okharakterizovat-moyu-zhizn-improvizaciya",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21471258772242944",
+      "timestamp": "2016-09-15T19:03:36",
+      "trx_id": "b6eab82028db9c77c2ee15b3a01f4e125f85058f",
+      "trx_in_block": 1,
+      "virtual_op": false
+    },
+    {
+      "block": 4999013,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "gtg",
+          "pending_payout": {
+            "amount": "281",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "rshares": 1000247174970,
+          "total_vote_weight": "3782708199031874645",
+          "voter": "liondani",
+          "weight": "3638186540158848502"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21470597347279688",
+      "timestamp": "2016-09-15T18:55:33",
+      "trx_id": "82d2c772db5312024f572c9dfbe926e45391f8e9",
+      "trx_in_block": 2,
+      "virtual_op": true
+    },
+    {
+      "block": 4999013,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "gtg",
+          "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "voter": "liondani",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21470597347279360",
+      "timestamp": "2016-09-15T18:55:33",
+      "trx_id": "82d2c772db5312024f572c9dfbe926e45391f8e9",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4998951,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "chitty",
+          "body": "But this is not an issue of Top Witnesses vs Backup witnesses. This is an issue that involves all members of the Steemit. If top witnesses keep receiving 1,370 Steems per day, their voting influence will keep growing while the rest of the users see their voting power diminished.",
+          "json_metadata": "{\"tags\":[\"steemit\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
+          "permlink": "re-gtg-re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185208490z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21470331059307521",
+      "timestamp": "2016-09-15T18:52:12",
+      "trx_id": "6a5ec719e623eaa595578cd4ce1fb0c06e8b568c",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4998801,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3004515379",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21469686814213440",
+      "timestamp": "2016-09-15T18:44:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4998797,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "Steem platform is currently very, very small. Witnesses plays very important role and it would get a lot harder when Steem would grow. Every minute they are in \"if\" condition.\nI like current scheme. I think it would make more sense over time.\nOf course, you are right, difference between potential earnings of top19 and backup witnesses is huge but so it is with their responsibilities.\nPlease take a look how many witnesses are really capable of running their nodes effectively.\nI'm not saying that backup witnesses have to set their feed price or take care about keeping their nodes up to date or online at all. They don't have to. That's why they shouldn't be overpaid.\n\nTaking a look at current top 100.\n47 of them (more than a half of backup witnesses) never set their feed price (some of them might not even know how to do that) or have it heavily outdated. 28 are not even able to generate blocks.\n\nYes, running a backup witness is not profitable and shouldn't be.\nYes, I'm a backup witness :-) (to those who do not know that)\n\n[Gandalf](https://steemit.com/@gtg) (\"gtg\")",
+          "json_metadata": "{\"tags\":[\"steemit\"],\"links\":[\"https://steemit.com/@gtg\"]}",
+          "parent_author": "chitty",
+          "parent_permlink": "re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142108544z",
+          "permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21469669634344193",
+      "timestamp": "2016-09-15T18:43:54",
+      "trx_id": "89dfe2d1bba04b62d3b6c9ae366313fef6d640d4",
+      "trx_in_block": 3,
+      "virtual_op": false
+    },
+    {
+      "block": 4998334,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3004775768",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21467681064486208",
+      "timestamp": "2016-09-15T18:19:03",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4997854,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "chitty",
+          "pending_payout": {
+            "amount": "4537",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+          "rshares": 89592123518,
+          "total_vote_weight": "11869963429489672230",
+          "voter": "gtg",
+          "weight": "52941814432216272"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21465619480183112",
+      "timestamp": "2016-09-15T17:53:51",
+      "trx_id": "c9e7016355ceceacefb91c8667da6fcc39fab7a6",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4997854,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "chitty",
+          "permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21465619480182784",
+      "timestamp": "2016-09-15T17:53:51",
+      "trx_id": "c9e7016355ceceacefb91c8667da6fcc39fab7a6",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4997768,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3005092479",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21465250112995904",
+      "timestamp": "2016-09-15T17:49:21",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4997264,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3005373678",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21463085449479488",
+      "timestamp": "2016-09-15T17:23:15",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4996748,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3005660853",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21460869246353984",
+      "timestamp": "2016-09-15T16:57:27",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4996177,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3005980146",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21458416820028480",
+      "timestamp": "2016-09-15T16:28:54",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4996177,
+      "op": {
+        "type": "pow_reward_operation",
+        "value": {
+          "reward": {
+            "amount": "5029004784",
+            "nai": "@@000000037",
+            "precision": 6
+          },
+          "worker": "gtg"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 78,
+      "operation_id": "21458416820027726",
+      "timestamp": "2016-09-15T16:28:54",
+      "trx_id": "23b2ab7aaa00d3dbaffdf399491d63d1e9bbb299",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4995706,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3006244149",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21456393890434624",
+      "timestamp": "2016-09-15T16:05:18",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4995216,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3006518851",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21454289356457536",
+      "timestamp": "2016-09-15T15:40:48",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4995198,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "gtg",
+          "pending_payout": {
+            "amount": "254",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "heavy-duty-witness-node-infrastructure",
+          "rshares": 7733788543,
+          "total_vote_weight": 0,
+          "voter": "nate-atkins",
+          "weight": 0
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21454212047044936",
+      "timestamp": "2016-09-15T15:39:54",
+      "trx_id": "df3d3ced61ea6724f2a0266dc772c2612f1481ab",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4995198,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "gtg",
+          "permlink": "heavy-duty-witness-node-infrastructure",
+          "voter": "nate-atkins",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21454212047044608",
+      "timestamp": "2016-09-15T15:39:54",
+      "trx_id": "df3d3ced61ea6724f2a0266dc772c2612f1481ab",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4994709,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3006800740",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21452111808037440",
+      "timestamp": "2016-09-15T15:15:27",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4994484,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "woman-onthe-wing",
+          "body": "Thanks very much!",
+          "json_metadata": "{\"tags\":[\"introducemyself\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
+          "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21451145440396289",
+      "timestamp": "2016-09-15T15:04:12",
+      "trx_id": "c34148d298ff982cc4adde1b70d17007b32f6396",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4994255,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3007054724",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21450161892885568",
+      "timestamp": "2016-09-15T14:52:42",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4993695,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3007367421",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21447756711201344",
+      "timestamp": "2016-09-15T14:24:42",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4993644,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "gtg",
+          "pending_payout": {
+            "amount": "7",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "rshares": 31585597770,
+          "total_vote_weight": "144521658873026143",
+          "voter": "chitty",
+          "weight": "30108678931880446"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21447537667867208",
+      "timestamp": "2016-09-15T14:22:09",
+      "trx_id": "e9a738ec9ac41ac077d40d10643f2c0b7866f5fe",
+      "trx_in_block": 1,
+      "virtual_op": true
+    },
+    {
+      "block": 4993644,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "gtg",
+          "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "voter": "chitty",
+          "weight": 1000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21447537667866880",
+      "timestamp": "2016-09-15T14:22:09",
+      "trx_id": "e9a738ec9ac41ac077d40d10643f2c0b7866f5fe",
+      "trx_in_block": 1,
+      "virtual_op": false
+    },
+    {
+      "block": 4993625,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "chitty",
+          "body": "This is true, but you have to agree that the gap between top 19 witnesses and the rest of the users is getting bigger... nobody buys 1,370 steem per day, every day!... its impossible to match. The result of this is richer witnesses with more influence and \"normal\" users with very little to no influence at all.",
+          "json_metadata": "{\"tags\":[\"steemit\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "permlink": "re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142108544z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21447456063488001",
+      "timestamp": "2016-09-15T14:21:12",
+      "trx_id": "1bdcc98bed55f12cfa2d9b04244bef9edb924e81",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4993519,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "IMHO, witnesses should - more than others - believe for a long term growth of Steem (as a platform), so Steem Power is appropriate in this case.",
+          "json_metadata": "{\"tags\":[\"steemit\"]}",
+          "parent_author": "chitty",
+          "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+          "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21447000796955393",
+      "timestamp": "2016-09-15T14:15:54",
+      "trx_id": "b600a2469a89f319c8a615339f973e36dc371876",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4993425,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "True, as well as encouraging others to try to do the same :-)",
+          "json_metadata": "{\"tags\":[\"stats\"]}",
+          "parent_author": "arcange",
+          "parent_permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
+          "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21446597070028801",
+      "timestamp": "2016-09-15T14:11:12",
+      "trx_id": "ec2f809a3da4ed18f5b7c9142ae39efeac32c664",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4993223,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3007631920",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21445729486636096",
+      "timestamp": "2016-09-15T14:01:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4992628,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3007965329",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21443173981095232",
+      "timestamp": "2016-09-15T13:31:18",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4992521,
+      "op": {
+        "type": "curation_reward_operation",
+        "value": {
+          "author": "arcange",
+          "curator": "gtg",
+          "payout_must_be_claimed": false,
+          "permlink": "steemsql-com-a-public-sql-server-database-with-all-steemit-blockchain-data",
+          "reward": {
+            "amount": "1795790704",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 18,
+      "op_type_id": 52,
+      "operation_id": "21442714419599412",
+      "timestamp": "2016-09-15T13:25:57",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4992488,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "arcange",
+          "body": "Lol. You're welcome!\nBut I suspect you're working hard to hit the top 20 chart with your two comments :p",
+          "json_metadata": "{\"tags\":[\"stats\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
+          "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21442572685672705",
+      "timestamp": "2016-09-15T13:24:18",
+      "trx_id": "85cc95a12cf3b7d3b4031df9db0d0823f631fec6",
+      "trx_in_block": 1,
+      "virtual_op": false
+    },
+    {
+      "block": 4992427,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "arcange",
+          "pending_payout": {
+            "amount": "697",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "steemsql-com-a-deep-analysis-of-steemians-gratefulness",
+          "rshares": 89388651441,
+          "total_vote_weight": "6260094423748531683",
+          "voter": "gtg",
+          "weight": "182612623457598373"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21442310692667720",
+      "timestamp": "2016-09-15T13:21:15",
+      "trx_id": "2ee6dba2392e15e319b6d90135c5d22d976b2cfb",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4992427,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "arcange",
+          "permlink": "steemsql-com-a-deep-analysis-of-steemians-gratefulness",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21442310692667392",
+      "timestamp": "2016-09-15T13:21:15",
+      "trx_id": "2ee6dba2392e15e319b6d90135c5d22d976b2cfb",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4992391,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "I noticed that just after writing a comment (when went back to continue reading ... ) ___Thank you___ for pointing out. :-)",
+          "json_metadata": "{\"tags\":[\"stats\"]}",
+          "parent_author": "arcange",
+          "parent_permlink": "re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z",
+          "permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21442156073845761",
+      "timestamp": "2016-09-15T13:19:27",
+      "trx_id": "3ee1d00e40e26f69568a5d0a29dc531136d88abd",
+      "trx_in_block": 3,
+      "virtual_op": false
+    },
+    {
+      "block": 4992167,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "@@ -84,17 +84,17 @@\n nks%22___ \n-:\n+;\n -)%0A%0AThan\n",
+          "json_metadata": "{\"tags\":[\"stats\"],\"users\":[\"arcange\"],\"links\":[\"https://steemit.com/@gtg\"]}",
+          "parent_author": "arcange",
+          "parent_permlink": "steemsql-com-a-deep-analysis-of-steemians-gratefulness",
+          "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21441194001170945",
+      "timestamp": "2016-09-15T13:08:15",
+      "trx_id": "e4a1330e48360cf80384631ffc32eb79537dfe25",
+      "trx_in_block": 1,
+      "virtual_op": false
+    },
+    {
+      "block": 4992129,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "arcange",
+          "body": "That's the purpose of using FREETEXT() instead of CONTAINS()",
+          "json_metadata": "{\"tags\":[\"stats\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
+          "permlink": "re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21441030792414977",
+      "timestamp": "2016-09-15T13:06:21",
+      "trx_id": "68e9537278f1dd0049cec811dbda262f2dba23cc",
+      "trx_in_block": 4,
+      "virtual_op": false
+    },
+    {
+      "block": 4992087,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "@arcange, please do not underestimate ___\"Thank you\"___ while searching for ___\"Thanks\"___ :-)\n\nThank you,\n[Gandalf](https://steemit.com/@gtg) (\"gtg\")",
+          "json_metadata": "{\"tags\":[\"stats\"],\"users\":[\"arcange\"],\"links\":[\"https://steemit.com/@gtg\"]}",
+          "parent_author": "arcange",
+          "parent_permlink": "steemsql-com-a-deep-analysis-of-steemians-gratefulness",
+          "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21440850403786753",
+      "timestamp": "2016-09-15T13:04:15",
+      "trx_id": "a5f11b1d7ff0a227a8c043c16161ce61109ab48d",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4992059,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3008283727",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21440730144705088",
+      "timestamp": "2016-09-15T13:02:51",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4991617,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3008530809",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21438831769158720",
+      "timestamp": "2016-09-15T12:40:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4991112,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3008814725",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21436662810675520",
+      "timestamp": "2016-09-15T12:15:21",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4990579,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3009113059",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21434373593105728",
+      "timestamp": "2016-09-15T11:48:42",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4990080,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3009391981",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21432230404424768",
+      "timestamp": "2016-09-15T11:23:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4989583,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3009669838",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21430095805677888",
+      "timestamp": "2016-09-15T10:58:51",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4989089,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3009947021",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21427974091835456",
+      "timestamp": "2016-09-15T10:34:09",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4988523,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3010263863",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21425543140344384",
+      "timestamp": "2016-09-15T10:05:48",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4987973,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3010572647",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21423180908332096",
+      "timestamp": "2016-09-15T09:38:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4987903,
+      "op": {
+        "type": "custom_json_operation",
+        "value": {
+          "id": "follow",
+          "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"nate-atkins\",\"what\":[\"blog\"]}]",
+          "required_auths": [],
+          "required_posting_auths": [
+            "gtg"
+          ]
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 18,
+      "operation_id": "21422880260620306",
+      "timestamp": "2016-09-15T09:34:36",
+      "trx_id": "4240776a1234d9bd626f870aa60c783e64e61d87",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4987785,
+      "op": {
+        "type": "custom_json_operation",
+        "value": {
+          "id": "follow",
+          "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"stan\",\"what\":[\"blog\"]}]",
+          "required_auths": [],
+          "required_posting_auths": [
+            "gtg"
+          ]
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 18,
+      "operation_id": "21422373454480658",
+      "timestamp": "2016-09-15T09:28:39",
+      "trx_id": "4bb7dd946abde91e42c7559a2c1e94658c724e36",
+      "trx_in_block": 3,
+      "virtual_op": false
+    },
+    {
+      "block": 4987502,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3010835010",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21421157978736448",
+      "timestamp": "2016-09-15T09:14:27",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4986973,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3011132446",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21418885941036352",
+      "timestamp": "2016-09-15T08:47:42",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4986425,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3011440015",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21416532298957376",
+      "timestamp": "2016-09-15T08:20:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4985953,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3011703991",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21414505074394176",
+      "timestamp": "2016-09-15T07:56:30",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4985918,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gamer00",
+          "body": "Thank you!",
+          "json_metadata": "{\"tags\":[\"introducemyself\"]}",
+          "parent_author": "gtg",
+          "parent_permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
+          "permlink": "re-gtg-re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t075443671z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21414354750538753",
+      "timestamp": "2016-09-15T07:54:45",
+      "trx_id": "71dd091dd0d9ab9a9d430daac91c63815bbec9cf",
+      "trx_in_block": 4,
+      "virtual_op": false
+    },
+    {
+      "block": 4985481,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3011968927",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21412477849829440",
+      "timestamp": "2016-09-15T07:32:54",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4985207,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "gamer00",
+          "pending_payout": {
+            "amount": "2310",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "hi-i-m-jaro-and-this-is-my-introductory-verification-post",
+          "rshares": 87425224445,
+          "total_vote_weight": "10238094428656307631",
+          "voter": "gtg",
+          "weight": "80620419036907891"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21411301028790600",
+      "timestamp": "2016-09-15T07:19:12",
+      "trx_id": "d3d8e6f2973bbf6743624331d8377820938f8aa2",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4985207,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "gamer00",
+          "permlink": "hi-i-m-jaro-and-this-is-my-introductory-verification-post",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21411301028790272",
+      "timestamp": "2016-09-15T07:19:12",
+      "trx_id": "d3d8e6f2973bbf6743624331d8377820938f8aa2",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4985205,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "Hello Jaro, welcome to Steemit! :-)",
+          "json_metadata": "{\"tags\":[\"introducemyself\"]}",
+          "parent_author": "gamer00",
+          "parent_permlink": "hi-i-m-jaro-and-this-is-my-introductory-verification-post",
+          "permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21411292438855681",
+      "timestamp": "2016-09-15T07:19:06",
+      "trx_id": "47b608831ce2cc3343da04aa70b0cd28a32f6be7",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4985121,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "woman-onthe-wing",
+          "pending_payout": {
+            "amount": "80",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle",
+          "rshares": 89173728934,
+          "total_vote_weight": "1519059690057255722",
+          "voter": "gtg",
+          "weight": "353532286649439483"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21410931661603144",
+      "timestamp": "2016-09-15T07:14:51",
+      "trx_id": "d25b5bf7c2b5aebca76a38698ae58f4fe2066947",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4985121,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "woman-onthe-wing",
+          "permlink": "introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21410931661602816",
+      "timestamp": "2016-09-15T07:14:51",
+      "trx_id": "d25b5bf7c2b5aebca76a38698ae58f4fe2066947",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4985120,
+      "op": {
+        "type": "comment_operation",
+        "value": {
+          "author": "gtg",
+          "body": "Hello Joanna, welcome to Steemit! :-)",
+          "json_metadata": "{\"tags\":[\"introducemyself\"]}",
+          "parent_author": "woman-onthe-wing",
+          "parent_permlink": "introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle",
+          "permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
+          "title": ""
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 1,
+      "operation_id": "21410927366636545",
+      "timestamp": "2016-09-15T07:14:48",
+      "trx_id": "03dab79b742c7c8d97a02bdbc4734740979857d8",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4984966,
+      "op": {
+        "type": "comment_payout_update_operation",
+        "value": {
+          "author": "gtg",
+          "permlink": "re-liondani-don-t-remove-curation-rewards-just-stop-them-when-the-post-reach-the-trending-page-20160815t123329115z"
+        }
+      },
+      "op_pos": 22,
+      "op_type_id": 61,
+      "operation_id": "21410265941677885",
+      "timestamp": "2016-09-15T07:07:00",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4984816,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3012342763",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21409621696578368",
+      "timestamp": "2016-09-15T06:59:30",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4984371,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3012593053",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21407710436132160",
+      "timestamp": "2016-09-15T06:37:12",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4983975,
+      "op": {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "author": "saramiller",
+          "pending_payout": {
+            "amount": "31",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "permlink": "sara",
+          "rshares": 89143001761,
+          "total_vote_weight": "659506704349789988",
+          "voter": "gtg",
+          "weight": "390623912921787924"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 72,
+      "operation_id": "21406009629081928",
+      "timestamp": "2016-09-15T06:17:24",
+      "trx_id": "df9c835bd5e652899133ea0c7c779df540294588",
+      "trx_in_block": 0,
+      "virtual_op": true
+    },
+    {
+      "block": 4983975,
+      "op": {
+        "type": "vote_operation",
+        "value": {
+          "author": "saramiller",
+          "permlink": "sara",
+          "voter": "gtg",
+          "weight": 10000
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 0,
+      "operation_id": "21406009629081600",
+      "timestamp": "2016-09-15T06:17:24",
+      "trx_id": "df9c835bd5e652899133ea0c7c779df540294588",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4983942,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3012833414",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21405867895161408",
+      "timestamp": "2016-09-15T06:15:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4983388,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3013144618",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21403488483278912",
+      "timestamp": "2016-09-15T05:47:57",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4982908,
+      "op": {
+        "type": "feed_publish_operation",
+        "value": {
+          "exchange_rate": {
+            "base": {
+              "amount": "578",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "quote": {
+              "amount": "1000",
+              "nai": "@@000000021",
+              "precision": 3
+            }
+          },
+          "publisher": "gtg"
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 7,
+      "operation_id": "21401426898977799",
+      "timestamp": "2016-09-15T05:23:54",
+      "trx_id": "cb0bf80096322be82877091d3421a8661c7f8162",
+      "trx_in_block": 2,
+      "virtual_op": false
+    },
+    {
+      "block": 4982841,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3013451451",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21401139136169792",
+      "timestamp": "2016-09-15T05:20:33",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4982316,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3013746012",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21398884278339136",
+      "timestamp": "2016-09-15T04:54:18",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4981926,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3013964003",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21397209241092160",
+      "timestamp": "2016-09-15T04:34:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4981353,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3014286159",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21394748224831808",
+      "timestamp": "2016-09-15T04:06:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4980839,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3014576078",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21392540611642176",
+      "timestamp": "2016-09-15T03:40:21",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4980312,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3014872262",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21390277163877696",
+      "timestamp": "2016-09-15T03:13:57",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4979808,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3015156213",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21388112500359488",
+      "timestamp": "2016-09-15T02:48:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4979287,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3015448316",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21385874822402112",
+      "timestamp": "2016-09-15T02:22:42",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4978712,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3015772201",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21383405216203840",
+      "timestamp": "2016-09-15T01:53:57",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4978228,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3016043540",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21381326452031552",
+      "timestamp": "2016-09-15T01:29:45",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4977786,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3016292817",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21379428076487744",
+      "timestamp": "2016-09-15T01:07:39",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4977216,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3016613231",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21376979945128512",
+      "timestamp": "2016-09-15T00:39:09",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4976681,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3016915434",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21374682137625920",
+      "timestamp": "2016-09-15T00:12:24",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4976187,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3017193077",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21372560423780416",
+      "timestamp": "2016-09-14T23:47:36",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4975625,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3017509913",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21370146652160576",
+      "timestamp": "2016-09-14T23:19:30",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4975112,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3017798117",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21367943333938496",
+      "timestamp": "2016-09-14T22:53:48",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4974677,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3018043562",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21366075023165504",
+      "timestamp": "2016-09-14T22:32:03",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4974677,
+      "op": {
+        "type": "pow_reward_operation",
+        "value": {
+          "reward": {
+            "amount": "5028060575",
+            "nai": "@@000000037",
+            "precision": 6
+          },
+          "worker": "gtg"
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 78,
+      "operation_id": "21366075023164750",
+      "timestamp": "2016-09-14T22:32:03",
+      "trx_id": "8bd1c461c1c28265e83605197353cb799e65b011",
+      "trx_in_block": 2,
+      "virtual_op": true
+    },
+    {
+      "block": 4974107,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3018364379",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21363626891805504",
+      "timestamp": "2016-09-14T22:03:33",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4973539,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3018684779",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21361187350382400",
+      "timestamp": "2016-09-14T21:35:06",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4973073,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3018947092",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21359185895621440",
+      "timestamp": "2016-09-14T21:11:48",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4972517,
+      "op": {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "gtg",
+          "vesting_shares": {
+            "amount": "3019261026",
+            "nai": "@@000000037",
+            "precision": 6
+          }
+        }
+      },
+      "op_pos": 1,
+      "op_type_id": 64,
+      "operation_id": "21356797893805888",
+      "timestamp": "2016-09-14T20:43:57",
+      "trx_id": null,
+      "trx_in_block": -1,
+      "virtual_op": true
+    },
+    {
+      "block": 4972501,
+      "op": {
+        "type": "custom_json_operation",
+        "value": {
+          "id": "follow",
+          "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"donkeypong\",\"what\":[\"blog\"]}]",
+          "required_auths": [],
+          "required_posting_auths": [
+            "gtg"
+          ]
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 18,
+      "operation_id": "21356729174327314",
+      "timestamp": "2016-09-14T20:43:09",
+      "trx_id": "1a9f9ab8a40277c09fb2eaa73628e77e1ad8355f",
+      "trx_in_block": 0,
+      "virtual_op": false
+    },
+    {
+      "block": 4972497,
+      "op": {
+        "type": "custom_json_operation",
+        "value": {
+          "id": "follow",
+          "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"anyx\",\"what\":[\"blog\"]}]",
+          "required_auths": [],
+          "required_posting_auths": [
+            "gtg"
+          ]
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 18,
+      "operation_id": "21356711994460434",
+      "timestamp": "2016-09-14T20:42:57",
+      "trx_id": "88de023596008edc1d7ae24435dbe497d75b0544",
+      "trx_in_block": 6,
+      "virtual_op": false
+    },
+    {
+      "block": 4972478,
+      "op": {
+        "type": "custom_json_operation",
+        "value": {
+          "id": "follow",
+          "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"jesta\",\"what\":[\"blog\"]}]",
+          "required_auths": [],
+          "required_posting_auths": [
+            "gtg"
+          ]
+        }
+      },
+      "op_pos": 0,
+      "op_type_id": 18,
+      "operation_id": "21356630390080018",
+      "timestamp": "2016-09-14T20:42:00",
+      "trx_id": "2613f69440058c775ed5c7d835601e93bbc8bf9c",
+      "trx_in_block": 2,
+      "virtual_op": false
+    }
+  ],
+  "total_operations": 1000,
+  "total_pages": 10
+}
