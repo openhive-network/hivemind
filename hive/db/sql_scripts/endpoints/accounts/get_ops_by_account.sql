@@ -169,7 +169,7 @@ DECLARE
   _block_range hive.blocks_range := hive.convert_to_blocks_range("from-block","to-block");
   _account_id INT                := hafah_backend.get_account_id("account-name", TRUE);
   _observer_id INT               := hafah_backend.get_account_id("observer-name", FALSE);
-  _operation_types INT[]         := hafah_backend.get_operation_types("operation-types", "participation-mode" = 'all');
+  _operation_types INT[]         := hafah_backend.get_operation_types("operation-types", TRUE);
   _muted_account_ids INT[] := NULL;
 
   _result hivemind_endpoints.operation_history;
