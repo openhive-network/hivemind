@@ -41,6 +41,7 @@ var/
 .installed.cfg
 *.egg
 pip-wheel-metadata
+scripts/python_api_package/hivemind_api/hivemind_api_client/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
