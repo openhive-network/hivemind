@@ -376,6 +376,14 @@ prepare_hivemind_image:
     - hivemind_image.env
   tags: *shared_tags
 
+extract-swagger-json:
+  extends: .filter_out_swagger_json
+  stage: build
+  variables:
+    INPUT_SQL_SWAGGER_FILE: "${CI_PROJECT_DIR}/hive/db/sql_scripts/endpoints/endpoint_schema.sql"
+  tags:
+  - public-runner-docker
+
 cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
