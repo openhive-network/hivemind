@@ -3,6 +3,7 @@ stages:
 - prepare
 - sync
 - benchmark
+- tests
 - publish
 - collector
 - cleanup
@@ -384,6 +385,35 @@ extract-swagger-json:
   tags:
   - public-runner-docker
 
+generate_python_api_client:
+  extends: .project_develop_configuration_template
+  stage: build
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  needs:
+  - job: extract-swagger-json
+    artifacts: true
+  script:
+    - ${PYPROJECT_DIR}/generate_hivemind_api_client.sh
+  artifacts:
+    paths:
+      - "${PYPROJECT_DIR}/hivemind_api"
+      - "${PYPROJECT_DIR}/hivemind_api/hivemind_api_client"
+  tags:
+    - public-runner-docker
+
+
+build_python_api_client_wheel:
+  extends: .build_wheel_template
+  stage: build
+  needs:
+  - job: generate_python_api_client
+    artifacts: true
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  tags:
+    - public-runner-docker
+
 cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
@@ -656,6 +686,19 @@ e2e_benchmark_on_postgrest:
   tags:
   - data-cache-storage
 
+python_api_client_test:
+  extends: .project_develop_configuration_template
+  stage: tests
+  needs:
+    - job: generate_python_api_client
+      artifacts: true
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  script:
+    - pytest "${PYPROJECT_DIR}/api_client_tests"
+  tags:
+    - public-runner-docker
+
 build_and_publish_image:
   stage: publish
   extends: .publish_docker_image_template
@@ -668,6 +711,21 @@ build_and_publish_image:
     docker tag "$CI_REGISTRY_IMAGE/postgrest-rewriter:$TAG" "registry-upload.hive.blog/hivemind/postgrest-rewriter:$TAG"
     docker push "registry-upload.hive.blog/hivemind/postgrest-rewriter:$TAG"
   tags: *shared_tags
+
+deploy_python_api_package_to_gitlab:
+  stage: publish
+  needs:
+    - job: build_python_api_client_wheel
+      artifacts: true
+    - job: generate_python_api_client
+      artifacts: true
+    - job: python_api_client_test
+  extends: .deploy_wheel_to_gitlab_template
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  when: on_success
+  tags:
+    - public-runner-docker
 
 Trigger benchmark-results-collector:
   stage: collector
