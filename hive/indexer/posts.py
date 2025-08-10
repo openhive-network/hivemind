@@ -127,6 +127,7 @@ class Posts(DbAdapterHolder):
                     post_id=result['id'],
                     payload=error,
                     community_id=result['community_id'],
+                    src_id=result['community_id'],
                 )
 
     @classmethod

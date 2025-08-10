@@ -6510,7 +6510,7 @@
                 "ismember"
               ],
               "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test not authorized to change title\",\"about\":\"this is will send a big notif\"}}]"
+              "json": "[\"updateProps\",{\"community\":\"hive-171744\",\"props\":{\"title\":\"Test not authorized to change\"}}]"
             }
           }
         ]

@@ -351,7 +351,7 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             log.info("validation failed with message: '%s'", payload)
-            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload, community_id=self.community_id)
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload, community_id=self.community_id, src_id=self.community_id)
 
         return self.valid
 
@@ -432,6 +432,8 @@ class CommunityOp:
                 Notify(
                     block_num=self.block_num,
                     type_id='error',
+                    src_id=self.community_id,
+                    community_id=self.community_id,
                     dst_id=self.actor_id,
                     when=self.date,
                     payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
