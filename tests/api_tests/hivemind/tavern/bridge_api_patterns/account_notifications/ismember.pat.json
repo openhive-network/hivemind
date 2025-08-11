@@ -5,7 +5,7 @@
     "msg": "error: exceeds max len: title",
     "score": 35,
     "type": "error",
-    "url": "trending/hive-171744"
+    "url": "c/hive-171744"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -61,7 +61,7 @@
     "msg": "@hive-199999 set your title to Is set",
     "score": 35,
     "type": "set_title",
-    "url": "trending/hive-199999"
+    "url": "c/hive-199999"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -69,7 +69,7 @@
     "msg": "@hive-111119 set properties {\"type_id\":3}",
     "score": 35,
     "type": "set_props",
-    "url": "trending/hive-111119"
+    "url": "c/hive-111119"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -77,7 +77,7 @@
     "msg": "@hive-111119 set your role to mod",
     "score": 35,
     "type": "set_role",
-    "url": "trending/hive-111119"
+    "url": "c/hive-111119"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -85,7 +85,7 @@
     "msg": "@hive-311119 set your role to member",
     "score": 35,
     "type": "set_role",
-    "url": "trending/hive-311119"
+    "url": "c/hive-311119"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -93,7 +93,7 @@
     "msg": "@hive-211119 set your role to member",
     "score": 35,
     "type": "set_role",
-    "url": "trending/hive-211119"
+    "url": "c/hive-211119"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -101,7 +101,7 @@
     "msg": "@hive-111119 set your role to member",
     "score": 35,
     "type": "set_role",
-    "url": "trending/hive-111119"
+    "url": "c/hive-111119"
   },
   {
     "date": "2016-09-15T19:47:54",
@@ -109,6 +109,6 @@
     "msg": "@hive-199999 set your role to mod",
     "score": 35,
     "type": "set_role",
-    "url": "trending/hive-199999"
+    "url": "c/hive-199999"
   }
 ]
