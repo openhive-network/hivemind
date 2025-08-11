@@ -100,7 +100,7 @@ BEGIN
         (
           CASE
             WHEN notifications.permlink <> '' THEN '@' || notifications.author || '/' || notifications.permlink
-            WHEN notifications.community <> '' THEN 'trending/' || notifications.community
+            WHEN notifications.community <> '' THEN 'c/' || notifications.community
             WHEN notifications.src <> '' THEN '@' || notifications.src
             WHEN notifications.dst <> '' THEN '@' || notifications.dst
           END
