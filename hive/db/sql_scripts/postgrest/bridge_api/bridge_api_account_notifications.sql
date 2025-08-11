@@ -41,7 +41,7 @@ BEGIN
         'msg', hivemind_postgrest_utilities.get_notify_message(hive_notification_cache),
         'url',  CASE
                   WHEN hive_notification_cache.permlink <> '' THEN '@' || hive_notification_cache.author || '/' || hive_notification_cache.permlink
-                  WHEN hive_notification_cache.community <> '' THEN 'trending/' || hive_notification_cache.community
+                  WHEN hive_notification_cache.community <> '' THEN 'c/' || hive_notification_cache.community
                   WHEN hive_notification_cache.src <> '' THEN '@' || hive_notification_cache.src
                   WHEN hive_notification_cache.dst <> '' THEN '@' || hive_notification_cache.dst
                 END
