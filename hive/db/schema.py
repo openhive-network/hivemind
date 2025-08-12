@@ -20,6 +20,7 @@ from hive.conf import SCHEMA_OWNER_NAME
 from hive.indexer.hive_db.haf_functions import prepare_app_context
 
 from hive.version import GIT_DATE, GIT_REVISION, VERSION
+import json
 
 log = logging.getLogger(__name__)
 
@@ -163,7 +164,10 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
         )
     )
-
+    text_fields = json.dumps({
+        "title": {"record": "position"},
+        "body": {"record": "position"},
+    })
     sa.Table(
         'hive_post_data',
         metadata,
@@ -171,6 +175,15 @@ def build_metadata():
         sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
         sa.Column('body', TEXT, nullable=False, server_default=''),
         sa.Column('json', TEXT, nullable=False, server_default=''),
+        # BM25 index for full-text search
+        sa.Index('hive_post_data_bm25_idx', 
+                 'id', 'title', 'body',
+                 postgresql_using='bm25',
+                 postgresql_with={
+                     'key_field': "'id'",
+                     'text_fields': f"'{text_fields}'"
+                 },
+                 postgresql_where=sql_text(f'{SCHEMA_NAME}.is_top_level_post(id)'))
     )
 
     sa.Table(
@@ -179,14 +192,6 @@ def build_metadata():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink'),
-    )
-
-    sa.Table(
-        'hive_text_search_data',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('body_tsv', TSVECTOR, nullable=False, server_default=''),
-        sa.Index('hive_text_search_data_body_tsv_idx', 'body_tsv', postgresql_using='gin')
     )
 
     sa.Table(
@@ -488,8 +493,45 @@ def setup(db, admin_db):
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_endpoints AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_postgrest_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
+    # Create extensions before table creation (needed for BM25 index type)
+    # Create ParadeDB pg_search extension for BM25 search
+    admin_db.query('CREATE EXTENSION IF NOT EXISTS pg_search;')
+    # Create plpython3u extension (requires superuser privileges)
+    # Note: plpython3u is an untrusted language, only superusers can use it
+    admin_db.query('CREATE EXTENSION IF NOT EXISTS plpython3u;')
+
     prepare_app_context(db=db)
+    
+    # Create a dummy is_top_level_post function BEFORE table creation so the
+    # BM25 index WHERE clause can refer to it
+    sql = f"""
+    CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+    RETURNS BOOLEAN
+    LANGUAGE sql
+    IMMUTABLE PARALLEL SAFE
+    AS $$
+      SELECT TRUE;
+    $$;
+    """
+    db.query_no_return(sql)
+    
     build_metadata().create_all(db.engine())
+
+    # Now that tables exist, replace the function with its real implementation that 
+    # references the hive_posts table
+    sql = f"""
+    CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+    RETURNS BOOLEAN
+    LANGUAGE sql
+    IMMUTABLE PARALLEL SAFE
+    AS $$
+      SELECT EXISTS (
+        SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
+        WHERE hp.id = post_id AND hp.depth = 0
+      );
+    $$;
+    """
+    db.query_no_return(sql)
     
     create_statistics(db)
 
@@ -576,6 +618,14 @@ def setup(db, admin_db):
         ON {SCHEMA_NAME}.hive_post_tags USING btree (tag_id, post_id DESC)
         """
     db.query_no_return(sql)
+
+    # Execute plpython3u scripts with admin privileges
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
+    admin_sql_scripts = [
+        "postgrest/utilities/preprocess_search_query.sql",
+    ]
+    for script in admin_sql_scripts:
+        execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
 
 def setup_runtime_code(db):
     sql_scripts = [
@@ -690,6 +740,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_subscription_id.sql",
         "postgrest/bridge_api/bridge_api_get_profiles.sql",
         "postgrest/utilities/valid_accounts.sql",
+        # preprocess_search_query.sql moved to admin execution below
         "postgrest/search-api/find_text.sql",
         "endpoints/endpoint_schema.sql",
         "endpoints/types/operation.sql",

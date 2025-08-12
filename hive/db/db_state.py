@@ -144,7 +144,7 @@ class DbState:
             'blacklisted_block_num_idx',
             'follow_muted_block_num_idx',
             'follow_blacklisted_block_num_idx',
-	    'hive_text_search_data_body_tsv_idx',
+            'hive_post_data_bm25_idx',
         ]
 
         to_return = {}

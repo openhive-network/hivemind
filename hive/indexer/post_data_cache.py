@@ -78,13 +78,6 @@ class PostDataCache(DbAdapterHolder):
                         SELECT id, title, body, json FROM insert_values
                         RETURNING id
                     ),
-                    insert_search_text AS (
-                        INSERT INTO {SCHEMA_NAME}.hive_text_search_data (id, body_tsv)
-                        SELECT iv.id, to_tsvector('simple', COALESCE(iv.title, '') || ' ' || COALESCE(iv.body, ''))
-                        FROM insert_values iv
-                        WHERE iv.is_root = true
-                        RETURNING id
-                    ),
                     update_post_data AS (
                         UPDATE {SCHEMA_NAME}.hive_post_data AS hpd 
                         SET title = COALESCE( i.title, hpd.title ),
@@ -94,27 +87,13 @@ class PostDataCache(DbAdapterHolder):
                         WHERE hpd.id = i.id AND i.id IS NOT NULL
                         RETURNING hpd.id
                     ),
-                    update_search_text AS (
-                        UPDATE {SCHEMA_NAME}.hive_text_search_data 
-                        SET body_tsv = to_tsvector('simple', COALESCE(i.title, '') || ' ' || COALESCE(i.body, '')) --TODO(mickiewicz@syncad.com) title or body could be null
-                        FROM update_values i
-                        WHERE hive_text_search_data.id = i.id AND i.id IS NOT NULL
-                        RETURNING hive_text_search_data.id
-                    ),
                     combined AS (
                         SELECT id FROM insert_post_data
                         UNION ALL
                         SELECT id FROM update_post_data
-                    ),
-                    combined_text_search AS (
-                        SELECT id FROM insert_search_text
-                        UNION ALL
-                        SELECT id FROM update_search_text
                     )
                     SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id))
                     FROM combined
-                    UNION ALL
-                    SELECT id FROM combined_text_search
         """
         if print_query:
             log.info(f"Executing query:\n{sql}")
