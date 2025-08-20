@@ -38,6 +38,8 @@ valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 # Includes also admin and owner, limit is set to prevent spam
 MAX_MOD_NB = 100
 
+
+
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
     "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
@@ -134,6 +136,19 @@ def encode_bitwise_mask(muted_reasons):
         mask |= 1 << number
     return mask
 
+
+def decode_bitwise_mask(mask):
+    muted_reasons = []
+    bit_position = 0
+
+    while mask > 0:
+        if mask & 1:
+            muted_reasons.append(bit_position)
+
+        mask >>= 1
+        bit_position += 1
+
+    return muted_reasons
 
 class Community:
     """Handles hive community registration and operations."""

@@ -9,6 +9,7 @@ from collections import OrderedDict
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
+from hive.indexer import community
 from hive.indexer.block import VirtualOperationType
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -116,13 +117,37 @@ class Posts(DbAdapterHolder):
                 'counter': cls._counter.increment(op['block_num']),
             }
 
+        # If muted_reasons is set here, it was caused by a post getting muted by a community type 2 or 3
+        if row['muted_reasons'] is not None:
+            muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
+            reasons = []
+            if 1 in muted_reasons:
+                reasons.append("community type does not allow non member to post/comment")
+            if 2 in muted_reasons:
+                reasons.append("parent post/comment is muted")
+
+            if len(reasons) == 1:
+                payload = f"Post is muted because {reasons[0]}"
+            else:
+                payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
+
+            Notify(
+                block_num=op['block_num'],
+                type_id='error',
+                dst_id=result['author_id'],
+                when=block_date,
+                post_id=result['id'],
+                payload=payload,
+                community_id=result['community_id'],
+                src_id=result['community_id'],
+            )
+
         if not DbState.is_massive_sync():
             if error:
-                author_id = result['author_id']
                 Notify(
                     block_num=op['block_num'],
                     type_id='error',
-                    dst_id=author_id,
+                    dst_id=result['author_id'],
                     when=block_date,
                     post_id=result['id'],
                     payload=error,
