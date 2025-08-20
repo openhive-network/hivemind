@@ -38,8 +38,6 @@ valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 # Includes also admin and owner, limit is set to prevent spam
 MAX_MOD_NB = 100
 
-
-
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
     "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
