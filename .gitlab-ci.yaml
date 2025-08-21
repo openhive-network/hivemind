@@ -10,7 +10,7 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: f77f308210a2b051517dc08a986bab9fc1afe98d # develop
+  ref: b077291d37d71d482fd22fa68ab23c905a5c0912 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
@@ -226,16 +226,16 @@ variables:
   echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
 .search-api_smoketest-script: &search-api_smoketest-script
-  - |
-    echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest..."
-    ./scripts/ci/start-api-smoketest.sh \
-        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        search-api_patterns/ \
-        api_smoketest_search-api.xml \
-        $RUNNER_PYTEST_WORKERS \
-        "auto"
-    echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest..."
+  ./scripts/ci/start-api-smoketest.sh \
+      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+      search-api_patterns/ \
+      api_smoketest_search-api.xml \
+      $RUNNER_PYTEST_WORKERS \
+      "auto"
+  echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .api-benchmark-script:
 - |
@@ -261,28 +261,28 @@ variables:
   echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
 
 .rest_api_smoketest-script: &rest_api_smoketest-script
-  - |
-    echo -e "\e[0Ksection_start:$(date +%s):rest_api_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest..."
-    ./scripts/ci/start-api-smoketest.sh \
-        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        rest_api_patterns/ \
-        api_smoketest_rest_api_patterns.xml \
-        $RUNNER_PYTEST_WORKERS \
-        "auto"
-    echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):rest_api_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest..."
+  ./scripts/ci/start-api-smoketest.sh \
+      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+      rest_api_patterns/ \
+      api_smoketest_rest_api_patterns.xml \
+      $RUNNER_PYTEST_WORKERS \
+      "auto"
+  echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
 
 .rest_api_negative_smoketest-script: &rest_api_negative_smoketest-script
-  - |
-    echo -e "\e[0Ksection_start:$(date +%s):rest_api_negative_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest negative..."
-    ./scripts/ci/start-api-smoketest.sh \
-        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        rest_api_negative/ \
-        api_smoketest_rest_api_negative.xml \
-        $RUNNER_PYTEST_WORKERS \
-        "auto"
-    echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):rest_api_negative_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest negative..."
+  ./scripts/ci/start-api-smoketest.sh \
+      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+      rest_api_negative/ \
+      api_smoketest_rest_api_negative.xml \
+      $RUNNER_PYTEST_WORKERS \
+      "auto"
+  echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
   ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
@@ -330,33 +330,33 @@ prepare_haf_data:
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
   extends: .job-defaults
-  image: 
+  image:
     name: "$HAF_IMAGE_NAME"
-    entrypoint: [ "" ]
+    entrypoint: [""]
   stage: build
   needs:
-    - prepare_haf_data
-    - prepare_haf_image
+  - prepare_haf_data
+  - prepare_haf_image
   variables:
     DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
     DATA_SOURCE: $DATA_CACHE_HAF
     DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
   script:
-    - |
-      set -e
-      haf/hive/scripts/copy_datadir.sh
-      sudo chmod 777 $DATA_CACHE_HIVEMIND
-      sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
-      cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
+  - |
+    set -e
+    haf/hive/scripts/copy_datadir.sh
+    sudo chmod 777 $DATA_CACHE_HIVEMIND
+    sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
+    cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
   artifacts:
     reports:
       dotenv:
-        - hived_uid.env
-    paths:
       - hived_uid.env
+    paths:
+    - hived_uid.env
   tags:
-    - data-cache-storage
+  - data-cache-storage
 
 prepare_hivemind_image:
   stage: build
@@ -398,10 +398,10 @@ cleanup_haf_cache_manual:
 # this cache
 cleanup_pipeline_cache:
   needs:
-    - replay_data_copy
-    - download_await
-    - sync
-    - e2e_benchmark_on_postgrest
+  - replay_data_copy
+  - download_await
+  - sync
+  - e2e_benchmark_on_postgrest
   extends:
   - .cleanup_cache_manual_template
   stage: cleanup
@@ -413,9 +413,9 @@ cleanup_pipeline_cache:
 
 download_await:
   extends: .job-defaults
-  image: 
+  image:
     name: "$HAF_IMAGE_NAME"
-    entrypoint: [ "" ]
+    entrypoint: [""]
   stage: prepare
   variables:
     GIT_STRATEGY: none
