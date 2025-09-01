@@ -123,7 +123,10 @@ class Posts(DbAdapterHolder):
             muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
             reasons = []
             if 1 in muted_reasons:
-                reasons.append("community type does not allow non member to post/comment")
+                if row['depth'] > 0:
+                    reasons.append("community type does not allow non members to post or comment")
+                else:
+                    reasons.append("community type does not allow non members to post")
             if 2 in muted_reasons:
                 reasons.append("parent post/comment is muted")
 
