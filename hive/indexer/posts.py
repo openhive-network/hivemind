@@ -119,7 +119,7 @@ class Posts(DbAdapterHolder):
 
         # If muted_reasons is set here, it was caused by a post getting muted by a community type 2 or 3
         # if it's not a new post we skip this step as a notification would already be sent
-        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post == False:
+        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post == True:
             raw_mask = row['muted_reasons']
             muted_reasons = community.decode_bitwise_mask(raw_mask)
             log.info(f"Raw mask: {raw_mask}, Decoded: {muted_reasons}")
