@@ -135,6 +135,19 @@ def encode_bitwise_mask(muted_reasons):
     return mask
 
 
+def decode_bitwise_mask(mask):
+    muted_reasons = []
+    bit_position = 0
+
+    while mask > 0:
+        if mask & 1:
+            muted_reasons.append(bit_position)
+
+        mask >>= 1
+        bit_position += 1
+
+    return muted_reasons
+
 class Community:
     """Handles hive community registration and operations."""
 
