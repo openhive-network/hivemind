@@ -122,7 +122,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _metadata_tags VARCHAR[])
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
                    post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, parent_author_id hivemind_app.hive_posts.author_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
-                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE)
+                   is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, muted_reasons hivemind_app.hive_posts.muted_reasons%TYPE)
     LANGUAGE plpgsql
 AS
 $function$
@@ -222,7 +222,7 @@ BEGIN
                 updated_at = _date,
                 active = _date,
                 block_num = _block_num
-          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
+          RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, hp.muted_reasons
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -309,7 +309,7 @@ BEGIN
                             updated_at = _date,
                             active = _date,
                             block_num = _block_num
-                        RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
+                        RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, hp.muted_reasons
                 ) -- WITH inserted_post
             , tagsid_and_posts AS MATERIALIZED (
                 SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
@@ -341,7 +341,8 @@ BEGIN
                 ip.community_id,
                 ip.is_valid,
                 ip.is_muted,
-                ip.depth
+                ip.depth,
+                ip.muted_reasons
             FROM inserted_post as ip;
     END IF;
 END
