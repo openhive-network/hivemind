@@ -68,6 +68,9 @@ class Blocks:
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
+
+    @classmethod
+    def set_head_date(cls):
         head_date = cls.head_date()
         if head_date == '':
             cls._head_block_date = None
