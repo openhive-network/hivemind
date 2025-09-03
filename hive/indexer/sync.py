@@ -99,7 +99,7 @@ class SyncHiveDb:
 
     def run(self) -> None:
         start_time = perf()
-
+        Blocks.set_head_date()
         def report_enter_to_stage(current_stage) -> bool:
             if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
                 last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
