@@ -11,7 +11,7 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: b077291d37d71d482fd22fa68ab23c905a5c0912 # develop
+  ref: 80e558bdeec9556ec46927853cf390c72ef03311 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
@@ -394,13 +394,13 @@ generate_python_api_client:
   - job: extract-swagger-json
     artifacts: true
   script:
-    - ${PYPROJECT_DIR}/generate_hivemind_api_client.sh
+  - ${PYPROJECT_DIR}/generate_hivemind_api_client.sh
   artifacts:
     paths:
-      - "${PYPROJECT_DIR}/hivemind_api"
-      - "${PYPROJECT_DIR}/hivemind_api/hivemind_api_client"
+    - "${PYPROJECT_DIR}/hivemind_api"
+    - "${PYPROJECT_DIR}/hivemind_api/hivemind_api_client"
   tags:
-    - public-runner-docker
+  - public-runner-docker
 
 
 build_python_api_client_wheel:
@@ -412,7 +412,7 @@ build_python_api_client_wheel:
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   tags:
-    - public-runner-docker
+  - public-runner-docker
 
 cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
@@ -690,14 +690,14 @@ python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
   needs:
-    - job: generate_python_api_client
-      artifacts: true
+  - job: generate_python_api_client
+    artifacts: true
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   script:
-    - pytest "${PYPROJECT_DIR}/api_client_tests"
+  - pytest "${PYPROJECT_DIR}/api_client_tests"
   tags:
-    - public-runner-docker
+  - public-runner-docker
 
 build_and_publish_image:
   stage: publish
@@ -715,17 +715,17 @@ build_and_publish_image:
 deploy_python_api_package_to_gitlab:
   stage: publish
   needs:
-    - job: build_python_api_client_wheel
-      artifacts: true
-    - job: generate_python_api_client
-      artifacts: true
-    - job: python_api_client_test
+  - job: build_python_api_client_wheel
+    artifacts: true
+  - job: generate_python_api_client
+    artifacts: true
+  - job: python_api_client_test
   extends: .deploy_wheel_to_gitlab_template
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   when: on_success
   tags:
-    - public-runner-docker
+  - public-runner-docker
 
 Trigger benchmark-results-collector:
   stage: collector
