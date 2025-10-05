@@ -2,43 +2,19 @@
 
 ## Introduction
 
-> We believe that high-quality content and communities of content producers and their
-audiences are the primary driver of growth of the hive.blog site, and in turn the wider
-adoption of the platform and HIVE. To this end, we wish to enable many users to build
-communities in parallel around curating specific types of content valuable to their audiences.
+Before the introduction of communities, Most Hive frontends used to rely on the global tags system for organization.
+In this sense Hive had many "communities" already but they were entirely informal; there was no ownership and no ability to formally organize.
+Tag usage standards are not possible to enforce, and users have different goals as to what they want to see and what sort of communities they want each tag to embody. 
 
-> To enable this, we intend to augment our current tag-based organizational structure for posts
-with a new system called “communities”, a special group into which others can post articles.
-Two types of communities will exist: communities into which anyone in the world can post
-(where community founders (or their delegated moderators) can decide, post-hoc, which
-posts to hide from view) or communities in which only community founders’ (or their
-delegated authors’) posts will appear.
+Hive communities add a governance layer which allows users to organize around a set of values, and gives them the power to do so effectively.
+It introduces a new system of moderation which is not dependent on users' hive power.
+By making it easier to organize, this system can be far more effective at connecting creators and curators.
+Curators are be attracted to communities which are well-organized: focused, high-quality, low-noise. Making it easier to find the highest quality content will make it easier to reward high quality content.
 
-> This system of moderation will function identically to the aforementioned comment
-moderation system, with all content (including hidden or moderated content) published
-permanently in the blockchain to prevent censorship. The hive.blog web site will respect
-the display preferences of the specific community maintainers (within their own community
-namespace only) while simultaneously propagating every participant’s voice throughout the
-blockchain to the entire world (regardless of moderator opinions).
+Many people want to see long-form, original content while many others just want to share links and snippets.
+The goal of the community feature is to empower users to create tighter groups and focus on what's important to them. 
 
-> We believe this unique approach finally solves one of the largest problems currently
-presented to social media services: the dichotomy between maintaining a high Signal-to-Noise
-Ratio (SNR) for a quality content experience free of spam and low-value comments,
-whilst simultaneously preventing any type of censorship.
-
-> It is our hope and design goal for our services (all of which are published with full source code
-> for easy deployment by anyone) to be replicated by others, displaying content according to
-> the wishes and whims of each individual website operator, giving readers ultimate choice
-> over the set of moderation opinions they wish to heed. 
->
-> *[source](https://steem.io/2017roadmap.pdf)*
-
-Today, most Hive frontends rely on the global tags system for organization. In this sense Hive has many "communities" already but they are entirely informal; there is no ownership and no ability to formally organize. Tag usage standards are not possible to enforce, and users have different goals as to what they want to see and what sort of communities they want each tag to embody. 
-
-Hive communities add a governance layer which allows users to organize around a set of values, and gives them the power to do so effectively. It introduces a new system of moderation which is not dependent on users' hive power. By making it easier to organize, this system can be far more effective at connecting creators and curators. Curators will be attracted to communities which are well-organized: focused, high-quality, low-noise. Making it easier to find the highest quality content will make it easier to reward high quality content.
-
-Many people want to see long-form, original content while many others just want to share links and snippets. The goal of the community feature is to empower users to create tighter groups and focus on what's important to them. Use cases for communities may include:
-
+Use cases for communities include:
  - microblogging & curated journals
  - local meetups
  - link sharing
@@ -48,35 +24,44 @@ Many people want to see long-form, original content while many others just want 
  - funny youtube videos
  - etc
 
+Communities are not a blockchain level feature, they exist within the hivemind set of APIs. 
+This means that if a user is forbidden from posting, they can still post to the community. 
+the difference is that the post will be tagged as "hidden" in api responses. (and front ends will not display it, but are free to do so!) 
+
 ## Overview
 
 #### Community Types
 
-All communities and posts are viewable and readable by all, and there is a governance mechanism which can affect visibility and prioritization of content for the purpose of decreasing noise and increasing positive interactions (however a community wishes to define it) and discourse. By default, communities are open for all to post and comment ("topics"). However, an organization may create a restricted community ("journal") for official updates: only members of the organization would be able to post updates, but anyone can comment. Alternatively, a professional group or local community ("council") may choose to limit all posting and commenting to approved members (perhaps those they verify independently).
+By default, communities are open for all to post and comment ("topics" or type 1). 
+However, an organization may create a restricted community ("journal" or type 2) for official updates: only members of the organization would be able to publish posts, but anyone can comment. 
+Alternatively, a professional group or local community ("council" or type 3) may choose to limit all posting and commenting to approved members (perhaps those they verify independently).
 
-1. **Topic**: anyone can post or comment
-2. **Journal**: guests can comment but not post. only members can post.
-3. **Council**: only members can post or comment
+1. **Topic / type 1**: anyone can post or comment
+2. **Journal / type 2**: guests can comment but not post. only members can post.
+3. **Council / type 3**: only members can post or comment
 
 #### User Roles Overview
 
 1. **Owner**: can assign admins. 
 2. **Admin**: can edit community properties and assign mods.
-3. **Mod**: can mute posts/users, add/remove members, pin posts, set user titles.
+3. **Mod**: can mute posts/users, add/remove members, pin/unpin posts, set user titles/roles.
 4. **Member**: in restricted (journal/council) communities, an approved member.
 5. **Guest**: can post/comment in topics and comment in journals.
+6. **Muted**: forbidden from posting or commenting. 
 
 #### User Actions
 
+Each role includes all the privileges of roles below it in the hierarchy.
+
 **Owner** has the ability to:
 
-- **set admins**: assign or revoke admin priviledges
+- **set admins**: assign or revoke admin privileges
 
 **Admins** have the ability to:
 
-- **set moderators**: grant or revoke mod priviledges
-- **set payout split**: control reward sharing destinations/percentages
-- **set display settings**: control the look and feel of community home pages
+- **set moderators**: grant or revoke mod privileges
+- **set community properties**: Update community properties (title/rules/description/NSFW/etc...)
+- **set community type**: Update community to topic, journal or council 
 
 **Moderators** have the ability to:
 
@@ -96,13 +81,18 @@ All communities and posts are viewable and readable by all, and there is a gover
 - **post in a topic**: as long as they are not muted
 - **comment in a topic or journal**: as long as they are not muted
 - **flag a post**: adds an item and a note to the community's moderation queue for review
-- **follow a community**: to customize their feed with communities they care about
+- **subscribe to a community**: to customize their feed with communities they care about
+
+**Muted** have no abilities and see their posts/comments hidden automatically
 
 ## Registration
 
 ##### NCI: Numerical Community Identifier
 
-Communities are registered by creating an on-chain account which conforms to `/^hive-[1-3]\d{4,6}$/`, with the first digit signifying the *type*. Type mappings are outlined in a later section. Thus the valid range is  `hive-10000` to `hive-3999999` for a total of 1M possible communities per type. This ensures the core protocol has stable ids for linking data without introducing a naming system.
+Communities are registered by creating an on-chain account which conforms to `/^hive-[1-3]\d{4,6}$/`, with the first digit signifying the *type*.
+Type mappings are outlined in a later section. Thus the valid range is  `hive-10000` to `hive-3999999` for a total of 1M possible communities per type. This ensures the core protocol has stable ids for linking data without introducing a naming system.
+
+Do note that the numerical system only defines what type the community will be created as. An admin can later change the type. (eg: if a community grows big enough to prevent guests from posting)
 
 ##### Custom URLs
 
@@ -113,28 +103,23 @@ Name registration, particularly in decentralized systems, is far from trivial. T
 3. ability to reassign a URL due to trademark issues
 4. decentralization: no central entity is controlling registration or collecting payments
 
-Name reassignments result unpredictable and/or complex behavior, which is why internal identifiers are not human-readable. This approach does not preclude anyone from developing a standardized naming system. Such a system may be objective and automated or subjective and voting driven. For subjective approaches, starting with just a numerical id is particularly useful as it allows a community to demonstrate its prowess before making a case to claim a specific human-readable identifier.
+Name reassignments result unpredictable and/or complex behavior, which is why internal identifiers are not human-readable.
+This approach does not preclude anyone from developing a standardized naming system. 
+Such a system may be objective and automated or subjective and voting driven.
+For subjective approaches, starting with just a numerical id is particularly useful as it allows a community to demonstrate its prowess before making a case to claim a specific human-readable identifier.
+
+At the moment custom URLs are not implemented.
 
 ## Considerations
 
 - Operations such as role grants and mutes are not retroactive.
   - This is to allow for consistent state among services which can also be replayed independently, as well as for simplicity of implementation. If it is needed to batch-mute old posts, this can be still be accomplished by issuing batch `mutePost` operations.
-  - Example: If a user is muted, the state of their previous posts is not changed. If the user attempts to post in a community during this period (e.g. from a UI which does not properly enforce roles), their posts will be marked "invalid" since they did not have the correct priviledge at the time. Likewise, if they are unmuted, any of these "invalid" posts remain so.
-  - Example: payout split changes cannot be retroactive, otherwise previously valid posts may be considered invalid.
+  - Example: If a user is muted, the state of their previous posts is not changed. If the user attempts to post in a community during this period (e.g. from a UI which does not properly enforce roles), their posts will be marked "invalid" since they did not have the correct privilege at the time. Likewise, if they are unmuted, any of these "invalid" posts remain so.
 - A post's `community` cannot be changed after the post is created. This avoids a host of edge cases.
 - A community can only have one account named as the owner.
 - Each user in a community is assigned, at most, 1 role (admin, mod, member, guest, muted).
-- Anybody could be promoted to member, mod, or admin of any community, but they will be shown as inactive unless they are subscribed to the community.
 
 ## Community Metadata
-
-##### Editable by Admins - Core Settings
-
-Core settings which will influence community logic and validation rules.
-
- - `reward_share`: (for future implementation) dictionary mapping `account` to `percent`
-    - specifies required minimum beneficiary amount per post for it to be considered valid
-    - can be blank or contain up to 8 entries
 
 ##### Editable by Admins - Community Properties
 
@@ -150,19 +135,11 @@ Can be stored as a JSON dictionary.
    - `avatar_url` - same format as account avatars; usually rendered as a circle
  - `type_id`: change the type of the community (1,2 or 3)
 
-Extra settings (for future implementation)
+Extra settings can be set arbitrary depending on one's need but those won't be validated.
 
- - `comment_display`: default comment display method (e.g. `votes`, `trending`, `age`, `forum`) 
- - `feed_display`: specify graphical layout in communities
- - `cover_url` - same format as account covers; used as header background image
- - `default_view` = `list | blog | grid` - default post display
- - `bg_color`: background color - hex-encoded RGB value (e.g. `#EEDDCC`)
- - `bg_color2`: background color - hex-encoded RGB value (if provided, creates a gradient)
+## Creation
 
-
-## Registration
-
-Register an onchain account name which conforms to `/hive-[1-3]\d{4,6}$/`. This is the owner account. From this account, submit a `setRole` command to set the first admin.
+Creation an onchain account name which conforms to `/hive-[1-3]\d{4,6}$/` (eg: hive-111111) This is the owner account. From this account, submit a `setRole` command to set the first admin.
 
 - Topics: the leading digit must be `1`
 - Journals: the leading digit must be `2`
@@ -215,7 +192,7 @@ The standard format for `custom_json` ops:
 
 In addition to editing user roles (e.g. appointing mods), admins can define the reward share and control display settings.
 
-#### Update display settings
+#### Update settings
 
 ```
 ["updateProps", {
@@ -224,16 +201,9 @@ In addition to editing user roles (e.g. appointing mods), admins can define the 
 }]
 ```
 
-Valid keys are `title`, `about`, `lang`, `is_nsfw`, `description`, `flag_text`, `settings`, `type_id`.
+Validated keys are `title`, `about`, `lang`, `is_nsfw`, `description`, `flag_text`, `settings`, `type_id`, `avatar_url`.
 
-#### Set reward share (for future implementation)
-
-```
-["setRewardShare", {
-  "community": <community>, 
-  "reward_share": { <account1>: <percent1>, ... }
-}]
-```
+but you are free to add any extra settings you want.
 
 ### Moderator Operations
 
@@ -270,8 +240,6 @@ Can be a topic or a comment.
   "notes": <comment>
 }]
 ```
-
-Any posts muted for spam should contain simply the string `spam` in the `notes` field. This standardized label will help train automated spam detection.
 
 #### Pin/unpin a post
 
@@ -314,7 +282,7 @@ Allows a user to signify which communities they want shown on their personal tre
 
 #### Flag a post
 
-Places a post in the review queue. It's up to the community to define what constitutes flagging.
+Raises awareness on a post/comment by sending it as a notification to team members (moderators included). It's up to the community to define what constitutes flagging.
 
 ```
 ["flagPost", {
@@ -327,121 +295,22 @@ Places a post in the review queue. It's up to the community to define what const
 
 #### Posting in a community
 
-To mark a post as belonging to a community, set the `community` key in `json_metadata`. Do not use an `@` prefix.
+To mark a post as belonging to a community, the main tag (category) should be the name of the community. 
 
 ```
 {
-    "community": "hive-192921",
     "app": "hiveblog/0.1",
     "format": "html",
-    "tags": ["hive"],
+    "tags": ["hive-192921", "travel", "vlog"],
     [...]
 }
 ```
 
-If a post is edited to name a different community, this change will be ignored.   If a post is posted "into" a community which does not exist, or one that the user does not have permission to post into, the json will be interpreted as if the "community" key does not exist, and the post will be posted onto the user's own blog.
-
-
-
-
+If a post is edited to name a different community, this change will be ignored.
+If a post is posted "into" a community which does not exist, the post will be published on the user's main blog. 
+If the user does not have permission to post into the community, the post will be set as muted automatically
 
 ---
-
-
-
-## Appendix A. Interface Considerations
-
-
-
- - community home
-    - apply custom display
-    - list posts by trending or created
-    - un/subscribe button
-    - new post button
- - communities index
-    - trending/popular communities
-    - keyword search
-    - must show follow status
- - mod tools
-   - user titles
-   - pin/unpin post
-   - mute/unmute user
-   - mute/unmute post
-- mod settings
-  - list and edit approved and muted users
-  - moderation queue
-  - moderation log
-- admin settings
-  - edit community settings
-  - edit mods list
-- owner settings
-    - community creation
-    - assign mods
-
-
-
-## Appendix B. Example Database Schema
-
-Not complete -- for reference only.
-
-```
-accounts
-  id
-  name
-
-communities
-  account_id
-  type [0,1,2]
-  name
-  about
-  description
-  language
-  is_nsfw
-  settings
-  is_valid
-  
-
-members
-  community_id
-  account_id
-  is_admin
-  is_mod
-  is_approved
-  is_muted
-  title
-  promoted_at
-  demoted_at
-
-posts
-  id
-  parent_id
-  author
-  permlink
-  community
-  created_at
-  is_pinned
-  is_muted
-
-posts_cache
-  post_id
-  title
-  preview
-  payout_at
-  rshares
-
-flags
-  account_id
-  post_id
-  notes
-
-modlog
-  account_id
-  community_id
-  action
-  params
-```
-
-
 
 ## Appendix C. Reference
 
