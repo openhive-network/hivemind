@@ -1,22 +1,38 @@
 [
   {
-    "about": "A place for major news from around the world.",
+    "about": "Banana-nothing.",
     "admins": [
-      "blocktrades",
       "test-safari"
     ],
-    "avatar_url": "http://example.com",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
-    "id": 92458,
+    "id": 92456,
     "is_nsfw": true,
     "lang": "en",
-    "name": "hive-135485",
-    "num_authors": 5,
-    "num_pending": 28,
+    "name": "hive-171487",
+    "num_authors": 2,
+    "num_pending": 23,
+    "subscribers": 5,
+    "sum_pending": 0,
+    "title": "Banana",
+    "type_id": 1
+  },
+  {
+    "about": "Nothing.",
+    "admins": [
+      "test-safari"
+    ],
+    "context": {},
+    "created_at": "2016-09-15 18:01:30",
+    "id": 92457,
+    "is_nsfw": true,
+    "lang": "en",
+    "name": "hive-171488",
+    "num_authors": 0,
+    "num_pending": 0,
     "subscribers": 4,
     "sum_pending": 0,
-    "title": "World News",
+    "title": "Hello",
     "type_id": 1
   }
 ]
