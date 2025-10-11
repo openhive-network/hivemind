@@ -716,7 +716,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-135485\",\"props\":{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http://example.com\"}}}]"
+              "json": "[\"updateProps\",{\"community\":\"hive-135485\",\"props\":{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http://example.com\",\"cover_url\":\"http://exa.com\"}}}]"
             }
           },
           {
@@ -5081,6 +5081,17 @@
               ],
               "id": "community",
               "json": "[\"updateProps\",{\"community\":\"hive-111119\",\"props\":{\"type_id\":3}}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-111119"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-111119\",\"props\":{\"cover_url\":\"not a valid url, this update won't go through\"}}]"
             }
           },
           {
