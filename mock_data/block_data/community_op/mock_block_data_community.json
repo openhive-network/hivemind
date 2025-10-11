@@ -5091,7 +5091,7 @@
                 "hive-111119"
               ],
               "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-111119\",\"props\":{\"cover_url\":\"not a valid url, this update won't go through\"}}]"
+              "json": "[\"updateProps\",{\"community\":\"hive-111119\",\"props\":{\"cover_url\":\"not a valid url, this update will not go through\"}}]"
             }
           },
           {
