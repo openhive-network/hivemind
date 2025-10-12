@@ -66,7 +66,6 @@ BEGIN
           hc.num_pending,
           hc.num_authors,
           hc.created_at::VARCHAR(19),
-          hc.avatar_url,
           (
             CASE
               WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
@@ -121,7 +120,6 @@ BEGIN
           hc.num_pending,
           hc.num_authors,
           hc.created_at::VARCHAR(19),
-          hc.avatar_url,
           (
             CASE
               WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
@@ -182,7 +180,6 @@ BEGIN
           hc.num_pending,
           hc.num_authors,
           hc.created_at::VARCHAR(19),
-          hc.avatar_url,
           (
             CASE
               WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))

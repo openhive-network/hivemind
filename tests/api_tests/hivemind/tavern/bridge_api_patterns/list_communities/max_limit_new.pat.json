@@ -4,7 +4,6 @@
     "admins": [
       "miners"
     ],
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 19:47:57",
     "id": 92539,
@@ -20,7 +19,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 19:47:51",
     "id": 92536,
@@ -36,7 +34,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 19:47:51",
     "id": 92535,
@@ -52,7 +49,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 19:47:51",
     "id": 92534,
@@ -68,7 +64,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 19:47:51",
     "id": 92533,
@@ -84,7 +79,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92469,
@@ -100,7 +94,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92468,
@@ -116,7 +109,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92467,
@@ -132,7 +124,6 @@
   },
   {
     "about": "this is about field",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92466,
@@ -148,7 +139,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92465,
@@ -164,7 +154,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92464,
@@ -183,7 +172,6 @@
     "admins": [
       "agartha"
     ],
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92463,
@@ -199,7 +187,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92462,
@@ -215,7 +202,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92461,
@@ -231,7 +217,6 @@
   },
   {
     "about": "",
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92460,
@@ -252,7 +237,6 @@
       "good-karma",
       "test-safari"
     ],
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92459,
@@ -272,7 +256,6 @@
       "blocktrades",
       "test-safari"
     ],
-    "avatar_url": "http://example.com",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92458,
@@ -291,7 +274,6 @@
     "admins": [
       "test-safari"
     ],
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92457,
@@ -310,7 +292,6 @@
     "admins": [
       "test-safari"
     ],
-    "avatar_url": "",
     "context": {},
     "created_at": "2016-09-15 18:01:30",
     "id": 92456,
