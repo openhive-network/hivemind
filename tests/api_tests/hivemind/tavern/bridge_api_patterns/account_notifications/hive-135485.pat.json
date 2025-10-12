@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T18:01:51",
-    "id": 2083300,
+    "id": "4060706672476163",
     "msg": "@good-karma subscribed to World News",
     "score": 56,
     "type": "subscribe",
@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": 2083295,
+    "id": "4060705867169805",
     "msg": "@roadscape subscribed to World News",
     "score": 55,
     "type": "subscribe",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": 2083290,
+    "id": "4060705867169800",
     "msg": "@gtg subscribed to World News",
     "score": 52,
     "type": "subscribe",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": 2083285,
+    "id": "4060705867169795",
     "msg": "@test-safari subscribed to World News",
     "score": 25,
     "type": "subscribe",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": 2083279,
+    "id": "4060701840637953",
     "msg": "@test-safari subscribed to World News",
     "score": 25,
     "type": "subscribe",
@@ -50,14 +50,14 @@
   {
     "date": "2016-09-15T18:01:33",
     "id": "4060701807083521",
-    "msg": "@test-safari set properties {\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http:\\/\\/example.com\"}}",
+    "msg": "@test-safari set properties {\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http:\\/\\/example.com\",\"cover_url\":\"http:\\/\\/exa.com\"}}",
     "score": 35,
     "type": "set_props",
     "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:30",
-    "id": 2083267,
+    "id": "4060700993388547",
     "msg": "@hive-135485 was created",
     "score": 35,
     "type": "new_community",

@@ -658,7 +658,9 @@ class CommunityOp:
             if 'avatar_url' in settings:
                 avatar_url = settings['avatar_url']
                 assert not avatar_url or _valid_url_proto(avatar_url)
-                out['avatar_url'] = avatar_url
+            if 'cover_url' in settings:
+                cover_url = settings['cover_url']
+                assert not cover_url or _valid_url_proto(cover_url)
         if 'type_id' in props:
             community_type = read_key_integer(props, 'type_id')
             assert community_type in valid_types, 'invalid community type'
