@@ -40,7 +40,6 @@ BEGIN
         hc.sum_pending,
         hc.num_pending,
         hc.num_authors,
-        hc.avatar_url,
         hc.description,
         hc.flag_text,
         hc.settings,
