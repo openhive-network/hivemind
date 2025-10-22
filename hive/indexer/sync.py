@@ -163,7 +163,9 @@ class SyncHiveDb:
                 DbState.ensure_off_synchronous_commit()
 
                 DbState.ensure_fk_are_disabled()
-                DbState.ensure_indexes_are_enabled()
+                if not DbState.are_indexes_enabled():
+                    self._wait_for_massive_consume()
+                    DbState.ensure_indexes_are_enabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
