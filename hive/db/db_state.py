@@ -341,10 +341,13 @@ class DbState:
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled= False
+    @classmethod
+    def are_indexes_enabled(cls):
+        return cls._indexes_were_enabled
 
     @classmethod
     def ensure_indexes_are_enabled(cls):
-        if cls._indexes_were_enabled:
+        if cls.are_indexes_enabled():
             return
 
         start_time = perf_counter()
