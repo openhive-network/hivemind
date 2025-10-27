@@ -24,5 +24,5 @@ RETURNS hivemind_app.blocks_view.num%TYPE
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-    SELECT hive.app_get_irreversible_block( 'hivemind_app' ) - CAST( extract(epoch from _time)/3 as INTEGER );
+    SELECT hive.get_estimated_hive_head_block() - CAST( extract(epoch from _time)/3 as INTEGER );
 $BODY$;
