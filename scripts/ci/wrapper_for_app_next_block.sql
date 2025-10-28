@@ -30,3 +30,14 @@ BEGIN
     RETURN __result;
 END;
 $BODY$;
+
+CREATE OR REPLACE FUNCTION hive.get_estimated_hive_head_block()
+    RETURNS INTEGER
+    LANGUAGE 'plpgsql'
+    STABLE
+AS
+$body$
+BEGIN
+    RETURN 5000000;
+END;
+$body$;
