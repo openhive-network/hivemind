@@ -165,9 +165,10 @@ BEGIN
   RETURN (
     SELECT CASE
       WHEN n BETWEEN __json_min_safe_integer AND __json_max_safe_integer
-        AND n = TRUNC(n)  -- Check if it's a whole number
-        THEN to_jsonb(n::BIGINT)
-      ELSE to_jsonb(n::TEXT)
+        THEN
+          to_jsonb(n::BIGINT)
+      ELSE
+          to_jsonb(n::TEXT)
     END
   );
 END;
