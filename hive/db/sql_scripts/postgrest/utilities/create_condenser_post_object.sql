@@ -91,15 +91,15 @@ BEGIN
       _result = jsonb_set(_result, '{net_rshares}', to_jsonb(0));
       _result = jsonb_set(_result, '{abs_rshares}', to_jsonb(0));
     ELSE
-      _result = jsonb_set(_result, '{total_vote_weight}', to_jsonb(_row.total_vote_weight));
-      _result = jsonb_set(_result, '{net_rshares}', to_jsonb(_row.rshares));
-      _result = jsonb_set(_result, '{abs_rshares}', to_jsonb(_row.abs_rshares));
+      _result = jsonb_set(_result, '{total_vote_weight}', hivemind_app.json_stringify_numeric(_row.total_vote_weight));
+      _result = jsonb_set(_result, '{net_rshares}', hivemind_app.json_stringify_numeric(_row.rshares));
+      _result = jsonb_set(_result, '{abs_rshares}', hivemind_app.json_stringify_numeric(_row.abs_rshares));
       _tmp_amount = FLOOR((_row.rshares + _row.abs_rshares) / 2);
-      _result = jsonb_set(_result, '{vote_rshares}', to_jsonb(_tmp_amount));
+      _result = jsonb_set(_result, '{vote_rshares}', hivemind_app.json_stringify_numeric(_tmp_amount));
     END IF;
   ELSE
     _result = jsonb_set(_result, '{post_id}', to_jsonb(_row.id));
-    _result = jsonb_set(_result, '{net_rshares}', to_jsonb(_row.rshares));
+    _result = jsonb_set(_result, '{net_rshares}', hivemind_app.json_stringify_numeric(_row.rshares));
     IF _row.is_paidout THEN
       _result = jsonb_set(_result, '{curator_payout_value}', to_jsonb(_row.curator_payout_value));
       SELECT amount, currency FROM hivemind_postgrest_utilities.parse_asset(_row.curator_payout_value) AS (amount NUMERIC, currency hivemind_postgrest_utilities.currency) INTO _tmp_amount, _tmp_currency;
