@@ -2,29 +2,29 @@
   "votes": [
     {
       "author": "gtg",
-      "id": 2111045,
+      "id": 2111040,
       "last_update": "2016-08-05T15:25:42",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 7498426175709,
       "vote_percent": 10000,
       "voter": "steempty",
-      "weight": 11895913786478469768
+      "weight": "11895913786478469768"
     },
     {
       "author": "gtg",
-      "id": 2111248,
+      "id": 2111243,
       "last_update": "2016-08-05T15:27:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 42312727614219,
       "vote_percent": 10000,
       "voter": "blocktrades",
-      "weight": 5027689552576220703
+      "weight": "5027689552576220703"
     },
     {
       "author": "gtg",
-      "id": 2160985,
+      "id": 2160980,
       "last_update": "2016-08-06T00:15:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -35,40 +35,40 @@
     },
     {
       "author": "gtg",
-      "id": 2160955,
+      "id": 2160950,
       "last_update": "2016-08-06T00:15:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 869557685770,
       "vote_percent": 10000,
       "voter": "silver",
-      "weight": 18786109503938095
+      "weight": "18786109503938095"
     },
     {
       "author": "gtg",
-      "id": 2165055,
+      "id": 2165050,
       "last_update": "2016-08-06T02:19:36",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 5114872713665,
       "vote_percent": 10000,
       "voter": "roadscape",
-      "weight": 97808918485474647
+      "weight": "97808918485474647"
     },
     {
       "author": "gtg",
-      "id": 2160929,
+      "id": 2160924,
       "last_update": "2016-08-06T00:14:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 2289539684123,
       "vote_percent": 10000,
       "voter": "complexring",
-      "weight": 52268159267844613
+      "weight": "52268159267844613"
     },
     {
       "author": "gtg",
-      "id": 2160990,
+      "id": 2160985,
       "last_update": "2016-08-06T00:15:51",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -79,7 +79,7 @@
     },
     {
       "author": "gtg",
-      "id": 2161002,
+      "id": 2160997,
       "last_update": "2016-08-06T00:16:00",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -90,7 +90,7 @@
     },
     {
       "author": "gtg",
-      "id": 2161000,
+      "id": 2160995,
       "last_update": "2016-08-06T00:15:57",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -101,7 +101,7 @@
     },
     {
       "author": "gtg",
-      "id": 2161004,
+      "id": 2160999,
       "last_update": "2016-08-06T00:16:03",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -112,7 +112,7 @@
     },
     {
       "author": "gtg",
-      "id": 2985509,
+      "id": 2985504,
       "last_update": "2016-08-19T11:40:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -123,7 +123,7 @@
     },
     {
       "author": "gtg",
-      "id": 2161005,
+      "id": 2161000,
       "last_update": "2016-08-06T00:16:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -134,7 +134,7 @@
     },
     {
       "author": "gtg",
-      "id": 2160996,
+      "id": 2160991,
       "last_update": "2016-08-06T00:15:54",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -145,7 +145,7 @@
     },
     {
       "author": "gtg",
-      "id": 3102746,
+      "id": 3102741,
       "last_update": "2016-08-21T12:52:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -156,7 +156,7 @@
     },
     {
       "author": "gtg",
-      "id": 2170384,
+      "id": 2170379,
       "last_update": "2016-08-06T05:24:54",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -167,7 +167,7 @@
     },
     {
       "author": "gtg",
-      "id": 2601651,
+      "id": 2601646,
       "last_update": "2016-08-12T19:15:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -178,7 +178,7 @@
     },
     {
       "author": "gtg",
-      "id": 2161006,
+      "id": 2161001,
       "last_update": "2016-08-06T00:16:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -189,7 +189,7 @@
     },
     {
       "author": "gtg",
-      "id": 2112396,
+      "id": 2112391,
       "last_update": "2016-08-05T15:35:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -200,18 +200,18 @@
     },
     {
       "author": "gtg",
-      "id": 2102505,
+      "id": 2102500,
       "last_update": "2016-08-05T14:22:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 7368210672,
       "vote_percent": 10000,
       "voter": "modeprator",
-      "weight": 22042702548688931
+      "weight": "22042702548688931"
     },
     {
       "author": "gtg",
-      "id": 2138741,
+      "id": 2138736,
       "last_update": "2016-08-05T18:50:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -222,18 +222,18 @@
     },
     {
       "author": "gtg",
-      "id": 2160460,
+      "id": 2160455,
       "last_update": "2016-08-06T00:00:39",
       "num_changes": 0,
       "permlink": "witness-gtg",
       "rshares": 785540122070,
       "vote_percent": 10000,
       "voter": "steemship",
-      "weight": 18937057891845807
+      "weight": "18937057891845807"
     },
     {
       "author": "gtg",
-      "id": 2305013,
+      "id": 2305008,
       "last_update": "2016-08-08T12:04:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -244,7 +244,7 @@
     },
     {
       "author": "gtg",
-      "id": 2167682,
+      "id": 2167677,
       "last_update": "2016-08-06T03:36:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -255,7 +255,7 @@
     },
     {
       "author": "gtg",
-      "id": 2111126,
+      "id": 2111121,
       "last_update": "2016-08-06T02:20:09",
       "num_changes": 1,
       "permlink": "witness-gtg",
@@ -266,7 +266,7 @@
     },
     {
       "author": "gtg",
-      "id": 3658570,
+      "id": 3658565,
       "last_update": "2016-08-31T16:59:03",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -277,7 +277,7 @@
     },
     {
       "author": "gtg",
-      "id": 3116420,
+      "id": 3116415,
       "last_update": "2016-08-21T17:53:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -288,7 +288,7 @@
     },
     {
       "author": "gtg",
-      "id": 2164888,
+      "id": 2164883,
       "last_update": "2016-08-06T02:12:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -299,7 +299,7 @@
     },
     {
       "author": "gtg",
-      "id": 2119946,
+      "id": 2119941,
       "last_update": "2016-08-05T16:25:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -310,7 +310,7 @@
     },
     {
       "author": "gtg",
-      "id": 2167472,
+      "id": 2167467,
       "last_update": "2016-08-06T03:27:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -321,7 +321,7 @@
     },
     {
       "author": "gtg",
-      "id": 2119496,
+      "id": 2119491,
       "last_update": "2016-08-05T16:22:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -332,7 +332,7 @@
     },
     {
       "author": "gtg",
-      "id": 3119994,
+      "id": 3119989,
       "last_update": "2016-08-21T18:57:51",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -343,7 +343,7 @@
     },
     {
       "author": "gtg",
-      "id": 2142030,
+      "id": 2142025,
       "last_update": "2016-08-05T19:15:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -354,7 +354,7 @@
     },
     {
       "author": "gtg",
-      "id": 3102661,
+      "id": 3102656,
       "last_update": "2016-08-21T12:50:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -365,7 +365,7 @@
     },
     {
       "author": "gtg",
-      "id": 2147402,
+      "id": 2147397,
       "last_update": "2016-08-05T19:55:21",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -376,7 +376,7 @@
     },
     {
       "author": "gtg",
-      "id": 3372688,
+      "id": 3372683,
       "last_update": "2016-08-26T05:26:00",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -387,7 +387,7 @@
     },
     {
       "author": "gtg",
-      "id": 2099995,
+      "id": 2099990,
       "last_update": "2016-08-05T14:02:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -398,7 +398,7 @@
     },
     {
       "author": "gtg",
-      "id": 2151702,
+      "id": 2151697,
       "last_update": "2016-08-05T20:31:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -409,7 +409,7 @@
     },
     {
       "author": "gtg",
-      "id": 2115532,
+      "id": 2115527,
       "last_update": "2016-08-05T15:55:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -420,7 +420,7 @@
     },
     {
       "author": "gtg",
-      "id": 2848258,
+      "id": 2848253,
       "last_update": "2016-08-17T04:56:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -431,7 +431,7 @@
     },
     {
       "author": "gtg",
-      "id": 2153333,
+      "id": 2153328,
       "last_update": "2016-08-05T21:02:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -442,7 +442,7 @@
     },
     {
       "author": "gtg",
-      "id": 2126950,
+      "id": 2126945,
       "last_update": "2016-08-05T17:17:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -453,7 +453,7 @@
     },
     {
       "author": "gtg",
-      "id": 3665863,
+      "id": 3665858,
       "last_update": "2016-08-31T19:52:15",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -464,7 +464,7 @@
     },
     {
       "author": "gtg",
-      "id": 2133672,
+      "id": 2133667,
       "last_update": "2016-08-05T18:09:15",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -475,7 +475,7 @@
     },
     {
       "author": "gtg",
-      "id": 2159927,
+      "id": 2159922,
       "last_update": "2016-08-05T23:43:36",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -486,7 +486,7 @@
     },
     {
       "author": "gtg",
-      "id": 2128571,
+      "id": 2128566,
       "last_update": "2016-08-05T17:29:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -497,7 +497,7 @@
     },
     {
       "author": "gtg",
-      "id": 2116478,
+      "id": 2116473,
       "last_update": "2016-08-05T16:01:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -508,7 +508,7 @@
     },
     {
       "author": "gtg",
-      "id": 2150126,
+      "id": 2150121,
       "last_update": "2016-08-05T20:17:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -519,7 +519,7 @@
     },
     {
       "author": "gtg",
-      "id": 2144790,
+      "id": 2144785,
       "last_update": "2016-08-05T19:34:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -530,7 +530,7 @@
     },
     {
       "author": "gtg",
-      "id": 2144375,
+      "id": 2144370,
       "last_update": "2016-08-05T19:31:42",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -541,7 +541,7 @@
     },
     {
       "author": "gtg",
-      "id": 2139515,
+      "id": 2139510,
       "last_update": "2016-08-05T18:56:00",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -552,7 +552,7 @@
     },
     {
       "author": "gtg",
-      "id": 2145324,
+      "id": 2145319,
       "last_update": "2016-08-05T19:38:12",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -563,7 +563,7 @@
     },
     {
       "author": "gtg",
-      "id": 2259857,
+      "id": 2259852,
       "last_update": "2016-08-07T19:20:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -574,7 +574,7 @@
     },
     {
       "author": "gtg",
-      "id": 2171047,
+      "id": 2171042,
       "last_update": "2016-08-06T06:01:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -585,7 +585,7 @@
     },
     {
       "author": "gtg",
-      "id": 2156737,
+      "id": 2156732,
       "last_update": "2016-08-05T22:23:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -596,7 +596,7 @@
     },
     {
       "author": "gtg",
-      "id": 2113704,
+      "id": 2113699,
       "last_update": "2016-08-05T15:44:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -607,7 +607,7 @@
     },
     {
       "author": "gtg",
-      "id": 2127384,
+      "id": 2127379,
       "last_update": "2016-08-05T17:20:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -618,7 +618,7 @@
     },
     {
       "author": "gtg",
-      "id": 2114603,
+      "id": 2114598,
       "last_update": "2016-08-05T15:50:15",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -629,7 +629,7 @@
     },
     {
       "author": "gtg",
-      "id": 2132485,
+      "id": 2132480,
       "last_update": "2016-08-05T17:59:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -640,7 +640,7 @@
     },
     {
       "author": "gtg",
-      "id": 2170257,
+      "id": 2170252,
       "last_update": "2016-08-06T05:19:51",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -651,7 +651,7 @@
     },
     {
       "author": "gtg",
-      "id": 2126170,
+      "id": 2126165,
       "last_update": "2016-08-05T17:11:42",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -662,7 +662,7 @@
     },
     {
       "author": "gtg",
-      "id": 2141300,
+      "id": 2141295,
       "last_update": "2016-08-05T19:09:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -673,7 +673,7 @@
     },
     {
       "author": "gtg",
-      "id": 2822535,
+      "id": 2822530,
       "last_update": "2016-08-16T19:40:33",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -684,7 +684,7 @@
     },
     {
       "author": "gtg",
-      "id": 2112081,
+      "id": 2112076,
       "last_update": "2016-08-05T15:32:54",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -695,7 +695,7 @@
     },
     {
       "author": "gtg",
-      "id": 2152231,
+      "id": 2152226,
       "last_update": "2016-08-05T20:42:57",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -706,7 +706,7 @@
     },
     {
       "author": "gtg",
-      "id": 2142240,
+      "id": 2142235,
       "last_update": "2016-08-05T19:16:57",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -717,7 +717,7 @@
     },
     {
       "author": "gtg",
-      "id": 2143467,
+      "id": 2143462,
       "last_update": "2016-08-05T19:25:12",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -728,7 +728,7 @@
     },
     {
       "author": "gtg",
-      "id": 2159067,
+      "id": 2159062,
       "last_update": "2016-08-05T23:20:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -739,7 +739,7 @@
     },
     {
       "author": "gtg",
-      "id": 3322021,
+      "id": 3322016,
       "last_update": "2016-08-25T05:21:15",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -750,7 +750,7 @@
     },
     {
       "author": "gtg",
-      "id": 2113070,
+      "id": 2113065,
       "last_update": "2016-08-05T15:40:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -761,7 +761,7 @@
     },
     {
       "author": "gtg",
-      "id": 2117797,
+      "id": 2117792,
       "last_update": "2016-08-05T16:10:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -772,7 +772,7 @@
     },
     {
       "author": "gtg",
-      "id": 2113500,
+      "id": 2113495,
       "last_update": "2016-08-05T15:42:57",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -783,7 +783,7 @@
     },
     {
       "author": "gtg",
-      "id": 2116730,
+      "id": 2116725,
       "last_update": "2016-08-05T16:03:03",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -794,7 +794,7 @@
     },
     {
       "author": "gtg",
-      "id": 2124851,
+      "id": 2124846,
       "last_update": "2016-08-05T17:01:30",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -805,7 +805,7 @@
     },
     {
       "author": "gtg",
-      "id": 2112796,
+      "id": 2112791,
       "last_update": "2016-08-05T15:38:24",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -816,7 +816,7 @@
     },
     {
       "author": "gtg",
-      "id": 2113531,
+      "id": 2113526,
       "last_update": "2016-08-05T15:43:09",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -827,7 +827,7 @@
     },
     {
       "author": "gtg",
-      "id": 2158450,
+      "id": 2158445,
       "last_update": "2016-08-05T23:06:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -838,7 +838,7 @@
     },
     {
       "author": "gtg",
-      "id": 2100150,
+      "id": 2100145,
       "last_update": "2016-08-05T14:03:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -849,7 +849,7 @@
     },
     {
       "author": "gtg",
-      "id": 2112782,
+      "id": 2112777,
       "last_update": "2016-08-05T15:38:18",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -860,7 +860,7 @@
     },
     {
       "author": "gtg",
-      "id": 2160988,
+      "id": 2160983,
       "last_update": "2016-08-06T00:15:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -871,7 +871,7 @@
     },
     {
       "author": "gtg",
-      "id": 2652128,
+      "id": 2652123,
       "last_update": "2016-08-13T18:01:48",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -882,7 +882,7 @@
     },
     {
       "author": "gtg",
-      "id": 2166001,
+      "id": 2165996,
       "last_update": "2016-08-06T02:48:21",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -893,7 +893,7 @@
     },
     {
       "author": "gtg",
-      "id": 2156693,
+      "id": 2156688,
       "last_update": "2016-08-05T22:22:27",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -904,7 +904,7 @@
     },
     {
       "author": "gtg",
-      "id": 2114576,
+      "id": 2114571,
       "last_update": "2016-08-05T15:50:06",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -915,7 +915,7 @@
     },
     {
       "author": "gtg",
-      "id": 2128887,
+      "id": 2128882,
       "last_update": "2016-08-05T17:31:21",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -926,7 +926,7 @@
     },
     {
       "author": "gtg",
-      "id": 2162620,
+      "id": 2162615,
       "last_update": "2016-08-06T01:01:45",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -937,7 +937,7 @@
     },
     {
       "author": "gtg",
-      "id": 2396717,
+      "id": 2396712,
       "last_update": "2016-08-09T19:18:51",
       "num_changes": 0,
       "permlink": "witness-gtg",
@@ -948,7 +948,7 @@
     },
     {
       "author": "gtg",
-      "id": 3111775,
+      "id": 3111770,
       "last_update": "2016-08-21T16:14:51",
       "num_changes": 0,
       "permlink": "witness-gtg",
