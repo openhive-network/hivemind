@@ -1615,7 +1615,7 @@
       "rshares": 29319603672,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 63251027095213912
+      "weight": "63251027095213912"
     },
     {
       "author": "jamtaylor",
@@ -1637,7 +1637,7 @@
       "rshares": 30541253826,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 137204976481959371
+      "weight": "137204976481959371"
     },
     {
       "author": "decrypt",
@@ -1648,7 +1648,7 @@
       "rshares": 29319603672,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 85306549021579150
+      "weight": "85306549021579150"
     },
     {
       "author": "weenis",
@@ -1659,7 +1659,7 @@
       "rshares": 29930428749,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 136904982585299903
+      "weight": "136904982585299903"
     },
     {
       "author": "timd",
@@ -1670,7 +1670,7 @@
       "rshares": 29930428749,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 134445543626637093
+      "weight": "134445543626637093"
     },
     {
       "author": "konti",
@@ -1681,7 +1681,7 @@
       "rshares": 30541253826,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 137214427962142206
+      "weight": "137214427962142206"
     },
     {
       "author": "dr2073",
@@ -1692,7 +1692,7 @@
       "rshares": 29319603672,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 128806116093126171
+      "weight": "128806116093126171"
     },
     {
       "author": "shredlord",
@@ -1703,7 +1703,7 @@
       "rshares": 29930428749,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 134431803196886637
+      "weight": "134431803196886637"
     },
     {
       "author": "aqlsam",
@@ -1714,7 +1714,7 @@
       "rshares": 31152078902,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9559129145560319
+      "weight": "9559129145560319"
     },
     {
       "author": "franciscomario",
@@ -1725,7 +1725,7 @@
       "rshares": 30541253826,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 30629566962433683
+      "weight": "30629566962433683"
     },
     {
       "author": "ap2002",
@@ -1736,7 +1736,7 @@
       "rshares": 30541253826,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 72933762027167384
+      "weight": "72933762027167384"
     },
     {
       "author": "taz",
@@ -1747,7 +1747,7 @@
       "rshares": 29930428749,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 134549230304703288
+      "weight": "134549230304703288"
     },
     {
       "author": "quotefancy",
@@ -1758,7 +1758,7 @@
       "rshares": 29930428749,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 134475552555359360
+      "weight": "134475552555359360"
     },
     {
       "author": "anduweb",
@@ -1769,7 +1769,7 @@
       "rshares": 29319603672,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 131089922608653972
+      "weight": "131089922608653972"
     },
     {
       "author": "katrienstoops",
@@ -1780,7 +1780,7 @@
       "rshares": 29319603672,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 131662546954903809
+      "weight": "131662546954903809"
     },
     {
       "author": "nippel66",
@@ -1791,7 +1791,7 @@
       "rshares": 28708778596,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 129044605455625385
+      "weight": "129044605455625385"
     },
     {
       "author": "deeprocks",
@@ -1802,7 +1802,7 @@
       "rshares": 28708778596,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 128951791786703252
+      "weight": "128951791786703252"
     },
     {
       "author": "algo-rythm",
@@ -1813,7 +1813,7 @@
       "rshares": 28708778596,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 129127440542078546
+      "weight": "129127440542078546"
     },
     {
       "author": "rok-sivante",
@@ -1890,7 +1890,7 @@
       "rshares": 26876844024,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 113108193064204496
+      "weight": "113108193064204496"
     },
     {
       "author": "hellokitty",
@@ -2429,7 +2429,7 @@
       "rshares": 28708778596,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 129135020657308058
+      "weight": "129135020657308058"
     },
     {
       "author": "wrightlabs",
@@ -2528,7 +2528,7 @@
       "rshares": 9162832714,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 41895030038214139
+      "weight": "41895030038214139"
     },
     {
       "author": "fubar-bdhr",
@@ -2539,7 +2539,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10381524663206001
+      "weight": "10381524663206001"
     },
     {
       "author": "cmp2020",
@@ -2561,7 +2561,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 40222927801898104
+      "weight": "40222927801898104"
     },
     {
       "author": "cmp2020",
@@ -2693,7 +2693,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 18428007399209777
+      "weight": "18428007399209777"
     },
     {
       "author": "skapaneas",
@@ -2737,7 +2737,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28154573757741953
+      "weight": "28154573757741953"
     },
     {
       "author": "jasonstaggers",
@@ -2803,7 +2803,7 @@
       "rshares": 27487681388,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 115513170554841954
+      "weight": "115513170554841954"
     },
     {
       "author": "hisnameisolllie",
@@ -2814,7 +2814,7 @@
       "rshares": 27487681388,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 115701433983501830
+      "weight": "115701433983501830"
     },
     {
       "author": "hisnameisolllie",
@@ -2825,7 +2825,7 @@
       "rshares": 27487681388,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 115707689910997795
+      "weight": "115707689910997795"
     },
     {
       "author": "ogijun",
@@ -2880,7 +2880,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22746173759116872
+      "weight": "22746173759116872"
     },
     {
       "author": "innuendo",
@@ -2924,7 +2924,7 @@
       "rshares": 27487681388,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 115513170554841954
+      "weight": "115513170554841954"
     },
     {
       "author": "corina",
@@ -2957,7 +2957,7 @@
       "rshares": 6719540515,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26221472058627792
+      "weight": "26221472058627792"
     },
     {
       "author": "cryptogee",
@@ -3012,7 +3012,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10449977851759148
+      "weight": "10449977851759148"
     },
     {
       "author": "gavvet",
@@ -3199,7 +3199,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 39268717373268409
+      "weight": "39268717373268409"
     },
     {
       "author": "recursive",
@@ -3210,7 +3210,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 29909578125996792
+      "weight": "29909578125996792"
     },
     {
       "author": "jl777",
@@ -3243,7 +3243,7 @@
       "rshares": 15271271838,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11364043131497604
+      "weight": "11364043131497604"
     },
     {
       "author": "yuridan",
@@ -3276,7 +3276,7 @@
       "rshares": 14660441220,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 35498775933111114
+      "weight": "35498775933111114"
     },
     {
       "author": "lukestokes",
@@ -3298,7 +3298,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13711649418490154
+      "weight": "13711649418490154"
     },
     {
       "author": "djm34",
@@ -3331,7 +3331,7 @@
       "rshares": 28098518752,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 118062575716981078
+      "weight": "118062575716981078"
     },
     {
       "author": "sterlinluxan",
@@ -3353,7 +3353,7 @@
       "rshares": 25655169296,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11932864956834343
+      "weight": "11932864956834343"
     },
     {
       "author": "corinnestokes",
@@ -3419,7 +3419,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11570622619101798
+      "weight": "11570622619101798"
     },
     {
       "author": "rok-sivante",
@@ -3430,7 +3430,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10732455845867114
+      "weight": "10732455845867114"
     },
     {
       "author": "geronimo",
@@ -3452,7 +3452,7 @@
       "rshares": 28098518752,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 117816649332237337
+      "weight": "117816649332237337"
     },
     {
       "author": "liberosist",
@@ -3463,7 +3463,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11402864884363215
+      "weight": "11402864884363215"
     },
     {
       "author": "steemingnow",
@@ -3474,7 +3474,7 @@
       "rshares": 15882122712,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11285676564766694
+      "weight": "11285676564766694"
     },
     {
       "author": "nanzo-scoop",
@@ -3496,7 +3496,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11402864884363215
+      "weight": "11402864884363215"
     },
     {
       "author": "kirtash85",
@@ -3507,7 +3507,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11486300143344925
+      "weight": "11486300143344925"
     },
     {
       "author": "jay-kopinski",
@@ -3595,7 +3595,7 @@
       "rshares": 7330276292,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22788327210928515
+      "weight": "22788327210928515"
     },
     {
       "author": "allasyummyfood",
@@ -3617,7 +3617,7 @@
       "rshares": 23822706616,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 68753264224447580
+      "weight": "68753264224447580"
     },
     {
       "author": "officialfuzzy",
@@ -3639,7 +3639,7 @@
       "rshares": 7330276292,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 20442213665647811
+      "weight": "20442213665647811"
     },
     {
       "author": "dev",
@@ -3650,7 +3650,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11486267787570048
+      "weight": "11486267787570048"
     },
     {
       "author": "ntomaino",
@@ -3672,7 +3672,7 @@
       "rshares": 15271271838,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 32285600093885141
+      "weight": "32285600093885141"
     },
     {
       "author": "beowulfoflegend",
@@ -3694,7 +3694,7 @@
       "rshares": 7330276292,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 20448247320823542
+      "weight": "20448247320823542"
     },
     {
       "author": "trevorjenglish",
@@ -3716,7 +3716,7 @@
       "rshares": 6108770115,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26017719438364847
+      "weight": "26017719438364847"
     },
     {
       "author": "cm-steem",
@@ -3738,7 +3738,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10443526473631645
+      "weight": "10443526473631645"
     },
     {
       "author": "ash",
@@ -3749,7 +3749,7 @@
       "rshares": 21379352092,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 83561816503998266
+      "weight": "83561816503998266"
     },
     {
       "author": "derekareith",
@@ -3760,7 +3760,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14989559054885050
+      "weight": "14989559054885050"
     },
     {
       "author": "sigmajin",
@@ -3782,7 +3782,7 @@
       "rshares": 6108770115,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26035783657642531
+      "weight": "26035783657642531"
     },
     {
       "author": "ash",
@@ -3793,7 +3793,7 @@
       "rshares": 21379352092,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 83561816503998266
+      "weight": "83561816503998266"
     },
     {
       "author": "mahekg",
@@ -3815,7 +3815,7 @@
       "rshares": 6108673196,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26038544916121725
+      "weight": "26038544916121725"
     },
     {
       "author": "d3m0t3x",
@@ -3826,7 +3826,7 @@
       "rshares": 6108770115,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26038940157645968
+      "weight": "26038940157645968"
     },
     {
       "author": "jumpman",
@@ -3837,7 +3837,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 32129121621330363
+      "weight": "32129121621330363"
     },
     {
       "author": "chris4210",
@@ -3859,7 +3859,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23490508539994605
+      "weight": "23490508539994605"
     },
     {
       "author": "anwenbaumeister",
@@ -3870,7 +3870,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21726592415650620
+      "weight": "21726592415650620"
     },
     {
       "author": "fyrstikken",
@@ -3892,7 +3892,7 @@
       "rshares": 6108770115,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26038940157645968
+      "weight": "26038940157645968"
     },
     {
       "author": "asmolokalo",
@@ -3925,7 +3925,7 @@
       "rshares": 25655169296,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 103003859193443976
+      "weight": "103003859193443976"
     },
     {
       "author": "recursive",
@@ -3947,7 +3947,7 @@
       "rshares": 26266006660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 86619004177607815
+      "weight": "86619004177607815"
     },
     {
       "author": "churdtzu",
@@ -3969,7 +3969,7 @@
       "rshares": 26266006660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 58989240584065722
+      "weight": "58989240584065722"
     },
     {
       "author": "williambanks",
@@ -3980,7 +3980,7 @@
       "rshares": 25655169296,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 108497841622807550
+      "weight": "108497841622807550"
     },
     {
       "author": "bravenewcoin",
@@ -4002,7 +4002,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 24184946232082133
+      "weight": "24184946232082133"
     },
     {
       "author": "cogliostro",
@@ -4013,7 +4013,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10688227047556341
+      "weight": "10688227047556341"
     },
     {
       "author": "nippel66",
@@ -4024,7 +4024,7 @@
       "rshares": 5497893104,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23438484963633777
+      "weight": "23438484963633777"
     },
     {
       "author": "thecryptofiend",
@@ -4035,7 +4035,7 @@
       "rshares": 11606254772,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 30178648004251335
+      "weight": "30178648004251335"
     },
     {
       "author": "algimantas",
@@ -4057,7 +4057,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16885099688337528
+      "weight": "16885099688337528"
     },
     {
       "author": "igster",
@@ -4068,7 +4068,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 29014836361399346
+      "weight": "29014836361399346"
     },
     {
       "author": "crazymumzysa",
@@ -4101,7 +4101,7 @@
       "rshares": 22601029354,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10616007056775626
+      "weight": "10616007056775626"
     },
     {
       "author": "crazymumzysa",
@@ -4123,7 +4123,7 @@
       "rshares": 21379352092,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 80815599603352456
+      "weight": "80815599603352456"
     },
     {
       "author": "crazymumzysa",
@@ -4189,7 +4189,7 @@
       "rshares": 25044331931,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 106691701751484837
+      "weight": "106691701751484837"
     },
     {
       "author": "sharingtheworld",
@@ -4200,7 +4200,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11486267787570048
+      "weight": "11486267787570048"
     },
     {
       "author": "steve-walschot",
@@ -4233,7 +4233,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11570622619101798
+      "weight": "11570622619101798"
     },
     {
       "author": "positive",
@@ -4244,7 +4244,7 @@
       "rshares": 24433494567,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 105034624670547530
+      "weight": "105034624670547530"
     },
     {
       "author": "steve-walschot",
@@ -4288,7 +4288,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21726592415650620
+      "weight": "21726592415650620"
     },
     {
       "author": "kuriko",
@@ -4321,7 +4321,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26822205610289111
+      "weight": "26822205610289111"
     },
     {
       "author": "steve-walschot",
@@ -4343,7 +4343,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34109568767869461
+      "weight": "34109568767869461"
     },
     {
       "author": "lioliomir",
@@ -4365,7 +4365,7 @@
       "rshares": 11606254772,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 32011337547112475
+      "weight": "32011337547112475"
     },
     {
       "author": "jesta",
@@ -4398,7 +4398,7 @@
       "rshares": 6108673196,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28128326081240141
+      "weight": "28128326081240141"
     },
     {
       "author": "stino-san",
@@ -4409,7 +4409,7 @@
       "rshares": 17103753556,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16105528920005656
+      "weight": "16105528920005656"
     },
     {
       "author": "jasonmcz",
@@ -4442,7 +4442,7 @@
       "rshares": 23822657203,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 102426556935946149
+      "weight": "102426556935946149"
     },
     {
       "author": "bradvanceauthor",
@@ -4453,7 +4453,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11486267787570048
+      "weight": "11486267787570048"
     },
     {
       "author": "cryptocreative",
@@ -4464,7 +4464,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 58602885554528739
+      "weight": "58602885554528739"
     },
     {
       "author": "nippel66",
@@ -4486,7 +4486,7 @@
       "rshares": 25044331931,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 113705890753983980
+      "weight": "113705890753983980"
     },
     {
       "author": "razvanelulmarin",
@@ -4497,7 +4497,7 @@
       "rshares": 15271292938,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 33518012854841330
+      "weight": "33518012854841330"
     },
     {
       "author": "romangelsi",
@@ -4508,7 +4508,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23507064921435446
+      "weight": "23507064921435446"
     },
     {
       "author": "kencode",
@@ -4530,7 +4530,7 @@
       "rshares": 22601029354,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 59833040799005658
+      "weight": "59833040799005658"
     },
     {
       "author": "lauralemons",
@@ -4541,7 +4541,7 @@
       "rshares": 15271271838,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9854031649837840
+      "weight": "9854031649837840"
     },
     {
       "author": "celebr1ty",
@@ -4563,7 +4563,7 @@
       "rshares": 23822657203,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 101585157139768701
+      "weight": "101585157139768701"
     },
     {
       "author": "ph111p",
@@ -4574,7 +4574,7 @@
       "rshares": 3054462966,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12814152113697016
+      "weight": "12814152113697016"
     },
     {
       "author": "neilstrauss",
@@ -4585,7 +4585,7 @@
       "rshares": 25044331931,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 106491398755933438
+      "weight": "106491398755933438"
     },
     {
       "author": "stellabelle",
@@ -4596,7 +4596,7 @@
       "rshares": 20157702697,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 84514911161013572
+      "weight": "84514911161013572"
     },
     {
       "author": "stellabelle",
@@ -4607,7 +4607,7 @@
       "rshares": 20157702697,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 84781389324346899
+      "weight": "84781389324346899"
     },
     {
       "author": "aleksandraz",
@@ -4629,7 +4629,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 44800698578316138
+      "weight": "44800698578316138"
     },
     {
       "author": "k4r1nn",
@@ -4640,7 +4640,7 @@
       "rshares": 12217093412,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 38860544436486869
+      "weight": "38860544436486869"
     },
     {
       "author": "mrs.steemit",
@@ -4662,7 +4662,7 @@
       "rshares": 6719535879,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26139505687686711
+      "weight": "26139505687686711"
     },
     {
       "author": "allasyummyfood",
@@ -4695,7 +4695,7 @@
       "rshares": 14660441220,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 63175511165979941
+      "weight": "63175511165979941"
     },
     {
       "author": "neilstrauss",
@@ -4717,7 +4717,7 @@
       "rshares": 12217093412,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28456318700363225
+      "weight": "28456318700363225"
     },
     {
       "author": "darkb4dawn",
@@ -4750,7 +4750,7 @@
       "rshares": 25655169296,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 67328119558141161
+      "weight": "67328119558141161"
     },
     {
       "author": "slowwalker",
@@ -4772,7 +4772,7 @@
       "rshares": 4887036314,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14674130323023301
+      "weight": "14674130323023301"
     },
     {
       "author": "pachenko",
@@ -4783,7 +4783,7 @@
       "rshares": 24433494567,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 25557667200637693
+      "weight": "25557667200637693"
     },
     {
       "author": "insomnia",
@@ -4794,7 +4794,7 @@
       "rshares": 22601029354,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 59876452671845987
+      "weight": "59876452671845987"
     },
     {
       "author": "retrik",
@@ -4805,7 +4805,7 @@
       "rshares": 28709356117,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 75033245458228600
+      "weight": "75033245458228600"
     },
     {
       "author": "andrarchy",
@@ -4816,7 +4816,7 @@
       "rshares": 4887036314,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 19384889775401637
+      "weight": "19384889775401637"
     },
     {
       "author": "lukestokes",
@@ -4838,7 +4838,7 @@
       "rshares": 24433494567,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 104306375377581296
+      "weight": "104306375377581296"
     },
     {
       "author": "allasyummyfood",
@@ -4860,7 +4860,7 @@
       "rshares": 22601029354,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 58329301371163041
+      "weight": "58329301371163041"
     },
     {
       "author": "doe",
@@ -4871,7 +4871,7 @@
       "rshares": 26266006660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 82271235710597715
+      "weight": "82271235710597715"
     },
     {
       "author": "bbqbear",
@@ -4904,7 +4904,7 @@
       "rshares": 11606254772,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 49066319815610584
+      "weight": "49066319815610584"
     },
     {
       "author": "ash",
@@ -4915,7 +4915,7 @@
       "rshares": 26266006660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28581184009903045
+      "weight": "28581184009903045"
     },
     {
       "author": "satch",
@@ -4948,7 +4948,7 @@
       "rshares": 28098518752,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 57246629631134778
+      "weight": "57246629631134778"
     },
     {
       "author": "jessewalden",
@@ -4970,7 +4970,7 @@
       "rshares": 25655169296,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 99989321972923322
+      "weight": "99989321972923322"
     },
     {
       "author": "trewinnard",
@@ -4981,7 +4981,7 @@
       "rshares": 20157702697,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 52974538002877969
+      "weight": "52974538002877969"
     },
     {
       "author": "ozmaster",
@@ -5003,7 +5003,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11336776500419803
+      "weight": "11336776500419803"
     },
     {
       "author": "the-alien",
@@ -5014,7 +5014,7 @@
       "rshares": 26876844024,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15471945503574819
+      "weight": "15471945503574819"
     },
     {
       "author": "positive",
@@ -5047,7 +5047,7 @@
       "rshares": 20157702697,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 53217535246779532
+      "weight": "53217535246779532"
     },
     {
       "author": "yanulyarus",
@@ -5058,7 +5058,7 @@
       "rshares": 12217093412,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 39315172299152903
+      "weight": "39315172299152903"
     },
     {
       "author": "alinaaa",
@@ -5069,7 +5069,7 @@
       "rshares": 25044331931,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 42400632611918820
+      "weight": "42400632611918820"
     },
     {
       "author": "marcele",
@@ -5091,7 +5091,7 @@
       "rshares": 18936206978,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 79989573344759168
+      "weight": "79989573344759168"
     },
     {
       "author": "greengo",
@@ -5102,7 +5102,7 @@
       "rshares": 20768542173,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 54741642349203127
+      "weight": "54741642349203127"
     },
     {
       "author": "dragonho",
@@ -5113,7 +5113,7 @@
       "rshares": 23211867985,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 51768313953873654
+      "weight": "51768313953873654"
     },
     {
       "author": "camilla",
@@ -5135,7 +5135,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11336776500419803
+      "weight": "11336776500419803"
     },
     {
       "author": "marius19",
@@ -5146,7 +5146,7 @@
       "rshares": 24433494567,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23022001604421938
+      "weight": "23022001604421938"
     },
     {
       "author": "cryptocreative",
@@ -5168,7 +5168,7 @@
       "rshares": 24433494567,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15405700321756034
+      "weight": "15405700321756034"
     },
     {
       "author": "venuspcs",
@@ -5179,7 +5179,7 @@
       "rshares": 21990190723,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 56422375810307864
+      "weight": "56422375810307864"
     },
     {
       "author": "klye",
@@ -5190,7 +5190,7 @@
       "rshares": 23822706616,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16005090754796645
+      "weight": "16005090754796645"
     },
     {
       "author": "jrd",
@@ -5212,7 +5212,7 @@
       "rshares": 21990190723,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 54010955669209227
+      "weight": "54010955669209227"
     },
     {
       "author": "clains",
@@ -5234,7 +5234,7 @@
       "rshares": 23822706616,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11514399944045788
+      "weight": "11514399944045788"
     },
     {
       "author": "putradham",
@@ -5245,7 +5245,7 @@
       "rshares": 23211867985,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10678822028507753
+      "weight": "10678822028507753"
     },
     {
       "author": "leta-blake",
@@ -5256,7 +5256,7 @@
       "rshares": 21990190723,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15565624778376184
+      "weight": "15565624778376184"
     },
     {
       "author": "cheetah",
@@ -5267,7 +5267,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 19159331822944720
+      "weight": "19159331822944720"
     },
     {
       "author": "azaan",
@@ -5289,7 +5289,7 @@
       "rshares": 22601029354,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28185520297773938
+      "weight": "28185520297773938"
     },
     {
       "author": "comealong",
@@ -5300,7 +5300,7 @@
       "rshares": 21379352092,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 31173431590108158
+      "weight": "31173431590108158"
     },
     {
       "author": "e-steem",
@@ -5311,7 +5311,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28154573757741953
+      "weight": "28154573757741953"
     },
     {
       "author": "instructor2121",
@@ -5322,7 +5322,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 58949939742350277
+      "weight": "58949939742350277"
     },
     {
       "author": "sunshine",
@@ -5333,7 +5333,7 @@
       "rshares": 21990190723,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21783382596681034
+      "weight": "21783382596681034"
     },
     {
       "author": "azaan",
@@ -5344,7 +5344,7 @@
       "rshares": 20768513460,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 27661194481772839
+      "weight": "27661194481772839"
     },
     {
       "author": "leta-blake",
@@ -5355,7 +5355,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10244886088038207
+      "weight": "10244886088038207"
     },
     {
       "author": "churdtzu",
@@ -5377,7 +5377,7 @@
       "rshares": 17103729920,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 57341884141890097
+      "weight": "57341884141890097"
     },
     {
       "author": "dwinblood",
@@ -5399,7 +5399,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 59382090707563481
+      "weight": "59382090707563481"
     },
     {
       "author": "maximkichev",
@@ -5421,7 +5421,7 @@
       "rshares": 20768542173,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11614931670007523
+      "weight": "11614931670007523"
     },
     {
       "author": "stevo",
@@ -5432,7 +5432,7 @@
       "rshares": 18325361591,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13127543196640911
+      "weight": "13127543196640911"
     },
     {
       "author": "vi1son",
@@ -5454,7 +5454,7 @@
       "rshares": 20157702697,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21273796198063287
+      "weight": "21273796198063287"
     },
     {
       "author": "eric-boucher",
@@ -5465,7 +5465,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 20952337503556930
+      "weight": "20952337503556930"
     },
     {
       "author": "phistr",
@@ -5476,7 +5476,7 @@
       "rshares": 19546863222,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 44696668991710790
+      "weight": "44696668991710790"
     },
     {
       "author": "claraking",
@@ -5509,7 +5509,7 @@
       "rshares": 12217093412,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 55868981010195882
+      "weight": "55868981010195882"
     },
     {
       "author": "infovore",
@@ -5531,7 +5531,7 @@
       "rshares": 16492905215,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 41301121037240871
+      "weight": "41301121037240871"
     },
     {
       "author": "giostar",
@@ -5542,7 +5542,7 @@
       "rshares": 17103729920,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 73110397371672705
+      "weight": "73110397371672705"
     },
     {
       "author": "infovore",
@@ -5553,7 +5553,7 @@
       "rshares": 19546863222,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10140730223666103
+      "weight": "10140730223666103"
     },
     {
       "author": "sitaru",
@@ -5608,7 +5608,7 @@
       "rshares": 18325361591,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22000120205551239
+      "weight": "22000120205551239"
     },
     {
       "author": "calaber24p",
@@ -5641,7 +5641,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13505237060623385
+      "weight": "13505237060623385"
     },
     {
       "author": "ghostyeti",
@@ -5652,7 +5652,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23006581321310958
+      "weight": "23006581321310958"
     },
     {
       "author": "giostar",
@@ -5674,7 +5674,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 56420116639217295
+      "weight": "56420116639217295"
     },
     {
       "author": "camilla",
@@ -5696,7 +5696,7 @@
       "rshares": 18325361591,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9709708998994781
+      "weight": "9709708998994781"
     },
     {
       "author": "positive",
@@ -5729,7 +5729,7 @@
       "rshares": 17714577417,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16908445908526719
+      "weight": "16908445908526719"
     },
     {
       "author": "coliraver",
@@ -5740,7 +5740,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34080440009110321
+      "weight": "34080440009110321"
     },
     {
       "author": "orestespaz",
@@ -5762,7 +5762,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34080440009110321
+      "weight": "34080440009110321"
     },
     {
       "author": "digitalarchitect",
@@ -5773,7 +5773,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34080440009110321
+      "weight": "34080440009110321"
     },
     {
       "author": "dream",
@@ -5784,7 +5784,7 @@
       "rshares": 15882122712,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 32808099112013601
+      "weight": "32808099112013601"
     },
     {
       "author": "positive",
@@ -5806,7 +5806,7 @@
       "rshares": 16492928006,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 69722537321579871
+      "weight": "69722537321579871"
     },
     {
       "author": "cryptoiskey",
@@ -5817,7 +5817,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34080440009110321
+      "weight": "34080440009110321"
     },
     {
       "author": "dmacshady",
@@ -5828,7 +5828,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34264922418646907
+      "weight": "34264922418646907"
     },
     {
       "author": "yuhhans",
@@ -5839,7 +5839,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 36011269592696318
+      "weight": "36011269592696318"
     },
     {
       "author": "yuhhans",
@@ -5850,7 +5850,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34264922418646907
+      "weight": "34264922418646907"
     },
     {
       "author": "gekko",
@@ -5861,7 +5861,7 @@
       "rshares": 16492928006,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 48900444817326433
+      "weight": "48900444817326433"
     },
     {
       "author": "dream",
@@ -5872,7 +5872,7 @@
       "rshares": 15882122712,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 33102508088181718
+      "weight": "33102508088181718"
     },
     {
       "author": "freiheit",
@@ -5894,7 +5894,7 @@
       "rshares": 14660441220,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 56416207915538352
+      "weight": "56416207915538352"
     },
     {
       "author": "positive",
@@ -5916,7 +5916,7 @@
       "rshares": 15271271838,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 61614107935617182
+      "weight": "61614107935617182"
     },
     {
       "author": "mctiller",
@@ -5938,7 +5938,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 36438705335077299
+      "weight": "36438705335077299"
     },
     {
       "author": "cryptoprometheus",
@@ -5960,7 +5960,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13144816394416293
+      "weight": "13144816394416293"
     },
     {
       "author": "jsc",
@@ -5971,7 +5971,7 @@
       "rshares": 2443573737,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9108017500370353
+      "weight": "9108017500370353"
     },
     {
       "author": "thecryptofiend",
@@ -6015,7 +6015,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11335587612219717
+      "weight": "11335587612219717"
     },
     {
       "author": "diego24",
@@ -6026,7 +6026,7 @@
       "rshares": 15271271838,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 47262688679205230
+      "weight": "47262688679205230"
     },
     {
       "author": "complexring",
@@ -6048,7 +6048,7 @@
       "rshares": 15882122712,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10078201255993834
+      "weight": "10078201255993834"
     },
     {
       "author": "cryptosteem",
@@ -6059,7 +6059,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11336776500419803
+      "weight": "11336776500419803"
     },
     {
       "author": "annie-kho",
@@ -6081,7 +6081,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13543771284565898
+      "weight": "13543771284565898"
     },
     {
       "author": "worstdevever",
@@ -6092,7 +6092,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21865007297548925
+      "weight": "21865007297548925"
     },
     {
       "author": "opheliafu",
@@ -6103,7 +6103,7 @@
       "rshares": 12827939224,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 43839660714126990
+      "weight": "43839660714126990"
     },
     {
       "author": "franciscomario",
@@ -6114,7 +6114,7 @@
       "rshares": 12827939224,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 58809842172635946
+      "weight": "58809842172635946"
     },
     {
       "author": "cheetah",
@@ -6125,7 +6125,7 @@
       "rshares": 12827939224,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 43839264442889720
+      "weight": "43839264442889720"
     },
     {
       "author": "steemed",
@@ -6147,7 +6147,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 42783965472155142
+      "weight": "42783965472155142"
     },
     {
       "author": "churdtzu",
@@ -6169,7 +6169,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34264922418646907
+      "weight": "34264922418646907"
     },
     {
       "author": "condra",
@@ -6224,7 +6224,7 @@
       "rshares": 12827894928,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 43257241455541305
+      "weight": "43257241455541305"
     },
     {
       "author": "olgamadam",
@@ -6235,7 +6235,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34264922418646907
+      "weight": "34264922418646907"
     },
     {
       "author": "dogguy",
@@ -6246,7 +6246,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12070041241739450
+      "weight": "12070041241739450"
     },
     {
       "author": "tilia",
@@ -6257,7 +6257,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 37612425391261012
+      "weight": "37612425391261012"
     },
     {
       "author": "gridcoinman",
@@ -6268,7 +6268,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 36072001341140855
+      "weight": "36072001341140855"
     },
     {
       "author": "juicyg",
@@ -6279,7 +6279,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34420975191921424
+      "weight": "34420975191921424"
     },
     {
       "author": "dantee7",
@@ -6290,7 +6290,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 41484701482702409
+      "weight": "41484701482702409"
     },
     {
       "author": "artakan",
@@ -6312,7 +6312,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26224249294068675
+      "weight": "26224249294068675"
     },
     {
       "author": "moneymike88",
@@ -6323,7 +6323,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 31957951530607110
+      "weight": "31957951530607110"
     },
     {
       "author": "arcaneinfo",
@@ -6334,7 +6334,7 @@
       "rshares": 12217093412,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15588870460881998
+      "weight": "15588870460881998"
     },
     {
       "author": "brindleswan",
@@ -6345,7 +6345,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11335587612219717
+      "weight": "11335587612219717"
     },
     {
       "author": "cwmyao1",
@@ -6356,7 +6356,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14810615702667430
+      "weight": "14810615702667430"
     },
     {
       "author": "earnest",
@@ -6367,7 +6367,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 47560932874287193
+      "weight": "47560932874287193"
     },
     {
       "author": "ph111p",
@@ -6378,7 +6378,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16316431827359128
+      "weight": "16316431827359128"
     },
     {
       "author": "churdtzu",
@@ -6400,7 +6400,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 37377081734544972
+      "weight": "37377081734544972"
     },
     {
       "author": "btcbtcbtc20155",
@@ -6411,7 +6411,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14440302243815492
+      "weight": "14440302243815492"
     },
     {
       "author": "alexgr",
@@ -6422,7 +6422,7 @@
       "rshares": 14049599207,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12771492147248399
+      "weight": "12771492147248399"
     },
     {
       "author": "cryptobarry",
@@ -6433,7 +6433,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 36368238598111324
+      "weight": "36368238598111324"
     },
     {
       "author": "blockchainbilly",
@@ -6444,7 +6444,7 @@
       "rshares": 12827894928,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34238117789186065
+      "weight": "34238117789186065"
     },
     {
       "author": "maximkichev",
@@ -6455,7 +6455,7 @@
       "rshares": 13438747067,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34927010043698594
+      "weight": "34927010043698594"
     },
     {
       "author": "bola",
@@ -6466,7 +6466,7 @@
       "rshares": 12827894928,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 33411996984621254
+      "weight": "33411996984621254"
     },
     {
       "author": "arcaneinfo",
@@ -6477,7 +6477,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 33857939094754774
+      "weight": "33857939094754774"
     },
     {
       "author": "sunnyray",
@@ -6488,7 +6488,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13156632236238629
+      "weight": "13156632236238629"
     },
     {
       "author": "jlwkolb",
@@ -6510,7 +6510,7 @@
       "rshares": 12827894928,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21846305720713897
+      "weight": "21846305720713897"
     },
     {
       "author": "overloaded",
@@ -6532,7 +6532,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 29014229729096548
+      "weight": "29014229729096548"
     },
     {
       "author": "carlos-cabeza",
@@ -6543,7 +6543,7 @@
       "rshares": 4887107071,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 18208172736176088
+      "weight": "18208172736176088"
     },
     {
       "author": "maximkichev",
@@ -6576,7 +6576,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 18811867961120363
+      "weight": "18811867961120363"
     },
     {
       "author": "churdtzu",
@@ -6598,7 +6598,7 @@
       "rshares": 9162832714,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 39450732630825518
+      "weight": "39450732630825518"
     },
     {
       "author": "maximkichev",
@@ -6609,7 +6609,7 @@
       "rshares": 11606238742,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15949411478983467
+      "weight": "15949411478983467"
     },
     {
       "author": "bhokor",
@@ -6620,7 +6620,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 34449969718811739
+      "weight": "34449969718811739"
     },
     {
       "author": "bhokor",
@@ -6631,7 +6631,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 33276689409404626
+      "weight": "33276689409404626"
     },
     {
       "author": "jlwkolb",
@@ -6653,7 +6653,7 @@
       "rshares": 9162832714,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 39528971374963768
+      "weight": "39528971374963768"
     },
     {
       "author": "maxikingstealer",
@@ -6664,7 +6664,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 41692612073294486
+      "weight": "41692612073294486"
     },
     {
       "author": "earnest",
@@ -6675,7 +6675,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 43384021829812124
+      "weight": "43384021829812124"
     },
     {
       "author": "cheetah",
@@ -6686,7 +6686,7 @@
       "rshares": 10384543743,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 29997755820849979
+      "weight": "29997755820849979"
     },
     {
       "author": "joseph",
@@ -6708,7 +6708,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 27620310451480861
+      "weight": "27620310451480861"
     },
     {
       "author": "earnest",
@@ -6719,7 +6719,7 @@
       "rshares": 9162832714,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 38013844984965867
+      "weight": "38013844984965867"
     },
     {
       "author": "artist1989",
@@ -6730,7 +6730,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21088683862368131
+      "weight": "21088683862368131"
     },
     {
       "author": "steemitlove",
@@ -6741,7 +6741,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 26969772955572065
+      "weight": "26969772955572065"
     },
     {
       "author": "condra",
@@ -6752,7 +6752,7 @@
       "rshares": 7330392660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22604979587826833
+      "weight": "22604979587826833"
     },
     {
       "author": "arcaneinfo",
@@ -6774,7 +6774,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 24179533841247002
+      "weight": "24179533841247002"
     },
     {
       "author": "makunga",
@@ -6785,7 +6785,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22668119505064736
+      "weight": "22668119505064736"
     },
     {
       "author": "gripenfire",
@@ -6796,7 +6796,7 @@
       "rshares": 10995399257,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 20310447781256276
+      "weight": "20310447781256276"
     },
     {
       "author": "alexgr",
@@ -6829,7 +6829,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 16364180748323041
+      "weight": "16364180748323041"
     },
     {
       "author": "rsmith32",
@@ -6862,7 +6862,7 @@
       "rshares": 9773688229,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15445489899294379
+      "weight": "15445489899294379"
     },
     {
       "author": "darkb4dawn",
@@ -6884,7 +6884,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 25578449458081237
+      "weight": "25578449458081237"
     },
     {
       "author": "jay-kopinski",
@@ -6906,7 +6906,7 @@
       "rshares": 9162832714,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15247697526317178
+      "weight": "15247697526317178"
     },
     {
       "author": "r33drum",
@@ -6972,7 +6972,7 @@
       "rshares": 7330276292,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9658925177300407
+      "weight": "9658925177300407"
     },
     {
       "author": "takahan",
@@ -6983,7 +6983,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 21771140194612048
+      "weight": "21771140194612048"
     },
     {
       "author": "jholmes91",
@@ -6994,7 +6994,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12240271843711735
+      "weight": "12240271843711735"
     },
     {
       "author": "kaylinart",
@@ -7038,7 +7038,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23755124449247908
+      "weight": "23755124449247908"
     },
     {
       "author": "rea",
@@ -7049,7 +7049,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 22598219821285765
+      "weight": "22598219821285765"
     },
     {
       "author": "noisy",
@@ -7060,7 +7060,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 17589113264573575
+      "weight": "17589113264573575"
     },
     {
       "author": "spiz0r",
@@ -7093,7 +7093,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 19575015466376890
+      "weight": "19575015466376890"
     },
     {
       "author": "dcryptogold",
@@ -7104,7 +7104,7 @@
       "rshares": 8551977200,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10242024054359279
+      "weight": "10242024054359279"
     },
     {
       "author": "paris-loves-her",
@@ -7115,7 +7115,7 @@
       "rshares": 7330392660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 20428682589831571
+      "weight": "20428682589831571"
     },
     {
       "author": "treeshaface",
@@ -7126,7 +7126,7 @@
       "rshares": 6719535879,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 28001547736528417
+      "weight": "28001547736528417"
     },
     {
       "author": "joseph",
@@ -7181,7 +7181,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13536496164869409
+      "weight": "13536496164869409"
     },
     {
       "author": "milena",
@@ -7236,7 +7236,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 29014242037523560
+      "weight": "29014242037523560"
     },
     {
       "author": "vlad",
@@ -7258,7 +7258,7 @@
       "rshares": 6719535879,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13793134867172842
+      "weight": "13793134867172842"
     },
     {
       "author": "cheetah",
@@ -7313,7 +7313,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 18636392610720781
+      "weight": "18636392610720781"
     },
     {
       "author": "showmethecoinz",
@@ -7324,7 +7324,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10644652266704153
+      "weight": "10644652266704153"
     },
     {
       "author": "anduweb",
@@ -7335,7 +7335,7 @@
       "rshares": 6719526605,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 17685434517232286
+      "weight": "17685434517232286"
     },
     {
       "author": "fyrstikken",
@@ -7346,7 +7346,7 @@
       "rshares": 7941132650,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15690054364523879
+      "weight": "15690054364523879"
     },
     {
       "author": "arcaneinfo",
@@ -7368,7 +7368,7 @@
       "rshares": 7330392660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9494338009554401
+      "weight": "9494338009554401"
     },
     {
       "author": "wopang",
@@ -7379,7 +7379,7 @@
       "rshares": 7330392660,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11306840030013073
+      "weight": "11306840030013073"
     },
     {
       "author": "k4r1nn",
@@ -7434,7 +7434,7 @@
       "rshares": 4887107071,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15489019724049855
+      "weight": "15489019724049855"
     },
     {
       "author": "tonyson-ned",
@@ -7456,7 +7456,7 @@
       "rshares": 5497904479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 23508994741592683
+      "weight": "23508994741592683"
     },
     {
       "author": "dream",
@@ -7654,7 +7654,7 @@
       "rshares": 4887036314,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 15524924295862809
+      "weight": "15524924295862809"
     },
     {
       "author": "venuspcs",
@@ -7731,7 +7731,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10442268729702961
+      "weight": "10442268729702961"
     },
     {
       "author": "cwmyao1",
@@ -7797,7 +7797,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9648306188475980
+      "weight": "9648306188475980"
     },
     {
       "author": "izzy",
@@ -7852,7 +7852,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9888301492783035
+      "weight": "9888301492783035"
     },
     {
       "author": "chhayll",
@@ -7885,7 +7885,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10480937131970722
+      "weight": "10480937131970722"
     },
     {
       "author": "steemed",
@@ -8061,7 +8061,7 @@
       "rshares": 3054454552,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11317498780539140
+      "weight": "11317498780539140"
     },
     {
       "author": "physicalbitcoin",
@@ -8072,7 +8072,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13000991014027245
+      "weight": "13000991014027245"
     },
     {
       "author": "vlad",
@@ -8215,7 +8215,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10096041453627283
+      "weight": "10096041453627283"
     },
     {
       "author": "fyrstikken",
@@ -8248,7 +8248,7 @@
       "rshares": 3054462966,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9130122804477978
+      "weight": "9130122804477978"
     },
     {
       "author": "cheetah",
@@ -8259,7 +8259,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13612804246664259
+      "weight": "13612804246664259"
     },
     {
       "author": "ajayseervi",
@@ -8292,7 +8292,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 17991044682485890
+      "weight": "17991044682485890"
     },
     {
       "author": "hitra-vn",
@@ -8336,7 +8336,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13459990730098677
+      "weight": "13459990730098677"
     },
     {
       "author": "alefernandez",
@@ -8358,7 +8358,7 @@
       "rshares": 4276218687,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12752025436560060
+      "weight": "12752025436560060"
     },
     {
       "author": "joseph",
@@ -8402,7 +8402,7 @@
       "rshares": 2443570372,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10252814610779547
+      "weight": "10252814610779547"
     },
     {
       "author": "alanc",
@@ -8512,7 +8512,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 13712920793164913
+      "weight": "13712920793164913"
     },
     {
       "author": "cybercodetwins",
@@ -8523,7 +8523,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11843661402244644
+      "weight": "11843661402244644"
     },
     {
       "author": "brianphobos",
@@ -8600,7 +8600,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12993669149027524
+      "weight": "12993669149027524"
     },
     {
       "author": "liberosist",
@@ -8611,7 +8611,7 @@
       "rshares": 4276233427,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11754377187632271
+      "weight": "11754377187632271"
     },
     {
       "author": "akareyon",
@@ -8622,7 +8622,7 @@
       "rshares": 4276230479,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9235575715560821
+      "weight": "9235575715560821"
     },
     {
       "author": "artist1989",
@@ -8688,7 +8688,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14311982894450747
+      "weight": "14311982894450747"
     },
     {
       "author": "maximkichev",
@@ -8699,7 +8699,7 @@
       "rshares": 3665342937,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14312333836392550
+      "weight": "14312333836392550"
     },
     {
       "author": "magicmonk",
@@ -8732,7 +8732,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12813905450034188
+      "weight": "12813905450034188"
     },
     {
       "author": "piedpiper",
@@ -8765,7 +8765,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 11850359022570474
+      "weight": "11850359022570474"
     },
     {
       "author": "bitcoinmeister",
@@ -8776,7 +8776,7 @@
       "rshares": 3054456656,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10354200670498014
+      "weight": "10354200670498014"
     },
     {
       "author": "ebenezer",
@@ -8798,7 +8798,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9219370944156452
+      "weight": "9219370944156452"
     },
     {
       "author": "cheetah",
@@ -8820,7 +8820,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14270471963695108
+      "weight": "14270471963695108"
     },
     {
       "author": "stoner19",
@@ -8985,7 +8985,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 12884978839191686
+      "weight": "12884978839191686"
     },
     {
       "author": "complexring",
@@ -9029,7 +9029,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9818419764874718
+      "weight": "9818419764874718"
     },
     {
       "author": "cryptogee",
@@ -9073,7 +9073,7 @@
       "rshares": 3665345463,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9309866783429851
+      "weight": "9309866783429851"
     },
     {
       "author": "rowbvp",
@@ -9249,7 +9249,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 14072849764033250
+      "weight": "14072849764033250"
     },
     {
       "author": "shaheer001",
@@ -9293,7 +9293,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10165988076536328
+      "weight": "10165988076536328"
     },
     {
       "author": "ajayseervi",
@@ -9315,7 +9315,7 @@
       "rshares": 3054458759,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9753166343070871
+      "weight": "9753166343070871"
     },
     {
       "author": "juanmora",
@@ -9337,7 +9337,7 @@
       "rshares": 2443570372,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10156558827940022
+      "weight": "10156558827940022"
     },
     {
       "author": "sigmajin",
@@ -9403,7 +9403,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10281929268775349
+      "weight": "10281929268775349"
     },
     {
       "author": "sunnyray",
@@ -9524,7 +9524,7 @@
       "rshares": 2443573737,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9577702490904705
+      "weight": "9577702490904705"
     },
     {
       "author": "denaver",
@@ -9535,7 +9535,7 @@
       "rshares": 2443570372,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10162597779806519
+      "weight": "10162597779806519"
     },
     {
       "author": "james9n",
@@ -9546,7 +9546,7 @@
       "rshares": 2443570372,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 9659891539517793
+      "weight": "9659891539517793"
     },
     {
       "author": "eplsite",
@@ -9722,7 +9722,7 @@
       "rshares": 2443575419,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 10252541626506704
+      "weight": "10252541626506704"
     },
     {
       "author": "marriedbear",
