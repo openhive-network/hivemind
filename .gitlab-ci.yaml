@@ -11,7 +11,7 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 5e15be4e8351e096ee436dcc8294ea4c7bed4bac # develop
+  ref: a4daf3db6b8cfa6e0bf5a9bffd1550db3f65c118 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
