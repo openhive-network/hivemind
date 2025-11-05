@@ -163,6 +163,14 @@ class Conf:
             default='{hivemind-host}',
         )
 
+        add(
+            '--prune-days',
+            type=int,
+            env_var='PRUNE_DAYS',
+            help='number of days of data to keep when pruning the database (0 means no pruning)',
+            default=0,
+        )
+
         # needed for e.g. tests - other args may be present
         args = parser.parse_args() if strict else parser.parse_known_args()[0]
 
