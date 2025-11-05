@@ -265,6 +265,26 @@ class Community:
         )
 
     @classmethod
+    def get_user_roles(cls, community_id, account_ids):
+        if not account_ids:
+            return {}
+
+        sql = f"""SELECT account_id, role_id FROM {SCHEMA_NAME}.hive_roles
+                  WHERE community_id = :community_id
+                    AND account_id = ANY(:account_ids)"""
+        rows = DbAdapterHolder.common_block_processing_db().query_all(
+            sql,
+            community_id=community_id,
+            account_ids=list(account_ids)
+        )
+
+        result = {aid: Role.guest.value for aid in account_ids}
+        for row in rows:
+            result[row['account_id']] = row['role_id']
+
+        return result
+
+    @classmethod
     def is_post_valid(cls, community_id, comment_op: dict):
         """Given a new post/comment, check if valid as per community rules
 
@@ -671,36 +691,45 @@ class CommunityOp:
     def _validate_permissions(self):
         community_id = self.community_id
         action = self.action
-        actor_role = Community.get_user_role(community_id, self.actor_id)
         new_role = self.role_id
 
         if action == 'setRole':
+            roles = Community.get_user_roles(community_id, [self.actor_id, self.account_id])
+            actor_role = roles[self.actor_id]
+            account_role = roles[self.account_id]
+
             assert actor_role >= Role.mod, 'only mods and up can alter roles'
             assert actor_role > new_role, 'cannot promote to or above own rank'
-            account_role = Community.get_user_role(community_id, self.account_id)
             assert account_role != Role.owner, 'cant modify owner role'
             if self.actor != self.account:
                 assert account_role < actor_role, 'cant modify higher-role user'
                 assert account_role != new_role, 'role would not change'
         elif action == 'updateProps':
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
-            # TODO: assert title changed?
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert not self._muted(), 'post is already muted'
             assert actor_role >= Role.mod, 'only mods can mute posts'
         elif action == 'unmutePost':
-            assert self._muted(), 'post is already not muted'
-            assert not self._parent_muted(), 'parent post is muted'
+            actor_role = Community.get_user_role(community_id, self.actor_id)
+            post_data = self._get_post_validation_data()
+            assert not post_data['is_muted'], 'post is already not muted'
+            assert not post_data['parent_is_muted'], 'parent post is muted'
             assert actor_role >= Role.mod, 'only mods can unmute posts'
         elif action == 'pinPost':
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert not self._pinned(), 'post is already pinned'
             assert actor_role >= Role.mod, 'only mods can pin posts'
         elif action == 'unpinPost':
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert self._pinned(), 'post is already not pinned'
             assert actor_role >= Role.mod, 'only mods can unpin posts'
         elif action == 'flagPost':
+            actor_role = Community.get_user_role(community_id, self.actor_id)
             assert actor_role > Role.muted, 'muted users cannot flag posts'
             assert not self._flagged(), 'user already flagged this post'
         elif action == 'subscribe':
@@ -715,13 +744,22 @@ class CommunityOp:
                     AND account_id = :account_id"""
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id))
 
+    def _get_post_validation_data(self):
+        sql = f"""SELECT p.is_muted, parent.is_muted as parent_is_muted
+                  FROM {SCHEMA_NAME}.hive_posts p
+                  LEFT JOIN {SCHEMA_NAME}.hive_posts parent ON p.parent_id = parent.id
+                  WHERE p.id = :id"""
+        row = DbAdapterHolder.common_block_processing_db().query_row(sql, id=self.post_id)
+        return {
+            'is_muted': bool(row['is_muted']),
+            'parent_is_muted': bool(row['parent_is_muted']) if row['parent_is_muted'] is not None else False
+        }
+
     def _muted(self):
-        """Check post's muted status."""
         sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _parent_muted(self):
-        """Check parent post's muted status."""
         parent_id = f"SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
         sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = ({parent_id})"
         return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
