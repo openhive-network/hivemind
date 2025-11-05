@@ -9,4 +9,4 @@
 	url = ../reputation_tracker.git
 [submodule "hafah"]
 	path = hafah
-	url = https://gitlab.syncad.com/hive/HAfAH.git
+	url = ../HAfAH.git
