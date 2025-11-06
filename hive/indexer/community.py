@@ -401,15 +401,16 @@ class CommunityOp:
 
         elif action == 'subscribe':
             DbAdapterHolder.common_block_processing_db().query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_subscriptions
-                               (account_id, community_id, created_at, block_num)
-                        VALUES (:actor_id, :community_id, :date, :block_num)""",
-                **params,
-            )
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_communities
-                           SET subscribers = subscribers + 1
-                         WHERE id = :community_id""",
+                f"""WITH insert_subscription AS (
+                        INSERT INTO {SCHEMA_NAME}.hive_subscriptions
+                            (account_id, community_id, created_at, block_num)
+                        VALUES (:actor_id, :community_id, :date, :block_num)
+                        RETURNING account_id, community_id
+                    )
+                    UPDATE {SCHEMA_NAME}.hive_communities
+                    SET subscribers = subscribers + 1
+                    WHERE id = :community_id
+                        AND EXISTS (SELECT 1 FROM insert_subscription)""",
                 **params,
             )
             NotificationCache.push_subscribe_notification(params)
@@ -710,10 +711,12 @@ class CommunityOp:
 
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
-                  WHERE community_id = :community_id
-                    AND account_id = :account_id"""
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id))
+        sql = f"""SELECT EXISTS(
+                      SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
+                      WHERE community_id = :community_id
+                        AND account_id = :account_id
+                  )"""
+        return DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id)
 
     def _muted(self):
         """Check post's muted status."""
