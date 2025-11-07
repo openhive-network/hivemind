@@ -22,14 +22,15 @@ BEGIN
     SET subscribers = subscribers + 1
     WHERE id = _community_id;
 
-    -- Create notification if block is recent enough
-    SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
+    -- Insert notification
 
+    -- With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
+    -- Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
+    -- In case of reputation being 0, the score is set to 25 rather than 0.
+    SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
     IF _block_num > _notification_first_block THEN
-        -- Get next counter value
         _counter := nextval('hivemind_app.notification_counter_seq')::INTEGER % 4194303;
 
-        -- Insert notification with reputation calculation
         WITH log_account_rep AS (
             SELECT
                 account_id,
