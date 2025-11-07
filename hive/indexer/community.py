@@ -400,17 +400,8 @@ class CommunityOp:
             self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""WITH insert_subscription AS (
-                        INSERT INTO {SCHEMA_NAME}.hive_subscriptions
-                            (account_id, community_id, created_at, block_num)
-                        VALUES (:actor_id, :community_id, :date, :block_num)
-                        RETURNING account_id, community_id
-                    )
-                    UPDATE {SCHEMA_NAME}.hive_communities
-                    SET subscribers = subscribers + 1
-                    WHERE id = :community_id
-                        AND EXISTS (SELECT 1 FROM insert_subscription)""",
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num)""",
                 **params,
             )
             NotificationCache.push_subscribe_notification(params)
