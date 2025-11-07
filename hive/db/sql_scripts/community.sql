@@ -1,3 +1,21 @@
+DROP FUNCTION IF EXISTS hivemind_app.insert_subscription;
+CREATE OR REPLACE FUNCTION hivemind_app.community_subscribe(
+    _actor_id INTEGER,
+    _community_id INTEGER,
+    _date TIMESTAMP,
+    _block_num INTEGER
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO hivemind_app.hive_subscriptions
+    (account_id, community_id, created_at, block_num)
+    VALUES (_actor_id, _community_id, _date, _block_num);
+
+    UPDATE hivemind_app.hive_communities
+    SET subscribers = subscribers + 1
+    WHERE id = _community_id;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS hivemind_app.set_community_role;
 CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
     _account_id INTEGER,
@@ -10,11 +28,11 @@ CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
 BEGIN
     RETURN QUERY
     WITH mod_check AS (
-        SELECT 
-            CASE 
+        SELECT
+            CASE
                 WHEN _role_id >= _mod_role_threshold THEN
-                    (SELECT COUNT(*) 
-                     FROM hivemind_app.hive_roles 
+                    (SELECT COUNT(*)
+                     FROM hivemind_app.hive_roles
                      WHERE community_id = _community_id
                      AND role_id >= _mod_role_threshold
                          AND account_id != _account_id)
@@ -26,12 +44,12 @@ BEGIN
         SELECT _account_id, _community_id, _role_id, _date
         FROM mod_check
         WHERE current_mod_count < _max_mod_nb OR _role_id < _mod_role_threshold
-        ON CONFLICT (account_id, community_id) 
+        ON CONFLICT (account_id, community_id)
         DO UPDATE SET role_id = _role_id
         RETURNING *
     )
-    SELECT 
-        CASE 
+    SELECT
+        CASE
             WHEN EXISTS (SELECT 1 FROM insert_attempt) THEN 'success'
             ELSE 'failed_mod_limit'
         END as status,
