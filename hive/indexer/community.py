@@ -14,7 +14,6 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.indexer.notification_cache import NotificationCache
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
@@ -404,7 +403,6 @@ class CommunityOp:
                 f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num)""",
                 **params,
             )
-            NotificationCache.push_subscribe_notification(params)
         elif action == 'unsubscribe':
             DbAdapterHolder.common_block_processing_db().query(
                 f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions

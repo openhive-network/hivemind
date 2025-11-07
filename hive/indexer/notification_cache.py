@@ -35,52 +35,6 @@ class NotificationCache(DbAdapterHolder):
                     )['num']
         return cls._notification_first_block
 
-    @classmethod
-    def push_subscribe_notification(cls, params):
-        if params["block_num"] > NotificationCache.notification_first_block(
-            DbAdapterHolder.common_block_processing_db()
-        ):
-            params['counter'] = cls._counter.increment(params["block_num"])
-            # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
-            # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
-            # In case of reputation being 0, the score is set to 25 rather than 0.
-            sql = f"""
-                WITH log_account_rep AS
-                (
-                    SELECT
-                        account_id,
-                        LOG(10, ABS(nullif(reputation, 0))) AS rep,
-                        (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-                    FROM reptracker_app.account_reputations
-                ),
-                calculate_rep AS
-                (
-                    SELECT
-                        account_id,
-                        GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-                    FROM log_account_rep lar
-                ),
-                final_rep AS
-                (
-                    SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
-                )
-                INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                SELECT {SCHEMA_NAME}.notification_id(n.created_at, 11, n.counter), n.block_num, 11, n.created_at, r.id, hc.id, 0, 0, COALESCE(rep.rep, 25), '', hc.name, hc.title
-                FROM
-                (VALUES (:block_num, (:date)::timestamp, :actor_id, :community_id, :counter)) AS n(block_num, created_at, src, dst, counter)
-                JOIN {SCHEMA_NAME}.hive_accounts AS r ON n.src = r.id
-                JOIN {SCHEMA_NAME}.hive_communities AS hc ON n.dst = hc.id
-                LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
-                WHERE n.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
-                    AND COALESCE(rep.rep, 25) > 0
-                    AND n.src IS DISTINCT FROM n.dst
-                ORDER BY n.block_num, n.created_at, r.id, hc.id
-                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
-            """
-            DbAdapterHolder.common_block_processing_db().query_no_return(sql, **params)
-
-
 class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
