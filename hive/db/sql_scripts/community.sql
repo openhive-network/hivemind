@@ -74,6 +74,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS hivemind_app.community_unsubscribe;
+CREATE OR REPLACE FUNCTION hivemind_app.community_unsubscribe(
+    _actor_id INTEGER,
+    _community_id INTEGER
+) RETURNS VOID AS $$
+BEGIN
+    DELETE FROM hivemind_app.hive_subscriptions
+    WHERE account_id = _actor_id
+      AND community_id = _community_id;
+
+    UPDATE hivemind_app.hive_communities
+    SET subscribers = subscribers - 1
+    WHERE id = _community_id;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS hivemind_app.set_community_role;
 CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
     _account_id INTEGER,
