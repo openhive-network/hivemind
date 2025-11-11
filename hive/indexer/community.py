@@ -404,16 +404,8 @@ class CommunityOp:
                 **params,
             )
         elif action == 'unsubscribe':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions
-                         WHERE account_id = :actor_id
-                           AND community_id = :community_id""",
-                **params,
-            )
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_communities
-                           SET subscribers = subscribers - 1
-                         WHERE id = :community_id""",
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                f"""SELECT {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
 
