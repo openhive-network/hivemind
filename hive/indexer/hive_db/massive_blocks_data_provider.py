@@ -14,10 +14,6 @@ from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
 
-OPERATIONS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_operations4hivemind(:first, :last)"
-BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last)"
-
-
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
 
@@ -60,16 +56,12 @@ class MassiveBlocksDataProviderHiveDb:
         self._conf = conf
         self._db = db_root
 
-        self._operations_provider = BlocksDataFromDbProvider(
-            sql_query=OPERATIONS_QUERY,
-            db=db_root,
-            strict = False
-        )
-
         # Because HAF returns range of available blocks, it is impossible
         # to get empty results for asking for blocks
+        BLOCKS_QUERY: Final[str] = f'SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last, {self._conf.get_prune_days()})'
+
         self._blocks_data_provider = BlocksDataFromDbProvider(
-            sql_query=BLOCKS_QUERY,
+            sql_query= BLOCKS_QUERY,
             db=db_root,
             strict = True
         )
@@ -91,6 +83,16 @@ class MassiveBlocksDataProviderHiveDb:
                 MassiveBlocksDataProviderHiveDb._op_types_dictionary[id] = OperationType.from_name(
                     name[len('hive::protocol::') :]
                 )
+
+    @classmethod
+    def is_before_first_not_pruned_block(cls) -> bool:
+        if not cls._conf.is_pruning():
+            return False
+
+        pruning_days = str( cls._conf.get_prune_days() )
+        sql = f"SELECT hivemind_app.is_far_than_interval( '{pruning_days} days' )"
+        res = Db.instance().query_one(sql)
+        return res
 
     @staticmethod
     def _id_to_virtual_type(id_: int):

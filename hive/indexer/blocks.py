@@ -49,22 +49,6 @@ class Blocks:
     _last_safe_cashout_block = 0
     _is_initial_sync = False
 
-    _concurrent_flush_1 = [
-        ('Posts', Posts.flush, Posts),
-        ('PostDataCache', PostDataCache.flush, PostDataCache),
-        ('Votes', Votes.flush, Votes),
-        ('Follow', Follow.flush, Follow),
-        ('Reblog', Reblog.flush, Reblog),
-        ('Notify', Notify.flush, Notify),
-    ]
-    _concurrent_flush_2 = [
-        ('Accounts', Accounts.flush, Accounts),
-        ("VoteNotifications", VoteNotificationCache.flush_vote_notifications, VoteNotificationCache),
-        ("PostNotifications", PostNotificationCache.flush_post_notifications, PostNotificationCache),
-        ("FollowNotifications", FollowNotificationCache.flush_follow_notifications, FollowNotificationCache),
-        ("ReblogNotifications", ReblogNotificationCache.flush_reblog_notifications, ReblogNotificationCache),
-    ]
-
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
@@ -165,12 +149,50 @@ class Blocks:
         )
 
     @classmethod
+    def is_before_first_not_pruned_block(cls) -> bool:
+        if not cls._conf.is_pruning():
+            return False
+
+        pruning_days = str( cls._conf.get_prune_days() )
+        sql = f"SELECT hivemind_app.is_far_than_interval( '{pruning_days} days' )"
+        res = Db.instance().query_one(sql)
+        return res
+
+    @classmethod
+    def update_flushers(cls):
+        if not cls.is_before_first_not_pruned_block():
+            cls._concurrent_flush_1 = [
+                ('Posts', Posts.flush, Posts),
+                ('PostDataCache', PostDataCache.flush, PostDataCache),
+                ('Votes', Votes.flush, Votes),
+                ('Follow', Follow.flush, Follow),
+                ('Reblog', Reblog.flush, Reblog),
+                ('Notify', Notify.flush, Notify),
+            ]
+            cls._concurrent_flush_2 = [
+                ('Accounts', Accounts.flush, Accounts),
+                ("VoteNotifications", VoteNotificationCache.flush_vote_notifications, VoteNotificationCache),
+                ("PostNotifications", PostNotificationCache.flush_post_notifications, PostNotificationCache),
+                ("FollowNotifications", FollowNotificationCache.flush_follow_notifications, FollowNotificationCache),
+                ("ReblogNotifications", ReblogNotificationCache.flush_reblog_notifications, ReblogNotificationCache),
+            ]
+        else:
+            cls._concurrent_flush_1 = [
+                ('Follow', Follow.flush, Follow),
+                ('Reblog', Reblog.flush, Reblog),
+            ]
+            cls._concurrent_flush_2 = [
+                ('Accounts', Accounts.flush, Accounts),
+            ]
+    @classmethod
     def flush_data_in_n_threads(cls) -> None:
+        cls.update_flushers()
         process_flush_items_threaded(cls._concurrent_flush_1)
         process_flush_items_threaded(cls._concurrent_flush_2)
 
     @classmethod
     def flush_data_in_1_thread(cls) -> None:
+        cls.update_flushers()
         process_flush_items(cls._concurrent_flush_1)
         process_flush_items(cls._concurrent_flush_2)
 
@@ -380,15 +402,18 @@ class Blocks:
 
                 # post ops
                 elif op_type == OperationType.COMMENT:
-                    Posts.comment_op(op, cls._head_block_date)
+                    if not cls.is_before_first_not_pruned_block():
+                        Posts.comment_op(op, cls._head_block_date)
                 elif op_type == OperationType.DELETE_COMMENT:
-                    key = f"{op['author']}/{op['permlink']}"
-                    if key not in ineffective_deleted_ops:
+                    if not cls.is_before_first_not_pruned_block():
+                        key = f"{op['author']}/{op['permlink']}"
                         Posts.delete_op(op, cls._head_block_date)
                 elif op_type == OperationType.COMMENT_OPTION:
-                    Posts.comment_options_op(op)
+                    if not cls.is_before_first_not_pruned_block():
+                        Posts.comment_options_op(op)
                 elif op_type == OperationType.VOTE:
-                    Votes.vote_op(op, cls._head_block_date)
+                    if not cls.is_before_first_not_pruned_block():
+                        Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
                 elif op_type == OperationType.CUSTOM_JSON:  # follow/reblog/community ops

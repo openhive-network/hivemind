@@ -289,3 +289,9 @@ class Conf:
             self._db.close_engine()
             self._db = None
             log.info("The database is disconnected...")
+
+    def is_pruning(self):
+        return self.get('prune_days') > 0
+
+    def get_prune_days(self) -> int:
+        return self.get('prune_days')

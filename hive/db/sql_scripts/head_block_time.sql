@@ -26,3 +26,16 @@ AS
 $BODY$
     SELECT hive.get_estimated_hive_head_block() - CAST( extract(epoch from _time)/3 as INTEGER );
 $BODY$;
+
+
+DROP FUNCTION IF EXISTS hivemind_app.is_far_than_interval CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.is_far_than_interval( in _time INTERVAL )
+    RETURNS boolean
+    LANGUAGE 'plpgsql' STABLE
+AS
+$BODY$
+BEGIN
+    RETURN hive.app_get_current_block_num( 'hivemind_app' ) <
+           hive.get_estimated_hive_head_block() - CAST( extract(epoch from _time)/3 as INTEGER );
+END;
+$BODY$;
