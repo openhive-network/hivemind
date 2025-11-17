@@ -9,6 +9,7 @@ from time import perf_counter
 from typing import Optional
 
 import sqlalchemy
+from sqlalchemy.schema import CreateIndex
 
 from hive.conf import (
    SCHEMA_NAME
@@ -254,7 +255,37 @@ class DbState:
                         log.info("Index %s already exists... Creation skipped.", index.name)
                     else:
                         time_start = perf_counter()
-                        index.create(engine)
+
+                        # Special handling for BM25 indexes - acquire lock before creation
+                        if 'bm25' in str(index.name).lower():
+                            log.info("Acquiring SHARE UPDATE EXCLUSIVE lock for BM25 index creation")
+                            # Use raw SQL to create index with lock in a single transaction
+                            # This avoids idle-in-transaction timeouts and connection issues
+                            try:
+                                # Use START TRANSACTION instead of BEGIN to work with adapter's transaction tracking
+                                db_mgr.db.query_no_return("START TRANSACTION")
+                                db_mgr.db.query_no_return(
+                                    f"LOCK TABLE {index.table.schema}.{index.table.name} IN SHARE UPDATE EXCLUSIVE MODE"
+                                )
+                                # Get the full index creation SQL from the index object
+                                create_sql = str(CreateIndex(index).compile(dialect=engine.dialect))
+                                log.info(f"Creating BM25 index with SQL: {create_sql[:200]}...")
+                                db_mgr.db.query_no_return(create_sql)
+                                db_mgr.db.query_no_return("COMMIT")
+                            except Exception as e:
+                                log.error("Failed to create BM25 index: " + str(e) )
+                                # Ensure we rollback on any error
+                                # Check if transaction is still active before attempting rollback
+                                if db_mgr.db.is_trx_active():
+                                    try:
+                                        db_mgr.db.query_no_return("ROLLBACK")
+                                    except:
+                                        pass  # Connection might already be dead
+                                raise
+                        else:
+                            # Normal index creation without locking
+                            index.create(engine)
+
                         end_time = perf_counter()
                         elapsed_time = end_time - time_start
                         log.info("Index %s created in time %.4f s", index.name, elapsed_time)
