@@ -24,9 +24,6 @@ compose:
 db:
 	docker run -d --name hive_db -p 5432:5432 -e POSTGRES_PASSWORD=root_password -e POSTGRES_DATABASE=hivepy postgres
 
-mysql:
-	docker run --env DATABASE_URL=mysql://root:root_password@mysql:3306/testdb -p 4000:8080 hive
-
 .PHONY: db-head-state
 db-head-state:
 	curl -H 'Content-Type: application/json' -d '{"id":1,"jsonrpc":"2.0","method":"db_head_state"}' http://localhost:8080

@@ -126,7 +126,6 @@ class Db:
             from sqlalchemy.pool import NullPool
             self._engine = sqlalchemy.create_engine(
                 self._url,
-                isolation_level="READ UNCOMMITTED",  # only supported in mysql
                 poolclass=NullPool,
                 echo=False,
                 connect_args={'application_name': f'hivemind_{self.name}'},
@@ -193,7 +192,7 @@ class Db:
     def engine_name(self):
         """Get the name of the engine (e.g. `postgresql`, `mysql`)."""
         _engine_name = self.get_dialect().name
-        if _engine_name not in ['postgresql', 'mysql']:
+        if _engine_name != 'postgresql':
             raise Exception(f"db engine {_engine_name} not supported")
         return _engine_name
 
