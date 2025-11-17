@@ -587,8 +587,6 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         _engine_name = cls.db().engine_name()
         if _engine_name == 'postgresql':
             return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
-        if _engine_name == 'mysql':
-            return bool(cls.db().query_one('SHOW TABLES'))
         raise Exception(f"unknown db engine {_engine_name}")
 
     @classmethod
