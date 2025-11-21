@@ -264,7 +264,7 @@ class Community:
         )
 
     @classmethod
-    def is_post_valid(cls, community_id, comment_op: dict):
+    def is_post_valid(cls, role):
         """Given a new post/comment, check if valid as per community rules
 
         For a comment to be valid, these conditions apply:
@@ -274,10 +274,6 @@ class Community:
         Note that the checks related to community types are performed on insert
         via the sql function process_community_post
         """
-
-        assert community_id, 'no community_id'
-        account_id = Accounts.get_id(comment_op['author'])
-        role = cls.get_user_role(community_id, account_id)
 
         # TODO: check `nsfw` tag requirement #267
         # TODO: (1.5) check that beneficiaries are valid
