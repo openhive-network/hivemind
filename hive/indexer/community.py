@@ -289,6 +289,7 @@ class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
 
     _notification_first_block = None
+    _counter = UniqueCounter()
 
     # pylint: disable=too-many-instance-attributes
 
@@ -399,8 +400,9 @@ class CommunityOp:
             self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
+            params['counter'] = CommunityOp._counter.increment(self.block_num)
             DbAdapterHolder.common_block_processing_db().query_no_return(
-                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num)""",
+                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
         elif action == 'unsubscribe':

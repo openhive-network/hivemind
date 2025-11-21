@@ -1,15 +1,12 @@
--- Create sequence for notification counter if it doesn't exist
-CREATE SEQUENCE IF NOT EXISTS hivemind_app.notification_counter_seq;
-
 DROP FUNCTION IF EXISTS hivemind_app.insert_subscription;
 CREATE OR REPLACE FUNCTION hivemind_app.community_subscribe(
     _actor_id INTEGER,
     _community_id INTEGER,
     _date TIMESTAMP,
-    _block_num INTEGER
+    _block_num INTEGER,
+    _counter INTEGER
 ) RETURNS VOID AS $$
 DECLARE
-    _counter INTEGER;
     _notification_first_block INTEGER;
 BEGIN
     -- Insert subscription
@@ -29,8 +26,6 @@ BEGIN
     -- In case of reputation being 0, the score is set to 25 rather than 0.
     SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
     IF _block_num > _notification_first_block THEN
-        _counter := nextval('hivemind_app.notification_counter_seq')::INTEGER % 4194303;
-
         WITH log_account_rep AS (
             SELECT
                 account_id,
