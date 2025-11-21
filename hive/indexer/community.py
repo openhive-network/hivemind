@@ -14,7 +14,6 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.indexer.notification_cache import NotificationCache
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
@@ -290,6 +289,7 @@ class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
 
     _notification_first_block = None
+    _counter = UniqueCounter()
 
     # pylint: disable=too-many-instance-attributes
 
@@ -400,30 +400,14 @@ class CommunityOp:
             self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_subscriptions
-                               (account_id, community_id, created_at, block_num)
-                        VALUES (:actor_id, :community_id, :date, :block_num)""",
+            params['counter'] = CommunityOp._counter.increment(self.block_num)
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_communities
-                           SET subscribers = subscribers + 1
-                         WHERE id = :community_id""",
-                **params,
-            )
-            NotificationCache.push_subscribe_notification(params)
         elif action == 'unsubscribe':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions
-                         WHERE account_id = :actor_id
-                           AND community_id = :community_id""",
-                **params,
-            )
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_communities
-                           SET subscribers = subscribers - 1
-                         WHERE id = :community_id""",
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                f"""SELECT {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
 
@@ -710,10 +694,12 @@ class CommunityOp:
 
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
-                  WHERE community_id = :community_id
-                    AND account_id = :account_id"""
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id))
+        sql = f"""SELECT EXISTS(
+                      SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
+                      WHERE community_id = :community_id
+                        AND account_id = :account_id
+                  )"""
+        return DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id)
 
     def _muted(self):
         """Check post's muted status."""
