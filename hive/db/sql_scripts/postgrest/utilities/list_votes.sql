@@ -13,7 +13,7 @@ BEGIN
     RETURN jsonb_build_object(
       'percent', _vote.percent::TEXT,
       'reputation', _vote.reputation,
-      'rshares', _vote.rshares,
+      'rshares', hivemind_app.json_stringify_numeric(_vote.rshares),
       'voter', _vote.voter
     );
   ELSIF _presentation_mode = 'database_api' THEN
@@ -22,25 +22,25 @@ BEGIN
       'voter', _vote.voter,
       'author', _vote.author,
       'permlink', _vote.permlink,
-      'weight', _vote.weight,
-      'rshares', _vote.rshares,
+      'weight', hivemind_app.json_stringify_numeric(_vote.weight),
+      'rshares', hivemind_app.json_stringify_numeric(_vote.rshares),
       'vote_percent', _vote.percent,
       'last_update', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
       'num_changes', _vote.num_changes
     );
   ELSIF _presentation_mode = 'bridge_api' THEN
     RETURN jsonb_build_object(
-      'rshares', _vote.rshares,
+      'rshares', hivemind_app.json_stringify_numeric(_vote.rshares),
       'voter', _vote.voter
     );
   ELSIF _presentation_mode = 'active_votes' THEN
     RETURN jsonb_build_object(
       'percent', _vote.percent,
       'reputation', _vote.reputation,
-      'rshares', _vote.rshares,
+      'rshares', hivemind_app.json_stringify_numeric(_vote.rshares),
       'voter', _vote.voter,
       'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
-      'weight', _vote.weight
+      'weight', hivemind_app.json_stringify_numeric(_vote.weight)
     )::jsonb;
   ELSE
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array - unspecified vote presentation mode');

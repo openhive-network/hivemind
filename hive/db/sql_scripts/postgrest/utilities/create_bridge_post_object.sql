@@ -40,7 +40,7 @@ BEGIN
     'updated', to_jsonb(hivemind_postgrest_utilities.json_date(_row.updated_at)),
     'depth', _row.depth,
     'children', _row.children,
-    'net_rshares', _row.rshares,
+    'net_rshares', hivemind_app.json_stringify_numeric(_row.rshares),
     'is_paidout', _row.is_paidout,
     'payout_at', to_jsonb(hivemind_postgrest_utilities.json_date(_row.payout_at)),
     'replies', to_jsonb('{}'::INT[]),

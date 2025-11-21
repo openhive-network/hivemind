@@ -2,73 +2,73 @@
   "votes": [
     {
       "author": "roelandp",
-      "id": 3355042,
+      "id": 3355037,
       "last_update": "2016-08-25T21:14:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 1443077144144,
       "vote_percent": 10000,
       "voter": "anonymous",
-      "weight": 14340640191507060
+      "weight": "14340640191507060"
     },
     {
       "author": "roelandp",
-      "id": 3355342,
+      "id": 3355337,
       "last_update": "2016-08-25T21:20:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 158985837190,
       "vote_percent": 10000,
       "voter": "highasfuck",
-      "weight": 18707262932859690
+      "weight": "18707262932859690"
     },
     {
       "author": "roelandp",
-      "id": 3359865,
+      "id": 3359860,
       "last_update": "2016-08-25T22:53:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 7872457033211,
       "vote_percent": 10000,
       "voter": "pharesim",
-      "weight": 575498905301694100
+      "weight": "575498905301694100"
     },
     {
       "author": "roelandp",
-      "id": 3355208,
+      "id": 3355203,
       "last_update": "2016-08-25T21:17:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 1754932215280,
       "vote_percent": 10000,
       "voter": "hr1",
-      "weight": 240710957476907253
+      "weight": "240710957476907253"
     },
     {
       "author": "roelandp",
-      "id": 3356223,
+      "id": 3356218,
       "last_update": "2016-08-25T21:37:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 9910147284570,
       "vote_percent": 5000,
       "voter": "tombstone",
-      "weight": 1299387373405102838
+      "weight": "1299387373405102838"
     },
     {
       "author": "roelandp",
-      "id": 3356214,
+      "id": 3356209,
       "last_update": "2016-08-25T21:37:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 2921333226039,
       "vote_percent": 10000,
       "voter": "wang",
-      "weight": 731336847763362836
+      "weight": "731336847763362836"
     },
     {
       "author": "roelandp",
-      "id": 3359916,
+      "id": 3359911,
       "last_update": "2016-08-25T22:54:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -79,7 +79,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359906,
+      "id": 3359901,
       "last_update": "2016-08-25T22:53:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -90,7 +90,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359920,
+      "id": 3359915,
       "last_update": "2016-08-25T22:54:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -101,14 +101,14 @@
     },
     {
       "author": "roelandp",
-      "id": 3393353,
+      "id": 3393348,
       "last_update": "2016-08-26T15:42:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 2152215026140,
       "vote_percent": 2900,
       "voter": "complexring",
-      "weight": 109163904259652527
+      "weight": "109163904259652527"
     }
   ]
 }

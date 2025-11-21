@@ -2,73 +2,73 @@
   "votes": [
     {
       "author": "roelandp",
-      "id": 3355042,
+      "id": 3355037,
       "last_update": "2016-08-25T21:14:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 1443077144144,
       "vote_percent": 10000,
       "voter": "anonymous",
-      "weight": 14340640191507060
+      "weight": "14340640191507060"
     },
     {
       "author": "roelandp",
-      "id": 3355342,
+      "id": 3355337,
       "last_update": "2016-08-25T21:20:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 158985837190,
       "vote_percent": 10000,
       "voter": "highasfuck",
-      "weight": 18707262932859690
+      "weight": "18707262932859690"
     },
     {
       "author": "roelandp",
-      "id": 3359865,
+      "id": 3359860,
       "last_update": "2016-08-25T22:53:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 7872457033211,
       "vote_percent": 10000,
       "voter": "pharesim",
-      "weight": 575498905301694100
+      "weight": "575498905301694100"
     },
     {
       "author": "roelandp",
-      "id": 3355208,
+      "id": 3355203,
       "last_update": "2016-08-25T21:17:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 1754932215280,
       "vote_percent": 10000,
       "voter": "hr1",
-      "weight": 240710957476907253
+      "weight": "240710957476907253"
     },
     {
       "author": "roelandp",
-      "id": 3356223,
+      "id": 3356218,
       "last_update": "2016-08-25T21:37:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 9910147284570,
       "vote_percent": 5000,
       "voter": "tombstone",
-      "weight": 1299387373405102838
+      "weight": "1299387373405102838"
     },
     {
       "author": "roelandp",
-      "id": 3356214,
+      "id": 3356209,
       "last_update": "2016-08-25T21:37:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 2921333226039,
       "vote_percent": 10000,
       "voter": "wang",
-      "weight": 731336847763362836
+      "weight": "731336847763362836"
     },
     {
       "author": "roelandp",
-      "id": 3359916,
+      "id": 3359911,
       "last_update": "2016-08-25T22:54:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -79,7 +79,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359906,
+      "id": 3359901,
       "last_update": "2016-08-25T22:53:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -90,7 +90,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359920,
+      "id": 3359915,
       "last_update": "2016-08-25T22:54:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -101,18 +101,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3393353,
+      "id": 3393348,
       "last_update": "2016-08-26T15:42:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 2152215026140,
       "vote_percent": 2900,
       "voter": "complexring",
-      "weight": 109163904259652527
+      "weight": "109163904259652527"
     },
     {
       "author": "roelandp",
-      "id": 3359908,
+      "id": 3359903,
       "last_update": "2016-08-25T22:53:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -123,7 +123,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359911,
+      "id": 3359906,
       "last_update": "2016-08-25T22:53:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -134,7 +134,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359921,
+      "id": 3359916,
       "last_update": "2016-08-25T22:54:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -145,40 +145,40 @@
     },
     {
       "author": "roelandp",
-      "id": 3356042,
+      "id": 3356037,
       "last_update": "2016-08-25T21:33:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 213971974610,
       "vote_percent": 10000,
       "voter": "alex90342fastn1",
-      "weight": 56900006113977735
+      "weight": "56900006113977735"
     },
     {
       "author": "roelandp",
-      "id": 3355470,
+      "id": 3355465,
       "last_update": "2016-08-25T21:23:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 325419220968,
       "vote_percent": 10000,
       "voter": "recursive2",
-      "weight": 50753603736711065
+      "weight": "50753603736711065"
     },
     {
       "author": "roelandp",
-      "id": 3355341,
+      "id": 3355336,
       "last_update": "2016-08-25T21:20:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 2475275982937,
       "vote_percent": 10000,
       "voter": "recursive",
-      "weight": 375527808414782336
+      "weight": "375527808414782336"
     },
     {
       "author": "roelandp",
-      "id": 3355312,
+      "id": 3355307,
       "last_update": "2016-08-25T21:19:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -189,7 +189,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355300,
+      "id": 3355295,
       "last_update": "2016-08-25T21:19:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -200,7 +200,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3654548,
+      "id": 3654543,
       "last_update": "2016-08-31T15:57:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -211,7 +211,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359914,
+      "id": 3359909,
       "last_update": "2016-08-25T22:53:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -222,7 +222,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356366,
+      "id": 3356361,
       "last_update": "2016-08-25T21:40:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -233,7 +233,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359919,
+      "id": 3359914,
       "last_update": "2016-08-25T22:54:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -244,7 +244,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355459,
+      "id": 3355454,
       "last_update": "2016-08-25T21:22:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -255,7 +255,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356510,
+      "id": 3356505,
       "last_update": "2016-08-25T21:43:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -266,7 +266,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359923,
+      "id": 3359918,
       "last_update": "2016-08-25T22:54:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -277,7 +277,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357500,
+      "id": 3357495,
       "last_update": "2016-08-25T22:09:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -288,7 +288,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3360505,
+      "id": 3360500,
       "last_update": "2016-08-25T23:07:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -299,7 +299,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355957,
+      "id": 3355952,
       "last_update": "2016-08-25T21:32:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -310,7 +310,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3363959,
+      "id": 3363954,
       "last_update": "2016-08-26T00:34:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -321,7 +321,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3371502,
+      "id": 3371497,
       "last_update": "2016-08-26T04:42:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -332,7 +332,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3372338,
+      "id": 3372333,
       "last_update": "2016-08-26T05:16:33",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -343,7 +343,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355157,
+      "id": 3355152,
       "last_update": "2016-08-25T21:16:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -354,7 +354,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355277,
+      "id": 3355272,
       "last_update": "2016-08-25T21:18:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -365,7 +365,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355278,
+      "id": 3355273,
       "last_update": "2016-08-25T21:19:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -376,7 +376,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355093,
+      "id": 3355088,
       "last_update": "2016-08-25T21:15:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -387,29 +387,29 @@
     },
     {
       "author": "roelandp",
-      "id": 3355605,
+      "id": 3355600,
       "last_update": "2016-08-25T21:26:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 319656816349,
       "vote_percent": 10000,
       "voter": "teamsteem",
-      "weight": 61393558228792426
+      "weight": "61393558228792426"
     },
     {
       "author": "roelandp",
-      "id": 3355179,
+      "id": 3355174,
       "last_update": "2016-08-25T21:16:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 654686841103,
       "vote_percent": 10000,
       "voter": "nanzo-scoop",
-      "weight": 100198439550794443
+      "weight": "100198439550794443"
     },
     {
       "author": "roelandp",
-      "id": 3377244,
+      "id": 3377239,
       "last_update": "2016-08-26T08:02:39",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -420,7 +420,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356140,
+      "id": 3356135,
       "last_update": "2016-08-25T21:35:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -431,7 +431,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3363433,
+      "id": 3363428,
       "last_update": "2016-08-26T00:24:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -442,7 +442,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359771,
+      "id": 3359766,
       "last_update": "2016-08-25T22:51:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -453,29 +453,29 @@
     },
     {
       "author": "roelandp",
-      "id": 3355574,
+      "id": 3355569,
       "last_update": "2016-08-25T21:25:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 324838465620,
       "vote_percent": 10000,
       "voter": "cyber",
-      "weight": 62064486103856892
+      "weight": "62064486103856892"
     },
     {
       "author": "roelandp",
-      "id": 3369570,
+      "id": 3369565,
       "last_update": "2016-08-26T03:25:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 233719327703,
       "vote_percent": 10000,
       "voter": "billbutler",
-      "weight": 12961183005643070
+      "weight": "12961183005643070"
     },
     {
       "author": "roelandp",
-      "id": 3357184,
+      "id": 3357179,
       "last_update": "2016-08-25T22:01:45",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -486,7 +486,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355275,
+      "id": 3355270,
       "last_update": "2016-08-25T21:18:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -497,18 +497,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3356832,
+      "id": 3356827,
       "last_update": "2016-08-25T21:51:45",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 172553610831,
       "vote_percent": 10000,
       "voter": "will-zewe",
-      "weight": 17041536787170570
+      "weight": "17041536787170570"
     },
     {
       "author": "roelandp",
-      "id": 3357872,
+      "id": 3357867,
       "last_update": "2016-08-25T22:16:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -519,7 +519,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3375745,
+      "id": 3375740,
       "last_update": "2016-08-26T06:56:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -530,29 +530,29 @@
     },
     {
       "author": "roelandp",
-      "id": 3356336,
+      "id": 3356331,
       "last_update": "2016-08-25T21:39:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 138061585013,
       "vote_percent": 10000,
       "voter": "schro",
-      "weight": 12233443676715403
+      "weight": "12233443676715403"
     },
     {
       "author": "roelandp",
-      "id": 3355168,
+      "id": 3355163,
       "last_update": "2016-08-25T21:16:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 281276583502,
       "vote_percent": 10000,
       "voter": "trogdor",
-      "weight": 44248091869338976
+      "weight": "44248091869338976"
     },
     {
       "author": "roelandp",
-      "id": 3357040,
+      "id": 3357035,
       "last_update": "2016-08-25T21:57:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -563,7 +563,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355498,
+      "id": 3355493,
       "last_update": "2016-08-25T21:24:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -574,18 +574,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3357768,
+      "id": 3357763,
       "last_update": "2016-08-25T22:15:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 239360246037,
       "vote_percent": 10000,
       "voter": "mauricemikkers",
-      "weight": 22810246454421459
+      "weight": "22810246454421459"
     },
     {
       "author": "roelandp",
-      "id": 3355761,
+      "id": 3355756,
       "last_update": "2016-08-25T21:29:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -596,7 +596,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3360569,
+      "id": 3360564,
       "last_update": "2016-08-25T23:09:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -607,7 +607,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356558,
+      "id": 3356553,
       "last_update": "2016-08-25T21:44:45",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -618,7 +618,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3358560,
+      "id": 3358555,
       "last_update": "2016-08-25T22:29:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -629,7 +629,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355396,
+      "id": 3355391,
       "last_update": "2016-08-25T21:21:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -640,7 +640,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356632,
+      "id": 3356627,
       "last_update": "2016-08-25T21:47:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -651,7 +651,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355038,
+      "id": 3355033,
       "last_update": "2016-08-25T21:14:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -662,7 +662,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3360870,
+      "id": 3360865,
       "last_update": "2016-08-25T23:16:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -673,7 +673,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3365463,
+      "id": 3365458,
       "last_update": "2016-08-26T01:12:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -684,7 +684,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3569422,
+      "id": 3569417,
       "last_update": "2016-08-30T00:55:27",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -695,7 +695,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355934,
+      "id": 3355929,
       "last_update": "2016-08-25T21:32:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -706,29 +706,29 @@
     },
     {
       "author": "roelandp",
-      "id": 3355351,
+      "id": 3355346,
       "last_update": "2016-08-25T21:20:27",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 412711767083,
       "vote_percent": 10000,
       "voter": "juneaugoldbuyer",
-      "weight": 48469946909458748
+      "weight": "48469946909458748"
     },
     {
       "author": "roelandp",
-      "id": 3356178,
+      "id": 3356173,
       "last_update": "2016-08-25T21:36:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 50712863419,
       "vote_percent": 10000,
       "voter": "derekareith",
-      "weight": 14798174799565845
+      "weight": "14798174799565845"
     },
     {
       "author": "roelandp",
-      "id": 3387963,
+      "id": 3387958,
       "last_update": "2016-08-26T13:55:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -739,7 +739,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355150,
+      "id": 3355145,
       "last_update": "2016-08-25T21:16:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -750,18 +750,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3355775,
+      "id": 3355770,
       "last_update": "2016-08-25T21:30:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 449718057019,
       "vote_percent": 10000,
       "voter": "neoxian",
-      "weight": 102444311094754580
+      "weight": "102444311094754580"
     },
     {
       "author": "roelandp",
-      "id": 3367178,
+      "id": 3367173,
       "last_update": "2016-08-26T02:11:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -772,7 +772,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355406,
+      "id": 3355401,
       "last_update": "2016-08-25T21:21:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -783,7 +783,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355160,
+      "id": 3355155,
       "last_update": "2016-08-25T21:16:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -794,7 +794,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355161,
+      "id": 3355156,
       "last_update": "2016-08-25T21:16:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -805,7 +805,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3396350,
+      "id": 3396345,
       "last_update": "2016-08-26T16:38:45",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -816,7 +816,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359080,
+      "id": 3359075,
       "last_update": "2016-08-25T22:38:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -827,7 +827,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355995,
+      "id": 3355990,
       "last_update": "2016-08-25T21:33:15",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -838,7 +838,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355801,
+      "id": 3355796,
       "last_update": "2016-08-25T21:30:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -849,7 +849,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357829,
+      "id": 3357824,
       "last_update": "2016-08-25T22:15:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -860,7 +860,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356816,
+      "id": 3356811,
       "last_update": "2016-08-25T21:51:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -871,7 +871,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355242,
+      "id": 3355237,
       "last_update": "2016-08-25T21:18:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -882,7 +882,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355091,
+      "id": 3355086,
       "last_update": "2016-08-25T21:15:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -893,18 +893,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3356591,
+      "id": 3356586,
       "last_update": "2016-08-25T21:45:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 232922931345,
       "vote_percent": 10000,
       "voter": "nabilov",
-      "weight": 23648818749856712
+      "weight": "23648818749856712"
     },
     {
       "author": "roelandp",
-      "id": 3355598,
+      "id": 3355593,
       "last_update": "2016-08-25T21:26:33",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -915,7 +915,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355385,
+      "id": 3355380,
       "last_update": "2016-08-25T21:21:15",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -926,7 +926,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355595,
+      "id": 3355590,
       "last_update": "2016-08-25T21:26:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -937,7 +937,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355760,
+      "id": 3355755,
       "last_update": "2016-08-25T21:29:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -948,7 +948,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357223,
+      "id": 3357218,
       "last_update": "2016-08-25T22:03:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -959,18 +959,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3369893,
+      "id": 3369888,
       "last_update": "2016-08-26T03:40:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 193924738154,
       "vote_percent": 10000,
       "voter": "blueorgy",
-      "weight": 10629311203454025
+      "weight": "10629311203454025"
     },
     {
       "author": "roelandp",
-      "id": 3355616,
+      "id": 3355611,
       "last_update": "2016-08-25T21:26:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -981,7 +981,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357059,
+      "id": 3357054,
       "last_update": "2016-08-25T21:58:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -992,7 +992,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3378203,
+      "id": 3378198,
       "last_update": "2016-08-26T08:34:45",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1003,7 +1003,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356203,
+      "id": 3356198,
       "last_update": "2016-08-25T21:36:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1014,7 +1014,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356349,
+      "id": 3356344,
       "last_update": "2016-08-25T21:39:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1025,7 +1025,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3358296,
+      "id": 3358291,
       "last_update": "2016-08-25T22:24:09",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1036,7 +1036,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3377882,
+      "id": 3377877,
       "last_update": "2016-08-26T08:24:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1047,7 +1047,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355154,
+      "id": 3355149,
       "last_update": "2016-08-25T21:16:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1058,7 +1058,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355232,
+      "id": 3355227,
       "last_update": "2016-08-25T21:17:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1069,7 +1069,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356914,
+      "id": 3356909,
       "last_update": "2016-08-25T21:53:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1080,7 +1080,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356807,
+      "id": 3356802,
       "last_update": "2016-08-25T21:51:03",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1091,7 +1091,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356253,
+      "id": 3356248,
       "last_update": "2016-08-25T21:38:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1102,7 +1102,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356037,
+      "id": 3356032,
       "last_update": "2016-08-25T21:33:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1113,7 +1113,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355325,
+      "id": 3355320,
       "last_update": "2016-08-25T21:19:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1124,7 +1124,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355057,
+      "id": 3355052,
       "last_update": "2016-08-25T21:14:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1135,7 +1135,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356765,
+      "id": 3356760,
       "last_update": "2016-08-25T21:49:51",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1146,7 +1146,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357557,
+      "id": 3357552,
       "last_update": "2016-08-25T22:11:33",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1157,7 +1157,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3364851,
+      "id": 3364846,
       "last_update": "2016-08-26T00:54:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1168,7 +1168,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357916,
+      "id": 3357911,
       "last_update": "2016-08-25T22:17:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1179,7 +1179,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355628,
+      "id": 3355623,
       "last_update": "2016-08-25T21:27:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1190,7 +1190,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3380113,
+      "id": 3380108,
       "last_update": "2016-08-26T09:47:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1201,7 +1201,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3361862,
+      "id": 3361857,
       "last_update": "2016-08-25T23:42:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1212,7 +1212,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357740,
+      "id": 3357735,
       "last_update": "2016-08-25T22:14:39",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1223,7 +1223,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357702,
+      "id": 3357697,
       "last_update": "2016-08-25T22:14:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1234,7 +1234,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355286,
+      "id": 3355281,
       "last_update": "2016-08-25T21:19:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1245,7 +1245,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355901,
+      "id": 3355896,
       "last_update": "2016-08-25T21:31:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1256,7 +1256,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356372,
+      "id": 3356367,
       "last_update": "2016-08-25T21:40:15",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1267,7 +1267,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355222,
+      "id": 3355217,
       "last_update": "2016-08-25T21:17:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1278,7 +1278,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355748,
+      "id": 3355743,
       "last_update": "2016-08-25T21:29:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1289,18 +1289,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3356710,
+      "id": 3356705,
       "last_update": "2016-08-25T21:48:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 102922516323,
       "vote_percent": 10000,
       "voter": "miacats",
-      "weight": 10317425343756290
+      "weight": "10317425343756290"
     },
     {
       "author": "roelandp",
-      "id": 3356384,
+      "id": 3356379,
       "last_update": "2016-08-25T21:40:36",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1311,7 +1311,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355753,
+      "id": 3355748,
       "last_update": "2016-08-25T21:29:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1322,7 +1322,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3445263,
+      "id": 3445258,
       "last_update": "2016-08-27T16:29:33",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1333,7 +1333,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355754,
+      "id": 3355749,
       "last_update": "2016-08-25T21:29:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1344,7 +1344,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3363905,
+      "id": 3363900,
       "last_update": "2016-08-26T00:33:48",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1355,7 +1355,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3357269,
+      "id": 3357264,
       "last_update": "2016-08-25T22:04:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1366,7 +1366,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356283,
+      "id": 3356278,
       "last_update": "2016-08-25T21:38:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1377,7 +1377,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356776,
+      "id": 3356771,
       "last_update": "2016-08-25T21:49:54",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1388,7 +1388,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3376429,
+      "id": 3376424,
       "last_update": "2016-08-26T07:28:06",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1399,7 +1399,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356690,
+      "id": 3356685,
       "last_update": "2016-08-25T21:48:18",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1410,7 +1410,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3356876,
+      "id": 3356871,
       "last_update": "2016-08-25T21:52:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1421,7 +1421,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3358041,
+      "id": 3358036,
       "last_update": "2016-08-25T22:19:57",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1432,7 +1432,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3368861,
+      "id": 3368856,
       "last_update": "2016-08-26T02:54:30",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1443,7 +1443,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3358389,
+      "id": 3358384,
       "last_update": "2016-08-25T22:26:00",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1454,7 +1454,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3358551,
+      "id": 3358546,
       "last_update": "2016-08-25T22:29:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1465,18 +1465,18 @@
     },
     {
       "author": "roelandp",
-      "id": 3355098,
+      "id": 3355093,
       "last_update": "2016-08-25T21:15:15",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
       "rshares": 155693801968,
       "vote_percent": 10000,
       "voter": "charlieshrem",
-      "weight": 13764401025164125
+      "weight": "13764401025164125"
     },
     {
       "author": "roelandp",
-      "id": 3355450,
+      "id": 3355445,
       "last_update": "2016-08-25T21:22:42",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1487,7 +1487,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355317,
+      "id": 3355312,
       "last_update": "2016-08-25T21:19:33",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1498,7 +1498,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3417132,
+      "id": 3417127,
       "last_update": "2016-08-27T00:50:21",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1509,7 +1509,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3359412,
+      "id": 3359407,
       "last_update": "2016-08-25T22:45:12",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
@@ -1520,7 +1520,7 @@
     },
     {
       "author": "roelandp",
-      "id": 3355166,
+      "id": 3355161,
       "last_update": "2016-08-25T21:16:24",
       "num_changes": 0,
       "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",

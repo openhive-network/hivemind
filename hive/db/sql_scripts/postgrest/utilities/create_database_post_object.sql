@@ -60,11 +60,11 @@ BEGIN
     _result = jsonb_set(_result, '{children_abs_rshares}', to_jsonb(0));
     _result = jsonb_set(_result, '{net_rshares}', to_jsonb(0));
   ELSE
-    _result = jsonb_set(_result, '{total_vote_weight}', to_jsonb(_row.total_vote_weight));
-    _result = jsonb_set(_result, '{vote_rshares}', to_jsonb(FLOOR((_row.rshares + _row.abs_rshares) / 2)));
-    _result = jsonb_set(_result, '{abs_rshares}', to_jsonb(_row.abs_rshares));
+    _result = jsonb_set(_result, '{total_vote_weight}', hivemind_app.json_stringify_numeric(_row.total_vote_weight));
+    _result = jsonb_set(_result, '{vote_rshares}', hivemind_app.json_stringify_numeric(FLOOR((_row.rshares + _row.abs_rshares) / 2)));
+    _result = jsonb_set(_result, '{abs_rshares}', hivemind_app.json_stringify_numeric(_row.abs_rshares));
     _result = jsonb_set(_result, '{children_abs_rshares}', to_jsonb(0));
-    _result = jsonb_set(_result, '{net_rshares}', to_jsonb(_row.rshares));
+    _result = jsonb_set(_result, '{net_rshares}', hivemind_app.json_stringify_numeric(_row.rshares));
   END IF;
 
   RETURN _result;
