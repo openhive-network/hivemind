@@ -585,15 +585,12 @@ BEGIN
     -- Extract type_id from name (6th character, after "hive-")
     _type_id := SUBSTRING(_name, 6, 1)::INTEGER;
 
-    -- Insert community
     INSERT INTO hivemind_app.hive_communities (id, name, type_id, created_at, block_num)
     VALUES (_account_id, _name, _type_id, _block_date, _block_num);
 
-    -- Insert owner role
     INSERT INTO hivemind_app.hive_roles (community_id, account_id, role_id, created_at)
     VALUES (_account_id, _account_id, 8, _block_date); -- 8 = owner role id
 
-    -- Insert community notification
     SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
     IF _block_num > _notification_first_block THEN
         INSERT INTO hivemind_app.hive_notification_cache
@@ -613,5 +610,38 @@ BEGIN
             ''
         WHERE _block_num > hivemind_app.block_before_irreversible('90 days');
     END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.set_user_title;
+CREATE OR REPLACE FUNCTION hivemind_app.set_user_title(
+    _actor_id INTEGER,
+    _account_id INTEGER,
+    _community_id INTEGER,
+    _title VARCHAR,
+    _date TIMESTAMP
+) RETURNS TABLE(success BOOLEAN, error_message TEXT) AS $$
+DECLARE
+    _actor_role INTEGER;
+    _community_name VARCHAR;
+    _community_title VARCHAR;
+BEGIN
+    -- Get role in the community (default to guest = 0 if no role)
+    SELECT COALESCE(role_id, 0) INTO _actor_role
+    FROM hivemind_app.hive_roles
+    WHERE community_id = _community_id AND account_id = _actor_id;
+
+    -- 4 is mod
+    IF _actor_role < 4 THEN
+        RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT;
+        RETURN;
+    END IF;
+
+    INSERT INTO hivemind_app.hive_roles (account_id, community_id, title, created_at)
+    VALUES (_account_id, _community_id, _title, _date)
+    ON CONFLICT (account_id, community_id)
+    DO UPDATE SET title = _title;
+
+    RETURN QUERY SELECT TRUE, ''::TEXT;
 END;
 $$ LANGUAGE plpgsql;
