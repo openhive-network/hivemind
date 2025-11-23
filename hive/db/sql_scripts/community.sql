@@ -527,3 +527,49 @@ BEGIN
     RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.register_community;
+CREATE OR REPLACE FUNCTION hivemind_app.register_community(
+    _name VARCHAR,
+    _account_id INTEGER,
+    _block_date TIMESTAMP,
+    _block_num INTEGER,
+    _counter INTEGER
+) RETURNS VOID AS $$
+DECLARE
+    _type_id INTEGER;
+    _notification_first_block INTEGER;
+BEGIN
+    -- Extract type_id from name (6th character, after "hive-")
+    _type_id := SUBSTRING(_name, 6, 1)::INTEGER;
+
+    -- Insert community
+    INSERT INTO hivemind_app.hive_communities (id, name, type_id, created_at, block_num)
+    VALUES (_account_id, _name, _type_id, _block_date, _block_num);
+
+    -- Insert owner role
+    INSERT INTO hivemind_app.hive_roles (community_id, account_id, role_id, created_at)
+    VALUES (_account_id, _account_id, 8, _block_date); -- 8 = owner role id
+
+    -- Insert community notification
+    SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
+    IF _block_num > _notification_first_block THEN
+        INSERT INTO hivemind_app.hive_notification_cache
+        (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+        SELECT
+            hivemind_app.notification_id(_block_date, 1, _counter),
+            _block_num,
+            1,
+            _block_date,
+            0,
+            _account_id,
+            0,
+            0,
+            35,
+            '',
+            _name,
+            ''
+        WHERE _block_num > hivemind_app.block_before_irreversible('90 days');
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
