@@ -168,14 +168,12 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        # Validation and preprocessing in Python
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
 
         _id = Accounts.get_id(name)
         counter = cls._counter.increment(block_num)
 
-        # Call SQL function to handle all database operations
         sql = f"""SELECT {SCHEMA_NAME}.register_community(:name, :account_id, :block_date, :block_num, :counter)"""
         DbAdapterHolder.common_block_processing_db().query_no_return(
             sql,
@@ -388,15 +386,37 @@ class CommunityOp:
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
-            DbAdapterHolder.common_block_processing_db().query_no_return(
-                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
+            if result and not result['success']:
+                Notify(
+                    block_num=self.block_num,
+                    type_id='error',
+                    dst_id=self.actor_id,
+                    when=self.date,
+                    payload=result['error_message'],
+                    community_id=self.community_id,
+                    src_id=self.community_id
+                )
+                return False
         elif action == 'unsubscribe':
-            DbAdapterHolder.common_block_processing_db().query_no_return(
-                f"""SELECT {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
+            if result and not result['success']:
+                Notify(
+                    block_num=self.block_num,
+                    type_id='error',
+                    dst_id=self.actor_id,
+                    when=self.date,
+                    payload=result['error_message'],
+                    community_id=self.community_id,
+                    src_id=self.community_id
+                )
+                return False
 
         # Account-level actions
         elif action == 'setRole':
@@ -642,6 +662,11 @@ class CommunityOp:
     def _validate_permissions(self):
         community_id = self.community_id
         action = self.action
+
+        # Skip validation as it's handled in SQL
+        if action in ('subscribe', 'unsubscribe'):
+            return
+
         actor_role = Community.get_user_role(community_id, self.actor_id)
         new_role = self.role_id
 
@@ -674,10 +699,6 @@ class CommunityOp:
         elif action == 'flagPost':
             assert actor_role > Role.muted, 'muted users cannot flag posts'
             assert not self._flagged(), 'user already flagged this post'
-        elif action == 'subscribe':
-            assert not self._subscribed(self.actor_id), 'already subscribed'
-        elif action == 'unsubscribe':
-            assert self._subscribed(self.actor_id), 'already unsubscribed'
 
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
