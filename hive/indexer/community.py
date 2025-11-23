@@ -168,32 +168,23 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
+        # Validation and preprocessing in Python
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
-        type_id = int(name[5])
+
         _id = Accounts.get_id(name)
         counter = cls._counter.increment(block_num)
 
-        # insert community
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_communities (id, name, type_id, created_at, block_num)
-                        VALUES (:id, :name, :type_id, :date, :block_num)"""
-        DbAdapterHolder.common_block_processing_db().query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
-
-        # insert owner
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_roles (community_id, account_id, role_id, created_at)
-                        VALUES (:community_id, :account_id, :role_id, :date)"""
-        DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
-
-        # insert community notification
-        # Howo: Maybe we should change this to set dst as the account creator instead
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        SELECT {SCHEMA_NAME}.notification_id((:created_at)::timestamp, 1, :counter), n.*
-                        FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
-                        AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
-                              AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                        """
-        DbAdapterHolder.common_block_processing_db().query(sql, block_num=block_num, created_at=block_date, dst=_id, community=name, counter=counter)
+        # Call SQL function to handle all database operations
+        sql = f"""SELECT {SCHEMA_NAME}.register_community(:name, :account_id, :block_date, :block_num, :counter)"""
+        DbAdapterHolder.common_block_processing_db().query_no_return(
+            sql,
+            name=name,
+            account_id=_id,
+            block_date=block_date,
+            block_num=block_num,
+            counter=counter
+        )
 
     @classmethod
     def validated_id(cls, name):
