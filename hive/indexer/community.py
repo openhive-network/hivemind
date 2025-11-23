@@ -168,7 +168,6 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        # Validation and preprocessing in Python
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
 
