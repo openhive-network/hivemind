@@ -443,15 +443,23 @@ class CommunityOp:
                     payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
                 )
         elif action == 'setUserTitle':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
-                               (account_id, community_id, title, created_at)
-                        VALUES (:account_id, :community_id, :title, :date)
-                            ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET title = :title""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.set_user_title(
+                    :actor_id, :account_id, :community_id, :title, :date
+                )""",
                 **params,
             )
-            self._notify('set_title', payload=self.title)
+            if result and not result['success']:
+                Notify(
+                    block_num=self.block_num,
+                    type_id='error',
+                    dst_id=self.actor_id,
+                    when=self.date,
+                    payload=result['error_message'],
+                    community_id=self.community_id,
+                    src_id=self.community_id
+                )
+                return False
 
         # Post-level actions
         elif action == 'mutePost':
@@ -664,7 +672,7 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
