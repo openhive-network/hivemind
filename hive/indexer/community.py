@@ -174,7 +174,7 @@ class Community:
         _id = Accounts.get_id(name)
         counter = cls._counter.increment(block_num)
 
-        sql = f"""SELECT {SCHEMA_NAME}.register_community(:name, :account_id, :block_date, :block_num, :counter)"""
+        sql = f"""SELECT {SCHEMA_NAME}.register_community(:name::VARCHAR, :account_id::INTEGER, :block_date::TIMESTAMP, :block_num::INTEGER, :counter::INTEGER)"""
         DbAdapterHolder.common_block_processing_db().query_no_return(
             sql,
             name=name,
