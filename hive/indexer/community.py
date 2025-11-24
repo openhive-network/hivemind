@@ -440,7 +440,7 @@ class CommunityOp:
                     community_id=self.community_id,
                     dst_id=self.actor_id,
                     when=self.date,
-                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
+                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded' # TODO, when sqlizing, make sure to update this to take into account permission validation text too
                 )
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -449,7 +449,10 @@ class CommunityOp:
                 )""",
                 **params,
             )
-            if result and not result['success']:
+
+            if result[0]['status'] == 'success':
+                self._notify('set_title', payload=self.title)
+            else:
                 Notify(
                     block_num=self.block_num,
                     type_id='error',
