@@ -420,9 +420,9 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            result = DbAdapterHolder.common_block_processing_db().query_all(
+            result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.set_community_role(
-                    :account_id, :community_id, :role_id, :date, 
+                    :actor_id, :account_id, :community_id, :role_id, :date,
                     :max_mod_nb, :mod_role_threshold
                 )""",
                 max_mod_nb=MAX_MOD_NB,
@@ -430,9 +430,9 @@ class CommunityOp:
                 **params
             )
 
-            if result[0]['status'] == 'success':
+            if result and result['success']:
                 self._notify('set_role', payload=Role(self.role_id).name)
-            else:
+            elif result:
                 Notify(
                     block_num=self.block_num,
                     type_id='error',
@@ -440,7 +440,7 @@ class CommunityOp:
                     community_id=self.community_id,
                     dst_id=self.actor_id,
                     when=self.date,
-                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded' # TODO, when sqlizing, make sure to update this to take into account permission validation text too
+                    payload=result['error_message']
                 )
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -450,9 +450,9 @@ class CommunityOp:
                 **params,
             )
 
-            if result[0]['status'] == 'success':
+            if result and result['success']:
                 self._notify('set_title', payload=self.title)
-            else:
+            elif result:
                 Notify(
                     block_num=self.block_num,
                     type_id='error',
@@ -675,7 +675,7 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
@@ -692,7 +692,6 @@ class CommunityOp:
         elif action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
-            # TODO: assert title changed?
             assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':
             assert not self._muted(), 'post is already muted'
