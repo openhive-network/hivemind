@@ -545,27 +545,33 @@ DECLARE
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
-    _account_role := hivemind_app.get_community_role(_account_id, _community_id);
-
     IF _actor_role < 4 THEN  -- 4 = Role.mod
         RETURN QUERY SELECT FALSE, 'only mods and up can alter roles'::TEXT;
+        RETURN;
     END IF;
 
     IF _actor_role <= _role_id THEN
         RETURN QUERY SELECT FALSE, 'cannot promote to or above own rank'::TEXT;
+        RETURN;
     END IF;
+
+    _account_role := hivemind_app.get_community_role(_account_id, _community_id);
 
     IF _account_role = 8 THEN  -- 8 = Role.owner
         RETURN QUERY SELECT FALSE, 'cant modify owner role'::TEXT;
+        RETURN;
     END IF;
+
 
     IF _actor_id != _account_id THEN
         IF _account_role >= _actor_role THEN
             RETURN QUERY SELECT FALSE, 'cant modify a user with a higher role'::TEXT;
+            RETURN;
         END IF;
 
         IF _account_role = _role_id THEN
             RETURN QUERY SELECT FALSE, 'role would not change'::TEXT;
+            RETURN;
         END IF;
     END IF;
 
@@ -579,6 +585,7 @@ BEGIN
 
         IF _mod_count >= _max_mod_nb THEN
             RETURN QUERY SELECT FALSE, 'moderator limit exceeded'::TEXT;
+            RETURN;
         END IF;
     END IF;
 
@@ -652,6 +659,7 @@ BEGIN
     -- 4 is mod
     IF _actor_role < 4 THEN
         RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT;
+        RETURN;
     END IF;
 
     INSERT INTO hivemind_app.hive_roles (account_id, community_id, title, created_at)
