@@ -437,12 +437,13 @@ class CommunityOp:
             self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '1'
-                         WHERE id = :post_id""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.pin_post(
+                    :actor_id, :community_id, :post_id
+                )""",
                 **params,
             )
-            self._notify('pin_post', payload=self.notes)
+            self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
             DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '0'
@@ -649,16 +650,13 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
 
         if action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
-        elif action == 'pinPost':
-            assert not self._pinned(), 'post is already pinned'
-            assert actor_role >= Role.mod, 'only mods can pin posts'
         elif action == 'unpinPost':
             assert self._pinned(), 'post is already not pinned'
             assert actor_role >= Role.mod, 'only mods can unpin posts'
