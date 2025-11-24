@@ -679,20 +679,9 @@ class CommunityOp:
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
-        new_role = self.role_id
 
-        if action == 'setRole':
-            assert actor_role >= Role.mod, 'only mods and up can alter roles'
-            assert actor_role > new_role, 'cannot promote to or above own rank'
-            account_role = Community.get_user_role(community_id, self.account_id)
-            assert account_role != Role.owner, 'cant modify owner role'
-            if self.actor != self.account:
-                assert account_role < actor_role, 'cant modify higher-role user'
-                assert account_role != new_role, 'role would not change'
-        elif action == 'updateProps':
+        if action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
-        elif action == 'setUserTitle':
-            assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':
             assert not self._muted(), 'post is already muted'
             assert actor_role >= Role.mod, 'only mods can mute posts'
@@ -710,6 +699,7 @@ class CommunityOp:
             assert actor_role > Role.muted, 'muted users cannot flag posts'
             assert not self._flagged(), 'user already flagged this post'
 
+    # TODO drop this, functions should return if user is subscribed or not if they result in a notification
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
         sql = f"""SELECT EXISTS(
