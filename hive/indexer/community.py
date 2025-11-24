@@ -390,34 +390,13 @@ class CommunityOp:
                 f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
-            if result and not result['success']:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=result['error_message'],
-                    community_id=self.community_id,
-                    src_id=self.community_id
-                )
-                return False
+            self._handle_result(result, None)
         elif action == 'unsubscribe':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
-            if result and not result['success']:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=result['error_message'],
-                    community_id=self.community_id,
-                    src_id=self.community_id
-                )
-                return False
-
+            self._handle_result(result, None)
         # Account-level actions
         elif action == 'setRole':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -429,19 +408,7 @@ class CommunityOp:
                 mod_role_threshold=Role.mod,
                 **params
             )
-
-            if result and result['success']:
-                self._notify('set_role', payload=Role(self.role_id).name)
-            elif result:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    src_id=self.community_id,
-                    community_id=self.community_id,
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=result['error_message']
-                )
+            self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.set_user_title(
@@ -449,21 +416,7 @@ class CommunityOp:
                 )""",
                 **params,
             )
-
-            if result and result['success']:
-                self._notify('set_title', payload=self.title)
-            elif result:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=result['error_message'],
-                    community_id=self.community_id,
-                    src_id=self.community_id
-                )
-                return False
-
+            self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
             DbAdapterHolder.common_block_processing_db().query(
@@ -499,6 +452,24 @@ class CommunityOp:
             self._notify_team('flag_post', payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
+        return True
+
+    def _handle_result(self, result, success_op, payload=None):
+        """Handle result from SQL operations with success/error_message pattern."""
+        if result and result['success']:
+            self._notify(success_op, payload=payload)
+            return True
+        elif result:
+            Notify(
+                block_num=self.block_num,
+                type_id='error',
+                dst_id=self.actor_id,
+                when=self.date,
+                payload=result['error_message'],
+                community_id=self.community_id,
+                src_id=self.community_id
+            )
+            return False
         return True
 
     def _notify(self, op, **kwargs):
