@@ -428,12 +428,13 @@ class CommunityOp:
             self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = 0
-                         WHERE id = :post_id""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.unmute_post(
+                    :actor_id, :community_id, :post_id
+                )""",
                 **params,
             )
-            self._notify('unmute_post', payload=self.notes)
+            self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
             DbAdapterHolder.common_block_processing_db().query(
@@ -648,20 +649,13 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
 
         if action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
-        elif action == 'mutePost':
-            assert not self._muted(), 'post is already muted'
-            assert actor_role >= Role.mod, 'only mods can mute posts'
-        elif action == 'unmutePost':
-            assert self._muted(), 'post is already not muted'
-            assert not self._parent_muted(), 'parent post is muted'
-            assert actor_role >= Role.mod, 'only mods can unmute posts'
         elif action == 'pinPost':
             assert not self._pinned(), 'post is already pinned'
             assert actor_role >= Role.mod, 'only mods can pin posts'
