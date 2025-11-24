@@ -703,3 +703,46 @@ BEGIN
     RETURN QUERY SELECT TRUE, ''::TEXT;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.unmute_post;
+CREATE OR REPLACE FUNCTION hivemind_app.unmute_post(
+    _actor_id INTEGER,
+    _community_id INTEGER,
+    _post_id INTEGER
+) RETURNS TABLE(success BOOLEAN, error_message TEXT) AS $$
+DECLARE
+    _actor_role INTEGER;
+    _is_muted BOOLEAN;
+    _parent_id INTEGER;
+    _parent_is_muted BOOLEAN;
+BEGIN
+    _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
+
+    IF _actor_role < 4 THEN
+        RETURN QUERY SELECT FALSE, 'only mods and above can unmute posts'::TEXT;
+        RETURN;
+    END IF;
+
+    SELECT is_muted, parent_id INTO _is_muted, _parent_id FROM hivemind_app.hive_posts WHERE id = _post_id;
+
+    IF NOT _is_muted THEN
+        RETURN QUERY SELECT FALSE, 'post is not muted'::TEXT;
+        RETURN;
+    END IF;
+
+    IF _parent_id IS NOT NULL THEN
+        -- TODO maybe it would be faster to fetch parent at the same time as we fetch the child in one query vs two ?
+        SELECT is_muted INTO _parent_is_muted FROM hivemind_app.hive_posts WHERE id = _parent_id;
+        IF _parent_is_muted THEN
+            RETURN QUERY SELECT FALSE, 'parent post is muted'::TEXT;
+            RETURN;
+        END IF;
+    END IF;
+
+    UPDATE hivemind_app.hive_posts
+    SET is_muted = false, muted_reasons = 0
+    WHERE id = _post_id;
+
+    RETURN QUERY SELECT TRUE, ''::TEXT;
+END;
+$$ LANGUAGE plpgsql;
