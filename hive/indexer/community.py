@@ -390,13 +390,13 @@ class CommunityOp:
                 f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
-            self._handle_result(result, None)
+            self._handle_result(result)
         elif action == 'unsubscribe':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
-            self._handle_result(result, None)
+            self._handle_result(result)
         # Account-level actions
         elif action == 'setRole':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -419,12 +419,13 @@ class CommunityOp:
             self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1',  muted_reasons = :muted_reasons
-                         WHERE id = :post_id""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.mute_post(
+                    :actor_id, :community_id, :post_id, :muted_reasons
+                )""",
                 **params,
             )
-            self._notify('mute_post', payload=self.notes)
+            self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
             DbAdapterHolder.common_block_processing_db().query(
@@ -454,10 +455,11 @@ class CommunityOp:
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
 
-    def _handle_result(self, result, success_op, payload=None):
+    def _handle_result(self, result, success_op=None, payload=None):
         """Handle result from SQL operations with success/error_message pattern."""
         if result and result['success']:
-            self._notify(success_op, payload=payload)
+            if success_op:
+                self._notify(success_op, payload=payload)
             return True
         elif result:
             Notify(
@@ -646,7 +648,7 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)

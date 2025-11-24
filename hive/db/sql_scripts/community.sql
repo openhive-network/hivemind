@@ -236,3 +236,36 @@ BEGIN
     RETURN QUERY SELECT TRUE, ''::TEXT;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.mute_post;
+CREATE OR REPLACE FUNCTION hivemind_app.mute_post(
+    _actor_id INTEGER,
+    _community_id INTEGER,
+    _post_id INTEGER,
+    _muted_reasons INTEGER
+) RETURNS TABLE(success BOOLEAN, error_message TEXT) AS $$
+DECLARE
+    _actor_role INTEGER;
+    _is_muted BOOLEAN;
+BEGIN
+    _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
+
+    IF _actor_role < 4 THEN
+        RETURN QUERY SELECT FALSE, 'only mods and above can mute posts'::TEXT;
+        RETURN;
+    END IF;
+
+    SELECT is_muted INTO _is_muted FROM hivemind_app.hive_posts WHERE id = _post_id;
+
+    IF _is_muted THEN
+        RETURN QUERY SELECT FALSE, 'post is already muted'::TEXT;
+        RETURN;
+    END IF;
+
+    UPDATE hivemind_app.hive_posts
+    SET is_muted = true, muted_reasons = _muted_reasons
+    WHERE id = _post_id;
+
+    RETURN QUERY SELECT TRUE, ''::TEXT;
+END;
+$$ LANGUAGE plpgsql;
