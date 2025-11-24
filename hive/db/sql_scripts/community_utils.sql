@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.get_community_role(
     _community_id INTEGER
 ) RETURNS INTEGER AS $$
 BEGIN
-    -- Get account's role in the community (default to guest = 0 if no role)
+    -- default to guest = 0 if no role
     RETURN COALESCE(
         (SELECT role_id FROM hivemind_app.hive_roles
          WHERE community_id = _community_id AND account_id = _account_id),
