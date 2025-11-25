@@ -377,7 +377,7 @@ class CommunityOp:
             self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.set_user_title(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_set_user_title(
                     :actor_id, :account_id, :community_id, :title, :date
                 )""",
                 **params,
@@ -386,7 +386,7 @@ class CommunityOp:
         # Post-level actions
         elif action == 'mutePost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.mute_post(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_mute_post(
                     :actor_id, :community_id, :account_id, :permlink, :muted_reasons
                 )""",
                 actor_id=self.actor_id,
@@ -399,7 +399,7 @@ class CommunityOp:
 
         elif action == 'unmutePost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.unmute_post(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unmute_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
                 actor_id=self.actor_id,
@@ -411,7 +411,7 @@ class CommunityOp:
 
         elif action == 'pinPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.pin_post(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_pin_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
                 actor_id=self.actor_id,
@@ -422,7 +422,7 @@ class CommunityOp:
             self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.unpin_post(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unpin_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
                 actor_id=self.actor_id,
@@ -433,7 +433,7 @@ class CommunityOp:
             self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.flag_post(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_flag_post(
                     :actor_id, :community_id, :account_id, :permlink, :community
                 )""",
                 actor_id=self.actor_id,
