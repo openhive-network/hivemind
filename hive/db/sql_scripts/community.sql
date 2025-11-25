@@ -810,3 +810,44 @@ BEGIN
     RETURN QUERY SELECT TRUE, ''::TEXT;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.flag_post;
+CREATE OR REPLACE FUNCTION hivemind_app.flag_post(
+    _actor_id INTEGER,
+    _community_id INTEGER,
+    _post_id INTEGER,
+    _community_name VARCHAR
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, team_members INTEGER[]) AS $$
+DECLARE
+    _actor_role INTEGER;
+    _already_flagged BOOLEAN;
+    _team_members INTEGER[];
+BEGIN
+    _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
+
+    IF _actor_role <= -2 THEN
+        RETURN QUERY SELECT FALSE, 'muted users cannot flag posts'::TEXT, NULL::INTEGER[];
+        RETURN;
+    END IF;
+
+    SELECT EXISTS(
+        SELECT 1 FROM hivemind_app.hive_notification_cache
+        WHERE community = _community_name
+          AND post_id = _post_id
+          AND type_id = 9 -- flag_post
+          AND src = _actor_id
+    ) INTO _already_flagged;
+
+    IF _already_flagged THEN
+        RETURN QUERY SELECT FALSE, 'user already flagged this post'::TEXT, NULL::INTEGER[];
+        RETURN;
+    END IF;
+
+    SELECT ARRAY_AGG(account_id) INTO _team_members
+    FROM hivemind_app.hive_roles
+    WHERE community_id = _community_id
+      AND role_id >= 4;
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
+END;
+$$ LANGUAGE plpgsql;
