@@ -453,7 +453,14 @@ class CommunityOp:
             )
             self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            self._notify_team('flag_post', payload=self.notes)
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.flag_post(
+                    :actor_id, :community_id, :post_id, :community
+                )""",
+                **params,
+            )
+            if self._handle_result(result):
+                self._notify_team('flag_post', team_members=result['team_members'], payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -498,16 +505,17 @@ class CommunityOp:
             **kwargs,
         )
 
-    def _notify_team(self, op, **kwargs):
+    def _notify_team(self, op, team_members=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
 
-        team_members = DbAdapterHolder.common_block_processing_db().query_col(
-            f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                WHERE community_id = :community_id
-                  AND role_id >= :min_role_id""",
-            community_id=self.community_id,
-            min_role_id=Role.mod.value  # 4
-        )
+        if team_members is None:
+            team_members = DbAdapterHolder.common_block_processing_db().query_col(
+                f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
+                    WHERE community_id = :community_id
+                      AND role_id >= :min_role_id""",
+                community_id=self.community_id,
+                min_role_id=Role.mod.value  # 4
+            )
 
         for member_id in team_members:
             # Skip sending notification to the source user (the one triggering the notification)
@@ -651,16 +659,13 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
 
         if action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
-        elif action == 'flagPost':
-            assert actor_role > Role.muted, 'muted users cannot flag posts'
-            assert not self._flagged(), 'user already flagged this post'
 
     # TODO drop this, functions should return if user is subscribed or not if they result in a notification
     def _subscribed(self, account_id):
