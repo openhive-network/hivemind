@@ -851,3 +851,41 @@ BEGIN
     RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_app.update_community_props;
+CREATE OR REPLACE FUNCTION hivemind_app.update_community_props(
+    _actor_id INTEGER,
+    _community_id INTEGER,
+    _props JSONB
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, team_members INTEGER[]) AS $$
+DECLARE
+    _actor_role INTEGER;
+    _team_members INTEGER[];
+BEGIN
+    _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
+
+    IF _actor_role < 6 THEN
+        RETURN QUERY SELECT FALSE, 'only admins can update props'::TEXT, NULL::INTEGER[];
+        RETURN;
+    END IF;
+
+    UPDATE hivemind_app.hive_communities
+    SET
+        title = CASE WHEN jsonb_exists(_props, 'title') THEN _props->>'title' ELSE title END,
+        about = CASE WHEN jsonb_exists(_props, 'about') THEN _props->>'about' ELSE about END,
+        lang = CASE WHEN jsonb_exists(_props, 'lang') THEN _props->>'lang' ELSE lang END,
+        is_nsfw = CASE WHEN jsonb_exists(_props, 'is_nsfw') THEN (_props->>'is_nsfw')::BOOLEAN ELSE is_nsfw END,
+        description = CASE WHEN jsonb_exists(_props, 'description') THEN _props->>'description' ELSE description END,
+        flag_text = CASE WHEN jsonb_exists(_props, 'flag_text') THEN _props->>'flag_text' ELSE flag_text END,
+        settings = CASE WHEN jsonb_exists(_props, 'settings') THEN (_props->>'settings')::JSONB ELSE settings END,
+        type_id = CASE WHEN jsonb_exists(_props, 'type_id') THEN (_props->>'type_id')::INTEGER ELSE type_id END
+    WHERE id = _community_id;
+
+    SELECT ARRAY_AGG(account_id) INTO _team_members
+    FROM hivemind_app.hive_roles
+    WHERE community_id = _community_id
+      AND role_id >= 4;
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
+END;
+$$ LANGUAGE plpgsql;
