@@ -425,46 +425,63 @@ class CommunityOp:
         elif action == 'mutePost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.mute_post(
-                    :actor_id, :community_id, :post_id, :muted_reasons
+                    :actor_id, :community_id, :account_id, :permlink, :muted_reasons
                 )""",
-                **params,
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink,
+                muted_reasons=params['muted_reasons']
             )
             self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.unmute_post(
-                    :actor_id, :community_id, :post_id
+                    :actor_id, :community_id, :account_id, :permlink
                 )""",
-                **params,
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
             self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.pin_post(
-                    :actor_id, :community_id, :post_id
+                    :actor_id, :community_id, :account_id, :permlink
                 )""",
-                **params,
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
             self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.unpin_post(
-                    :actor_id, :community_id, :post_id
+                    :actor_id, :community_id, :account_id, :permlink
                 )""",
-                **params,
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
             self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.flag_post(
-                    :actor_id, :community_id, :post_id, :community
+                    :actor_id, :community_id, :account_id, :permlink, :community
                 )""",
-                **params,
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink,
+                community=self.community
             )
             if self._handle_result(result):
-                self._notify_team('flag_post', team_members=result['team_members'], payload=self.notes)
+                self._notify_team('flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -473,7 +490,8 @@ class CommunityOp:
         """Handle result from SQL operations with success/error_message pattern."""
         if result and result['success']:
             if success_op:
-                self._notify(success_op, payload=payload)
+                post_id = result['post_id'] if 'post_id' in result.keys() else None
+                self._notify(success_op, post_id=post_id, payload=payload)
             return True
         elif result:
             Notify(
@@ -488,7 +506,7 @@ class CommunityOp:
             return False
         return True
 
-    def _notify(self, op, **kwargs):
+    def _notify(self, op, post_id=None, **kwargs):
         dst_id = None
         score = 35
 
@@ -502,14 +520,14 @@ class CommunityOp:
             type_id=op,
             src_id=self.actor_id,
             dst_id=dst_id,
-            post_id=self.post_id,
+            post_id=post_id,
             when=self.date,
             community_id=self.community_id,
             score=score,
             **kwargs,
         )
 
-    def _notify_team(self, op, team_members=None, **kwargs):
+    def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
         for member_id in team_members:
             # Skip sending notification to the source user (the one triggering the notification)
@@ -521,7 +539,7 @@ class CommunityOp:
                 type_id=op,
                 src_id=self.actor_id,
                 dst_id=member_id,
-                post_id=self.post_id,
+                post_id=post_id,
                 when=self.date,
                 community_id=self.community_id,
                 score=35,
@@ -545,7 +563,7 @@ class CommunityOp:
         if 'account' in schema:
             self._read_account()
         if 'permlink' in schema:
-            self._read_permlink() # TODO remove this and manage the pid/permlink read in SQL when needed
+            self._read_permlink()
         if 'role' in schema:
             self._read_role()
         if 'notes' in schema:
@@ -574,25 +592,7 @@ class CommunityOp:
         assert self.account, 'permlink requires named account'
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
-
-        sql = f"""
-          SELECT hp.id, community_id
-          FROM {SCHEMA_NAME}.live_posts_comments_view hp
-          JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hp.permlink_id=hpd.id
-          WHERE author_id=:_author AND hpd.permlink=:_permlink
-        """
-        result = DbAdapterHolder.common_block_processing_db().query_row(sql, _author=self.account_id, _permlink=_permlink)
-        assert result, f'post does not exists {self.account}/{_permlink}'
-        result = dict(result)
-
-        _pid = result.get('id', None)
-        assert _pid, f'post does not exists {self.account}/{_permlink}'
-
-        _comm = result.get('community_id', None)
-        assert self.community_id == _comm, 'post does not belong to community'
-
         self.permlink = _permlink
-        self.post_id = _pid
 
     def _read_role(self):
         _role = read_key_str(self.op, 'role', 16)
