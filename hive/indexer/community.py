@@ -341,8 +341,7 @@ class CommunityOp:
             # validate and read schema
             self._read_schema()
 
-            # validate permissions
-            self._validate_permissions()
+            # permissions are validated directly in SQL
 
             self.valid = True
 
@@ -512,16 +511,6 @@ class CommunityOp:
 
     def _notify_team(self, op, team_members=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
-
-        if team_members is None:
-            team_members = DbAdapterHolder.common_block_processing_db().query_col(
-                f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                    WHERE community_id = :community_id
-                      AND role_id >= :min_role_id""",
-                community_id=self.community_id,
-                min_role_id=Role.mod.value  # 4
-            )
-
         for member_id in team_members:
             # Skip sending notification to the source user (the one triggering the notification)
             if member_id == self.actor_id:
@@ -556,7 +545,7 @@ class CommunityOp:
         if 'account' in schema:
             self._read_account()
         if 'permlink' in schema:
-            self._read_permlink()
+            self._read_permlink() # TODO remove this and manage the pid/permlink read in SQL when needed
         if 'role' in schema:
             self._read_role()
         if 'notes' in schema:
@@ -659,16 +648,6 @@ class CommunityOp:
         assert out, 'props were blank'
         self.props = out
 
-    def _validate_permissions(self):
-        community_id = self.community_id
-        action = self.action
-
-        # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost', 'updateProps'):
-            return
-
-        actor_role = Community.get_user_role(community_id, self.actor_id)
-
     # TODO drop this, functions should return if user is subscribed or not if they result in a notification
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
@@ -678,38 +657,3 @@ class CommunityOp:
                         AND account_id = :account_id
                   )"""
         return DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id)
-
-    def _muted(self):
-        """Check post's muted status."""
-        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _parent_muted(self):
-        """Check parent post's muted status."""
-        parent_id = f"SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = ({parent_id})"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _pinned(self):
-        """Check post's pinned status."""
-        sql = f"SELECT is_pinned FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _flagged(self):
-        """Check user's flag status. Note that because hive_notification_cache gets flushed every 90 days, this means you can re-flag every 90 days"""
-        from hive.indexer.notify import NotifyType
-
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
-                  WHERE community = :community
-                    AND post_id = :post_id
-                    AND type_id = :type_id
-                    AND src = :src"""
-        return bool(
-            DbAdapterHolder.common_block_processing_db().query_one(
-                sql,
-                community=self.community,
-                post_id=self.post_id,
-                type_id=NotifyType['flag_post'],
-                src=self.actor_id,
-            )
-        )
