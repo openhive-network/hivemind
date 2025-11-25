@@ -526,7 +526,7 @@ class CommunityOp:
         if 'account' in schema:
             self._read_account()
         if 'permlink' in schema:
-            self._read_permlink()
+            self._read_permlink() # TODO remove this and manage the pid/permlink read in SQL when needed
         if 'role' in schema:
             self._read_role()
         if 'notes' in schema:

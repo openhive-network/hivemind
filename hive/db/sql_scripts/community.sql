@@ -846,7 +846,7 @@ BEGIN
     SELECT ARRAY_AGG(account_id) INTO _team_members
     FROM hivemind_app.hive_roles
     WHERE community_id = _community_id
-      AND role_id >= 4;
+      AND role_id >= 4; -- better or equal to mod
 
     RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
 END;
@@ -884,7 +884,7 @@ BEGIN
     SELECT ARRAY_AGG(account_id) INTO _team_members
     FROM hivemind_app.hive_roles
     WHERE community_id = _community_id
-      AND role_id >= 4;
+      AND role_id >= 4; --  better or equal to mod
 
     RETURN QUERY SELECT TRUE, ''::TEXT, _team_members;
 END;
