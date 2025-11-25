@@ -215,44 +215,6 @@ class Community:
         return cid
 
     @classmethod
-    def _get_name(cls, cid):
-        if cid in cls._names:
-            return cls._names[cid]
-        sql = f"SELECT name FROM {SCHEMA_NAME}.hive_communities WHERE id = :id"
-        name = DbAdapterHolder.common_block_processing_db().query_one(sql, id=cid)
-        if cid:
-            cls._ids[name] = cid
-            cls._names[cid] = name
-        return name
-
-    @classmethod
-    def get_all_muted(cls, community_id):
-        """Return a list of all muted accounts."""
-        return DbAdapterHolder.common_block_processing_db().query_col(
-            f"""SELECT name FROM {SCHEMA_NAME}.hive_accounts
-                                WHERE id IN (SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                                              WHERE community_id = :community_id
-                                                AND role_id < 0)""",
-            community_id=community_id,
-        )
-
-    @classmethod
-    def get_user_role(cls, community_id, account_id):
-        """Get user role within a specific community."""
-
-        return (
-            DbAdapterHolder.common_block_processing_db().query_one(
-                f"""SELECT role_id FROM {SCHEMA_NAME}.hive_roles
-                                    WHERE community_id = :community_id
-                                      AND account_id = :account_id
-                                    LIMIT 1""",
-                community_id=community_id,
-                account_id=account_id,
-            )
-            or Role.guest.value
-        )
-
-    @classmethod
     def is_post_valid(cls, role):
         """Given a new post/comment, check if valid as per community rules
 
