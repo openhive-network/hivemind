@@ -378,11 +378,16 @@ class CommunityOp:
 
         # Community-level commands
         if action == 'updateProps':
-            bind = ', '.join([k + " = :" + k for k in list(self.props.keys())])
-            DbAdapterHolder.common_block_processing_db().query(
-                f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.update_community_props(
+                    :actor_id, :community_id, :props
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                props=json.dumps(self.props)
             )
-            self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            if self._handle_result(result):
+                self._notify_team('set_props', team_members=result['team_members'], payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
@@ -659,13 +664,10 @@ class CommunityOp:
         action = self.action
 
         # Skip validation as it's handled in SQL
-        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost'):
+        if action in ('subscribe', 'unsubscribe', 'setUserTitle', 'setRole', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost', 'updateProps'):
             return
 
         actor_role = Community.get_user_role(community_id, self.actor_id)
-
-        if action == 'updateProps':
-            assert actor_role >= Role.admin, 'only admins can update props'
 
     # TODO drop this, functions should return if user is subscribed or not if they result in a notification
     def _subscribed(self, account_id):
