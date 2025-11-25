@@ -641,8 +641,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.set_user_title;
-CREATE OR REPLACE FUNCTION hivemind_app.set_user_title(
+DROP FUNCTION IF EXISTS hivemind_app.community_set_user_title;
+CREATE OR REPLACE FUNCTION hivemind_app.community_set_user_title(
     _actor_id INTEGER,
     _account_id INTEGER,
     _community_id INTEGER,
@@ -671,8 +671,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.mute_post;
-CREATE OR REPLACE FUNCTION hivemind_app.mute_post(
+DROP FUNCTION IF EXISTS hivemind_app.community_mute_post;
+CREATE OR REPLACE FUNCTION hivemind_app.community_mute_post(
     _actor_id INTEGER,
     _community_id INTEGER,
     _account_id INTEGER,
@@ -715,8 +715,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.unmute_post;
-CREATE OR REPLACE FUNCTION hivemind_app.unmute_post(
+DROP FUNCTION IF EXISTS hivemind_app.community_unmute_post;
+CREATE OR REPLACE FUNCTION hivemind_app.community_unmute_post(
     _actor_id INTEGER,
     _community_id INTEGER,
     _account_id INTEGER,
@@ -768,8 +768,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.pin_post;
-CREATE OR REPLACE FUNCTION hivemind_app.pin_post(
+DROP FUNCTION IF EXISTS hivemind_app.community_pin_post;
+CREATE OR REPLACE FUNCTION hivemind_app.community_pin_post(
     _actor_id INTEGER,
     _community_id INTEGER,
     _account_id INTEGER,
@@ -811,8 +811,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.unpin_post;
-CREATE OR REPLACE FUNCTION hivemind_app.unpin_post(
+DROP FUNCTION IF EXISTS hivemind_app.community_unpin_post;
+CREATE OR REPLACE FUNCTION hivemind_app.community_unpin_post(
     _actor_id INTEGER,
     _community_id INTEGER,
     _account_id INTEGER,
@@ -854,8 +854,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.flag_post;
-CREATE OR REPLACE FUNCTION hivemind_app.flag_post(
+DROP FUNCTION IF EXISTS hivemind_app.community_flag_post;
+CREATE OR REPLACE FUNCTION hivemind_app.community_flag_post(
     _actor_id INTEGER,
     _community_id INTEGER,
     _account_id INTEGER,
