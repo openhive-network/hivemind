@@ -448,12 +448,13 @@ class CommunityOp:
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
 
-    def _handle_result(self, result, success_op=None, payload=None):
-        """Handle result from SQL operations with success/error_message pattern."""
+    def _handle_result(self, result, operation_name=None, payload=None):
+        """Handle result from SQL operations with success/error_messages as notifications"""
         if result and result['success']:
-            if success_op:
+            if operation_name:
                 post_id = result['post_id'] if 'post_id' in result.keys() else None
-                self._notify(success_op, post_id=post_id, payload=payload)
+                is_subscribed = result['is_subscribed'] if 'is_subscribed' in result.keys() else False
+                self._notify(operation_name, post_id=post_id, is_subscribed=is_subscribed, payload=payload)
             return True
         elif result:
             Notify(
@@ -468,13 +469,13 @@ class CommunityOp:
             return False
         return True
 
-    def _notify(self, op, post_id=None, **kwargs):
+    def _notify(self, op, post_id=None, is_subscribed=None, **kwargs):
         dst_id = None
         score = 35
 
         if self.account_id:
             dst_id = self.account_id
-            if not self._subscribed(self.account_id):
+            if is_subscribed == False:
                 score = 15
 
         Notify(
@@ -609,13 +610,3 @@ class CommunityOp:
             out['type_id'] = community_type
         assert out, 'props were blank'
         self.props = out
-
-    # TODO drop this, functions should return if user is subscribed or not if they result in a notification
-    def _subscribed(self, account_id):
-        """Check an account's subscription status."""
-        sql = f"""SELECT EXISTS(
-                      SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
-                      WHERE community_id = :community_id
-                        AND account_id = :account_id
-                  )"""
-        return DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id)

@@ -244,17 +244,18 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_mute_post(
     _account_id INTEGER,
     _permlink VARCHAR,
     _muted_reasons INTEGER
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _is_muted BOOLEAN;
     _post_id INTEGER;
     _post_error TEXT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods and above can mute posts'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'only mods and above can mute posts'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -262,14 +263,14 @@ BEGIN
     FROM hivemind_app.get_post_id_by_permlink(_account_id, _permlink, _community_id) p;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
     SELECT is_muted INTO _is_muted FROM hivemind_app.hive_posts WHERE id = _post_id;
 
     IF _is_muted THEN
-        RETURN QUERY SELECT FALSE, 'post is already muted'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'post is already muted'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -277,7 +278,9 @@ BEGIN
     SET is_muted = true, muted_reasons = _muted_reasons
     WHERE id = _post_id;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -287,7 +290,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_unmute_post(
     _community_id INTEGER,
     _account_id INTEGER,
     _permlink VARCHAR
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _is_muted BOOLEAN;
@@ -295,11 +298,12 @@ DECLARE
     _parent_is_muted BOOLEAN;
     _post_id INTEGER;
     _post_error TEXT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods and above can unmute posts'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'only mods and above can unmute posts'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -307,21 +311,21 @@ BEGIN
     FROM hivemind_app.get_post_id_by_permlink(_account_id, _permlink, _community_id) p;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
     SELECT is_muted, parent_id INTO _is_muted, _parent_id FROM hivemind_app.hive_posts WHERE id = _post_id;
 
     IF NOT _is_muted THEN
-        RETURN QUERY SELECT FALSE, 'post is not muted'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'post is not muted'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
     IF _parent_id IS NOT NULL THEN
         SELECT is_muted INTO _parent_is_muted FROM hivemind_app.hive_posts WHERE id = _parent_id;
         IF _parent_is_muted THEN
-            RETURN QUERY SELECT FALSE, 'parent post is muted'::TEXT, NULL::INTEGER;
+            RETURN QUERY SELECT FALSE, 'parent post is muted'::TEXT, NULL::INTEGER, FALSE;
             RETURN;
         END IF;
     END IF;
@@ -330,7 +334,9 @@ BEGIN
     SET is_muted = false, muted_reasons = 0
     WHERE id = _post_id;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -340,17 +346,18 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_pin_post(
     _community_id INTEGER,
     _account_id INTEGER,
     _permlink VARCHAR
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _is_pinned BOOLEAN;
     _post_id INTEGER;
     _post_error TEXT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods and above can pin posts'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'only mods and above can pin posts'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -358,14 +365,14 @@ BEGIN
     FROM hivemind_app.get_post_id_by_permlink(_account_id, _permlink, _community_id) p;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
     SELECT is_pinned INTO _is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id;
 
     IF _is_pinned THEN
-        RETURN QUERY SELECT FALSE, 'post is already pinned'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'post is already pinned'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -373,7 +380,9 @@ BEGIN
     SET is_pinned = true
     WHERE id = _post_id;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -383,17 +392,18 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_unpin_post(
     _community_id INTEGER,
     _account_id INTEGER,
     _permlink VARCHAR
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _is_pinned BOOLEAN;
     _post_id INTEGER;
     _post_error TEXT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods and above can unpin posts'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'only mods and above can unpin posts'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -401,14 +411,14 @@ BEGIN
     FROM hivemind_app.get_post_id_by_permlink(_account_id, _permlink, _community_id) p;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
     SELECT is_pinned INTO _is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id;
 
     IF NOT _is_pinned THEN
-        RETURN QUERY SELECT FALSE, 'post is not pinned'::TEXT, NULL::INTEGER;
+        RETURN QUERY SELECT FALSE, 'post is not pinned'::TEXT, NULL::INTEGER, FALSE;
         RETURN;
     END IF;
 
@@ -416,7 +426,9 @@ BEGIN
     SET is_pinned = false
     WHERE id = _post_id;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -427,18 +439,19 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_flag_post(
     _account_id INTEGER,
     _permlink VARCHAR,
     _community_name VARCHAR
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, team_members INTEGER[]) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, post_id INTEGER, team_members INTEGER[], is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _already_flagged BOOLEAN;
     _team_members INTEGER[];
     _post_id INTEGER;
     _post_error TEXT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role <= -2 THEN
-        RETURN QUERY SELECT FALSE, 'muted users cannot flag posts'::TEXT, NULL::INTEGER, NULL::INTEGER[];
+        RETURN QUERY SELECT FALSE, 'muted users cannot flag posts'::TEXT, NULL::INTEGER, NULL::INTEGER[], FALSE;
         RETURN;
     END IF;
 
@@ -446,7 +459,7 @@ BEGIN
     FROM hivemind_app.get_post_id_by_permlink(_account_id, _permlink, _community_id) p;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, NULL::INTEGER[];
+        RETURN QUERY SELECT FALSE, _post_error, NULL::INTEGER, NULL::INTEGER[], FALSE;
         RETURN;
     END IF;
 
@@ -459,7 +472,7 @@ BEGIN
     ) INTO _already_flagged;
 
     IF _already_flagged THEN
-        RETURN QUERY SELECT FALSE, 'user already flagged this post'::TEXT, NULL::INTEGER, NULL::INTEGER[];
+        RETURN QUERY SELECT FALSE, 'user already flagged this post'::TEXT, NULL::INTEGER, NULL::INTEGER[], FALSE;
         RETURN;
     END IF;
 
@@ -468,7 +481,9 @@ BEGIN
     WHERE community_id = _community_id
       AND role_id >= 4; -- better or equal to mod
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _team_members;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _post_id, _team_members, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
