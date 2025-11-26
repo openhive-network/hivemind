@@ -210,24 +210,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.community_set_user_title;
-CREATE OR REPLACE FUNCTION hivemind_app.community_set_user_title(
+DROP FUNCTION IF EXISTS hivemind_app.community_set_title;
+CREATE OR REPLACE FUNCTION hivemind_app.community_set_title(
     _actor_id INTEGER,
     _account_id INTEGER,
     _community_id INTEGER,
     _title VARCHAR,
     _date TIMESTAMP
-) RETURNS TABLE(success BOOLEAN, error_message TEXT) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
-    _community_name VARCHAR;
-    _community_title VARCHAR;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     -- 4 is mod
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT;
+        RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT, FALSE;
         RETURN;
     END IF;
 
@@ -236,7 +235,9 @@ BEGIN
     ON CONFLICT (account_id, community_id)
     DO UPDATE SET title = _title;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 

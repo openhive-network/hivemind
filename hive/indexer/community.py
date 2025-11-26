@@ -377,7 +377,7 @@ class CommunityOp:
             self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_set_user_title(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_set_title(
                     :actor_id, :account_id, :community_id, :title, :date
                 )""",
                 **params,
