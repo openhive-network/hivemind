@@ -94,8 +94,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS hivemind_app.set_community_role;
-CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
+DROP FUNCTION IF EXISTS hivemind_app.community_set_role;
+CREATE OR REPLACE FUNCTION hivemind_app.community_set_role(
     _actor_id INTEGER,
     _account_id INTEGER,
     _community_id INTEGER,
@@ -103,40 +103,41 @@ CREATE OR REPLACE FUNCTION hivemind_app.set_community_role(
     _date TIMESTAMP,
     _max_mod_nb INTEGER, -- maximum number of roles >= to mod in a community
     _mod_role_threshold INTEGER -- minimum role id to be counted as
-) RETURNS TABLE(success BOOLEAN, error_message TEXT) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN) AS $$
 DECLARE
     _actor_role INTEGER;
     _account_role INTEGER;
     _mod_count BIGINT;
+    _is_subscribed BOOLEAN;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN  -- 4 = Role.mod
-        RETURN QUERY SELECT FALSE, 'only mods and up can alter roles'::TEXT;
+        RETURN QUERY SELECT FALSE, 'only mods and up can alter roles'::TEXT, FALSE;
         RETURN;
     END IF;
 
     IF _actor_role <= _role_id THEN
-        RETURN QUERY SELECT FALSE, 'cannot promote to or above own rank'::TEXT;
+        RETURN QUERY SELECT FALSE, 'cannot promote to or above own rank'::TEXT, FALSE;
         RETURN;
     END IF;
 
     _account_role := hivemind_app.get_community_role(_account_id, _community_id);
 
     IF _account_role = 8 THEN  -- 8 = Role.owner
-        RETURN QUERY SELECT FALSE, 'cant modify owner role'::TEXT;
+        RETURN QUERY SELECT FALSE, 'cant modify owner role'::TEXT, FALSE;
         RETURN;
     END IF;
 
 
     IF _actor_id != _account_id THEN
         IF _account_role >= _actor_role THEN
-            RETURN QUERY SELECT FALSE, 'cant modify a user with a higher role'::TEXT;
+            RETURN QUERY SELECT FALSE, 'cant modify a user with a higher role'::TEXT, FALSE;
             RETURN;
         END IF;
 
         IF _account_role = _role_id THEN
-            RETURN QUERY SELECT FALSE, 'role would not change'::TEXT;
+            RETURN QUERY SELECT FALSE, 'role would not change'::TEXT, FALSE;
             RETURN;
         END IF;
     END IF;
@@ -150,7 +151,7 @@ BEGIN
           AND account_id != _account_id;
 
         IF _mod_count >= _max_mod_nb THEN
-            RETURN QUERY SELECT FALSE, 'moderator limit exceeded'::TEXT;
+            RETURN QUERY SELECT FALSE, 'moderator limit exceeded'::TEXT, FALSE;
             RETURN;
         END IF;
     END IF;
@@ -160,7 +161,9 @@ BEGIN
     ON CONFLICT (account_id, community_id)
     DO UPDATE SET role_id = _role_id;
 
-    RETURN QUERY SELECT TRUE, ''::TEXT;
+    _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
+
+    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed;
 END;
 $$ LANGUAGE plpgsql;
 
