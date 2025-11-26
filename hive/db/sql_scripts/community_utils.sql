@@ -36,6 +36,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.get_post_id_by_permlink(
 DECLARE
     _post_id INTEGER;
     _post_community_id INTEGER;
+    _account_name VARCHAR;
 BEGIN
     SELECT hp.id, hp.community_id INTO _post_id, _post_community_id
     FROM hivemind_app.live_posts_comments_view hp
@@ -43,7 +44,8 @@ BEGIN
     WHERE hp.author_id = _account_id AND hpd.permlink = _permlink;
 
     IF _post_id IS NULL THEN
-        RETURN QUERY SELECT NULL::INTEGER, 'post does not exist'::TEXT;
+        SELECT name INTO _account_name FROM hivemind_app.hive_accounts WHERE id = _account_id;
+        RETURN QUERY SELECT NULL::INTEGER, ('post does not exist: @' || _account_name || '/' || _permlink)::TEXT;
         RETURN;
     END IF;
 
