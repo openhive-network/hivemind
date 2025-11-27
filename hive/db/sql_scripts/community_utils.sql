@@ -50,7 +50,7 @@ BEGIN
     END IF;
 
     IF _post_community_id != _community_id THEN
-        RETURN QUERY SELECT NULL::INTEGER, 'post does not belong to community'::TEXT;
+        RETURN QUERY SELECT NULL::INTEGER, 'post does not belong to a community'::TEXT;
         RETURN;
     END IF;
 
