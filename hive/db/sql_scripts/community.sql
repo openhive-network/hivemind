@@ -61,7 +61,6 @@ BEGIN
         JOIN hivemind_app.hive_communities AS hc ON hc.id = _community_id
         LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
         WHERE r.id = _actor_id
-            AND _block_num > hivemind_app.block_before_irreversible('90 days')
             AND COALESCE(rep.rep, 25) > 0
             AND r.id IS DISTINCT FROM hc.id
         ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING;
@@ -192,7 +191,7 @@ BEGIN
     IF _block_num > _notification_first_block THEN
         INSERT INTO hivemind_app.hive_notification_cache
         (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-        SELECT
+        VALUES (
             hivemind_app.notification_id(_block_date, 1, _counter),
             _block_num,
             1,
@@ -205,7 +204,7 @@ BEGIN
             '',
             _name,
             ''
-        WHERE _block_num > hivemind_app.block_before_irreversible('90 days');
+        );
     END IF;
 END;
 $$ LANGUAGE plpgsql;
