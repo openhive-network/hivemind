@@ -639,7 +639,7 @@ BEGIN
             '',
             _name,
             ''
-        WHERE _block_num > hivemind_app.block_before_irreversible('90 days');
+        );
     END IF;
 END;
 $$ LANGUAGE plpgsql;
