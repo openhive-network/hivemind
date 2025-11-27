@@ -45,7 +45,7 @@ BEGIN
 
     IF _post_id IS NULL THEN
         SELECT name INTO _account_name FROM hivemind_app.hive_accounts WHERE id = _account_id;
-        RETURN QUERY SELECT NULL::INTEGER, ('post does not exist: @' || _account_name || '/' || _permlink)::TEXT;
+        RETURN QUERY SELECT NULL::INTEGER, ('post does not exists ' || _account_name || '/' || _permlink)::TEXT;
         RETURN;
     END IF;
 
