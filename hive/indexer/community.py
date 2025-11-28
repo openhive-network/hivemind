@@ -215,7 +215,23 @@ class Community:
         return cid
 
     @classmethod
-    def is_post_valid(cls, role):
+    def get_user_role(cls, community_id, account_id):
+        """Get user role within a specific community."""
+
+        return (
+            DbAdapterHolder.common_block_processing_db().query_one(
+                f"""SELECT role_id FROM {SCHEMA_NAME}.hive_roles
+                                    WHERE community_id = :community_id
+                                      AND account_id = :account_id
+                                    LIMIT 1""",
+                community_id=community_id,
+                account_id=account_id,
+            )
+            or Role.guest.value
+        )
+
+    @classmethod
+    def is_post_valid(cls, community_id, comment_op: dict):
         """Given a new post/comment, check if valid as per community rules
 
         For a comment to be valid, these conditions apply:
@@ -225,6 +241,10 @@ class Community:
         Note that the checks related to community types are performed on insert
         via the sql function process_community_post
         """
+
+        assert community_id, 'no community_id'
+        account_id = Accounts.get_id(comment_op['author'])
+        role = cls.get_user_role(community_id, account_id)
 
         # TODO: check `nsfw` tag requirement #267
         # TODO: (1.5) check that beneficiaries are valid
