@@ -525,15 +525,17 @@ sync:
     ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
     # Apply CI-specific PostgreSQL tuning for faster sync
     # Note: shared_buffers requires restart so we skip it (already 16GB in base config)
-    # Note: fsync and full_page_writes are now managed by hivemind during massive sync
+    # Note: fsync/full_page_writes are set here because ALTER SYSTEM requires superuser
     # Each ALTER SYSTEM must run outside a transaction, so we use separate -c flags
     psql "${HAF_ADMIN_POSTGRES_URL}" \
       -c "ALTER SYSTEM SET effective_cache_size = '90GB'" \
       -c "ALTER SYSTEM SET work_mem = '256MB'" \
       -c "ALTER SYSTEM SET maintenance_work_mem = '8GB'" \
+      -c "ALTER SYSTEM SET fsync = 'off'" \
+      -c "ALTER SYSTEM SET full_page_writes = 'off'" \
       -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
       -c "SELECT pg_reload_conf()"
-    echo "PostgreSQL CI tuning applied (work_mem=256MB, maintenance_work_mem=8GB)"
+    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, work_mem=256MB)"
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
