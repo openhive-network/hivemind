@@ -327,6 +327,7 @@ prepare_haf_data:
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
   - data-cache-storage
+  - test-builder-9
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
@@ -358,6 +359,7 @@ replay_data_copy:
     - hived_uid.env
   tags:
   - data-cache-storage
+  - test-builder-9
 
 prepare_hivemind_image:
   stage: build
@@ -448,6 +450,7 @@ cleanup_pipeline_cache:
   when: always
   tags:
   - data-cache-storage
+  - test-builder-9
 
 download_await:
   extends: .job-defaults
@@ -473,6 +476,7 @@ download_await:
     fi
   tags:
   - data-cache-storage
+  - test-builder-9
 
 sync:
   extends: .job-defaults
@@ -699,6 +703,7 @@ e2e_benchmark_on_postgrest:
     - hivemind-benchmark-server-await.log
   tags:
   - data-cache-storage
+  - test-builder-9
 
 python_api_client_test:
   extends: .project_develop_configuration_template
