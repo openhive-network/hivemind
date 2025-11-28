@@ -84,14 +84,14 @@ class VoteNotificationCache(NotificationCache):
                 ORDER BY hn.block_num, created_at, hn.src, hn.dst
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
+            cls.beginTx()
             for chunk in chunks(cls.vote_notifications, 1000):
-                cls.beginTx()
                 values_str = ",".join(
                     f"({n['block_num']}, {escape_characters(n['voter'])}, {escape_characters(n['author'])}, {escape_characters(n['permlink'])}, {escape_characters(n['last_update'])}::timestamp, {n['rshares']}, {n['counter']})"
                     for k, n in chunk.items()
                 )
                 cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
+            cls.commitTx()
         else:
             n = 0
         cls.vote_notifications.clear()
@@ -150,14 +150,14 @@ class PostNotificationCache(NotificationCache):
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
+            cls.beginTx()
             for chunk in chunks(cls.comment_notifications, 1000):
-                cls.beginTx()
                 values_str = ",".join(
                     f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']}, {n['counter']})"
                     for _, n in chunk.items()
                 )
                 cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
+            cls.commitTx()
         else:
             n = 0
         cls.comment_notifications.clear()
@@ -225,14 +225,14 @@ class FollowNotificationCache(NotificationCache):
                 ORDER BY nd.block_num, created_at, r.id, r.id
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
+            cls.beginTx()
             for chunk in chunks(cls.follow_notifications_to_flush, 1000):
-                cls.beginTx()
                 values_str = ",".join(
                     f"({follower}, {following}, {block_num}, {counter})"
                     for (follower, following, block_num, counter) in chunk
                 )
                 cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
+            cls.commitTx()
         else:
             n = 0
         cls.follow_notifications_to_flush.clear()
@@ -295,14 +295,14 @@ class ReblogNotificationCache(NotificationCache):
                 ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, pp.id
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
+            cls.beginTx()
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
-                cls.beginTx()
                 values_str = ",".join(
                     f"({n['block_num']}, {escape_characters(n['created_at'])}::timestamp, {escape_characters(n['src'])}, {escape_characters(n['dst'])}, {escape_characters(n['permlink'])}, {n['counter']})"
                     for _, n in chunk.items()
                 )
                 cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
+            cls.commitTx()
         else:
             n = 0
         cls.reblog_notifications_to_flush.clear()
