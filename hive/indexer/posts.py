@@ -220,7 +220,9 @@ class Posts(DbAdapterHolder):
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()
 
-            cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update_posts_rshares in votes
+            # Advisory lock removed: posts payout updates and votes rshares updates affect
+            # disjoint columns of hive_posts, so PostgreSQL row-level locking is sufficient.
+            # Lock was causing serialization between parallel flush operations.
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
