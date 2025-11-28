@@ -174,14 +174,11 @@ class Votes(DbAdapterHolder):
             # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
             cnt = count()
-            cls.beginTx()
-            cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')
-
-            all_post_ids = []
             for chunk in chunks(cls._votes_data, 1000):
+                cls.beginTx()
                 values_str = ','.join(
                     "({}, '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
-                        next(cnt),
+                        next(cnt),  # for ordering
                         vd['voter'],
                         vd['author'],
                         vd['permlink'],
@@ -196,12 +193,9 @@ class Votes(DbAdapterHolder):
                 )
                 actual_query = sql.format(values_str)
                 post_ids = cls.db.query_prepared_all(actual_query)
-                all_post_ids.extend([id[0] for id in post_ids])
-
-            if all_post_ids:
-                cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=all_post_ids)
-
-            cls.commitTx()
+                cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update hive_posts in posts
+                cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids])
+                cls.commitTx()
 
             n = len(cls._votes_data)
             cls._votes_data.clear()

@@ -217,15 +217,15 @@ class Posts(DbAdapterHolder):
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
         """
 
-        cls.beginTx()
-        cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')
-
         for chunk in chunks(cls._comment_payout_ops, 1000):
+            cls.beginTx()
+
+            cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update_posts_rshares in votes
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
 
-        cls.commitTx()
+            cls.commitTx()
 
         n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()
