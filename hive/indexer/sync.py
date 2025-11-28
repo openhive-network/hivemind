@@ -257,6 +257,8 @@ class SyncHiveDb:
             Blocks.close_own_db_access()
             self._wait_for_connections_closed(active_connections_before)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
+            # Refresh baseline after transitioning from massive to live mode
+            active_connections_before = self._get_active_db_connections()
 
         Blocks.process_multi(blocks, is_massive_sync=False)
         active_connections_after_live = self._get_active_db_connections()
