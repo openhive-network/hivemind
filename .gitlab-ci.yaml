@@ -519,6 +519,18 @@ sync:
     pushd ${WORKING_DIR}/app
     ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
     ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
+    # Apply CI-specific PostgreSQL tuning for faster sync
+    # Note: shared_buffers requires restart so we skip it (already 16GB in base config)
+    psql "${HAF_ADMIN_POSTGRES_URL}" -c "
+      ALTER SYSTEM SET effective_cache_size = '90GB';
+      ALTER SYSTEM SET work_mem = '256MB';
+      ALTER SYSTEM SET maintenance_work_mem = '8GB';
+      ALTER SYSTEM SET fsync = 'off';
+      ALTER SYSTEM SET full_page_writes = 'off';
+      ALTER SYSTEM SET max_parallel_workers_per_gather = 4;
+      SELECT pg_reload_conf();
+    "
+    echo "PostgreSQL CI tuning applied (fsync=off, work_mem=256MB, maintenance_work_mem=8GB)"
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
@@ -554,6 +566,7 @@ sync:
     - haf-$CI_JOB_NAME.log
   tags:
   - data-cache-storage
+  - test-builder-9
 
 e2e_benchmark_on_postgrest:
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
