@@ -849,21 +849,56 @@ def set_fillfactor(db):
 
 
 def set_logged_table_attribute(db, logged):
-    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intensively updated"""
+    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intensively updated.
 
+    Tables are converted in parallel to minimize total conversion time.
+    The largest table (hive_votes at ~319GB) is the bottleneck.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from time import perf_counter
+
+    # Ordered by size descending - largest tables start first for better parallelism
     logged_config = [
-        'hive_accounts',
-        'hive_permlink_data',
-        'hive_post_tags',
-        'hive_posts',
-        'hive_post_data',
-        'hive_votes',
+        'hive_votes',         # ~319 GB
+        'hive_post_data',     # ~127 GB
+        'hive_posts',         # ~83 GB
+        'hive_permlink_data', # ~27 GB
+        'hive_post_tags',     # ~12 GB
+        'hive_accounts',      # ~748 MB
     ]
 
-    for table in logged_config:
-        log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on table: {SCHEMA_NAME}.{table}")
-        sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET {'LOGGED' if logged else 'UNLOGGED'}"
-        db.query_no_return(sql)
+    mode = 'LOGGED' if logged else 'UNLOGGED'
+    log.info(f"Converting {len(logged_config)} tables to {mode} in parallel...")
+    start_time = perf_counter()
+
+    def convert_table(table):
+        """Convert a single table - runs in separate thread with own connection."""
+        table_start = perf_counter()
+        thread_db = db.clone(f'logged_convert_{table}')
+        try:
+            sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET {mode}"
+            thread_db.query_no_return(sql)
+            elapsed = perf_counter() - table_start
+            return (table, elapsed, None)
+        except Exception as e:
+            elapsed = perf_counter() - table_start
+            return (table, elapsed, e)
+        finally:
+            thread_db.close()
+
+    with ThreadPoolExecutor(max_workers=len(logged_config)) as executor:
+        futures = {executor.submit(convert_table, table): table for table in logged_config}
+
+        for future in as_completed(futures):
+            table, elapsed, error = future.result()
+            if error:
+                log.error(f"Failed to set {mode} on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
+                raise error
+            else:
+                log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
+
+    total_elapsed = perf_counter() - start_time
+    log.info(f"All {len(logged_config)} tables converted to {mode} in {total_elapsed:.1f}s")
 
 
 def execute_sql_script(query_executor, path_to_script):
