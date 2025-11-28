@@ -40,6 +40,8 @@ class DbState:
     _fk_were_disabled = False
     _fk_were_enabled = False
     _original_synchronous_commit_mode = None
+    _original_fsync = None
+    _original_full_page_writes = None
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -311,6 +313,42 @@ class DbState:
         cls._original_synchronous_commit_mode = None
 
         log.info("SET synchronous_commit = ON")
+
+    @classmethod
+    def disable_wal_safety_for_massive_sync(cls):
+        """Disable WAL safety features during massive sync for better performance.
+
+        This is safe because if massive sync is interrupted, the database is in an
+        inconsistent state anyway and must be rebuilt from scratch.
+
+        Original values are saved and restored after massive sync completes.
+        """
+        if cls._original_fsync is not None:
+            return  # Already disabled
+
+        # Save original values
+        cls._original_fsync = cls.db().query_one("SELECT current_setting('fsync')")
+        cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
+
+        log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+        cls.db().query_no_return("ALTER SYSTEM SET fsync = 'off'")
+        cls.db().query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
+        cls.db().query_no_return("SELECT pg_reload_conf()")
+        log.info("[MASSIVE] WAL safety features disabled (fsync=off, full_page_writes=off)")
+
+    @classmethod
+    def restore_wal_safety_after_massive_sync(cls):
+        """Restore WAL safety features to their original values after massive sync."""
+        if cls._original_fsync is None:
+            return  # Nothing to restore
+
+        log.info(f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+        cls.db().query_no_return(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
+        cls.db().query_no_return(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
+        cls.db().query_no_return("SELECT pg_reload_conf()")
+        cls._original_fsync = None
+        cls._original_full_page_writes = None
+        log.info("[MASSIVE] WAL safety features restored")
 
     @classmethod
     def ensure_indexes_are_disabled(cls):
