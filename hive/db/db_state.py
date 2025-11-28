@@ -32,6 +32,7 @@ class DbState:
     """Manages database state: sync status, migrations, etc."""
 
     _db = None
+    _admin_db = None  # Admin connection for privileged operations like ALTER SYSTEM
 
     # prop is true until massive sync complete
     _is_massive_sync = False
@@ -76,6 +77,9 @@ class DbState:
 
         db_setup_owner.close()
 
+        # Keep admin connection for privileged operations during sync (like ALTER SYSTEM)
+        cls._admin_db = cls.db().clone('admin_for_sync')
+
     @classmethod
     def teardown(cls):
         """Drop all tables in db."""
@@ -88,6 +92,17 @@ class DbState:
             cls._db = Db.instance()
         return cls._db
 
+    @classmethod
+    def admin_db(cls):
+        """Get admin db connection for privileged operations. May be None if not available."""
+        return cls._admin_db
+
+    @classmethod
+    def close_admin_db(cls):
+        """Close admin db connection after massive sync completes."""
+        if cls._admin_db:
+            cls._admin_db.close()
+            cls._admin_db = None
 
     @classmethod
     def set_massive_sync(cls, is_massive: bool):
@@ -322,20 +337,26 @@ class DbState:
         inconsistent state anyway and must be rebuilt from scratch.
 
         Original values are saved and restored after massive sync completes.
-        Requires superuser privileges; skipped gracefully if not available.
+        Requires superuser privileges via admin_db; skipped gracefully if not available.
         """
         if cls._original_fsync is not None:
             return  # Already disabled
 
+        admin = cls.admin_db()
+        if admin is None:
+            log.info("[MASSIVE] No admin connection available, skipping WAL safety optimization")
+            return
+
         try:
-            # Save original values
+            # Save original values (can read from any connection)
             cls._original_fsync = cls.db().query_one("SELECT current_setting('fsync')")
             cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
 
             log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
-            cls.db().query_no_return("ALTER SYSTEM SET fsync = 'off'")
-            cls.db().query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
-            cls.db().query_no_return("SELECT pg_reload_conf()")
+            # ALTER SYSTEM requires superuser - use admin connection
+            admin.query_no_return("ALTER SYSTEM SET fsync = 'off'")
+            admin.query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
+            admin.query_no_return("SELECT pg_reload_conf()")
             log.info("[MASSIVE] WAL safety features disabled (fsync=off, full_page_writes=off)")
         except Exception as e:
             # ALTER SYSTEM requires superuser privileges
@@ -349,10 +370,18 @@ class DbState:
         if cls._original_fsync is None:
             return  # Nothing to restore
 
-        log.info(f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
-        cls.db().query_no_return(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
-        cls.db().query_no_return(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
-        cls.db().query_no_return("SELECT pg_reload_conf()")
+        admin = cls.admin_db()
+        if admin is None:
+            log.warning("[MASSIVE] No admin connection available, cannot restore WAL safety settings")
+            return
+
+        try:
+            log.info(f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+            admin.query_no_return(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
+            admin.query_no_return(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
+            admin.query_no_return("SELECT pg_reload_conf()")
+        except Exception as e:
+            log.warning(f"[MASSIVE] Could not restore WAL safety features: {e}")
         cls._original_fsync = None
         cls._original_full_page_writes = None
         log.info("[MASSIVE] WAL safety features restored")
