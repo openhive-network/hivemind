@@ -77,9 +77,6 @@ class DbState:
 
         db_setup_owner.close()
 
-        # Keep admin connection for privileged operations during sync (like ALTER SYSTEM)
-        cls._admin_db = cls.db().clone('admin_for_sync')
-
     @classmethod
     def teardown(cls):
         """Drop all tables in db."""
@@ -94,7 +91,13 @@ class DbState:
 
     @classmethod
     def admin_db(cls):
-        """Get admin db connection for privileged operations. May be None if not available."""
+        """Get or create admin db connection for privileged operations.
+
+        Created lazily to avoid being captured in active_connections_before snapshot.
+        May return None if base db is not available.
+        """
+        if cls._admin_db is None and cls._db is not None:
+            cls._admin_db = cls._db.clone('admin_for_sync')
         return cls._admin_db
 
     @classmethod
@@ -353,10 +356,10 @@ class DbState:
             cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
 
             log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
-            # ALTER SYSTEM requires superuser - use admin connection
-            admin.query_no_return("ALTER SYSTEM SET fsync = 'off'")
-            admin.query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
-            admin.query_no_return("SELECT pg_reload_conf()")
+            # ALTER SYSTEM requires superuser and cannot run inside a transaction block
+            admin.query_no_return_autocommit("ALTER SYSTEM SET fsync = 'off'")
+            admin.query_no_return_autocommit("ALTER SYSTEM SET full_page_writes = 'off'")
+            admin.query_no_return_autocommit("SELECT pg_reload_conf()")
             log.info("[MASSIVE] WAL safety features disabled (fsync=off, full_page_writes=off)")
         except Exception as e:
             # ALTER SYSTEM requires superuser privileges
@@ -377,9 +380,9 @@ class DbState:
 
         try:
             log.info(f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
-            admin.query_no_return(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
-            admin.query_no_return(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
-            admin.query_no_return("SELECT pg_reload_conf()")
+            admin.query_no_return_autocommit(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
+            admin.query_no_return_autocommit(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
+            admin.query_no_return_autocommit("SELECT pg_reload_conf()")
         except Exception as e:
             log.warning(f"[MASSIVE] Could not restore WAL safety features: {e}")
         cls._original_fsync = None

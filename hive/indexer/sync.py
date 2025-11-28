@@ -178,7 +178,6 @@ class SyncHiveDb:
                 DbState.ensure_indexes_are_enabled()
                 DbState.restore_wal_safety_after_massive_sync()
                 DbState.close_admin_db()  # No longer needed after massive sync
-                active_connections_before = self._get_active_db_connections()  # Refresh after closing admin_db
 
                 if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
                     self.print_summary()
