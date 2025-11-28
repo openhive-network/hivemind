@@ -659,6 +659,7 @@ def setup_runtime_code(db):
         "hafapp_api.sql",
         "grant_hivemind_user.sql",
         "community.sql",
+        "community_utils.sql",
         "postgrest/utilities/exceptions.sql",
         "postgrest/utilities/validate_json_arguments.sql",
         "postgrest/utilities/api_limits.sql",
@@ -859,7 +860,7 @@ def set_logged_table_attribute(db, logged):
         'hive_votes',
     ]
 
-    for table in logged_config.items():
+    for table in logged_config:
         log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on a table: {table}")
         sql = """ALTER TABLE {} SET {}"""
         db.query_no_return(sql.format(table, 'LOGGED' if logged else 'UNLOGGED'))

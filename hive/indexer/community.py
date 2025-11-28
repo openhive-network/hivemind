@@ -170,30 +170,19 @@ class Community:
 
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
-        type_id = int(name[5])
+
         _id = Accounts.get_id(name)
         counter = cls._counter.increment(block_num)
 
-        # insert community
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_communities (id, name, type_id, created_at, block_num)
-                        VALUES (:id, :name, :type_id, :date, :block_num)"""
-        DbAdapterHolder.common_block_processing_db().query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
-
-        # insert owner
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_roles (community_id, account_id, role_id, created_at)
-                        VALUES (:community_id, :account_id, :role_id, :date)"""
-        DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
-
-        # insert community notification
-        # Howo: Maybe we should change this to set dst as the account creator instead
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notification_cache (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        SELECT {SCHEMA_NAME}.notification_id((:created_at)::timestamp, 1, :counter), n.*
-                        FROM (VALUES(:block_num, 1, (:created_at)::timestamp, 0, :dst, 0, 0, 35, '', :community, ''))
-                        AS n(block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-                        WHERE n.score >= 0 AND n.src IS DISTINCT FROM n.dst
-                              AND n.block_num > hivemind_app.block_before_irreversible('90 days')
-                        """
-        DbAdapterHolder.common_block_processing_db().query(sql, block_num=block_num, created_at=block_date, dst=_id, community=name, counter=counter)
+        sql = f"""SELECT {SCHEMA_NAME}.register_community(:name, :account_id, :block_date, :block_num, :counter)"""
+        DbAdapterHolder.common_block_processing_db().query_no_return(
+            sql,
+            name=name,
+            account_id=_id,
+            block_date=block_date,
+            block_num=block_num,
+            counter=counter
+        )
 
     @classmethod
     def validated_id(cls, name):
@@ -224,44 +213,6 @@ class Community:
             cls._ids[name] = cid
             cls._names[cid] = name
         return cid
-
-    @classmethod
-    def _get_name(cls, cid):
-        if cid in cls._names:
-            return cls._names[cid]
-        sql = f"SELECT name FROM {SCHEMA_NAME}.hive_communities WHERE id = :id"
-        name = DbAdapterHolder.common_block_processing_db().query_one(sql, id=cid)
-        if cid:
-            cls._ids[name] = cid
-            cls._names[cid] = name
-        return name
-
-    @classmethod
-    def get_all_muted(cls, community_id):
-        """Return a list of all muted accounts."""
-        return DbAdapterHolder.common_block_processing_db().query_col(
-            f"""SELECT name FROM {SCHEMA_NAME}.hive_accounts
-                                WHERE id IN (SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                                              WHERE community_id = :community_id
-                                                AND role_id < 0)""",
-            community_id=community_id,
-        )
-
-    @classmethod
-    def get_user_role(cls, community_id, account_id):
-        """Get user role within a specific community."""
-
-        return (
-            DbAdapterHolder.common_block_processing_db().query_one(
-                f"""SELECT role_id FROM {SCHEMA_NAME}.hive_roles
-                                    WHERE community_id = :community_id
-                                      AND account_id = :account_id
-                                    LIMIT 1""",
-                community_id=community_id,
-                account_id=account_id,
-            )
-            or Role.guest.value
-        )
 
     @classmethod
     def is_post_valid(cls, role):
@@ -352,8 +303,7 @@ class CommunityOp:
             # validate and read schema
             self._read_schema()
 
-            # validate permissions
-            self._validate_permissions()
+            # permissions are validated directly in SQL
 
             self.valid = True
 
@@ -389,103 +339,143 @@ class CommunityOp:
 
         # Community-level commands
         if action == 'updateProps':
-            bind = ', '.join([k + " = :" + k for k in list(self.props.keys())])
-            DbAdapterHolder.common_block_processing_db().query(
-                f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.update_community_props(
+                    :actor_id, :community_id, :props
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                props=json.dumps(self.props)
             )
-            self._notify_team('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
+            if self._handle_result(result):
+                self._notify_team('set_props', team_members=result['team_members'], payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
-            DbAdapterHolder.common_block_processing_db().query_no_return(
-                f"""SELECT {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
             )
+            self._handle_result(result)
         elif action == 'unsubscribe':
-            DbAdapterHolder.common_block_processing_db().query_no_return(
-                f"""SELECT {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
             )
-
+            self._handle_result(result)
         # Account-level actions
         elif action == 'setRole':
-            result = DbAdapterHolder.common_block_processing_db().query_all(
-                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role(
-                    :account_id, :community_id, :role_id, :date, 
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_set_role(
+                    :actor_id, :account_id, :community_id, :role_id, :date,
                     :max_mod_nb, :mod_role_threshold
                 )""",
                 max_mod_nb=MAX_MOD_NB,
                 mod_role_threshold=Role.mod,
                 **params
             )
-
-            if result[0]['status'] == 'success':
-                self._notify('set_role', payload=Role(self.role_id).name)
-            else:
-                Notify(
-                    block_num=self.block_num,
-                    type_id='error',
-                    src_id=self.community_id,
-                    community_id=self.community_id,
-                    dst_id=self.actor_id,
-                    when=self.date,
-                    payload=f'Cannot set role: {Role(self.role_id).name} limit of {MAX_MOD_NB} moderators/admins/owners exceeded'
-                )
+            self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
-                               (account_id, community_id, title, created_at)
-                        VALUES (:account_id, :community_id, :title, :date)
-                            ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET title = :title""",
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_set_title(
+                    :actor_id, :account_id, :community_id, :title, :date
+                )""",
                 **params,
             )
-            self._notify('set_title', payload=self.title)
-
+            self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1',  muted_reasons = :muted_reasons
-                         WHERE id = :post_id""",
-                **params,
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_mute_post(
+                    :actor_id, :community_id, :account_id, :permlink, :muted_reasons
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink,
+                muted_reasons=params['muted_reasons']
             )
-            self._notify('mute_post', payload=self.notes)
+            self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = 0
-                         WHERE id = :post_id""",
-                **params,
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unmute_post(
+                    :actor_id, :community_id, :account_id, :permlink
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
-            self._notify('unmute_post', payload=self.notes)
+            self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '1'
-                         WHERE id = :post_id""",
-                **params,
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_pin_post(
+                    :actor_id, :community_id, :account_id, :permlink
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
-            self._notify('pin_post', payload=self.notes)
+            self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
-            DbAdapterHolder.common_block_processing_db().query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '0'
-                         WHERE id = :post_id""",
-                **params,
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_unpin_post(
+                    :actor_id, :community_id, :account_id, :permlink
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink
             )
-            self._notify('unpin_post', payload=self.notes)
+            self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            self._notify_team('flag_post', payload=self.notes)
+            result = DbAdapterHolder.common_block_processing_db().query_row(
+                f"""SELECT * FROM {SCHEMA_NAME}.community_flag_post(
+                    :actor_id, :community_id, :account_id, :permlink, :community
+                )""",
+                actor_id=self.actor_id,
+                community_id=self.community_id,
+                account_id=self.account_id,
+                permlink=self.permlink,
+                community=self.community
+            )
+            if self._handle_result(result):
+                self._notify_team('flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes)
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
 
-    def _notify(self, op, **kwargs):
+    def _handle_result(self, result, operation_name=None, payload=None):
+        """Handle result from SQL operations with success/error_messages as notifications"""
+        if result and result['success']:
+            if operation_name:
+                post_id = result['post_id'] if 'post_id' in result.keys() else None
+                is_subscribed = result['is_subscribed'] if 'is_subscribed' in result.keys() else False
+                self._notify(operation_name, post_id=post_id, is_subscribed=is_subscribed, payload=payload)
+            return True
+        elif result:
+            Notify(
+                block_num=self.block_num,
+                type_id='error',
+                dst_id=self.actor_id,
+                when=self.date,
+                payload=result['error_message'],
+                community_id=self.community_id,
+                src_id=self.community_id
+            )
+            return False
+        return True
+
+    def _notify(self, op, post_id=None, is_subscribed=None, **kwargs):
         dst_id = None
         score = 35
 
         if self.account_id:
             dst_id = self.account_id
-            if not self._subscribed(self.account_id):
+            if is_subscribed == False:
                 score = 15
 
         Notify(
@@ -493,24 +483,15 @@ class CommunityOp:
             type_id=op,
             src_id=self.actor_id,
             dst_id=dst_id,
-            post_id=self.post_id,
+            post_id=post_id,
             when=self.date,
             community_id=self.community_id,
             score=score,
             **kwargs,
         )
 
-    def _notify_team(self, op, **kwargs):
+    def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
-
-        team_members = DbAdapterHolder.common_block_processing_db().query_col(
-            f"""SELECT account_id FROM {SCHEMA_NAME}.hive_roles
-                WHERE community_id = :community_id
-                  AND role_id >= :min_role_id""",
-            community_id=self.community_id,
-            min_role_id=Role.mod.value  # 4
-        )
-
         for member_id in team_members:
             # Skip sending notification to the source user (the one triggering the notification)
             if member_id == self.actor_id:
@@ -521,7 +502,7 @@ class CommunityOp:
                 type_id=op,
                 src_id=self.actor_id,
                 dst_id=member_id,
-                post_id=self.post_id,
+                post_id=post_id,
                 when=self.date,
                 community_id=self.community_id,
                 score=35,
@@ -574,25 +555,7 @@ class CommunityOp:
         assert self.account, 'permlink requires named account'
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
-
-        sql = f"""
-          SELECT hp.id, community_id
-          FROM {SCHEMA_NAME}.live_posts_comments_view hp
-          JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hp.permlink_id=hpd.id
-          WHERE author_id=:_author AND hpd.permlink=:_permlink
-        """
-        result = DbAdapterHolder.common_block_processing_db().query_row(sql, _author=self.account_id, _permlink=_permlink)
-        assert result, f'post does not exists {self.account}/{_permlink}'
-        result = dict(result)
-
-        _pid = result.get('id', None)
-        assert _pid, f'post does not exists {self.account}/{_permlink}'
-
-        _comm = result.get('community_id', None)
-        assert self.community_id == _comm, 'post does not belong to community'
-
         self.permlink = _permlink
-        self.post_id = _pid
 
     def _read_role(self):
         _role = read_key_str(self.op, 'role', 16)
@@ -647,87 +610,3 @@ class CommunityOp:
             out['type_id'] = community_type
         assert out, 'props were blank'
         self.props = out
-
-    def _validate_permissions(self):
-        community_id = self.community_id
-        action = self.action
-        actor_role = Community.get_user_role(community_id, self.actor_id)
-        new_role = self.role_id
-
-        if action == 'setRole':
-            assert actor_role >= Role.mod, 'only mods and up can alter roles'
-            assert actor_role > new_role, 'cannot promote to or above own rank'
-            account_role = Community.get_user_role(community_id, self.account_id)
-            assert account_role != Role.owner, 'cant modify owner role'
-            if self.actor != self.account:
-                assert account_role < actor_role, 'cant modify higher-role user'
-                assert account_role != new_role, 'role would not change'
-        elif action == 'updateProps':
-            assert actor_role >= Role.admin, 'only admins can update props'
-        elif action == 'setUserTitle':
-            # TODO: assert title changed?
-            assert actor_role >= Role.mod, 'only mods can set user titles'
-        elif action == 'mutePost':
-            assert not self._muted(), 'post is already muted'
-            assert actor_role >= Role.mod, 'only mods can mute posts'
-        elif action == 'unmutePost':
-            assert self._muted(), 'post is already not muted'
-            assert not self._parent_muted(), 'parent post is muted'
-            assert actor_role >= Role.mod, 'only mods can unmute posts'
-        elif action == 'pinPost':
-            assert not self._pinned(), 'post is already pinned'
-            assert actor_role >= Role.mod, 'only mods can pin posts'
-        elif action == 'unpinPost':
-            assert self._pinned(), 'post is already not pinned'
-            assert actor_role >= Role.mod, 'only mods can unpin posts'
-        elif action == 'flagPost':
-            assert actor_role > Role.muted, 'muted users cannot flag posts'
-            assert not self._flagged(), 'user already flagged this post'
-        elif action == 'subscribe':
-            assert not self._subscribed(self.actor_id), 'already subscribed'
-        elif action == 'unsubscribe':
-            assert self._subscribed(self.actor_id), 'already unsubscribed'
-
-    def _subscribed(self, account_id):
-        """Check an account's subscription status."""
-        sql = f"""SELECT EXISTS(
-                      SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
-                      WHERE community_id = :community_id
-                        AND account_id = :account_id
-                  )"""
-        return DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id)
-
-    def _muted(self):
-        """Check post's muted status."""
-        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _parent_muted(self):
-        """Check parent post's muted status."""
-        parent_id = f"SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = ({parent_id})"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _pinned(self):
-        """Check post's pinned status."""
-        sql = f"SELECT is_pinned FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
-
-    def _flagged(self):
-        """Check user's flag status. Note that because hive_notification_cache gets flushed every 90 days, this means you can re-flag every 90 days"""
-        from hive.indexer.notify import NotifyType
-
-        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notification_cache
-                  WHERE community = :community
-                    AND post_id = :post_id
-                    AND type_id = :type_id
-                    AND src = :src"""
-        return bool(
-            DbAdapterHolder.common_block_processing_db().query_one(
-                sql,
-                community=self.community,
-                post_id=self.post_id,
-                type_id=NotifyType['flag_post'],
-                src=self.actor_id,
-            )
-        )
