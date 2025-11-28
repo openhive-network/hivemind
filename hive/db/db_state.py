@@ -320,6 +320,10 @@ class DbState:
         # is_pre_process, drop, create
         cls.processing_indexes(True, True, False)
 
+        # Set tables to UNLOGGED for faster inserts (no WAL writes)
+        from hive.db.schema import set_logged_table_attribute
+        set_logged_table_attribute(cls.db(), False)
+
         cls._indexes_were_disabled = True
         cls._indexes_were_enabled = False
         log.info("[MASSIVE] Indexes are disabled")
@@ -367,7 +371,9 @@ class DbState:
         if cls._fk_were_enabled:
             return
 
-        from hive.db.schema import create_fk
+        # Set tables back to LOGGED before going live (generates WAL for durability)
+        from hive.db.schema import set_logged_table_attribute, create_fk
+        set_logged_table_attribute(cls.db(), True)
 
         start_time_foreign_keys = perf_counter()
         log.info("Recreating foreign keys")
