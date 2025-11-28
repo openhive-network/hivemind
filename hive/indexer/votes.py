@@ -193,9 +193,7 @@ class Votes(DbAdapterHolder):
                 )
                 actual_query = sql.format(values_str)
                 post_ids = cls.db.query_prepared_all(actual_query)
-                # Advisory lock removed: votes and posts update disjoint columns of hive_posts,
-                # so PostgreSQL row-level locking is sufficient. Lock was causing serialization
-                # between parallel flush operations.
+                cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update hive_posts in posts
                 cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids])
                 cls.commitTx()
 
