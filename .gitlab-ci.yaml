@@ -326,7 +326,7 @@ prepare_haf_data:
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
@@ -357,7 +357,7 @@ replay_data_copy:
     paths:
     - hived_uid.env
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 prepare_hivemind_image:
   stage: build
@@ -447,7 +447,7 @@ cleanup_pipeline_cache:
     CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
   when: always
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 download_await:
   extends: .job-defaults
@@ -472,7 +472,7 @@ download_await:
       chmod +x ${DATA_CACHE_HIVEMIND}/await
     fi
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 sync:
   extends: .job-defaults
@@ -565,7 +565,7 @@ sync:
     - version.log
     - haf-$CI_JOB_NAME.log
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 e2e_benchmark_on_postgrest:
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
@@ -697,7 +697,7 @@ e2e_benchmark_on_postgrest:
     - hivemind-server-await.log
     - hivemind-benchmark-server-await.log
   tags:
-  - data-cache-storage
+  - hive-builder-5
 
 python_api_client_test:
   extends: .project_develop_configuration_template
