@@ -322,19 +322,26 @@ class DbState:
         inconsistent state anyway and must be rebuilt from scratch.
 
         Original values are saved and restored after massive sync completes.
+        Requires superuser privileges; skipped gracefully if not available.
         """
         if cls._original_fsync is not None:
             return  # Already disabled
 
-        # Save original values
-        cls._original_fsync = cls.db().query_one("SELECT current_setting('fsync')")
-        cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
+        try:
+            # Save original values
+            cls._original_fsync = cls.db().query_one("SELECT current_setting('fsync')")
+            cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
 
-        log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
-        cls.db().query_no_return("ALTER SYSTEM SET fsync = 'off'")
-        cls.db().query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
-        cls.db().query_no_return("SELECT pg_reload_conf()")
-        log.info("[MASSIVE] WAL safety features disabled (fsync=off, full_page_writes=off)")
+            log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+            cls.db().query_no_return("ALTER SYSTEM SET fsync = 'off'")
+            cls.db().query_no_return("ALTER SYSTEM SET full_page_writes = 'off'")
+            cls.db().query_no_return("SELECT pg_reload_conf()")
+            log.info("[MASSIVE] WAL safety features disabled (fsync=off, full_page_writes=off)")
+        except Exception as e:
+            # ALTER SYSTEM requires superuser privileges
+            log.warning(f"[MASSIVE] Could not disable WAL safety features (requires superuser): {e}")
+            cls._original_fsync = None
+            cls._original_full_page_writes = None
 
     @classmethod
     def restore_wal_safety_after_massive_sync(cls):
