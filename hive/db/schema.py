@@ -659,7 +659,6 @@ def setup_runtime_code(db):
         "hafapp_api.sql",
         "grant_hivemind_user.sql",
         "community.sql",
-        "community_utils.sql",
         "postgrest/utilities/exceptions.sql",
         "postgrest/utilities/validate_json_arguments.sql",
         "postgrest/utilities/api_limits.sql",
