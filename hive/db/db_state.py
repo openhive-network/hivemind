@@ -356,6 +356,12 @@ class DbState:
 
         start_time = perf_counter()
 
+        # Set tables back to LOGGED before creating indexes
+        # This must happen before index creation because some indexes (e.g., BM25/pg_search)
+        # don't support UNLOGGED tables
+        from hive.db.schema import set_logged_table_attribute
+        set_logged_table_attribute(cls.db(), True)
+
         log.info("Creating indexes: started")
         cls.processing_indexes(False, False, True)
         log.info("Creating indexes: finished")
@@ -371,9 +377,9 @@ class DbState:
         if cls._fk_were_enabled:
             return
 
-        # Set tables back to LOGGED before going live (generates WAL for durability)
-        from hive.db.schema import set_logged_table_attribute, create_fk
-        set_logged_table_attribute(cls.db(), True)
+        # Note: set_logged_table_attribute(True) is now called in ensure_indexes_are_enabled()
+        # because some indexes (e.g., BM25/pg_search) don't support UNLOGGED tables
+        from hive.db.schema import create_fk
 
         start_time_foreign_keys = perf_counter()
         log.info("Recreating foreign keys")
