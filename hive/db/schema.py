@@ -849,7 +849,7 @@ def set_fillfactor(db):
 
 
 def set_logged_table_attribute(db, logged):
-    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intesively updated"""
+    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intensively updated"""
 
     logged_config = [
         'hive_accounts',
@@ -861,9 +861,9 @@ def set_logged_table_attribute(db, logged):
     ]
 
     for table in logged_config:
-        log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on a table: {table}")
-        sql = """ALTER TABLE {} SET {}"""
-        db.query_no_return(sql.format(table, 'LOGGED' if logged else 'UNLOGGED'))
+        log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on table: {SCHEMA_NAME}.{table}")
+        sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET {'LOGGED' if logged else 'UNLOGGED'}"
+        db.query_no_return(sql)
 
 
 def execute_sql_script(query_executor, path_to_script):
