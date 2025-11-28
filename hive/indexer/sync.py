@@ -255,10 +255,10 @@ class SyncHiveDb:
         if not DbLiveContextHolder.is_live_context():
             DbLiveContextHolder.set_live_context(True)
             Blocks.close_own_db_access()
-            self._wait_for_connections_closed(active_connections_before)
-            Blocks.setup_own_db_access(shared_db_adapter=self._db)
-            # Refresh baseline after transitioning from massive to live mode
+            # Get the expected baseline after closing massive sync connections
+            # (should only have hivemind_root remaining)
             active_connections_before = self._get_active_db_connections()
+            Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
         Blocks.process_multi(blocks, is_massive_sync=False)
         active_connections_after_live = self._get_active_db_connections()
