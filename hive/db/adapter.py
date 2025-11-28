@@ -169,6 +169,14 @@ class Db:
     def query_no_return(self, sql, **kwargs):
         self._query(sql, **kwargs)
 
+    def query_no_return_autocommit(self, sql):
+        """Execute a query with autocommit enabled (outside any transaction).
+
+        Required for commands like ALTER SYSTEM that cannot run inside a transaction block.
+        """
+        query = sqlalchemy.text(sql)
+        self._basic_connection.execution_options(autocommit=True).execute(query)
+
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
         res = self._query(sql,**kwargs)
