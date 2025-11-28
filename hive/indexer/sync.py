@@ -151,6 +151,7 @@ class SyncHiveDb:
                 report_enter_to_stage(application_stage)
 
                 DbState.ensure_off_synchronous_commit()
+                DbState.disable_wal_safety_for_massive_sync()
                 DbState.ensure_fk_are_disabled()
                 DbState.ensure_indexes_are_disabled()
 
@@ -175,6 +176,7 @@ class SyncHiveDb:
 
                 DbState.ensure_on_synchronous_commit()
                 DbState.ensure_indexes_are_enabled()
+                DbState.restore_wal_safety_after_massive_sync()
 
                 if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
                     self.print_summary()
