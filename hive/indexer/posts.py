@@ -60,7 +60,7 @@ class Posts(DbAdapterHolder):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
         sql = f"""
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth, muted_reasons, role_id
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth, muted_reasons
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
@@ -81,7 +81,7 @@ class Posts(DbAdapterHolder):
             return
         result = dict(row)
 
-        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['role_id'])
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])
 
         is_new_post = result['is_new_post']
         parent_author = op.get('parent_author')
@@ -415,10 +415,10 @@ class Posts(DbAdapterHolder):
         Votes.drop_votes_of_deleted_comment(op)
 
     @classmethod
-    def _verify_post_against_community(cls, op, community_id, is_valid, role_id):
+    def _verify_post_against_community(cls, op, community_id, is_valid):
         error = None
         # is_valid is always set to true for now
-        if community_id and is_valid and not Community.is_post_valid(role_id):
+        if community_id and is_valid and not Community.is_post_valid(community_id, op):
             error = 'not allowed to post in this community (role is muted)'
             # is_valid = False # TODO: reserved for future blacklist status?
         return error
