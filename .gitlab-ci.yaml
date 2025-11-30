@@ -92,8 +92,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       bridge_api_patterns/ \
       api_smoketest_bridge.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest\r\e[0K"
 
 .bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
@@ -104,8 +103,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       bridge_api_negative/ \
       api_smoketest_bridge_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest_negative\r\e[0K"
 
 .condenser_api_smoketest-script: &condenser_api_smoketest-script
@@ -116,8 +114,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       condenser_api_patterns/ \
       api_smoketest_condenser_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest\r\e[0K"
 
 .condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
@@ -128,8 +125,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       condenser_api_negative/ \
       api_smoketest_condenser_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest_negative\r\e[0K"
 
 .database_api_smoketest-script: &database_api_smoketest-script
@@ -140,8 +136,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       database_api_patterns/ \
       api_smoketest_database_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest\r\e[0K"
 
 .database_api_smoketest_negative-script: &database_api_smoketest_negative-script
@@ -152,8 +147,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       database_api_negative/ \
       api_smoketest_database_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest_negative\r\e[0K"
 
 .follow_api_smoketest-script: &follow_api_smoketest-script
@@ -164,8 +158,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       follow_api_patterns/ \
       api_smoketest_follow_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest\r\e[0K"
 
 .follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
@@ -176,8 +169,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       follow_api_negative/ \
       api_smoketest_follow_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest_negative\r\e[0K"
 
 .tags_api_smoketest-script: &tags_api_smoketest-script
@@ -188,8 +180,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       tags_api_patterns/ \
       api_smoketest_tags_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest\r\e[0K"
 
 .tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
@@ -200,8 +191,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       tags_api_negative/ \
       api_smoketest_tags_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .mock_tests-script: &mock_tests-script
@@ -223,8 +213,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       hive_api_patterns/ \
       api_smoketest_hive_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
 .search-api_smoketest-script: &search-api_smoketest-script
@@ -235,8 +224,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       search-api_patterns/ \
       api_smoketest_search-api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .api-benchmark-script:
@@ -258,8 +246,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       postgrest_negative/ \
       postgrest_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
 
 .rest_api_smoketest-script: &rest_api_smoketest-script
@@ -270,8 +257,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       rest_api_patterns/ \
       api_smoketest_rest_api_patterns.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
 
 .rest_api_negative_smoketest-script: &rest_api_negative_smoketest-script
@@ -282,8 +268,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       rest_api_negative/ \
       api_smoketest_rest_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
