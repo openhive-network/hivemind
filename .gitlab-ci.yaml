@@ -17,7 +17,7 @@ include:
 variables:
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
-  RUNNER_PYTEST_WORKERS: 16  # Explicit pytest-xdist worker count for parallel test execution (32-core machine)
+  RUNNER_PYTEST_WORKERS: 12  # pytest-xdist worker count - 12 is optimal for 32-core machine (leaves headroom for PostgreSQL and other processes)
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
   # HAF
@@ -520,9 +520,11 @@ sync:
       -c "ALTER SYSTEM SET maintenance_work_mem = '8GB'" \
       -c "ALTER SYSTEM SET fsync = 'off'" \
       -c "ALTER SYSTEM SET full_page_writes = 'off'" \
+      -c "ALTER SYSTEM SET synchronous_commit = 'off'" \
+      -c "ALTER SYSTEM SET wal_buffers = '64MB'" \
       -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
       -c "SELECT pg_reload_conf()"
-    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, work_mem=256MB)"
+    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, synchronous_commit=off, work_mem=256MB)"
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
