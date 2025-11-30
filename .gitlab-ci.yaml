@@ -505,7 +505,7 @@ sync:
     USE_POSTGREST: 1
   script:
   - |
-    sleep 20s
+    sleep 5s  # Brief pause to ensure services are starting; await handles actual readiness
     cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
     pushd ${WORKING_DIR}/app
     ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
@@ -522,9 +522,10 @@ sync:
       -c "ALTER SYSTEM SET full_page_writes = 'off'" \
       -c "ALTER SYSTEM SET synchronous_commit = 'off'" \
       -c "ALTER SYSTEM SET wal_buffers = '64MB'" \
+      -c "ALTER SYSTEM SET checkpoint_completion_target = '0.9'" \
       -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
       -c "SELECT pg_reload_conf()"
-    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, synchronous_commit=off, work_mem=256MB)"
+    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, synchronous_commit=off, checkpoint_completion_target=0.9)"
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
