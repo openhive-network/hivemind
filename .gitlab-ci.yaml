@@ -569,6 +569,16 @@ e2e_benchmark_on_postgrest:
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
   stage: benchmark
   interruptible: true
+  cache:
+    key:
+      files:
+        - tox.ini
+        - requirements.txt
+      prefix: pip-cache
+    paths:
+      - .tox/
+      - .cache/pip/
+    policy: pull-push
   needs:
   - job: replay_data_copy
     artifacts: true
@@ -621,6 +631,7 @@ e2e_benchmark_on_postgrest:
     JOB_TOKEN: $CI_JOB_TOKEN
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"  # Enable pip caching for faster tox runs
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
