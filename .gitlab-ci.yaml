@@ -753,11 +753,10 @@ Trigger benchmark-results-collector:
   needs:
   - job: e2e_benchmark_on_postgrest
     artifacts: true   # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
+  # NOTE: This job is set to manual because the api-benchmark-script is currently
+  # commented out in e2e_benchmark_on_postgrest, so request_process_times.log is not
+  # generated. Re-enable automatic triggering when benchmarks are re-enabled.
   rules:
-  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    when: on_success
-  - if: '$CI_COMMIT_BRANCH == "develop"'
-    when: on_success
   - when: manual
     allow_failure: true
   variables:
