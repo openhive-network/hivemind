@@ -17,6 +17,7 @@ include:
 variables:
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
+  RUNNER_PYTEST_WORKERS: 4  # Explicit pytest-xdist worker count for parallel test execution
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
   # HAF
