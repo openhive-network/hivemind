@@ -526,8 +526,11 @@ sync:
       -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
       -c "ALTER SYSTEM SET max_parallel_maintenance_workers = 4" \
       -c "ALTER SYSTEM SET max_parallel_workers = 8" \
+      -c "ALTER SYSTEM SET random_page_cost = '1.1'" \
+      -c "ALTER SYSTEM SET effective_io_concurrency = '200'" \
+      -c "ALTER SYSTEM SET jit = 'off'" \
       -c "SELECT pg_reload_conf()"
-    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, synchronous_commit=off, checkpoint_completion_target=0.9, max_parallel_maintenance_workers=4)"
+    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, synchronous_commit=off, SSD optimizations, jit=off)"
     pushd ${WORKING_DIR}
     ${WORKING_DIR}/docker_entrypoint.sh setup \
           --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
