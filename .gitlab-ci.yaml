@@ -423,6 +423,7 @@ cleanup_hivemind_haf_cache_manual:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
   tags:
   - data-cache-storage
+  - hive-builder-9
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
 # For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
@@ -433,6 +434,7 @@ cleanup_haf_cache_manual:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_* /cache/replay_data_haf_*"
   tags:
   - data-cache-storage
+  - hive-builder-9
 
 # Cleans up cahce after tests. Must depend on all jobs that use
 # this cache
