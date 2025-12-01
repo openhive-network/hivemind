@@ -1,114 +1,66 @@
-# Hivemind Validate Response Fix Report
+# Task Report: Add hive-builder-9 tag to cleanup jobs
 
 ## Summary
 
-This task addressed an issue where REST API pattern tests were failing with errors about an unexpected `id` parameter being passed to SQL functions. Investigation revealed that the `compare_rest_response_with_pattern` function in the `tests_api` submodule was appending responses to output files without first removing existing files, potentially causing response concatenation issues.
+Successfully added the `hive-builder-9` tag to two manual cleanup jobs in the CI configuration that were missing it. This ensures consistency with all other `data-cache-storage` jobs which require both tags.
 
-## Analysis
+## Problem
 
-### Problem Description
+Two manual cleanup jobs in `.gitlab-ci.yaml` were missing the `hive-builder-9` tag:
+- `cleanup_hivemind_haf_cache_manual`
+- `cleanup_haf_cache_manual`
 
-According to the task description, the CI pipeline was failing with errors like:
-- `"Could not find hivemind_endpoints.get_ops_by_account(account-name, id, page, page-size)"`
-- `"Could not find hivemind_endpoints.get_ops_by_account(account-name, id, operation-types, page-size)"`
-
-The `.out.json` artifact files reportedly contained two responses concatenated together:
-1. First call succeeded with correct parameters
-2. Second call failed due to an unexpected `id` parameter
-
-### Root Cause Analysis
-
-The `validate_response` module in `tests/tests_api/validate_response/__init__.py` has two similar functions:
-
-1. **`compare_response_with_pattern`** (used for JSON-RPC tests):
-   - Properly removes existing output file before saving (lines 106-109)
-   - Uses `os.remove()` if file exists
-
-2. **`compare_rest_response_with_pattern`** (used for REST API tests):
-   - Was **missing** the file deletion logic
-   - Used `save_json()` which appends to files (`'a'` mode)
-   - This could lead to multiple responses being concatenated in the output file
-
-### The Fix
-
-Added the missing file deletion logic to `compare_rest_response_with_pattern` to match the behavior of `compare_response_with_pattern`:
-
-```python
-# Remove existing output file to avoid concatenating responses from multiple test runs
-if os.path.exists(response_fname):
-    os.remove(response_fname)
-```
-
-This ensures that when a test runs (or re-runs due to retries or parallel execution), it starts with a fresh output file rather than appending to a potentially stale file.
+Both jobs had the `data-cache-storage` tag but were inconsistent with other similar jobs that have both tags.
 
 ## Changes Made
 
-### Commit 1: tests_api submodule
-**Branch:** `fix/validate-response-file-cleanup`
-**File:** `validate_response/__init__.py`
+### Commit: cb39df72
+**Message:** CI: Add hive-builder-9 tag to cleanup jobs for consistency
 
-Added file deletion before saving response in `compare_rest_response_with_pattern`:
-- Lines 234-236: Added `os.path.exists()` check and `os.remove()` call
+**File Modified:** `.gitlab-ci.yaml`
 
-### Commit 2: hivemind main repo
-**Branch:** `fix/validate-response-id-parameter`
-**Commit:** `f08c79c3`
+**Changes:**
+1. Added `hive-builder-9` tag to `cleanup_hivemind_haf_cache_manual` job (line 426)
+2. Added `hive-builder-9` tag to `cleanup_haf_cache_manual` job (line 437)
 
-Updated `tests/tests_api` submodule reference to point to the fixed version.
+## Results
+
+### Verification
+Both jobs now have the required tags as confirmed by the GitLab API:
+
+- `cleanup_hivemind_haf_cache_manual`: `tag_list: ["data-cache-storage", "hive-builder-9"]`
+- `cleanup_haf_cache_manual`: `tag_list: ["data-cache-storage", "hive-builder-9"]`
+
+### Pipeline Status
+- Pipeline ID: 140570
+- URL: https://gitlab.syncad.com/hive/hivemind/-/pipelines/140570
+- Status at report time: Running (long-running sync job in progress)
+- All non-sync jobs completed successfully
 
 ## Technical Details
 
 ### Files Modified
+| File | Lines Changed |
+|------|---------------|
+| `.gitlab-ci.yaml` | +2 lines (tags added) |
 
-1. `tests/tests_api` (submodule reference updated)
-   - Points to commit `d58d284c` in `tests_api` repo (branch `fix/validate-response-file-cleanup`)
-
-### Submodule Change Details
-
-**File:** `tests/tests_api/validate_response/__init__.py`
-
-**Diff:**
-```diff
-@@ -231,6 +231,10 @@ def compare_rest_response_with_pattern(...):
-
-   response_fname = test_fname + RESPONSE_FILE_EXT
-
-+  # Remove existing output file to avoid concatenating responses from multiple test runs
-+  if os.path.exists(response_fname):
-+    os.remove(response_fname)
-+
-   json_response: dict[str, Any] = response.json()
-   save_json(response_fname, json_response)
-```
-
-## Pipeline Status
-
-**Note:** The GitLab API token used for this task does not have access to the pipelines endpoint. Pipeline verification should be done manually via:
-- https://gitlab.syncad.com/hive/hivemind/-/pipelines?ref=fix/validate-response-id-parameter
-
-The changes have been pushed to:
-- Main repo: `fix/validate-response-id-parameter` branch
-- Submodule: `fix/validate-response-file-cleanup` branch in `tests_api` repo
-
-## Recommendations
-
-1. **Verify Pipeline:** Check the pipeline manually to confirm the fix resolves the test failures.
-
-2. **Merge Submodule First:** The `tests_api` submodule changes should be merged first:
-   - Create MR in `tests_api` repo from `fix/validate-response-file-cleanup` to main branch
-   - Once merged, update the submodule reference in the hivemind repo
-
-3. **Consider Additional Investigation:** If the fix does not resolve the issue, further investigation may be needed to understand where the `id` parameter is being injected into requests. The current analysis suggests the issue is with output file handling, but there may be additional factors.
+### Jobs Updated
+| Job Name | Tags Before | Tags After |
+|----------|-------------|------------|
+| `cleanup_hivemind_haf_cache_manual` | `data-cache-storage` | `data-cache-storage`, `hive-builder-9` |
+| `cleanup_haf_cache_manual` | `data-cache-storage` | `data-cache-storage`, `hive-builder-9` |
 
 ## Issues Encountered
 
-- GitLab API access for pipelines/jobs is restricted with the provided token
-- The exact source of the `id` parameter injection could not be definitively confirmed without access to the actual failing test artifacts
-- The submodule architecture requires coordinated changes across two repositories
+None. This was a straightforward tag addition with no complications.
 
-## Test Categories Affected
+## Recommendations
 
-The fix affects REST API pattern tests using `compare_rest_response_with_pattern`:
-- `rest_api_patterns/get_ops_by_account/`
-- `rest_api_negative/get_ops_by_account/`
-- And potentially other REST API tests using the same validation function
+No further work needed. The fix is complete and verified through the GitLab API. The pipeline should complete successfully once the sync and benchmark stages finish (typical hivemind pipeline duration is 30-60 minutes).
+
+## Iterations
+
+- **Iteration 1:** Successfully completed the task in a single iteration
+  - Added `hive-builder-9` tag to both cleanup jobs
+  - Committed and pushed changes
+  - Verified fix through GitLab API job metadata
