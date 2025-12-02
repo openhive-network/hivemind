@@ -47,6 +47,7 @@ variables:
   tags: &shared_tags
   - public-runner-docker
   - hived-for-tests
+  - hived
 
 .start-timer:
 - ./scripts/ci/timer.sh start
