@@ -4,7 +4,8 @@ set -euo pipefail
 
 export HIVEMIND_ADDRESS="$1"
 export HIVEMIND_PORT="$2"
-ITERATIONS=${3:-5}
+# Use 1 iteration for now to reduce CI time; benchmark tests validate API functionality
+ITERATIONS=${3:-1}
 JOBS=${4:-"auto"}
 
 TAVERN_DIR="$(realpath ./tests/api_tests/hivemind/tavern)"
@@ -28,12 +29,12 @@ echo "Attempting to start benchmarks on hivemind instance listening on: ${HIVEMI
 
 for ((i = 0; i < ITERATIONS; i++)); do
   echo "About to run iteration ${i}"
-  rm -f HIVEMIND_BENCHMARKS_IDS_FILE
+  rm -f "$HIVEMIND_BENCHMARKS_IDS_FILE"
   tox -e tavern-benchmark -- \
     -W ignore::pytest.PytestDeprecationWarning \
     -n "${JOBS}" \
     -m "not postgrest_exception" \
-    "${@:5}"
+    ${@:5}
   echo "Done!"
 done
 
