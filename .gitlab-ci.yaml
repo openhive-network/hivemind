@@ -11,7 +11,7 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 9abb738e9e83f00882102dffcddd7f5f82f3dddf # mi/image_tag_variable
+  ref: bf820442979eff6c7cb7e387f26cd4ccf9345f3c # mi/image_tag_variable
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
@@ -761,7 +761,8 @@ Trigger benchmark-results-collector:
   - when: manual
     allow_failure: true
   variables:
-    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
+    ARTIFACTS_URL: 
+      https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
     #description:
     SOURCE: hivemind
