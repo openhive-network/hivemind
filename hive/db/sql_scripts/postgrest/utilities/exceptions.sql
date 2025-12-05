@@ -1,3 +1,40 @@
+-- Helper function to build hived-compatible error data structure
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.build_hived_error_data;
+CREATE FUNCTION hivemind_postgrest_utilities.build_hived_error_data(
+  _assertion_expression TEXT,
+  _assert_hash TEXT DEFAULT '0000000000000000000'
+)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN jsonb_build_object(
+    'code', 10,
+    'name', 'assert_exception',
+    'message', 'Assert Exception',
+    'stack', jsonb_build_array(
+      jsonb_build_object(
+        'context', jsonb_build_object(
+          'level', 'error',
+          'file', '',
+          'line', 0,
+          'method', '',
+          'hostname', '',
+          'thread_name', '',
+          'timestamp', to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD"T"HH24:MI:SS')
+        ),
+        'format', '',
+        'data', jsonb_build_object('category', 'hivemind')
+      )
+    ),
+    'extension', jsonb_build_object('assertion_expression', _assertion_expression),
+    'assert_hash', _assert_hash
+  );
+END
+$$;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL)
 RETURNS JSONB
@@ -20,6 +57,31 @@ BEGIN
       'data', _data
     );
   END IF;
+  RAISE EXCEPTION '%', REPLACE(error_json_result::TEXT, ' :', ':');
+END
+$$;
+
+-- Enhanced raise_exception that accepts JSONB data for hived-compatible errors
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_exception_with_data;
+CREATE FUNCTION hivemind_postgrest_utilities.raise_exception_with_data(
+  _code INT,
+  _message TEXT,
+  _data JSONB,
+  _id JSON = NULL
+)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+DECLARE
+  error_json_result JSONB;
+BEGIN
+  error_json_result := jsonb_build_object(
+    'code', _code,
+    'message', _message,
+    'data', _data
+  );
   RAISE EXCEPTION '%', REPLACE(error_json_result::TEXT, ' :', ':');
 END
 $$;
@@ -70,8 +132,18 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    _exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || _exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -83,8 +155,18 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    _exception_message,
+    '1a2b3c4d5e6f7a8b9c0d'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || _exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -115,6 +197,9 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
+  exception_message TEXT;
 BEGIN
   IF _author IS NULL THEN
     _author = '';
@@ -122,7 +207,16 @@ BEGIN
   IF _permlink IS NULL THEN
     _permlink = '';
   END IF;
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Post ' || _author::TEXT || '/' || _permlink::TEXT || ' does not exist');
+  exception_message := 'Post ' || _author::TEXT || '/' || _permlink::TEXT || ' does not exist';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '4d5e6f7a8b9c0d1e2f3a'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -173,8 +267,18 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', _exception_message);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    _exception_message,
+    '2b3c4d5e6f7a8b9c0d1e'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || _exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -212,8 +316,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Category ' || _category_name || ' does not exist');
+  exception_message := 'Category ' || _category_name || ' does not exist';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '5e6f7a8b9c0d1e2f3a4b'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -225,8 +341,18 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    _exception_message,
+    '6f7a8b9c0d1e2f3a4b5c'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || _exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -286,8 +412,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSONB;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Tag ' || _tag || ' does not exist');
+  exception_message := 'Tag ' || _tag || ' does not exist';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '7a8b9c0d1e2f3a4b5c6d'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
