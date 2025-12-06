@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.home(JSON);
 CREATE FUNCTION hivemind_endpoints.home(JSON)
-RETURNS JSONB
+RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
 AS
@@ -23,22 +23,22 @@ BEGIN
 
   __id = __request_data->>'id';
   IF __id IS NULL THEN
-    return jsonb_build_object('jsonrpc', '2.0', 'error', 'id required');
+    return json_build_object('id', null, 'jsonrpc', '2.0', 'error', 'id required');
   END IF;
 
   __method = __request_data->>'method';
   if __method is NULL THEN
-    RETURN jsonb_build_object('jsonrpc', '2.0', 'error', 'no method passed', 'id', __id);
+    RETURN json_build_object('id', __id, 'jsonrpc', '2.0', 'error', 'no method passed');
   END IF;
 
   --early check to reject methods that require parameters
   __params = __request_data->'params';
-  IF __method NOT IN ('call', 'hive.db_head_state', 'condenser.get_trending_tags', 
-                      'bridge.list_pop_communities', 'bridge.get_payout_stats', 
+  IF __method NOT IN ('call', 'hive.db_head_state', 'condenser.get_trending_tags',
+                      'bridge.list_pop_communities', 'bridge.get_payout_stats',
                       'bridge.get_trending_topics','bridge.list_muted_reasons_enum'
                      ) THEN
     IF __params is NULL THEN
-      RETURN jsonb_build_object('jsonrpc', '2.0', 'error', 'this method requires parameters', 'id', __id);
+      RETURN json_build_object('id', __id, 'jsonrpc', '2.0', 'error', 'this method requires parameters');
     END IF;
   END IF;
 
@@ -57,12 +57,12 @@ BEGIN
     SELECT split_part(__method, '.', 2) INTO __method_type;
   END IF;
 
-  
-  RETURN jsonb_build_object( 'jsonrpc', '2.0', 'id', __id, 'result', hivemind_postgrest_utilities.dispatch(__api_type, __method_type, __params_jsonb) );
+
+  RETURN json_build_object( 'id', __id, 'jsonrpc', '2.0', 'result', hivemind_postgrest_utilities.dispatch(__api_type, __method_type, __params_jsonb) );
 
   EXCEPTION
     WHEN raise_exception THEN
-      RETURN jsonb_build_object('jsonrpc', '2.0', 'error', SQLERRM::JSONB, 'id', __id);
+      RETURN json_build_object('id', __id, 'jsonrpc', '2.0', 'error', SQLERRM::JSON);
 END
 $$
 ;
