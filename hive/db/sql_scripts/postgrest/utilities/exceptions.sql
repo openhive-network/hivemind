@@ -4,19 +4,19 @@ CREATE FUNCTION hivemind_postgrest_utilities.build_hived_error_data(
   _assertion_expression TEXT,
   _assert_hash TEXT DEFAULT '0000000000000000000'
 )
-RETURNS JSONB
+RETURNS JSON
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN jsonb_build_object(
+  RETURN json_build_object(
     'code', 10,
     'name', 'assert_exception',
     'message', 'Assert Exception',
-    'stack', jsonb_build_array(
-      jsonb_build_object(
-        'context', jsonb_build_object(
+    'stack', json_build_array(
+      json_build_object(
+        'context', json_build_object(
           'level', 'error',
           'file', '',
           'line', 0,
@@ -26,10 +26,10 @@ BEGIN
           'timestamp', to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD"T"HH24:MI:SS')
         ),
         'format', '',
-        'data', jsonb_build_object('category', 'hivemind')
+        'data', json_build_object('category', 'hivemind')
       )
     ),
-    'extension', jsonb_build_object('assertion_expression', _assertion_expression),
+    'extension', json_build_object('assertion_expression', _assertion_expression),
     'assert_hash', _assert_hash
   );
 END
@@ -61,23 +61,23 @@ BEGIN
 END
 $$;
 
--- Enhanced raise_exception that accepts JSONB data for hived-compatible errors
+-- Enhanced raise_exception that accepts JSON data for hived-compatible errors
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_exception_with_data;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_exception_with_data(
   _code INT,
   _message TEXT,
-  _data JSONB,
+  _data JSON,
   _id JSON = NULL
 )
-RETURNS JSONB
+RETURNS JSON
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
 DECLARE
-  error_json_result JSONB;
+  error_json_result JSON;
 BEGIN
-  error_json_result := jsonb_build_object(
+  error_json_result := json_build_object(
     'code', _code,
     'message', _message,
     'data', _data
@@ -133,7 +133,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
 BEGIN
   hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
     _exception_message,
@@ -156,7 +156,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
 BEGIN
   hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
     _exception_message,
@@ -198,7 +198,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
   exception_message TEXT;
 BEGIN
   IF _author IS NULL THEN
@@ -268,7 +268,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
 BEGIN
   hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
     _exception_message,
@@ -317,7 +317,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
   exception_message TEXT;
 BEGIN
   exception_message := 'Category ' || _category_name || ' does not exist';
@@ -342,7 +342,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
 BEGIN
   hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
     _exception_message,
@@ -413,7 +413,7 @@ IMMUTABLE
 AS
 $$
 DECLARE
-  hived_error_data JSONB;
+  hived_error_data JSON;
   exception_message TEXT;
 BEGIN
   exception_message := 'Tag ' || _tag || ' does not exist';

@@ -62,7 +62,18 @@ BEGIN
 
   EXCEPTION
     WHEN raise_exception THEN
-      RETURN json_build_object('id', __id, 'jsonrpc', '2.0', 'error', SQLERRM::JSON);
+      DECLARE
+        error_obj JSON;
+        error_parts JSON;
+      BEGIN
+        error_parts := SQLERRM::JSON;
+        error_obj := json_build_object(
+          'code', (error_parts->>'code')::INT,
+          'message', error_parts->>'message',
+          'data', error_parts->'data'
+        );
+        RETURN json_build_object('id', __id, 'jsonrpc', '2.0', 'error', error_obj);
+      END;
 END
 $$
 ;
