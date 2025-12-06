@@ -13,7 +13,7 @@ BEGIN
   RETURN json_build_object(
     'code', 10,
     'name', 'assert_exception',
-    'message', 'Assert Exception',
+    'message', _assertion_expression,
     'stack', json_build_array(
       json_build_object(
         'context', json_build_object(
