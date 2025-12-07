@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "invalid account name length: `too.long.account.name`",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "invalid account name length: `too.long.account.name`"
+    },
+    "message": "invalid account name length: `too.long.account.name`",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-06T22:51:27"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:invalid account name length: `too.long.account.name`"
 }

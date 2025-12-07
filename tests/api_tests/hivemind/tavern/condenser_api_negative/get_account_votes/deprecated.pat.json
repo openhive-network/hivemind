@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
+    },
+    "message": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-06T22:51:26"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
 }

@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "Post admin/non_existing_permlink does not exist",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "Post admin/non_existing_permlink does not exist"
+    },
+    "message": "Post admin/non_existing_permlink does not exist",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-06T22:51:27"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:Post admin/non_existing_permlink does not exist"
 }
