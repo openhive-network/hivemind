@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]"
+    },
+    "message": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T04:03:13"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]"
 }

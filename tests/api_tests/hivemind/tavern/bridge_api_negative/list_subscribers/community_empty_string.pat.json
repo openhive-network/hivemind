@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "community name cannot be blank",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "6f7a8b9c0d1e2f3a4b5c",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "community name cannot be blank"
+    },
+    "message": "community name cannot be blank",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T04:03:13"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:community name cannot be blank"
 }

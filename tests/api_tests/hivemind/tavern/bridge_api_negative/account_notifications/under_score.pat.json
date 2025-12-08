@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "score = -1 outside valid range [0:100]",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "score = -1 outside valid range [0:100]"
+    },
+    "message": "score = -1 outside valid range [0:100]",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T04:03:13"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:score = -1 outside valid range [0:100]"
 }
