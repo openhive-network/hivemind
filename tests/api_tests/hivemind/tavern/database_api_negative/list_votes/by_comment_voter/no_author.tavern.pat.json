@@ -1,0 +1,30 @@
+{
+  "code": -32602,
+  "message": "Assert Exception:invalid account (not specified)",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "invalid account (not specified)",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T18:32:33"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "invalid account (not specified)"
+    },
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d"
+  }
+}

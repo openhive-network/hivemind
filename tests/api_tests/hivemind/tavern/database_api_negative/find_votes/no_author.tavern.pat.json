@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "message": "Invalid parameters",
+  "data": "missing a required argument: 'author'"
+}
