@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "invalid account name type",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "invalid account name type"
+    },
+    "message": "invalid account name type",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T20:43:23"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:invalid account name type"
 }
