@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-08T18:32:33"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

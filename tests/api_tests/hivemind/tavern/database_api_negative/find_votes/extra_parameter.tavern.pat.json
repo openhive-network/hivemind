@@ -1,5 +1,0 @@
-{
-  "code": -32602,
-  "message": "Invalid parameters",
-  "data": "got an unexpected keyword argument 'extra_parameter'"
-}
