@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "Unsupported order, valid orders: by_comment_voter, by_voter_comment",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "Unsupported order, valid orders: by_comment_voter, by_voter_comment"
+    },
+    "message": "Unsupported order, valid orders: by_comment_voter, by_voter_comment",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:22:38"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:Unsupported order, valid orders: by_comment_voter, by_voter_comment"
 }
