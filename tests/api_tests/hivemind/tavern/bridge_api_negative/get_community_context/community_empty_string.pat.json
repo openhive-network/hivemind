@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:community name cannot be blank",
   "data": {
-    "assert_hash": "6f7a8b9c0d1e2f3a4b5c",
     "code": 10,
-    "extension": {
-      "assertion_expression": "community name cannot be blank"
-    },
-    "message": "community name cannot be blank",
     "name": "assert_exception",
+    "message": "community name cannot be blank",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:08"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:community name cannot be blank"
+    ],
+    "extension": {
+      "assertion_expression": "community name cannot be blank"
+    },
+    "assert_hash": "6f7a8b9c0d1e2f3a4b5c"
+  }
 }

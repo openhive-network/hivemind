@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
   "data": {
-    "assert_hash": "1a2b3c4d5e6f7a8b9c0d",
     "code": 10,
-    "extension": {
-      "assertion_expression": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]"
-    },
-    "message": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
     "name": "assert_exception",
+    "message": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:08"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]"
+    ],
+    "extension": {
+      "assertion_expression": "[{\"789\": \"invalid account char\"}, {\"\": \"invalid account (not specified)\"}, {\"------\": \"invalid account char\"}, {\"421\": \"invalid account char\"}, {\"thisusernameistoolong\": \"invalid account name length: `thisusernameistoolong`\"}]"
+    },
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d"
+  }
 }

@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
   "data": {
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
-    "extension": {
-      "assertion_expression": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
-    },
-    "message": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
     "name": "assert_exception",
+    "message": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-06T22:51:26"
+          "timestamp": "2025-12-09T00:45:00"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
+    ],
+    "extension": {
+      "assertion_expression": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

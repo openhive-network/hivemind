@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:permlink cannot be blank",
   "data": {
-    "assert_hash": "2b3c4d5e6f7a8b9c0d1e",
     "code": 10,
-    "extension": {
-      "assertion_expression": "permlink cannot be blank"
-    },
-    "message": "permlink cannot be blank",
     "name": "assert_exception",
+    "message": "permlink cannot be blank",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:07"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:permlink cannot be blank"
+    ],
+    "extension": {
+      "assertion_expression": "permlink cannot be blank"
+    },
+    "assert_hash": "2b3c4d5e6f7a8b9c0d1e"
+  }
 }

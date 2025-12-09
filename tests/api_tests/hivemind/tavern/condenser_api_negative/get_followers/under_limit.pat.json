@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:Account steemit does not exist",
   "data": {
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
-    "extension": {
-      "assertion_expression": "limit = 0 outside valid range [1:1000]"
-    },
-    "message": "limit = 0 outside valid range [1:1000]",
     "name": "assert_exception",
+    "message": "Account steemit does not exist",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-06T22:51:27"
+          "timestamp": "2025-12-09T00:45:00"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:limit = 0 outside valid range [1:1000]"
+    ],
+    "extension": {
+      "assertion_expression": "Account steemit does not exist"
+    },
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d"
+  }
 }

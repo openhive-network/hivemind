@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:limit = 26 outside valid range [1:25]",
   "data": {
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
-    "extension": {
-      "assertion_expression": "limit = 26 outside valid range [1:25]"
-    },
-    "message": "limit = 26 outside valid range [1:25]",
     "name": "assert_exception",
+    "message": "limit = 26 outside valid range [1:25]",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:07"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:limit = 26 outside valid range [1:25]"
+    ],
+    "extension": {
+      "assertion_expression": "limit = 26 outside valid range [1:25]"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

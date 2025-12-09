@@ -1,5 +1,30 @@
 {
-  "code": -31999,
-  "data": "Post jsc/testing-summary was deleted 1 time(s)",
-  "message": "Invalid parameters"
+  "code": -32602,
+  "message": "Assert Exception:Post jsc/testing-summary does not exist",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Post jsc/testing-summary does not exist",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:45:00"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "Post jsc/testing-summary does not exist"
+    },
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a"
+  }
 }

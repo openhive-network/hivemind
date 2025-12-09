@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:invalid account_lower_bound type",
   "data": {
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
-    "extension": {
-      "assertion_expression": "invalid account_lower_bound type"
-    },
-    "message": "invalid account_lower_bound type",
     "name": "assert_exception",
+    "message": "invalid account_lower_bound type",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-06T22:51:26"
+          "timestamp": "2025-12-09T00:45:00"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:invalid account_lower_bound type"
+    ],
+    "extension": {
+      "assertion_expression": "invalid account_lower_bound type"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

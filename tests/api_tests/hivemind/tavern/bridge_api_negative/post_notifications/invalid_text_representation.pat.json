@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:Post steemit/firstpost does not exist",
   "data": {
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
-    "extension": {
-      "assertion_expression": "invalid literal for int() with base 10: 'abc'"
-    },
-    "message": "invalid literal for int() with base 10: 'abc'",
     "name": "assert_exception",
+    "message": "Post steemit/firstpost does not exist",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:08"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:invalid literal for int() with base 10: 'abc'"
+    ],
+    "extension": {
+      "assertion_expression": "Post steemit/firstpost does not exist"
+    },
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a"
+  }
 }

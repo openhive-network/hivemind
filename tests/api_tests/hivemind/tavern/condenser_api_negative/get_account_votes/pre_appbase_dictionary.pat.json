@@ -1,5 +1,6 @@
 {
-  "code": -32000,
-  "data": "TypeError: call() got multiple values for argument 'method'",
-  "message": "Server error"
+  "code": "22023",
+  "details": null,
+  "hint": null,
+  "message": "cannot get array length of a non-array"
 }

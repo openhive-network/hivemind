@@ -1,30 +1,30 @@
 {
   "code": -32602,
+  "message": "Assert Exception:Account notexistingtest does not exist",
   "data": {
-    "assert_hash": "1a2b3c4d5e6f7a8b9c0d",
     "code": 10,
-    "extension": {
-      "assertion_expression": "Account notexistingtest does not exist"
-    },
-    "message": "Account notexistingtest does not exist",
     "name": "assert_exception",
+    "message": "Account notexistingtest does not exist",
     "stack": [
       {
         "context": {
-          "file": "",
-          "hostname": "",
           "level": "error",
+          "file": "",
           "line": 0,
           "method": "",
+          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-08T04:03:13"
+          "timestamp": "2025-12-09T00:40:07"
         },
+        "format": "",
         "data": {
           "category": "hivemind"
-        },
-        "format": ""
+        }
       }
-    ]
-  },
-  "message": "Assert Exception:Account notexistingtest does not exist"
+    ],
+    "extension": {
+      "assertion_expression": "Account notexistingtest does not exist"
+    },
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d"
+  }
 }

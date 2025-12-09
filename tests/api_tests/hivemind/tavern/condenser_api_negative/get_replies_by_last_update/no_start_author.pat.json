@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "missing a required argument: 'start_author'",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:missing a required argument: 'start_author'",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "missing a required argument: 'start_author'",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:45:01"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "missing a required argument: 'start_author'"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

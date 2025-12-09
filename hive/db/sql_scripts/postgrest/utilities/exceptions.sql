@@ -93,8 +93,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'unknown method: ' || _method_name);
+  exception_message := 'unknown method: ' || _method_name;
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -228,8 +240,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || _expected_count || ' params');
+  exception_message := 'expected ' || _expected_count || ' params';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -241,8 +265,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'got an unexpected keyword argument ''' || _arg_name || '''');
+  exception_message := 'got an unexpected keyword argument ''' || _arg_name || '''';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -254,8 +290,20 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'missing a required argument: ''' || _arg_name || '''');
+  exception_message := 'missing a required argument: ''' || _arg_name || '''';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
@@ -363,8 +411,21 @@ RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', format('got an unexpected keyword argument ''%s''', _arg_name), _id);
+  exception_message := format('got an unexpected keyword argument ''%s''', _arg_name);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data,
+    _id
+  );
 END
 $$
 ;
@@ -387,8 +448,21 @@ RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters','invalid account name type', _id);
+  exception_message := 'invalid account name type';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data,
+    _id
+  );
 END
 $$
 ;
@@ -399,8 +473,21 @@ RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
+DECLARE
+  hived_error_data JSON;
+  exception_message TEXT;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters','too many positional arguments', _id);
+  exception_message := 'too many positional arguments';
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || exception_message,
+    hived_error_data,
+    _id
+  );
 END
 $$
 ;
@@ -437,8 +524,18 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  hived_error_data JSON;
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
+  hived_error_data := hivemind_postgrest_utilities.build_hived_error_data(
+    _exception_message,
+    '3c4d5e6f7a8b9c0d1e2f'
+  );
+  RETURN hivemind_postgrest_utilities.raise_exception_with_data(
+    -32602,
+    'Assert Exception:' || _exception_message,
+    hived_error_data
+  );
 END
 $$
 ;
