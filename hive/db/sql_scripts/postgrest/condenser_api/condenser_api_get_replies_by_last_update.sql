@@ -17,18 +17,7 @@ _truncate_body INT;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start_author": "string", "start_permlink": "string", "limit": "number", "truncate_body": "number", "observer": "string"}', 1, NULL);
 
-  _author =
-    hivemind_postgrest_utilities.valid_account(
-        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', True),
-      False);
-
-  _permlink =
-    hivemind_postgrest_utilities.valid_permlink(
-      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
-    True);
-
-  _author_id = hivemind_postgrest_utilities.find_account_id(_author, True);
-
+  -- Validate simple parameters first before database lookups
   _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
                                                      least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
                                                      1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
@@ -37,6 +26,19 @@ BEGIN
     hivemind_postgrest_utilities.valid_number(
       hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
     0, 0, NULL, 'truncate_body');
+
+  _permlink =
+    hivemind_postgrest_utilities.valid_permlink(
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
+    True);
+
+  -- Now validate accounts and posts (database lookups)
+  _author =
+    hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', True),
+      False);
+
+  _author_id = hivemind_postgrest_utilities.find_account_id(_author, True);
 
   _observer_id =
     hivemind_postgrest_utilities.find_account_id(

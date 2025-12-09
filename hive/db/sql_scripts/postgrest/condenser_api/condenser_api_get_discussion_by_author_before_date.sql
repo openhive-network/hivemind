@@ -20,6 +20,22 @@ BEGIN
 
   -- BEFORE DATE IS IGNORED BECAUSE IN PYTHON CODE IT IS ALSO IGNORED
 
+  -- Validate simple parameters first before database lookups
+  _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
+                                                     least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+                                                     1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
+
+  _truncate_body =
+    hivemind_postgrest_utilities.valid_number(
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
+    0, 0, NULL, 'truncate_body');
+
+  _permlink =
+    hivemind_postgrest_utilities.valid_permlink(
+      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
+    True);
+
+  -- Now validate accounts and posts (database lookups)
   _author =
     hivemind_postgrest_utilities.valid_account(
         hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True),
@@ -31,20 +47,6 @@ BEGIN
     False);
 
   _author_id = hivemind_postgrest_utilities.find_account_id(_author, True);
-
-  _permlink =
-    hivemind_postgrest_utilities.valid_permlink(
-      hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
-    True);
-
-  _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
-                                                     least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
-                                                     1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
-
-  _truncate_body =
-    hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
-    0, 0, NULL, 'truncate_body');
 
   _post_id = hivemind_postgrest_utilities.find_comment_id(_author, _permlink, (CASE WHEN _permlink IS NULL OR _permlink = '' THEN False ELSE True END));
 
