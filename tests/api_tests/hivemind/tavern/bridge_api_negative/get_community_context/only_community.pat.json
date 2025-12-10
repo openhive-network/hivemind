@@ -1,30 +1,30 @@
 {
   "code": -32602,
-  "message": "Assert Exception:Community hive-117600 does not exist",
   "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
+    "extension": {
+      "assertion_expression": "missing a required argument: 'account'"
+    },
+    "message": "missing a required argument: 'account'",
     "name": "assert_exception",
-    "message": "Community hive-117600 does not exist",
     "stack": [
       {
         "context": {
-          "level": "error",
           "file": "",
+          "hostname": "",
+          "level": "error",
           "line": 0,
           "method": "",
-          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-09T00:40:08"
+          "timestamp": "2025-12-10T12:25:17"
         },
-        "format": "",
         "data": {
           "category": "hivemind"
-        }
+        },
+        "format": ""
       }
-    ],
-    "extension": {
-      "assertion_expression": "Community hive-117600 does not exist"
-    },
-    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
-  }
+    ]
+  },
+  "message": "Assert Exception:missing a required argument: 'account'"
 }

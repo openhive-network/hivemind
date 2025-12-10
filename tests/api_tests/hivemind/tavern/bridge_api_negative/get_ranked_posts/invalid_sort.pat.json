@@ -1,30 +1,30 @@
 {
   "code": -32602,
-  "message": "Assert Exception:Account steemit does not exist",
   "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
+    "extension": {
+      "assertion_expression": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted"
+    },
+    "message": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted",
     "name": "assert_exception",
-    "message": "Account steemit does not exist",
     "stack": [
       {
         "context": {
-          "level": "error",
           "file": "",
+          "hostname": "",
+          "level": "error",
           "line": 0,
           "method": "",
-          "hostname": "",
           "thread_name": "",
-          "timestamp": "2025-12-09T00:40:08"
+          "timestamp": "2025-12-10T12:25:18"
         },
-        "format": "",
         "data": {
           "category": "hivemind"
-        }
+        },
+        "format": ""
       }
-    ],
-    "extension": {
-      "assertion_expression": "Account steemit does not exist"
-    },
-    "assert_hash": "1a2b3c4d5e6f7a8b9c0d"
-  }
+    ]
+  },
+  "message": "Assert Exception:Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted"
 }

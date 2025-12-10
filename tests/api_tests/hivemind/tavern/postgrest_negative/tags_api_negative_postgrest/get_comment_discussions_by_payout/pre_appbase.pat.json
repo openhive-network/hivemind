@@ -1,30 +1,30 @@
 {
   "code": -32602,
-  "message": "Assert Exception:Post otc/ does not exist",
   "data": {
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a",
     "code": 10,
-    "name": "assert_exception",
-    "message": "Post otc/ does not exist",
-    "stack": [
-      {
-        "context": {
-          "level": "error",
-          "file": "",
-          "line": 0,
-          "method": "",
-          "hostname": "",
-          "thread_name": "",
-          "timestamp": "2025-12-09T00:40:19"
-        },
-        "format": "",
-        "data": {
-          "category": "hivemind"
-        }
-      }
-    ],
     "extension": {
       "assertion_expression": "Post otc/ does not exist"
     },
-    "assert_hash": "4d5e6f7a8b9c0d1e2f3a"
-  }
+    "message": "Post otc/ does not exist",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-10T12:38:41"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:Post otc/ does not exist"
 }
