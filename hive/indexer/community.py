@@ -624,6 +624,35 @@ class CommunityOp:
             if 'cover_url' in settings:
                 cover_url = settings['cover_url']
                 assert not cover_url or _valid_url_proto(cover_url)
+            if 'required_beneficiaries' in settings:
+                required_beneficiaries = settings['required_beneficiaries']
+                assert isinstance(required_beneficiaries, list), 'required_beneficiaries must be a list'
+                assert len(required_beneficiaries) <= 8, 'too many required beneficiaries (max 8)'
+
+                total_weight = 0
+                seen_accounts = set()
+
+                for beneficiary in required_beneficiaries:
+                    assert isinstance(beneficiary, dict), 'each beneficiary must be a dict'
+                    assert 'account' in beneficiary, 'beneficiary missing account field'
+                    assert 'weight' in beneficiary, 'beneficiary missing weight field'
+
+                    account = beneficiary['account']
+                    weight = beneficiary['weight']
+
+                    assert isinstance(account, str), 'beneficiary account must be string'
+                    assert isinstance(weight, int), 'beneficiary weight must be integer'
+                    assert len(account) >= 3 and len(account) <= 16, 'invalid account name length'
+                    assert weight > 0 and weight <= 10000, 'weight must be between 1 and 10000 basis points'
+                    assert account not in seen_accounts, f'duplicate beneficiary account: {account}'
+
+                    # Verify account exists (using existing Accounts system)
+                    assert Accounts.exists(account), f'beneficiary account does not exist: {account}'
+
+                    seen_accounts.add(account)
+                    total_weight += weight
+
+                assert total_weight <= 10000, 'total required beneficiary weight exceeds 100% (10000 basis points)'
         if 'type_id' in props:
             community_type = read_key_integer(props, 'type_id')
             assert community_type in valid_types, 'invalid community type'

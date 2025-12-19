@@ -520,3 +520,123 @@ BEGIN
 END
 $function$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_app.validate_required_beneficiaries;
+CREATE OR REPLACE FUNCTION hivemind_app.validate_required_beneficiaries(
+    _author hivemind_app.hive_accounts.name%TYPE,
+    _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
+    _beneficiaries JSONB
+) RETURNS TABLE (should_mute BOOLEAN, error_message TEXT, author_id INTEGER, community_id INTEGER)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    _post_id INTEGER;
+    _post_depth INTEGER;
+    _post_community_id INTEGER;
+    _post_author_id INTEGER;
+    _post_is_muted BOOLEAN;
+    _post_muted_reasons INTEGER;
+    _community_settings JSONB;
+    _required_beneficiaries JSONB;
+    _required_ben JSONB;
+    _required_account TEXT;
+    _required_weight INTEGER;
+    _post_ben JSONB;
+    _found_weight INTEGER;
+    _validation_failed BOOLEAN := FALSE;
+    _error_parts TEXT[] := ARRAY[]::TEXT[];
+    _existing_muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
+    _new_muted_reasons INTEGER;
+BEGIN
+    -- Get post info
+    SELECT hp.id, hp.depth, hp.community_id, hp.author_id, hp.is_muted, hp.muted_reasons
+    INTO _post_id, _post_depth, _post_community_id, _post_author_id, _post_is_muted, _post_muted_reasons
+    FROM hivemind_app.hive_posts hp
+    WHERE hp.author_id = (SELECT id FROM hivemind_app.hive_accounts WHERE name = _author)
+      AND hp.permlink_id = (SELECT id FROM hivemind_app.hive_permlink_data WHERE permlink = _permlink)
+      AND hp.counter_deleted = 0
+    LIMIT 1;
+
+    -- Return early if post doesn't exist, is a comment, or not in a community
+    IF _post_id IS NULL OR _post_depth != 0 OR _post_community_id IS NULL THEN
+        RETURN QUERY SELECT FALSE, ''::TEXT, NULL::INTEGER, NULL::INTEGER;
+        RETURN;
+    END IF;
+
+    -- Get community settings
+    SELECT settings INTO _community_settings
+    FROM hivemind_app.hive_communities
+    WHERE id = _post_community_id;
+
+    -- Return early if no settings or no required_beneficiaries
+    IF _community_settings IS NULL OR NOT (_community_settings ? 'required_beneficiaries') THEN
+        RETURN QUERY SELECT FALSE, ''::TEXT, NULL::INTEGER, NULL::INTEGER;
+        RETURN;
+    END IF;
+
+    _required_beneficiaries := _community_settings->'required_beneficiaries';
+
+    -- Return early if empty array
+    IF jsonb_array_length(_required_beneficiaries) = 0 THEN
+        RETURN QUERY SELECT FALSE, ''::TEXT, NULL::INTEGER, NULL::INTEGER;
+        RETURN;
+    END IF;
+
+    -- Validate each required beneficiary
+    FOR _required_ben IN SELECT * FROM jsonb_array_elements(_required_beneficiaries)
+    LOOP
+        _required_account := _required_ben->>'account';
+        _required_weight := (_required_ben->>'weight')::INTEGER;
+        _found_weight := 0;
+
+        -- Find matching beneficiary in post
+        FOR _post_ben IN SELECT * FROM jsonb_array_elements(_beneficiaries)
+        LOOP
+            IF _post_ben->>'account' = _required_account THEN
+                _found_weight := (_post_ben->>'weight')::INTEGER;
+                EXIT;
+            END IF;
+        END LOOP;
+
+        -- Check if beneficiary is missing or insufficient
+        IF _found_weight = 0 THEN
+            _validation_failed := TRUE;
+            _error_parts := array_append(_error_parts,
+                format('%s (required: %s%%, provided: 0%%)', _required_account, (_required_weight::NUMERIC / 100)::TEXT));
+        ELSIF _found_weight < _required_weight THEN
+            _validation_failed := TRUE;
+            _error_parts := array_append(_error_parts,
+                format('%s (required: %s%%, provided: %s%%)', _required_account,
+                    (_required_weight::NUMERIC / 100)::TEXT, (_found_weight::NUMERIC / 100)::TEXT));
+        END IF;
+    END LOOP;
+
+    -- If validation failed, mute the post
+    IF _validation_failed THEN
+        -- Get existing muted reasons
+        IF _post_is_muted AND _post_muted_reasons IS NOT NULL THEN
+            _existing_muted_reasons := hivemind_app.decode_bitwise_mask(_post_muted_reasons);
+        END IF;
+
+        -- Add MUTED_BENEFICIARY (5) if not already present
+        IF NOT (5 = ANY(_existing_muted_reasons)) THEN
+            _existing_muted_reasons := array_append(_existing_muted_reasons, 5);
+        END IF;
+
+        _new_muted_reasons := hivemind_app.encode_bitwise_mask(_existing_muted_reasons);
+
+        -- Update post
+        UPDATE hivemind_app.hive_posts
+        SET is_muted = TRUE, muted_reasons = _new_muted_reasons
+        WHERE id = _post_id;
+
+        -- Return that we should notify with error message
+        RETURN QUERY SELECT TRUE,
+            'Post does not meet required beneficiaries: ' || array_to_string(_error_parts, ', '),
+            _post_author_id,
+            _post_community_id;
+    ELSE
+        RETURN QUERY SELECT FALSE, ''::TEXT, NULL::INTEGER, NULL::INTEGER;
+    END IF;
+END;
+$$;

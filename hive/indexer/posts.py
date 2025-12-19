@@ -130,11 +130,15 @@ class Posts(DbAdapterHolder):
                     reasons.append("community type does not allow non members to post")
             if 2 in muted_reasons:
                 reasons.append("parent post/comment is muted")
+            if 5 in muted_reasons:
+                reasons.append("post does not meet required beneficiary settings")
 
             if len(reasons) == 1:
                 payload = f"Post is muted because {reasons[0]}"
-            else:
+            elif len(reasons) == 2:
                 payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
+            else:
+                payload = f"Post is muted because {', '.join(reasons[:-1])}, and {reasons[-1]}"
 
             Notify(
                 block_num=op['block_num'],
@@ -367,7 +371,7 @@ class Posts(DbAdapterHolder):
         DbAdapterHolder.common_block_processing_db().query(sql, child_id=child_id)
 
     @classmethod
-    def comment_options_op(cls, op):
+    def comment_options_op(cls, op, block_date):
         """Process comment_options_operation"""
         max_accepted_payout = (
             legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
@@ -403,6 +407,29 @@ class Posts(DbAdapterHolder):
             allow_curation_rewards=allow_curation_rewards,
             beneficiaries=dumps(beneficiaries),
         )
+
+        # Validate required beneficiaries for community posts
+        from hive.indexer.notify import Notify
+        sql = f"SELECT * FROM {SCHEMA_NAME}.validate_required_beneficiaries(:author, :permlink, :beneficiaries)"
+        result = DbAdapterHolder.common_block_processing_db().query_row(
+            sql,
+            author=op['author'],
+            permlink=op['permlink'],
+            beneficiaries=dumps(beneficiaries)
+        )
+
+        if result and result['should_mute']:
+            # Send error notification to author
+            Notify(
+                block_num=op['block_num'],
+                type_id='error',
+                dst_id=result['author_id'],
+                when=block_date,
+                post_id=None,  # We don't have post_id from SQL function, but it's optional
+                payload=result['error_message'],
+                community_id=result['community_id'],
+                src_id=result['community_id'],
+            )
 
     @classmethod
     def delete(cls, op, block_date):

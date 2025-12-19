@@ -379,7 +379,7 @@ class Blocks:
                     if key not in ineffective_deleted_ops:
                         Posts.delete_op(op, cls._head_block_date)
                 elif op_type == OperationType.COMMENT_OPTION:
-                    Posts.comment_options_op(op)
+                    Posts.comment_options_op(op, cls._head_block_date)
                 elif op_type == OperationType.VOTE:
                     Votes.vote_op(op, cls._head_block_date)
 
