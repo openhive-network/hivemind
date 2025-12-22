@@ -6527,5 +6527,250 @@
         ]
       }
     ]
+  },
+  "5000014": {
+    "transactions": [
+      {
+        "ref_block_num": 100002,
+        "ref_block_prefix": 2,
+        "expiration": "2020-03-23T12:18:00",
+        "operations": [
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-187432",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "benef-tester",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "howo",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-187432"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-187432\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-187432\",\"props\":{\"title\":\"Beneficiary Test Community\",\"about\":\"Testing required beneficiaries\",\"is_nsfw\":false,\"description\":\"This community requires 5% beneficiary to howo\",\"flag_text\":\"\",\"settings\":{\"required_beneficiaries\":[{\"account\":\"howo\",\"weight\":500}]}}}]"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-187432",
+              "author": "benef-tester",
+              "permlink": "post-with-beneficiary",
+              "title": "Post with correct beneficiary",
+              "body": "This post has the required 5% beneficiary to howo",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_options_operation",
+            "value": {
+              "author": "benef-tester",
+              "permlink": "post-with-beneficiary",
+              "max_accepted_payout": {
+                "amount": "1000000000",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "percent_hbd": 10000,
+              "allow_votes": true,
+              "allow_curation_rewards": true,
+              "extensions": [
+                {
+                  "type": "comment_payout_beneficiaries",
+                  "value": {
+                    "beneficiaries": [
+                      {
+                        "account": "howo",
+                        "weight": 500
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "benef-tester",
+              "parent_permlink": "post-with-beneficiary",
+              "author": "test-safari",
+              "permlink": "comment-on-good-post",
+              "title": "",
+              "body": "This is a comment on a post with beneficiaries",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-187432",
+              "author": "benef-tester",
+              "permlink": "post-without-beneficiary",
+              "title": "Post without beneficiary - should be muted",
+              "body": "This post does not have the required beneficiary and should be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_options_operation",
+            "value": {
+              "author": "benef-tester",
+              "permlink": "post-without-beneficiary",
+              "max_accepted_payout": {
+                "amount": "1000000000",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "percent_hbd": 10000,
+              "allow_votes": true,
+              "allow_curation_rewards": true,
+              "extensions": []
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "benef-tester",
+              "parent_permlink": "post-without-beneficiary",
+              "author": "test-safari",
+              "permlink": "comment-on-muted-post",
+              "title": "",
+              "body": "This is a comment on a muted post - comments should not be muted",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
   }
 }
