@@ -26,8 +26,8 @@ pushd "$SRCROOT"
 git status
 pip3 install .
 
-# immediately initialize atomic package to avoid spawning compiler at final image
-python3 -c 'import atomic'
+# verify hivemind signals module loads correctly (uses stdlib threading, no compilation needed)
+python3 -c 'from hive.signals import AtomicCounter'
 
 python3 -m build --wheel
 

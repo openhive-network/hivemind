@@ -1,14 +1,31 @@
 """Hive signal handling."""
 
 import logging
+import threading
 from signal import SIGINT, signal, SIGTERM
-
-from atomic import AtomicLong
 
 log = logging.getLogger(__name__)
 
-EXCEPTION_THROWN = AtomicLong(0)
-FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
+
+class AtomicCounter:
+    """Thread-safe counter using stdlib threading.Lock()."""
+    def __init__(self, initial=0):
+        self._value = initial
+        self._lock = threading.Lock()
+
+    @property
+    def value(self):
+        with self._lock:
+            return self._value
+
+    def __iadd__(self, other):
+        with self._lock:
+            self._value += other
+        return self
+
+
+EXCEPTION_THROWN = AtomicCounter(0)
+FINISH_SIGNAL_DURING_SYNC = AtomicCounter(0)
 
 
 default_sigint_handler = None

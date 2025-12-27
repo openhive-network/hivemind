@@ -158,11 +158,6 @@ class Blocks:
             # after HF17 all posts are paid after 7 days which means it is safe to assume that
             # posts created at or before LIB - 7days will be paidout at the end of massive sync
             cls._last_safe_cashout_block = lib - ONE_WEEK_IN_BLOCKS
-        log.info(
-            "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d",
-            lib,
-            cls._last_safe_cashout_block,
-        )
 
     @classmethod
     def flush_data_in_n_threads(cls) -> None:
@@ -194,7 +189,6 @@ class Blocks:
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
 
-        log.info("#############################################################################")
         return first_block, last_num
 
     @classmethod
@@ -219,7 +213,6 @@ class Blocks:
                 cls._periodic_actions(blocks[0])
 
         if is_massive_sync:
-            log.info("[PROCESS MULTI] Flushing data in N threads")
             cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")

@@ -1,7 +1,6 @@
 """Hive sync manager."""
 
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 import logging
 import time
 from time import perf_counter as perf
@@ -23,7 +22,6 @@ from hive.signals import (
     set_custom_signal_handlers,
     set_exception_thrown,
 )
-from hive.utils.misc import log_memory_usage
 from hive.utils.normalize import secs_to_str
 from hive.utils.stats import BroadcastObject
 from hive.utils.stats import FlushStatusManager as FSM
@@ -119,7 +117,6 @@ class SyncHiveDb:
         self._create_massive_provider_if_no_exist()
         while True:
             last_imported_block = Blocks.last_imported()
-            log.info(f"Last imported block is: {last_imported_block}")
 
             # SqlAlchemy will not use autocommit when there is a pending transaction
             # hive.app_next_iteration issues COMMIT, and autocommit is not desired
@@ -139,8 +136,6 @@ class SyncHiveDb:
                     report_enter_to_stage(application_stage)
                 continue
 
-            log.info(f"target_head_block: {self._ubound}")
-            log.info(f"test_max_block: {self._last_block_to_process}")
 
             # this  commit is added here only to prevent error idle-in-transaction timeout
             # it should be removed, but it requires to check any possible long-lasting actions
@@ -185,7 +180,6 @@ class SyncHiveDb:
                 DbState.ensure_fk_are_enabled()
 
                 log.info("[SINGLE] *** SINGLE block processing***")
-                log.info(f"[SINGLE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
 
                 self._process_live_blocks(self._lbound, self._ubound, active_connections_before)
             else:
@@ -251,6 +245,9 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
+        # Convert Row objects to mappings for dict-like access (Python 3.14 compatibility)
+        blocks = [row._mapping for row in blocks]
+
         if not DbLiveContextHolder.is_live_context():
             DbLiveContextHolder.set_live_context(True)
             Blocks.close_own_db_access()
@@ -280,6 +277,10 @@ class SyncHiveDb:
             self._massive_consume_blocks_thread_pool.submit(self._consume_massive_blocks, blocks)
 
     def _on_stop_synchronization(self, active_connections_before):
+        # Ensure tables are converted back to LOGGED before shutdown.
+        # UNLOGGED tables are truncated during crash recovery, which can happen
+        # if PostgreSQL is killed (e.g., docker timeout) instead of graceful shutdown.
+        DbState.ensure_indexes_are_enabled()
         self.print_summary()
 
     def _create_massive_provider_if_no_exist(self):
@@ -307,7 +308,7 @@ class SyncHiveDb:
         )
 
         sql = f"SELECT * FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
-        patch_level_info = PatchLevelInfo(**database.query_row(sql))
+        patch_level_info = PatchLevelInfo(**database.query_row(sql)._mapping)
 
         show_app_version(log, blocks_info, patch_level_info)
 
@@ -351,6 +352,9 @@ class SyncHiveDb:
             log.info("No blocks to consume")
             return 0
 
+        # Convert Row objects to mappings for dict-like access (Python 3.14 compatibility)
+        blocks = [row._mapping for row in blocks]
+
         lbound = blocks[ 0 ]['num']
         ubound = blocks[ -1 ]['num']
         orig_lbound = lbound
@@ -387,9 +391,6 @@ class SyncHiveDb:
                 )
 
                 log.info(timer.batch_status(prefix))
-                log.info(f"[MASSIVE] Time elapsed: {time_current - SyncHiveDb.time_start}s")
-                log.info(f"[MASSIVE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
-                log.info(log_memory_usage())
                 self.rate = minmax(self.rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
                 if block_end - block_start > 1.0 or is_debug:

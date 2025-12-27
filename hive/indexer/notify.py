@@ -90,7 +90,7 @@ class Notify(DbAdapterHolder):
         n = len(Notify._notifies)
         if n > 0:
             if cls._notification_first_block is None:
-                cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")['num']
+                cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")._mapping['num']
             max_block_num = max(n.block_num for n in Notify._notifies)
             cls.beginTx()
 

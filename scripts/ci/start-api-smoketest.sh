@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+# Enable Python fault handler for better crash debugging
+export PYTHONFAULTHANDLER=1
+# Disable output buffering for real-time output
+export PYTHONUNBUFFERED=1
+
 export HIVEMIND_ADDRESS="$1"
 export HIVEMIND_PORT="$2"
 TEST_GROUP="$3"
@@ -37,11 +42,19 @@ if [ -v RUN_TESTS_WITH_MARKER ]; then
   tox -e tavern -- \
     -W ignore::pytest.PytestDeprecationWarning \
     -n "${JOBS}" \
+    --dist loadfile \
+    --max-worker-restart 0 \
+    -v \
+    --tb=short \
     -m "${RUN_TESTS_WITH_MARKER}" \
     --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
 else
   tox -e tavern -- \
     -W ignore::pytest.PytestDeprecationWarning \
     -n "${JOBS}" \
+    --dist loadfile \
+    --max-worker-restart 0 \
+    -v \
+    --tb=short \
     --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
 fi

@@ -1,0 +1,103 @@
+# Docker Compose configuration for CI sync job
+# This allows proper PostgreSQL shutdown before cache creation
+name: 'hivemind-sync'
+
+services:
+  haf:
+    image: ${HAF_IMAGE:-registry.gitlab.syncad.com/hive/haf/instance:latest}
+    entrypoint: /home/haf_admin/docker_entrypoint.sh
+    command: ["--skip-hived"]
+    environment:
+      HIVED_UID: ${HIVED_UID:-}
+      DATADIR: /home/hived/datadir
+      SHM_DIR: /home/hived/shm_dir
+      PGCTLTIMEOUT: 600
+      PG_ACCESS: |
+        host    haf_block_log    hivemind         all    trust
+        host    haf_block_log    haf_admin        all    trust
+        host    postgres         haf_admin        all    trust
+    volumes:
+      - ${HAF_DATADIR:-./datadir}:/home/hived/datadir
+      - ${HAF_SHM_DIR:-./shm_dir}:/home/hived/shm_dir
+    networks:
+      haf-network:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U haf_admin -d haf_block_log || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  hivemind-setup:
+    image: ${HIVEMIND_IMAGE:-registry.gitlab.syncad.com/hive/hivemind/instance:latest}
+    working_dir: /home/hivemind
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "Applying CI-specific PostgreSQL tuning..."
+        psql "$${HAF_ADMIN_POSTGRES_URL}" \
+          -c "ALTER SYSTEM SET effective_cache_size = '90GB'" \
+          -c "ALTER SYSTEM SET work_mem = '256MB'" \
+          -c "ALTER SYSTEM SET maintenance_work_mem = '8GB'" \
+          -c "ALTER SYSTEM SET fsync = 'off'" \
+          -c "ALTER SYSTEM SET full_page_writes = 'off'" \
+          -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
+          -c "SELECT pg_reload_conf()"
+        echo "PostgreSQL CI tuning applied"
+        echo "Running hivemind setup..."
+        /home/hivemind/docker_entrypoint.sh setup \
+          --database-admin-url="$${HAF_ADMIN_POSTGRES_URL}" \
+          --with-apps \
+          --add-mocks=$${ADD_MOCKS:-true}
+        echo "Hivemind setup complete"
+    environment:
+      HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf:5432/haf_block_log
+      HAF_POSTGRES_URL: postgresql://hivemind@haf:5432/haf_block_log
+      ADD_MOCKS: ${ADD_MOCKS:-true}
+    networks:
+      haf-network:
+    depends_on:
+      haf:
+        condition: service_healthy
+
+  hivemind-sync:
+    image: ${HIVEMIND_IMAGE:-registry.gitlab.syncad.com/hive/hivemind/instance:latest}
+    working_dir: /home/hivemind
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "Starting reputation_tracker in background..."
+        /home/hivemind/app/reputation_tracker/scripts/process_blocks.sh \
+          --stop-at-block="$${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
+          --postgres-url="$${HAF_POSTGRES_URL}" &
+        REP_TRACKER_PID=$$!
+
+        echo "Starting hivemind sync..."
+        /home/hivemind/docker_entrypoint.sh sync \
+          --log-mask-sensitive-data \
+          --pid-file hive_sync.pid \
+          --test-max-block="$${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
+          --test-profile=False \
+          --prometheus-port 11011 \
+          --database-url="$${HAF_POSTGRES_URL}" \
+          --community-start-block 4998000
+
+        echo "Waiting for reputation_tracker to complete..."
+        wait $$REP_TRACKER_PID
+
+        echo "Hivemind sync complete"
+    environment:
+      HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf:5432/haf_block_log
+      HAF_POSTGRES_URL: postgresql://hivemind@haf:5432/haf_block_log
+      RUNNER_HIVEMIND_SYNC_MAX_BLOCK: ${RUNNER_HIVEMIND_SYNC_MAX_BLOCK:-5000024}
+    networks:
+      haf-network:
+    # Note: depends_on is omitted - CI script controls ordering by running
+    # hivemind-setup before hivemind-sync. This avoids docker-compose trying
+    # to re-run setup when starting sync.
+
+networks:
+  haf-network:
+    name: haf-network

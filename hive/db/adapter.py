@@ -175,7 +175,8 @@ class Db:
         Required for commands like ALTER SYSTEM that cannot run inside a transaction block.
         """
         query = sqlalchemy.text(sql)
-        self._basic_connection.execution_options(autocommit=True).execute(query)
+        # SQLAlchemy 2.0: use isolation_level="AUTOCOMMIT" instead of autocommit=True
+        self._basic_connection.execution_options(isolation_level="AUTOCOMMIT").execute(query)
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
@@ -258,10 +259,12 @@ class Db:
         #        else:
         #            query = sqlalchemy.text(sql).execution_options(autocommit=False)
         #            self._prep_sql[sql] = query
-        if is_prepared:
-            query = sql
-        else:
+        # Python 3.14 compatibility: Always wrap strings with text()
+        # SQLAlchemy requires proper text objects, not plain strings
+        if isinstance(sql, str):
             query = sqlalchemy.text(sql)
+        else:
+            query = sql
         return query
 
     def _query(self, sql, is_prepared: bool = False, **kwargs):
@@ -278,7 +281,7 @@ class Db:
             query = self._sql_text(sql, is_prepared)
             if 'log_query' in kwargs and kwargs['log_query']:
                 log.info(f"QUERY: {query}")
-            result = self._basic_connection.execution_options(autocommit=False).execute(query, **kwargs)
+            result = self._basic_connection.execute(query, kwargs)
             if 'log_result' in kwargs and kwargs['log_result']:
                 log.info(f"RESULT: {result}")
             Stats.log_db(sql, perf() - start)
