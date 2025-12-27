@@ -43,6 +43,7 @@ class DbState:
     _original_synchronous_commit_mode = None
     _original_fsync = None
     _original_full_page_writes = None
+    _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -342,9 +343,10 @@ class DbState:
         Original values are saved and restored after massive sync completes.
         Requires superuser privileges via admin_db; skipped gracefully if not available.
         """
-        if cls._original_fsync is not None:
-            return  # Already disabled
+        if cls._original_fsync is not None or cls._wal_safety_disable_attempted:
+            return  # Already disabled or already attempted
 
+        cls._wal_safety_disable_attempted = True
         admin = cls.admin_db()
         if admin is None:
             log.info("[MASSIVE] No admin connection available, skipping WAL safety optimization")
@@ -387,6 +389,7 @@ class DbState:
             log.warning(f"[MASSIVE] Could not restore WAL safety features: {e}")
         cls._original_fsync = None
         cls._original_full_page_writes = None
+        cls._wal_safety_disable_attempted = False  # Reset for next sync
         log.info("[MASSIVE] WAL safety features restored")
 
     @classmethod
@@ -605,10 +608,10 @@ class DbState:
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
                 if (table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data"):
-                    db_mgr.db.get_connection(0).execute("VACUUM (FULL, VERBOSE,ANALYZE) " + table)
+                    db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (FULL, VERBOSE,ANALYZE) " + table))
                 else:
-                    db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
-                db_mgr.db.get_connection(0).execute("VACUUM (VERBOSE,ANALYZE) " + table)
+                    db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (VERBOSE,ANALYZE) " + table))
+                db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (VERBOSE,ANALYZE) " + table))
 
         methods = []
         for table in tables:
@@ -628,7 +631,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         rows = cls.db().query_all(sql)
         tables = []
         for row in rows:
-            tables.append(row["table_name"])
+            tables.append(row._mapping["table_name"])
 
         cls.vacuum_tables_in_threads(tables)
 
@@ -664,7 +667,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
     def status():
         """Basic health status: head block/time, current age (secs)."""
         sql = f"SELECT * FROM {SCHEMA_NAME}.get_head_state()"
-        row = DbState.db().query_row(sql)
+        row = DbState.db().query_row(sql)._mapping
         return dict(
             db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['age'])
         )

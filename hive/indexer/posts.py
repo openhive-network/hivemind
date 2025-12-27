@@ -79,6 +79,7 @@ class Posts(DbAdapterHolder):
         if not row:
             log.error(f"Failed to process comment_op: {op}")
             return
+        row = row._mapping
         result = dict(row)
 
         error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])

@@ -97,21 +97,31 @@ def main():
     blocks.sort(key=lambda b: b.block_number)
 
     last_block_in_db = db.query_row("SELECT * FROM hafd.blocks ORDER BY num DESC LIMIT 1")
-    log.info(f'Last block in db: {last_block_in_db["num"]}')
 
     last_block_num_to_mock = blocks[-1].block_number
     log.info(f'Last block to mock: {last_block_num_to_mock}')
 
-    if last_block_num_to_mock > last_block_in_db['num']:
-        MockBlockProvider.set_last_real_block_num_date(
-            block_num=last_block_in_db['num'],
-            block_date=last_block_in_db['created_at'],
-            block_id=last_block_in_db['hash'],
-        )
+    if last_block_in_db is None:
+        log.error('No blocks found in hafd.blocks table. The mocker requires an existing database with replayed blocks.')
+        log.error('Please ensure HAF has finished replaying before running the mocker.')
+        sys.exit(1)
+    else:
+        # Convert Row to mapping for dict-like access (Python 3.14 compatibility)
+        last_block_in_db = last_block_in_db._mapping
 
-        create_mocked_blocks_after_haf_db_blocks(lbound=last_block_in_db['num'] + 1, ubound=last_block_num_to_mock)
-        Db.instance().query_no_return(f'SELECT hive.set_irreversible({last_block_num_to_mock})')
-        log.info(f'Irreversible block set to {last_block_num_to_mock}')
+        if last_block_num_to_mock > last_block_in_db['num']:
+            log.info(f'Last block in db: {last_block_in_db["num"]}')
+            MockBlockProvider.set_last_real_block_num_date(
+                block_num=last_block_in_db['num'],
+                block_date=last_block_in_db['created_at'],
+                block_id=last_block_in_db['hash'],
+            )
+
+            create_mocked_blocks_after_haf_db_blocks(lbound=last_block_in_db['num'] + 1, ubound=last_block_num_to_mock)
+            Db.instance().query_no_return(f'SELECT hive.set_irreversible({last_block_num_to_mock})')
+            log.info(f'Irreversible block set to {last_block_num_to_mock}')
+        else:
+            log.info(f'Last block in db: {last_block_in_db["num"]}')
 
     for block in blocks:
         log.info(f'####################################################### Block number: {block.block_number} STARTING')

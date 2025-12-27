@@ -2,11 +2,11 @@
 # Base docker file having defined environment for build and run of a Hivemind instance.
 # Use scripts/ci/build_ci_base_image.sh to build a new version of the CI base image. It must be properly tagged and pushed to the container registry.
 
-ARG POSTGREST_VERSION=v12.0.2
+ARG POSTGREST_VERSION=409108966606eba9e8f270c76dfb929cae65dba3
 
 FROM registry.gitlab.syncad.com/hive/common-ci-configuration/postgrest:${POSTGREST_VERSION} AS pure_postgrest
 
-FROM --platform=$BUILDPLATFORM registry.gitlab.syncad.com/hive/common-ci-configuration/python:3.12.9-slim-bookworm as runtime
+FROM --platform=$BUILDPLATFORM python:3.14-slim-bookworm as runtime
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -27,6 +27,7 @@ RUN <<EOF
     git \
     ca-certificates \
     postgresql-client \
+    libpq-dev \
     wget \
     procps \
     xz-utils \
@@ -37,6 +38,8 @@ RUN <<EOF
   /root/setup_os.sh --haf-admin-account="haf_admin"
   # This user needs UID of 1000 to be able to save logs to cache when run in CI
   useradd -ms /bin/bash -c "Hivemind service account" -u 1000 "hivemind" --groups users
+  # Grant hivemind sudo access for CI operations (e.g., relaxing pgdata permissions for caching)
+  echo "hivemind ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 EOF
 
 COPY --chmod=755 --from=pure_postgrest /bin/postgrest /usr/local/bin
@@ -51,8 +54,8 @@ SHELL ["/bin/bash", "-c"]
 RUN <<EOF
   set -e
 
-  apt update 
-  DEBIAN_FRONTEND=noniteractive apt install -y gcc
+  apt update
+  DEBIAN_FRONTEND=noniteractive apt install -y gcc g++ libffi-dev
 
   git config --global --add safe.directory /home/hivemind/app
 EOF
@@ -62,7 +65,8 @@ USER hivemind
 ENV PATH=/home/hivemind/.local/bin:${PATH}
 
 RUN <<EOF
-  pip install --no-cache-dir --verbose --user tox==3.25.0
+  pip install --no-cache-dir --upgrade pip setuptools
+  pip install --no-cache-dir --verbose --user tox==4.23.2
 EOF
 
 FROM ci-base-image AS builder

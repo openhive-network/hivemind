@@ -21,7 +21,7 @@ function image-exists() {
 }
 
 REGISTRY=${REGISTRY:-"registry.gitlab.syncad.com/hive/hivemind"}
-CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.12-slim-1"}
+CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.14-slim-1"}
 
 while [ $# -gt 0 ]; do
   case "$1" in

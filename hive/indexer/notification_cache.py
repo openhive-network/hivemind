@@ -32,7 +32,7 @@ class NotificationCache(DbAdapterHolder):
                 if cls._notification_first_block is None:
                     cls._notification_first_block = db.query_row(
                         f"select {SCHEMA_NAME}.block_before_irreversible( '90 days' ) AS num"
-                    )['num']
+                    )._mapping['num']
         return cls._notification_first_block
 
 class VoteNotificationCache(NotificationCache):

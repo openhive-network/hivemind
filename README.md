@@ -16,7 +16,7 @@
 
 # Overview
 
-Hivemind is a microservice that simplifies data access and enables the
+Hivemind is a HAF-based microservice that simplifies data access and enables the
 development of rich social media applications on top of the Hive blockchain. It
 maintains the state of social features such as post feeds, follows, and
 communities, providing a consensus interpretation layer for Hive applications.

@@ -366,7 +366,7 @@ class CommunityOp:
                 actor_id=self.actor_id,
                 community_id=self.community_id,
                 props=json.dumps(self.props)
-            )
+            )._mapping
             if self._handle_result(result):
                 self._notify_team('set_props', team_members=result['team_members'], payload=json.dumps(read_key_dict(self.op, 'props')))
 
@@ -375,13 +375,13 @@ class CommunityOp:
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
                 **params,
-            )
+            )._mapping
             self._handle_result(result)
         elif action == 'unsubscribe':
             result = DbAdapterHolder.common_block_processing_db().query_row(
                 f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
                 **params,
-            )
+            )._mapping
             self._handle_result(result)
         # Account-level actions
         elif action == 'setRole':
@@ -393,7 +393,7 @@ class CommunityOp:
                 max_mod_nb=MAX_MOD_NB,
                 mod_role_threshold=Role.mod,
                 **params
-            )
+            )._mapping
             self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -401,7 +401,7 @@ class CommunityOp:
                     :actor_id, :account_id, :community_id, :title, :date
                 )""",
                 **params,
-            )
+            )._mapping
             self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
@@ -414,7 +414,7 @@ class CommunityOp:
                 account_id=self.account_id,
                 permlink=self.permlink,
                 muted_reasons=params['muted_reasons']
-            )
+            )._mapping
             self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
@@ -426,7 +426,7 @@ class CommunityOp:
                 community_id=self.community_id,
                 account_id=self.account_id,
                 permlink=self.permlink
-            )
+            )._mapping
             self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
@@ -438,7 +438,7 @@ class CommunityOp:
                 community_id=self.community_id,
                 account_id=self.account_id,
                 permlink=self.permlink
-            )
+            )._mapping
             self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -449,7 +449,7 @@ class CommunityOp:
                 community_id=self.community_id,
                 account_id=self.account_id,
                 permlink=self.permlink
-            )
+            )._mapping
             self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
             result = DbAdapterHolder.common_block_processing_db().query_row(
@@ -461,7 +461,7 @@ class CommunityOp:
                 account_id=self.account_id,
                 permlink=self.permlink,
                 community=self.community
-            )
+            )._mapping
             if self._handle_result(result):
                 self._notify_team('flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes)
 

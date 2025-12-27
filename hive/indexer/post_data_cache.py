@@ -39,7 +39,7 @@ class PostDataCache(DbAdapterHolder):
                   SELECT hpd.body FROM {SCHEMA_NAME}.hive_post_data hpd WHERE hpd.id = :post_id;
                   """
             row = cls.db.query_row(sql, post_id=pid)
-            post_data = dict(row)
+            post_data = dict(row._mapping)
         return post_data['body']
 
     @classmethod

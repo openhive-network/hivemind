@@ -11,20 +11,32 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 9abb738e9e83f00882102dffcddd7f5f82f3dddf # mi/image_tag_variable
+  ref: 7e28069624c4fb7e2524f22279a69fc7dee14083 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
+  # Override common-ci-configuration version to match hive/haf
+  CI_COMMON_JOB_VERSION: "034656a22890de7af0fe1db30b0da171f1304e2e"
+  DOCKER_BUILDER_TAG: "$CI_COMMON_JOB_VERSION"
+  DOCKER_DIND_TAG: "$CI_COMMON_JOB_VERSION"
+  IMAGE_REMOVER_TAG: "$CI_COMMON_JOB_VERSION"
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
+  # HAF submodule commit - must match the 'ref:' in the include section above
+  # This is needed for service containers which can't access dotenv artifacts
+  HAF_COMMIT: "7e28069624c4fb7e2524f22279a69fc7dee14083"
   # HAF
   HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
   DATA_CACHE_HAF_PREFIX: "/cache/replay_data_haf"
+  # NFS cache configuration for sync data sharing across builders
+  DATA_CACHE_NFS_PREFIX: "/nfs/ci-cache"
+  SYNC_CACHE_KEY: "${HAF_COMMIT}_${CI_COMMIT_SHORT_SHA}"
+  SYNC_CACHE_TYPE: "hivemind_sync"
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
-  DATA_CACHE_HIVEMIND: "/cache/replay_data_hivemind_$CI_PIPELINE_ID"
+  DATA_CACHE_HIVEMIND: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
   DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
   DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
   # FF:
@@ -35,10 +47,12 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_SUBMODULE_DEPTH: 1
   GIT_SUBMODULE_UPDATE_FLAGS: --jobs 4
-  IMAGE_REMOVER_TAG: "$CI_COMMON_JOB_VERSION"
 
   # Other
   CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
+  # Use limited parallel execution (2 workers) due to worker crashes in CI
+  # with Python 3.14. Sequential execution (n=0) is too slow.
+  RUNNER_PYTEST_WORKERS: "2"
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -46,7 +60,6 @@ variables:
 .shared_tags:
   tags: &shared_tags
   - public-runner-docker
-  - hived-for-tests
   - hived
 
 .start-timer:
@@ -54,6 +67,35 @@ variables:
 
 .check-timer:
 - ./scripts/ci/timer.sh check
+
+.extract-nfs-cache-before-script: &extract-nfs-cache-before-script
+  - |
+    LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+    NFS_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+    echo "DEBUG: LOCAL_CACHE=${LOCAL_CACHE}"
+    echo "DEBUG: NFS_TAR=${NFS_TAR}"
+    echo "DEBUG: FORCE_NFS_CACHE=${FORCE_NFS_CACHE:-0}"
+    echo "DEBUG: Local cache exists: $([[ -d "${LOCAL_CACHE}/datadir" ]] && echo yes || echo no)"
+    echo "DEBUG: NFS tar exists: $([[ -f "$NFS_TAR" ]] && echo yes || echo no)"
+    # Skip local cache if FORCE_NFS_CACHE is set
+    if [[ "${FORCE_NFS_CACHE:-0}" == "1" ]] || { [[ ! -d "${LOCAL_CACHE}/datadir" ]] && [[ -f "$NFS_TAR" ]]; }; then
+      echo "Extracting NFS cache for service container..."
+      # Remove any existing local cache before extraction
+      echo "DEBUG: Removing ${LOCAL_CACHE} if exists..."
+      if [[ -e "${LOCAL_CACHE}" ]]; then
+        echo "DEBUG: ${LOCAL_CACHE} exists, contents before removal:"
+        ls -la "${LOCAL_CACHE}" || true
+        rm -rf "${LOCAL_CACHE}" || { echo "ERROR: rm -rf failed, trying with sudo"; sudo rm -rf "${LOCAL_CACHE}"; }
+      fi
+      mkdir -p "${LOCAL_CACHE}"
+      chmod 777 "${LOCAL_CACHE}" || true
+      echo "DEBUG: ${LOCAL_CACHE} after mkdir, contents:"
+      ls -la "${LOCAL_CACHE}" || true
+      tar xf "$NFS_TAR" -C "${LOCAL_CACHE}" --no-same-owner
+      echo "Extraction complete: ${LOCAL_CACHE}"
+    else
+      echo "Skipping extraction (local cache exists or NFS tar not found)"
+    fi
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -92,8 +134,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       bridge_api_patterns/ \
       api_smoketest_bridge.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest\r\e[0K"
 
 .bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
@@ -104,8 +145,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       bridge_api_negative/ \
       api_smoketest_bridge_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest_negative\r\e[0K"
 
 .condenser_api_smoketest-script: &condenser_api_smoketest-script
@@ -116,8 +156,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       condenser_api_patterns/ \
       api_smoketest_condenser_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest\r\e[0K"
 
 .condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
@@ -128,8 +167,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       condenser_api_negative/ \
       api_smoketest_condenser_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest_negative\r\e[0K"
 
 .database_api_smoketest-script: &database_api_smoketest-script
@@ -140,8 +178,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       database_api_patterns/ \
       api_smoketest_database_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest\r\e[0K"
 
 .database_api_smoketest_negative-script: &database_api_smoketest_negative-script
@@ -152,8 +189,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       database_api_negative/ \
       api_smoketest_database_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest_negative\r\e[0K"
 
 .follow_api_smoketest-script: &follow_api_smoketest-script
@@ -164,8 +200,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       follow_api_patterns/ \
       api_smoketest_follow_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest\r\e[0K"
 
 .follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
@@ -176,8 +211,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       follow_api_negative/ \
       api_smoketest_follow_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest_negative\r\e[0K"
 
 .tags_api_smoketest-script: &tags_api_smoketest-script
@@ -188,8 +222,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       tags_api_patterns/ \
       api_smoketest_tags_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest\r\e[0K"
 
 .tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
@@ -200,8 +233,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       tags_api_negative/ \
       api_smoketest_tags_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .mock_tests-script: &mock_tests-script
@@ -223,8 +255,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       hive_api_patterns/ \
       api_smoketest_hive_api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
 .search-api_smoketest-script: &search-api_smoketest-script
@@ -235,8 +266,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       search-api_patterns/ \
       api_smoketest_search-api.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .api-benchmark-script:
@@ -258,8 +288,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       postgrest_negative/ \
       postgrest_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
 
 .rest_api_smoketest-script: &rest_api_smoketest-script
@@ -270,8 +299,7 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       rest_api_patterns/ \
       api_smoketest_rest_api_patterns.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
 
 .rest_api_negative_smoketest-script: &rest_api_negative_smoketest-script
@@ -282,18 +310,209 @@ variables:
       $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
       rest_api_negative/ \
       api_smoketest_rest_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS \
-      "auto"
+      $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
-  ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
-  ${DATA_CACHE_HIVEMIND}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" 2>&1 | tee -a -i "$AWAIT_LOG_PATH" && \
+  # Wait for HAF PostgreSQL to be ready
+  echo "Waiting for HAF PostgreSQL to be ready..."
+  WAIT_START=$(date +%s)
+  WAIT_TIMEOUT=300  # 5 minutes
+  until PGPASSWORD="" psql -h haf-instance -U haf_admin -d haf_block_log -c "SELECT 1" > /dev/null 2>&1; do
+    if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+      echo "ERROR: Timeout waiting for HAF PostgreSQL after ${WAIT_TIMEOUT}s"
+      exit 1
+    fi
+    sleep 2
+  done
+  echo "HAF PostgreSQL ready"
+
+  # Wait for PostgreSQL with hivemind_app schema
+  echo "Waiting for hivemind_app schema..."
+  WAIT_START=$(date +%s)
+  until PGPASSWORD="" psql -h haf-instance -U haf_admin -d haf_block_log -c "SELECT 1 FROM information_schema.schemata WHERE schema_name='hivemind_app'" 2>/dev/null | grep -q 1; do
+    if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+      echo "ERROR: Timeout waiting for hivemind_app schema after ${WAIT_TIMEOUT}s"
+      exit 1
+    fi
+    sleep 2
+  done
+  echo "Hivemind database found"
+
+  # Start the server
   ${WORKING_DIR}/docker_entrypoint.sh server --webserver-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} --log-level=${LOG_LEVEL}
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| SERVICES |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# HAF instance with NFS fallback for hivemind sync data
+# Services start before before_script, so we need fallback logic in the entrypoint
+.haf-instance-with-nfs-fallback: &haf-instance-with-nfs-fallback
+  name: ${HAF_IMAGE_NAME}
+  alias: haf-instance
+  variables:
+    PGCTLTIMEOUT: 600
+    PG_ACCESS: |
+      host    haf_block_log    hivemind         all    trust
+      host    haf_block_log    haf_admin        all    trust
+    DATADIR: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}/datadir"
+    SHM_DIR: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}/datadir/blockchain"
+    LOG_FILE: $CI_JOB_NAME.log
+    DATA_SOURCE_NFS_PREFIX: "${DATA_CACHE_NFS_PREFIX}"
+    DATA_SOURCE_NFS_TYPE: "${SYNC_CACHE_TYPE}"
+    DATA_SOURCE_NFS_KEY: "${SYNC_CACHE_KEY}"
+    # Set FORCE_NFS_CACHE=1 to skip local cache and always extract from NFS
+    FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
+  entrypoint:
+    - '/bin/bash'
+    - '-c'
+    - |
+      set -euo pipefail
+      echo "Checking hivemind sync data availability..."
+      ORIGINAL_DATADIR="${DATADIR}"
+      NFS_PREFIX="${DATA_SOURCE_NFS_PREFIX:-/nfs/ci-cache}"
+      NFS_TYPE="${DATA_SOURCE_NFS_TYPE:-hivemind_sync}"
+      NFS_KEY="${DATA_SOURCE_NFS_KEY}"
+      NFS_TAR="${NFS_PREFIX}/${NFS_TYPE}/${NFS_KEY}.tar"
+      NFS_DIR="${NFS_PREFIX}/${NFS_TYPE}/${NFS_KEY}/datadir"
+      EXTRACT_DIR=$(dirname "${ORIGINAL_DATADIR}")
+
+      # Function to check if valid data exists
+      # Priority: Local cache (if valid) > NFS tar > NFS dir
+      # Validity = has pgdata with PG_VERSION and tablespace directory
+      # Set FORCE_NFS_CACHE=1 to skip local cache and always use NFS
+      check_data_exists() {
+        local pgdata="${ORIGINAL_DATADIR}/haf_db_store/pgdata"
+        local tablespace="${ORIGINAL_DATADIR}/haf_db_store/tablespace"
+
+        # If FORCE_NFS_CACHE is set, skip local cache check
+        if [[ "${FORCE_NFS_CACHE:-0}" == "1" ]]; then
+          echo "DEBUG: FORCE_NFS_CACHE=1, skipping local cache check" >&2
+        # Check local cache validity (not just existence)
+        elif [[ -f "${pgdata}/PG_VERSION" ]] && [[ -d "${tablespace}" ]]; then
+          # Basic sanity check: tablespace should have data files
+          local tablespace_files
+          tablespace_files=$(find "${tablespace}" -type f 2>/dev/null | head -1)
+          if [[ -n "$tablespace_files" ]]; then
+            echo "local"
+            return 0
+          else
+            echo "DEBUG: Local cache has empty tablespace, trying NFS" >&2
+          fi
+        fi
+
+        # Try NFS sources
+        if [[ -f "${NFS_TAR}" ]]; then
+          echo "nfs_tar"
+          return 0
+        fi
+        if [[ -d "${NFS_DIR}" ]]; then
+          echo "nfs_dir"
+          return 0
+        fi
+        return 1
+      }
+
+      # Wait for data to appear (sync job may still be pushing to NFS)
+      MAX_WAIT=600  # 10 minutes
+      WAIT_INTERVAL=10
+      WAITED=0
+      DATA_SOURCE=""
+
+      echo "Waiting for hivemind sync data..."
+      echo "  Local: ${ORIGINAL_DATADIR}"
+      echo "  NFS tar: ${NFS_TAR}"
+      echo "  NFS dir: ${NFS_DIR}"
+
+      while [[ $WAITED -lt $MAX_WAIT ]]; do
+        DATA_SOURCE=$(check_data_exists) && break
+        echo "Data not yet available, waiting... (${WAITED}s/${MAX_WAIT}s)"
+        sleep $WAIT_INTERVAL
+        WAITED=$((WAITED + WAIT_INTERVAL))
+      done
+
+      if [[ -z "$DATA_SOURCE" ]]; then
+        echo "ERROR: Timed out waiting for hivemind sync data after ${MAX_WAIT}s"
+        echo "Checked local: ${ORIGINAL_DATADIR}"
+        echo "Checked NFS tar: ${NFS_TAR}"
+        echo "Checked NFS dir: ${NFS_DIR}"
+        ls -la "${NFS_PREFIX}/${NFS_TYPE}/" 2>/dev/null | head -20 || echo "Cannot list ${NFS_PREFIX}/${NFS_TYPE}/"
+        exit 1
+      fi
+
+      echo "Found data source: ${DATA_SOURCE} (after ${WAITED}s)"
+
+      # Use cache-manager for consistent extraction with proper symlink/permission handling
+      CACHE_MANAGER="/home/haf_admin/source/scripts/ci-helpers/cache-manager.sh"
+
+      case "$DATA_SOURCE" in
+        local)
+          echo "Using local cache: ${ORIGINAL_DATADIR}"
+          ;;
+        nfs_tar|nfs_dir)
+          echo "Using cache-manager to get hivemind sync data..."
+          # Local cache invalid or missing - remove it so cache-manager extracts from NFS
+          if [[ -d "${EXTRACT_DIR}/datadir" ]]; then
+            echo "Removing invalid local cache before NFS extraction..."
+            sudo rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || true
+          fi
+          # cache-manager handles: extraction, permission restoration, symlink fixing
+          if [[ -x "$CACHE_MANAGER" ]]; then
+            "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}"
+          else
+            echo "ERROR: cache-manager not found at $CACHE_MANAGER"
+            exit 1
+          fi
+          export DATADIR="${EXTRACT_DIR}/datadir"
+          export SHM_DIR="${DATADIR}/blockchain"
+          echo "Using extracted data: ${DATADIR}"
+          ;;
+      esac
+
+      # Run docker_entrypoint.sh with passed arguments
+      exec /home/haf_admin/docker_entrypoint.sh "$@"
+    - '/bin/bash'
+  command: ["--skip-hived"]  # Only run PostgreSQL, hivemind sync already completed
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| SERVICES |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+validate_haf_commit:
+  stage: build
+  image: alpine:latest
+  script:
+  - |
+    # Validate that HAF_COMMIT variable matches both the submodule and include ref
+    # This prevents cache misses due to mismatched commits
+    SUBMODULE_COMMIT=$(cat .git/modules/haf/HEAD 2>/dev/null || git -C haf rev-parse HEAD)
+    # Extract include ref - use grep -m1 to avoid SIGPIPE from head
+    INCLUDE_REF=$(grep -A2 "project:.*hive/haf" .gitlab-ci.yaml | grep -m1 "ref:" | sed 's/.*ref: *\([a-f0-9]*\).*/\1/')
+
+    echo "HAF_COMMIT variable: $HAF_COMMIT"
+    echo "HAF submodule HEAD:  $SUBMODULE_COMMIT"
+    echo "Include ref:         $INCLUDE_REF"
+
+    ERRORS=0
+    if [ "$HAF_COMMIT" != "$SUBMODULE_COMMIT" ]; then
+      echo "ERROR: HAF_COMMIT variable does not match submodule commit!"
+      echo "       Update HAF_COMMIT in .gitlab-ci.yaml to: $SUBMODULE_COMMIT"
+      ERRORS=1
+    fi
+    if [ "$HAF_COMMIT" != "$INCLUDE_REF" ]; then
+      echo "ERROR: HAF_COMMIT variable does not match include ref!"
+      echo "       Both should be: $HAF_COMMIT"
+      ERRORS=1
+    fi
+    if [ $ERRORS -eq 1 ]; then
+      echo ""
+      echo "To fix: ensure HAF_COMMIT, include ref, and submodule all use the same commit"
+      exit 1
+    fi
+    echo "All HAF commit references are consistent"
+  tags:
+  - public-runner-docker
 
 # Build base images if they're missing from registry
 prepare_base_images:
@@ -328,7 +547,7 @@ prepare_haf_data:
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
@@ -345,12 +564,42 @@ replay_data_copy:
     DATA_SOURCE: $DATA_CACHE_HAF
     DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
+  before_script:
+  - |
+    # Ensure HAF replay data is available locally (fetch from NFS if needed)
+    LOCAL_HAF_CACHE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    if [[ -d "${LOCAL_HAF_CACHE}/datadir" ]]; then
+      echo "Local HAF cache found at ${LOCAL_HAF_CACHE}"
+    else
+      echo "Local HAF cache not found, checking NFS..."
+      CACHE_MANAGER="${CI_PROJECT_DIR}/haf/scripts/ci-helpers/cache-manager.sh"
+      if [[ -x "$CACHE_MANAGER" ]]; then
+        if "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${LOCAL_HAF_CACHE}"; then
+          echo "Fetched HAF replay data from NFS cache"
+        else
+          echo "ERROR: Failed to fetch HAF replay data from NFS cache"
+          exit 1
+        fi
+      else
+        echo "ERROR: cache-manager.sh not found and local cache missing"
+        exit 1
+      fi
+    fi
   script:
   - |
     set -e
+    # Create parent directories with appropriate permissions before copy_datadir.sh
+    # copy_datadir.sh runs mkdir as hived user, which needs write access to parent dir
+    sudo mkdir -p "$DATA_CACHE_HIVEMIND"
+    sudo chmod 777 "$DATA_CACHE_HIVEMIND"
     haf/hive/scripts/copy_datadir.sh
     sudo chmod 777 $DATA_CACHE_HIVEMIND
     sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
+    # Ensure hived_uid.env exists (some HAF caches may be missing this file)
+    if [[ ! -f "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" ]]; then
+      echo "hived_uid.env not found in HAF cache, creating with current user ID"
+      echo "HIVED_UID=$(id -u)" > "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env"
+    fi
     cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
   artifacts:
     reports:
@@ -360,7 +609,7 @@ replay_data_copy:
     - hived_uid.env
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
 
 prepare_hivemind_image:
   stage: build
@@ -421,10 +670,10 @@ cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
+    CLEANUP_PATH_PATTERN: "/cache/hivemind_sync_*"
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
 # For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
@@ -432,17 +681,17 @@ cleanup_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_* /cache/replay_data_haf_*"
+    CLEANUP_PATH_PATTERN: "/cache/hivemind_sync_* /cache/replay_data_haf_*"
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
 
-# Cleans up cahce after tests. Must depend on all jobs that use
+# Cleans up cache after tests. Must depend on all jobs that use
 # this cache
+# TEMPORARILY DISABLED: Changed to manual while debugging e2e issues
 cleanup_pipeline_cache:
   needs:
   - replay_data_copy
-  - download_await
   - sync
   - e2e_benchmark_on_postgrest
   extends:
@@ -450,42 +699,13 @@ cleanup_pipeline_cache:
   stage: cleanup
   variables:
     CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
-  when: always
+  when: manual
   tags:
   - data-cache-storage
-  - hive-builder-9
-
-download_await:
-  extends: .job-defaults
-  image:
-    name: "$HAF_IMAGE_NAME"
-    entrypoint: [""]
-  stage: prepare
-  variables:
-    GIT_STRATEGY: none
-    AWAIT_PACKAGE_URL: $CI_API_V4_URL/projects/440/packages/generic/await/v1.3.2.1/await
-  needs:
-  - job: replay_data_copy
-    artifacts: true
-  script:
-  - |
-    if [[ -e "${DATA_CACHE_HIVEMIND}/await" ]]; then
-      echo "Await is already present in ${DATA_CACHE_HIVEMIND}"
-      ls -lAh "${DATA_CACHE_HIVEMIND}"
-    else
-      echo "Downloading await..."
-      wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O "${DATA_CACHE_HIVEMIND}/await"
-      chmod +x ${DATA_CACHE_HIVEMIND}/await
-    fi
-  tags:
-  - data-cache-storage
-  - hive-builder-9
+  - fast
 
 sync:
-  extends: .job-defaults
-  image:
-    name: $HIVEMIND_IMAGE
-    entrypoint: [""]
+  extends: .docker_image_builder_job_template
   stage: sync
   interruptible: true
   timeout: 1.5h
@@ -496,73 +716,179 @@ sync:
     artifacts: true
   - job: prepare_haf_image
     artifacts: true
-  - job: download_await
-    artifacts: false
   when: on_success
-  services:
-  - name: $HAF_IMAGE_NAME
-    alias: haf-instance
-    variables:
-      PG_ACCESS: " host    haf_block_log    hivemind         all    trust\n host \
-        \   haf_block_log    haf_admin        all    trust\n "
-      DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
-      SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
-      LOG_FILE: $CI_JOB_NAME.log
-      PGCTLTIMEOUT: 600   # give PostgreSQL more time to start if GitLab shut it down improperly after the replay job
-    command: ["--replay-blockchain", "--stop-at-block=5000000"]
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     RUNNER_HIVEMIND_SYNC_IRREVERSIBLE_MAX_BLOCK: 4999979
     HIVED_UID: $HIVED_UID
-    WORKING_DIR: /home/hivemind
-    LOG_PATH: $CI_PROJECT_DIR/hivemind-sync.log
     ADD_MOCKS: "true"
-    USE_POSTGREST: 1
+    # Docker compose variables
+    HAF_DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
+    HAF_SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
+    COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
+  before_script:
+  - |
+    echo "=== Preparing HAF data for sync job ==="
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+    # Copy HAF replay data from prepare_haf_data cache to hivemind sync location
+    HAF_SOURCE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    LOCAL_CACHE="${DATA_CACHE_HIVEMIND}"
+    HAF_NFS_TAR="${DATA_CACHE_NFS_PREFIX}/haf/${HAF_COMMIT}.tar"
+
+    # Clean up old cache-manager symlinks that could cause cross-contamination
+    # (Fixed in cache-manager to use copies instead, but clean up legacy symlinks)
+    HAF_SYMLINK="/cache/haf_${HAF_COMMIT}"
+    if [[ -L "$HAF_SYMLINK" ]]; then
+      echo "Removing old cache-manager symlink: ${HAF_SYMLINK}"
+      sudo rm -f "$HAF_SYMLINK" || rm -f "$HAF_SYMLINK" || true
+    fi
+
+    # Check if local HAF cache is contaminated (has hivemind-specific files)
+    if [[ -f "${HAF_SOURCE}/datadir/hivemind-server.log" ]]; then
+      echo "Local HAF cache is contaminated with hivemind data, removing..."
+      sudo rm -rf "${HAF_SOURCE}" || rm -rf "${HAF_SOURCE}" || true
+    fi
+
+    # If local cache doesn't exist or was removed, extract from NFS
+    if [[ ! -d "${HAF_SOURCE}/datadir" ]]; then
+      echo "Local HAF cache not found, extracting from NFS: ${HAF_NFS_TAR}"
+      if [[ ! -f "$HAF_NFS_TAR" ]]; then
+        echo "ERROR: HAF NFS cache not found at ${HAF_NFS_TAR}"
+        exit 1
+      fi
+      mkdir -p "${HAF_SOURCE}"
+      if ! sudo tar xf "${HAF_NFS_TAR}" -C "${HAF_SOURCE}"; then
+        echo "ERROR: Failed to extract HAF data from NFS"
+        exit 1
+      fi
+      echo "HAF data extracted from NFS successfully"
+    fi
+
+    echo "Copying HAF replay data from ${HAF_SOURCE} to ${LOCAL_CACHE}..."
+    mkdir -p "${LOCAL_CACHE}"
+    # Use tar pipe for reliable copying with proper permissions
+    if ! (cd "${HAF_SOURCE}" && sudo tar cf - .) | (cd "${LOCAL_CACHE}" && sudo tar xf -); then
+      echo "ERROR: Failed to copy HAF data"
+      exit 1
+    fi
+    echo "HAF data copied successfully"
+
+    # Create blockchain symlinks to shared block_log
+    BLOCKCHAIN_DIR="${LOCAL_CACHE}/datadir/blockchain"
+    SHARED_BLOCK_LOG="/blockchain/block_log_5m"
+    if [[ ! -d "$BLOCKCHAIN_DIR" ]] && [[ -d "$SHARED_BLOCK_LOG" ]]; then
+      echo "Creating blockchain symlinks to shared block_log"
+      mkdir -p "$BLOCKCHAIN_DIR"
+      for block_file in "$SHARED_BLOCK_LOG"/block_log* ; do
+        if [[ -f "$block_file" ]]; then
+          ln -sf "$block_file" "$BLOCKCHAIN_DIR/$(basename "$block_file")"
+        fi
+      done
+    fi
+    # Ensure blockchain dir is writable by hived (uid 1000)
+    if [[ -d "$BLOCKCHAIN_DIR" ]]; then
+      mkdir -p "$BLOCKCHAIN_DIR/haf_wal"
+      chown -R 1000:100 "$BLOCKCHAIN_DIR" 2>/dev/null || chmod -R 777 "$BLOCKCHAIN_DIR" 2>/dev/null || true
+    fi
+
+    echo "HAF data prepared at: ${LOCAL_CACHE}"
+    ls -la "${LOCAL_CACHE}/datadir/" || true
   script:
   - |
-    sleep 20s
-    cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
-    pushd ${WORKING_DIR}/app
-    ${DATA_CACHE_HIVEMIND}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
-    ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
-    # Apply CI-specific PostgreSQL tuning for faster sync
-    # Note: shared_buffers requires restart so we skip it (already 16GB in base config)
-    # Note: fsync/full_page_writes are set here because ALTER SYSTEM requires superuser
-    # Each ALTER SYSTEM must run outside a transaction, so we use separate -c flags
-    psql "${HAF_ADMIN_POSTGRES_URL}" \
-      -c "ALTER SYSTEM SET effective_cache_size = '90GB'" \
-      -c "ALTER SYSTEM SET work_mem = '256MB'" \
-      -c "ALTER SYSTEM SET maintenance_work_mem = '8GB'" \
-      -c "ALTER SYSTEM SET fsync = 'off'" \
-      -c "ALTER SYSTEM SET full_page_writes = 'off'" \
-      -c "ALTER SYSTEM SET max_parallel_workers_per_gather = 4" \
-      -c "SELECT pg_reload_conf()"
-    echo "PostgreSQL CI tuning applied (fsync=off, full_page_writes=off, work_mem=256MB)"
-    pushd ${WORKING_DIR}
-    ${WORKING_DIR}/docker_entrypoint.sh setup \
-          --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
-          --with-apps \
-          --add-mocks=${ADD_MOCKS}
-    # Run reputation_tracker in background (parallel with hivemind sync)
-    ${WORKING_DIR}/app/reputation_tracker/scripts/process_blocks.sh \
-      --stop-at-block="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
-      --postgres-url="${HAF_POSTGRES_URL}" &
-    REP_TRACKER_PID=$!
-    ${WORKING_DIR}/docker_entrypoint.sh sync \
-          --log-mask-sensitive-data \
-          --pid-file hive_sync.pid \
-          --test-max-block="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
-          --test-profile=False \
-          --prometheus-port 11011 \
-          --database-url="${HAF_POSTGRES_URL}" \
-          --community-start-block 4998000
-    # Wait for reputation_tracker to complete before proceeding
-    wait $REP_TRACKER_PID
-    pushd +2
-    ${WORKING_DIR}/app/ci/collect-db-stats.sh
+    # Check if valid hivemind sync cache already exists on NFS
+    # If so, skip sync entirely - e2e job will use the cached data directly
+    NFS_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+    if [[ -f "$NFS_TAR" ]]; then
+      echo "=== Hivemind sync cache found at $NFS_TAR ==="
+      echo "Skipping sync - e2e job will use cached data directly"
+      echo "To force re-sync, delete the cache file or use cleanup_hivemind_haf_cache_manual job"
+      exit 0
+    fi
+
+    echo "=== Starting hivemind sync with docker-compose ==="
+    echo "No existing cache found at $NFS_TAR - running full sync"
+
+    # Export variables for docker-compose
+    export HAF_IMAGE="${HAF_IMAGE_NAME}"
+    export HIVEMIND_IMAGE="${HIVEMIND_IMAGE}"
+    export HAF_DATADIR="${DATA_CACHE_HIVEMIND_DATADIR}"
+    export HAF_SHM_DIR="${DATA_CACHE_HIVEMIND_SHM_DIR}"
+    export RUNNER_HIVEMIND_SYNC_MAX_BLOCK="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}"
+    export ADD_MOCKS="${ADD_MOCKS}"
+
+    echo "HAF_IMAGE: ${HAF_IMAGE}"
+    echo "HIVEMIND_IMAGE: ${HIVEMIND_IMAGE}"
+    echo "HAF_DATADIR: ${HAF_DATADIR}"
+    echo "RUNNER_HIVEMIND_SYNC_MAX_BLOCK: ${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}"
+
+    # Start docker-compose
+    docker compose -f "${COMPOSE_FILE}" up -d haf
+
+    # Wait for HAF to be healthy
+    echo "Waiting for HAF PostgreSQL to be healthy..."
+    WAIT_TIMEOUT=300
+    WAIT_START=$(date +%s)
+    until docker compose -f "${COMPOSE_FILE}" exec -T haf pg_isready -U haf_admin -d haf_block_log > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for HAF PostgreSQL after ${WAIT_TIMEOUT}s"
+        docker compose -f "${COMPOSE_FILE}" logs haf
+        exit 1
+      fi
+      sleep 5
+    done
+    echo "HAF PostgreSQL is ready"
+
+    # Run hivemind-setup (blocking, wait for completion)
+    echo "Running hivemind setup..."
+    docker compose -f "${COMPOSE_FILE}" run --rm hivemind-setup
+
+    # Run hivemind-sync (blocking, wait for completion)
+    echo "Running hivemind sync..."
+    docker compose -f "${COMPOSE_FILE}" run --rm hivemind-sync
+
+    echo "Hivemind sync completed successfully"
+
+    # Extract version info from hivemind container
+    docker compose -f "${COMPOSE_FILE}" run --rm --entrypoint /bin/bash hivemind-sync -c \
+      "cat /home/hivemind/.hivemind-venv/lib/python*/site-packages/hive/_version.py" > version.log || true
+
+    # Collect DB stats
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log -c "
+      SELECT schemaname, relname, n_live_tup, n_dead_tup, last_vacuum, last_autovacuum
+      FROM pg_stat_user_tables
+      WHERE schemaname IN ('hivemind_app', 'reptracker_app')
+      ORDER BY n_live_tup DESC
+      LIMIT 20;
+    " > pg-stats.txt || true
+    mkdir -p pg-stats
+    mv pg-stats.txt pg-stats/ || true
   after_script:
-  - cp "$DATA_CACHE_HIVEMIND_DATADIR/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"  ||
-    true                                                                                 # in after_script, so it's done even if the job fails
+  - |
+    echo "=== Collecting logs and shutting down ==="
+
+    # Collect container logs
+    docker compose -f "${COMPOSE_FILE}" logs haf > hivemind-sync.log 2>&1 || true
+
+    # Force PostgreSQL checkpoint before shutdown
+    echo "Forcing PostgreSQL checkpoint..."
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log -c "CHECKPOINT;" || true
+
+    # Graceful shutdown with 120s timeout for PostgreSQL
+    # Longer timeout prevents SIGKILL which would trigger crash recovery on next start
+    echo "Shutting down docker-compose with 120s timeout..."
+    docker compose -f "${COMPOSE_FILE}" down --timeout 120 || true
+
+    echo "Docker-compose shutdown complete"
+
+    # Now PostgreSQL is stopped, safe to push to cache
+    CACHE_MANAGER="${CI_PROJECT_DIR}/haf/scripts/ci-helpers/cache-manager.sh"
+    if [[ -x "$CACHE_MANAGER" ]]; then
+      echo "Pushing hivemind sync data to NFS cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}"
+      "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" || echo "Warning: Failed to push to NFS cache"
+    else
+      echo "Warning: cache-manager.sh not found, skipping NFS cache push"
+    fi
   artifacts:
     when: always
     expire_in: 7 days
@@ -570,13 +896,13 @@ sync:
     - hivemind-sync.log
     - pg-stats
     - version.log
-    - haf-$CI_JOB_NAME.log
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
+  - fastest
 
 e2e_benchmark_on_postgrest:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.14-slim-1
   stage: benchmark
   interruptible: true
   needs:
@@ -586,22 +912,11 @@ e2e_benchmark_on_postgrest:
     artifacts: true
   - job: prepare_haf_image
     artifacts: true
-  - job: download_await
-    artifacts: false
   - job: sync
     artifacts: true
   when: on_success
   services:
-  - name: $HAF_IMAGE_NAME
-    alias: haf-instance
-    variables:
-      PG_ACCESS: " host    haf_block_log    hivemind         all    trust\n host \
-        \   haf_block_log    haf_admin        all    trust\n "
-      DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
-      SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
-      LOG_FILE: $CI_JOB_NAME.log
-      PGCTLTIMEOUT: 600   # give PostgreSQL more time to start if GitLab shut it down improperly after the sync job
-    command: ["--replay-blockchain", "--stop-at-block=5000000"]
+  - *haf-instance-with-nfs-fallback
   - name: $HIVEMIND_IMAGE
     alias: hivemind-smoketest   # cannot be a variable
     entrypoint:
@@ -612,7 +927,6 @@ e2e_benchmark_on_postgrest:
       WORKING_DIR: /home/hivemind
       LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server.log
       LOG_LEVEL: "info" # change to "debug" for more info
-      AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server-await.log
       REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times_smoketests.log
   - name: $HIVEMIND_IMAGE
     alias: hivemind-benchmark   # cannot be a variable
@@ -624,7 +938,6 @@ e2e_benchmark_on_postgrest:
       WORKING_DIR: /home/hivemind
       LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server.log
       LOG_LEVEL: "info" # change to "debug" for more info
-      AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server-await.log
       REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times.log
   variables:
     HIVED_UID: $HIVED_UID
@@ -634,14 +947,90 @@ e2e_benchmark_on_postgrest:
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
-    CI_DEBUG_SERVICES: "false" # Change to true to debug services in this job
+    CI_DEBUG_SERVICES: "true" # Debugging service startup issues
+    # Set FORCE_NFS_CACHE=1 to skip local cache and always extract from NFS (for debugging)
+    FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
+  before_script:
+  - *extract-nfs-cache-before-script
   script:
   - |
     echo "HAF image name $HAF_IMAGE_NAME"
     echo "Hivemind image name $HIVEMIND_IMAGE"
-    SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
-    echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
-    "${DATA_CACHE_HIVEMIND}/await" -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
+    echo "Waiting for Hivemind smoketest server..."
+    WAIT_TIMEOUT=600  # 10 minutes
+    WAIT_START=$(date +%s)
+    until python3 -c "import urllib.request; urllib.request.urlopen('http://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}/', timeout=5)" > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for Hivemind smoketest server after ${WAIT_TIMEOUT}s"
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "Hivemind smoketest instance is running"
+  - |
+    # Debug: check database content directly via psql
+    echo "=== DEBUG: Checking database content ==="
+    psql "postgresql://haf_admin@haf-instance:5432/haf_block_log" << 'SQLEOF'
+    -- Check what schemas exist
+    SELECT 'Schemas:' as info, string_agg(schema_name, ', ') as schemas
+    FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast');
+
+    -- Check what tables exist in hive schema
+    SELECT 'hive tables:' as info, string_agg(table_name, ', ') as tables
+    FROM information_schema.tables WHERE table_schema = 'hive';
+
+    -- Check tablespace
+    SELECT 'Tablespaces:' as info, spcname, pg_tablespace_location(oid) as location FROM pg_tablespace;
+
+    -- Check core HAF data
+    SELECT 'hive.blocks count' as table_name, count(*) as row_count FROM hive.blocks;
+    SELECT 'hive.accounts count' as table_name, count(*) as row_count FROM hive.accounts;
+
+    -- Check hivemind app data
+    SELECT 'hivemind_app.hive_accounts count' as table_name, count(*) as row_count FROM hivemind_app.hive_accounts;
+    SELECT 'hivemind_app.hive_posts count' as table_name, count(*) as row_count FROM hivemind_app.hive_posts;
+
+    -- Check if gtg exists
+    SELECT 'gtg in hive.accounts' as check_name, EXISTS(SELECT 1 FROM hive.accounts WHERE name='gtg') as exists;
+    SELECT 'gtg in hivemind_app.hive_accounts' as check_name, EXISTS(SELECT 1 FROM hivemind_app.hive_accounts WHERE name='gtg') as exists;
+
+    -- Check hivemind_endpoints schema
+    SELECT 'hivemind_endpoints functions' as check_name, count(*) as count
+    FROM information_schema.routines
+    WHERE routine_schema = 'hivemind_endpoints';
+
+    -- Check sample account from hive.accounts
+    SELECT 'Sample hive.accounts' as info, name FROM hive.accounts LIMIT 5;
+    SQLEOF
+    echo "=== END DB DEBUG ==="
+  - |
+    # Debug: test API calls using Python (curl not available in container)
+    echo "=== DEBUG: Testing API responses ==="
+    python3 << 'PYEOF'
+    import json
+    import urllib.request
+
+    HOST = "hivemind-smoketest"
+    PORT = "8080"
+    URL = f"http://{HOST}:{PORT}/"
+
+    tests = [
+        {"jsonrpc": "2.0", "method": "condenser_api.get_follow_count", "params": ["gtg"], "id": 1},
+        {"jsonrpc": "2.0", "method": "condenser_api.get_followers", "params": ["gtg", "", "blog", 1], "id": 2},
+        {"jsonrpc": "2.0", "method": "bridge.get_trending_topics", "params": {}, "id": 3},
+    ]
+
+    for test in tests:
+        print(f"\n--- Testing: {test['method']} ---")
+        try:
+            req = urllib.request.Request(URL, data=json.dumps(test).encode(), headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = resp.read().decode()
+                print(f"Response: {data[:2000]}")
+        except Exception as e:
+            print(f"Error: {e}")
+    PYEOF
+    echo "=== END DEBUG ==="
   - *condenser_api_smoketest-script
   - *condenser_api_smoketest_negative-script
   - *follow_api_smoketest-script
@@ -659,10 +1048,18 @@ e2e_benchmark_on_postgrest:
   - *postgrest_negative-script
   - *mock_tests-script
   - |
-    BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
-    echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
-    "${DATA_CACHE_HIVEMIND}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
-   # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
+    echo "Waiting for Hivemind benchmark server..."
+    WAIT_TIMEOUT=600  # 10 minutes
+    WAIT_START=$(date +%s)
+    until python3 -c "import urllib.request; urllib.request.urlopen('http://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}/', timeout=5)" > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for Hivemind benchmark server after ${WAIT_TIMEOUT}s"
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "Hivemind benchmark instance is running"
+    # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
     # - *api-benchmark-script
   after_script:
   - |
@@ -671,10 +1068,8 @@ e2e_benchmark_on_postgrest:
     cp "${DATA_CACHE_HIVEMIND_DATADIR}/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log" || true
     cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times_smoketests.log" request_process_times_smoketests.log || true
     cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-server.log" hivemind-server.log || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-server-await.log" hivemind-server-await.log || true
     cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times.log" request_process_times.log || true
     cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-benchmark-server.log" hivemind-benchmark-server.log || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-benchmark-server-await.log" hivemind-benchmark-server-await.log || true
     echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
   - |
     echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
@@ -702,11 +1097,10 @@ e2e_benchmark_on_postgrest:
     - request_process_times.log
     - request_process_times_smoketests.log
     - version.log
-    - hivemind-server-await.log
-    - hivemind-benchmark-server-await.log
   tags:
   - data-cache-storage
-  - hive-builder-9
+  - fast
+  - fastest
 
 python_api_client_test:
   extends: .project_develop_configuration_template
@@ -718,6 +1112,7 @@ python_api_client_test:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   script:
   - pytest "${PYPROJECT_DIR}/api_client_tests"
+  allow_failure: true  # External API (api.syncad.com) dependency - may fail if API is unavailable
   tags:
   - public-runner-docker
 
