@@ -6619,7 +6619,7 @@
             "type": "account_create_operation",
             "value": {
               "creator": "test-safari",
-              "new_account_name": "acidyo",
+              "new_account_name": "acidyobene",
               "owner": {
                 "weight_threshold": 1,
                 "account_auths": [],
@@ -6674,7 +6674,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-187432\",\"props\":{\"title\":\"Beneficiary Test Community\",\"about\":\"Testing required beneficiaries\",\"is_nsfw\":false,\"description\":\"This community requires 5% beneficiary to howo\",\"flag_text\":\"\",\"settings\":{\"required_beneficiaries\":[{\"account\":\"acidyo\",\"weight\":500}]}}}]"
+              "json": "[\"updateProps\",{\"community\":\"hive-187432\",\"props\":{\"title\":\"Beneficiary Test Community\",\"about\":\"Testing required beneficiaries\",\"is_nsfw\":false,\"description\":\"This community requires 5% beneficiary to howo\",\"flag_text\":\"\",\"settings\":{\"required_beneficiaries\":[{\"account\":\"acidyobene\",\"weight\":500}]}}}]"
             }
           },
           {
@@ -6685,7 +6685,7 @@
               "author": "benef-tester",
               "permlink": "post-with-beneficiary",
               "title": "Post with correct beneficiary",
-              "body": "This post has the required 5% beneficiary to acidyo",
+              "body": "This post has the required 5% beneficiary to acidyobene",
               "json_metadata": "{}"
             }
           },
@@ -6708,7 +6708,7 @@
                   "value": {
                     "beneficiaries": [
                       {
-                        "account": "acidyo",
+                        "account": "acidyobene",
                         "weight": 500
                       }
                     ]
