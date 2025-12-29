@@ -410,7 +410,7 @@ class Posts(DbAdapterHolder):
 
         # Validate required beneficiaries for community posts
         from hive.indexer.notify import Notify
-        sql = f"SELECT * FROM {SCHEMA_NAME}.validate_required_beneficiaries(:author, :permlink, :beneficiaries)"
+        sql = f"SELECT should_mute, error_message, author_id, community_id FROM {SCHEMA_NAME}.validate_required_beneficiaries(:author, :permlink, :beneficiaries)"
         result = DbAdapterHolder.common_block_processing_db().query_row(
             sql,
             author=op['author'],
