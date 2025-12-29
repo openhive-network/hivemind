@@ -418,6 +418,9 @@ class Posts(DbAdapterHolder):
             beneficiaries=dumps(beneficiaries)
         )
 
+        if result:
+            result = result._mapping
+
         if result and result['should_mute']:
             # Send error notification to author
             Notify(
