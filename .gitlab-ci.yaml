@@ -147,6 +147,8 @@ default:
 
 # Manual submodule initialization - needed because haf contains nested hive submodule
 # with relative URLs that don't work with GIT_SUBMODULE_STRATEGY: recursive
+# This ONLY initializes haf and its nested submodules - other submodules (hafah,
+# reputation_tracker, tests_api) must be initialized separately if needed
 .init_submodules:
   before_script: &init_submodules
     - |
@@ -166,8 +168,6 @@ default:
       # Initialize nested submodules inside haf (hive and its submodules)
       git submodule update --init --recursive --jobs 4
       cd ..
-      # Update any remaining submodules (hafah, reputation_tracker, tests_api)
-      git submodule update --init --recursive --jobs 4
       echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
 
 .shared_tags:
