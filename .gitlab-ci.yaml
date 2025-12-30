@@ -1,4 +1,5 @@
 stages:
+- detect
 - build
 - prepare
 - sync
@@ -11,22 +12,49 @@ stages:
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 - project: hive/haf
-  ref: 7e28069624c4fb7e2524f22279a69fc7dee14083 # develop
+  ref: 1ac5d12439b9cca33e6db383adc59967cae75fc4 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 variables:
-  # Override common-ci-configuration version to match hive/haf
-  CI_COMMON_JOB_VERSION: "034656a22890de7af0fe1db30b0da171f1304e2e"
+  # =============================================================================
+  # Quick Test / Auto-Skip Mode
+  # =============================================================================
+  # Two ways to skip builds/sync and use cached data:
+  #
+  # 1. AUTOMATIC (recommended): When only tests/docs change, sync is
+  #    automatically skipped and cached data is used. No configuration needed.
+  #
+  # 2. MANUAL: Set QUICK_TEST=true to force skip mode with a specific cache:
+  #    - QUICK_TEST=true
+  #    - QUICK_TEST_HAF_COMMIT=<sha>  (required - HAF commit for cached data)
+  #    - QUICK_TEST_HIVEMIND_COMMIT=<sha>  (required - Hivemind commit short SHA)
+  #
+  # Find available caches: ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'
+  # =============================================================================
+  QUICK_TEST: "false"
+  QUICK_TEST_HAF_COMMIT: ""       # Required when QUICK_TEST=true
+  QUICK_TEST_HIVEMIND_COMMIT: ""  # Required when QUICK_TEST=true (short SHA)
+  # Auto-populated by detect_changes job:
+  AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
+  AUTO_CACHE_KEY: ""              # Cache key to use when skipping sync
+
+  # Override common-ci-configuration version - use latest with cache-manager fixes
+  CI_COMMON_JOB_VERSION: "3dd346380da7f28cdaf3ef3955559c905d94bd1c"
   DOCKER_BUILDER_TAG: "$CI_COMMON_JOB_VERSION"
   DOCKER_DIND_TAG: "$CI_COMMON_JOB_VERSION"
   IMAGE_REMOVER_TAG: "$CI_COMMON_JOB_VERSION"
+  # CI base image from common-ci-configuration (Python 3.14)
+  BUILDER_IMAGE_TAG: ":ubuntu24.04-py3.14-2"
+  HIVE_CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image${BUILDER_IMAGE_TAG}"
+  # Python 3.12 image for pydantic-core based tools (pydantic-core doesn't support 3.14 yet)
+  PYTHON_COMPAT_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/python:3.12.9-1"
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
   # HAF submodule commit - must match the 'ref:' in the include section above
   # This is needed for service containers which can't access dotenv artifacts
-  HAF_COMMIT: "7e28069624c4fb7e2524f22279a69fc7dee14083"
+  HAF_COMMIT: "1ac5d12439b9cca33e6db383adc59967cae75fc4"
   # HAF
   HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
@@ -34,7 +62,7 @@ variables:
   # NFS cache configuration for sync data sharing across builders
   DATA_CACHE_NFS_PREFIX: "/nfs/ci-cache"
   SYNC_CACHE_KEY: "${HAF_COMMIT}_${CI_COMMIT_SHORT_SHA}"
-  SYNC_CACHE_TYPE: "hivemind_sync"
+  SYNC_CACHE_TYPE: "haf_hivemind_sync"  # Must start with 'haf' for cache-manager pgdata permission handling
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
   DATA_CACHE_HIVEMIND: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
   DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
@@ -71,30 +99,34 @@ variables:
 .extract-nfs-cache-before-script: &extract-nfs-cache-before-script
   - |
     LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
-    NFS_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
     echo "DEBUG: LOCAL_CACHE=${LOCAL_CACHE}"
-    echo "DEBUG: NFS_TAR=${NFS_TAR}"
+    echo "DEBUG: SYNC_CACHE_KEY=${SYNC_CACHE_KEY}"
     echo "DEBUG: FORCE_NFS_CACHE=${FORCE_NFS_CACHE:-0}"
     echo "DEBUG: Local cache exists: $([[ -d "${LOCAL_CACHE}/datadir" ]] && echo yes || echo no)"
-    echo "DEBUG: NFS tar exists: $([[ -f "$NFS_TAR" ]] && echo yes || echo no)"
-    # Skip local cache if FORCE_NFS_CACHE is set
-    if [[ "${FORCE_NFS_CACHE:-0}" == "1" ]] || { [[ ! -d "${LOCAL_CACHE}/datadir" ]] && [[ -f "$NFS_TAR" ]]; }; then
-      echo "Extracting NFS cache for service container..."
-      # Remove any existing local cache before extraction
-      echo "DEBUG: Removing ${LOCAL_CACHE} if exists..."
-      if [[ -e "${LOCAL_CACHE}" ]]; then
-        echo "DEBUG: ${LOCAL_CACHE} exists, contents before removal:"
-        ls -la "${LOCAL_CACHE}" || true
-        rm -rf "${LOCAL_CACHE}" || { echo "ERROR: rm -rf failed, trying with sudo"; sudo rm -rf "${LOCAL_CACHE}"; }
+
+    # Skip local cache if FORCE_NFS_CACHE is set or local cache doesn't exist
+    if [[ "${FORCE_NFS_CACHE:-0}" == "1" ]] || [[ ! -d "${LOCAL_CACHE}/datadir" ]]; then
+      echo "Fetching hivemind sync data via cache-manager..."
+
+      # Fetch cache-manager from common-ci-configuration
+      CACHE_MANAGER="/tmp/cache-manager.sh"
+      if [[ ! -x "$CACHE_MANAGER" ]]; then
+        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+        chmod +x "$CACHE_MANAGER"
       fi
-      mkdir -p "${LOCAL_CACHE}"
-      chmod 777 "${LOCAL_CACHE}" || true
-      echo "DEBUG: ${LOCAL_CACHE} after mkdir, contents:"
-      ls -la "${LOCAL_CACHE}" || true
-      tar xf "$NFS_TAR" -C "${LOCAL_CACHE}" --no-same-owner
-      echo "Extraction complete: ${LOCAL_CACHE}"
+
+      # Remove any existing local cache before extraction
+      if [[ -e "${LOCAL_CACHE}" ]]; then
+        rm -rf "${LOCAL_CACHE}" || sudo rm -rf "${LOCAL_CACHE}" || true
+      fi
+
+      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" || {
+        echo "ERROR: Failed to fetch cache via cache-manager"
+        exit 1
+      }
+      echo "Cache ready at: ${LOCAL_CACHE}"
     else
-      echo "Skipping extraction (local cache exists or NFS tar not found)"
+      echo "Using existing local cache: ${LOCAL_CACHE}"
     fi
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -372,7 +404,7 @@ variables:
       echo "Checking hivemind sync data availability..."
       ORIGINAL_DATADIR="${DATADIR}"
       NFS_PREFIX="${DATA_SOURCE_NFS_PREFIX:-/nfs/ci-cache}"
-      NFS_TYPE="${DATA_SOURCE_NFS_TYPE:-hivemind_sync}"
+      NFS_TYPE="${DATA_SOURCE_NFS_TYPE:-haf_hivemind_sync}"
       NFS_KEY="${DATA_SOURCE_NFS_KEY}"
       NFS_TAR="${NFS_PREFIX}/${NFS_TYPE}/${NFS_KEY}.tar"
       NFS_DIR="${NFS_PREFIX}/${NFS_TYPE}/${NFS_KEY}/datadir"
@@ -479,9 +511,162 @@ variables:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+# =============================================================================
+# Change Detection & Quick Test Setup
+# =============================================================================
+# Detects if only tests/docs changed, finds cached sync data, and exports
+# variables for downstream jobs:
+#   AUTO_SKIP_SYNC  - true if sync can be skipped
+#   SYNC_CACHE_KEY  - cache key to use (HAF_COMMIT_HIVEMIND_SHORT_SHA)
+detect_changes:
+  stage: detect
+  image: "$HIVE_CI_BASE_IMAGE"
+  rules:
+    # Skip for tags (always do full build for releases)
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq docker.io >/dev/null
+  script:
+    - |
+      set -euo pipefail
+
+      # Initialize defaults
+      CAN_SKIP_SYNC=false
+      CACHE_KEY=""
+
+      # Handle manual QUICK_TEST mode
+      if [[ "$QUICK_TEST" == "true" ]]; then
+        echo "=== Manual QUICK_TEST Mode ==="
+        CAN_SKIP_SYNC=true
+        if [[ -z "$QUICK_TEST_HAF_COMMIT" ]] || [[ -z "$QUICK_TEST_HIVEMIND_COMMIT" ]]; then
+          echo "ERROR: QUICK_TEST=true requires both QUICK_TEST_HAF_COMMIT and QUICK_TEST_HIVEMIND_COMMIT"
+          echo ""
+          echo "Find available caches:"
+          echo "  ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'"
+          exit 1
+        fi
+        CACHE_KEY="${QUICK_TEST_HAF_COMMIT}_${QUICK_TEST_HIVEMIND_COMMIT}"
+        echo "Using cache key: $CACHE_KEY"
+      else
+        # Automatic detection mode
+        echo "=== Detecting Changed Files ==="
+
+        # Get changed files based on pipeline type
+        if [[ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]]; then
+          BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+          echo "MR pipeline: comparing against target branch"
+        elif [[ "${CI_PIPELINE_SOURCE:-}" == "push" ]]; then
+          # For push pipelines with shallow clone, fetch more history
+          echo "Push pipeline: fetching history for comparison..."
+          git fetch --deepen=2 origin "${CI_COMMIT_REF_NAME}" 2>/dev/null || true
+          BASE_SHA="HEAD~1"
+          echo "Push pipeline: comparing against previous commit"
+        else
+          # Fetch develop branch for comparison
+          git fetch origin develop --depth=1 2>/dev/null || true
+          BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "")
+          if [[ -z "$BASE_SHA" ]]; then
+            echo "Cannot determine base - assuming full sync needed"
+            CAN_SKIP_SYNC=false
+          else
+            echo "Other pipeline: comparing against develop"
+          fi
+        fi
+
+        # Get changed files (skip if we already determined full sync needed)
+        CHANGED_FILES=""
+        if [[ "$CAN_SKIP_SYNC" != "false" ]] && [[ -n "$BASE_SHA" ]]; then
+          echo "Comparing $BASE_SHA to HEAD"
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "Cannot determine changed files - assuming full sync needed"
+            CAN_SKIP_SYNC=false
+          fi
+        fi
+
+        if [[ -n "$CHANGED_FILES" ]]; then
+          echo "Changed files:"
+          echo "$CHANGED_FILES" | head -50
+
+          # Skip sync when only tests, docs, or non-code files change
+          # SQL changes DO require sync (they affect database schema/functions)
+          SKIP_SYNC_PATTERNS="^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yaml$"
+
+          NEEDS_SYNC=$(echo "$CHANGED_FILES" | grep -vE "$SKIP_SYNC_PATTERNS" || true)
+
+          if [[ -z "$NEEDS_SYNC" ]]; then
+            echo ""
+            echo "=== Can skip sync (only tests/docs/CI config changed) ==="
+            CAN_SKIP_SYNC=true
+          else
+            echo ""
+            echo "=== Full sync required ==="
+            echo "Files requiring sync:"
+            echo "$NEEDS_SYNC" | head -20
+          fi
+        fi  # end of CHANGED_FILES check
+
+        # Find cached data when we can skip sync
+        if [[ "$CAN_SKIP_SYNC" == "true" ]]; then
+          echo ""
+          echo "Looking for cached hivemind sync data..."
+
+          # Docker login for image verification
+          echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY" 2>/dev/null || true
+
+          NFS_CACHE_PATH="/nfs/ci-cache/haf_hivemind_sync"
+          if [[ -d "$NFS_CACHE_PATH" ]]; then
+            # Look through recent cache files to find one with valid images
+            for TAR in $(ls -t "$NFS_CACHE_PATH"/*.tar 2>/dev/null | head -10); do
+              TEST_KEY=$(basename "$TAR" .tar)
+              # Extract HAF commit (first part before underscore)
+              TEST_HAF_COMMIT="${TEST_KEY%%_*}"
+              TEST_SHORT="${TEST_HAF_COMMIT:0:8}"
+
+              # Verify HAF Docker image exists
+              HAF_IMG="registry.gitlab.syncad.com/hive/haf:${TEST_SHORT}"
+              if docker manifest inspect "$HAF_IMG" >/dev/null 2>&1; then
+                CACHE_KEY="$TEST_KEY"
+                echo "Found cached data with valid HAF image: $CACHE_KEY"
+                echo "HAF image: $HAF_IMG"
+                break
+              else
+                echo "Cache $TEST_KEY missing HAF image ($HAF_IMG), trying next..."
+              fi
+            done
+          fi
+
+          if [[ -z "$CACHE_KEY" ]]; then
+            echo "WARNING: No cached data with valid images found - cannot skip sync"
+            CAN_SKIP_SYNC=false
+          fi
+        fi
+      fi
+
+      # Export results
+      echo "AUTO_SKIP_SYNC=$CAN_SKIP_SYNC" >> detect_changes.env
+      if [[ -n "$CACHE_KEY" ]]; then
+        echo "SYNC_CACHE_KEY=$CACHE_KEY" >> detect_changes.env
+        # Also export the HAF commit for image lookup
+        HAF_FROM_CACHE="${CACHE_KEY%%_*}"
+        echo "AUTO_HAF_COMMIT=$HAF_FROM_CACHE" >> detect_changes.env
+      fi
+
+      echo ""
+      echo "=== Summary ==="
+      cat detect_changes.env
+  artifacts:
+    reports:
+      dotenv: detect_changes.env
+    expire_in: 1 day
+  tags:
+    - data-cache-storage  # Needs NFS access to find caches
+
 validate_haf_commit:
   stage: build
-  image: alpine:latest
+  image: "$HIVE_CI_BASE_IMAGE"
   script:
   - |
     # Validate that HAF_COMMIT variable matches both the submodule and include ref
@@ -571,17 +756,17 @@ replay_data_copy:
     if [[ -d "${LOCAL_HAF_CACHE}/datadir" ]]; then
       echo "Local HAF cache found at ${LOCAL_HAF_CACHE}"
     else
-      echo "Local HAF cache not found, checking NFS..."
-      CACHE_MANAGER="${CI_PROJECT_DIR}/haf/scripts/ci-helpers/cache-manager.sh"
-      if [[ -x "$CACHE_MANAGER" ]]; then
-        if "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${LOCAL_HAF_CACHE}"; then
-          echo "Fetched HAF replay data from NFS cache"
-        else
-          echo "ERROR: Failed to fetch HAF replay data from NFS cache"
-          exit 1
-        fi
+      echo "Local HAF cache not found, fetching from NFS..."
+      # Fetch cache-manager from common-ci-configuration
+      CACHE_MANAGER="/tmp/cache-manager.sh"
+      if [[ ! -x "$CACHE_MANAGER" ]]; then
+        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+        chmod +x "$CACHE_MANAGER"
+      fi
+      if "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${LOCAL_HAF_CACHE}"; then
+        echo "Fetched HAF replay data from NFS cache"
       else
-        echo "ERROR: cache-manager.sh not found and local cache missing"
+        echo "ERROR: Failed to fetch HAF replay data from NFS cache"
         exit 1
       fi
     fi
@@ -640,6 +825,7 @@ extract-swagger-json:
 generate_python_api_client:
   extends: .project_develop_configuration_template
   stage: build
+  image: "${PYTHON_COMPAT_IMAGE}"
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   needs:
@@ -670,7 +856,7 @@ cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/hivemind_sync_*"
+    CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_*"
   tags:
   - data-cache-storage
   - fast
@@ -681,7 +867,7 @@ cleanup_haf_cache_manual:
   extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/hivemind_sync_* /cache/replay_data_haf_*"
+    CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_* /cache/replay_data_haf_*"
   tags:
   - data-cache-storage
   - fast
@@ -710,6 +896,9 @@ sync:
   interruptible: true
   timeout: 1.5h
   needs:
+  - job: detect_changes
+    artifacts: true
+    optional: true  # Optional for tagged builds
   - job: replay_data_copy
     artifacts: true
   - job: prepare_hivemind_image
@@ -728,8 +917,42 @@ sync:
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
   before_script:
   - |
-    echo "=== Preparing HAF data for sync job ==="
-    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    # Check for skip mode (QUICK_TEST or AUTO_SKIP_SYNC)
+    SYNC_SKIPPED=false
+    if [[ "${QUICK_TEST:-false}" == "true" ]] || [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+      echo "=== Skipping sync (using cached data) ==="
+      echo "QUICK_TEST=${QUICK_TEST:-false}"
+      echo "AUTO_SKIP_SYNC=${AUTO_SKIP_SYNC:-false}"
+      echo "SYNC_CACHE_KEY=${SYNC_CACHE_KEY}"
+
+      # Fetch cache-manager from common-ci-configuration
+      CACHE_MANAGER="/tmp/cache-manager.sh"
+      if [[ ! -x "$CACHE_MANAGER" ]]; then
+        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+        chmod +x "$CACHE_MANAGER"
+      fi
+
+      # Use cache-manager to get cached hivemind sync data
+      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+      echo "Fetching cached hivemind sync data via cache-manager..."
+      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" || {
+        echo "ERROR: No cached data found for key: ${SYNC_CACHE_KEY}"
+        echo ""
+        echo "Available ${SYNC_CACHE_TYPE} caches:"
+        "$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | head -10 || echo "(cache-manager list failed)"
+        exit 1
+      }
+      echo "Cached data ready at: $LOCAL_CACHE"
+      echo "Sync skipped - using cached data from: $SYNC_CACHE_KEY"
+
+      # Mark that sync was skipped (for after_script)
+      touch "${CI_PROJECT_DIR}/.sync_skipped"
+      SYNC_SKIPPED=true
+    fi
+
+    if [[ "$SYNC_SKIPPED" == "false" ]]; then
+      echo "=== Preparing HAF data for sync job ==="
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
     # Copy HAF replay data from prepare_haf_data cache to hivemind sync location
     HAF_SOURCE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
@@ -750,28 +973,33 @@ sync:
       sudo rm -rf "${HAF_SOURCE}" || rm -rf "${HAF_SOURCE}" || true
     fi
 
-    # If local cache doesn't exist or was removed, extract from NFS
+    # Fetch cache-manager from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+    fi
+
+    # If local HAF cache doesn't exist or was removed, fetch from NFS via cache-manager
     if [[ ! -d "${HAF_SOURCE}/datadir" ]]; then
-      echo "Local HAF cache not found, extracting from NFS: ${HAF_NFS_TAR}"
-      if [[ ! -f "$HAF_NFS_TAR" ]]; then
-        echo "ERROR: HAF NFS cache not found at ${HAF_NFS_TAR}"
+      echo "Local HAF cache not found, fetching from NFS via cache-manager..."
+      "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${HAF_SOURCE}" || {
+        echo "ERROR: Failed to fetch HAF data from NFS cache"
         exit 1
-      fi
-      mkdir -p "${HAF_SOURCE}"
-      if ! sudo tar xf "${HAF_NFS_TAR}" -C "${HAF_SOURCE}"; then
-        echo "ERROR: Failed to extract HAF data from NFS"
-        exit 1
-      fi
-      echo "HAF data extracted from NFS successfully"
+      }
+      echo "HAF data fetched from NFS successfully"
     fi
 
     echo "Copying HAF replay data from ${HAF_SOURCE} to ${LOCAL_CACHE}..."
     mkdir -p "${LOCAL_CACHE}"
-    # Use tar pipe for reliable copying with proper permissions
-    if ! (cd "${HAF_SOURCE}" && sudo tar cf - .) | (cd "${LOCAL_CACHE}" && sudo tar xf -); then
-      echo "ERROR: Failed to copy HAF data"
-      exit 1
-    fi
+    # Use cache-manager copy for proper permission handling
+    "$CACHE_MANAGER" copy "${HAF_SOURCE}" "${LOCAL_CACHE}" || {
+      # Fallback to tar pipe if copy not supported
+      if ! (cd "${HAF_SOURCE}" && sudo tar cf - .) | (cd "${LOCAL_CACHE}" && sudo tar xf -); then
+        echo "ERROR: Failed to copy HAF data"
+        exit 1
+      fi
+    }
     echo "HAF data copied successfully"
 
     # Create blockchain symlinks to shared block_log
@@ -794,8 +1022,15 @@ sync:
 
     echo "HAF data prepared at: ${LOCAL_CACHE}"
     ls -la "${LOCAL_CACHE}/datadir/" || true
+    fi  # end of SYNC_SKIPPED check
   script:
   - |
+    # Check if sync was skipped in before_script (QUICK_TEST or AUTO_SKIP_SYNC mode)
+    if [[ -f "${CI_PROJECT_DIR}/.sync_skipped" ]]; then
+      echo "=== Sync skipped (using cached data) ==="
+      exit 0
+    fi
+
     # Check if valid hivemind sync cache already exists on NFS
     # If so, skip sync entirely - e2e job will use the cached data directly
     NFS_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
@@ -863,11 +1098,8 @@ sync:
     " > pg-stats.txt || true
     mkdir -p pg-stats
     mv pg-stats.txt pg-stats/ || true
-  after_script:
-  - |
-    echo "=== Collecting logs and shutting down ==="
 
-    # Collect container logs
+    # Collect container logs before shutdown
     docker compose -f "${COMPOSE_FILE}" logs haf > hivemind-sync.log 2>&1 || true
 
     # Force PostgreSQL checkpoint before shutdown
@@ -882,13 +1114,43 @@ sync:
     echo "Docker-compose shutdown complete"
 
     # Now PostgreSQL is stopped, safe to push to cache
-    CACHE_MANAGER="${CI_PROJECT_DIR}/haf/scripts/ci-helpers/cache-manager.sh"
-    if [[ -x "$CACHE_MANAGER" ]]; then
-      echo "Pushing hivemind sync data to NFS cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}"
-      "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" || echo "Warning: Failed to push to NFS cache"
-    else
-      echo "Warning: cache-manager.sh not found, skipping NFS cache push"
+    # This is in script section (not after_script) to ensure reliable execution
+    # Fetch cache-manager from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      echo "Downloading cache-manager.sh from common-ci-configuration..."
+      curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+      echo "cache-manager.sh downloaded ($(wc -c < "$CACHE_MANAGER") bytes)"
     fi
+    echo "Pushing hivemind sync data to NFS cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}"
+    echo "Source path: ${DATA_CACHE_HIVEMIND}"
+    ls -la "${DATA_CACHE_HIVEMIND}/" 2>/dev/null | head -5 || echo "Warning: Cannot list source directory"
+    # Run cache-manager with debug output
+    export DEBUG=1
+    echo "Running: cache-manager put ${SYNC_CACHE_TYPE} ${SYNC_CACHE_KEY} ${DATA_CACHE_HIVEMIND}"
+    if ! "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" 2>&1; then
+      echo "ERROR: cache-manager put failed (exit code: $?). Debug info:"
+      echo "NFS path: ${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}"
+      ls -la "${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}/" 2>/dev/null | head -5 || echo "Cannot list NFS root"
+      ls -la "${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}/${SYNC_CACHE_TYPE}/" 2>/dev/null | head -5 || echo "Cannot list NFS type dir"
+      # Try running bash with verbose
+      echo "Re-running with bash -x for debugging:"
+      bash -x "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" 2>&1 | head -50 || true
+      echo "Warning: Failed to push to NFS cache - e2e job may fail if running on different builder"
+    fi
+  after_script:
+  - |
+    # Skip after_script if sync was skipped (using cached data)
+    if [[ -f "${CI_PROJECT_DIR}/.sync_skipped" ]]; then
+      echo "=== Sync was skipped - no cleanup needed ==="
+      exit 0
+    fi
+
+    # Only cleanup that might be needed if job failed mid-execution
+    # Main shutdown and cache push is now in script section
+    echo "=== Cleanup (if needed) ==="
+    docker compose -f "${COMPOSE_FILE}" down --timeout 30 2>/dev/null || true
   artifacts:
     when: always
     expire_in: 7 days
@@ -902,10 +1164,13 @@ sync:
   - fastest
 
 e2e_benchmark_on_postgrest:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.14-slim-1
+  image: "$HIVE_CI_BASE_IMAGE"
   stage: benchmark
   interruptible: true
   needs:
+  - job: detect_changes
+    artifacts: true
+    optional: true  # Optional for tagged builds
   - job: replay_data_copy
     artifacts: true
   - job: prepare_hivemind_image
@@ -952,6 +1217,7 @@ e2e_benchmark_on_postgrest:
     FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
   before_script:
   - *extract-nfs-cache-before-script
+  - pip install --quiet tox
   script:
   - |
     echo "HAF image name $HAF_IMAGE_NAME"
@@ -968,9 +1234,10 @@ e2e_benchmark_on_postgrest:
     done
     echo "Hivemind smoketest instance is running"
   - |
-    # Debug: check database content directly via psql
+    # Debug: check database content directly via psql (optional - psql may not be installed)
     echo "=== DEBUG: Checking database content ==="
-    psql "postgresql://haf_admin@haf-instance:5432/haf_block_log" << 'SQLEOF'
+    if command -v psql &> /dev/null; then
+      psql "postgresql://haf_admin@haf-instance:5432/haf_block_log" << 'SQLEOF'
     -- Check what schemas exist
     SELECT 'Schemas:' as info, string_agg(schema_name, ', ') as schemas
     FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast');
@@ -1002,6 +1269,9 @@ e2e_benchmark_on_postgrest:
     -- Check sample account from hive.accounts
     SELECT 'Sample hive.accounts' as info, name FROM hive.accounts LIMIT 5;
     SQLEOF
+    else
+      echo "psql not available, skipping database debug check"
+    fi
     echo "=== END DB DEBUG ==="
   - |
     # Debug: test API calls using Python (curl not available in container)
