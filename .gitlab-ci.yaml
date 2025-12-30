@@ -75,9 +75,10 @@ variables:
   # don't reduce server CPU and make fetch less effective.
   GIT_STRATEGY: fetch
   GIT_DEPTH: 0
-  GIT_SUBMODULE_STRATEGY: recursive
-  GIT_SUBMODULE_DEPTH: 0
-  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 4
+  # Disable automatic submodule handling - nested submodules with relative URLs
+  # don't work with fetch strategy. Submodules are initialized manually in before_script.
+  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_FORCE_HTTPS: "true"
   # Temporary: separate clone path prevents clone-strategy jobs from erasing
   # fetch workspaces during transition. Remove once all projects use fetch.
   GIT_CLONE_PATH: $CI_BUILDS_DIR/fetch/$CI_RUNNER_SHORT_TOKEN/$CI_CONCURRENT_ID/$CI_PROJECT_PATH
@@ -91,6 +92,9 @@ variables:
 default:
   hooks:
     pre_get_sources_script:
+      # Allow file transport for nested submodules and rewrite relative URLs
+      - git config --global protocol.file.allow always
+      - git config --global url."${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/".insteadOf "../"
       # Clean corrupt git state left by cancelled pipelines (see GitLab #296638, #4600)
       # Wrapped in subshell to avoid changing working directory for subsequent git operations
       - |
@@ -137,6 +141,16 @@ default:
           echo "pre_get_sources: no .git directory (fresh workspace)"
         fi
         )
+  before_script:
+    # Initialize submodules manually (GIT_SUBMODULE_STRATEGY: none)
+    # Skip if git not available (some jobs use minimal images)
+    - |
+      if command -v git >/dev/null 2>&1; then
+        # Ensure file transport is allowed (config may not persist from pre_get_sources_script)
+        git config --global protocol.file.allow always
+        git submodule sync --recursive
+        git submodule update --init --recursive --jobs 4
+      fi
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
