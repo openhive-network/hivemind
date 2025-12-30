@@ -631,10 +631,10 @@ default:
           export DATADIR="${EXTRACT_DIR}/datadir"
           export SHM_DIR="${DATADIR}/blockchain"
           # Ensure hived user (UID 1000) can write to datadir for blockchain symlink creation
-          # The entrypoint runs as root, so chown/chmod should work
+          # Service container runs as haf_admin (not root), so we can't chown
+          # Instead, make directories world-writable so any user can create subdirs
           echo "Setting permissions on ${DATADIR}..."
-          chown -R 1000:1000 "${DATADIR}" || echo "chown failed (maybe not root?)"
-          chmod -R u+rwX "${DATADIR}" || echo "chmod failed"
+          chmod o+w "${DATADIR}" || echo "chmod datadir failed"
           ls -la "${DATADIR}" | head -5
           echo "Using extracted data: ${DATADIR}"
           ;;
