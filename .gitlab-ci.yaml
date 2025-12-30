@@ -75,9 +75,9 @@ variables:
   # don't reduce server CPU and make fetch less effective.
   GIT_STRATEGY: fetch
   GIT_DEPTH: 0
-  # Disable automatic submodule handling - nested submodules with relative URLs
-  # don't work with fetch strategy. Submodules are initialized manually in before_script.
-  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 0
+  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 4
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   # Temporary: separate clone path prevents clone-strategy jobs from erasing
   # fetch workspaces during transition. Remove once all projects use fetch.
@@ -141,16 +141,6 @@ default:
           echo "pre_get_sources: no .git directory (fresh workspace)"
         fi
         )
-  before_script:
-    # Initialize submodules manually (GIT_SUBMODULE_STRATEGY: none)
-    # Skip if git not available (some jobs use minimal images)
-    - |
-      if command -v git >/dev/null 2>&1; then
-        # Ensure file transport is allowed (config may not persist from pre_get_sources_script)
-        git config --global protocol.file.allow always
-        git submodule sync --recursive
-        git submodule update --init --recursive --jobs 4
-      fi
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
