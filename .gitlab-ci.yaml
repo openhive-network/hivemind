@@ -1494,13 +1494,17 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
+  image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client
     artifacts: true
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  before_script:
+  - poetry -C "${PYPROJECT_DIR}" lock
+  - poetry -C "${PYPROJECT_DIR}" install
   script:
-  - pytest "${PYPROJECT_DIR}/api_client_tests"
+  - poetry run -C "${PYPROJECT_DIR}" pytest "${PYPROJECT_DIR}/api_client_tests"
   allow_failure: true  # External API (api.syncad.com) dependency - may fail if API is unavailable
   tags:
   - public-runner-docker
