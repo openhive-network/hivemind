@@ -29,6 +29,7 @@ class Posts(DbAdapterHolder):
     comment_payout_ops = {}
     _comment_payout_ops = []
     _counter = UniqueCounter()
+    _community_posts_tracker = {}  # Tracks posts in communities for batch beneficiary validation
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -104,6 +105,17 @@ class Posts(DbAdapterHolder):
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
+
+        # Track new community posts for batch beneficiary validation
+        if is_new_post and row['depth'] == 0 and row['community_id'] is not None:
+            cls._community_posts_tracker[(op['author'], op['permlink'])] = {
+                'post_id': result['id'],
+                'community_id': row['community_id'],
+                'author_id': row['author_id'],
+                'has_comment_options': False,
+                'beneficiaries': None,
+            }
+
         if row['depth'] > 0:
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
@@ -408,31 +420,169 @@ class Posts(DbAdapterHolder):
             beneficiaries=dumps(beneficiaries),
         )
 
-        # Validate required beneficiaries for community posts
-        from hive.indexer.notify import Notify
-        sql = f"SELECT should_mute, error_message, author_id, community_id FROM {SCHEMA_NAME}.validate_required_beneficiaries(:author, :permlink, :beneficiaries)"
-        result = DbAdapterHolder.common_block_processing_db().query_row(
-            sql,
-            author=op['author'],
-            permlink=op['permlink'],
-            beneficiaries=dumps(beneficiaries)
-        )
+        # Update tracker if this post is being tracked for beneficiary validation
+        key = (op['author'], op['permlink'])
+        if key in cls._community_posts_tracker:
+            cls._community_posts_tracker[key]['has_comment_options'] = True
+            cls._community_posts_tracker[key]['beneficiaries'] = beneficiaries
 
-        if result:
-            result = result._mapping
+    @classmethod
+    def _validate_beneficiaries(cls, post_beneficiaries, required_beneficiaries):
+        """Validate post beneficiaries against community required beneficiaries.
 
-        if result and result['should_mute']:
-            # Send error notification to author
-            Notify(
-                block_num=op['block_num'],
-                type_id='error',
-                dst_id=result['author_id'],
-                when=block_date,
-                post_id=None,  # We don't have post_id from SQL function, but it's optional
-                payload=result['error_message'],
-                community_id=result['community_id'],
-                src_id=result['community_id'],
-            )
+        Args:
+            post_beneficiaries: List of beneficiary dicts with 'account' and 'weight' keys
+            required_beneficiaries: JSONB array from community settings
+
+        Returns:
+            Error message string if validation fails, None if valid
+        """
+        if not required_beneficiaries:
+            return None
+
+        # Parse required_beneficiaries if it's a JSON string
+        if isinstance(required_beneficiaries, str):
+            required_beneficiaries = loads(required_beneficiaries)
+
+        error_parts = []
+
+        for required_ben in required_beneficiaries:
+            required_account = required_ben['account']
+            required_weight = int(required_ben['weight'])
+            found_weight = 0
+
+            # Find matching beneficiary in post
+            if post_beneficiaries:
+                for post_ben in post_beneficiaries:
+                    if post_ben['account'] == required_account:
+                        found_weight = int(post_ben['weight'])
+                        break
+
+            # Check if beneficiary is missing or insufficient
+            if found_weight == 0:
+                error_parts.append(
+                    f"{required_account} (required: {required_weight / 100}%, provided: 0%)"
+                )
+            elif found_weight < required_weight:
+                error_parts.append(
+                    f"{required_account} (required: {required_weight / 100}%, provided: {found_weight / 100}%)"
+                )
+
+        if error_parts:
+            return 'Post does not meet required beneficiaries: ' + ', '.join(error_parts)
+        return None
+
+    @classmethod
+    def _batch_mute_posts(cls, posts_to_mute):
+        """Batch update posts to add MUTED_BENEFICIARY (5) reason.
+
+        Args:
+            posts_to_mute: List of dicts with 'post_id' keys
+        """
+        if not posts_to_mute:
+            return
+
+        # Extract just the post IDs
+        post_ids = [p['post_id'] for p in posts_to_mute]
+
+        # Use SQL to batch update all posts, adding MUTED_BENEFICIARY (5) to muted_reasons
+        sql = f"""
+            UPDATE {SCHEMA_NAME}.hive_posts
+            SET
+                is_muted = TRUE,
+                muted_reasons = CASE
+                    WHEN muted_reasons IS NULL THEN {SCHEMA_NAME}.encode_bitwise_mask(ARRAY[5])
+                    WHEN 5 = ANY({SCHEMA_NAME}.decode_bitwise_mask(muted_reasons)) THEN muted_reasons
+                    ELSE {SCHEMA_NAME}.encode_bitwise_mask(
+                        array_append({SCHEMA_NAME}.decode_bitwise_mask(muted_reasons), 5)
+                    )
+                END
+            WHERE id = ANY(:post_ids)
+        """
+
+        DbAdapterHolder.common_block_processing_db().query_no_return(sql, post_ids=post_ids)
+
+    @classmethod
+    def process_required_beneficiaries_batch(cls, block_date, block_num):
+        """Batch process required beneficiaries validation for all tracked community posts.
+
+        This is called at the end of block processing to validate all posts in communities
+        that have required_beneficiaries settings.
+
+        Args:
+            block_date: Timestamp of the current block
+            block_num: Block number being processed
+        """
+        if not cls._community_posts_tracker:
+            return
+
+        # Get unique community IDs from tracked posts
+        community_ids = list({p['community_id'] for p in cls._community_posts_tracker.values()})
+
+        # Fetch community settings ONCE for all communities that have required_beneficiaries
+        sql = f"""
+            SELECT id, settings->'required_beneficiaries' as required_beneficiaries
+            FROM {SCHEMA_NAME}.hive_communities
+            WHERE id = ANY(:community_ids)
+              AND settings ? 'required_beneficiaries'
+              AND jsonb_array_length(settings->'required_beneficiaries') > 0
+        """
+
+        rows = DbAdapterHolder.common_block_processing_db().query_all(sql, community_ids=community_ids)
+
+        # Build a map of community_id -> required_beneficiaries
+        settings_map = {}
+        for row in rows:
+            row = row._mapping
+            settings_map[row['id']] = row['required_beneficiaries']
+
+        posts_to_mute = []
+
+        # Process each tracked post
+        for (author, permlink), post_data in cls._community_posts_tracker.items():
+            community_id = post_data['community_id']
+
+            # Skip if community doesn't have required_beneficiaries
+            if community_id not in settings_map:
+                continue
+
+            error_message = None
+
+            # CHEAP CHECK: No comment_options_op received -> auto-mute
+            if not post_data['has_comment_options']:
+                error_message = 'Post does not meet required beneficiaries: missing comment_options operation'
+            else:
+                # Validate beneficiaries against requirements
+                error_message = cls._validate_beneficiaries(
+                    post_data['beneficiaries'],
+                    settings_map[community_id]
+                )
+
+            # If validation failed, add to mute list and send notification
+            if error_message:
+                posts_to_mute.append({
+                    'post_id': post_data['post_id'],
+                    'error': error_message
+                })
+
+                # Send error notification to author
+                Notify(
+                    block_num=block_num,
+                    type_id='error',
+                    dst_id=post_data['author_id'],
+                    when=block_date,
+                    post_id=post_data['post_id'],
+                    payload=error_message,
+                    community_id=community_id,
+                    src_id=community_id,
+                )
+
+        # Batch update all posts that need muting
+        if posts_to_mute:
+            cls._batch_mute_posts(posts_to_mute)
+
+        # Clear tracker for next block
+        cls._community_posts_tracker = {}
 
     @classmethod
     def delete(cls, op, block_date):

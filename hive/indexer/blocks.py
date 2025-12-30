@@ -390,6 +390,10 @@ class Blocks:
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
+
+        # Batch process required beneficiaries validation for community posts
+        Posts.process_required_beneficiaries_batch(cls._current_block_date, num)
+
         return num
 
     @staticmethod
