@@ -145,29 +145,48 @@ default:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# Manual submodule initialization - needed because haf contains nested hive submodule
+# Manual submodule initialization - needed because submodules have nested submodules
 # with relative URLs that don't work with GIT_SUBMODULE_STRATEGY: recursive
-# This ONLY initializes haf and its nested submodules - other submodules (hafah,
-# reputation_tracker, tests_api) must be initialized separately if needed
+# This initializes haf (with recursive for nested hive), reputation_tracker, and hafah
+# (without recursive to avoid their nested haf relative URL issues)
 .init_submodules:
   before_script: &init_submodules
     - |
       echo -e "\e[0Ksection_start:$(date +%s):init_submodules[collapsed=true]\r\e[0KInitializing submodules..."
       git config --global --add safe.directory '*'
-      # Get the commit we need from the haf submodule
+
+      # Initialize HAF submodule (with nested hive submodule)
       HAF_URL="https://gitlab.syncad.com/hive/haf.git"
       HAF_SUBMOD_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-      echo "Need haf submodule at commit $HAF_SUBMOD_COMMIT"
-      # Remove existing haf directory if it exists (can be stale from GIT_STRATEGY=fetch)
+      echo "Initializing haf submodule at commit $HAF_SUBMOD_COMMIT"
       sudo rm -rf haf 2>/dev/null || rm -rf haf
-      # Clone and checkout specific commit
       git clone --no-checkout "$HAF_URL" haf
       cd haf
       git fetch origin develop
       git checkout $HAF_SUBMOD_COMMIT
-      # Initialize nested submodules inside haf (hive and its submodules)
       git submodule update --init --recursive --jobs 4
       cd ..
+
+      # Initialize reputation_tracker submodule (NO --recursive to avoid nested haf relative URL issues)
+      REPTRACKER_URL="https://gitlab.syncad.com/hive/reputation_tracker.git"
+      REPTRACKER_COMMIT=$(git ls-tree HEAD reputation_tracker | awk '{print $3}')
+      echo "Initializing reputation_tracker submodule at commit $REPTRACKER_COMMIT"
+      sudo rm -rf reputation_tracker 2>/dev/null || rm -rf reputation_tracker
+      git clone --no-checkout "$REPTRACKER_URL" reputation_tracker
+      cd reputation_tracker
+      git checkout $REPTRACKER_COMMIT
+      cd ..
+
+      # Initialize hafah submodule (NO --recursive to avoid nested haf relative URL issues)
+      HAFAH_URL="https://gitlab.syncad.com/hive/HAfAH.git"
+      HAFAH_COMMIT=$(git ls-tree HEAD hafah | awk '{print $3}')
+      echo "Initializing hafah submodule at commit $HAFAH_COMMIT"
+      sudo rm -rf hafah 2>/dev/null || rm -rf hafah
+      git clone --no-checkout "$HAFAH_URL" hafah
+      cd hafah
+      git checkout $HAFAH_COMMIT
+      cd ..
+
       echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
 
 .shared_tags:
