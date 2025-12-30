@@ -756,7 +756,8 @@ validate_haf_commit:
   - |
     # Validate that HAF_COMMIT variable matches both the submodule and include ref
     # This prevents cache misses due to mismatched commits
-    SUBMODULE_COMMIT=$(cat .git/modules/haf/HEAD 2>/dev/null || git -C haf rev-parse HEAD)
+    # Use git ls-tree to get the expected submodule commit (not stale cache data)
+    SUBMODULE_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
     # Extract include ref - use grep -m1 to avoid SIGPIPE from head
     INCLUDE_REF=$(grep -A2 "project:.*hive/haf" .gitlab-ci.yaml | grep -m1 "ref:" | sed 's/.*ref: *\([a-f0-9]*\).*/\1/')
 
