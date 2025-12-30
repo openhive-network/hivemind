@@ -616,11 +616,13 @@ default:
             }
             chmod +x "$CACHE_MANAGER"
           fi
-          # Local cache invalid or missing - remove it so cache-manager extracts from NFS
-          if [[ -d "${EXTRACT_DIR}/datadir" ]]; then
-            echo "Removing invalid local cache before NFS extraction..."
-            sudo rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || true
+          # Remove entire extraction directory (including shm_dir and datadir) before NFS extraction
+          # Previous runs may leave files with different permissions that block extraction
+          if [[ -d "${EXTRACT_DIR}" ]]; then
+            echo "Removing existing local cache before NFS extraction..."
+            sudo rm -rf "${EXTRACT_DIR}" 2>/dev/null || rm -rf "${EXTRACT_DIR}" 2>/dev/null || true
           fi
+          mkdir -p "${EXTRACT_DIR}"
           # cache-manager handles: extraction, permission restoration, symlink fixing
           "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}" || {
             echo "ERROR: cache-manager failed to extract data"
