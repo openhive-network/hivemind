@@ -900,8 +900,7 @@ prepare_hivemind_image:
   extends: .docker_image_builder_job_template
   needs:
   - prepare_base_images
-  before_script:
-  - git config --global --add safe.directory $CI_PROJECT_DIR
+  before_script: *init_submodules
   script:
   - *instance-build-script
   artifacts:
