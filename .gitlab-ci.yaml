@@ -14,8 +14,15 @@ include:
 - project: hive/haf
   ref: 1ac5d12439b9cca33e6db383adc59967cae75fc4 # develop
   file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
+# HAF app testing templates from common-ci-configuration
+- project: 'hive/common-ci-configuration'
+  ref: feature/haf-app-testing-templates
+  file: '/templates/haf_app_testing.gitlab-ci.yml'
 
 variables:
+  # Cache manager configuration (from common-ci-configuration)
+  CACHE_MANAGER: "/tmp/cache-manager.sh"
+  CACHE_MANAGER_REF: "feature/haf-app-testing-templates"
   # =============================================================================
   # Quick Test / Auto-Skip Mode
   # =============================================================================
@@ -593,29 +600,42 @@ default:
 
       echo "Found data source: ${DATA_SOURCE} (after ${WAITED}s)"
 
-      # Use cache-manager for consistent extraction with proper symlink/permission handling
-      CACHE_MANAGER="/home/haf_admin/source/scripts/ci-helpers/cache-manager.sh"
-
       case "$DATA_SOURCE" in
         local)
           echo "Using local cache: ${ORIGINAL_DATADIR}"
           ;;
         nfs_tar|nfs_dir)
           echo "Using cache-manager to get hivemind sync data..."
-          # Local cache invalid or missing - remove it so cache-manager extracts from NFS
-          if [[ -d "${EXTRACT_DIR}/datadir" ]]; then
-            echo "Removing invalid local cache before NFS extraction..."
-            sudo rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || true
+          # Download cache-manager (use wget since curl may not be available in HAF image)
+          CACHE_MANAGER="/tmp/cache-manager.sh"
+          if [[ ! -x "$CACHE_MANAGER" ]]; then
+            echo "Downloading cache-manager from common-ci-configuration..."
+            wget -q "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -O "$CACHE_MANAGER" || {
+              echo "ERROR: Failed to download cache-manager"
+              exit 1
+            }
+            chmod +x "$CACHE_MANAGER"
           fi
+          # Remove entire extraction directory (including shm_dir and datadir) before NFS extraction
+          # Previous runs may leave files with different permissions that block extraction
+          if [[ -d "${EXTRACT_DIR}" ]]; then
+            echo "Removing existing local cache before NFS extraction..."
+            sudo rm -rf "${EXTRACT_DIR}" 2>/dev/null || rm -rf "${EXTRACT_DIR}" 2>/dev/null || true
+          fi
+          mkdir -p "${EXTRACT_DIR}"
           # cache-manager handles: extraction, permission restoration, symlink fixing
-          if [[ -x "$CACHE_MANAGER" ]]; then
-            "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}"
-          else
-            echo "ERROR: cache-manager not found at $CACHE_MANAGER"
+          "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}" || {
+            echo "ERROR: cache-manager failed to extract data"
             exit 1
-          fi
+          }
           export DATADIR="${EXTRACT_DIR}/datadir"
           export SHM_DIR="${DATADIR}/blockchain"
+          # Ensure hived user (UID 1000) can write to datadir for blockchain symlink creation
+          # Service container runs as haf_admin (not root), so we can't chown
+          # Instead, make directories world-writable so any user can create subdirs
+          echo "Setting permissions on ${DATADIR}..."
+          chmod o+w "${DATADIR}" || echo "chmod datadir failed"
+          ls -la "${DATADIR}" | head -5
           echo "Using extracted data: ${DATADIR}"
           ;;
       esac
@@ -783,38 +803,11 @@ detect_changes:
     - data-cache-storage  # Needs NFS access to find caches
 
 validate_haf_commit:
+  extends: .haf_commit_validation
   stage: build
-  image: "$HIVE_CI_BASE_IMAGE"
-  script:
-  - |
-    # Validate that HAF_COMMIT variable matches both the submodule and include ref
-    # This prevents cache misses due to mismatched commits
-    # Use git ls-tree to get the expected submodule commit (not stale cache data)
-    SUBMODULE_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-    # Extract include ref - use grep -m1 to avoid SIGPIPE from head
-    INCLUDE_REF=$(grep -A2 "project:.*hive/haf" .gitlab-ci.yaml | grep -m1 "ref:" | sed 's/.*ref: *\([a-f0-9]*\).*/\1/')
-
-    echo "HAF_COMMIT variable: $HAF_COMMIT"
-    echo "HAF submodule HEAD:  $SUBMODULE_COMMIT"
-    echo "Include ref:         $INCLUDE_REF"
-
-    ERRORS=0
-    if [ "$HAF_COMMIT" != "$SUBMODULE_COMMIT" ]; then
-      echo "ERROR: HAF_COMMIT variable does not match submodule commit!"
-      echo "       Update HAF_COMMIT in .gitlab-ci.yaml to: $SUBMODULE_COMMIT"
-      ERRORS=1
-    fi
-    if [ "$HAF_COMMIT" != "$INCLUDE_REF" ]; then
-      echo "ERROR: HAF_COMMIT variable does not match include ref!"
-      echo "       Both should be: $HAF_COMMIT"
-      ERRORS=1
-    fi
-    if [ $ERRORS -eq 1 ]; then
-      echo ""
-      echo "To fix: ensure HAF_COMMIT, include ref, and submodule all use the same commit"
-      exit 1
-    fi
-    echo "All HAF commit references are consistent"
+  variables:
+    HAF_INCLUDE_REF: "$HAF_COMMIT"
+    HAF_SUBMODULE_PATH: "haf"
   tags:
   - public-runner-docker
 
@@ -1494,6 +1487,7 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
+  # Override image to use Python 3.12 - pydantic-core doesn't support Python 3.14 yet
   image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client

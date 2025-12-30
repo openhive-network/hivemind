@@ -12,13 +12,26 @@ python3 -m pip install -U pip setuptools wheel build
 pip3 install pyyaml
 
 # generate version for reputation tracker
+# Handle both submodule layouts: proper submodules (.git/modules/) and standalone clones (.git dir)
 pushd "$SRCROOT/reputation_tracker"
-./scripts/generate_version_sql.sh "$SRCROOT/reputation_tracker" "$SRCROOT/.git/modules/reputation_tracker"
+if [ -d "$SRCROOT/.git/modules/reputation_tracker" ]; then
+  ./scripts/generate_version_sql.sh "$SRCROOT/reputation_tracker" "$SRCROOT/.git/modules/reputation_tracker"
+elif [ -d "$SRCROOT/reputation_tracker/.git" ]; then
+  ./scripts/generate_version_sql.sh "$SRCROOT/reputation_tracker" "$SRCROOT/reputation_tracker/.git"
+else
+  echo "WARNING: Cannot find git dir for reputation_tracker, skipping version generation"
+fi
 popd
 
 # generate version for hafah
 pushd "$SRCROOT/hafah"
-./scripts/generate_version_sql.bash "$SRCROOT/hafah" "$SRCROOT/.git/modules/hafah"
+if [ -d "$SRCROOT/.git/modules/hafah" ]; then
+  ./scripts/generate_version_sql.bash "$SRCROOT/hafah" "$SRCROOT/.git/modules/hafah"
+elif [ -d "$SRCROOT/hafah/.git" ]; then
+  ./scripts/generate_version_sql.bash "$SRCROOT/hafah" "$SRCROOT/hafah/.git"
+else
+  echo "WARNING: Cannot find git dir for hafah, skipping version generation"
+fi
 popd
 
 # Do actual installation in the source directory
