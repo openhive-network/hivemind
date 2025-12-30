@@ -630,6 +630,8 @@ default:
           }
           export DATADIR="${EXTRACT_DIR}/datadir"
           export SHM_DIR="${DATADIR}/blockchain"
+          # Ensure hived user (UID 1000) can write to datadir for blockchain symlink creation
+          chown -R 1000:1000 "${DATADIR}" 2>/dev/null || true
           echo "Using extracted data: ${DATADIR}"
           ;;
       esac
