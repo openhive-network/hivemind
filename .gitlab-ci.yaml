@@ -167,7 +167,7 @@ default:
       git submodule update --init --recursive --jobs 4
       cd ..
 
-      # Initialize reputation_tracker submodule (NO --recursive to avoid nested haf relative URL issues)
+      # Initialize reputation_tracker submodule with nested haf
       REPTRACKER_URL="https://gitlab.syncad.com/hive/reputation_tracker.git"
       REPTRACKER_COMMIT=$(git ls-tree HEAD reputation_tracker | awk '{print $3}')
       echo "Initializing reputation_tracker submodule at commit $REPTRACKER_COMMIT"
@@ -175,9 +175,16 @@ default:
       git clone --no-checkout "$REPTRACKER_URL" reputation_tracker
       cd reputation_tracker
       git checkout $REPTRACKER_COMMIT
-      cd ..
+      # Initialize nested haf submodule (using absolute URL since relative ../haf.git won't work)
+      NESTED_HAF_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
+      rm -rf haf
+      git clone --no-checkout "$HAF_URL" haf
+      cd haf
+      git checkout $NESTED_HAF_COMMIT
+      git submodule update --init --recursive --jobs 4
+      cd ../..
 
-      # Initialize hafah submodule (NO --recursive to avoid nested haf relative URL issues)
+      # Initialize hafah submodule with nested haf
       HAFAH_URL="https://gitlab.syncad.com/hive/HAfAH.git"
       HAFAH_COMMIT=$(git ls-tree HEAD hafah | awk '{print $3}')
       echo "Initializing hafah submodule at commit $HAFAH_COMMIT"
@@ -185,7 +192,14 @@ default:
       git clone --no-checkout "$HAFAH_URL" hafah
       cd hafah
       git checkout $HAFAH_COMMIT
-      cd ..
+      # Initialize nested haf submodule (using absolute URL since relative ../haf.git won't work)
+      NESTED_HAF_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
+      rm -rf haf
+      git clone --no-checkout "$HAF_URL" haf
+      cd haf
+      git checkout $NESTED_HAF_COMMIT
+      git submodule update --init --recursive --jobs 4
+      cd ../..
 
       echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
 
