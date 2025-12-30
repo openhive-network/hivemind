@@ -837,19 +837,6 @@ replay_data_copy:
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
   before_script:
   - |
-    # Initialize HAF submodule (needed for haf/hive/scripts/copy_datadir.sh)
-    git config --global --add safe.directory '*'
-    HAF_URL="https://gitlab.syncad.com/hive/haf.git"
-    HAF_SUBMOD_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-    echo "Need haf submodule at commit $HAF_SUBMOD_COMMIT"
-    sudo rm -rf haf 2>/dev/null || rm -rf haf
-    git clone --no-checkout "$HAF_URL" haf
-    cd haf
-    git fetch origin develop
-    git checkout $HAF_SUBMOD_COMMIT
-    git submodule update --init --recursive --jobs 4
-    cd ..
-  - |
     # Ensure HAF replay data is available locally (fetch from NFS if needed)
     LOCAL_HAF_CACHE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
     if [[ -d "${LOCAL_HAF_CACHE}/datadir" ]]; then
@@ -876,7 +863,8 @@ replay_data_copy:
     # copy_datadir.sh runs mkdir as hived user, which needs write access to parent dir
     sudo mkdir -p "$DATA_CACHE_HIVEMIND"
     sudo chmod 777 "$DATA_CACHE_HIVEMIND"
-    haf/hive/scripts/copy_datadir.sh
+    # Use HAF Docker image's built-in script (no git available in HAF image)
+    /home/haf_admin/source/hive/scripts/copy_datadir.sh
     sudo chmod 777 $DATA_CACHE_HIVEMIND
     sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
     # Ensure hived_uid.env exists (some HAF caches may be missing this file)
