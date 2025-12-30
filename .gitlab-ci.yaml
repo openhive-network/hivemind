@@ -601,7 +601,16 @@ default:
       echo "Found data source: ${DATA_SOURCE} (after ${WAITED}s)"
 
       # Use cache-manager for consistent extraction with proper symlink/permission handling
-      CACHE_MANAGER="/home/haf_admin/source/scripts/ci-helpers/cache-manager.sh"
+      # Try local first, then download from common-ci-configuration
+      CACHE_MANAGER="/tmp/cache-manager.sh"
+      if [[ ! -x "$CACHE_MANAGER" ]]; then
+        echo "Downloading cache-manager from common-ci-configuration..."
+        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER" || {
+          echo "ERROR: Failed to download cache-manager"
+          exit 1
+        }
+        chmod +x "$CACHE_MANAGER"
+      fi
 
       case "$DATA_SOURCE" in
         local)
@@ -615,12 +624,10 @@ default:
             sudo rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || rm -rf "${EXTRACT_DIR}/datadir" 2>/dev/null || true
           fi
           # cache-manager handles: extraction, permission restoration, symlink fixing
-          if [[ -x "$CACHE_MANAGER" ]]; then
-            "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}"
-          else
-            echo "ERROR: cache-manager not found at $CACHE_MANAGER"
+          "$CACHE_MANAGER" get "${NFS_TYPE}" "${NFS_KEY}" "${EXTRACT_DIR}" || {
+            echo "ERROR: cache-manager failed to extract data"
             exit 1
-          fi
+          }
           export DATADIR="${EXTRACT_DIR}/datadir"
           export SHM_DIR="${DATADIR}/blockchain"
           echo "Using extracted data: ${DATADIR}"
@@ -1474,6 +1481,7 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
+  # Override image to use Python 3.12 - pydantic-core doesn't support Python 3.14 yet
   image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client
