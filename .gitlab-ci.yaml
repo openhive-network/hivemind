@@ -75,10 +75,11 @@ variables:
   # don't reduce server CPU and make fetch less effective.
   GIT_STRATEGY: fetch
   GIT_DEPTH: 0
-  # Disable automatic submodule fetching - we handle it manually in before_script
-  # This is needed because haf contains nested hive submodule with relative URLs
-  GIT_SUBMODULE_STRATEGY: none
-  GIT_SUBMODULE_FORCE_HTTPS: "true"
+  # Recursive submodule fetching - GitLab handles nested submodules automatically
+  # GIT_CONFIG settings below allow file:// protocol for nested submodule relative URLs
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 0
+  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 4
   # Allow file:// protocol for nested submodules (required for test-tools in hive)
   GIT_CONFIG_COUNT: 1
   GIT_CONFIG_KEY_0: "protocol.file.allow"
@@ -145,30 +146,8 @@ default:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# Manual submodule initialization - needed because haf contains nested hive submodule
-# with relative URLs that don't work with GIT_SUBMODULE_STRATEGY: recursive
-.init_submodules:
-  before_script: &init_submodules
-    - |
-      echo -e "\e[0Ksection_start:$(date +%s):init_submodules[collapsed=true]\r\e[0KInitializing submodules..."
-      git config --global --add safe.directory '*'
-      # Get the commit we need from the haf submodule
-      HAF_URL="https://gitlab.syncad.com/hive/haf.git"
-      HAF_SUBMOD_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-      echo "Need haf submodule at commit $HAF_SUBMOD_COMMIT"
-      # Remove existing haf directory if it exists (can be stale from GIT_STRATEGY=fetch)
-      sudo rm -rf haf 2>/dev/null || rm -rf haf
-      # Clone and checkout specific commit
-      git clone --no-checkout "$HAF_URL" haf
-      cd haf
-      git fetch origin develop
-      git checkout $HAF_SUBMOD_COMMIT
-      # Initialize nested submodules inside haf (hive and its submodules)
-      git submodule update --init --recursive --jobs 4
-      cd ..
-      # Update any remaining submodules (hafah, reputation_tracker, tests_api)
-      git submodule update --init --recursive --jobs 4
-      echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
+# Submodules are now handled automatically by GIT_SUBMODULE_STRATEGY: recursive
+# with GIT_CONFIG_COUNT settings to allow file:// protocol for nested submodules
 
 .shared_tags:
   tags: &shared_tags
