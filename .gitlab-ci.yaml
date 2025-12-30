@@ -631,7 +631,11 @@ default:
           export DATADIR="${EXTRACT_DIR}/datadir"
           export SHM_DIR="${DATADIR}/blockchain"
           # Ensure hived user (UID 1000) can write to datadir for blockchain symlink creation
-          chown -R 1000:1000 "${DATADIR}" 2>/dev/null || true
+          # The entrypoint runs as root, so chown/chmod should work
+          echo "Setting permissions on ${DATADIR}..."
+          chown -R 1000:1000 "${DATADIR}" || echo "chown failed (maybe not root?)"
+          chmod -R u+rwX "${DATADIR}" || echo "chmod failed"
+          ls -la "${DATADIR}" | head -5
           echo "Using extracted data: ${DATADIR}"
           ;;
       esac
