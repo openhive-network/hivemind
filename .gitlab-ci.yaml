@@ -600,24 +600,22 @@ default:
 
       echo "Found data source: ${DATA_SOURCE} (after ${WAITED}s)"
 
-      # Use cache-manager for consistent extraction with proper symlink/permission handling
-      # Try local first, then download from common-ci-configuration
-      CACHE_MANAGER="/tmp/cache-manager.sh"
-      if [[ ! -x "$CACHE_MANAGER" ]]; then
-        echo "Downloading cache-manager from common-ci-configuration..."
-        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER" || {
-          echo "ERROR: Failed to download cache-manager"
-          exit 1
-        }
-        chmod +x "$CACHE_MANAGER"
-      fi
-
       case "$DATA_SOURCE" in
         local)
           echo "Using local cache: ${ORIGINAL_DATADIR}"
           ;;
         nfs_tar|nfs_dir)
           echo "Using cache-manager to get hivemind sync data..."
+          # Download cache-manager (use wget since curl may not be available in HAF image)
+          CACHE_MANAGER="/tmp/cache-manager.sh"
+          if [[ ! -x "$CACHE_MANAGER" ]]; then
+            echo "Downloading cache-manager from common-ci-configuration..."
+            wget -q "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -O "$CACHE_MANAGER" || {
+              echo "ERROR: Failed to download cache-manager"
+              exit 1
+            }
+            chmod +x "$CACHE_MANAGER"
+          fi
           # Local cache invalid or missing - remove it so cache-manager extracts from NFS
           if [[ -d "${EXTRACT_DIR}/datadir" ]]; then
             echo "Removing invalid local cache before NFS extraction..."
