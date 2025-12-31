@@ -208,6 +208,16 @@ default:
       git submodule update --init --recursive --jobs 4
       cd ../..
 
+      # Initialize tests_api submodule (no nested submodules)
+      TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
+      TESTS_API_COMMIT=$(git ls-tree HEAD tests/tests_api | awk '{print $3}')
+      echo "Initializing tests_api submodule at commit $TESTS_API_COMMIT"
+      sudo rm -rf tests/tests_api 2>/dev/null || rm -rf tests/tests_api
+      git clone --no-checkout "$TESTS_API_URL" tests/tests_api
+      cd tests/tests_api
+      git checkout $TESTS_API_COMMIT
+      cd ../..
+
       echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
 
 .shared_tags:
@@ -1329,6 +1339,14 @@ e2e_benchmark_on_postgrest:
     FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
   before_script:
   - *extract-nfs-cache-before-script
+  - |
+    # Initialize tests_api submodule for validate_response module
+    TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
+    TESTS_API_COMMIT=$(git ls-tree HEAD tests/tests_api | awk '{print $3}')
+    echo "Initializing tests_api submodule at commit $TESTS_API_COMMIT"
+    sudo rm -rf tests/tests_api 2>/dev/null || rm -rf tests/tests_api
+    git clone --no-checkout "$TESTS_API_URL" tests/tests_api
+    cd tests/tests_api && git checkout $TESTS_API_COMMIT && cd ../..
   - pip install --quiet tox
   script:
   - |
