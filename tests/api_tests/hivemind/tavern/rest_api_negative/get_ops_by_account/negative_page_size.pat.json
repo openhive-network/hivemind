@@ -1,1 +1,6 @@
-"id required"
+{
+  "code": "P0001",
+  "details": null,
+  "hint": null,
+  "message": "Assert Exception:page-size > 0: page-size of -1 is lesser or equal 0"
+}
