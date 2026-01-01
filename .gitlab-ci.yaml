@@ -855,6 +855,7 @@ prepare_haf_data:
   tags:
   - data-cache-storage
   - fast
+  - fastest
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
@@ -1501,6 +1502,7 @@ e2e_benchmark_on_postgrest:
   - data-cache-storage
   - fast
   - fastest
+  - bigjob
 
 python_api_client_test:
   extends: .project_develop_configuration_template
