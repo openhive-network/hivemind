@@ -859,10 +859,7 @@ prepare_haf_data:
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
-  extends: .job-defaults
-  image:
-    name: "$HAF_IMAGE_NAME"
-    entrypoint: [""]
+  extends: .docker_image_builder_job_template
   stage: build
   needs:
   - prepare_haf_data
@@ -873,6 +870,11 @@ replay_data_copy:
     DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
   before_script:
+  - |
+    # Initialize HAF submodule for copy_datadir.sh script
+    git config --global --add safe.directory "$CI_PROJECT_DIR"
+    git config --global --add safe.directory "$CI_PROJECT_DIR/haf"
+    git submodule update --init --depth=1 haf
   - |
     # Ensure HAF replay data is available locally (fetch from NFS if needed)
     LOCAL_HAF_CACHE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
@@ -900,8 +902,8 @@ replay_data_copy:
     # copy_datadir.sh runs mkdir as hived user, which needs write access to parent dir
     sudo mkdir -p "$DATA_CACHE_HIVEMIND"
     sudo chmod 777 "$DATA_CACHE_HIVEMIND"
-    # Use HAF Docker image's built-in script (no git available in HAF image)
-    /home/haf_admin/source/hive/scripts/copy_datadir.sh
+    # Use copy_datadir.sh from HAF submodule
+    "${CI_PROJECT_DIR}/haf/scripts/copy_datadir.sh"
     sudo chmod 777 $DATA_CACHE_HIVEMIND
     sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
     # Ensure hived_uid.env exists (some HAF caches may be missing this file)
