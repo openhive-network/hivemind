@@ -871,10 +871,11 @@ replay_data_copy:
     SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
   before_script:
   - |
-    # Initialize HAF submodule for copy_datadir.sh script
+    # Initialize HAF submodule (recursive for nested hive submodule - copy_datadir.sh is a symlink)
     git config --global --add safe.directory "$CI_PROJECT_DIR"
     git config --global --add safe.directory "$CI_PROJECT_DIR/haf"
-    git submodule update --init --depth=1 haf
+    git config --global --add safe.directory "$CI_PROJECT_DIR/haf/hive"
+    git submodule update --init --recursive --depth=1 haf
   - |
     # Ensure HAF replay data is available locally (fetch from NFS if needed)
     LOCAL_HAF_CACHE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
