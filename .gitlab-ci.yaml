@@ -857,72 +857,6 @@ prepare_haf_data:
   - fast
   - fastest
 
-# Creates a temporary copy of replay data for the exclusive use of current pipeline
-replay_data_copy:
-  extends: .docker_image_builder_job_template
-  stage: build
-  needs:
-  - prepare_haf_data
-  - prepare_haf_image
-  variables:
-    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    DATA_SOURCE: $DATA_CACHE_HAF
-    DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
-    SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
-  before_script:
-  - |
-    # Initialize HAF submodule (recursive for nested hive submodule - copy_datadir.sh is a symlink)
-    git config --global --add safe.directory "$CI_PROJECT_DIR"
-    git config --global --add safe.directory "$CI_PROJECT_DIR/haf"
-    git config --global --add safe.directory "$CI_PROJECT_DIR/haf/hive"
-    git submodule update --init --recursive --depth=1 haf
-  - |
-    # Ensure HAF replay data is available locally (fetch from NFS if needed)
-    LOCAL_HAF_CACHE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    if [[ -d "${LOCAL_HAF_CACHE}/datadir" ]]; then
-      echo "Local HAF cache found at ${LOCAL_HAF_CACHE}"
-    else
-      echo "Local HAF cache not found, fetching from NFS..."
-      # Fetch cache-manager from common-ci-configuration
-      CACHE_MANAGER="/tmp/cache-manager.sh"
-      if [[ ! -x "$CACHE_MANAGER" ]]; then
-        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
-        chmod +x "$CACHE_MANAGER"
-      fi
-      if "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${LOCAL_HAF_CACHE}"; then
-        echo "Fetched HAF replay data from NFS cache"
-      else
-        echo "ERROR: Failed to fetch HAF replay data from NFS cache"
-        exit 1
-      fi
-    fi
-  script:
-  - |
-    set -e
-    # Create parent directories with appropriate permissions before copy_datadir.sh
-    # copy_datadir.sh runs mkdir as hived user, which needs write access to parent dir
-    sudo mkdir -p "$DATA_CACHE_HIVEMIND"
-    sudo chmod 777 "$DATA_CACHE_HIVEMIND"
-    # Use copy_datadir.sh from HAF submodule
-    "${CI_PROJECT_DIR}/haf/scripts/copy_datadir.sh"
-    sudo chmod 777 $DATA_CACHE_HIVEMIND
-    sudo chmod 777 $DATA_CACHE_HIVEMIND_DATADIR
-    # Ensure hived_uid.env exists (some HAF caches may be missing this file)
-    if [[ ! -f "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" ]]; then
-      echo "hived_uid.env not found in HAF cache, creating with current user ID"
-      echo "HIVED_UID=$(id -u)" > "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env"
-    fi
-    cp "$DATA_CACHE_HIVEMIND_DATADIR/hived_uid.env" "$CI_PROJECT_DIR/hived_uid.env"
-  artifacts:
-    reports:
-      dotenv:
-      - hived_uid.env
-    paths:
-    - hived_uid.env
-  tags:
-  - data-cache-storage
-  - fast
-
 prepare_hivemind_image:
   stage: build
   extends: .docker_image_builder_job_template
@@ -1003,7 +937,6 @@ cleanup_haf_cache_manual:
 # TEMPORARILY DISABLED: Changed to manual while debugging e2e issues
 cleanup_pipeline_cache:
   needs:
-  - replay_data_copy
   - sync
   - e2e_benchmark_on_postgrest
   extends:
@@ -1025,7 +958,7 @@ sync:
   - job: detect_changes
     artifacts: true
     optional: true  # Optional for tagged builds
-  - job: replay_data_copy
+  - job: prepare_haf_data
     artifacts: true
   - job: prepare_hivemind_image
     artifacts: true
@@ -1035,13 +968,25 @@ sync:
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     RUNNER_HIVEMIND_SYNC_IRREVERSIBLE_MAX_BLOCK: 4999979
-    HIVED_UID: $HIVED_UID
+    # Variables for copy_datadir.sh (like balance_tracker)
+    DATA_SOURCE: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
+    SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
     ADD_MOCKS: "true"
     # Docker compose variables
     HAF_DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
     HAF_SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
   before_script:
+  - |
+    # Initialize HAF submodule (recursive for nested hive submodule - copy_datadir.sh is a symlink)
+    git config --global --add safe.directory "$CI_PROJECT_DIR"
+    git config --global --add safe.directory "$CI_PROJECT_DIR/haf"
+    git config --global --add safe.directory "$CI_PROJECT_DIR/haf/hive"
+    git submodule update --init --recursive --depth=1 haf
+  - |
+    # Docker login
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   - |
     # Check for skip mode (QUICK_TEST or AUTO_SKIP_SYNC)
     SYNC_SKIPPED=false
@@ -1078,76 +1023,57 @@ sync:
 
     if [[ "$SYNC_SKIPPED" == "false" ]]; then
       echo "=== Preparing HAF data for sync job ==="
-      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
-    # Copy HAF replay data from prepare_haf_data cache to hivemind sync location
-    HAF_SOURCE="${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    LOCAL_CACHE="${DATA_CACHE_HIVEMIND}"
-    HAF_NFS_TAR="${DATA_CACHE_NFS_PREFIX}/haf/${HAF_COMMIT}.tar"
-
-    # Clean up old cache-manager symlinks that could cause cross-contamination
-    # (Fixed in cache-manager to use copies instead, but clean up legacy symlinks)
-    HAF_SYMLINK="/cache/haf_${HAF_COMMIT}"
-    if [[ -L "$HAF_SYMLINK" ]]; then
-      echo "Removing old cache-manager symlink: ${HAF_SYMLINK}"
-      sudo rm -f "$HAF_SYMLINK" || rm -f "$HAF_SYMLINK" || true
-    fi
-
-    # Check if local HAF cache is contaminated (has hivemind-specific files)
-    if [[ -f "${HAF_SOURCE}/datadir/hivemind-server.log" ]]; then
-      echo "Local HAF cache is contaminated with hivemind data, removing..."
-      sudo rm -rf "${HAF_SOURCE}" || rm -rf "${HAF_SOURCE}" || true
-    fi
-
-    # Fetch cache-manager from common-ci-configuration
-    CACHE_MANAGER="/tmp/cache-manager.sh"
-    if [[ ! -x "$CACHE_MANAGER" ]]; then
-      curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
-      chmod +x "$CACHE_MANAGER"
-    fi
-
-    # If local HAF cache doesn't exist or was removed, fetch from NFS via cache-manager
-    if [[ ! -d "${HAF_SOURCE}/datadir" ]]; then
-      echo "Local HAF cache not found, fetching from NFS via cache-manager..."
-      "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${HAF_SOURCE}" || {
-        echo "ERROR: Failed to fetch HAF data from NFS cache"
-        exit 1
-      }
-      echo "HAF data fetched from NFS successfully"
-    fi
-
-    echo "Copying HAF replay data from ${HAF_SOURCE} to ${LOCAL_CACHE}..."
-    mkdir -p "${LOCAL_CACHE}"
-    # Use cache-manager copy for proper permission handling
-    "$CACHE_MANAGER" copy "${HAF_SOURCE}" "${LOCAL_CACHE}" || {
-      # Fallback to tar pipe if copy not supported
-      if ! (cd "${HAF_SOURCE}" && sudo tar cf - .) | (cd "${LOCAL_CACHE}" && sudo tar xf -); then
-        echo "ERROR: Failed to copy HAF data"
-        exit 1
+      # Fetch cache-manager from common-ci-configuration
+      CACHE_MANAGER="/tmp/cache-manager.sh"
+      if [[ ! -x "$CACHE_MANAGER" ]]; then
+        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+        chmod +x "$CACHE_MANAGER"
       fi
-    }
-    echo "HAF data copied successfully"
 
-    # Create blockchain symlinks to shared block_log
-    BLOCKCHAIN_DIR="${LOCAL_CACHE}/datadir/blockchain"
-    SHARED_BLOCK_LOG="/blockchain/block_log_5m"
-    if [[ ! -d "$BLOCKCHAIN_DIR" ]] && [[ -d "$SHARED_BLOCK_LOG" ]]; then
-      echo "Creating blockchain symlinks to shared block_log"
-      mkdir -p "$BLOCKCHAIN_DIR"
-      for block_file in "$SHARED_BLOCK_LOG"/block_log* ; do
-        if [[ -f "$block_file" ]]; then
-          ln -sf "$block_file" "$BLOCKCHAIN_DIR/$(basename "$block_file")"
-        fi
-      done
-    fi
-    # Ensure blockchain dir is writable by hived (uid 1000)
-    if [[ -d "$BLOCKCHAIN_DIR" ]]; then
-      mkdir -p "$BLOCKCHAIN_DIR/haf_wal"
-      chown -R 1000:100 "$BLOCKCHAIN_DIR" 2>/dev/null || chmod -R 777 "$BLOCKCHAIN_DIR" 2>/dev/null || true
-    fi
+      # If local HAF cache doesn't exist, fetch from NFS via cache-manager
+      if [[ ! -d "${DATA_SOURCE}/datadir" ]]; then
+        echo "Local HAF cache not found, fetching from NFS via cache-manager..."
+        "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${DATA_SOURCE}" || {
+          echo "ERROR: Failed to fetch HAF data from NFS cache"
+          exit 1
+        }
+        echo "HAF data fetched from NFS successfully"
+      else
+        echo "Local HAF cache found at ${DATA_SOURCE}"
+      fi
 
-    echo "HAF data prepared at: ${LOCAL_CACHE}"
-    ls -la "${LOCAL_CACHE}/datadir/" || true
+      # Use copy_datadir.sh from HAF submodule (like balance_tracker)
+      # This handles the copy with proper permissions
+      echo "Copying HAF replay data using copy_datadir.sh..."
+      sudo mkdir -p "$(dirname "$DATADIR")"
+      sudo chmod 777 "$(dirname "$DATADIR")"
+      "${CI_PROJECT_DIR}/haf/scripts/copy_datadir.sh"
+      sudo chmod 777 "$(dirname "$DATADIR")"
+      sudo chmod 777 "$DATADIR" 2>/dev/null || true
+      echo "HAF data copied successfully"
+
+      # Create blockchain symlinks to shared block_log (if not already present)
+      BLOCKCHAIN_DIR="${DATADIR}/blockchain"
+      SHARED_BLOCK_LOG="/blockchain/block_log_5m"
+      if [[ ! -d "$BLOCKCHAIN_DIR" ]] && [[ -d "$SHARED_BLOCK_LOG" ]]; then
+        echo "Creating blockchain symlinks to shared block_log"
+        mkdir -p "$BLOCKCHAIN_DIR"
+        for block_file in "$SHARED_BLOCK_LOG"/block_log* ; do
+          if [[ -f "$block_file" ]]; then
+            ln -sf "$block_file" "$BLOCKCHAIN_DIR/$(basename "$block_file")"
+          fi
+        done
+      fi
+
+      # Ensure blockchain dir is writable by hived (uid 1000)
+      if [[ -d "$BLOCKCHAIN_DIR" ]]; then
+        mkdir -p "$BLOCKCHAIN_DIR/haf_wal"
+        chown -R 1000:100 "$BLOCKCHAIN_DIR" 2>/dev/null || chmod -R 777 "$BLOCKCHAIN_DIR" 2>/dev/null || true
+      fi
+
+      echo "HAF data prepared at: ${DATADIR}"
+      ls -la "${DATADIR}/" || true
     fi  # end of SYNC_SKIPPED check
   script:
   - |
@@ -1297,8 +1223,6 @@ e2e_benchmark_on_postgrest:
   - job: detect_changes
     artifacts: true
     optional: true  # Optional for tagged builds
-  - job: replay_data_copy
-    artifacts: true
   - job: prepare_hivemind_image
     artifacts: true
   - job: prepare_haf_image
@@ -1331,7 +1255,6 @@ e2e_benchmark_on_postgrest:
       LOG_LEVEL: "info" # change to "debug" for more info
       REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times.log
   variables:
-    HIVED_UID: $HIVED_UID
     JOB_TOKEN: $CI_JOB_TOKEN
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
