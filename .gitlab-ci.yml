@@ -152,73 +152,11 @@ default:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# Manual submodule initialization - needed because submodules have nested submodules
-# with relative URLs that don't work with GIT_SUBMODULE_STRATEGY: recursive
-# This initializes haf (with recursive for nested hive), reputation_tracker, and hafah
-# (without recursive to avoid their nested haf relative URL issues)
+# Manual submodule initialization - uses external script for complex submodule handling
+# (haf with nested hive, reputation_tracker/hafah with nested haf, tests_api)
 .init_submodules:
   before_script: &init_submodules
-    - |
-      echo -e "\e[0Ksection_start:$(date +%s):init_submodules[collapsed=true]\r\e[0KInitializing submodules..."
-      git config --global --add safe.directory '*'
-
-      # Initialize HAF submodule (with nested hive submodule)
-      HAF_URL="https://gitlab.syncad.com/hive/haf.git"
-      HAF_SUBMOD_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-      echo "Initializing haf submodule at commit $HAF_SUBMOD_COMMIT"
-      sudo rm -rf haf 2>/dev/null || rm -rf haf
-      git clone --no-checkout "$HAF_URL" haf
-      cd haf
-      git fetch origin develop
-      git checkout $HAF_SUBMOD_COMMIT
-      git submodule update --init --recursive --jobs 4
-      cd ..
-
-      # Initialize reputation_tracker submodule with nested haf
-      REPTRACKER_URL="https://gitlab.syncad.com/hive/reputation_tracker.git"
-      REPTRACKER_COMMIT=$(git ls-tree HEAD reputation_tracker | awk '{print $3}')
-      echo "Initializing reputation_tracker submodule at commit $REPTRACKER_COMMIT"
-      sudo rm -rf reputation_tracker 2>/dev/null || rm -rf reputation_tracker
-      git clone --no-checkout "$REPTRACKER_URL" reputation_tracker
-      cd reputation_tracker
-      git checkout $REPTRACKER_COMMIT
-      # Initialize nested haf submodule (using absolute URL since relative ../haf.git won't work)
-      NESTED_HAF_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-      rm -rf haf
-      git clone --no-checkout "$HAF_URL" haf
-      cd haf
-      git checkout $NESTED_HAF_COMMIT
-      git submodule update --init --recursive --jobs 4
-      cd ../..
-
-      # Initialize hafah submodule with nested haf
-      HAFAH_URL="https://gitlab.syncad.com/hive/HAfAH.git"
-      HAFAH_COMMIT=$(git ls-tree HEAD hafah | awk '{print $3}')
-      echo "Initializing hafah submodule at commit $HAFAH_COMMIT"
-      sudo rm -rf hafah 2>/dev/null || rm -rf hafah
-      git clone --no-checkout "$HAFAH_URL" hafah
-      cd hafah
-      git checkout $HAFAH_COMMIT
-      # Initialize nested haf submodule (using absolute URL since relative ../haf.git won't work)
-      NESTED_HAF_COMMIT=$(git ls-tree HEAD haf | awk '{print $3}')
-      rm -rf haf
-      git clone --no-checkout "$HAF_URL" haf
-      cd haf
-      git checkout $NESTED_HAF_COMMIT
-      git submodule update --init --recursive --jobs 4
-      cd ../..
-
-      # Initialize tests_api submodule (no nested submodules)
-      TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
-      TESTS_API_COMMIT=$(git ls-tree HEAD tests/tests_api | awk '{print $3}')
-      echo "Initializing tests_api submodule at commit $TESTS_API_COMMIT"
-      sudo rm -rf tests/tests_api 2>/dev/null || rm -rf tests/tests_api
-      git clone --no-checkout "$TESTS_API_URL" tests/tests_api
-      cd tests/tests_api
-      git checkout $TESTS_API_COMMIT
-      cd ../..
-
-      echo -e "\e[0Ksection_end:$(date +%s):init_submodules\r\e[0K"
+    - ./scripts/ci/init-submodules.sh
 
 .shared_tags:
   tags: &shared_tags
@@ -293,148 +231,52 @@ default:
   cat hivemind_image.env
   echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
 
-.bridge_api_smoketest-script: &bridge_api_smoketest-script
+# All smoketest script anchors consolidated into run-all-smoketests anchor
+# Individual test runs use the same start-api-smoketest.sh script
+.run-all-smoketests: &run-all-smoketests
 - |
-  echo -e "\e[0Ksection_start:$(date +%s):bridge_api_smoketest[collapsed=true]\r\e[0KRunning bridge API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      bridge_api_patterns/ \
-      api_smoketest_bridge.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest\r\e[0K"
+  echo "=== Running all API smoketests ==="
+  HOST="$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME"
+  PORT="$RUNNER_HIVEMIND_SERVER_HTTP_PORT"
+  WORKERS="$RUNNER_PYTEST_WORKERS"
 
-.bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):bridge_api_smoketest_negative[collapsed=true]\r\e[0KRunning bridge API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      bridge_api_negative/ \
-      api_smoketest_bridge_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest_negative\r\e[0K"
+  # Define all test groups: test_dir:output_xml
+  SMOKETESTS=(
+    "condenser_api_patterns:api_smoketest_condenser_api.xml"
+    "condenser_api_negative:api_smoketest_condenser_api_negative.xml"
+    "follow_api_patterns:api_smoketest_follow_api.xml"
+    "follow_api_negative:api_smoketest_follow_api_negative.xml"
+    "bridge_api_patterns:api_smoketest_bridge.xml"
+    "bridge_api_negative:api_smoketest_bridge_negative.xml"
+    "tags_api_patterns:api_smoketest_tags_api.xml"
+    "tags_api_negative:api_smoketest_tags_api_negative.xml"
+    "database_api_patterns:api_smoketest_database_api.xml"
+    "database_api_negative:api_smoketest_database_api_negative.xml"
+    "rest_api_patterns:api_smoketest_rest_api_patterns.xml"
+    "rest_api_negative:api_smoketest_rest_api_negative.xml"
+    "hive_api_patterns:api_smoketest_hive_api.xml"
+    "search-api_patterns:api_smoketest_search-api.xml"
+    "postgrest_negative:postgrest_negative.xml"
+    "mock_tests:api_smoketest_mock_tests.xml"
+  )
 
-.condenser_api_smoketest-script: &condenser_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):condenser_api_smoketest[collapsed=true]\r\e[0KRunning condenser API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      condenser_api_patterns/ \
-      api_smoketest_condenser_api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest\r\e[0K"
+  FAILED=0
+  for test_spec in "${SMOKETESTS[@]}"; do
+    IFS=':' read -r test_dir output_xml <<< "$test_spec"
+    section_name="${test_dir//\//_}"
+    echo -e "\e[0Ksection_start:$(date +%s):${section_name}[collapsed=true]\r\e[0KRunning ${test_dir} smoketest..."
+    if ! ./scripts/ci/start-api-smoketest.sh "$HOST" "$PORT" "${test_dir}/" "$output_xml" "$WORKERS"; then
+      echo "WARNING: ${test_dir} smoketest failed"
+      FAILED=$((FAILED + 1))
+    fi
+    echo -e "\e[0Ksection_end:$(date +%s):${section_name}\r\e[0K"
+  done
 
-.condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):condenser_api_smoketest_negative[collapsed=true]\r\e[0KRunning condenser API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      condenser_api_negative/ \
-      api_smoketest_condenser_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest_negative\r\e[0K"
-
-.database_api_smoketest-script: &database_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):database_api_smoketest[collapsed=true]\r\e[0KRunning database API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      database_api_patterns/ \
-      api_smoketest_database_api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest\r\e[0K"
-
-.database_api_smoketest_negative-script: &database_api_smoketest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):database_api_smoketest_negative[collapsed=true]\r\e[0KRunning database API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      database_api_negative/ \
-      api_smoketest_database_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest_negative\r\e[0K"
-
-.follow_api_smoketest-script: &follow_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):follow_api_smoketest[collapsed=true]\r\e[0KRunning follow API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      follow_api_patterns/ \
-      api_smoketest_follow_api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest\r\e[0K"
-
-.follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):follow_api_smoketest_negative[collapsed=true]\r\e[0KRunning follow API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      follow_api_negative/ \
-      api_smoketest_follow_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest_negative\r\e[0K"
-
-.tags_api_smoketest-script: &tags_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):tags_api_smoketest[collapsed=true]\r\e[0KRunning tags API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      tags_api_patterns/ \
-      api_smoketest_tags_api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest\r\e[0K"
-
-.tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):tags_api_smoketest_negative[collapsed=true]\r\e[0KRunning tags API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      tags_api_negative/ \
-      api_smoketest_tags_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
-
-.mock_tests-script: &mock_tests-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):mock_tests[collapsed=true]\r\e[0KRunning mock tests..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      mock_tests/ \
-      api_smoketest_mock_tests.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):mock_tests\r\e[0K"
-
-.hive_api_smoketest-script: &hive_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):hive_api_smoketest[collapsed=true]\r\e[0KRunning Hive API smoketests..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      hive_api_patterns/ \
-      api_smoketest_hive_api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
-
-.search-api_smoketest-script: &search-api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):search-api_smoketest[collapsed=true]\r\e[0KRunning find API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      search-api_patterns/ \
-      api_smoketest_search-api.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
+  if [[ $FAILED -gt 0 ]]; then
+    echo "ERROR: $FAILED smoketest group(s) failed"
+    exit 1
+  fi
+  echo "=== All smoketests completed successfully ==="
 
 .api-benchmark-script:
 - |
@@ -445,40 +287,6 @@ default:
       $RUNNER_BENCHMARK_ITERATIONS \
       $RUNNER_PYTEST_WORKERS
   echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K"
-
-
-.postgrest_negative-script: &postgrest_negative-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):postgrest_negative[collapsed=true]\r\e[0KRunning Postgrest negative smoketests..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      postgrest_negative/ \
-      postgrest_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
-
-.rest_api_smoketest-script: &rest_api_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):rest_api_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      rest_api_patterns/ \
-      api_smoketest_rest_api_patterns.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):rest_api_smoketest\r\e[0K"
-
-.rest_api_negative_smoketest-script: &rest_api_negative_smoketest-script
-- |
-  echo -e "\e[0Ksection_start:$(date +%s):rest_api_negative_smoketest[collapsed=true]\r\e[0KRunning rest API smoketest negative..."
-  ./scripts/ci/start-api-smoketest.sh \
-      $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
-      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-      rest_api_negative/ \
-      api_smoketest_rest_api_negative.xml \
-      $RUNNER_PYTEST_WORKERS
-  echo -e "\e[0Ksection_end:$(date +%s):rest_api_negative_smoketest\r\e[0K"
 
 .hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script |
   # Wait for HAF PostgreSQL to be ready
@@ -1358,22 +1166,7 @@ e2e_benchmark_on_postgrest:
             print(f"Error: {e}")
     PYEOF
     echo "=== END DEBUG ==="
-  - *condenser_api_smoketest-script
-  - *condenser_api_smoketest_negative-script
-  - *follow_api_smoketest-script
-  - *follow_api_smoketest_negative-script
-  - *bridge_api_smoketest-script
-  - *bridge_api_smoketest_negative-script
-  - *tags_api_smoketest-script
-  - *tags_api_smoketest_negative-script
-  - *database_api_smoketest-script
-  - *database_api_smoketest_negative-script
-  - *rest_api_smoketest-script
-  - *rest_api_negative_smoketest-script
-  - *hive_api_smoketest-script
-  - *search-api_smoketest-script
-  - *postgrest_negative-script
-  - *mock_tests-script
+  - *run-all-smoketests
   - |
     echo "Waiting for Hivemind benchmark server..."
     WAIT_TIMEOUT=600  # 10 minutes
