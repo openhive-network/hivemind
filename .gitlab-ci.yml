@@ -20,6 +20,7 @@ include:
     - '/templates/haf_data_preparation.gitlab-ci.yml'
     - '/templates/cache_cleanup.gitlab-ci.yml'
     - '/templates/python_projects.gitlab-ci.yml'
+    - '/templates/npm_projects.gitlab-ci.yml'
     - '/templates/test_jobs.gitlab-ci.yml'
     - '/templates/haf_app_testing.gitlab-ci.yml'
 
