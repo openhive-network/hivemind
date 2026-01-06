@@ -141,8 +141,9 @@ ADD --chown=hivemind:hivemind --chmod=755 https://gitlab.syncad.com/hive/common-
 ADD --chown=hivemind:hivemind --chmod=755 https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}/haf-app-tools/scripts/common.sh /home/hivemind/haf/scripts/common.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
-COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
-COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/hafah /home/hivemind/app/hafah
+# No --exclude needed: reputation_tracker and hafah no longer have nested HAF submodules
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/hafah /home/hivemind/app/hafah
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
