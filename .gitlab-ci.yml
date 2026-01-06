@@ -35,8 +35,9 @@ variables:
   # =============================================================================
   # Two ways to skip builds/sync and use cached data:
   #
-  # 1. AUTOMATIC (recommended): When only tests/docs change, sync is
-  #    automatically skipped and cached data is used. No configuration needed.
+  # 1. AUTOMATIC: When only tests/docs change, detect_changes sets AUTO_SKIP_SYNC=true.
+  #    The sync job will then search for compatible cached data and use it if available.
+  #    If no cache is found, it falls back to full sync.
   #
   # 2. MANUAL: Set QUICK_TEST=true to force skip mode with a specific cache:
   #    - QUICK_TEST=true
@@ -48,9 +49,8 @@ variables:
   QUICK_TEST: "false"
   QUICK_TEST_HAF_COMMIT: ""       # Required when QUICK_TEST=true
   QUICK_TEST_HIVEMIND_COMMIT: ""  # Required when QUICK_TEST=true (short SHA)
-  # Auto-populated by detect_changes job:
+  # Auto-populated by detect_changes job (uses .haf_app_detect_changes template):
   AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
-  AUTO_CACHE_KEY: ""              # Cache key to use when skipping sync
 
   # Override common-ci-configuration version - use latest with cache-manager fixes
   CI_COMMON_JOB_VERSION: "3dd346380da7f28cdaf3ef3955559c905d94bd1c"
@@ -475,157 +475,21 @@ default:
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # =============================================================================
-# Change Detection & Quick Test Setup
+# Change Detection
 # =============================================================================
-# Detects if only tests/docs changed, finds cached sync data, and exports
-# variables for downstream jobs:
-#   AUTO_SKIP_SYNC  - true if sync can be skipped
-#   SYNC_CACHE_KEY  - cache key to use (HAF_COMMIT_HIVEMIND_SHORT_SHA)
+# Uses common-ci-configuration template to detect if only tests/docs changed.
+# Exports AUTO_SKIP_SYNC=true when full sync can be skipped.
+# Note: Unlike some HAF apps, hivemind's sync job handles cache lookup itself,
+# gracefully falling back to full sync if no cached data is available.
 detect_changes:
-  stage: detect
-  image: "$HIVE_CI_BASE_IMAGE"
-  rules:
-    # Skip for tags (always do full build for releases)
-    - if: $CI_COMMIT_TAG
-      when: never
-    - when: on_success
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq docker.io >/dev/null
-  script:
-    - |
-      set -euo pipefail
-
-      # Initialize defaults
-      CAN_SKIP_SYNC=false
-      CACHE_KEY=""
-
-      # Handle manual QUICK_TEST mode
-      if [[ "$QUICK_TEST" == "true" ]]; then
-        echo "=== Manual QUICK_TEST Mode ==="
-        CAN_SKIP_SYNC=true
-        if [[ -z "$QUICK_TEST_HAF_COMMIT" ]] || [[ -z "$QUICK_TEST_HIVEMIND_COMMIT" ]]; then
-          echo "ERROR: QUICK_TEST=true requires both QUICK_TEST_HAF_COMMIT and QUICK_TEST_HIVEMIND_COMMIT"
-          echo ""
-          echo "Find available caches:"
-          echo "  ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'"
-          exit 1
-        fi
-        CACHE_KEY="${QUICK_TEST_HAF_COMMIT}_${QUICK_TEST_HIVEMIND_COMMIT}"
-        echo "Using cache key: $CACHE_KEY"
-      else
-        # Automatic detection mode
-        echo "=== Detecting Changed Files ==="
-
-        # Get changed files based on pipeline type
-        if [[ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]]; then
-          BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
-          echo "MR pipeline: comparing against target branch"
-        elif [[ "${CI_PIPELINE_SOURCE:-}" == "push" ]]; then
-          # For push pipelines with shallow clone, fetch more history
-          echo "Push pipeline: fetching history for comparison..."
-          git fetch --deepen=2 origin "${CI_COMMIT_REF_NAME}" 2>/dev/null || true
-          BASE_SHA="HEAD~1"
-          echo "Push pipeline: comparing against previous commit"
-        else
-          # Fetch develop branch for comparison
-          git fetch origin develop --depth=1 2>/dev/null || true
-          BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "")
-          if [[ -z "$BASE_SHA" ]]; then
-            echo "Cannot determine base - assuming full sync needed"
-            CAN_SKIP_SYNC=false
-          else
-            echo "Other pipeline: comparing against develop"
-          fi
-        fi
-
-        # Get changed files (skip if we already determined full sync needed)
-        CHANGED_FILES=""
-        if [[ "$CAN_SKIP_SYNC" != "false" ]] && [[ -n "$BASE_SHA" ]]; then
-          echo "Comparing $BASE_SHA to HEAD"
-          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
-          if [[ -z "$CHANGED_FILES" ]]; then
-            echo "Cannot determine changed files - assuming full sync needed"
-            CAN_SKIP_SYNC=false
-          fi
-        fi
-
-        if [[ -n "$CHANGED_FILES" ]]; then
-          echo "Changed files:"
-          echo "$CHANGED_FILES" | head -50
-
-          # Skip sync when only tests, docs, or non-code files change
-          # SQL changes DO require sync (they affect database schema/functions)
-          SKIP_SYNC_PATTERNS="^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yaml$"
-
-          NEEDS_SYNC=$(echo "$CHANGED_FILES" | grep -vE "$SKIP_SYNC_PATTERNS" || true)
-
-          if [[ -z "$NEEDS_SYNC" ]]; then
-            echo ""
-            echo "=== Can skip sync (only tests/docs/CI config changed) ==="
-            CAN_SKIP_SYNC=true
-          else
-            echo ""
-            echo "=== Full sync required ==="
-            echo "Files requiring sync:"
-            echo "$NEEDS_SYNC" | head -20
-          fi
-        fi  # end of CHANGED_FILES check
-
-        # Find cached data when we can skip sync
-        if [[ "$CAN_SKIP_SYNC" == "true" ]]; then
-          echo ""
-          echo "Looking for cached hivemind sync data..."
-
-          # Docker login for image verification
-          echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY" 2>/dev/null || true
-
-          NFS_CACHE_PATH="/nfs/ci-cache/haf_hivemind_sync"
-          if [[ -d "$NFS_CACHE_PATH" ]]; then
-            # Look through recent cache files to find one with valid images
-            for TAR in $(ls -t "$NFS_CACHE_PATH"/*.tar 2>/dev/null | head -10); do
-              TEST_KEY=$(basename "$TAR" .tar)
-              # Extract HAF commit (first part before underscore)
-              TEST_HAF_COMMIT="${TEST_KEY%%_*}"
-              TEST_SHORT="${TEST_HAF_COMMIT:0:8}"
-
-              # Verify HAF Docker image exists
-              HAF_IMG="registry.gitlab.syncad.com/hive/haf:${TEST_SHORT}"
-              if docker manifest inspect "$HAF_IMG" >/dev/null 2>&1; then
-                CACHE_KEY="$TEST_KEY"
-                echo "Found cached data with valid HAF image: $CACHE_KEY"
-                echo "HAF image: $HAF_IMG"
-                break
-              else
-                echo "Cache $TEST_KEY missing HAF image ($HAF_IMG), trying next..."
-              fi
-            done
-          fi
-
-          if [[ -z "$CACHE_KEY" ]]; then
-            echo "WARNING: No cached data with valid images found - cannot skip sync"
-            CAN_SKIP_SYNC=false
-          fi
-        fi
-      fi
-
-      # Export results
-      echo "AUTO_SKIP_SYNC=$CAN_SKIP_SYNC" >> detect_changes.env
-      if [[ -n "$CACHE_KEY" ]]; then
-        echo "SYNC_CACHE_KEY=$CACHE_KEY" >> detect_changes.env
-        # Also export the HAF commit for image lookup
-        HAF_FROM_CACHE="${CACHE_KEY%%_*}"
-        echo "AUTO_HAF_COMMIT=$HAF_FROM_CACHE" >> detect_changes.env
-      fi
-
-      echo ""
-      echo "=== Summary ==="
-      cat detect_changes.env
-  artifacts:
-    reports:
-      dotenv: detect_changes.env
-    expire_in: 1 day
-  tags:
-    - data-cache-storage  # Needs NFS access to find caches
+  extends: .haf_app_detect_changes
+  variables:
+    # Files that don't require re-sync:
+    # - tests/, docs/ (don't affect sync)
+    # - *.md, README, CHANGELOG, LICENSE, CLAUDE.md (docs)
+    # - .gitlab-ci.yml (CI config)
+    # Note: SQL changes DO require sync (affect database schema/functions)
+    HAF_APP_SKIP_PATTERNS: '^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
 
 # Build base images if they're missing from registry
 prepare_base_images:
@@ -831,28 +695,78 @@ sync:
   - |
     # Check for skip mode (QUICK_TEST or AUTO_SKIP_SYNC)
     SYNC_SKIPPED=false
-    if [[ "${QUICK_TEST:-false}" == "true" ]] || [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
-      echo "=== Skipping sync (using cached data) ==="
-      echo "QUICK_TEST=${QUICK_TEST:-false}"
-      echo "AUTO_SKIP_SYNC=${AUTO_SKIP_SYNC:-false}"
-      echo "SYNC_CACHE_KEY=${SYNC_CACHE_KEY}"
 
-      # Use cache-manager to get cached hivemind sync data
-      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+    # Create default sync_cache_override.env (may be overridden below)
+    # This ensures the dotenv artifact exists even when sync runs normally
+    echo "SYNC_CACHE_KEY=${SYNC_CACHE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+    # QUICK_TEST mode: explicitly requested cache - error if not found
+    if [[ "${QUICK_TEST:-false}" == "true" ]]; then
+      echo "=== QUICK_TEST Mode (explicit cache request) ==="
+      echo "QUICK_TEST_HAF_COMMIT=${QUICK_TEST_HAF_COMMIT}"
+      echo "QUICK_TEST_HIVEMIND_COMMIT=${QUICK_TEST_HIVEMIND_COMMIT}"
+
+      if [[ -z "$QUICK_TEST_HAF_COMMIT" ]] || [[ -z "$QUICK_TEST_HIVEMIND_COMMIT" ]]; then
+        echo "ERROR: QUICK_TEST=true requires both QUICK_TEST_HAF_COMMIT and QUICK_TEST_HIVEMIND_COMMIT"
+        echo ""
+        echo "Find available caches:"
+        echo "  ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'"
+        exit 1
+      fi
+
+      QUICK_TEST_CACHE_KEY="${QUICK_TEST_HAF_COMMIT}_${QUICK_TEST_HIVEMIND_COMMIT}"
+      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${QUICK_TEST_CACHE_KEY}"
       echo "Fetching cached hivemind sync data via cache-manager..."
-      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" || {
-        echo "ERROR: No cached data found for key: ${SYNC_CACHE_KEY}"
+      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${QUICK_TEST_CACHE_KEY}" "${LOCAL_CACHE}" || {
+        echo "ERROR: No cached data found for key: ${QUICK_TEST_CACHE_KEY}"
         echo ""
         echo "Available ${SYNC_CACHE_TYPE} caches:"
         "$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | head -10 || echo "(cache-manager list failed)"
         exit 1
       }
       echo "Cached data ready at: $LOCAL_CACHE"
-      echo "Sync skipped - using cached data from: $SYNC_CACHE_KEY"
-
-      # Mark that sync was skipped (for after_script)
+      echo "Sync skipped - using cached data from: $QUICK_TEST_CACHE_KEY"
+      # Override SYNC_CACHE_KEY for e2e job
+      echo "SYNC_CACHE_KEY=${QUICK_TEST_CACHE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
       touch "${CI_PROJECT_DIR}/.sync_skipped"
       SYNC_SKIPPED=true
+
+    # AUTO_SKIP_SYNC mode: try to use any compatible cache, fallback to full sync
+    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+      echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
+      echo "Looking for compatible hivemind sync cache..."
+
+      # First check if exact cache exists
+      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+      if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
+        echo "Exact cache found: ${SYNC_CACHE_KEY}"
+        echo "Sync skipped - using cached data"
+        touch "${CI_PROJECT_DIR}/.sync_skipped"
+        SYNC_SKIPPED=true
+      else
+        # Search for any compatible cache with current HAF_COMMIT
+        echo "Exact cache not found, searching for compatible cache with HAF_COMMIT=${HAF_COMMIT}..."
+        NFS_CACHE_DIR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}"
+        FOUND_CACHE=$(ls -t "${NFS_CACHE_DIR}/${HAF_COMMIT}_"*.tar 2>/dev/null | head -1 || true)
+
+        if [[ -n "$FOUND_CACHE" ]]; then
+          FOUND_KEY=$(basename "$FOUND_CACHE" .tar)
+          echo "Found compatible cache: ${FOUND_KEY}"
+          LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${FOUND_KEY}"
+          if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${FOUND_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
+            echo "Sync skipped - using cached data from: ${FOUND_KEY}"
+            # Override SYNC_CACHE_KEY for e2e job
+            echo "SYNC_CACHE_KEY=${FOUND_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+            touch "${CI_PROJECT_DIR}/.sync_skipped"
+            SYNC_SKIPPED=true
+          fi
+        fi
+
+        if [[ "$SYNC_SKIPPED" == "false" ]]; then
+          echo "No compatible cache found - falling back to full sync"
+          echo "This is expected for first run after HAF_COMMIT change"
+        fi
+      fi
     fi
 
     if [[ "$SYNC_SKIPPED" == "false" ]]; then
@@ -1033,10 +947,14 @@ sync:
   artifacts:
     when: always
     expire_in: 7 days
+    reports:
+      # Export SYNC_CACHE_KEY override when using cached data from a different commit
+      dotenv: sync_cache_override.env
     paths:
     - hivemind-sync.log
     - pg-stats
     - version.log
+    - sync_cache_override.env
   tags:
   - data-cache-storage
   - fast
