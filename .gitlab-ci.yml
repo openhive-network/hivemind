@@ -1,7 +1,6 @@
 stages:
 - detect
 - build
-- prepare
 - sync
 - benchmark
 - tests
@@ -161,8 +160,7 @@ default:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# Manual submodule initialization - uses external script for complex submodule handling
-# (haf with nested hive, reputation_tracker/hafah with nested haf, tests_api)
+# Manual submodule initialization (reputation_tracker, hafah, tests_api)
 .init_submodules:
   before_script: &init_submodules
     - ./scripts/ci/init-submodules.sh
