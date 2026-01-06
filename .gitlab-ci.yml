@@ -728,6 +728,16 @@ sync:
       echo "Sync skipped - using cached data from: $QUICK_TEST_CACHE_KEY"
       # Override SYNC_CACHE_KEY for e2e job
       echo "SYNC_CACHE_KEY=${QUICK_TEST_CACHE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+      # CRITICAL: Services don't see dotenv overrides, they use variables evaluated at job start.
+      # Create NFS symlink so the service can find data at the default cache key path.
+      NFS_QT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${QUICK_TEST_CACHE_KEY}.tar"
+      NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+      if [[ "$NFS_QT_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+        echo "Creating NFS symlink for service: ${NFS_DEFAULT_TAR} -> $(basename $NFS_QT_TAR)"
+        ln -sf "$(basename "$NFS_QT_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+      fi
+
       touch "${CI_PROJECT_DIR}/.sync_skipped"
       SYNC_SKIPPED=true
 
@@ -755,8 +765,19 @@ sync:
           LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${FOUND_KEY}"
           if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${FOUND_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
             echo "Sync skipped - using cached data from: ${FOUND_KEY}"
-            # Override SYNC_CACHE_KEY for e2e job
+            # Override SYNC_CACHE_KEY for e2e job (for before_script and after_script)
             echo "SYNC_CACHE_KEY=${FOUND_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+            # CRITICAL: Services don't see dotenv overrides, they use variables evaluated at job start.
+            # Create NFS symlinks so the service can find data at the default cache key path.
+            # Jobs may run on different runners, so we use NFS for cross-runner visibility.
+            NFS_FOUND_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${FOUND_KEY}.tar"
+            NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+            if [[ "$NFS_FOUND_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+              echo "Creating NFS symlink for service: ${NFS_DEFAULT_TAR} -> $(basename $NFS_FOUND_TAR)"
+              ln -sf "$(basename "$NFS_FOUND_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+            fi
+
             touch "${CI_PROJECT_DIR}/.sync_skipped"
             SYNC_SKIPPED=true
           fi
