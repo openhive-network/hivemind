@@ -11,6 +11,23 @@ source "$SCRIPTPATH/common.sh"
 
 log_exec_params "$@"
 
+# HAF role creation script - check multiple locations (Docker image vs development)
+HAF_APP_ROLE_SCRIPT=""
+if [[ -x "/home/hivemind/haf/scripts/create_haf_app_role.sh" ]]; then
+  # Docker image path
+  HAF_APP_ROLE_SCRIPT="/home/hivemind/haf/scripts/create_haf_app_role.sh"
+elif [[ -x "$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" ]]; then
+  # Development with haf submodule (backwards compatibility)
+  HAF_APP_ROLE_SCRIPT="$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh"
+else
+  # Fetch from common-ci-configuration
+  echo "Fetching create_haf_app_role.sh from common-ci-configuration..."
+  COMMON_CI_REF="${COMMON_CI_REF:-develop}"
+  HAF_APP_ROLE_SCRIPT="/tmp/create_haf_app_role.sh"
+  curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}/haf-app-tools/scripts/create_haf_app_role.sh" -o "$HAF_APP_ROLE_SCRIPT"
+  chmod +x "$HAF_APP_ROLE_SCRIPT"
+fi
+
 # Script responsible for setup of specified postgres instance.
 #
 # - creates all builtin hivemind roles on pointed PostgreSQL server instance
@@ -80,8 +97,8 @@ else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
 
-"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind"
-"$SCRIPTPATH/../haf/scripts/create_haf_app_role.sh" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group"
+"$HAF_APP_ROLE_SCRIPT" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind"
+"$HAF_APP_ROLE_SCRIPT" --postgres-url="$POSTGRES_ACCESS" --haf-app-account="hivemind_user" --base-group="hive_applications_group"
 
 #psql "$POSTGRES_ACCESS" -c "GRANT SET ON PARAMETER log_min_messages TO hivemind;"
 
