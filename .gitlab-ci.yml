@@ -11,18 +11,25 @@ stages:
 
 include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
-- project: hive/haf
-  ref: 1ac5d12439b9cca33e6db383adc59967cae75fc4 # develop
-  file: /scripts/ci-helpers/prepare_data_image_job.yml   # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
-# HAF app testing templates from common-ci-configuration
+# All CI templates from common-ci-configuration (no HAF submodule needed)
 - project: 'hive/common-ci-configuration'
-  ref: feature/haf-app-testing-templates
-  file: '/templates/haf_app_testing.gitlab-ci.yml'
+  ref: develop
+  file:
+    - '/templates/base.gitlab-ci.yml'
+    - '/templates/docker_image_jobs.gitlab-ci.yml'
+    - '/templates/haf_data_preparation.gitlab-ci.yml'
+    - '/templates/cache_cleanup.gitlab-ci.yml'
+    - '/templates/python_projects.gitlab-ci.yml'
+    - '/templates/test_jobs.gitlab-ci.yml'
+    - '/templates/haf_app_testing.gitlab-ci.yml'
 
 variables:
+  # Common CI configuration reference
+  COMMON_CI_REF: "develop"
+  COMMON_CI_URL: "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}"
   # Cache manager configuration (from common-ci-configuration)
   CACHE_MANAGER: "/tmp/cache-manager.sh"
-  CACHE_MANAGER_REF: "feature/haf-app-testing-templates"
+  CACHE_MANAGER_REF: "develop"
   # =============================================================================
   # Quick Test / Auto-Skip Mode
   # =============================================================================
@@ -59,9 +66,9 @@ variables:
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
-  # HAF submodule commit - must match the 'ref:' in the include section above
-  # This is needed for service containers which can't access dotenv artifacts
-  HAF_COMMIT: "1ac5d12439b9cca33e6db383adc59967cae75fc4"
+  # HAF configuration (no submodule needed)
+  # HAF_COMMIT: Used for data cache key lookup and Docker image tag (first 8 chars)
+  HAF_COMMIT: "219ef44775ee1ed85630cf513d8671f6ca4ccc49"  # Known cached HAF commit
   # HAF
   HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
@@ -83,7 +90,6 @@ variables:
   GIT_STRATEGY: fetch
   GIT_DEPTH: 0
   # Disable automatic submodule fetching - we handle it manually in before_script
-  # This is needed because haf contains nested hive submodule with relative URLs
   GIT_SUBMODULE_STRATEGY: none
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   # Allow file:// protocol for nested submodules (required for test-tools in hive)
@@ -620,15 +626,6 @@ detect_changes:
   tags:
     - data-cache-storage  # Needs NFS access to find caches
 
-validate_haf_commit:
-  extends: .haf_commit_validation
-  stage: build
-  variables:
-    HAF_INCLUDE_REF: "$HAF_COMMIT"
-    HAF_SUBMODULE_PATH: "haf"
-  tags:
-  - public-runner-docker
-
 # Build base images if they're missing from registry
 prepare_base_images:
   stage: build
@@ -639,15 +636,40 @@ prepare_base_images:
   - *base-image-build-script
   tags: *shared_tags
 
+# Use existing HAF image from registry (no submodule needed)
 prepare_haf_image:
   stage: build
-  extends: .prepare_haf_image
-  variables:
-    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
-    REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
-    REGISTRY_PASS: "$HAF_IMG_BUILDER_PASSWORD"
-  before_script: *init_submodules
-  tags: *shared_tags
+  image: "${HIVE_CI_BASE_IMAGE}"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq docker.io >/dev/null
+  script:
+    - |
+      # Derive image tag from HAF_COMMIT (first 8 characters)
+      HAF_SHORT_COMMIT="${HAF_COMMIT:0:8}"
+      HAF_IMAGE_NAME="registry.gitlab.syncad.com/hive/haf:${HAF_SHORT_COMMIT}"
+      echo "Using HAF image: ${HAF_IMAGE_NAME}"
+
+      # Verify image exists in registry
+      if ! docker manifest inspect "$HAF_IMAGE_NAME" >/dev/null 2>&1; then
+        echo "ERROR: HAF image not found: ${HAF_IMAGE_NAME}"
+        echo "Please use a HAF_COMMIT that has a published image."
+        echo ""
+        echo "Find available HAF commits with published images:"
+        echo "  Check https://gitlab.syncad.com/hive/haf/container_registry"
+        exit 1
+      fi
+      echo "Image verified: ${HAF_IMAGE_NAME}"
+
+      # Export image name for downstream jobs
+      echo "HAF_IMAGE_NAME=${HAF_IMAGE_NAME}" > docker_image_name.env
+      echo "HAF_REGISTRY_TAG=${HAF_SHORT_COMMIT}" >> docker_image_name.env
+  artifacts:
+    reports:
+      dotenv: docker_image_name.env
+    paths:
+      - docker_image_name.env
+  tags:
+    - public-runner-docker
 
 prepare_haf_data:
   extends: .prepare_haf_data_5m
@@ -656,10 +678,11 @@ prepare_haf_data:
     artifacts: true
   stage: build
   variables:
-    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
-    CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
-  before_script: *init_submodules
+    CONFIG_INI_SOURCE: "/tmp/config_5M.ini"
+  before_script:
+    # Fetch config_5M.ini from common-ci-configuration (no submodule needed)
+    - curl -fsSL "${COMMON_CI_URL}/haf-app-tools/config/config_5M.ini" -o /tmp/config_5M.ini
   tags:
   - data-cache-storage
   - fast
@@ -670,7 +693,9 @@ prepare_hivemind_image:
   extends: .docker_image_builder_job_template
   needs:
   - prepare_base_images
-  before_script: *init_submodules
+  before_script:
+    # Initialize submodules (reputation_tracker, hafah, tests_api - no HAF needed)
+    - ./scripts/ci/init-submodules.sh
   script:
   - *instance-build-script
   artifacts:
@@ -787,14 +812,21 @@ sync:
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
   before_script:
   - |
-    # Initialize HAF submodule (recursive for nested hive submodule - copy_datadir.sh is a symlink)
+    # Git and Docker setup (no HAF submodule needed)
     git config --global --add safe.directory "$CI_PROJECT_DIR"
-    git config --global --add safe.directory "$CI_PROJECT_DIR/haf"
-    git config --global --add safe.directory "$CI_PROJECT_DIR/haf/hive"
-    git submodule update --init --recursive --depth=1 haf
-  - |
-    # Docker login
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  - |
+    # Fetch common scripts from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    COPY_DATADIR="/tmp/copy_datadir.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+    fi
+    if [[ ! -x "$COPY_DATADIR" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/haf-app-tools/scripts/copy_datadir.sh" -o "$COPY_DATADIR"
+      chmod +x "$COPY_DATADIR"
+    fi
   - |
     # Check for skip mode (QUICK_TEST or AUTO_SKIP_SYNC)
     SYNC_SKIPPED=false
@@ -803,13 +835,6 @@ sync:
       echo "QUICK_TEST=${QUICK_TEST:-false}"
       echo "AUTO_SKIP_SYNC=${AUTO_SKIP_SYNC:-false}"
       echo "SYNC_CACHE_KEY=${SYNC_CACHE_KEY}"
-
-      # Fetch cache-manager from common-ci-configuration
-      CACHE_MANAGER="/tmp/cache-manager.sh"
-      if [[ ! -x "$CACHE_MANAGER" ]]; then
-        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
-        chmod +x "$CACHE_MANAGER"
-      fi
 
       # Use cache-manager to get cached hivemind sync data
       LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
@@ -832,13 +857,6 @@ sync:
     if [[ "$SYNC_SKIPPED" == "false" ]]; then
       echo "=== Preparing HAF data for sync job ==="
 
-      # Fetch cache-manager from common-ci-configuration
-      CACHE_MANAGER="/tmp/cache-manager.sh"
-      if [[ ! -x "$CACHE_MANAGER" ]]; then
-        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
-        chmod +x "$CACHE_MANAGER"
-      fi
-
       # If local HAF cache doesn't exist, fetch from NFS via cache-manager
       if [[ ! -d "${DATA_SOURCE}/datadir" ]]; then
         echo "Local HAF cache not found, fetching from NFS via cache-manager..."
@@ -851,12 +869,12 @@ sync:
         echo "Local HAF cache found at ${DATA_SOURCE}"
       fi
 
-      # Use copy_datadir.sh from HAF submodule (like balance_tracker)
+      # Use copy_datadir.sh from common-ci-configuration
       # This handles the copy with proper permissions
       echo "Copying HAF replay data using copy_datadir.sh..."
       sudo mkdir -p "$(dirname "$DATADIR")"
       sudo chmod 777 "$(dirname "$DATADIR")"
-      "${CI_PROJECT_DIR}/haf/scripts/copy_datadir.sh"
+      "$COPY_DATADIR"
       sudo chmod 777 "$(dirname "$DATADIR")"
       sudo chmod 777 "$DATADIR" 2>/dev/null || true
       echo "HAF data copied successfully"
