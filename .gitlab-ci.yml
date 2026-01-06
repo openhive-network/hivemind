@@ -70,6 +70,8 @@ variables:
   # HAF configuration (no submodule needed)
   # HAF_COMMIT: Used for data cache key lookup and Docker image tag (first 8 chars)
   HAF_COMMIT: "219ef44775ee1ed85630cf513d8671f6ca4ccc49"  # Known cached HAF commit
+  # Enable CI-specific PostgreSQL config with reduced memory for HAF service containers
+  HAF_CI_MODE: "1"
   # HAF
   HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
