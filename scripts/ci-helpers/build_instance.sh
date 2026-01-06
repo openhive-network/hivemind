@@ -4,9 +4,9 @@ set -e
 
 SCRIPTSDIR="$(dirname "$(realpath "$0")")/.."
 
-export LOG_FILE=build_instance.log
-# shellcheck source=../haf/scripts/common.sh
-source "$SCRIPTSDIR/../haf/scripts/common.sh"
+# Setup logging
+LOG_FILE=build_instance.log
+exec > >(tee -i "${LOG_FILE}") 2>&1
 
 BUILD_IMAGE_TAG=""
 REGISTRY=""
