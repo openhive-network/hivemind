@@ -176,7 +176,7 @@ default:
 .shared_tags:
   tags: &shared_tags
   - public-runner-docker
-  - hived
+  - standard
 
 .start-timer:
 - ./scripts/ci/timer.sh start
@@ -532,6 +532,7 @@ find_haf_image:
     expire_in: 1 day
   tags:
     - public-runner-docker
+    - standard
 
 # Build base images if they're missing from registry
 prepare_base_images:
@@ -562,8 +563,8 @@ prepare_haf_data:
     - echo "Using HAF image:${HAF_IMAGE_NAME} (commit:${HAF_COMMIT})"
   tags:
   - data-cache-storage
-  - fast
   - fastest
+  - standard
 
 prepare_hivemind_image:
   stage: build
@@ -591,6 +592,7 @@ extract-swagger-json:
     INPUT_SQL_SWAGGER_FILE: "${CI_PROJECT_DIR}/hive/db/sql_scripts/endpoints/endpoint_schema.sql"
   tags:
   - public-runner-docker
+  - standard
 
 generate_python_api_client:
   extends: .project_develop_configuration_template
@@ -609,6 +611,7 @@ generate_python_api_client:
     - "${PYPROJECT_DIR}/hivemind_api/hivemind_api_client"
   tags:
   - public-runner-docker
+  - standard
 
 
 build_python_api_client_wheel:
@@ -621,6 +624,7 @@ build_python_api_client_wheel:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   tags:
   - public-runner-docker
+  - standard
 
 cleanup_hivemind_haf_cache_manual:
   extends: .cleanup_cache_manual_template
@@ -629,7 +633,7 @@ cleanup_hivemind_haf_cache_manual:
     CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_*"
   tags:
   - data-cache-storage
-  - fast
+  - standard
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
 # For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
@@ -640,7 +644,7 @@ cleanup_haf_cache_manual:
     CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_* /cache/replay_data_haf_*"
   tags:
   - data-cache-storage
-  - fast
+  - standard
 
 # Cleans up cache after tests. Must depend on all jobs that use
 # this cache
@@ -657,7 +661,7 @@ cleanup_pipeline_cache:
   when: manual
   tags:
   - data-cache-storage
-  - fast
+  - standard
 
 sync:
   extends: .docker_image_builder_job_template
@@ -963,8 +967,8 @@ sync:
     - sync_cache_override.env
   tags:
   - data-cache-storage
-  - fast
   - fastest
+  - standard
 
 e2e_benchmark_on_postgrest:
   image: "$HIVE_CI_BASE_IMAGE"
@@ -1019,7 +1023,6 @@ e2e_benchmark_on_postgrest:
     # Set FORCE_NFS_CACHE=1 to skip local cache and always extract from NFS (for debugging)
     FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
   before_script:
-  - *extract-nfs-cache-before-script
   - |
     # Initialize tests_api submodule for validate_response module
     TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
@@ -1165,8 +1168,8 @@ e2e_benchmark_on_postgrest:
     - version.log
   tags:
   - data-cache-storage
-  - fast
   - fastest
+  - standard
 
 python_api_client_test:
   extends: .project_develop_configuration_template
@@ -1186,6 +1189,7 @@ python_api_client_test:
   allow_failure: true  # External API (api.syncad.com) dependency - may fail if API is unavailable
   tags:
   - public-runner-docker
+  - standard
 
 build_and_publish_image:
   stage: publish
@@ -1214,6 +1218,7 @@ deploy_python_api_package_to_gitlab:
   when: on_success
   tags:
   - public-runner-docker
+  - standard
 
 Trigger benchmark-results-collector:
   stage: collector
