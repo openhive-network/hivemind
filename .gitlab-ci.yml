@@ -37,8 +37,8 @@ variables:
   # Two ways to skip builds/sync and use cached data:
   #
   # 1. AUTOMATIC: When only tests/docs change, detect_changes sets AUTO_SKIP_SYNC=true.
-  #    The sync job will then search for compatible cached data and use it if available.
-  #    If no cache is found, it falls back to full sync.
+  #    The sync job will use cached data if an exact match exists for this app commit.
+  #    If no exact cache is found, it runs full sync to ensure schema compatibility.
   #
   # 2. MANUAL: Set QUICK_TEST=true to force skip mode with a specific cache:
   #    - QUICK_TEST=true
@@ -184,38 +184,25 @@ default:
 .check-timer:
 - ./scripts/ci/timer.sh check
 
+# Use shared extract-test-cache.sh from common-ci-configuration
+# Maps FORCE_NFS_CACHE to FORCE_EXTRACT for debugging cache issues
 .extract-nfs-cache-before-script: &extract-nfs-cache-before-script
   - |
     LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
-    echo "DEBUG: LOCAL_CACHE=${LOCAL_CACHE}"
-    echo "DEBUG: SYNC_CACHE_KEY=${SYNC_CACHE_KEY}"
-    echo "DEBUG: FORCE_NFS_CACHE=${FORCE_NFS_CACHE:-0}"
-    echo "DEBUG: Local cache exists: $([[ -d "${LOCAL_CACHE}/datadir" ]] && echo yes || echo no)"
+    echo "Extracting hivemind sync cache to: ${LOCAL_CACHE}"
 
-    # Skip local cache if FORCE_NFS_CACHE is set or local cache doesn't exist
-    if [[ "${FORCE_NFS_CACHE:-0}" == "1" ]] || [[ ! -d "${LOCAL_CACHE}/datadir" ]]; then
-      echo "Fetching hivemind sync data via cache-manager..."
+    # Fetch shared extract script from common-ci-configuration
+    EXTRACT_SCRIPT="/tmp/extract-test-cache.sh"
+    curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${CACHE_MANAGER_REF:-develop}/scripts/extract-test-cache.sh" -o "$EXTRACT_SCRIPT"
+    chmod +x "$EXTRACT_SCRIPT"
 
-      # Fetch cache-manager from common-ci-configuration
-      CACHE_MANAGER="/tmp/cache-manager.sh"
-      if [[ ! -x "$CACHE_MANAGER" ]]; then
-        curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
-        chmod +x "$CACHE_MANAGER"
-      fi
+    # Map FORCE_NFS_CACHE to FORCE_EXTRACT for the shared script
+    export FORCE_EXTRACT="${FORCE_NFS_CACHE:-0}"
+    # Tell script to check if PostgreSQL is already running (prevents deleting data in use)
+    export POSTGRES_HOST="haf-instance"
 
-      # Remove any existing local cache before extraction
-      if [[ -e "${LOCAL_CACHE}" ]]; then
-        rm -rf "${LOCAL_CACHE}" || sudo rm -rf "${LOCAL_CACHE}" || true
-      fi
-
-      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" || {
-        echo "ERROR: Failed to fetch cache via cache-manager"
-        exit 1
-      }
-      echo "Cache ready at: ${LOCAL_CACHE}"
-    else
-      echo "Using existing local cache: ${LOCAL_CACHE}"
-    fi
+    # Run shared extraction script (handles marker files, cleanup, exact key match)
+    "$EXTRACT_SCRIPT" "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}"
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -769,12 +756,13 @@ sync:
       touch "${CI_PROJECT_DIR}/.sync_skipped"
       SYNC_SKIPPED=true
 
-    # AUTO_SKIP_SYNC mode: try to use any compatible cache, fallback to full sync
+    # AUTO_SKIP_SYNC mode: try exact cache, fallback to full sync
+    # NOTE: No fallback to caches with different app commits - this ensures schema compatibility
     elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
       echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
-      echo "Looking for compatible hivemind sync cache..."
+      echo "Looking for hivemind sync cache (exact key match only)..."
 
-      # First check if exact cache exists
+      # Check if exact cache exists
       LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
       if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
         echo "Exact cache found: ${SYNC_CACHE_KEY}"
@@ -782,39 +770,8 @@ sync:
         touch "${CI_PROJECT_DIR}/.sync_skipped"
         SYNC_SKIPPED=true
       else
-        # Search for any compatible cache with current HAF_COMMIT
-        echo "Exact cache not found, searching for compatible cache with HAF_COMMIT=${HAF_COMMIT}..."
-        NFS_CACHE_DIR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}"
-        FOUND_CACHE=$(ls -t "${NFS_CACHE_DIR}/${HAF_COMMIT}_"*.tar 2>/dev/null | head -1 || true)
-
-        if [[ -n "$FOUND_CACHE" ]]; then
-          FOUND_KEY=$(basename "$FOUND_CACHE" .tar)
-          echo "Found compatible cache: ${FOUND_KEY}"
-          LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${FOUND_KEY}"
-          if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${FOUND_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
-            echo "Sync skipped - using cached data from: ${FOUND_KEY}"
-            # Override SYNC_CACHE_KEY for e2e job (for before_script and after_script)
-            echo "SYNC_CACHE_KEY=${FOUND_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
-
-            # CRITICAL: Services don't see dotenv overrides, they use variables evaluated at job start.
-            # Create NFS symlinks so the service can find data at the default cache key path.
-            # Jobs may run on different runners, so we use NFS for cross-runner visibility.
-            NFS_FOUND_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${FOUND_KEY}.tar"
-            NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
-            if [[ "$NFS_FOUND_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
-              echo "Creating NFS symlink for service: ${NFS_DEFAULT_TAR} -> $(basename $NFS_FOUND_TAR)"
-              ln -sf "$(basename "$NFS_FOUND_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
-            fi
-
-            touch "${CI_PROJECT_DIR}/.sync_skipped"
-            SYNC_SKIPPED=true
-          fi
-        fi
-
-        if [[ "$SYNC_SKIPPED" == "false" ]]; then
-          echo "No compatible cache found - falling back to full sync"
-          echo "This is expected for first run after HAF_COMMIT change"
-        fi
+        echo "Exact cache not found - will run full sync"
+        echo "This ensures schema compatibility with current app version"
       fi
     fi
 
