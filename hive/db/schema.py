@@ -661,6 +661,7 @@ def setup_runtime_code(db):
         "community.sql",
         "community_utils.sql",
         "postgrest/utilities/exceptions.sql",
+        "postgrest/utilities/sql_reload_test.sql",
         "postgrest/utilities/validate_json_arguments.sql",
         "postgrest/utilities/api_limits.sql",
         "postgrest/utilities/parse_argument_from_json.sql",

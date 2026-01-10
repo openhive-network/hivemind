@@ -51,6 +51,21 @@ services:
           --with-apps \
           --add-mocks=$${ADD_MOCKS:-true}
         echo "Hivemind setup complete"
+
+        # Verify SQL reload test - this proves setup_runtime_code() was called
+        echo "=== SQL RELOAD TEST ==="
+        EXPECTED_MARKER="SQL_RELOAD_TEST_2026_01_09_V1"
+        ACTUAL_MARKER=$$(psql "$${HAF_ADMIN_POSTGRES_URL}" -t -c "SELECT hivemind_postgrest_utilities.sql_reload_test_marker();" | tr -d ' \n')
+        echo "Expected marker: $${EXPECTED_MARKER}"
+        echo "Actual marker:   $${ACTUAL_MARKER}"
+        if [ "$${ACTUAL_MARKER}" = "$${EXPECTED_MARKER}" ]; then
+          echo "SUCCESS: SQL functions were properly reloaded!"
+        else
+          echo "FAILURE: SQL functions were NOT reloaded correctly!"
+          echo "This indicates setup_runtime_code() did not run or SQL files were stale."
+          exit 1
+        fi
+        echo "=== END SQL RELOAD TEST ==="
     environment:
       HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf:5432/haf_block_log
       HAF_POSTGRES_URL: postgresql://hivemind@haf:5432/haf_block_log
