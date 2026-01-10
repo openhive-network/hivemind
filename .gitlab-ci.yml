@@ -505,7 +505,7 @@ find_haf_image:
     UPSTREAM_BRANCH: "develop"
     UPSTREAM_OUTPUT: "haf_image.env"
   before_script:
-    - apk add --no-cache git bash curl
+    # docker-builder image already has git, bash, and curl
     # Fetch source patterns from HAF's script (single source of truth)
     - |
       PATTERNS_URL="https://gitlab.syncad.com/hive/haf/-/raw/develop/scripts/ci-helpers/source-patterns.sh"
