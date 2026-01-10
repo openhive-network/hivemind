@@ -1,4 +1,4 @@
--- Helper function to build hived-compatible error data structure
+-- Helper function to build WAX-compatible error data structure
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.build_hived_error_data;
 CREATE FUNCTION hivemind_postgrest_utilities.build_hived_error_data(
   _assertion_expression TEXT,
@@ -61,7 +61,7 @@ BEGIN
 END
 $$;
 
--- Enhanced raise_exception that accepts JSON data for hived-compatible errors
+-- Enhanced raise_exception that accepts JSON data for WAX-compatible errors
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_exception_with_data;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_exception_with_data(
   _code INT,
