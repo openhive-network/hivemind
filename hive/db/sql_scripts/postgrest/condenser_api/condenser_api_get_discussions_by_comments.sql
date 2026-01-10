@@ -21,7 +21,6 @@ BEGIN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('filter_tags not supported');
   END IF;
 
-  -- Validate simple parameters first before database lookups
   _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
                                                      least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
                                                      1, hivemind_postgrest_utilities.get_max_posts_per_call_limit(), 'limit');
@@ -36,7 +35,6 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_permlink', False),
     True);
 
-  -- Now validate accounts and posts (database lookups)
   _author =
     hivemind_postgrest_utilities.valid_account(
         hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start_author', True),

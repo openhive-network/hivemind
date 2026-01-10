@@ -14,14 +14,12 @@ DECLARE
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string","permlink":"string"}', 2, NULL);
 
-  -- Parse and validate format first
   _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
   _permlink = hivemind_postgrest_utilities.valid_permlink(
     hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True),
     False
   );
 
-  -- Now do database lookups
   _account_id = hivemind_postgrest_utilities.find_account_id( hivemind_postgrest_utilities.valid_account(_author, False), True );
   _post_id = hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True );
 

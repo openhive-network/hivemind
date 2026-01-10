@@ -20,7 +20,6 @@ BEGIN
     _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "start": "string", "type": "string", "limit": "number"}', 1, NULL);
   END IF;
 
-  -- Validate simple parameters first before database lookups
   _limit =
     hivemind_postgrest_utilities.valid_number(
       hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
@@ -36,7 +35,6 @@ BEGIN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported follow type, valid types: blog, ignore');
   END IF;
 
-  -- Now validate accounts (database lookups)
   _account =
     hivemind_postgrest_utilities.valid_account(
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True),
