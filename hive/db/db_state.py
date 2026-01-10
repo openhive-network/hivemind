@@ -1,4 +1,5 @@
 """Hive db state manager. Check if schema loaded, massive synced, etc."""
+# TEST: Force CI to detect code change and run full sync (2026-01-09)
 
 # pylint: disable=too-many-lines
 
