@@ -55,7 +55,6 @@ services:
       HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf:5432/haf_block_log
       HAF_POSTGRES_URL: postgresql://hivemind@haf:5432/haf_block_log
       ADD_MOCKS: ${ADD_MOCKS:-true}
-      DO_SCHEMA_UPGRADE: "1"
     networks:
       haf-network:
     depends_on:
