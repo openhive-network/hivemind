@@ -12,7 +12,7 @@ include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 # All CI templates from common-ci-configuration (no HAF submodule needed)
 - project: 'hive/common-ci-configuration'
-  ref: develop
+  ref: feature/centralized-needs-templates  # TODO: change to develop after MR !184 merges
   file:
     - '/templates/base.gitlab-ci.yml'
     - '/templates/docker_image_jobs.gitlab-ci.yml'
@@ -545,10 +545,7 @@ prepare_base_images:
   tags: *shared_tags
 
 prepare_haf_data:
-  extends: .prepare_haf_data_5m
-  needs:
-  - job: find_haf_image
-    artifacts: true
+  extends: .haf_app_prepare_data_with_find
   stage: build
   variables:
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
