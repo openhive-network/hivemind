@@ -811,8 +811,6 @@ sync:
 # Cache is extracted BEFORE services start, ensuring data is ready.
 e2e_benchmark_on_postgrest:
   extends: .docker_image_builder_job_template
-  # Use haf-app-test-runner for Python/pip support (tavern tests need tox)
-  image: registry.gitlab.syncad.com/hive/common-ci-configuration/haf-app-test-runner:2.1
   stage: benchmark
   interruptible: true
   timeout: 30 minutes
@@ -831,10 +829,8 @@ e2e_benchmark_on_postgrest:
     # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
     HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
     HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
-    # Docker-in-Docker TLS connection (haf-app-test-runner doesn't auto-detect like docker-builder)
-    DOCKER_HOST: "tcp://docker:2376"
-    DOCKER_TLS_VERIFY: "1"
-    DOCKER_CERT_PATH: "/certs/client"
+    # Use updated docker-builder with Python/JMeter (common-ci-configuration MR !190)
+    DOCKER_BUILDER_TAG: "a9ddde802ce8b1b2d4011167226ead0e92d438dc"
     # DinD-specific variables (SHM_DIR is inside datadir/blockchain for hivemind)
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
