@@ -811,6 +811,8 @@ sync:
 # Cache is extracted BEFORE services start, ensuring data is ready.
 e2e_benchmark_on_postgrest:
   extends: .docker_image_builder_job_template
+  # Use haf-app-test-runner for Python/pip support (tavern tests need tox)
+  image: registry.gitlab.syncad.com/hive/common-ci-configuration/haf-app-test-runner:2.1
   stage: benchmark
   interruptible: true
   timeout: 30 minutes
