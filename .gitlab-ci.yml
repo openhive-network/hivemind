@@ -979,10 +979,16 @@ sync:
   - fastest
   - standard
 
+# =============================================================================
+# E2E Benchmark Job (DinD Pattern)
+# =============================================================================
+# Uses Docker-in-Docker to avoid race conditions with service containers.
+# Cache is extracted BEFORE services start, ensuring data is ready.
 e2e_benchmark_on_postgrest:
-  image: "$HIVE_CI_BASE_IMAGE"
+  extends: .docker_image_builder_job_template
   stage: benchmark
   interruptible: true
+  timeout: 30 minutes
   needs:
   - job: detect_changes
     artifacts: true
@@ -994,45 +1000,112 @@ e2e_benchmark_on_postgrest:
   - job: sync
     artifacts: true
   when: on_success
-  services:
-  - *haf-instance-with-nfs-fallback
-  - name: $HIVEMIND_IMAGE
-    alias: hivemind-smoketest   # cannot be a variable
-    entrypoint:
-    - bash
-    - -c
-    - *hivemind-postgrest-serve-script
-    variables:
-      WORKING_DIR: /home/hivemind
-      LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server.log
-      LOG_LEVEL: "info" # change to "debug" for more info
-      REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times_smoketests.log
-  - name: $HIVEMIND_IMAGE
-    alias: hivemind-benchmark   # cannot be a variable
-    entrypoint:
-    - bash
-    - -c
-    - *hivemind-postgrest-serve-script
-    variables:
-      WORKING_DIR: /home/hivemind
-      LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server.log
-      LOG_LEVEL: "info" # change to "debug" for more info
-      REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times.log
   variables:
-    # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job/services
+    # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
     HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
     HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
-    JOB_TOKEN: $CI_JOB_TOKEN
-    RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
-    RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
-    # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
-    # Missing variable enables the entire test group.
+    # DinD-specific variables
+    DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
+    SHM_DIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/shm_dir"
+    HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
+    HAF_SHM_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/shm_dir"
+    COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-test.yml"
+    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml --ansi never"
+    # Hivemind server config
+    HIVEMIND_PORT: "8080"
+    # Test config
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
-    CI_DEBUG_SERVICES: "true" # Debugging service startup issues
-    # Set FORCE_NFS_CACHE=1 to skip local cache and always extract from NFS (for debugging)
-    FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
   before_script:
   - *early_exit_check
+  - !reference [.docker_image_builder_job_template, before_script]
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):extract_cache[collapsed=true]\r\e[0KExtracting hivemind sync cache..."
+    # Fetch cache-manager from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+    fi
+
+    # Extract cache to job-specific directory
+    JOB_DATA_DIR="${CI_PROJECT_DIR}/${CI_JOB_ID}"
+    mkdir -p "$JOB_DATA_DIR"
+
+    echo "Extracting cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY} -> ${JOB_DATA_DIR}"
+    if ! "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${JOB_DATA_DIR}"; then
+      echo "ERROR: Failed to extract hivemind sync cache"
+      exit 1
+    fi
+
+    # Relocate shm_dir from inside datadir to be a sibling (for old cache formats)
+    if [[ -d "${DATADIR}/shm_dir" ]] && [[ ! -d "${SHM_DIR}" ]]; then
+      echo "Relocating shm_dir to parallel location..."
+      mv "${DATADIR}/shm_dir" "${SHM_DIR}"
+    fi
+
+    # Copy blockchain files to docker/blockchain for bind mount
+    echo "Copying blockchain files to docker/blockchain..."
+    rm -rf "${CI_PROJECT_DIR}/docker/blockchain"/* 2>/dev/null || true
+    mkdir -p "${CI_PROJECT_DIR}/docker/blockchain"
+    if [[ -d "${DATADIR}/blockchain" ]]; then
+      cp -aL "${DATADIR}/blockchain"/* "${CI_PROJECT_DIR}/docker/blockchain/" 2>/dev/null || true
+    fi
+
+    echo "Cache extracted successfully"
+    ls -la "${DATADIR}/" || true
+    echo -e "\e[0Ksection_end:$(date +%s):extract_cache\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):compose_startup[collapsed=true]\r\e[0KStarting docker-compose services..."
+    # Create ci.env for docker-compose variable substitution
+    cat > "${CI_PROJECT_DIR}/docker/ci.env" << EOF
+    HAF_IMAGE_NAME=${HAF_IMAGE_NAME}
+    HIVEMIND_IMAGE=${HIVEMIND_IMAGE}
+    HAF_DATA_DIRECTORY=${HAF_DATA_DIRECTORY}
+    HAF_SHM_DIRECTORY=${HAF_SHM_DIRECTORY}
+    HIVEMIND_PORT=${HIVEMIND_PORT}
+    LOG_LEVEL=info
+    EOF
+    cat "${CI_PROJECT_DIR}/docker/ci.env"
+
+    # Start services
+    cd "${CI_PROJECT_DIR}/docker"
+    docker compose --env-file ci.env -f docker-compose-test.yml config
+    docker compose --env-file ci.env -f docker-compose-test.yml up -d --quiet-pull
+    cd "${CI_PROJECT_DIR}"
+    echo -e "\e[0Ksection_end:$(date +%s):compose_startup\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):wait_services[collapsed=true]\r\e[0KWaiting for services..."
+    # Wait for PostgreSQL
+    WAIT_TIMEOUT=300
+    WAIT_START=$(date +%s)
+    echo "Waiting for PostgreSQL..."
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf pg_isready -U haf_admin -d haf_block_log > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for PostgreSQL after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs haf
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "PostgreSQL is ready"
+
+    # Wait for hivemind server
+    echo "Waiting for hivemind server..."
+    WAIT_START=$(date +%s)
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-server curl -sf http://localhost:${HIVEMIND_PORT}/ > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for hivemind server after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "Hivemind server is ready"
+    echo -e "\e[0Ksection_end:$(date +%s):wait_services\r\e[0K"
   - |
     # Initialize tests_api submodule for validate_response module
     TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
@@ -1044,117 +1117,55 @@ e2e_benchmark_on_postgrest:
   - pip install --quiet tox
   script:
   - |
-    echo "HAF image name $HAF_IMAGE_NAME"
-    echo "Hivemind image name $HIVEMIND_IMAGE"
-    echo "Waiting for Hivemind smoketest server..."
-    WAIT_TIMEOUT=600  # 10 minutes
-    WAIT_START=$(date +%s)
-    until python3 -c "import urllib.request; urllib.request.urlopen('http://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}/', timeout=5)" > /dev/null 2>&1; do
-      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
-        echo "ERROR: Timeout waiting for Hivemind smoketest server after ${WAIT_TIMEOUT}s"
-        exit 1
-      fi
-      sleep 2
-    done
-    echo "Hivemind smoketest instance is running"
+    echo "HAF image: $HAF_IMAGE_NAME"
+    echo "Hivemind image: $HIVEMIND_IMAGE"
+    echo "Services running via docker-compose"
   - |
-    # Debug: check database content directly via psql (optional - psql may not be installed)
+    # Debug: check database content
     echo "=== DEBUG: Checking database content ==="
-    if command -v psql &> /dev/null; then
-      psql "postgresql://haf_admin@haf-instance:5432/haf_block_log" << 'SQLEOF'
-    -- Check what schemas exist
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log << 'SQLEOF'
     SELECT 'Schemas:' as info, string_agg(schema_name, ', ') as schemas
     FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast');
-
-    -- Check what tables exist in hive schema
-    SELECT 'hive tables:' as info, string_agg(table_name, ', ') as tables
-    FROM information_schema.tables WHERE table_schema = 'hive';
-
-    -- Check tablespace
-    SELECT 'Tablespaces:' as info, spcname, pg_tablespace_location(oid) as location FROM pg_tablespace;
-
-    -- Check core HAF data
     SELECT 'hive.blocks count' as table_name, count(*) as row_count FROM hive.blocks;
-    SELECT 'hive.accounts count' as table_name, count(*) as row_count FROM hive.accounts;
-
-    -- Check hivemind app data
     SELECT 'hivemind_app.hive_accounts count' as table_name, count(*) as row_count FROM hivemind_app.hive_accounts;
     SELECT 'hivemind_app.hive_posts count' as table_name, count(*) as row_count FROM hivemind_app.hive_posts;
-
-    -- Check if gtg exists
-    SELECT 'gtg in hive.accounts' as check_name, EXISTS(SELECT 1 FROM hive.accounts WHERE name='gtg') as exists;
-    SELECT 'gtg in hivemind_app.hive_accounts' as check_name, EXISTS(SELECT 1 FROM hivemind_app.hive_accounts WHERE name='gtg') as exists;
-
-    -- Check hivemind_endpoints schema
-    SELECT 'hivemind_endpoints functions' as check_name, count(*) as count
-    FROM information_schema.routines
-    WHERE routine_schema = 'hivemind_endpoints';
-
-    -- Check sample account from hive.accounts
-    SELECT 'Sample hive.accounts' as info, name FROM hive.accounts LIMIT 5;
     SQLEOF
-    else
-      echo "psql not available, skipping database debug check"
-    fi
     echo "=== END DB DEBUG ==="
   - |
-    # Debug: test API calls using Python (curl not available in container)
+    # Debug: test API calls
     echo "=== DEBUG: Testing API responses ==="
-    python3 << 'PYEOF'
-    import json
-    import urllib.request
-
-    HOST = "hivemind-smoketest"
-    PORT = "8080"
-    URL = f"http://{HOST}:{PORT}/"
-
-    tests = [
-        {"jsonrpc": "2.0", "method": "condenser_api.get_follow_count", "params": ["gtg"], "id": 1},
-        {"jsonrpc": "2.0", "method": "condenser_api.get_followers", "params": ["gtg", "", "blog", 1], "id": 2},
-        {"jsonrpc": "2.0", "method": "bridge.get_trending_topics", "params": {}, "id": 3},
-    ]
-
-    for test in tests:
-        print(f"\n--- Testing: {test['method']} ---")
-        try:
-            req = urllib.request.Request(URL, data=json.dumps(test).encode(), headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = resp.read().decode()
-                print(f"Response: {data[:2000]}")
-        except Exception as e:
-            print(f"Error: {e}")
-    PYEOF
+    # In DinD, services are available via 'docker' hostname
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-server curl -s http://localhost:${HIVEMIND_PORT}/ \
+      -H "Content-Type: application/json" \
+      -d '{"jsonrpc": "2.0", "method": "condenser_api.get_follow_count", "params": ["gtg"], "id": 1}' || echo "API test failed"
     echo "=== END DEBUG ==="
-  - *run-all-smoketests
   - |
-    echo "Waiting for Hivemind benchmark server..."
-    WAIT_TIMEOUT=600  # 10 minutes
-    WAIT_START=$(date +%s)
-    until python3 -c "import urllib.request; urllib.request.urlopen('http://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}/', timeout=5)" > /dev/null 2>&1; do
-      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
-        echo "ERROR: Timeout waiting for Hivemind benchmark server after ${WAIT_TIMEOUT}s"
-        exit 1
-      fi
-      sleep 2
-    done
-    echo "Hivemind benchmark instance is running"
-    # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
-    # - *api-benchmark-script
+    # Run smoketests - in DinD, services are accessible via 'docker' hostname
+    # The docker-compose ports mapping exposes services to the Docker host
+    export RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME="docker"
+    export RUNNER_HIVEMIND_SERVER_HTTP_PORT="${HIVEMIND_PORT}"
+    echo "Running smoketests against docker:${HIVEMIND_PORT}"
+  - *run-all-smoketests
   after_script:
   - |
     echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
-    ls -lah "${DATA_CACHE_HIVEMIND_DATADIR}"
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log" || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times_smoketests.log" request_process_times_smoketests.log || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-server.log" hivemind-server.log || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times.log" request_process_times.log || true
-    cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-benchmark-server.log" hivemind-benchmark-server.log || true
+    # Collect docker-compose logs
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs haf > haf-${CI_JOB_NAME}.log 2>&1 || true
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server > hivemind-server.log 2>&1 || true
     echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):teardown[collapsed=true]\r\e[0KStopping docker-compose..."
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" down --volumes --timeout 30 2>/dev/null || true
+    echo -e "\e[0Ksection_end:$(date +%s):teardown\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):cleanup[collapsed=true]\r\e[0KCleaning up..."
+    sudo rm -rf "${CI_PROJECT_DIR}/${CI_JOB_ID}" 2>/dev/null || true
+    echo -e "\e[0Ksection_end:$(date +%s):cleanup\r\e[0K"
   - |
     echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
     {
       echo "ARTIFACTS_JOB_ID=$CI_JOB_ID"
-      echo "APP_VERSION=$(python -c "with open('version.log') as f:  exec(f.read()); print(__version__)")"
+      echo "APP_VERSION=$(python -c "with open('version.log') as f:  exec(f.read()); print(__version__)" 2>/dev/null || echo 'unknown')"
       echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION"
     } > variables.env
     cat variables.env
@@ -1167,14 +1178,10 @@ e2e_benchmark_on_postgrest:
       dotenv: variables.env
     paths:
     - "*.xml"
-    - haf-$CI_JOB_NAME.log
-    - hivemind-sync.log
+    - haf-*.log
     - hivemind-server.log
-    - hivemind-benchmark-server.log
     - pg-stats
     - tests/api_tests/hivemind/tavern/**/*.out.json
-    - request_process_times.log
-    - request_process_times_smoketests.log
     - version.log
   tags:
   - data-cache-storage
