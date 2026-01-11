@@ -12,7 +12,7 @@ include:
 - template: Workflows/Branch-Pipelines.gitlab-ci.yml
 # All CI templates from common-ci-configuration (no HAF submodule needed)
 - project: 'hive/common-ci-configuration'
-  ref: feature/centralized-needs-templates  # TODO: change to develop after MR !184 merges
+  ref: develop
   file:
     - '/templates/base.gitlab-ci.yml'
     - '/templates/docker_image_jobs.gitlab-ci.yml'
