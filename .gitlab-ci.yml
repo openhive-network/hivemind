@@ -166,6 +166,21 @@ default:
         fi
         )
 
+# =============================================================================
+# Early exit for doc-only changes
+# =============================================================================
+# Jobs can reference this to skip work when only docs/tests changed.
+# The job still runs and passes, but exits immediately without doing work.
+.early_exit_for_docs_only:
+  script: &early_exit_check
+    - |
+      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+        echo "=== Skipping (docs/tests only change) ==="
+        echo "Only documentation, tests, or CI config files changed."
+        echo "No work needed - exiting with success."
+        exit 0
+      fi
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Manual submodule initialization (reputation_tracker, hafah, tests_api)
@@ -692,10 +707,7 @@ sync:
     HAF_SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
   before_script:
-  - |
-    # Git and Docker setup (no HAF submodule needed)
-    git config --global --add safe.directory "$CI_PROJECT_DIR"
-    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  - !reference [.haf_app_sync_setup, script]
   - |
     # Fetch common scripts from common-ci-configuration
     CACHE_MANAGER="/tmp/cache-manager.sh"
@@ -1020,6 +1032,7 @@ e2e_benchmark_on_postgrest:
     # Set FORCE_NFS_CACHE=1 to skip local cache and always extract from NFS (for debugging)
     FORCE_NFS_CACHE: "${FORCE_NFS_CACHE:-0}"
   before_script:
+  - *early_exit_check
   - |
     # Initialize tests_api submodule for validate_response module
     TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
