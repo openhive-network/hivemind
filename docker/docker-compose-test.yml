@@ -11,7 +11,8 @@ services:
     environment:
       HIVED_UID: ${HIVED_UID:-}
       DATADIR: /home/hived/datadir
-      SHM_DIR: /home/hived/shm_dir
+      # For hivemind, SHM_DIR is inside datadir/blockchain (contains shared_memory.bin)
+      SHM_DIR: /home/hived/datadir/blockchain
       PGCTLTIMEOUT: 600
       PG_ACCESS: |
         host    haf_block_log    hivemind         all    trust
@@ -21,8 +22,6 @@ services:
       - "5432:5432"
     volumes:
       - haf_datadir:/home/hived/datadir
-      - haf_shmdir:/home/hived/shm_dir
-      - ./blockchain:/home/hived/datadir/blockchain
     networks:
       - haf-network
     healthcheck:
@@ -76,9 +75,3 @@ volumes:
       o: bind
       type: none
       device: ${HAF_DATA_DIRECTORY:-/tmp/haf_data}
-  haf_shmdir:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ${HAF_SHM_DIRECTORY:-/tmp/haf_shm}

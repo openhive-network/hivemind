@@ -829,11 +829,9 @@ e2e_benchmark_on_postgrest:
     # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
     HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
     HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
-    # DinD-specific variables
+    # DinD-specific variables (SHM_DIR is inside datadir/blockchain for hivemind)
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
-    SHM_DIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/shm_dir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
-    HAF_SHM_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/shm_dir"
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-test.yml"
     COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml --ansi never"
     # Hivemind server config
@@ -866,20 +864,6 @@ e2e_benchmark_on_postgrest:
       exit 1
     fi
 
-    # Relocate shm_dir from inside datadir to be a sibling (for old cache formats)
-    if [[ -d "${DATADIR}/shm_dir" ]] && [[ ! -d "${SHM_DIR}" ]]; then
-      echo "Relocating shm_dir to parallel location..."
-      mv "${DATADIR}/shm_dir" "${SHM_DIR}"
-    fi
-
-    # Copy blockchain files to docker/blockchain for bind mount
-    echo "Copying blockchain files to docker/blockchain..."
-    rm -rf "${CI_PROJECT_DIR}/docker/blockchain"/* 2>/dev/null || true
-    mkdir -p "${CI_PROJECT_DIR}/docker/blockchain"
-    if [[ -d "${DATADIR}/blockchain" ]]; then
-      cp -aL "${DATADIR}/blockchain"/* "${CI_PROJECT_DIR}/docker/blockchain/" 2>/dev/null || true
-    fi
-
     echo "Cache extracted successfully"
     ls -la "${DATADIR}/" || true
     echo -e "\e[0Ksection_end:$(date +%s):extract_cache\r\e[0K"
@@ -890,7 +874,6 @@ e2e_benchmark_on_postgrest:
     HAF_IMAGE_NAME=${HAF_IMAGE_NAME}
     HIVEMIND_IMAGE=${HIVEMIND_IMAGE}
     HAF_DATA_DIRECTORY=${HAF_DATA_DIRECTORY}
-    HAF_SHM_DIRECTORY=${HAF_SHM_DIRECTORY}
     HIVEMIND_PORT=${HIVEMIND_PORT}
     LOG_LEVEL=info
     EOF
