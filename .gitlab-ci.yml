@@ -171,10 +171,13 @@ default:
 # =============================================================================
 # Jobs can reference this to skip work when only docs/tests changed.
 # The job still runs and passes, but exits immediately without doing work.
+# Note: QUICK_TEST=true overrides AUTO_SKIP - user explicitly wants tests to run.
 .early_exit_for_docs_only:
   script: &early_exit_check
     - |
-      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+      if [[ "${QUICK_TEST:-false}" == "true" ]]; then
+        echo "=== QUICK_TEST mode: running tests with cached data ==="
+      elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
         echo "=== Skipping (docs/tests only change) ==="
         echo "Only documentation, tests, or CI config files changed."
         echo "No work needed - exiting with success."
