@@ -53,8 +53,8 @@ variables:
   # Auto-populated by detect_changes job (uses .haf_app_detect_changes template):
   AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
 
-  # Override common-ci-configuration version - use latest with cache-manager fixes
-  CI_COMMON_JOB_VERSION: "3dd346380da7f28cdaf3ef3955559c905d94bd1c"
+  # Override common-ci-configuration version - includes Python 3.12, JMeter, psql in docker-builder
+  CI_COMMON_JOB_VERSION: "47dab930d3676b007782723c45ae7080fa611705"
   DOCKER_BUILDER_TAG: "$CI_COMMON_JOB_VERSION"
   DOCKER_DIND_TAG: "$CI_COMMON_JOB_VERSION"
   IMAGE_REMOVER_TAG: "$CI_COMMON_JOB_VERSION"
