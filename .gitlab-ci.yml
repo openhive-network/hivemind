@@ -832,8 +832,6 @@ e2e_benchmark_on_postgrest:
     # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
     HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
     HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
-    # Use updated docker-builder with Python/JMeter (common-ci-configuration MR !190)
-    DOCKER_BUILDER_TAG: "a9ddde802ce8b1b2d4011167226ead0e92d438dc"
     # DinD-specific variables (SHM_DIR is inside datadir/blockchain for hivemind)
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
