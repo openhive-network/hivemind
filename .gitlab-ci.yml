@@ -933,7 +933,7 @@ e2e_benchmark_on_postgrest:
     sudo rm -rf tests/tests_api 2>/dev/null || rm -rf tests/tests_api
     git clone --no-checkout "$TESTS_API_URL" tests/tests_api
     cd tests/tests_api && git checkout $TESTS_API_COMMIT && cd ../..
-  - pip install --quiet tox
+  - pip install --quiet --break-system-packages tox
   script:
   - |
     echo "HAF image: $HAF_IMAGE_NAME"
