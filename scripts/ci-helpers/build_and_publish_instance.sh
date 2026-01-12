@@ -25,4 +25,7 @@ if [[ ! -x "$COMMON_SCRIPT" ]]; then
     chmod +x "$COMMON_SCRIPT"
 fi
 
-exec "$COMMON_SCRIPT" --src-dir="$SRC_DIR" --project-name=hivemind "$@"
+# Use CI_COMMIT_TAG if available (tag pipeline), otherwise CI_COMMIT_SHORT_SHA
+IMAGE_TAG="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA:-latest}}"
+
+exec "$COMMON_SCRIPT" --src-dir="$SRC_DIR" --project-name=hivemind --image-tag="$IMAGE_TAG" "$@"
