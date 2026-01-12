@@ -257,6 +257,8 @@ default:
 # Individual test runs use the same start-api-smoketest.sh script
 .run-all-smoketests: &run-all-smoketests
 - |
+  # Add user-local bin to PATH for pip-installed tools (tox)
+  export PATH="$HOME/.local/bin:$PATH"
   echo "=== Running all API smoketests ==="
   HOST="$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME"
   PORT="$RUNNER_HIVEMIND_SERVER_HTTP_PORT"
