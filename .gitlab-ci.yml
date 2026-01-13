@@ -1038,9 +1038,15 @@ build_and_publish_image:
   - |
     TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
     scripts/ci-helpers/build_and_publish_instance.sh --image-tag=$TAG
-    export HIVE_BLOG_IMAGE_SOURCE="$CI_REGISTRY_IMAGE/postgrest-rewriter:$TAG"
-    export HIVE_BLOG_IMAGE_TARGET="hivemind/postgrest-rewriter:$TAG"
-  - !reference [.hive_blog_push, script]
+
+    # Push both main app and postgrest-rewriter to hive.blog registry
+    echo "Pushing main app to hive.blog: ${HIVE_BLOG_REGISTRY}/hivemind:${TAG}"
+    docker tag "$CI_REGISTRY_IMAGE:$TAG" "${HIVE_BLOG_REGISTRY}/hivemind:${TAG}"
+    docker push "${HIVE_BLOG_REGISTRY}/hivemind:${TAG}"
+
+    echo "Pushing postgrest-rewriter to hive.blog: ${HIVE_BLOG_REGISTRY}/hivemind/postgrest-rewriter:${TAG}"
+    docker tag "$CI_REGISTRY_IMAGE/postgrest-rewriter:$TAG" "${HIVE_BLOG_REGISTRY}/hivemind/postgrest-rewriter:${TAG}"
+    docker push "${HIVE_BLOG_REGISTRY}/hivemind/postgrest-rewriter:${TAG}"
   tags: *shared_tags
 
 deploy_python_api_package_to_gitlab:
