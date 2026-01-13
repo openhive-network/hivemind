@@ -125,6 +125,18 @@ if [[ -n "$BUILD_IMAGE_TAG" ]]; then
   TAG_BUILD_ARGS+=("--build-arg" "GIT_COMMIT_TAG=$BUILD_IMAGE_TAG")
 fi
 
+# Build main image tags (always short SHA, 'latest' on develop, version on tags)
+MAIN_TAGS=("--tag" "$TAG" "--tag" "$MINIMAL_TAG")
+if [[ "${CI_COMMIT_BRANCH:-}" == "${CI_DEFAULT_BRANCH:-develop}" ]]; then
+  MAIN_TAGS+=("--tag" "${REGISTRY}:latest" "--tag" "${REGISTRY}/minimal:latest")
+fi
+
+# Build rewriter image tags
+REWRITER_TAGS=("--tag" "$REWRITER_IMAGE_TAG")
+if [[ "${CI_COMMIT_BRANCH:-}" == "${CI_DEFAULT_BRANCH:-develop}" ]]; then
+  REWRITER_TAGS+=("--tag" "${REGISTRY}/postgrest-rewriter:latest")
+fi
+
 echo "Building Hivemind full and minimal images..."
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
@@ -134,12 +146,11 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
-  --tag "$TAG" \
-  --tag "$MINIMAL_TAG" \
+  "${MAIN_TAGS[@]}" \
   --file Dockerfile .
 echo "Done!"
 
-echo "Building HYivemind rewriter image..."
+echo "Building Hivemind rewriter image..."
 docker buildx build "${TAG_BUILD_ARGS[@]}" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
   --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
@@ -148,7 +159,7 @@ docker buildx build "${TAG_BUILD_ARGS[@]}" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
   --target=$REWRITER_TARGET \
-  --tag "$REWRITER_IMAGE_TAG" \
+  "${REWRITER_TAGS[@]}" \
   --file Dockerfile.rewriter .
 echo "Done!"
 

@@ -1029,15 +1029,11 @@ python_api_client_test:
   - public-runner-docker
   - standard
 
-build_and_publish_image:
-  stage: publish
-  extends: .publish_docker_image_template
-  before_script:
-  - !reference [.publish_docker_image_template, before_script]
-  script:
-  - |
-    TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
-    scripts/ci-helpers/build_and_publish_instance.sh --image-tag=$TAG
+# Publish to registry.hive.blog - pull/retag/push only, no rebuild
+publish_images:
+  extends: .docker_publish_job_template
+  variables:
+    PUBLISH_IMAGES: "hivemind minimal postgrest-rewriter"
   tags: *shared_tags
 
 deploy_python_api_package_to_gitlab:
