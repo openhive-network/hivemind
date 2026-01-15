@@ -18,7 +18,8 @@ The project is transitioning from Python to PL/pgSQL, so you'll find remnants of
 **Prerequisites:** Python 3.10+, PostgreSQL 17+, pip >= 22.2.2, setuptools >= 63.1.0
 
 ```bash
-# Clone with submodules (HAF and reputation_tracker are submodules)
+# Clone with submodules (reputation_tracker, hafah, tests_api are submodules)
+# Note: HAF is NOT a submodule - CI uses dynamic image detection
 git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
 
 # Install in virtual environment (RECOMMENDED)
@@ -36,9 +37,8 @@ deactivate
 
 **Docker Images:**
 ```bash
-# Build HAF (from haf/ submodule)
-cd haf
-./scripts/ci-helpers/build_instance.sh local $(pwd) registry.gitlab.syncad.com/hive/haf
+# HAF images are automatically detected by CI from registry.gitlab.syncad.com/hive/haf
+# No local HAF build needed - CI uses dynamic image detection (see find_haf_image job in .gitlab-ci.yml)
 
 # Build reputation tracker (from reputation_tracker/ submodule)
 cd reputation_tracker
@@ -228,7 +228,6 @@ tests/
 │   └── postgrest_negative/     # Negative test cases
 └── utils/                      # Python unit tests
 
-haf/                       # HAF submodule (Hive Application Framework)
 reputation_tracker/        # Reputation tracker submodule (required dependency)
 hafah/                     # HAfAH submodule (account history application)
 mock_data/                 # Mock block/vops data for testing
@@ -281,7 +280,7 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 
 ## Common Gotchas
 
-**Submodules:** HAF, reputation_tracker, and hafah are git submodules. Always clone with `--recurse-submodules`.
+**Submodules:** reputation_tracker, hafah, and tests_api are git submodules. Always clone with `--recurse-submodules`. Note: HAF is NOT a submodule - CI dynamically detects the latest HAF Docker image.
 
 **Virtual Environment:** The Python package must be installed. Use `pip install .` in a virtual environment.
 
@@ -301,10 +300,19 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 
 ## CI Pipeline
 
-The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
-- Build Docker images (base, instance, rewriter)
-- Sync to 5M blocks with mock data
-- Run API smoketests (bridge, condenser, negative)
-- Benchmarking tests
+The `.gitlab-ci.yml` defines the build/test pipeline. Key jobs:
+- `find_haf_image`: Dynamically detects latest HAF Docker image from registry (no submodule needed)
+- `prepare_hivemind_image`: Build Docker images (base, instance, rewriter)
+- `sync`: Sync to 5M blocks with mock data
+- `e2e_benchmark_on_postgrest`: Run API smoketests (bridge, condenser, negative) and benchmarks
+
+**HAF Dynamic Image Detection:**
+The `find_haf_image` job automatically finds the latest built HAF image by:
+1. Scanning the HAF repository's configured branch (default: `develop`)
+2. Finding commits that changed source files
+3. Locating corresponding Docker images in the registry
+4. Exporting `HAF_UPSTREAM_IMAGE`, `HAF_UPSTREAM_COMMIT`, `HAF_UPSTREAM_TAG`
+
+To use a different HAF branch, modify `UPSTREAM_BRANCH` in the `find_haf_image` job.
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
