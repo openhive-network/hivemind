@@ -96,7 +96,9 @@ def main():
     log.info('Sorting block data')
     blocks.sort(key=lambda b: b.block_number)
 
-    last_block_in_db = db.query_row("SELECT * FROM hafd.blocks ORDER BY num DESC LIMIT 1")
+    # HAF refactored schema uses block_id instead of num column
+    # Use hafd.block_id_to_num(block_id) to get the block number as 'num' for compatibility
+    last_block_in_db = db.query_row("SELECT *, hafd.block_id_to_num(block_id) AS num FROM hafd.blocks ORDER BY block_id DESC LIMIT 1")
 
     last_block_num_to_mock = blocks[-1].block_number
     log.info(f'Last block to mock: {last_block_num_to_mock}')
