@@ -331,6 +331,8 @@ detect_changes:
     # - .gitlab-ci.yml (CI config)
     # Note: SQL changes DO require sync (affect database schema/functions)
     HAF_APP_SKIP_PATTERNS: '^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+  tags:
+    - data-cache-storage  # Override default tag - public-docker-runner has no available runners
 
 # =============================================================================
 # Upstream Image Detection
