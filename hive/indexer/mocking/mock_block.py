@@ -36,11 +36,12 @@ class AccountMock:
         return self._name
 
     def push(self) -> None:
+        # HAF refactored schema uses block_id instead of block_num
         sql = """
-INSERT INTO 
-    hafd.accounts (id, name, block_num)
+INSERT INTO
+    hafd.accounts (id, name, block_id)
 VALUES
-    (:id, :name, :block_num);
+    (:id, :name, hafd.make_block_id(:block_num, 1));
 """
 
         self.__class__.account_id += 1
@@ -84,11 +85,12 @@ class OperationBase:
         return self._body
 
     def push(self) -> None:
+        # HAF refactored schema requires block_id column
         sql = """
-INSERT INTO 
-    hafd.operations (id, trx_in_block, op_pos, body_binary)
+INSERT INTO
+    hafd.operations (block_id, id, trx_in_block, op_pos, body_binary)
 VALUES
-    (:id, -2, -2, :body :: jsonb :: hafd.operation);
+    (hafd.make_block_id(:block_num, 1), :id, -2, -2, :body :: jsonb :: hafd.operation);
 """
         OperationBase.pos_in_block += 1
 
@@ -105,6 +107,7 @@ VALUES
         Db.instance().query(
             sql=sql,
             id=OperationBase.operation_id,
+            block_num=self.block_number,
             body=json.dumps(self.body),
         )
 
@@ -183,11 +186,12 @@ class TransactionMock:
             yield operation
 
     def push(self) -> None:
+        # HAF refactored schema uses block_id instead of block_num
         sql = """
-INSERT INTO 
-    hafd.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
+INSERT INTO
+    hafd.transactions (block_id, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
 VALUES
-    (:block_num, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
+    (hafd.make_block_id(:block_num, 1), -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
 """
 
         log.info(f'Attempting to push mocked TRANSACTION with hash: {self.hash}')
