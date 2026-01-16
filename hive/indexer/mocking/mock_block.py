@@ -41,7 +41,7 @@ class AccountMock:
 INSERT INTO
     hafd.accounts (id, name, block_id)
 VALUES
-    (:id, :name, hafd.make_block_id(:block_num, 1));
+    (:id, :name, hafd.make_block_id(:block_num, 0));
 """
 
         self.__class__.account_id += 1
@@ -90,7 +90,7 @@ class OperationBase:
 INSERT INTO
     hafd.operations (block_id, id, trx_in_block, op_pos, body_binary)
 VALUES
-    (hafd.make_block_id(:block_num, 1), :id, -2, -2, :body :: jsonb :: hafd.operation);
+    (hafd.make_block_id(:block_num, 0), :id, -2, -2, :body :: jsonb :: hafd.operation);
 """
         OperationBase.pos_in_block += 1
 
@@ -191,7 +191,7 @@ class TransactionMock:
 INSERT INTO
     hafd.transactions (block_id, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
 VALUES
-    (hafd.make_block_id(:block_num, 1), -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
+    (hafd.make_block_id(:block_num, 0), -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
 """
 
         log.info(f'Attempting to push mocked TRANSACTION with hash: {self.hash}')
@@ -258,12 +258,12 @@ class BlockMockAfterDb:
 
         # HAF refactored schema uses block_id instead of num
         # block_id is created using hafd.make_block_id(block_num, fork_id)
-        # For mocked data, we use fork_id = 1 (the initial fork)
+        # For mocked data, we use fork_id = 0 (same as HAF massive sync)
         sql = f"""
 INSERT INTO hafd.blocks (block_id, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
                          witness_signature, signing_key, hbd_interest_rate, total_vesting_fund_hive, total_vesting_shares,
                          total_reward_fund_hive, virtual_supply, current_supply, current_hbd_supply, dhf_interval_ledger)
-VALUES (hafd.make_block_id(:num, 1), :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
+VALUES (hafd.make_block_id(:num, 0), :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
                          1000000, 1000, 1000, 1000, 2000, 2000);
 """
 
