@@ -898,16 +898,10 @@ e2e_benchmark_on_postgrest:
     done
     echo "PostgreSQL is ready"
 
-    # Wait for hivemind server using curl from job container (like common-ci pattern)
-    # In DinD, services are accessible via 'docker' hostname
-    # Use getent for reliable DNS resolution (curl may resolve 'docker' to wrong IP)
-    DOCKER_IP=$(getent hosts docker 2>/dev/null | awk '{print $1}' | head -1)
-    if [[ -z "$DOCKER_IP" ]]; then
-      DOCKER_IP="docker"
-    fi
-    echo "Waiting for hivemind server at ${DOCKER_IP}:${HIVEMIND_PORT}..."
+    # Wait for hivemind server using docker compose exec (avoids IPv6 networking issues)
+    echo "Waiting for hivemind server at localhost:${HIVEMIND_PORT}..."
     WAIT_START=$(date +%s)
-    until curl -sf --max-time 5 "http://${DOCKER_IP}:${HIVEMIND_PORT}/" > /dev/null 2>&1; do
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-server curl -sf --max-time 5 "http://localhost:${HIVEMIND_PORT}/" > /dev/null 2>&1; do
       if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
         echo "ERROR: Timeout waiting for hivemind server after ${WAIT_TIMEOUT}s"
         docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server
