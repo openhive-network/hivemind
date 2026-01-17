@@ -90,7 +90,8 @@ Each role includes all the privileges of roles below it in the hierarchy.
 ##### NCI: Numerical Community Identifier
 
 Communities are registered by creating an on-chain account which conforms to `/^hive-[1-3]\d{4,6}$/`, with the first digit signifying the *type*.
-Type mappings are outlined in a later section. Thus the valid range is  `hive-10000` to `hive-3999999` for a total of 1M possible communities per type. This ensures the core protocol has stable ids for linking data without introducing a naming system.
+This pattern allows for **5 to 7 total digits** after the `hive-` prefix: one type digit (1, 2, or 3) followed by 4 to 6 additional digits.
+Type mappings are outlined in a later section. Thus the valid range is  `hive-10000` to `hive-3999999`. This ensures the core protocol has stable ids for linking data without introducing a naming system.
 
 Do note that the numerical system only defines what type the community will be created as. An admin can later change the type. (eg: if a community grows big enough to prevent guests from posting)
 
@@ -139,7 +140,7 @@ Extra settings can be set arbitrary depending on one's need but those won't be v
 
 ## Creation
 
-Creation an onchain account name which conforms to `/hive-[1-3]\d{4,6}$/` (eg: hive-111111) This is the owner account. From this account, submit a `setRole` command to set the first admin.
+Create an onchain account name which conforms to `/hive-[1-3]\d{4,6}$/` (5-7 total digits, e.g., `hive-13323`, `hive-111111`, `hive-1234567`). This is the owner account. From this account, submit a `setRole` command to set the first admin.
 
 - Topics: the leading digit must be `1`
 - Journals: the leading digit must be `2`
