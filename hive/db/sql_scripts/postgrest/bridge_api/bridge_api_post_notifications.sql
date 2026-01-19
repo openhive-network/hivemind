@@ -106,6 +106,7 @@ BEGIN
           END
         ) AS url
       FROM notifications
+      ORDER BY notifications.id DESC
       LIMIT _limit
     ) row
   );
