@@ -25,6 +25,8 @@ include:
     - '/templates/source_change_detection.gitlab-ci.yml'
 
 variables:
+  # Override HAF image to use specific feature branch commit
+  UPSTREAM_OVERRIDE_TAG: "92e16281e47074d4bbd511f5aa2c0ec25ecb7999"
   # Common CI configuration reference
   COMMON_CI_REF: "develop"
   COMMON_CI_URL: "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}"
