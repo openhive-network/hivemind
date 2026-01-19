@@ -95,6 +95,7 @@ BEGIN
                 ELSE hivemind_postgrest_utilities.get_number_of_mentions_in_post( hnv.post_id )
             END as mentions
         ) as hm
+        ORDER BY hnv.id DESC
         LIMIT _limit
       ) hive_notification_cache
   );

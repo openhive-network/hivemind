@@ -404,6 +404,7 @@ prepare_haf_data:
     # Log the mapped variables
     - echo "Using HAF image:${HAF_IMAGE_NAME} (commit:${HAF_COMMIT})"
   tags:
+  - public-runner-docker
   - data-cache-storage
   - fastest
 
@@ -470,6 +471,7 @@ cleanup_hivemind_haf_cache_manual:
   variables:
     CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_*"
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
@@ -480,6 +482,7 @@ cleanup_haf_cache_manual:
   variables:
     CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_* /cache/replay_data_haf_*"
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 # Cleans up cache after tests. Must depend on all jobs that use
@@ -496,6 +499,7 @@ cleanup_pipeline_cache:
     CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
   when: manual
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 sync:
@@ -798,6 +802,7 @@ sync:
     - version.log
     - sync_cache_override.env
   tags:
+  - public-runner-docker
   - data-cache-storage
   - fastest
 
@@ -990,6 +995,7 @@ e2e_benchmark_on_postgrest:
     - tests/api_tests/hivemind/tavern/**/*.out.json
     - version.log
   tags:
+  - public-runner-docker
   - data-cache-storage
   - fastest
 
