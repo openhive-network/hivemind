@@ -98,10 +98,16 @@ class SyncHiveDb:
     def run(self) -> None:
         start_time = perf()
         Blocks.set_head_date()
+
         def report_enter_to_stage(current_stage) -> bool:
-            if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
+            if (
+                report_enter_to_stage.prev_application_stage is None
+                or report_enter_to_stage.prev_application_stage != current_stage
+            ):
                 last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
-                log.info(f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}")
+                log.info(
+                    f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}"
+                )
                 report_enter_to_stage.prev_application_stage = current_stage
                 return True
             report_enter_to_stage.prev_application_stage = current_stage
@@ -116,14 +122,19 @@ class SyncHiveDb:
 
         self._create_massive_provider_if_no_exist()
         while True:
+            # Wait for previous massive consumption BEFORE modifying context state.
+            # This prevents race condition where flush threads access context while
+            # app_next_iteration is modifying it.
+            self._wait_for_massive_consume()
+
             last_imported_block = Blocks.last_imported()
 
             # SqlAlchemy will not use autocommit when there is a pending transaction
             # hive.app_next_iteration issues COMMIT, and autocommit is not desired
             # because it save current block before the decision if new range of blocks will be processed or not
             if self._db.is_trx_active():
-                self._db.query_no_return( "COMMIT" )
-            self._db.query_no_return( "START TRANSACTION" )
+                self._db.query_no_return("COMMIT")
+            self._db.query_no_return("START TRANSACTION")
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
@@ -136,13 +147,12 @@ class SyncHiveDb:
                     report_enter_to_stage(application_stage)
                 continue
 
-
             # this  commit is added here only to prevent error idle-in-transaction timeout
             # it should be removed, but it requires to check any possible long-lasting actions
             # so as quic workaround this COMMIT stays
-            self._db.query_no_return( "COMMIT" )
+            self._db.query_no_return("COMMIT")
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
-                DbState.set_massive_sync( True )
+                DbState.set_massive_sync(True)
                 report_enter_to_stage(application_stage)
 
                 DbState.ensure_off_synchronous_commit()
@@ -152,7 +162,7 @@ class SyncHiveDb:
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "MASSIVE_WITH_INDEXES":
-                DbState.set_massive_sync( True )
+                DbState.set_massive_sync(True)
                 if report_enter_to_stage(application_stage):
                     self.print_summary()
 
@@ -166,7 +176,7 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
-                DbState.set_massive_sync( False )
+                DbState.set_massive_sync(False)
                 report_enter_to_stage(application_stage)
 
                 DbState.ensure_on_synchronous_commit()
@@ -220,9 +230,11 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
-        result = self._db.query_one( "CALL hive.app_next_iteration( _contexts => ARRAY['{}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
-                                     .format(SCHEMA_NAME, limit, batch)
-                                    )
+        result = self._db.query_one(
+            "CALL hive.app_next_iteration( _contexts => ARRAY['{}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )".format(
+                SCHEMA_NAME, limit, batch
+            )
+        )
 
         self._db._trx_active = True
         (lbound, ubound) = None, None
@@ -265,16 +277,15 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
-        self._wait_for_massive_consume()  # wait for finish previous consumption
-
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
-        #self._consume_massive_blocks(blocks, lbound, ubound)
+        # self._consume_massive_blocks(blocks, lbound, ubound)
 
-        self._massive_consume_blocks_futures =\
-            self._massive_consume_blocks_thread_pool.submit(self._consume_massive_blocks, blocks)
+        self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
+            self._consume_massive_blocks, blocks
+        )
 
     def _on_stop_synchronization(self, active_connections_before):
         # Ensure tables are converted back to LOGGED before shutdown.
@@ -285,10 +296,7 @@ class SyncHiveDb:
 
     def _create_massive_provider_if_no_exist(self):
         if not self._massive_blocks_data_provider:
-            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                conf=self._conf,
-                db_root=self._db
-            )
+            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(conf=self._conf, db_root=self._db)
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
@@ -338,10 +346,18 @@ class SyncHiveDb:
         log.info("Elapsed time: %.4fs. Calculated elapsed time: %.4fs. Difference: %.4fs", stop, ttm, stop - ttm)
 
         if self.rate:
-           log.info(
-               "Highest block processing rate: %.4f bps. %d:%d", self.rate['max'], self.rate['max_from'], self.rate['max_to']
-           )
-           log.info("Lowest block processing rate: %.4f bps. %d:%d", self.rate['min'], self.rate['min_from'], self.rate['min_to'])
+            log.info(
+                "Highest block processing rate: %.4f bps. %d:%d",
+                self.rate['max'],
+                self.rate['max_from'],
+                self.rate['max_to'],
+            )
+            log.info(
+                "Lowest block processing rate: %.4f bps. %d:%d",
+                self.rate['min'],
+                self.rate['min_from'],
+                self.rate['min_to'],
+            )
         log.info("=== TOTAL STATS ===")
         self.rate = {}
 
@@ -355,8 +371,8 @@ class SyncHiveDb:
         # Convert Row objects to mappings for dict-like access (Python 3.14 compatibility)
         blocks = [row._mapping for row in blocks]
 
-        lbound = blocks[ 0 ]['num']
-        ubound = blocks[ -1 ]['num']
+        lbound = blocks[0]['num']
+        ubound = blocks[-1]['num']
         orig_lbound = lbound
         orig_ubound = ubound
 
