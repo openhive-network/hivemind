@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Hivemind** is a HAF (Hive Application Framework)-based microservice that provides social media features for the Hive blockchain. It consists of two main components:
+**Hivemind** is a HAF (Hive Application Framework)-based microservice that provides social media features for the Hive
+blockchain. It consists of two main components:
 
 1. **Indexer** (Python): Extracts and processes social data from HAF into application tables
 2. **Server** (PL/pgSQL + PostgREST): Exposes a JSON-RPC API for querying social data
@@ -35,6 +36,7 @@ deactivate
 ### Building and Running
 
 **Docker Images:**
+
 ```bash
 # Build HAF (from haf/ submodule)
 cd haf
@@ -52,6 +54,7 @@ docker build -t postgrest_rewriter:local -f Dockerfile.rewriter .
 ```
 
 **Installation on HAF Database:**
+
 ```bash
 # 1. Setup roles and schema
 ./scripts/setup_postgres.sh --postgres-url=postgresql://haf_admin@localhost:5432/haf_block_log
@@ -67,6 +70,7 @@ docker build -t postgrest_rewriter:local -f Dockerfile.rewriter .
 ```
 
 **Running the Indexer:**
+
 ```bash
 # Activate virtual environment first
 . venv/bin/activate
@@ -87,6 +91,7 @@ hive sync --help
 ```
 
 **Running the Server:**
+
 ```bash
 # Start PostgREST server (requires openresty/nginx rewriter)
 ./scripts/start_postgrest.sh
@@ -103,6 +108,7 @@ curl localhost:8080 \
 ### Testing
 
 **API Tests (Tavern framework):**
+
 ```bash
 # Run all API tests
 ./scripts/run_tests.sh
@@ -121,6 +127,7 @@ tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning -n auto --junitxml=r
 ```
 
 **Unit Tests:**
+
 ```bash
 # All tests
 make test-all
@@ -172,6 +179,7 @@ docker run --rm --network=haf --name=hivemind \
 ### Code Formatting
 
 **ALWAYS run black before committing Python code:**
+
 ```bash
 cd <repo_root>
 pip install .'[dev]'  # If not already installed
@@ -247,37 +255,44 @@ The indexer operates in three modes for efficiency:
 Indexes are created when transitioning from massive to live sync (or when hitting `--test-max-block`).
 
 **HAF Context:**
-- Hivemind uses the `hivemind_app` context/schema
-- Only processes irreversible blocks (no micro-fork handling needed)
-- Depends on `reputation_tracker` application (default schema: `reptracker_app`)
+
+-   Hivemind uses the `hivemind_app` context/schema
+-   Only processes irreversible blocks (no micro-fork handling needed)
+-   Depends on `reputation_tracker` application (default schema: `reptracker_app`)
 
 **Database Schemas:**
-- `hivemind_app`: Application tables with social data
-- `hivemind_endpoints`: Server functions called by PostgREST
-- `hivemind_postgrest_utilities`: Utilities for endpoints
+
+-   `hivemind_app`: Application tables with social data
+-   `hivemind_endpoints`: Server functions called by PostgREST
+-   `hivemind_postgrest_utilities`: Utilities for endpoints
 
 **Database Roles:**
-- `hivemind`: Used for running sync and server
+
+-   `hivemind`: Used for running sync and server
 
 **Server Architecture:**
-- PostgREST exposes PostgreSQL functions as REST endpoints
-- Nginx/openresty rewrites JSON-RPC calls to `/rpc/home` endpoint
-- All API logic is in PL/pgSQL functions in `hive/db/sql_scripts/postgrest/`
+
+-   PostgREST exposes PostgreSQL functions as REST endpoints
+-   Nginx/openresty rewrites JSON-RPC calls to `/rpc/home` endpoint
+-   All API logic is in PL/pgSQL functions in `hive/db/sql_scripts/postgrest/`
 
 **Entry Points (setup.cfg):**
-- `hive`: Main CLI (routes to sync, build_schema, upgrade_schema, status)
-- `mocker`: Inject mock data into HAF for testing
+
+-   `hive`: Main CLI (routes to sync, build_schema, upgrade_schema, status)
+-   `mocker`: Inject mock data into HAF for testing
 
 **Dependencies (Python):**
-- SQLAlchemy 1.4.49 for HAF database access
-- aiopg, aiohttp for async operations
-- configargparse for configuration
-- psycopg2-binary for PostgreSQL
+
+-   SQLAlchemy 1.4.49 for HAF database access
+-   aiopg, aiohttp for async operations
+-   configargparse for configuration
+-   psycopg2-binary for PostgreSQL
 
 **Testing Framework:**
-- Tavern (pytest plugin) for API tests (YAML-based)
-- Tests are in `tests/api_tests/hivemind/tavern/`
-- Run via tox with `-e tavern`
+
+-   Tavern (pytest plugin) for API tests (YAML-based)
+-   Tests are in `tests/api_tests/hivemind/tavern/`
+-   Run via tox with `-e tavern`
 
 ## Common Gotchas
 
@@ -287,13 +302,17 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 
 **PostgreSQL Access:** Indexer needs `hivemind` role, setup needs `haf_admin` role.
 
-**Community Start Block:** In production, communities start at a specific block well after 5M. Use `--community-start-block` for testing with 5M block_log.
+**Community Start Block:** In production, communities start at a specific block well after 5M. Use
+`--community-start-block` for testing with 5M block_log.
 
-**Mock Data Required:** API tests need mock operations injected (see test setup above) because 5M blocks lack recent operations.
+**Mock Data Required:** API tests need mock operations injected (see test setup above) because 5M blocks lack recent
+operations.
 
-**Reputation Tracker Sync Order:** Must sync reputation_tracker to 4,999,979 BEFORE Hivemind completes massive sync, as Hivemind builds notification cache after massive sync.
+**Reputation Tracker Sync Order:** Must sync reputation_tracker to 4,999,979 BEFORE Hivemind completes massive sync, as
+Hivemind builds notification cache after massive sync.
 
-**Nginx Rewriter Required:** The server requires nginx/openresty to rewrite JSON-RPC to REST calls. Without it, API calls fail.
+**Nginx Rewriter Required:** The server requires nginx/openresty to rewrite JSON-RPC to REST calls. Without it, API
+calls fail.
 
 **Black Formatting:** All Python code must be formatted with `black` before committing.
 
@@ -302,9 +321,21 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 ## CI Pipeline
 
 The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
-- Build Docker images (base, instance, rewriter)
-- Sync to 5M blocks with mock data
-- Run API smoketests (bridge, condenser, negative)
-- Benchmarking tests
+
+-   Build Docker images (base, instance, rewriter)
+-   Sync to 5M blocks with mock data
+-   Run API smoketests (bridge, condenser, negative)
+-   Benchmarking tests
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
+
+## Dependency Management (Poetry)
+
+-   **Always use Poetry version 2.1.3**
+-   **Dependency versions are specified in `pyproject.toml` and locked in `poetry.lock`**
+-   **Always use `poetry lock`** (without additional flags like `--regenerate`)
+-   **Always run `poetry lock` after changing `pyproject.toml`**
+-   **The `poetry.lock` file must be in the repository** - never add it to `.gitignore`
+-   **Never delete `poetry.lock`** - it ensures reproducible builds
+-   **Never edit `poetry.lock` manually** - always use poetry commands
+-   **Don't upgrade dependencies on your own** - only upgrade when explicitly requested
