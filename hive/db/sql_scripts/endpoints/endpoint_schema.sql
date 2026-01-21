@@ -171,7 +171,7 @@ declare
     }
   },
   "paths": {
-    "/rpc/home#hive.get_reblogged_by_account": {
+    "/blog/reblogs": {
       "post": {
         "tags": [
           "hive_api"
