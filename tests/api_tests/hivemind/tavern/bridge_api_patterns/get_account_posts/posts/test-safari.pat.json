@@ -23,6 +23,7 @@
     "permlink": "reblogged-and-recreated",
     "post_id": 1256897,
     "reblogs": 1,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -58,6 +59,7 @@
     "permlink": "muted-and-recreated",
     "post_id": 1256895,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -93,6 +95,7 @@
     "permlink": "please-comment-hive3-03",
     "post_id": 1256870,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -128,6 +131,7 @@
     "permlink": "please-comment-hive3-02",
     "post_id": 1256869,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -163,6 +167,7 @@
     "permlink": "please-comment-hive3",
     "post_id": 1256868,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -198,6 +203,7 @@
     "permlink": "please-comment-hive2-03",
     "post_id": 1256867,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -233,6 +239,7 @@
     "permlink": "please-comment-hive2-02",
     "post_id": 1256866,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -268,6 +275,7 @@
     "permlink": "please-comment-hive2",
     "post_id": 1256865,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -307,6 +315,7 @@
     "permlink": "please-comment-hive1-03",
     "post_id": 1256864,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -342,6 +351,7 @@
     "permlink": "parent-post-for-muted-steemit",
     "post_id": 1256863,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -381,6 +391,7 @@
     "permlink": "please-comment-hive1-02",
     "post_id": 1256861,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -420,6 +431,7 @@
     "permlink": "please-comment-hive1",
     "post_id": 1256860,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -455,6 +467,7 @@
     "permlink": "reblogged-and-edited",
     "post_id": 1256859,
     "reblogs": 1,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -490,6 +503,7 @@
     "permlink": "muted-and-edited",
     "post_id": 1256851,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -528,6 +542,7 @@
     "permlink": "secrets5",
     "post_id": 1256848,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -566,6 +581,7 @@
     "permlink": "secrets4",
     "post_id": 1256847,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -605,6 +621,7 @@
     "permlink": "secrets2",
     "post_id": 1256845,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -644,6 +661,7 @@
     "permlink": "secrets1",
     "post_id": 1256844,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

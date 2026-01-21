@@ -24,6 +24,7 @@
     "post_id": 1256903,
     "replies": [],
     "reblogs": 1,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -59,6 +60,7 @@
     "post_id": 1256901,
     "replies": [],
     "reblogs": 5,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -94,6 +96,7 @@
     "post_id": 1256849,
     "replies": [],
     "reblogs": 1,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

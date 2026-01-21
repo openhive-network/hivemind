@@ -354,7 +354,7 @@
   "author_reputation": 57.34,
   "beneficiaries": [],
   "blacklists": [],
-  "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I\u2019ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I\u2019ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
+  "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I’ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I’ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
   "category": "witness-category",
   "children": 7,
   "created": "2016-08-05T14:02:24",
@@ -379,6 +379,7 @@
   "post_id": 624896,
   "replies": [],
   "reblogs": 0,
+  "observer_reblogged": false,
   "stats": {
     "flag_weight": 0.0,
     "gray": false,

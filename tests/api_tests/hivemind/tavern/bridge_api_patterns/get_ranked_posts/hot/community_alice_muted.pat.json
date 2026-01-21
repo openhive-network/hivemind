@@ -27,6 +27,7 @@
     "permlink": "Third-after-member-post-hive1",
     "post_id": 1256975,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -66,6 +67,7 @@
     "permlink": "Second-after-member-post-hive1",
     "post_id": 1256972,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -108,6 +110,7 @@
     "permlink": "First-after-member-post-hive1",
     "post_id": 1256968,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -147,6 +150,7 @@
     "permlink": "Third-after-muted-post-hive1",
     "post_id": 1256920,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -186,6 +190,7 @@
     "permlink": "Second-after-muted-post-hive1",
     "post_id": 1256917,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -228,6 +233,7 @@
     "permlink": "First-after-muted-post-hive1",
     "post_id": 1256914,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -267,6 +273,7 @@
     "permlink": "My-third-post-hive1",
     "post_id": 1256892,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -306,6 +313,7 @@
     "permlink": "My-second-post-hive1",
     "post_id": 1256886,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -348,6 +356,7 @@
     "permlink": "My-first-post-hive-1",
     "post_id": 1256871,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -387,6 +396,7 @@
     "permlink": "please-comment-hive1-03",
     "post_id": 1256864,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -426,6 +436,7 @@
     "permlink": "please-comment-hive1-02",
     "post_id": 1256861,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -465,6 +476,7 @@
     "permlink": "please-comment-hive1",
     "post_id": 1256860,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

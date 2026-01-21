@@ -66,6 +66,7 @@
     "post_id": 1258084,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

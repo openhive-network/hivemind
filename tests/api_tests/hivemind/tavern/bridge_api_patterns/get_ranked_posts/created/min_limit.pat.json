@@ -27,6 +27,7 @@
     "permlink": "flagtest",
     "post_id": 1258138,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

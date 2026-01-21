@@ -23,6 +23,7 @@
     "permlink": "notmember-hive-211119",
     "post_id": 1258113,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -61,6 +62,7 @@
     "permlink": "ismember-hive-211119",
     "post_id": 1258112,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

@@ -29,6 +29,7 @@
     "permlink": "re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z",
     "post_id": 1255186,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "james-show/re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z"
     ],
@@ -38,7 +39,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:27:21",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@anduweb/re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z"
   },
@@ -72,6 +73,7 @@
     "permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z",
     "post_id": 1254973,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "james-show/re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z"
     ],
@@ -81,7 +83,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:11:06",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@anduweb/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z"
   },
@@ -325,7 +327,7 @@
     "author_reputation": 66.16,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Top 19 witnesses get paid way too much, I feel like I am stating the obvious here and it wouldn\u00b4t really be that important if we weren\u00b4t trying to build a more balanced voting/reward system.\n\nIt\u2019s like we are rowing both ways, on one side we are discussing changes in the code to reduce some big whale\u00b4s influence but on the other the system is giving around 1,370 SP per day to 19 users, yeah that\u00b4s right 1,370 SP per day!, this amount is unreachable even for the most prolific bloggers on Steemit and the gap between witnesses and normal users is growing each day. \n\n![](https://s18.postimg.org/qv4sjw8s9/shutterstock109187921.jpg)\n\nPlease don\u00b4t get me wrong this is not an attack on witnesses, I believe most witnesses are doing a great job, they not only maintain the network they also contribute with countless projects and tools. \n\nSo I am not against top witnesses getting paid, I just don\u00b4t think their SP daily payout is sustainable in the long term. \n\n## Possible Solutions\n\nI see two possible solutions to the problem and they would both be very easy to implement:\n\n1.-  It would be better if witnesses were getting a bigger percentage of liquid Steem, instead of 100% in Steem Power. This would not only reduce their SP daily growth it will also add selling pressure to steem, thus contributing to more people buying large amounts of steem for cheap.\n\n2.- Change the current DPOS system so that at least 38 witnesses were finding consecutive blocks. This would be only a partial solution in my opinion, it will reduce top witnesses payout but it would probably still be too much. It would also help out some backup witnesses that are having a hard time maintaining their nodes which are getting more expensive as the specs needed become more demanding. \n\nIt is weird that I have not read anything about this issue on steemit, maybe I have missed it or maybe it is because nobody wants to write controversial posts. Either way I would like to make it perfectly clear that this **IS NOT AN ATTACK ON WITNESSES OR WHALES**, it is my very humble proposal to improve SP distribution, something that would benefit the whole community.\n\n## I would love to read your thoughts on this matter?",
+    "body": "Top 19 witnesses get paid way too much, I feel like I am stating the obvious here and it wouldn´t really be that important if we weren´t trying to build a more balanced voting/reward system.\n\nIt’s like we are rowing both ways, on one side we are discussing changes in the code to reduce some big whale´s influence but on the other the system is giving around 1,370 SP per day to 19 users, yeah that´s right 1,370 SP per day!, this amount is unreachable even for the most prolific bloggers on Steemit and the gap between witnesses and normal users is growing each day. \n\n![](https://s18.postimg.org/qv4sjw8s9/shutterstock109187921.jpg)\n\nPlease don´t get me wrong this is not an attack on witnesses, I believe most witnesses are doing a great job, they not only maintain the network they also contribute with countless projects and tools. \n\nSo I am not against top witnesses getting paid, I just don´t think their SP daily payout is sustainable in the long term. \n\n## Possible Solutions\n\nI see two possible solutions to the problem and they would both be very easy to implement:\n\n1.-  It would be better if witnesses were getting a bigger percentage of liquid Steem, instead of 100% in Steem Power. This would not only reduce their SP daily growth it will also add selling pressure to steem, thus contributing to more people buying large amounts of steem for cheap.\n\n2.- Change the current DPOS system so that at least 38 witnesses were finding consecutive blocks. This would be only a partial solution in my opinion, it will reduce top witnesses payout but it would probably still be too much. It would also help out some backup witnesses that are having a hard time maintaining their nodes which are getting more expensive as the specs needed become more demanding. \n\nIt is weird that I have not read anything about this issue on steemit, maybe I have missed it or maybe it is because nobody wants to write controversial posts. Either way I would like to make it perfectly clear that this **IS NOT AN ATTACK ON WITNESSES OR WHALES**, it is my very humble proposal to improve SP distribution, something that would benefit the whole community.\n\n## I would love to read your thoughts on this matter?",
     "category": "steemit",
     "children": 19,
     "created": "2016-09-15T13:03:24",
@@ -351,6 +353,7 @@
     "permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
     "post_id": 1253575,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "elyaque/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z",
       "geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z",
@@ -365,7 +368,7 @@
       "hide": false,
       "total_votes": 59
     },
-    "title": "A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T13:03:24",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts"
   },
@@ -399,6 +402,7 @@
     "permlink": "re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z",
     "post_id": 1254885,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -406,7 +410,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:01:36",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z"
   },
@@ -444,6 +448,7 @@
     "permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z",
     "post_id": 1254823,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "james-show/re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z"
     ],
@@ -453,7 +458,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:57:54",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z"
   },
@@ -487,6 +492,7 @@
     "permlink": "re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z",
     "post_id": 1254515,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -494,7 +500,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:30:54",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z"
   },
@@ -533,6 +539,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z",
     "post_id": 1253641,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -540,7 +547,7 @@
       "hide": false,
       "total_votes": 1
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T13:11:00",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@elyaque/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z"
   },
@@ -591,6 +598,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z",
     "post_id": 1253872,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -598,7 +606,7 @@
       "hide": false,
       "total_votes": 4
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:47:15",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z"
   },
@@ -649,6 +657,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z",
     "post_id": 1254814,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "chitty/re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z"
     ],
@@ -658,7 +667,7 @@
       "hide": false,
       "total_votes": 4
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:56:48",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z"
   },
@@ -695,6 +704,7 @@
     "permlink": "re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z",
     "post_id": 1255296,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -702,7 +712,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:38:24",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z"
   },
@@ -736,6 +746,7 @@
     "permlink": "re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z",
     "post_id": 1255103,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "anduweb/re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z"
     ],
@@ -745,7 +756,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:23:36",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z"
   },
@@ -784,6 +795,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z",
     "post_id": 1254595,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "chitty/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z",
       "anduweb/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z"
@@ -794,7 +806,7 @@
       "hide": false,
       "total_votes": 1
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:37:33",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z"
   },
@@ -828,6 +840,7 @@
     "permlink": "re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z",
     "post_id": 1254940,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -835,7 +848,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:06:12",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z"
   },
@@ -869,6 +882,7 @@
     "permlink": "re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z",
     "post_id": 1257526,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -876,7 +890,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T18:54:45",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@liondani/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z"
   },
@@ -913,6 +927,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z",
     "post_id": 1255214,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -920,7 +935,7 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T15:29:45",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@mindhunter/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z"
   },
@@ -966,6 +981,7 @@
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z",
     "post_id": 1254444,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [
       "chitty/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z",
       "liondani/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z"
@@ -976,7 +992,7 @@
       "hide": false,
       "total_votes": 2
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:34:12",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@pfunk/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z"
   }

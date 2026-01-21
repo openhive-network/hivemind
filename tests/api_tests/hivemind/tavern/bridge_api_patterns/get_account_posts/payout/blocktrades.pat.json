@@ -1363,7 +1363,7 @@
     "author_reputation": 69.12,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "<html>\n<p>On the coding side of things, we made several <a href=\"https://github.com/steemit/steem/pulls\">pull requests</a> for features/fixes we recently made to the Steem client. Some I've mentioned previously, but one new one is the ability to send two transactions for the same amount of funds between the same pair of users in the same block. Previously the 2nd transaction would be rejected.</p>\n<p>This week we spent more time on business and design discussions versus coding work. Some proposals for changing features related to voting were discussed and ultimately rejected after soliciting community input (most notoriously, the vote nullification feature). Last I heard Dan was planning to go back to the drawing board on this issue, although I have hopes that some other features such as the ones below will take precedence for the near term.&nbsp;</p>\n<p>I've been pushing hard both publicly and behind the scenes for an introductory location where new users can get a nice introduction to the Steemit site and Steemit culture, and a recent post by Ned makes me think we're going to make some headway on this issue soon. I think this is critically important, not only so new users don't feel lost, but also to reduce friction between new and existing users and move us closer to a common ground about site usage.</p>\n<p>I also participated in some discussions about how to protect people from losing too much Steem in the event that a hacker manages to gain control of their account, as well as a feature for allowing a user to regain control of their Steem account if they lose their password. I think both of these features will be big selling points when making the case for Steem as a safe alternative to traditional money.&nbsp;</p>\n<p>I'm still arguing the case that a primary focus for the front-end developers for Steemit should be a feature that allows for new users who sign up via facebook to \u201cShare\u201d that they've signed up to Steemit as a means of viral advertising. If you agree or if you think there's other more important features that the GUI guys should focus on first, please leave a comment.&nbsp;</p>\n</html>",
+    "body": "<html>\n<p>On the coding side of things, we made several <a href=\"https://github.com/steemit/steem/pulls\">pull requests</a> for features/fixes we recently made to the Steem client. Some I've mentioned previously, but one new one is the ability to send two transactions for the same amount of funds between the same pair of users in the same block. Previously the 2nd transaction would be rejected.</p>\n<p>This week we spent more time on business and design discussions versus coding work. Some proposals for changing features related to voting were discussed and ultimately rejected after soliciting community input (most notoriously, the vote nullification feature). Last I heard Dan was planning to go back to the drawing board on this issue, although I have hopes that some other features such as the ones below will take precedence for the near term.&nbsp;</p>\n<p>I've been pushing hard both publicly and behind the scenes for an introductory location where new users can get a nice introduction to the Steemit site and Steemit culture, and a recent post by Ned makes me think we're going to make some headway on this issue soon. I think this is critically important, not only so new users don't feel lost, but also to reduce friction between new and existing users and move us closer to a common ground about site usage.</p>\n<p>I also participated in some discussions about how to protect people from losing too much Steem in the event that a hacker manages to gain control of their account, as well as a feature for allowing a user to regain control of their Steem account if they lose their password. I think both of these features will be big selling points when making the case for Steem as a safe alternative to traditional money.&nbsp;</p>\n<p>I'm still arguing the case that a primary focus for the front-end developers for Steemit should be a feature that allows for new users who sign up via facebook to “Share” that they've signed up to Steemit as a means of viral advertising. If you agree or if you think there's other more important features that the GUI guys should focus on first, please leave a comment.&nbsp;</p>\n</html>",
     "category": "witness-category",
     "children": 75,
     "created": "2016-08-19T21:21:00",
@@ -1388,6 +1388,7 @@
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 4.0,
@@ -2611,7 +2612,7 @@
     "author_reputation": 69.12,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "<html>\n<p>I had decided to stop posting these, since my last post was getting flack from some of the other witnesses (see comments in my previous witness post for details), but a couple of other people have since commented asking me to resume posting, so I've decided to start posting these again anyways. If other whales want to downvote these posts, so be it, I suppose my reputation score can stand the hit.</p>\n<p>Depending on how much I have to say at any given time, these posts may not be strictly weekly. Over the next two weeks, I have a really busy schedule related to <a href=\"http://www.peerplays.com/\">Peerplays project</a> deadlines, so I probably won't post during that time unless something important comes up.</p>\n<p>One thing I did like about making these posts weekly is it was a nice way to keep track of where my time goes. Two weeks have gone by, and it's already hard for me to remember exactly what we worked on during that time. I used to think I have a really great memory, but it seems to work better for facts/figures than for daily events, especially when my days tend to consist of jumping back and forth between a lot of different tasks. Sometimes I long for the days when I could just focus on one task for a long stretch of time. But it's hard to report on those tasks too, since then you sometimes struggle to say more than \u201ccontinued work on x\u201d unless you can figure out some nice way to describe your sub-goals in a way that makes sense to anyone besides yourself.</p>\n<h3>What I remember of the last week or so...</h3>\n<p>Not surprisingly, the thing I remember best is what I've done in the past few days. We've just added some new Steem-related trading pairs to <a href=\"https://blocktrades.us\">BlockTrades</a>:</p>\n<p>STEEM \u2192 ETH</p>\n<p>&nbsp;STEEM \u2192 DOGE&nbsp;</p>\n<p>STEEM \u2192 DASH&nbsp;</p>\n<p>STEEM \u2192 LTC&nbsp;</p>\n<p>(we already had the other direction for these pairs)<br>\nNew bidirectional paths for Steem Dollars:&nbsp;</p>\n<p>SBD &lt;-&gt;&nbsp;ETH</p>\n<p>SBD &lt;-&gt; DOGE</p>\n<p>SBD &lt;-&gt; DASH</p>\n<p>SBD &lt;-&gt; LTC<br>\nWe'll also be adding support for some new coins soon and we'll add Steem/SBD pairs for those coins too.</p>\n<h3>The Politics of Steem</h3>\n<p>On the political side of Steem, the debate continues as to where Steem and Steemit should \u201cgo\u201d next. I continue to oppose to what I consider premature \u201ctinkering\u201d to the voting and curation system. The most recent case of this is <a href=\"https://github.com/steemit/steem/issues/323\">https://github.com/steemit/steem/issues/323</a>. At the very least, as suggested by some other witnesses, I think the threshold for such a vote should be more than a majority (at least 2/3 of all witnesses, for example). I've also heard several other curation-related proposals which I don't think have yet made it to the stage of github issues, but I haven't heard any yet that I think have a solid story to support them: they seem more like experiments to me, and I think experimenting with the heart of the value proposition for Steem Power is a risky operation.</p>\n<p>Instead of tweaking the curation system, I'm still advocating for more changes to the front-end of Steemit. This is because I believe that Steem is first and foremost an open, decentralized social media platform and that the user experience is more important than the rewards system. The platform should be easier to join, doing things like adding images, audio, and video should be extremely easy for novice users, the tagging system should work better, there should be more ways for users to interact with each other, there should a clear place on the Steemit site to get help and find information about site usage, and the latest revision of the post editor feels terrible to me (this is the first big post I've made using this version so I hadn't noticed it till now, but ultimately I resorted to editing this post in a separate editor using raw HTML). Everyday billions of people use social media sites that are tightly controlled by the site owners and who pay nothing to their users. If we focus on adding the types of features those sites already have and keep our system open and free, with the chance for rewards, I think we're sitting on a winning combination.</p>\n<p>I do believe that the rewards system is an important force for attracting new users, but I think it's inevitable that not everyone is going to be able to make lots of money by authoring articles. First, most people aren't great writers (I hope this point isn't too controversial). Second, non-native English speakers are at a distinct disadvantage when trying to write English articles and the majority of powerful voters read English.</p>\n<p>One way that we can spread rewards around to users that aren't great English writers is to accept the idea that finding good articles and translating articles written in other languages is a useful function, as long as proper attribution is given to the original source. And if we're willing to give decent rewards to such posts, I think we will reduce the cases of unattributed copy-paste posting. Note, this doesn't require any changes to the code of Steem or Steemit, this is just a proposal for a cultural change.</p>\n<h3>Final Note</h3>\n<p>I met with the Steem team for lunch last week, and I was pleased to see they had added two new members to the team, including a new front-end web programmer. But I still think they can use more web guys, so if you're a skilled javascript programmer, I hope you will consider sending your resume to Ned. I think they generally favor employees who are willing to relocate, but if you're a rockstar maybe you can negotiate the point if it's an issue for you.</p>\n</html>",
+    "body": "<html>\n<p>I had decided to stop posting these, since my last post was getting flack from some of the other witnesses (see comments in my previous witness post for details), but a couple of other people have since commented asking me to resume posting, so I've decided to start posting these again anyways. If other whales want to downvote these posts, so be it, I suppose my reputation score can stand the hit.</p>\n<p>Depending on how much I have to say at any given time, these posts may not be strictly weekly. Over the next two weeks, I have a really busy schedule related to <a href=\"http://www.peerplays.com/\">Peerplays project</a> deadlines, so I probably won't post during that time unless something important comes up.</p>\n<p>One thing I did like about making these posts weekly is it was a nice way to keep track of where my time goes. Two weeks have gone by, and it's already hard for me to remember exactly what we worked on during that time. I used to think I have a really great memory, but it seems to work better for facts/figures than for daily events, especially when my days tend to consist of jumping back and forth between a lot of different tasks. Sometimes I long for the days when I could just focus on one task for a long stretch of time. But it's hard to report on those tasks too, since then you sometimes struggle to say more than “continued work on x” unless you can figure out some nice way to describe your sub-goals in a way that makes sense to anyone besides yourself.</p>\n<h3>What I remember of the last week or so...</h3>\n<p>Not surprisingly, the thing I remember best is what I've done in the past few days. We've just added some new Steem-related trading pairs to <a href=\"https://blocktrades.us\">BlockTrades</a>:</p>\n<p>STEEM → ETH</p>\n<p>&nbsp;STEEM → DOGE&nbsp;</p>\n<p>STEEM → DASH&nbsp;</p>\n<p>STEEM → LTC&nbsp;</p>\n<p>(we already had the other direction for these pairs)<br>\nNew bidirectional paths for Steem Dollars:&nbsp;</p>\n<p>SBD &lt;-&gt;&nbsp;ETH</p>\n<p>SBD &lt;-&gt; DOGE</p>\n<p>SBD &lt;-&gt; DASH</p>\n<p>SBD &lt;-&gt; LTC<br>\nWe'll also be adding support for some new coins soon and we'll add Steem/SBD pairs for those coins too.</p>\n<h3>The Politics of Steem</h3>\n<p>On the political side of Steem, the debate continues as to where Steem and Steemit should “go” next. I continue to oppose to what I consider premature “tinkering” to the voting and curation system. The most recent case of this is <a href=\"https://github.com/steemit/steem/issues/323\">https://github.com/steemit/steem/issues/323</a>. At the very least, as suggested by some other witnesses, I think the threshold for such a vote should be more than a majority (at least 2/3 of all witnesses, for example). I've also heard several other curation-related proposals which I don't think have yet made it to the stage of github issues, but I haven't heard any yet that I think have a solid story to support them: they seem more like experiments to me, and I think experimenting with the heart of the value proposition for Steem Power is a risky operation.</p>\n<p>Instead of tweaking the curation system, I'm still advocating for more changes to the front-end of Steemit. This is because I believe that Steem is first and foremost an open, decentralized social media platform and that the user experience is more important than the rewards system. The platform should be easier to join, doing things like adding images, audio, and video should be extremely easy for novice users, the tagging system should work better, there should be more ways for users to interact with each other, there should a clear place on the Steemit site to get help and find information about site usage, and the latest revision of the post editor feels terrible to me (this is the first big post I've made using this version so I hadn't noticed it till now, but ultimately I resorted to editing this post in a separate editor using raw HTML). Everyday billions of people use social media sites that are tightly controlled by the site owners and who pay nothing to their users. If we focus on adding the types of features those sites already have and keep our system open and free, with the chance for rewards, I think we're sitting on a winning combination.</p>\n<p>I do believe that the rewards system is an important force for attracting new users, but I think it's inevitable that not everyone is going to be able to make lots of money by authoring articles. First, most people aren't great writers (I hope this point isn't too controversial). Second, non-native English speakers are at a distinct disadvantage when trying to write English articles and the majority of powerful voters read English.</p>\n<p>One way that we can spread rewards around to users that aren't great English writers is to accept the idea that finding good articles and translating articles written in other languages is a useful function, as long as proper attribution is given to the original source. And if we're willing to give decent rewards to such posts, I think we will reduce the cases of unattributed copy-paste posting. Note, this doesn't require any changes to the code of Steem or Steemit, this is just a proposal for a cultural change.</p>\n<h3>Final Note</h3>\n<p>I met with the Steem team for lunch last week, and I was pleased to see they had added two new members to the team, including a new front-end web programmer. But I still think they can use more web guys, so if you're a skilled javascript programmer, I hope you will consider sending your resume to Ned. I think they generally favor employees who are willing to relocate, but if you're a rockstar maybe you can negotiate the point if it's an issue for you.</p>\n</html>",
     "category": "witness-category",
     "children": 55,
     "created": "2016-09-01T00:16:15",
@@ -2639,6 +2640,7 @@
     "permlink": "witness-report-for-blocktrades-for-last-week-of-august",
     "post_id": 1078306,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -2725,6 +2727,7 @@
     "permlink": "re-egjoshslim-a-request-to-blocktrades-please-allow-us-too-trade-steem-and-steem-dollars-for-other-currencies-20160830t142318352z",
     "post_id": 1056595,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -2847,6 +2850,7 @@
     "permlink": "re-dollarvigilante-the-great-steemit-debate-tone-vays-vs-jeff-berwick-ponzi-scheme-or-paradigm-shift-20160819t030618512z",
     "post_id": 882503,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -2905,6 +2909,7 @@
     "permlink": "re-pjheinz-re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160820t024946321z",
     "post_id": 899871,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3107,6 +3112,7 @@
     "permlink": "re-charlieshrem-how-to-live-completely-off-steem-using-a-virtual-and-physical-debit-card-topped-up-with-steem-20160910t172944767z",
     "post_id": 1198358,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3189,6 +3195,7 @@
     "permlink": "re-bacchist-dan-needs-to-be-stopped-20160817t042416831z",
     "post_id": 846962,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3247,6 +3254,7 @@
     "permlink": "re-ekaterina4ka-knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3-20160829t125910851z",
     "post_id": 1040800,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3254,7 +3262,7 @@
       "hide": false,
       "total_votes": 4
     },
-    "title": "RE: Knitting needles , my passion . Post 3. \u0412\u044f\u0437\u0430\u043d\u0438\u0435 \u0441\u043f\u0438\u0446\u0430\u043c\u0438, \u043c\u043e\u0435 \u0443\u0432\u043b\u0435\u0447\u0435\u043d\u0438\u0435. \u041f\u043e\u0441\u0442 3.",
+    "title": "RE: Knitting needles , my passion . Post 3. Вязание спицами, мое увлечение. Пост 3.",
     "updated": "2016-08-29T12:59:06",
     "url": "/photography/@ekaterina4ka/knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3#@blocktrades/re-ekaterina4ka-knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3-20160829t125910851z"
   },
@@ -3309,6 +3317,7 @@
     "permlink": "re-heretickitten-re-timsaid-who-s-the-real-threat-to-your-security-rogue-hackers-vs-the-government-20160823t210021642z",
     "post_id": 957017,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3316,7 +3325,7 @@
       "hide": false,
       "total_votes": 5
     },
-    "title": "RE: Who\u2019s the real Threat to your Security? Rogue Hackers vs. the Government",
+    "title": "RE: Who’s the real Threat to your Security? Rogue Hackers vs. the Government",
     "updated": "2016-08-23T21:00:21",
     "url": "/security/@timsaid/who-s-the-real-threat-to-your-security-rogue-hackers-vs-the-government#@blocktrades/re-heretickitten-re-timsaid-who-s-the-real-threat-to-your-security-rogue-hackers-vs-the-government-20160823t210021642z"
   },
@@ -3371,6 +3380,7 @@
     "permlink": "re-lukmarcus-re-blocktrades-re-lukmarcus-griddler-contest-01-create-correct-image-and-get-the-reward-20160829t152206231z",
     "post_id": 1042376,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3457,6 +3467,7 @@
     "permlink": "re-leahmchenry-my-softer-cover-of-loosing-my-religion-a-song-for-your-sunday-afternoon-on-steemit-20160828t024205929z",
     "post_id": 1021432,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3547,6 +3558,7 @@
     "permlink": "re-timcliff-re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t174828393z",
     "post_id": 1161506,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3597,6 +3609,7 @@
     "permlink": "re-maxrubin-how-to-use-this-website-20160817t030316689z",
     "post_id": 846145,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3659,6 +3672,7 @@
     "permlink": "re-bacchist-re-blakemiles84-re-bacchist-dan-needs-to-be-stopped-20160817t042543912z",
     "post_id": 846980,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3705,6 +3719,7 @@
     "permlink": "re-jesta-re-blocktrades-re-pjheinz-re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160822t035102905z",
     "post_id": 929588,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3751,6 +3766,7 @@
     "permlink": "re-innuendo-re-furion-re-innuendo-is-the-steem-social-contract-being-abused-steem-funds-are-to-be-used-to-fund-unrelated-projects-20160817t005844221z",
     "post_id": 844701,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3809,6 +3825,7 @@
     "permlink": "re-michaelmatthews-warning-how-i-lost-bitcoins-using-a-paper-wallet-20160816t190720317z",
     "post_id": 839563,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3867,6 +3884,7 @@
     "permlink": "re-mynameisbrian-satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar-20160901t184605661z",
     "post_id": 1088507,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3913,6 +3931,7 @@
     "permlink": "re-matherly-that-evil-dispicable-montrously-devious-vlad-putin-he-s-responsible-for-all-our-problems-and-then-some-20160817t032551179z",
     "post_id": 846392,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -3959,6 +3978,7 @@
     "permlink": "re-aleksandraz-re-blocktrades-re-mermayed-fight-flight-and-stage-fright-the-3rd-fear-response-no-one-talks-about-20160818t145510336z",
     "post_id": 871792,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

@@ -32,6 +32,7 @@
     "permlink": "crocodile01",
     "post_id": 1256963,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -79,6 +80,7 @@
     "permlink": "nonpinpost1",
     "post_id": 1256941,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -123,6 +125,7 @@
     "permlink": "regular-post",
     "post_id": 1256970,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -167,6 +170,7 @@
     "permlink": "nonpinpost3",
     "post_id": 1256953,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -211,6 +215,7 @@
     "permlink": "regular-post",
     "post_id": 1256965,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

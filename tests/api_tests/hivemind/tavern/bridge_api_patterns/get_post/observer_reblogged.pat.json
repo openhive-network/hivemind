@@ -428,7 +428,7 @@
   "post_id": 1,
   "replies": [],
   "reblogs": 1,
-  "observer_reblogged": false,
+  "observer_reblogged": true,
   "stats": {
     "flag_weight": 2.0,
     "gray": false,

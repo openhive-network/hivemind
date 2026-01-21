@@ -72,6 +72,7 @@
     "permlink": "re-complexring-preview-of-custom-steemit-com-skins-by-maximkichev-20160824t220504965z",
     "post_id": 973569,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -360,7 +361,7 @@
     "blacklists": [
       "reputation-0"
     ],
-    "body": "Today is an historical day for me. This is my **thousandth** post on Steemit already, I hit **100** followers today \u00e1nd I'm finally past the magical limit of **3000** SP! :D\n![Achievement unlocked](http://rlv.zcache.com/achievement_unlocked_bumper_sticker-r50c3a5b34b904bb4a8d9e6aad6b920a1_v9wht_8byvr_512.jpg)\n#### Thanks!\nThanks to all my followers, voters and friends! I hope we'll meet again soon, and continue scoring milestones! :)\nAlso, a thank you for the devs, we **love** your work, keep going!",
+    "body": "Today is an historical day for me. This is my **thousandth** post on Steemit already, I hit **100** followers today ánd I'm finally past the magical limit of **3000** SP! :D\n![Achievement unlocked](http://rlv.zcache.com/achievement_unlocked_bumper_sticker-r50c3a5b34b904bb4a8d9e6aad6b920a1_v9wht_8byvr_512.jpg)\n#### Thanks!\nThanks to all my followers, voters and friends! I hope we'll meet again soon, and continue scoring milestones! :)\nAlso, a thank you for the devs, we **love** your work, keep going!",
     "category": "steemit",
     "children": 35,
     "created": "2016-08-21T20:34:39",
@@ -388,6 +389,7 @@
     "permlink": "my-1000th-post-and-other-steemit-achievements",
     "post_id": 925023,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 4.0,
@@ -483,6 +485,7 @@
     "permlink": "re-jvper-international-money-transfer-provider-started-using-steem-20160823t142700478z",
     "post_id": 951445,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

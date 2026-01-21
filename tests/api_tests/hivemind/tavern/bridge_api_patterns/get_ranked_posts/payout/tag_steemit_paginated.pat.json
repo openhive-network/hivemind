@@ -298,6 +298,7 @@
     "post_id": 1191842,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -852,6 +853,7 @@
     "post_id": 1186647,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

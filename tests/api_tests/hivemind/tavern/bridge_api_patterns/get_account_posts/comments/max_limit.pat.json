@@ -43,6 +43,7 @@
     "post_id": 1258003,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -97,6 +98,7 @@
     "post_id": 1257653,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -151,6 +153,7 @@
     "post_id": 1257605,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -205,6 +208,7 @@
     "post_id": 1257514,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -239,7 +243,7 @@
     "author_reputation": 64.17,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Hi! I am a content-detection robot. This post is to help manual curators; I have NOT flagged you.\nHere is similar content:\nhttp://fizhnews.com/news/How-Sony\u2019s-New-Show-\u2018Startup\u2019-Gets-Bitcoin-Right",
+    "body": "Hi! I am a content-detection robot. This post is to help manual curators; I have NOT flagged you.\nHere is similar content:\nhttp://fizhnews.com/news/How-Sony’s-New-Show-‘Startup’-Gets-Bitcoin-Right",
     "category": "bitcoin",
     "children": 0,
     "created": "2016-09-15T18:46:30",
@@ -259,13 +263,14 @@
     "post_id": 1257416,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "total_votes": 4
     },
-    "title": "RE: Sony\u2019s New Show \u2018Startup\u2019 Gets Bitcoin Right but other parts of the program can use some work",
+    "title": "RE: Sony’s New Show ‘Startup’ Gets Bitcoin Right but other parts of the program can use some work",
     "updated": "2016-09-15T18:46:30",
     "url": "/bitcoin/@owaisted/sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work#@cheetah/re-sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work-20160915t184630"
   },
@@ -317,6 +322,7 @@
     "post_id": 1257147,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -371,6 +377,7 @@
     "post_id": 1256592,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -425,6 +432,7 @@
     "post_id": 1253612,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -479,6 +487,7 @@
     "post_id": 1253133,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -561,6 +570,7 @@
     "post_id": 1252625,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -615,6 +625,7 @@
     "post_id": 1252467,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -669,6 +680,7 @@
     "post_id": 1252343,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -723,6 +735,7 @@
     "post_id": 1252143,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -777,6 +790,7 @@
     "post_id": 1252102,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -831,6 +845,7 @@
     "post_id": 1251858,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -885,6 +900,7 @@
     "post_id": 1251837,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -939,6 +955,7 @@
     "post_id": 1250816,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -993,6 +1010,7 @@
     "post_id": 1250783,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1047,6 +1065,7 @@
     "post_id": 1250521,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1101,6 +1120,7 @@
     "post_id": 1250441,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

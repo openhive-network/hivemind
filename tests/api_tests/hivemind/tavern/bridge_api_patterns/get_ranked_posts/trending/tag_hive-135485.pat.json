@@ -27,6 +27,7 @@
     "permlink": "crocodile03",
     "post_id": 1256966,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -67,6 +68,7 @@
     "permlink": "crocodile02",
     "post_id": 1256964,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -110,6 +112,7 @@
     "permlink": "pinpost12",
     "post_id": 1256952,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -155,6 +158,7 @@
     "permlink": "pinpost11",
     "post_id": 1256951,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -195,6 +199,7 @@
     "permlink": "pinpost10",
     "post_id": 1256950,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -235,6 +240,7 @@
     "permlink": "pinpost9",
     "post_id": 1256949,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -275,6 +281,7 @@
     "permlink": "pinpost8",
     "post_id": 1256948,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -315,6 +322,7 @@
     "permlink": "pinpost7",
     "post_id": 1256947,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -355,6 +363,7 @@
     "permlink": "pinpost6",
     "post_id": 1256946,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -400,6 +409,7 @@
     "permlink": "pinpost5",
     "post_id": 1256945,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -440,6 +450,7 @@
     "permlink": "pinpost4",
     "post_id": 1256943,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -480,6 +491,7 @@
     "permlink": "pinpost3",
     "post_id": 1256942,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -520,6 +532,7 @@
     "permlink": "pinpost2",
     "post_id": 1256940,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -565,6 +578,7 @@
     "permlink": "pinpost1",
     "post_id": 1256939,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -605,6 +619,7 @@
     "permlink": "pinned-post",
     "post_id": 1256938,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -650,6 +665,7 @@
     "permlink": "crocodile01",
     "post_id": 1256963,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -697,6 +713,7 @@
     "permlink": "nonpinpost1",
     "post_id": 1256941,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -741,6 +758,7 @@
     "permlink": "regular-post",
     "post_id": 1256970,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -785,6 +803,7 @@
     "permlink": "nonpinpost3",
     "post_id": 1256953,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -829,6 +848,7 @@
     "permlink": "regular-post",
     "post_id": 1256965,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

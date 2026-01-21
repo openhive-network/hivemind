@@ -11,7 +11,7 @@
     "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "<html>\n<p>Don\u2019t cry because it\u2019s over. Smile because it happened.&nbsp;</p>\n</html>",
+    "body": "<html>\n<p>Don’t cry because it’s over. Smile because it happened.&nbsp;</p>\n</html>",
     "category": "frase",
     "children": 0,
     "created": "2016-09-15T19:23:48",
@@ -37,6 +37,7 @@
     "post_id": 1257838,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -95,6 +96,7 @@
     "post_id": 1257792,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -164,6 +166,7 @@
     "post_id": 1257788,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

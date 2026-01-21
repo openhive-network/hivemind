@@ -29,6 +29,7 @@
     "post_id": 5239,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -117,6 +118,7 @@
     "post_id": 5234,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -139,7 +141,7 @@
     "author_reputation": 65.67,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Un vecino de Arenas de San Pedro ha fallecido al ahogarse en el r\u00edo Arenal, al caerse al cauce cuando intentaba rescatar a su perro, que se hab\u00eda precipitado al agua. \n\n\nSe trata de Ricardo Santos, de 52 a\u00f1os y conocido en Arenas como miembro de la Asociaci\u00f3n de Amigos del Palacio de La Mosquera y fue n\u00famero dos en la lista municipal Por Arenas en 2015.\n\n\n El hecho ocurri\u00f3 al caerse al r\u00edo a la altura del Pol\u00edgono El Martinete, aguas abajo del Arenal, un cauce con abundante caudal y fuerte corriente tras las intensas precipitaciones de los \u00faltimos d\u00edas.\n\n\n La v\u00edctima ha intentado rescatar a su perro de una corriente que le arrastr\u00f3 y que hizo que se le perdiera de vista, seg\u00fan la llamada que alert\u00f3 al Servicio de Emergencias 112, realizada por un amigo que le acompa\u00f1aba en su paseo por la orilla del r\u00edo Arenal.\n\n\n Hasta el lugar del hecho acudieron efectivos de Polic\u00eda Local, Guardia Civil y de Protecci\u00f3n Civil, que para lograr extraer el  cuerpo del fallecido tuvieron que amarrarse a un \u00e1rbol para evitar ser arrastrados por la corriente en un lugar agreste y con \"muchas piedras.\n\n\n Tras realizarle, sin \u00e9xito, las labores de recuperaci\u00f3n cardiopulmonar, los facultativos de Sacyl desplazados a la zona s\u00f3lo pudieron certificar el fallecimiento.",
+    "body": "Un vecino de Arenas de San Pedro ha fallecido al ahogarse en el río Arenal, al caerse al cauce cuando intentaba rescatar a su perro, que se había precipitado al agua. \n\n\nSe trata de Ricardo Santos, de 52 años y conocido en Arenas como miembro de la Asociación de Amigos del Palacio de La Mosquera y fue número dos en la lista municipal Por Arenas en 2015.\n\n\n El hecho ocurrió al caerse al río a la altura del Polígono El Martinete, aguas abajo del Arenal, un cauce con abundante caudal y fuerte corriente tras las intensas precipitaciones de los últimos días.\n\n\n La víctima ha intentado rescatar a su perro de una corriente que le arrastró y que hizo que se le perdiera de vista, según la llamada que alertó al Servicio de Emergencias 112, realizada por un amigo que le acompañaba en su paseo por la orilla del río Arenal.\n\n\n Hasta el lugar del hecho acudieron efectivos de Policía Local, Guardia Civil y de Protección Civil, que para lograr extraer el  cuerpo del fallecido tuvieron que amarrarse a un árbol para evitar ser arrastrados por la corriente en un lugar agreste y con \"muchas piedras.\n\n\n Tras realizarle, sin éxito, las labores de recuperación cardiopulmonar, los facultativos de Sacyl desplazados a la zona sólo pudieron certificar el fallecimiento.",
     "category": "news",
     "children": 1,
     "created": "2016-05-12T17:10:39",
@@ -157,6 +159,7 @@
     "post_id": 5218,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

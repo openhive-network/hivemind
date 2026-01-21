@@ -25,6 +25,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive3",
     "post_id": 1256929,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -62,6 +63,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive2-03",
     "post_id": 1256928,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -99,6 +101,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive2-02",
     "post_id": 1256927,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -139,6 +142,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive2",
     "post_id": 1256926,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -180,6 +184,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive1-03",
     "post_id": 1256925,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -221,6 +226,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive1-02",
     "post_id": 1256924,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -265,6 +271,7 @@
     "permlink": "after-muted-comment-to-please-comment-hive1",
     "post_id": 1256923,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -300,6 +307,7 @@
     "permlink": "Third-after-muted-post-hive3",
     "post_id": 1256922,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -335,6 +343,7 @@
     "permlink": "Third-after-muted-post-hive2",
     "post_id": 1256921,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -374,6 +383,7 @@
     "permlink": "Third-after-muted-post-hive1",
     "post_id": 1256920,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -409,6 +419,7 @@
     "permlink": "Second-after-muted-post-hive3",
     "post_id": 1256919,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -447,6 +458,7 @@
     "permlink": "Second-after-muted-post-hive2",
     "post_id": 1256918,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -489,6 +501,7 @@
     "permlink": "Second-after-muted-post-hive1",
     "post_id": 1256917,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -527,6 +540,7 @@
     "permlink": "First-after-muted-post-hive3",
     "post_id": 1256916,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -562,6 +576,7 @@
     "permlink": "First-after-muted-post-hive2",
     "post_id": 1256915,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -601,6 +616,7 @@
     "permlink": "First-after-muted-post-hive1",
     "post_id": 1256914,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -636,6 +652,7 @@
     "permlink": "My-third-post-hive3",
     "post_id": 1256894,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -671,6 +688,7 @@
     "permlink": "My-third-post-hive2",
     "post_id": 1256893,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -710,6 +728,7 @@
     "permlink": "My-third-post-hive1",
     "post_id": 1256892,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -745,6 +764,7 @@
     "permlink": "My-second-post-hive3",
     "post_id": 1256888,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

@@ -51,6 +51,7 @@
     "permlink": "test-beneficiaries",
     "post_id": 1251464,
     "reblogs": 0,
+    "observer_reblogged": false,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,

@@ -30,6 +30,7 @@
     "post_id": 1251614,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -47,7 +48,7 @@
     "author_reputation": 55.66,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "\u0421\u043f\u0430\u0441\u0438\u0431\u043e \u0431\u043e\u043b\u044c\u0448\u043e\u0435 \u0432\u0430\u043c:)",
+    "body": "Спасибо большое вам:)",
     "category": "steemit",
     "children": 0,
     "created": "2016-09-14T19:18:24",
@@ -71,6 +72,7 @@
     "post_id": 1246187,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -88,7 +90,7 @@
     "author_reputation": 55.66,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "\u0421\u043f\u0430\u0441\u0438\u0431\u043e \u0431\u043e\u043b\u044c\u0448\u043e\u0435!",
+    "body": "Спасибо большое!",
     "category": "steemit",
     "children": 0,
     "created": "2016-09-14T19:16:57",
@@ -112,6 +114,7 @@
     "post_id": 1246171,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -153,6 +156,7 @@
     "post_id": 1246163,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -194,6 +198,7 @@
     "post_id": 1234292,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -235,6 +240,7 @@
     "post_id": 1212188,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -276,6 +282,7 @@
     "post_id": 1199090,
     "replies": [],
     "reblogs": 0,
+    "observer_reblogged": false,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
