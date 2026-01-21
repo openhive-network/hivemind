@@ -163,13 +163,13 @@ BEGIN
 
   -- Return reblog status for posts matching the criteria
   IF _tag IS NULL OR _tag = '' OR _tag = 'all' THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_all_rest(_post_id, _observer_id, _limit, _sort_type);
+    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_all(_post_id, _observer_id, _limit, _sort_type);
   ELSIF _tag = 'my' THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_observer_communities_rest(_post_id, _observer_id, _limit, _sort_type);
+    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_observer_communities(_post_id, _observer_id, _limit, _sort_type);
   ELSIF hivemind_postgrest_utilities.check_community(_tag) THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_community_rest(_post_id, _observer_id, _limit, _tag, _sort_type);
+    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_community(_post_id, _observer_id, _limit, _tag, _sort_type);
   ELSE
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_tag_rest(_post_id, _observer_id, _limit, _tag, _sort_type);
+    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_tag(_post_id, _observer_id, _limit, _tag, _sort_type);
   END IF;
 END
 $$;

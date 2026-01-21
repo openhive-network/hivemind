@@ -56,10 +56,6 @@ declare
       "description": null
     },
     {
-      "name": "hive_api",
-      "description": "Hive-specific API endpoints"
-    },
-    {
       "name": "Other",
       "description": "General API information"
     }
