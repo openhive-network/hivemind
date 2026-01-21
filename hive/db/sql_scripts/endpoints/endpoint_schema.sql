@@ -56,6 +56,10 @@ declare
       "description": null
     },
     {
+      "name": "hive_api",
+      "description": "Hive-specific API endpoints"
+    },
+    {
       "name": "Other",
       "description": "General API information"
     }
@@ -167,6 +171,135 @@ declare
     }
   },
   "paths": {
+    "/rpc/home#hive.get_reblogged_by_account": {
+      "post": {
+        "tags": [
+          "hive_api"
+        ],
+        "summary": "Get reblog status for ranked posts",
+        "description": "Returns reblog status for posts matching the same criteria as bridge.get_ranked_posts. This is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.\n\nJSON-RPC call example:\n```json\n{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"hive.get_reblogged_by_account\",\n  \"params\": {\n    \"sort\": \"trending\",\n    \"tag\": \"\",\n    \"observer\": \"alice\",\n    \"limit\": 20\n  }\n}\n```\n",
+        "operationId": "hive.get_reblogged_by_account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["jsonrpc", "method", "id", "params"],
+                "properties": {
+                  "jsonrpc": {
+                    "type": "string",
+                    "enum": ["2.0"]
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": ["hive.get_reblogged_by_account"]
+                  },
+                  "id": {
+                    "type": "integer"
+                  },
+                  "params": {
+                    "type": "object",
+                    "required": ["sort", "observer"],
+                    "properties": {
+                      "sort": {
+                        "type": "string",
+                        "enum": ["trending", "hot", "created", "payout", "payout_comments", "muted"],
+                        "description": "Sorting method for posts"
+                      },
+                      "tag": {
+                        "type": "string",
+                        "description": "Filter by tag, community name, ''my'' for observer''s subscribed communities, or empty/''all'' for all posts"
+                      },
+                      "observer": {
+                        "type": "string",
+                        "description": "Account name to check reblog status for (required)"
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "default": 20,
+                        "minimum": 1,
+                        "description": "Maximum number of posts to return"
+                      },
+                      "start_author": {
+                        "type": "string",
+                        "description": "Author of post to start pagination from"
+                      },
+                      "start_permlink": {
+                        "type": "string",
+                        "description": "Permlink of post to start pagination from"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Array of posts with reblog status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jsonrpc": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "post_id": {
+                            "type": "integer",
+                            "description": "Unique post identifier"
+                          },
+                          "author": {
+                            "type": "string",
+                            "description": "Post author account name"
+                          },
+                          "permlink": {
+                            "type": "string",
+                            "description": "Post permlink"
+                          },
+                          "reblogged": {
+                            "type": "boolean",
+                            "description": "True if the observer has reblogged this post"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "jsonrpc": "2.0",
+                  "id": 1,
+                  "result": [
+                    {
+                      "post_id": 141560746,
+                      "author": "hiveio",
+                      "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
+                      "reblogged": true
+                    },
+                    {
+                      "post_id": 141559832,
+                      "author": "alice",
+                      "permlink": "my-awesome-post",
+                      "reblogged": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/accounts/{account-name}/operations": {
       "get": {
         "tags": [
