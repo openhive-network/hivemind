@@ -328,14 +328,3 @@ The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
 -   Benchmarking tests
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
-
-## Dependency Management (Poetry)
-
--   **Always use Poetry version 2.1.3**
--   **Dependency versions are specified in `pyproject.toml` and locked in `poetry.lock`**
--   **Always use `poetry lock`** (without additional flags like `--regenerate`)
--   **Always run `poetry lock` after changing `pyproject.toml`**
--   **The `poetry.lock` file must be in the repository** - never add it to `.gitignore`
--   **Never delete `poetry.lock`** - it ensures reproducible builds
--   **Never edit `poetry.lock` manually** - always use poetry commands
--   **Don't upgrade dependencies on your own** - only upgrade when explicitly requested
