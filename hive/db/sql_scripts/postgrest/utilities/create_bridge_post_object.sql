@@ -48,6 +48,7 @@ BEGIN
                   WHEN _update_reblogs_field THEN (SELECT COUNT(*) FROM hivemind_app.hive_reblogs hr WHERE hr.post_id = _row.id)
                   ELSE 0
                 END),
+    'observer_reblogged', (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = _row.id)),
     'url', _row.url,
     'beneficiaries', _row.beneficiaries,
     'max_accepted_payout', _row.max_accepted_payout,
