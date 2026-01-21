@@ -4,14 +4,20 @@ from typing import Final
 
 from api_client_tests.api_caller import HivemindApiCaller
 
+from beekeepy._communication.is_url_reachable import async_get_first_reachable_url
 from beekeepy._communication.url import HttpUrl
 
-DEFAULT_ENDPOINT_FOR_TESTS: Final[HttpUrl] = HttpUrl("https://api.syncad.com")
+FALLBACK_ENDPOINTS: Final[list[HttpUrl]] = [
+    HttpUrl("https://api.syncad.com"),
+    HttpUrl("https://api.hive.blog"),
+]
 SEARCHED_ACCOUNT_IN_TESTS: Final[str] = "gtg"
+
 
 async def test_generated_api_client():
     # ARRANGE
-    api_caller = HivemindApiCaller(endpoint_url=DEFAULT_ENDPOINT_FOR_TESTS)
+    endpoint = await async_get_first_reachable_url(FALLBACK_ENDPOINTS)
+    api_caller = HivemindApiCaller(endpoint_url=endpoint)
 
     # ACT
     async with api_caller as api:
