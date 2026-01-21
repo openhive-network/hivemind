@@ -245,8 +245,6 @@ BEGIN
       result := hivemind_endpoints.hive_api_get_info(__params);
     WHEN __method_type = 'db_head_state' THEN
       result := hivemind_endpoints.hive_api_db_head_state(__params);
-    WHEN __method_type = 'get_reblogged_by_account' THEN
-      result := hivemind_endpoints.hive_api_get_reblogged_by_account(__params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('hive_api' || __method_type);
   END CASE;
