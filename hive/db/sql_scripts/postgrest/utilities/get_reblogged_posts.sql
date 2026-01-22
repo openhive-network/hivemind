@@ -36,10 +36,10 @@ BEGIN
     SELECT
       hp.id::INT AS post_id,
       ha.name::TEXT AS author,
-      hpd.permlink::TEXT AS permlink,
+      hp.permlink::TEXT AS permlink,
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
-      SELECT hp.id, hp.author_id
+      SELECT hp.id, hp.author_id, hp.permlink
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
@@ -69,8 +69,7 @@ BEGIN
         hp.id DESC
       LIMIT _limit
     ) hp
-    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id;
 END
 $$
 ;
@@ -101,10 +100,10 @@ BEGIN
     SELECT
       hp.id::INT AS post_id,
       ha.name::TEXT AS author,
-      hpd.permlink::TEXT AS permlink,
+      hp.permlink::TEXT AS permlink,
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
-      SELECT hp.id, hp.author_id
+      SELECT hp.id, hp.author_id, hp.permlink
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_subscriptions hs ON hs.community_id = hp.community_id AND hs.account_id = _observer_id
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
@@ -135,8 +134,7 @@ BEGIN
         hp.id DESC
       LIMIT _limit
     ) hp
-    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id;
 END
 $$
 ;
@@ -175,10 +173,10 @@ BEGIN
     SELECT
       hp.id::INT AS post_id,
       ha.name::TEXT AS author,
-      hpd.permlink::TEXT AS permlink,
+      hp.permlink::TEXT AS permlink,
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
-      SELECT hp.id, hp.author_id
+      SELECT hp.id, hp.author_id, hp.permlink
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
@@ -208,8 +206,7 @@ BEGIN
         hp.id DESC
       LIMIT _limit
     ) hp
-    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id;
 END
 $$
 ;
@@ -248,10 +245,10 @@ BEGIN
     SELECT
       hp.id::INT AS post_id,
       ha.name::TEXT AS author,
-      hpd.permlink::TEXT AS permlink,
+      hp.permlink::TEXT AS permlink,
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
-      SELECT hp.id, hp.author_id
+      SELECT hp.id, hp.author_id, hp.permlink
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id AND hpt.tag_id = _tag_id
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
@@ -282,8 +279,7 @@ BEGIN
         hp.id DESC
       LIMIT _limit
     ) hp
-    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id;
 END
 $$
 ;
