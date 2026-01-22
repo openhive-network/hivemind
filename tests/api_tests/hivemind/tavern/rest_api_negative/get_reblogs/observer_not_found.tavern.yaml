@@ -19,7 +19,7 @@
         json:
           sort: "trending"
           tag: ""
-          observer: "nonexistent_account_xyz"
+          observer: "notfound123"
           limit: 5
       response:
         status_code: 400

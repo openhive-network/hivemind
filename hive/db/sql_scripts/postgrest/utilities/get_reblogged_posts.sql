@@ -41,6 +41,7 @@ BEGIN
     FROM (
       SELECT hp.id, hp.author_id
       FROM hivemind_app.live_posts_view hp
+      JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
         hp.depth = 0
         AND CASE _sort_type
@@ -51,7 +52,7 @@ BEGIN
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hp.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -106,6 +107,7 @@ BEGIN
       SELECT hp.id, hp.author_id
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_subscriptions hs ON hs.community_id = hp.community_id AND hs.account_id = _observer_id
+      JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
         hp.depth = 0
         AND CASE _sort_type
@@ -116,7 +118,7 @@ BEGIN
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hp.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -178,6 +180,7 @@ BEGIN
     FROM (
       SELECT hp.id, hp.author_id
       FROM hivemind_app.live_posts_view hp
+      JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
         hp.community_id = _community_id
         AND CASE _sort_type
@@ -188,7 +191,7 @@ BEGIN
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hp.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -251,6 +254,7 @@ BEGIN
       SELECT hp.id, hp.author_id
       FROM hivemind_app.live_posts_view hp
       JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id AND hpt.tag_id = _tag_id
+      JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
         hp.depth = 0
         AND CASE _sort_type
@@ -261,7 +265,7 @@ BEGIN
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hp.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
