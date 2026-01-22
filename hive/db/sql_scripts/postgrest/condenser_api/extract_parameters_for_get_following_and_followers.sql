@@ -20,6 +20,21 @@ BEGIN
     _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "start": "string", "type": "string", "limit": "number"}', 1, NULL);
   END IF;
 
+  _limit =
+    hivemind_postgrest_utilities.valid_number(
+      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
+    1000, 1, 1000, 'limit');
+
+  IF _called_from_condenser_api THEN
+    _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'follow_type', False), 'blog');
+  ELSE
+    _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'type', False), 'blog');
+  END IF;
+
+  IF _follow_type NOT IN ('blog', 'ignore') THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported follow type, valid types: blog, ignore');
+  END IF;
+
   _account =
     hivemind_postgrest_utilities.valid_account(
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'account', True),
@@ -32,21 +47,6 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', False),
       True);
   PERFORM hivemind_postgrest_utilities.find_account_id(_start, True); -- make sure account exists
-
-  IF _called_from_condenser_api THEN
-    _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'follow_type', False), 'blog');
-  ELSE
-    _follow_type = COALESCE(hivemind_postgrest_utilities.parse_argument_from_json(_params, 'type', False), 'blog');
-  END IF;
-
-  IF _follow_type NOT IN ('blog', 'ignore') THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported follow type, valid types: blog, ignore');
-  END IF;
-
-  _limit =
-    hivemind_postgrest_utilities.valid_number(
-      hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
-    1000, 1, 1000, 'limit');
 
   RETURN jsonb_build_object(
     'account', _account,

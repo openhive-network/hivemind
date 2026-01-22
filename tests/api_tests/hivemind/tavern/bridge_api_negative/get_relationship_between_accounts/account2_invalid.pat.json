@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "invalid account char",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "1a2b3c4d5e6f7a8b9c0d",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "invalid account char"
+    },
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-10T12:25:18"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:invalid account char"
 }

@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "invalid sort `recent`",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:condenser_api get state is not supported",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:45:00"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "condenser_api get state is not supported"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

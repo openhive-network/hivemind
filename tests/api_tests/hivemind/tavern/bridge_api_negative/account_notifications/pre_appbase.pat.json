@@ -1,5 +1,5 @@
 {
-  "code": -32602,
-  "data": "`call` requires condenser_api",
-  "message": "Invalid parameters"
+  "code": -32601,
+  "message": "Api not found bridge_api",
+  "data": null
 }

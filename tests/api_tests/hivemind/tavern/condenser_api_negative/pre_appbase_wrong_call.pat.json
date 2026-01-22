@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "unknown method: condenser_api.find_comments",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:unknown method: condenser_api.find_comments",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:45:00"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "unknown method: condenser_api.find_comments"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

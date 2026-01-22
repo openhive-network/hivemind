@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "limit = 1001 outside valid range [1:1000]",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:limit = 1001 outside valid range [1:1000]",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:40:08"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "limit = 1001 outside valid range [1:1000]"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }

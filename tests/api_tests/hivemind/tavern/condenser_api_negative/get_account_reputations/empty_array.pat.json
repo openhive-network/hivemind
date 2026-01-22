@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "expected 2 params",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:expected 2 params",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:45:00"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "expected 2 params"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
 }
