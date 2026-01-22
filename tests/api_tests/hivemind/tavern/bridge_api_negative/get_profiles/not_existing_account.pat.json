@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "[{\"nonexisting\": \"account does not exist\"}]",
-  "message": "Invalid parameters"
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "[{\"nonexisting\": \"account does not exist\"}]"
+    },
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2025-12-10T12:25:18"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:[{\"nonexisting\": \"account does not exist\"}]"
 }

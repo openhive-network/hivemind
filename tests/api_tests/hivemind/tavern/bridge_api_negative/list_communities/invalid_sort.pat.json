@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "Unsupported sort, valid sorts: rank, new, subs",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:Unsupported sort, valid sorts: rank, new, subs",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:40:07"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "Unsupported sort, valid sorts: rank, new, subs"
+    },
+    "assert_hash": "6f7a8b9c0d1e2f3a4b5c"
+  }
 }

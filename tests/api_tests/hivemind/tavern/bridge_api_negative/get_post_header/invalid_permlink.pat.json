@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "permlink cannot be blank",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:permlink cannot be blank",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:40:08"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "permlink cannot be blank"
+    },
+    "assert_hash": "2b3c4d5e6f7a8b9c0d1e"
+  }
 }

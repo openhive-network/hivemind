@@ -1,5 +1,30 @@
 {
   "code": -32602,
-  "data": "Post gtg/not_existing_permlink does not exist",
-  "message": "Invalid parameters"
+  "message": "Assert Exception:Post gtg/not_existing_permlink does not exist",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2025-12-09T00:40:07"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "Post gtg/not_existing_permlink does not exist"
+    },
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a"
+  }
 }
