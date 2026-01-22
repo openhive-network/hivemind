@@ -706,6 +706,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_unread_notifications.sql",
         "postgrest/utilities/find_tag_id.sql",
         "postgrest/utilities/get_ranked_posts.sql",
+        "postgrest/utilities/get_reblogged_posts.sql",
         "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql",
@@ -745,6 +746,7 @@ def setup_runtime_code(db):
         "endpoints/endpoint_schema.sql",
         "endpoints/types/operation.sql",
         "endpoints/accounts/get_ops_by_account.sql",
+        "endpoints/blog/get_reblogs.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

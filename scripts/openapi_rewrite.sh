@@ -18,7 +18,8 @@ OUTPUT="$SCRIPTDIR/output"
 ENDPOINTS_IN_ORDER="
 ../$endpoints/endpoint_schema.sql
 ../$endpoints/types/operation.sql
-../$endpoints/accounts/get_ops_by_account.sql"
+../$endpoints/accounts/get_ops_by_account.sql
+../$endpoints/blog/get_reblogs.sql"
 
 
 # Function to reverse the lines
