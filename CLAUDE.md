@@ -283,8 +283,8 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 - Each test has a `.tavern.yaml` file and a corresponding `.pat.json` pattern file
 - Pattern files contain expected JSON responses that tests compare against
 - When tests run, `.out.json` files are generated with actual API output
-- Locally: output files are in `logs/tavern/<api_type>/<test_name>/<test>.out.json`
-- CI: output files are available as artifacts in the `e2e_benchmark_on_postgrest` job
+- Output files are available as artifacts in the `e2e_benchmark_on_postgrest` CI job
+- Download artifacts to `logs/tavern/<api_type>/<test_name>/<test>.out.json`
 - Use these `.out.json` files to see actual API responses and fix pattern mismatches
 
 ## Common Gotchas
