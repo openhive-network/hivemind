@@ -1,0 +1,14 @@
+[
+  {
+    "author": "test-safari",
+    "permlink": "reblogged-and-recreated",
+    "post_id": 0,
+    "reblogged": false
+  },
+  {
+    "author": "test-safari",
+    "permlink": "reblogged-and-edited",
+    "post_id": 0,
+    "reblogged": true
+  }
+]
