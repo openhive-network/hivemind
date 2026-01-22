@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "Post roadscape/banana-cherry does not exist"
     },
-    "message": "Post roadscape/banana-cherry does not exist",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

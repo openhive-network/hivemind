@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "invalid account name length: `totally_valid_length`",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "got an unexpected keyword argument 'extra_param'",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

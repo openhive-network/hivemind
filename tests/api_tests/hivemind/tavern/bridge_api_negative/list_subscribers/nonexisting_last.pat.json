@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "nonexisting subscription on hive-135485 does not exist"
     },
-    "message": "nonexisting subscription on hive-135485 does not exist",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

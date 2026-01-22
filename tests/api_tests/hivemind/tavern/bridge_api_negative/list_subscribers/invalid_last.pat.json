@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "invalid account char"
     },
-    "message": "invalid account char",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

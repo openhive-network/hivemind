@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "int() argument must be a string, a bytes-like object or a number, not 'list'",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "missing a required argument: 'account2'"
     },
-    "message": "missing a required argument: 'account2'",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

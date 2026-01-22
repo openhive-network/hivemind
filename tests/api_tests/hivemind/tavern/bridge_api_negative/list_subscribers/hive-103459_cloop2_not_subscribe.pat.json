@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "cloop2 subscription on hive-103459 does not exist"
     },
-    "message": "cloop2 subscription on hive-103459 does not exist",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

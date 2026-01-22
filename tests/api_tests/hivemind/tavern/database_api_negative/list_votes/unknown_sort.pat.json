@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Unsupported order, valid orders: by_comment_voter, by_voter_comment",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

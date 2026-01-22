@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "invalid literal for int() with base 10: 'hello-world'",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "limit = 0 outside valid range [1:250]",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

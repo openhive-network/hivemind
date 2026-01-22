@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "permlink cannot be blank"
     },
-    "message": "permlink cannot be blank",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Post ciao/re-the-amazing-mr-hydde-20160811t213717 does not exist",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

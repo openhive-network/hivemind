@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "invalid literal for int() with base 10: 'abc'"
     },
-    "message": "invalid literal for int() with base 10: 'abc'",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

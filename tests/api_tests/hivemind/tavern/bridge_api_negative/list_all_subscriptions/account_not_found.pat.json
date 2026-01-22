@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Account wyuh does not exist",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

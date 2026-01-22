@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted"
     },
-    "message": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

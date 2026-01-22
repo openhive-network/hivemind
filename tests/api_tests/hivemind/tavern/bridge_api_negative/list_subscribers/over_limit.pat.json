@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "limit = 101 outside valid range [1:100]"
     },
-    "message": "limit = 101 outside valid range [1:100]",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

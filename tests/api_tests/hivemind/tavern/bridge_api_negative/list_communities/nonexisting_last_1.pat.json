@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Community hive-12345 does not exist",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

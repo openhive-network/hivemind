@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Post /re-budgiebee-re-mikkolyytinen-re-budgiebee-hey-can-somebody-please-tell-me-how-to-add-pictures-to-blogs-20160911t191955857z does not exist",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

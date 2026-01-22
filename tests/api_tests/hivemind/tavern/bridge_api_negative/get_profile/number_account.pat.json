@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "[{\"468\": \"invalid account char\"}]",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

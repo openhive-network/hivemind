@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "Unsupported sort, valid sorts: blog, feed, posts, comments, replies, payout"
     },
-    "message": "Unsupported sort, valid sorts: blog, feed, posts, comments, replies, payout",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

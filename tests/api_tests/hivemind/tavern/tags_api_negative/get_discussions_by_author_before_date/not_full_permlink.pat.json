@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "Post dragonho/suntory-time-weekend does not exist"
     },
-    "message": "Post dragonho/suntory-time-weekend does not exist",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

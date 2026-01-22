@@ -4,7 +4,7 @@
   "data": {
     "code": 10,
     "name": "assert_exception",
-    "message": "Category non_existing_tag does not exist",
+    "message": "Assert Exception",
     "stack": [
       {
         "context": {

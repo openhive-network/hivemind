@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "camilla subscription on hive-171488 does not exist"
     },
-    "message": "camilla subscription on hive-171488 does not exist",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

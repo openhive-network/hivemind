@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "[{\"nonexisting\": \"account does not exist\"}]"
     },
-    "message": "[{\"nonexisting\": \"account does not exist\"}]",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {

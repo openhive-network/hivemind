@@ -6,7 +6,7 @@
     "extension": {
       "assertion_expression": "score = -1 outside valid range [0:100]"
     },
-    "message": "score = -1 outside valid range [0:100]",
+    "message": "Assert Exception",
     "name": "assert_exception",
     "stack": [
       {
