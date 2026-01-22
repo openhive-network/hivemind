@@ -134,14 +134,10 @@ BEGIN
     hivemind_postgrest_utilities.valid_tag("tag", True),
     True);
 
-  -- Find observer account id
+  -- Find observer account id (throws exception if not found)
   _observer_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account("observer", False),
     True);
-
-  IF _observer_id = 0 THEN
-    RAISE EXCEPTION 'observer account not found';
-  END IF;
 
   -- Parse sort type
   CASE "sort"
