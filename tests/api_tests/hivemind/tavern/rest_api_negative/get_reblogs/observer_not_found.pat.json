@@ -2,5 +2,5 @@
   "code": "P0001",
   "details": null,
   "hint": null,
-  "message": "Account notfound123 does not exist"
+  "message": "{\"code\": -32602, \"data\": \"Account notfound123 does not exist\", \"message\": \"Invalid parameters\"}"
 }
