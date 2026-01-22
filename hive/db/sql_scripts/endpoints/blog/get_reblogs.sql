@@ -88,14 +88,7 @@
         description: Invalid parameters (missing observer or invalid sort)
  */
 
--- Define the return type for reblog status
-DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
-CREATE TYPE hivemind_endpoints.reblog_status AS (
-    post_id INT,
-    author TEXT,
-    permlink TEXT,
-    reblogged BOOLEAN
-);
+-- Type hivemind_endpoints.reblog_status is defined in postgrest/utilities/get_reblogged_posts.sql
 
 -- openapi-generated-code-begin
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_reblogs;

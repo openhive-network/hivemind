@@ -1,6 +1,15 @@
 -- Utility functions for /blog/reblogs REST endpoint
 -- These functions return lightweight reblog status for posts matching ranked posts criteria
 
+-- Define the return type for reblog status (must be created before the functions that use it)
+DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
+CREATE TYPE hivemind_endpoints.reblog_status AS (
+    post_id INT,
+    author TEXT,
+    permlink TEXT,
+    reblogged BOOLEAN
+);
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_reblogged_posts_for_all;
 CREATE FUNCTION hivemind_postgrest_utilities.get_reblogged_posts_for_all(
   IN _post_id INT,
