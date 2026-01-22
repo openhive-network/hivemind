@@ -2,5 +2,5 @@
   "code": "P0001",
   "details": null,
   "hint": null,
-  "message": "{\"code\": -32602, \"data\": \"Account notfound123 does not exist\", \"message\": \"Invalid parameters\"}"
+  "message": "{\"code\": -32602, \"message\": \"Assert Exception:Account notfound123 does not exist\", \"data\": {\"code\": 10, \"name\": \"assert_exception\", \"message\": \"Assert Exception\", \"stack\": [{\"context\": {\"level\": \"error\", \"file\": \"\", \"line\": 0, \"method\": \"\", \"hostname\": \"\", \"thread_name\": \"\", \"timestamp\": \"2026-01-22T09:54:14\"}, \"format\": \"\", \"data\": {\"category\": \"hivemind\"}}], \"extension\": {\"assertion_expression\": \"Account notfound123 does not exist\"}, \"assert_hash\": \"1a2b3c4d5e6f7a8b9c0d\"}}"
 }
