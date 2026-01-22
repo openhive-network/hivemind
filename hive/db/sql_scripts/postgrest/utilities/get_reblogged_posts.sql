@@ -70,7 +70,7 @@ BEGIN
       LIMIT _limit
     ) hp
     JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_posts_data hpd ON hpd.id = hp.id;
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
 END
 $$
 ;
@@ -136,7 +136,7 @@ BEGIN
       LIMIT _limit
     ) hp
     JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_posts_data hpd ON hpd.id = hp.id;
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
 END
 $$
 ;
@@ -209,7 +209,7 @@ BEGIN
       LIMIT _limit
     ) hp
     JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_posts_data hpd ON hpd.id = hp.id;
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
 END
 $$
 ;
@@ -283,7 +283,7 @@ BEGIN
       LIMIT _limit
     ) hp
     JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-    JOIN hivemind_app.hive_posts_data hpd ON hpd.id = hp.id;
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
 END
 $$
 ;
