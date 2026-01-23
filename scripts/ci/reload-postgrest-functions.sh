@@ -8,8 +8,8 @@
 # This allows skipping the full sync and reusing cached data when only
 # API function code changed.
 #
-# IMPORTANT: The order of SQL files matches hive/db/schema.py::setup_runtime_code()
-# to ensure proper dependency resolution.
+# IMPORTANT: The SQL file list is extracted from hive/db/schema.py to ensure
+# this script stays in sync with the main installation code.
 #
 # Usage:
 #   ./scripts/ci/reload-postgrest-functions.sh --postgres-url=postgresql://hivemind@localhost:5432/haf_block_log
@@ -79,10 +79,23 @@ if [ -z "$ADMIN_URL" ]; then
 fi
 
 SQL_SCRIPTS_DIR="$REPO_ROOT/hive/db/sql_scripts"
+SCHEMA_PY="$REPO_ROOT/hive/db/schema.py"
 
 echo "=== Reloading PostgREST SQL functions ==="
 echo "PostgreSQL URL: ${POSTGRES_URL%%@*}@..."
 echo "SQL scripts dir: $SQL_SCRIPTS_DIR"
+
+# Extract PostgREST/endpoint scripts from schema.py
+# This ensures we stay in sync with the main installation code
+extract_postgrest_scripts() {
+    # Extract the sql_scripts list from setup_runtime_code() in schema.py
+    # Filter to only postgrest/ and endpoints/ scripts
+    # Exclude preprocess_search_query.sql as it's handled separately (requires admin)
+    grep -E '^\s+"(postgrest/|endpoints/)' "$SCHEMA_PY" | \
+        sed 's/.*"\([^"]*\)".*/\1/' | \
+        grep -v '^#' | \
+        grep -v 'preprocess_search_query'
+}
 
 # Function to load a SQL script
 load_sql() {
@@ -101,147 +114,25 @@ load_sql() {
 }
 
 # First, execute admin-level scripts (plpython3u)
+# These are defined in setup_db() in schema.py
 echo ""
 echo "=== Installing admin-level scripts ==="
 load_sql "$ADMIN_URL" "postgrest/utilities/preprocess_search_query.sql"
 
-# Load PostgREST scripts in the exact order from schema.py::setup_runtime_code()
+# Load PostgREST scripts in the order from schema.py::setup_runtime_code()
 # This ensures proper dependency resolution
 echo ""
-echo "=== Loading PostgREST scripts (in dependency order from schema.py) ==="
+echo "=== Loading PostgREST scripts (extracted from schema.py) ==="
 
-# Order matches hive/db/schema.py lines 656-749
-POSTGREST_SCRIPTS=(
-    # Main PostgREST entry point
-    "postgrest/home.sql"
-    # Utilities (base dependencies first)
-    "postgrest/utilities/exceptions.sql"
-    "postgrest/utilities/validate_json_arguments.sql"
-    "postgrest/utilities/api_limits.sql"
-    "postgrest/utilities/parse_argument_from_json.sql"
-    "postgrest/utilities/valid_account.sql"
-    "postgrest/utilities/find_account_id.sql"
-    # condenser_api.get_follow_count (depends on find_account_id)
-    "postgrest/condenser_api/condenser_api_get_follow_count.sql"
-    # More utilities
-    "postgrest/utilities/find_comment_id.sql"
-    "postgrest/utilities/valid_permlink.sql"
-    # condenser_api.get_reblogged_by (depends on find_comment_id, valid_permlink)
-    "postgrest/condenser_api/condenser_api_get_reblogged_by.sql"
-    # More utilities
-    "postgrest/utilities/valid_number.sql"
-    "postgrest/utilities/valid_tag.sql"
-    "postgrest/utilities/find_category_id.sql"
-    # condenser_api tag functions
-    "postgrest/condenser_api/condenser_api_get_trending_tags.sql"
-    "postgrest/condenser_api/condenser_api_get_account_reputations.sql"
-    # Community utilities
-    "postgrest/utilities/check_community.sql"
-    "postgrest/utilities/valid_community.sql"
-    "postgrest/utilities/valid_limit.sql"
-    "postgrest/utilities/json_date.sql"
-    "postgrest/utilities/community.sql"
-    # bridge_api community functions
-    "postgrest/bridge_api/bridge_api_get_community.sql"
-    "postgrest/bridge_api/bridge_api_get_community_context.sql"
-    # Dispatch and API method utilities
-    "postgrest/utilities/dispatch.sql"
-    "postgrest/utilities/get_api_method.sql"
-    "postgrest/utilities/valid_offset.sql"
-    "postgrest/utilities/list_votes.sql"
-    "postgrest/utilities/assets_operations.sql"
-    "postgrest/utilities/create_condenser_post_object.sql"
-    # condenser_api blog and content functions
-    "postgrest/condenser_api/condenser_api_get_blog.sql"
-    "postgrest/condenser_api/condenser_api_get_content.sql"
-    # database_api vote functions
-    "postgrest/database_api/database_api_find_votes.sql"
-    "postgrest/database_api/database_api_list_votes.sql"
-    # condenser_api active votes
-    "postgrest/condenser_api/condenser_api_get_active_votes.sql"
-    # Post object utilities
-    "postgrest/utilities/rep_log10.sql"
-    "postgrest/utilities/muted_reasons_operations.sql"
-    "postgrest/utilities/create_bridge_post_object.sql"
-    # bridge_api post functions
-    "postgrest/bridge_api/bridge_api_get_post.sql"
-    "postgrest/bridge_api/bridge_api_get_payout_stats.sql"
-    # hive_api info functions
-    "postgrest/hive_api/hive_api_get_info.sql"
-    "postgrest/hive_api/hive_api_db_head_state.sql"
-    # Account posts utilities and functions
-    "postgrest/utilities/get_account_posts.sql"
-    "postgrest/bridge_api/bridge_api_get_account_posts.sql"
-    "postgrest/bridge_api/bridge_api_get_relationship_between_accounts.sql"
-    "postgrest/bridge_api/bridge_api_unread_notifications.sql"
-    # Ranked posts utilities and functions
-    "postgrest/utilities/find_tag_id.sql"
-    "postgrest/utilities/get_ranked_posts.sql"
-    "postgrest/utilities/get_reblogged_posts.sql"
-    "postgrest/bridge_api/bridge_api_get_ranked_posts.sql"
-    # condenser_api discussion functions
-    "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql"
-    "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql"
-    "postgrest/condenser_api/condenser_api_get_replies_by_last_update.sql"
-    "postgrest/condenser_api/condenser_api_get_discussion_by_author_before_date.sql"
-    "postgrest/condenser_api/condenser_api_get_discussion_by.sql"
-    # Notifications utilities and functions
-    "postgrest/utilities/notifications.sql"
-    "postgrest/bridge_api/bridge_api_account_notifications.sql"
-    "postgrest/bridge_api/bridge_api_post_notifications.sql"
-    # database_api comments
-    "postgrest/utilities/create_database_post_object.sql"
-    "postgrest/database_api/database_api_find_comments.sql"
-    # Date validation
-    "postgrest/utilities/valid_date.sql"
-    # bridge_api list and community functions
-    "postgrest/bridge_api/bridge_api_list_subscribers.sql"
-    "postgrest/bridge_api/bridge_api_get_trending_topics.sql"
-    "postgrest/bridge_api/bridge_api_list_communities.sql"
-    "postgrest/bridge_api/bridge_api_get_discussion.sql"
-    "postgrest/bridge_api/bridge_api_get_post_header.sql"
-    # Profile utilities and functions
-    "postgrest/utilities/get_profiles.sql"
-    "postgrest/utilities/get_muted_accounts_list.sql"
-    "postgrest/bridge_api/bridge_api_get_profile.sql"
-    "postgrest/bridge_api/bridge_api_does_user_follow_any_lists.sql"
-    "postgrest/utilities/extract_profile_metadata.sql"
-    "postgrest/bridge_api/bridge_api_get_follow_list.sql"
-    # Role and community functions
-    "postgrest/utilities/get_role_name.sql"
-    "postgrest/utilities/find_community_id.sql"
-    "postgrest/bridge_api/bridge_api_list_community_roles.sql"
-    "postgrest/bridge_api/bridge_api_list_all_subscriptions.sql"
-    "postgrest/bridge_api/bridge_api_list_pop_communities.sql"
-    # condenser_api follow functions
-    "postgrest/condenser_api/extract_parameters_for_get_following_and_followers.sql"
-    "postgrest/condenser_api/condenser_api_get_followers.sql"
-    "postgrest/condenser_api/condenser_api_get_following.sql"
-    # Remaining utilities
-    "postgrest/utilities/find_subscription_id.sql"
-    "postgrest/bridge_api/bridge_api_get_profiles.sql"
-    "postgrest/utilities/valid_accounts.sql"
-    # Search API
-    "postgrest/search-api/find_text.sql"
-)
-
-for script in "${POSTGREST_SCRIPTS[@]}"; do
+# Extract and load scripts
+SCRIPT_COUNT=0
+while IFS= read -r script; do
     load_sql "$POSTGRES_URL" "$script"
-done
+    SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
+done < <(extract_postgrest_scripts)
 
-# Endpoint scripts (REST-style endpoints)
 echo ""
-echo "=== Loading endpoint scripts ==="
-ENDPOINT_SCRIPTS=(
-    "endpoints/endpoint_schema.sql"
-    "endpoints/types/operation.sql"
-    "endpoints/accounts/get_ops_by_account.sql"
-    "endpoints/blog/get_reblogs.sql"
-)
-
-for script in "${ENDPOINT_SCRIPTS[@]}"; do
-    load_sql "$POSTGRES_URL" "$script"
-done
+echo "Loaded $SCRIPT_COUNT PostgREST/endpoint scripts"
 
 # Verification step
 if [ "$VERIFY" = true ]; then
