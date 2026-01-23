@@ -1005,27 +1005,13 @@ e2e_benchmark_on_postgrest:
         }
 
       # Run the reload script from the host, connecting through the exposed port
-      # First ensure psql is available on the CI runner
-      if command -v psql &> /dev/null; then
-        echo "Using host psql to reload functions..."
-        POSTGRES_URL="postgresql://hivemind@docker:5432/haf_block_log"
-        ADMIN_URL="postgresql://haf_admin@docker:5432/haf_block_log"
-        "${CI_PROJECT_DIR}/scripts/ci/reload-postgrest-functions.sh" \
-          --postgres-url="$POSTGRES_URL" \
-          --admin-url="$ADMIN_URL" \
-          --verify
-      else
-        echo "psql not available on host, running reload via docker exec..."
-        # Copy SQL scripts to container and run them
-        # Use a simpler approach: run psql commands directly
-        for sql_dir in postgrest endpoints; do
-          find "${CI_PROJECT_DIR}/hive/db/sql_scripts/${sql_dir}" -name "*.sql" -type f | while read sql_file; do
-            echo "  Loading: $(basename "$sql_file")"
-            docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
-              exec -T haf psql -U hivemind -d haf_block_log -f "/dev/stdin" < "$sql_file" > /dev/null 2>&1 || true
-          done
-        done
-      fi
+      # docker-builder image has psql available
+      POSTGRES_URL="postgresql://hivemind@docker:5432/haf_block_log"
+      ADMIN_URL="postgresql://haf_admin@docker:5432/haf_block_log"
+      "${CI_PROJECT_DIR}/scripts/ci/reload-postgrest-functions.sh" \
+        --postgres-url="$POSTGRES_URL" \
+        --admin-url="$ADMIN_URL" \
+        --verify
       echo "SQL functions reloaded successfully"
       echo ""
     fi
