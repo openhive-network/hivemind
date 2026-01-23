@@ -52,6 +52,23 @@ variables:
   QUICK_TEST_HIVEMIND_COMMIT: ""  # Required when QUICK_TEST=true (short SHA)
   # Auto-populated by detect_changes job (uses .haf_app_detect_changes template):
   AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
+  POSTGREST_ONLY_CHANGE: "false"  # Set to true when only PostgREST SQL code changed
+
+  # =============================================================================
+  # PostgREST-Only Mode
+  # =============================================================================
+  # When only PostgREST/SQL endpoint code changes (not the indexer), CI can skip
+  # the full sync and reuse cached data with a matching schema version.
+  # The SQL functions are reloaded on the cached database.
+  #
+  # Files that require full sync (indexer changes):
+  #   hive/indexer/*.py, hive/db/schema.py, hive/utils/*.py, setup.py, etc.
+  #
+  # Files that only require SQL reload (PostgREST changes):
+  #   hive/db/sql_scripts/postgrest/**/*.sql
+  #   hive/db/sql_scripts/endpoints/**/*.sql
+  # =============================================================================
+  POSTGREST_ONLY_PATTERNS: '^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
 
   # Override common-ci-configuration image tags
   # docker-builder: 47dab93 has Python 3.12, JMeter, psql (needed for e2e tests)
@@ -329,8 +346,69 @@ detect_changes:
     # - tests/, docs/ (don't affect sync)
     # - *.md, README, CHANGELOG, LICENSE, CLAUDE.md (docs)
     # - .gitlab-ci.yml (CI config)
-    # Note: SQL changes DO require sync (affect database schema/functions)
+    # Note: PostgREST SQL changes now have special handling - they skip sync but reload SQL
     HAF_APP_SKIP_PATTERNS: '^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+  after_script:
+    # Additional detection for PostgREST-only changes
+    # If all non-skip changes are in PostgREST directories, we can skip sync and reload SQL
+    - |
+      # Ensure git is available (after_script runs in fresh shell)
+      if ! command -v git &> /dev/null; then
+        apk add --no-cache git 2>/dev/null || apt-get update && apt-get install -y git 2>/dev/null || true
+      fi
+
+      if [[ -f detect_changes.env ]]; then
+        # Source the existing detection results
+        source detect_changes.env
+
+        # If already marked as full skip (docs/tests only), don't override
+        if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+          echo "Already marked for skip (docs/tests only) - no PostgREST detection needed"
+          exit 0
+        fi
+
+        # Get changed files that aren't in the standard skip patterns
+        if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
+          BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+        elif [ "$CI_COMMIT_REF_NAME" = "develop" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
+          BASE_SHA="HEAD~1"
+        else
+          BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "HEAD~1")
+        fi
+
+        CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
+
+        # Filter out standard skip patterns
+        HAF_APP_SKIP_PATTERNS='^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+        NEEDS_WORK=$(echo "$CHANGED_FILES" | grep -vE "${HAF_APP_SKIP_PATTERNS}" || true)
+
+        if [ -n "$NEEDS_WORK" ]; then
+          # Check if ALL remaining changes are in PostgREST directories
+          POSTGREST_PATTERNS='^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
+          NON_POSTGREST_CHANGES=$(echo "$NEEDS_WORK" | grep -vE "$POSTGREST_PATTERNS" || true)
+
+          if [ -z "$NON_POSTGREST_CHANGES" ]; then
+            echo ""
+            echo "=== PostgREST-Only Change Detected ==="
+            echo "All code changes are in PostgREST/endpoint SQL files."
+            echo "Sync can be skipped - SQL functions will be reloaded on cached data."
+            echo ""
+            echo "Changed PostgREST files:"
+            echo "$NEEDS_WORK" | head -20
+
+            # Append to the dotenv file
+            echo "POSTGREST_ONLY_CHANGE=true" >> detect_changes.env
+          else
+            echo ""
+            echo "=== Non-PostgREST changes detected ==="
+            echo "Files requiring full sync:"
+            echo "$NON_POSTGREST_CHANGES" | head -20
+            echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
+          fi
+        else
+          echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
+        fi
+      fi
 
 find_haf_image:
   extends: .find_haf_image
@@ -570,6 +648,59 @@ sync:
         echo "Exact cache not found - will run full sync"
         echo "This ensures schema compatibility with current app version"
       fi
+
+    # POSTGREST_ONLY_CHANGE mode: find any compatible cache with matching HAF commit and schema
+    elif [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]]; then
+      echo "=== POSTGREST_ONLY_CHANGE Mode (only PostgREST SQL changed) ==="
+      echo "Looking for compatible cache (same HAF commit, compatible schema)..."
+
+      # Get current patch level from update_db_patchlevel.sql (the expected revision)
+      EXPECTED_REVISION=""
+      PATCHLEVEL_FILE="${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql"
+      if [[ -f "$PATCHLEVEL_FILE" ]]; then
+        # Extract the revision hash from the SQL file
+        EXPECTED_REVISION=$(grep -oP "'\K[a-f0-9]{40}(?=')" "$PATCHLEVEL_FILE" | tail -1 || echo "")
+      fi
+      echo "Expected patch revision: ${EXPECTED_REVISION:-unknown}"
+
+      # List available caches with matching HAF commit
+      echo "Searching for caches with HAF commit: ${HAF_COMMIT}"
+      AVAILABLE_CACHES=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | grep "^${HAF_COMMIT}_" || true)
+
+      if [[ -n "$AVAILABLE_CACHES" ]]; then
+        echo "Found compatible cache candidates:"
+        echo "$AVAILABLE_CACHES" | head -5
+
+        # Use the most recent cache (first in list, which is sorted by mtime)
+        COMPATIBLE_KEY=$(echo "$AVAILABLE_CACHES" | head -1)
+        LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${COMPATIBLE_KEY}"
+
+        echo ""
+        echo "Attempting to use cache: ${COMPATIBLE_KEY}"
+        if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${COMPATIBLE_KEY}" "${LOCAL_CACHE}"; then
+          echo "Compatible cache extracted successfully"
+          echo "SYNC_CACHE_KEY=${COMPATIBLE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+          # Create NFS symlink for services (same pattern as QUICK_TEST)
+          NFS_COMPAT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${COMPATIBLE_KEY}.tar"
+          NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+          if [[ "$NFS_COMPAT_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+            echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename $NFS_COMPAT_TAR)"
+            ln -sf "$(basename "$NFS_COMPAT_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+          fi
+
+          touch "${CI_PROJECT_DIR}/.sync_skipped"
+          touch "${CI_PROJECT_DIR}/.postgrest_only_mode"
+          SYNC_SKIPPED=true
+          echo ""
+          echo "Sync skipped - SQL functions will be reloaded by e2e job"
+        else
+          echo "Failed to extract cache - will run full sync"
+        fi
+      else
+        echo "No compatible caches found for HAF commit ${HAF_COMMIT}"
+        echo "Will run full sync"
+      fi
     fi
 
     if [[ "$SYNC_SKIPPED" == "false" ]]; then
@@ -758,6 +889,7 @@ sync:
     - pg-stats
     - version.log
     - sync_cache_override.env
+    - .postgrest_only_mode  # Marker file for PostgREST-only mode
   tags:
   - public-runner-docker
   - data-cache-storage
@@ -859,6 +991,44 @@ e2e_benchmark_on_postgrest:
       sleep 2
     done
     echo "PostgreSQL is ready"
+
+    # If in PostgREST-only mode, reload SQL functions before server starts
+    if [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]] || [[ -f "${CI_PROJECT_DIR}/.postgrest_only_mode" ]]; then
+      echo ""
+      echo "=== PostgREST-Only Mode: Reloading SQL functions ==="
+      # Run the reload script inside the HAF container (has psql access)
+      # Copy the reload script and SQL files to the container
+      docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
+        exec -T haf psql -U hivemind -d haf_block_log -c "SELECT 'Database connection OK'" || {
+          echo "ERROR: Cannot connect to database as hivemind user"
+          exit 1
+        }
+
+      # Run the reload script from the host, connecting through the exposed port
+      # First ensure psql is available on the CI runner
+      if command -v psql &> /dev/null; then
+        echo "Using host psql to reload functions..."
+        POSTGRES_URL="postgresql://hivemind@docker:5432/haf_block_log"
+        ADMIN_URL="postgresql://haf_admin@docker:5432/haf_block_log"
+        "${CI_PROJECT_DIR}/scripts/ci/reload-postgrest-functions.sh" \
+          --postgres-url="$POSTGRES_URL" \
+          --admin-url="$ADMIN_URL" \
+          --verify
+      else
+        echo "psql not available on host, running reload via docker exec..."
+        # Copy SQL scripts to container and run them
+        # Use a simpler approach: run psql commands directly
+        for sql_dir in postgrest endpoints; do
+          find "${CI_PROJECT_DIR}/hive/db/sql_scripts/${sql_dir}" -name "*.sql" -type f | while read sql_file; do
+            echo "  Loading: $(basename "$sql_file")"
+            docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
+              exec -T haf psql -U hivemind -d haf_block_log -f "/dev/stdin" < "$sql_file" > /dev/null 2>&1 || true
+          done
+        done
+      fi
+      echo "SQL functions reloaded successfully"
+      echo ""
+    fi
 
     # Wait for hivemind server using docker compose exec (avoids IPv6 networking issues)
     # Use wget since the container has wget but not curl
