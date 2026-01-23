@@ -40,19 +40,18 @@ BEGIN
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
       SELECT hp.id, hp.author_id, hp.permlink_id
-      FROM hivemind_app.live_posts_view hp
+      FROM hivemind_app.live_posts_comments_view hp
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
-        hp.depth = 0
-        AND CASE _sort_type
-          WHEN 'trending' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          WHEN 'hot' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          WHEN 'created' THEN (_post_id = 0 OR hp.id < _post_id)
-          WHEN 'payout' THEN NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+        CASE _sort_type
+          WHEN 'trending' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+          WHEN 'hot' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          WHEN 'created' THEN hp.depth = 0 AND (_post_id = 0 OR hp.id < _post_id)
+          WHEN 'payout' THEN hp.depth = 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hp.depth = 0 AND hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -105,20 +104,19 @@ BEGIN
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
       SELECT hp.id, hp.author_id, hp.permlink_id
-      FROM hivemind_app.live_posts_view hp
+      FROM hivemind_app.live_posts_comments_view hp
       JOIN hivemind_app.hive_subscriptions hs ON hs.community_id = hp.community_id AND hs.account_id = _observer_id
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
-        hp.depth = 0
-        AND CASE _sort_type
-          WHEN 'trending' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          WHEN 'hot' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          WHEN 'created' THEN (_post_id = 0 OR hp.id < _post_id)
-          WHEN 'payout' THEN NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+        CASE _sort_type
+          WHEN 'trending' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+          WHEN 'hot' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          WHEN 'created' THEN hp.depth = 0 AND (_post_id = 0 OR hp.id < _post_id)
+          WHEN 'payout' THEN hp.depth = 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hp.depth = 0 AND hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -179,19 +177,19 @@ BEGIN
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
       SELECT hp.id, hp.author_id, hp.permlink_id
-      FROM hivemind_app.live_posts_view hp
+      FROM hivemind_app.live_posts_comments_view hp
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
         hp.community_id = _community_id
         AND CASE _sort_type
-          WHEN 'trending' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          WHEN 'hot' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          WHEN 'created' THEN (_post_id = 0 OR hp.id < _post_id)
-          WHEN 'payout' THEN NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+          WHEN 'trending' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+          WHEN 'hot' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          WHEN 'created' THEN hp.depth = 0 AND (_post_id = 0 OR hp.id < _post_id)
+          WHEN 'payout' THEN hp.depth = 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hp.depth = 0 AND hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
@@ -252,20 +250,19 @@ BEGIN
       EXISTS (SELECT 1 FROM hivemind_app.hive_reblogs WHERE blogger_id = _observer_id AND post_id = hp.id) AS reblogged
     FROM (
       SELECT hp.id, hp.author_id, hp.permlink_id
-      FROM hivemind_app.live_posts_view hp
+      FROM hivemind_app.live_posts_comments_view hp
       JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id AND hpt.tag_id = _tag_id
       JOIN hivemind_app.hive_accounts_view hav ON hav.id = hp.author_id
       WHERE
-        hp.depth = 0
-        AND CASE _sort_type
-          WHEN 'trending' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          WHEN 'hot' THEN NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          WHEN 'created' THEN (_post_id = 0 OR hp.id < _post_id)
-          WHEN 'payout' THEN NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+        CASE _sort_type
+          WHEN 'trending' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
+          WHEN 'hot' THEN hp.depth = 0 AND NOT hp.is_paidout AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
+          WHEN 'created' THEN hp.depth = 0 AND (_post_id = 0 OR hp.id < _post_id)
+          WHEN 'payout' THEN hp.depth = 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           WHEN 'payout_comments' THEN hp.depth > 0 AND NOT hp.is_paidout AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
-          WHEN 'muted' THEN hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
+          WHEN 'muted' THEN hp.depth = 0 AND hav.is_grayed AND NOT hp.is_paidout AND hp.payout > 0
             AND (_post_id = 0 OR hp.payout < _payout_limit OR (hp.payout = _payout_limit AND hp.id < _post_id))
           ELSE True
         END
