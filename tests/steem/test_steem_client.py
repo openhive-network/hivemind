@@ -1,10 +1,11 @@
 # pylint: disable=missing-docstring
 # pylint: disable=redefined-outer-name
 import datetime
+
 import pytest
 
-from hive.utils.normalize import parse_time
 from hive.steem.client import SteemClient
+from hive.utils.normalize import parse_time
 
 
 @pytest.fixture

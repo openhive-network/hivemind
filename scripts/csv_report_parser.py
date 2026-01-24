@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import csv
 import json
 import os
-import csv
 from time import perf_counter
+
 import requests
 
 
@@ -21,7 +22,7 @@ def parse_csv_files(root_dir):
     ret_benchmark_request_params = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
     print(f"Processing file: {file_path}")
-    with open(file_path, 'r') as csv_file:
+    with open(file_path) as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
             test_name = row[0] + ".tavern.yaml"
@@ -32,7 +33,7 @@ def parse_csv_files(root_dir):
             test_benchmark_time_threshold = None
             try:
                 test_benchmark_time_threshold = float(row[3])
-            except:
+            except (ValueError, IndexError):
                 pass
 
             if test_name in ret_times:
@@ -122,7 +123,7 @@ if __name__ == "__main__":
         ofile.write("    <table id=\"benchmarks\">\n")
         ofile.write("      <thead>\n")
         ofile.write(
-            "        <tr><th>Test name</th><th>Response mean size [kB]</th><th>Response ref size [kB]</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n"
+            "        <tr><th>Test name</th><th>Response mean size [kB]</th><th>Response ref size [kB]</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\\[ {\\vert} {T_{mean} - T_{ref} \\over T_{ref}} {\\lvert} \\cdot 100 \\] [%]</th><th>\\[ {\\vert} {T_{median} - T_{ref} \\over T_{ref}} {\\lvert} \\cdot 100 \\] [%]</th></tr>\n"
         )
         ofile.write("      </thead>\n")
         ofile.write("      <tbody>\n")

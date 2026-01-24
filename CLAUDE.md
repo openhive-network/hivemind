@@ -25,7 +25,7 @@ git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
 python3 -m venv venv/
 . venv/bin/activate
 pip install .                    # Base install
-pip install .'[dev]'            # With dev tools (black, pyYAML)
+pip install .'[dev]'            # With dev tools (ruff, pyYAML)
 pip install .'[tests]'          # With testing tools (tox)
 
 # Deactivate virtual environment
@@ -171,12 +171,13 @@ docker run --rm --network=haf --name=hivemind \
 
 ### Code Formatting
 
-**ALWAYS run black before committing Python code:**
+**ALWAYS run ruff before committing Python code:**
 ```bash
 cd <repo_root>
 pip install .'[dev]'  # If not already installed
-black hive/          # Format all Python in hive/
-black <file.py>      # Format specific file
+ruff check --fix hive/   # Lint and auto-fix issues
+ruff format hive/        # Format all Python in hive/
+ruff format <file.py>    # Format specific file
 ```
 
 ### Uninstalling
@@ -303,7 +304,7 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 
 **Nginx Rewriter Required:** The server requires nginx/openresty to rewrite JSON-RPC to REST calls. Without it, API calls fail.
 
-**Black Formatting:** All Python code must be formatted with `black` before committing.
+**Ruff Formatting:** All Python code must be linted and formatted with `ruff` before committing.
 
 **PostgREST Version:** Requires PostgREST 12.0.2 exactly.
 

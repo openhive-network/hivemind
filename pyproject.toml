@@ -25,6 +25,25 @@ dirty = "{base_version}+{vcs}{rev}-dirty.{author_date:%Y%m%dT%H%M%S}"
 distance-dirty = "{base_version}-{distance}+{vcs}{rev}-dirty.{author_date:%Y%m%dT%H%M%S}"
 
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-skip-string-normalization = true
+target-version = "py39"
+
+[tool.ruff.format]
+quote-style = "preserve"  # Matches black's skip-string-normalization
+
+[tool.ruff.lint]
+select = [
+    "F",    # Pyflakes
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+]
+ignore = [
+    "E501",   # Line too long (let formatter handle, ignore edge cases)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["hive"]

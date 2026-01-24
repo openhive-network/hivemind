@@ -1,13 +1,13 @@
-import logging
 import enum
+import logging
 
-from hive.conf import SCHEMA_NAME
-from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.indexer.accounts import Accounts
-from hive.indexer.notification_cache import NotificationCache
-from hive.utils.normalize import escape_characters
-from hive.utils.misc import UniqueCounter
 from funcy.seqs import first
+
+from hive.indexer.accounts import Accounts
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.indexer.notification_cache import NotificationCache
+from hive.utils.misc import UniqueCounter
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class FollowAction(enum.IntEnum):
 
 
 def insert_or_update(items, follower, following, block_num):
-    for (n, (itfollower, itfollowing, itblock_num)) in enumerate(items):
+    for n, (itfollower, itfollowing, _itblock_num) in enumerate(items):
         if follower == itfollower and following == itfollowing:
             items[n] = (follower, following, block_num)
             break
@@ -39,8 +39,7 @@ def insert_or_update(items, follower, following, block_num):
         items.append((follower, following, block_num))
 
 
-class Batch():
-
+class Batch:
     def __init__(self):
         self.data = []
 
@@ -140,7 +139,7 @@ class Follow(DbAdapterHolder):
         return {
             'follower': escape_characters(op['follower']),
             'following': [escape_characters(following) for following in op['following']],
-            'action': defs[what]
+            'action': defs[what],
         }
 
     @classmethod
@@ -167,7 +166,9 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
-                NotificationCache.follow_notifications_to_flush.append((follower, following, block_num, cls._counter.increment(block_num)))
+                NotificationCache.follow_notifications_to_flush.append(
+                    (follower, following, block_num, cls._counter.increment(block_num))
+                )
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)
@@ -231,11 +232,11 @@ class Follow(DbAdapterHolder):
     def flush_follows(cls):
         """Flush accumulated follow operations to the database in batches."""
         n = (
-            cls.follows_batches_to_flush.len() +
-            cls.muted_batches_to_flush.len() +
-            cls.blacklisted_batches_to_flush.len() +
-            cls.follow_muted_batches_to_flush.len() +
-            cls.follow_blacklisted_batches_to_flush.len()
+            cls.follows_batches_to_flush.len()
+            + cls.muted_batches_to_flush.len()
+            + cls.blacklisted_batches_to_flush.len()
+            + cls.follow_muted_batches_to_flush.len()
+            + cls.follow_blacklisted_batches_to_flush.len()
         )
         if n == 0:
             return 0
@@ -247,16 +248,26 @@ class Follow(DbAdapterHolder):
         blacklisted = []
         follow_muted = []
         follow_blacklisted = []
-        for (n, (mode, batch)) in enumerate(cls.follows_batches_to_flush.iter()):
-            follows.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates""")
-        for (n, (mode, batch)) in enumerate(cls.muted_batches_to_flush.iter()):
-            muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates""")
-        for (n, (mode, batch)) in enumerate(cls.blacklisted_batches_to_flush.iter()):
-            blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates""")
-        for (n, (mode, batch)) in enumerate(cls.follow_muted_batches_to_flush.iter()):
-            follow_muted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates""")
-        for (n, (mode, batch)) in enumerate(cls.follow_blacklisted_batches_to_flush.iter()):
-            follow_blacklisted.append(f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates""")
+        for n, (mode, batch) in enumerate(cls.follows_batches_to_flush.iter()):
+            follows.append(
+                f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow" for r,g,b in batch])}])::hivemind_app.follow_updates"""
+            )
+        for n, (mode, batch) in enumerate(cls.muted_batches_to_flush.iter()):
+            muted.append(
+                f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.mute" for r,g,b in batch])}])::hivemind_app.mute_updates"""
+            )
+        for n, (mode, batch) in enumerate(cls.blacklisted_batches_to_flush.iter()):
+            blacklisted.append(
+                f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.blacklist" for r,g,b in batch])}])::hivemind_app.blacklist_updates"""
+            )
+        for n, (mode, batch) in enumerate(cls.follow_muted_batches_to_flush.iter()):
+            follow_muted.append(
+                f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_mute" for r,g,b in batch])}])::hivemind_app.follow_mute_updates"""
+            )
+        for n, (mode, batch) in enumerate(cls.follow_blacklisted_batches_to_flush.iter()):
+            follow_blacklisted.append(
+                f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates"""
+            )
         if follows or muted or blacklisted or follow_muted or follow_blacklisted:
             cls.db.query_no_return(
                 f"""

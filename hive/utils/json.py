@@ -12,16 +12,22 @@ log = logging.getLogger(__name__)
 # ----------------
 
 
-def valid_command(val, valid=[]):
+def valid_command(val, valid=None):
     """Validate given command among accepted set."""
     # pylint: disable=dangerous-default-value
+    if valid is None:
+        valid = []
     assert val in valid, f'invalid command: {val}'
     return val
 
 
-def valid_keys(obj, required=[], optional=[]):
+def valid_keys(obj, required=None, optional=None):
     """Compare a set of input keys to expected and optional keys."""
     # pylint: disable=dangerous-default-value
+    if optional is None:
+        optional = []
+    if required is None:
+        required = []
     keys = obj.keys()
     missing = required - keys
     assert not missing, f'missing required keys: {missing}'

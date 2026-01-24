@@ -1,26 +1,26 @@
 # pylint: disable=missing-docstring
-import pytest
-
 from datetime import datetime
 from decimal import Decimal
 
+import pytest
+
 from hive.utils.normalize import (
-    block_num,
-    block_date,
-    vests_amount,
-    steem_amount,
-    sbd_amount,
-    parse_amount,
     amount,
-    legacy_amount,
-    parse_time,
-    utc_timestamp,
-    load_json_key,
-    trunc,
-    rep_log10,
-    secs_to_str,
-    strtobool,
+    block_date,
+    block_num,
     int_log_level,
+    legacy_amount,
+    load_json_key,
+    parse_amount,
+    parse_time,
+    rep_log10,
+    sbd_amount,
+    secs_to_str,
+    steem_amount,
+    strtobool,
+    trunc,
+    utc_timestamp,
+    vests_amount,
 )
 
 
@@ -99,18 +99,18 @@ def test_rep_log10():
 
 
 def test_strtobool():
-    assert strtobool('t') == True
-    assert strtobool('T') == True
-    assert strtobool('1') == True
-    assert strtobool('true') == True
-    assert strtobool('yes') == True
+    assert strtobool('t') is True
+    assert strtobool('T') is True
+    assert strtobool('1') is True
+    assert strtobool('true') is True
+    assert strtobool('yes') is True
 
-    assert strtobool('f') == False
-    assert strtobool('F') == False
-    assert strtobool('0') == False
-    assert strtobool('false') == False
-    assert strtobool('n') == False
-    assert strtobool('no') == False
+    assert strtobool('f') is False
+    assert strtobool('F') is False
+    assert strtobool('0') is False
+    assert strtobool('false') is False
+    assert strtobool('n') is False
+    assert strtobool('no') is False
 
     with pytest.raises(ValueError):
         strtobool('foo')

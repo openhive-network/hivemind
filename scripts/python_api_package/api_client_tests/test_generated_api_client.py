@@ -3,10 +3,9 @@ from __future__ import annotations
 from typing import Final
 
 import aiohttp
+from beekeepy._communication import HttpUrl
 
 from api_client_tests.api_caller import HivemindApiCaller
-
-from beekeepy._communication import HttpUrl
 
 FALLBACK_ENDPOINTS: Final[list[HttpUrl]] = [
     HttpUrl("https://api.syncad.com"),
@@ -31,7 +30,9 @@ async def _get_healthy_endpoint(endpoints: list[HttpUrl], service_path: str) -> 
 
 async def test_generated_api_client():
     # ARRANGE
-    endpoint = await _get_healthy_endpoint(FALLBACK_ENDPOINTS, f"/hivemind-api/accounts/{SEARCHED_ACCOUNT_IN_TESTS}/operations")
+    endpoint = await _get_healthy_endpoint(
+        FALLBACK_ENDPOINTS, f"/hivemind-api/accounts/{SEARCHED_ACCOUNT_IN_TESTS}/operations"
+    )
     api_caller = HivemindApiCaller(endpoint_url=endpoint)
 
     # ACT

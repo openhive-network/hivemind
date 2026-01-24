@@ -1,12 +1,12 @@
 """Methods to parse steemd values and clean strings."""
 
-from datetime import datetime
 import decimal
 import logging
 import math
+from datetime import datetime
 
-from pytz import utc
 import ujson as json
+from pytz import utc
 
 NAI_MAP = {
     '@@000000013': 'HBD',
@@ -204,7 +204,7 @@ def secs_to_str(secs):
     units = (('s', 60), ('m', 60), ('h', 24), ('d', 7))
     out = []
     rem = secs
-    for (unit, cycle) in units:
+    for unit, cycle in units:
         out.append((rem % cycle, unit))
         rem = int(rem / cycle)
         if not rem:

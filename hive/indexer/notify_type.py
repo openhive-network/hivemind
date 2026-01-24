@@ -1,4 +1,6 @@
 from enum import IntEnum
+
+
 class NotifyType(IntEnum):
     """Labels for notify `type_id` field."""
 

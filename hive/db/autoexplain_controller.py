@@ -36,7 +36,7 @@ class AutoExplainController:
             self.__wrapped_db.query_no_return("SET client_min_messages=log")
 
         self.__previous_log_level = logging.getLogger('sqlalchemy.dialects').getEffectiveLevel()
-        if self.__previous_log_level > getattr(logging, 'INFO'):
+        if self.__previous_log_level > logging.INFO:
             logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -49,7 +49,7 @@ class AutoExplainController:
         if PostgresClientLogSeverity[self.__previous_psql_client_log_level].value > PostgresClientLogSeverity.log.value:
             self.__wrapped_db.query_no_return(f"SET client_min_messages={self.__previous_psql_client_log_level}")
 
-        if self.__previous_log_level > getattr(logging, 'INFO'):
+        if self.__previous_log_level > logging.INFO:
             logging.getLogger('sqlalchemy.dialects').setLevel(self.__previous_log_level)
 
 
@@ -58,29 +58,29 @@ class AutoExplainWrapper:
         self.__wrapped_db = _db
 
     def query(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             return self.__wrapped_db.query(sql, **kwargs)
 
     def query_no_return(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             self.__wrapped_db.query_no_return(sql, **kwargs)
 
     def query_all(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             return self.__wrapped_db.query_all(sql, **kwargs)
 
     def query_row(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             return self.__wrapped_db.query_row(sql, **kwargs)
 
     def query_col(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             return self.__wrapped_db.query_col(sql, **kwargs)
 
     def query_one(self, sql, **kwargs):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             return self.__wrapped_db.query_one(sql, **kwargs)
 
     def batch_queries(self, queries, trx):
-        with AutoExplainController(self.__wrapped_db) as auto_explain:
+        with AutoExplainController(self.__wrapped_db):
             self.__wrapped_db.batch_queries(queries, trx)

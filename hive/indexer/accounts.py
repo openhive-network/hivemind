@@ -3,11 +3,10 @@
 import logging
 
 from hive.conf import SCHEMA_NAME
-from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.account import get_profile_str
-from hive.utils.normalize import escape_characters
 from hive.utils.misc import chunks
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +56,9 @@ class Accounts(DbAdapterHolder):
     def load_ids(cls):
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
-        cls._ids = dict(DbAdapterHolder.common_block_processing_db().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
+        cls._ids = dict(
+            DbAdapterHolder.common_block_processing_db().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts")
+        )
 
     @classmethod
     def clear_ids(cls):

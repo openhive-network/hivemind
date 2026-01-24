@@ -73,7 +73,7 @@ class PrometheusClient:
             port = int(port)
         if PrometheusClient.deamon is None:
             try:
-                import prometheus_client
+                import prometheus_client  # noqa: F401
             except ImportError:
                 log.warn("Failed to import prometheus client. Online stats disabled")
                 return
@@ -86,10 +86,10 @@ class PrometheusClient:
     def broadcast(obj):
         if PrometheusClient.deamon is None:
             return
-        if type(obj) == type(list()):
+        if isinstance(obj, list):
             for v in obj:
                 PrometheusClient.broadcast(v)
-        elif type(obj) == type(BroadcastObject('', '', '')):
+        elif isinstance(obj, BroadcastObject):
             PrometheusClient.logs_to_broadcast.put(obj)
         else:
             raise Exception(f"Not expected type. Should be list or BroadcastObject, but: {type(obj)} given")
@@ -100,7 +100,7 @@ class Stat:
         self.time = time
 
     def update(self, other):
-        assert type(self) == type(other)
+        assert type(self) is type(other)
         attributes = self.__dict__
         oatte = other.__dict__
         for key, val in attributes.items():
@@ -118,10 +118,9 @@ class Stat:
 
 
 class StatusManager:
-
     # Fully abstract class
     def __init__(self):
-        assert False
+        raise AssertionError()
 
     @staticmethod
     def start():
@@ -152,7 +151,7 @@ class StatusManager:
     def log_dict(col: dict) -> float:
         sorted_stats = sorted(col.items(), key=lambda kv: kv[1], reverse=True)
         measured_time = 0.0
-        for (k, v) in sorted_stats:
+        for k, v in sorted_stats:
             log.info(f"`{k}`: {v}")
             measured_time += v.time
         return measured_time
@@ -358,7 +357,6 @@ def minmax(collection: dict, blocks: int, time: float, _from: int):
     _to = _from + blocks
     PrometheusClient.broadcast(BroadcastObject('block_processing_rate', value, 'bps'))
     if len(collection.keys()) == 0:
-
         collection['min'] = value
         collection['min_from'] = _from
         collection['min_to'] = _to
@@ -368,7 +366,6 @@ def minmax(collection: dict, blocks: int, time: float, _from: int):
         collection['max_to'] = _to
 
     else:
-
         mn = min(collection['min'], value)
         if mn == value:
             collection['min'] = value
@@ -442,7 +439,7 @@ class StatsAbstract:
             try:
                 avg = ms / reqs
                 millisec = ms / self._ms
-            except ZeroDivisionError as ex:
+            except ZeroDivisionError:
                 avg = 0.0
                 millisec = 0.0
             if reqs == 0:

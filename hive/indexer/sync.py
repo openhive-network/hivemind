@@ -1,12 +1,13 @@
 """Hive sync manager."""
 
-from concurrent.futures import ThreadPoolExecutor
+import ast
 import logging
 import time
+from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter as perf
-from typing import Iterable, Tuple
 
-from hive.conf import Conf, SCHEMA_NAME
+from hive.conf import SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -15,7 +16,6 @@ from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.utils.payout_stats import PayoutStats
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
@@ -23,14 +23,13 @@ from hive.signals import (
     set_exception_thrown,
 )
 from hive.utils.normalize import secs_to_str
+from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import BroadcastObject
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.timer import Timer
-
-import ast
 
 log = logging.getLogger(__name__)
 
@@ -194,7 +193,7 @@ class SyncHiveDb:
                 self._process_live_blocks(self._lbound, self._ubound, active_connections_before)
             else:
                 self._on_stop_synchronization(active_connections_before)
-                assert False, f"Unknown application stage {application_stage}"
+                raise AssertionError(f'Unknown application stage {application_stage}')
 
     def _wait_for_massive_consume(self):
         if self._massive_consume_blocks_futures is None:
@@ -221,7 +220,7 @@ class SyncHiveDb:
 
         return False
 
-    def _query_for_app_next_block(self) -> Tuple[int, int]:
+    def _query_for_app_next_block(self) -> tuple[int, int]:
         limit = "NULL"
         batch = "NULL"
         if self._last_block_to_process:
@@ -231,9 +230,7 @@ class SyncHiveDb:
             batch = self._max_batch
 
         result = self._db.query_one(
-            "CALL hive.app_next_iteration( _contexts => ARRAY['{}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )".format(
-                SCHEMA_NAME, limit, batch
-            )
+            f"CALL hive.app_next_iteration( _contexts => ARRAY['{SCHEMA_NAME}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {limit}, _override_max_batch => {batch} )"
         )
 
         self._db._trx_active = True
@@ -301,13 +298,11 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert (
-                is_superuser
-            ), 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
     @staticmethod
     def _show_info(database: Db) -> None:
-        from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
+        from hive.utils.misc import BlocksInfo, PatchLevelInfo, show_app_version
 
         blocks_info = BlocksInfo(
             last=Blocks.head_num(),
@@ -373,8 +368,6 @@ class SyncHiveDb:
 
         lbound = blocks[0]['num']
         ubound = blocks[-1]['num']
-        orig_lbound = lbound
-        orig_ubound = ubound
 
         is_debug = log.isEnabledFor(10)
         num = 0

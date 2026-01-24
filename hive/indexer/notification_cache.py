@@ -1,13 +1,13 @@
 """Handle notification cache"""
 
-import logging
 import collections
+import logging
 import threading
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.misc import UniqueCounter, chunks
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks, UniqueCounter
 
 # pylint: disable=too-many-lines,line-too-long
 
@@ -35,16 +35,14 @@ class NotificationCache(DbAdapterHolder):
                     )._mapping['num']
         return cls._notification_first_block
 
+
 class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
     @classmethod
     def flush_vote_notifications(cls):
         n = len(cls.vote_notifications)
-        max_block_num = max(
-            n["block_num"]
-            for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items()
-        )
+        max_block_num = max(n["block_num"] for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items())
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
             sql = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
@@ -104,10 +102,7 @@ class PostNotificationCache(NotificationCache):
     @classmethod
     def flush_post_notifications(cls):
         n = len(cls.comment_notifications)
-        max_block_num = max(
-            n["block_num"]
-            for _, n in cls.comment_notifications.items() or [("", {"block_num": 0})]
-        )
+        max_block_num = max(n["block_num"] for _, n in cls.comment_notifications.items() or [("", {"block_num": 0})])
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
             # Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
@@ -172,8 +167,7 @@ class FollowNotificationCache(NotificationCache):
     def flush_follow_notifications(cls):
         n = len(cls.follow_notifications_to_flush)
         max_block_num = max(
-            block_num
-            for r, g, block_num, counter in cls.follow_notifications_to_flush or [("", "", 0, 0)]
+            block_num for r, g, block_num, counter in cls.follow_notifications_to_flush or [("", "", 0, 0)]
         )
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
@@ -247,8 +241,7 @@ class ReblogNotificationCache(NotificationCache):
     def flush_reblog_notifications(cls):
         n = len(cls.reblog_notifications_to_flush)
         max_block_num = max(
-            n["block_num"]
-            for _, n in cls.reblog_notifications_to_flush.items() or [("", {"block_num": 0})]
+            n["block_num"] for _, n in cls.reblog_notifications_to_flush.items() or [("", {"block_num": 0})]
         )
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
             # With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.

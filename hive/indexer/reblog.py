@@ -1,15 +1,13 @@
-""" Class for reblog operations """
+"""Class for reblog operations"""
 
 import logging
-from collections import OrderedDict
 
 from hive.conf import SCHEMA_NAME
-from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
-from hive.utils.normalize import escape_characters
 from hive.utils.misc import UniqueCounter
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +70,9 @@ class Reblog(DbAdapterHolder):
     def delete(cls, author, permlink, account):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache."""
         sql = f"SELECT {SCHEMA_NAME}.delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
-        status = DbAdapterHolder.common_block_processing_db().query_col(sql, author=author, permlink=permlink, account=account)
+        status = DbAdapterHolder.common_block_processing_db().query_col(
+            sql, author=author, permlink=permlink, account=account
+        )
         assert status is not None
         if status == 0:
             log.debug("reblog: post not found: %s/%s", author, permlink)
@@ -110,7 +110,7 @@ class Reblog(DbAdapterHolder):
             limit = 1000
             count = 0
             cls.beginTx()
-            for k, v in cls.reblog_items_to_flush.items():
+            for _k, v in cls.reblog_items_to_flush.items():
                 reblog_item = v['op']
                 if count < limit:
                     values.append(
@@ -136,4 +136,3 @@ class Reblog(DbAdapterHolder):
             cls.reblog_items_to_flush.clear()
 
         return item_count
-

@@ -1,4 +1,5 @@
 """Performant FIFO queue which ignores duplicates."""
+
 from math import ceil
 
 

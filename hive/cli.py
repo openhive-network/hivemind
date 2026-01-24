@@ -10,6 +10,7 @@ from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
 
+
 def setup_logging(conf):
     """Setup logging with timestamps"""
 
@@ -76,7 +77,8 @@ def launch_mode(mode, conf):
         Db.set_shared_instance(conf.db())
 
         from hive.indexer.sync import SyncHiveDb
-        with SyncHiveDb(conf=conf, enter_sync = False, upgrade_schema = False) as schema_builder:
+
+        with SyncHiveDb(conf=conf, enter_sync=False, upgrade_schema=False) as schema_builder:
             schema_builder.build_database_schema()
 
     elif mode == 'upgrade_schema':
@@ -88,7 +90,8 @@ def launch_mode(mode, conf):
         Db.set_shared_instance(conf.db())
 
         from hive.indexer.sync import SyncHiveDb
-        with SyncHiveDb(conf=conf, enter_sync = False, upgrade_schema = True) as schema_builder:
+
+        with SyncHiveDb(conf=conf, enter_sync=False, upgrade_schema=True) as schema_builder:
             schema_builder.build_database_schema()
 
     elif mode == 'sync':
@@ -99,7 +102,8 @@ def launch_mode(mode, conf):
 
         Db.set_shared_instance(conf.db())
         from hive.indexer.sync import SyncHiveDb
-        with SyncHiveDb(conf=conf, enter_sync = True, upgrade_schema = False) as sync:
+
+        with SyncHiveDb(conf=conf, enter_sync=True, upgrade_schema=False) as sync:
             sync.run()
 
     elif mode == 'status':

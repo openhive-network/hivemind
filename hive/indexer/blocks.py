@@ -1,41 +1,37 @@
 """Blocks processor."""
 
-import concurrent
-from concurrent.futures import ThreadPoolExecutor
 import logging
 from pathlib import Path
 from time import perf_counter
-from typing import Tuple
 
-from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
+from hive.conf import ONE_WEEK_IN_BLOCKS, SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
-from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.indexer.flusher import process_flush_items, process_flush_items_threaded
 from hive.indexer.follow import Follow
 from hive.indexer.hive_db.block import BlockHiveDb
+from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
+from hive.indexer.mentions import Mentions
+from hive.indexer.notification_cache import (
+    FollowNotificationCache,
+    NotificationCache,
+    PostNotificationCache,
+    ReblogNotificationCache,
+    VoteNotificationCache,
+)
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
-from hive.indexer.mentions import Mentions
-from hive.indexer.notification_cache import (
-    NotificationCache,
-    VoteNotificationCache,
-    PostNotificationCache,
-    FollowNotificationCache,
-    ReblogNotificationCache
-)
-from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
-from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
-from hive.indexer.flusher import time_collector, process_flush_items, process_flush_items_threaded
 
 log = logging.getLogger(__name__)
 
@@ -170,15 +166,12 @@ class Blocks:
         process_flush_items(cls._concurrent_flush_2)
 
     @classmethod
-    def process_blocks(cls, blocks) -> Tuple[int, int]:
+    def process_blocks(cls, blocks) -> tuple[int, int]:
         last_num = 0
         first_block = -1
         try:
             for block_raw in blocks:
-                hiveBlock = BlockHiveDb(
-                    block_raw,
-                    MassiveBlocksDataProviderHiveDb._operation_id_to_enum
-                )
+                hiveBlock = BlockHiveDb(block_raw, MassiveBlocksDataProviderHiveDb._operation_id_to_enum)
                 if first_block == -1:
                     first_block = hiveBlock.get_num()
                 last_num = cls._process(hiveBlock)
@@ -220,10 +213,7 @@ class Blocks:
     @classmethod
     def _periodic_actions(cls, block_raw) -> None:
         """Actions performed at a given time, calculated on the basis of the current block number"""
-        block = BlockHiveDb(
-            block_raw,
-            MassiveBlocksDataProviderHiveDb._operation_id_to_enum
-        )
+        block = BlockHiveDb(block_raw, MassiveBlocksDataProviderHiveDb._operation_id_to_enum)
 
         if (block_num := block.get_num()) % 1200 == 0:  # 1hour
             log.info(f"head block {block_num} @ {block.get_date()}")
@@ -330,9 +320,7 @@ class Blocks:
         )
 
         def try_register_account(account_name, op, op_details):
-            if not Accounts.register(
-                account_name, op_details, cls._head_block_date, num
-            ):
+            if not Accounts.register(account_name, op_details, cls._head_block_date, num):
                 log.error(f"Failed to register account {account_name} from operation: {op}")
 
         for transaction in block.get_next_transaction():

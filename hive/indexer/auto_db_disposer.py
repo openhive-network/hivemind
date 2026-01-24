@@ -1,4 +1,4 @@
-class AutoDbDisposer(object):
+class AutoDbDisposer:
     """Manages whole lifecycle of a database.
     Object of this class should be created by `with` context.
     """
