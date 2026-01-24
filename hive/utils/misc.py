@@ -1,19 +1,22 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from logging import Logger
-import os
 
 import psutil
 
 from hive.utils.stats import BroadcastObject, PrometheusClient
 
 
-def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
+def log_memory_usage(memtypes=None, broadcast=True) -> str:
     """
     Logs current memory types, additionally broadcast if broadcast set to True (default)
 
     Available memtypes: rss, vms, shared, text, lib, data, dirty
     """
+
+    if memtypes is None:
+        memtypes = ["rss", "vms", "shared"]
 
     def format_bytes(val: int):
         assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
@@ -41,14 +44,14 @@ def chunks(lst, n):
     if isinstance(lst, dict):
         items = list(lst.items())
         for i in range(0, len(items), n):
-            yield dict(items[i:i + n])
+            yield dict(items[i : i + n])
     elif isinstance(lst, set):
         items = list(lst)
         for i in range(0, len(items), n):
-            yield set(items[i:i + n])
+            yield set(items[i : i + n])
     else:
         for i in range(0, len(lst), n):
-            yield lst[i:i + n]
+            yield lst[i : i + n]
 
 
 def get_memory_amount() -> float:
@@ -85,7 +88,7 @@ class UniqueCounter:
 
 
 def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):
-    from hive.version import VERSION, GIT_REVISION, GIT_DATE
+    from hive.version import GIT_DATE, GIT_REVISION, VERSION
 
     log.info(f"hivemind_version : {VERSION}")
     log.info(f"hivemind_git_rev : {GIT_REVISION}")

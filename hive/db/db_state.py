@@ -2,31 +2,25 @@
 
 # pylint: disable=too-many-lines
 
-from concurrent.futures import as_completed, ThreadPoolExecutor
 import logging
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Optional
 
 import sqlalchemy
 
-from hive.conf import (
-   SCHEMA_NAME
-  ,SCHEMA_OWNER_NAME
-  ,ONE_WEEK_IN_BLOCKS
-  ,REPTRACKER_SCHEMA_NAME
-  ,SWAGGER_URL
-  )
-
+from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME, SCHEMA_OWNER_NAME, SWAGGER_URL
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
-from hive.utils.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
+from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import FinalOperationStatusManager as FOSM
 
 log = logging.getLogger(__name__)
+
 
 class DbState:
     """Manages database state: sync status, migrations, etc."""
@@ -65,15 +59,15 @@ class DbState:
 
             setup(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
-        elif schema_upgrade == True:
+        elif schema_upgrade is True:
             log.info("Attempting to perform db schema upgrade...")
             db_setup_admin = cls.db().clone('setup_admin')
             perform_db_upgrade(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
             log.info("Database schema upgrade finished")
 
-        db_setup_owner.query_no_return( f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}" )
-        db_setup_owner.query_no_return( f"SET custom.swagger_url = '{SWAGGER_URL}'" )
+        db_setup_owner.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}")
+        db_setup_owner.query_no_return(f"SET custom.swagger_url = '{SWAGGER_URL}'")
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()
@@ -194,7 +188,9 @@ class DbState:
             sqlalchemy.Column('reputation', sqlalchemy.BigInteger, nullable=False, server_default='0'),
         )
 
-        idx_reputation_on_account_reputations = sqlalchemy.Index('idx_reputation_on_account_reputations', rep.c.reputation)
+        idx_reputation_on_account_reputations = sqlalchemy.Index(
+            'idx_reputation_on_account_reputations', rep.c.reputation
+        )
 
         if rep not in _indexes:
             _indexes[rep] = []
@@ -255,8 +251,6 @@ class DbState:
         with AutoDbDisposer(db, table_name) as db_mgr:
             engine = db_mgr.db.engine()
 
-            any_index_created = False
-
             for index in indexes:
                 log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
                 try:
@@ -279,7 +273,6 @@ class DbState:
                         end_time = perf_counter()
                         elapsed_time = end_time - time_start
                         log.info("Index %s created in time %.4f s", index.name, elapsed_time)
-                        any_index_created = True
 
         log.info("[MASSIVE] End %s-massive sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
 
@@ -310,7 +303,6 @@ class DbState:
         )
         FOSM.clear()
         log.info(f"=== {action} INDEXES ===")
-
 
     @classmethod
     def ensure_off_synchronous_commit(cls):
@@ -357,7 +349,9 @@ class DbState:
             cls._original_fsync = cls.db().query_one("SELECT current_setting('fsync')")
             cls._original_full_page_writes = cls.db().query_one("SELECT current_setting('full_page_writes')")
 
-            log.info(f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+            log.info(
+                f"[MASSIVE] Saving WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}"
+            )
             # ALTER SYSTEM requires superuser and cannot run inside a transaction block
             admin.query_no_return_autocommit("ALTER SYSTEM SET fsync = 'off'")
             admin.query_no_return_autocommit("ALTER SYSTEM SET full_page_writes = 'off'")
@@ -381,7 +375,9 @@ class DbState:
             return
 
         try:
-            log.info(f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}")
+            log.info(
+                f"[MASSIVE] Restoring WAL safety settings: fsync={cls._original_fsync}, full_page_writes={cls._original_full_page_writes}"
+            )
             admin.query_no_return_autocommit(f"ALTER SYSTEM SET fsync = '{cls._original_fsync}'")
             admin.query_no_return_autocommit(f"ALTER SYSTEM SET full_page_writes = '{cls._original_full_page_writes}'")
             admin.query_no_return_autocommit("SELECT pg_reload_conf()")
@@ -402,6 +398,7 @@ class DbState:
 
         # Set tables to UNLOGGED for faster inserts (no WAL writes)
         from hive.db.schema import set_logged_table_attribute
+
         set_logged_table_attribute(cls.db(), False)
 
         cls._indexes_were_disabled = True
@@ -415,16 +412,18 @@ class DbState:
 
         log.info("Dropping foreign keys")
         from hive.db.schema import drop_fk
+
         time_start = perf_counter()
         drop_fk(cls.db())
         end_time = perf_counter()
         elapsed_time = end_time - time_start
         log.info("Dropped foreign keys: %.4f s", elapsed_time)
         if cls.db().is_trx_active():
-            cls.db().query_no_return( "COMMIT" )
+            cls.db().query_no_return("COMMIT")
 
         cls._fk_were_disabled = True
-        cls._fk_were_enabled= False
+        cls._fk_were_enabled = False
+
     @classmethod
     def are_indexes_enabled(cls):
         return cls._indexes_were_enabled
@@ -440,6 +439,7 @@ class DbState:
         # This must happen before index creation because some indexes (e.g., BM25/pg_search)
         # don't support UNLOGGED tables
         from hive.db.schema import set_logged_table_attribute
+
         set_logged_table_attribute(cls.db(), True)
 
         log.info("Creating indexes: started")
@@ -466,7 +466,7 @@ class DbState:
         create_fk(cls.db())
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
         if cls.db().is_trx_active():
-            cls.db().query_no_return( "COMMIT" )
+            cls.db().query_no_return("COMMIT")
 
         cls._fk_were_disabled = False
         cls._fk_were_enabled = True
@@ -521,8 +521,8 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            #cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});");
+            # cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});")
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -536,7 +536,7 @@ class DbState:
     @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
-        result = func(*args)
+        func(*args)
         return FOSM.stop(startTime)
 
     @classmethod
@@ -603,11 +603,10 @@ class DbState:
 
     @classmethod
     def vacuum_tables_in_threads(cls, tables):
-
         def vacuum_table(table, db):
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
-                if (table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data"):
+                if table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data":
                     db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (FULL, VERBOSE,ANALYZE) " + table))
                 else:
                     db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (VERBOSE,ANALYZE) " + table))
@@ -621,7 +620,6 @@ class DbState:
 
     @classmethod
     def vacuum_all_hivemind_tables_in_threads(cls):
-
         log.info("Requesting vacuum on hivemind tables")
         sql = f"""
 SELECT table_schema || '.' || table_name AS table_name
@@ -646,10 +644,11 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
             if is_initial_massive:
                 cls.vacuum_all_hivemind_tables_in_threads()
 
-            cls._finish_all_tables( is_initial_massive, last_completed_blocks, last_imported_blocks)
+            cls._finish_all_tables(is_initial_massive, last_completed_blocks, last_imported_blocks)
 
             if is_initial_massive:
-                cls.vacuum_tables_in_threads([
+                cls.vacuum_tables_in_threads(
+                    [
                         f"{SCHEMA_NAME}.hive_posts",
                         f"{SCHEMA_NAME}.hive_feed_cache",
                         f"{SCHEMA_NAME}.hive_mentions",
@@ -657,7 +656,8 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
                         f"{SCHEMA_NAME}.hive_state",
                         f"{SCHEMA_NAME}.hive_notification_cache",
                         f"{SCHEMA_NAME}.hive_accounts",
-                        ])
+                    ]
+                )
 
             log.info("[MASSIVE] Massive sync complete!")
             return True

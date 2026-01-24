@@ -2,21 +2,22 @@
 
 # pylint: disable=too-many-lines
 
-from enum import IntEnum
 import logging
 import re
+from enum import IntEnum
 from time import perf_counter
-from hive.utils.misc import UniqueCounter
 
 import ujson as json
 
 from hive.conf import SCHEMA_NAME
-from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
+from hive.utils.misc import UniqueCounter
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
+
 
 class Role(IntEnum):
     """Labels for `role_id` field."""
@@ -106,12 +107,14 @@ def read_key_dict(obj, key):
     assert isinstance(obj[key], dict), f'key `{key}` not a dict'
     return obj[key]
 
+
 def read_key_integer(op, key):
     """Reads a key from dict, ensuring valid integer if present."""
     if key in op:
-        assert isinstance(op[key], int), 'must be int: %s' % key
+        assert isinstance(op[key], int), f'must be int: {key}'
         return op[key]
     return None
+
 
 def check_community(name) -> bool:
     """Perform basic validation on community name"""
@@ -125,6 +128,7 @@ def check_community(name) -> bool:
     ):
         return True
     return False
+
 
 def encode_bitwise_mask(muted_reasons):
     mask = 0
@@ -146,6 +150,7 @@ def decode_bitwise_mask(mask):
         bit_position += 1
 
     return muted_reasons
+
 
 class Community:
     """Handles hive community registration and operations."""
@@ -176,12 +181,7 @@ class Community:
 
         sql = f"""SELECT {SCHEMA_NAME}.register_community(:name, :account_id, :block_date, :block_num, :counter)"""
         DbAdapterHolder.common_block_processing_db().query_no_return(
-            sql,
-            name=name,
-            account_id=_id,
-            block_date=block_date,
-            block_num=block_num,
-            counter=counter
+            sql, name=name, account_id=_id, block_date=block_date, block_num=block_num, counter=counter
         )
 
     @classmethod
@@ -330,7 +330,15 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             log.info("validation failed with message: '%s'", payload)
-            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload, community_id=self.community_id, src_id=self.community_id)
+            Notify(
+                block_num=self.block_num,
+                type_id='error',
+                dst_id=self.actor_id,
+                when=self.date,
+                payload=payload,
+                community_id=self.community_id,
+                src_id=self.community_id,
+            )
 
         return self.valid
 
@@ -354,116 +362,162 @@ class CommunityOp:
             notes=self.notes,
             title=self.title,
             block_num=self.block_num,
-            muted_reasons=encode_bitwise_mask([0]), # 0 is MUTED_COMMUNITY_MODERATION, used in the mutePost action
+            muted_reasons=encode_bitwise_mask([0]),  # 0 is MUTED_COMMUNITY_MODERATION, used in the mutePost action
         )
 
         # Community-level commands
         if action == 'updateProps':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.update_community_props(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.update_community_props(
                     :actor_id, :community_id, :props
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                props=json.dumps(self.props)
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    props=json.dumps(self.props),
+                )
+                ._mapping
+            )
             if self._handle_result(result):
-                self._notify_team('set_props', team_members=result['team_members'], payload=json.dumps(read_key_dict(self.op, 'props')))
+                self._notify_team(
+                    'set_props',
+                    team_members=result['team_members'],
+                    payload=json.dumps(read_key_dict(self.op, 'props')),
+                )
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
-                **params,
-            )._mapping
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_subscribe(:actor_id, :community_id, :date, :block_num, :counter)""",
+                    **params,
+                )
+                ._mapping
+            )
             self._handle_result(result)
         elif action == 'unsubscribe':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
-                **params,
-            )._mapping
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_unsubscribe(:actor_id, :community_id)""",
+                    **params,
+                )
+                ._mapping
+            )
             self._handle_result(result)
         # Account-level actions
         elif action == 'setRole':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_set_role(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_set_role(
                     :actor_id, :account_id, :community_id, :role_id, :date,
                     :max_mod_nb, :mod_role_threshold
                 )""",
-                max_mod_nb=MAX_MOD_NB,
-                mod_role_threshold=Role.mod,
-                **params
-            )._mapping
+                    max_mod_nb=MAX_MOD_NB,
+                    mod_role_threshold=Role.mod,
+                    **params,
+                )
+                ._mapping
+            )
             self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_set_title(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_set_title(
                     :actor_id, :account_id, :community_id, :title, :date
                 )""",
-                **params,
-            )._mapping
+                    **params,
+                )
+                ._mapping
+            )
             self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_mute_post(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_mute_post(
                     :actor_id, :community_id, :account_id, :permlink, :muted_reasons
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                account_id=self.account_id,
-                permlink=self.permlink,
-                muted_reasons=params['muted_reasons']
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    account_id=self.account_id,
+                    permlink=self.permlink,
+                    muted_reasons=params['muted_reasons'],
+                )
+                ._mapping
+            )
             self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_unmute_post(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_unmute_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                account_id=self.account_id,
-                permlink=self.permlink
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    account_id=self.account_id,
+                    permlink=self.permlink,
+                )
+                ._mapping
+            )
             self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_pin_post(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_pin_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                account_id=self.account_id,
-                permlink=self.permlink
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    account_id=self.account_id,
+                    permlink=self.permlink,
+                )
+                ._mapping
+            )
             self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_unpin_post(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_unpin_post(
                     :actor_id, :community_id, :account_id, :permlink
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                account_id=self.account_id,
-                permlink=self.permlink
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    account_id=self.account_id,
+                    permlink=self.permlink,
+                )
+                ._mapping
+            )
             self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
-            result = DbAdapterHolder.common_block_processing_db().query_row(
-                f"""SELECT * FROM {SCHEMA_NAME}.community_flag_post(
+            result = (
+                DbAdapterHolder.common_block_processing_db()
+                .query_row(
+                    f"""SELECT * FROM {SCHEMA_NAME}.community_flag_post(
                     :actor_id, :community_id, :account_id, :permlink, :community
                 )""",
-                actor_id=self.actor_id,
-                community_id=self.community_id,
-                account_id=self.account_id,
-                permlink=self.permlink,
-                community=self.community
-            )._mapping
+                    actor_id=self.actor_id,
+                    community_id=self.community_id,
+                    account_id=self.account_id,
+                    permlink=self.permlink,
+                    community=self.community,
+                )
+                ._mapping
+            )
             if self._handle_result(result):
-                self._notify_team('flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes)
+                self._notify_team(
+                    'flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes
+                )
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
@@ -484,7 +538,7 @@ class CommunityOp:
                 when=self.date,
                 payload=result['error_message'],
                 community_id=self.community_id,
-                src_id=self.community_id
+                src_id=self.community_id,
             )
             return False
         return True
@@ -495,7 +549,7 @@ class CommunityOp:
 
         if self.account_id:
             dst_id = self.account_id
-            if is_subscribed == False:
+            if is_subscribed is False:
                 score = 15
 
         Notify(

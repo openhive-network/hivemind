@@ -1,9 +1,10 @@
 """Flush blocks data."""
 
 import concurrent
-from concurrent.futures import ThreadPoolExecutor
 import logging
-from typing import Callable, List, Tuple, Any, TypeVar, Sequence
+from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Callable, TypeVar
 
 from hive.utils.stats import FlushStatusManager as FSM
 
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 T = TypeVar('T')
 
 
-def time_collector(func: Callable, *args, **kwargs) -> Tuple[Any, float]:
+def time_collector(func: Callable, *args, **kwargs) -> tuple[Any, float]:
     """Measure execution time of a function."""
     start_time = FSM.start()
     result = func(*args, **kwargs)
@@ -20,9 +21,7 @@ def time_collector(func: Callable, *args, **kwargs) -> Tuple[Any, float]:
     return result, elapsed_time
 
 
-def process_flush_items(
-    items: List[Tuple[str, Callable, T, Sequence[Any]]]
-) -> None:
+def process_flush_items(items: list[tuple[str, Callable, T, Sequence[Any]]]) -> None:
     """Process a list of flush items, measuring their execution time.
 
     Args:
@@ -33,19 +32,13 @@ def process_flush_items(
         description, f, c, *args = item
         try:
             (n, elapsed_time) = time_collector(f, *args)
-            log.info(
-                "%s flush executed in: %.4f s",
-                description,
-                elapsed_time
-            )
+            log.info("%s flush executed in: %.4f s", description, elapsed_time)
         except Exception as exc:
             log.error(f'{description!r} generated an exception: {exc}')
             raise exc
 
 
-def process_flush_items_threaded(
-    items: List[Tuple[str, Callable, T, Sequence[Any]]]
-) -> None:
+def process_flush_items_threaded(items: list[tuple[str, Callable, T, Sequence[Any]]]) -> None:
     """Process a list of flush items in parallel using a thread pool.
 
     Args:
@@ -55,10 +48,7 @@ def process_flush_items_threaded(
     completed_threads = 0
     pool = ThreadPoolExecutor(max_workers=len(items))
 
-    flush_futures = {
-        pool.submit(time_collector, f, *args): (description, c)
-        for (description, f, c, *args) in items
-    }
+    flush_futures = {pool.submit(time_collector, f, *args): (description, c) for (description, f, c, *args) in items}
 
     for future in concurrent.futures.as_completed(flush_futures):
         (description, c) = flush_futures[future]

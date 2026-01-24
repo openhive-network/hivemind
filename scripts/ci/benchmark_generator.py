@@ -28,7 +28,7 @@ def get_request_from_yaml(path_to_yaml):
     import yaml
 
     yaml_document = None
-    with open(path_to_yaml, "r") as yaml_file:
+    with open(path_to_yaml) as yaml_file:
         yaml_document = yaml.load(yaml_file, Loader=yaml.BaseLoader)
     if "stages" in yaml_document:
         if "request" in yaml_document["stages"][0]:
@@ -49,7 +49,7 @@ def make_benchmark_test_file(file_name, address, tests_root_dir):
 
     pattern = "*.tavern.yaml"
     test_files = []
-    for path, subdirs, files in os.walk(tests_root_dir):
+    for path, _subdirs, files in os.walk(tests_root_dir):
         for name in files:
             if fnmatch(name, pattern):
                 test_files.append(os.path.join(path, name))

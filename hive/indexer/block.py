@@ -1,9 +1,7 @@
-from abc import ABC, abstractmethod
-from enum import Enum
 import logging
 import queue
-
-from hive.signals import can_continue_thread
+from abc import ABC, abstractmethod
+from enum import Enum
 
 log = logging.getLogger(__name__)
 
@@ -175,7 +173,7 @@ class BlocksProviderBase(ABC):
     def _get_from_queue(data_queue, number_of_elements):
         """Tool function to get elements from queue"""
         ret = []
-        for element in range(number_of_elements):
+        for _element in range(number_of_elements):
             while True:
                 try:
                     ret.append(data_queue.get(True, 1))

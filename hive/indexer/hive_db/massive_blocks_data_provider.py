@@ -1,16 +1,12 @@
-from concurrent.futures import ThreadPoolExecutor
 import logging
-import queue
-from typing import Final, List, Optional
+from typing import Final
 
 from sqlalchemy import text
 
 from hive.conf import Conf
 from hive.db.adapter import Db
-from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
-from hive.indexer.hive_db.block import BlockHiveDb
-from hive.signals import can_continue_thread, set_exception_thrown
-from hive.utils.stats import WaitingStatusManager as WSM
+from hive.indexer.block import OperationType, VirtualOperationType
+from hive.signals import set_exception_thrown
 
 log = logging.getLogger(__name__)
 
@@ -21,12 +17,7 @@ BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:fir
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
 
-    def __init__(
-        self,
-        sql_query: str,
-        db: Db,
-        strict: bool
-    ):
+    def __init__(self, sql_query: str, db: Db, strict: bool):
         self._db = db
         self._sql_query = sql_query
         self._strict = strict
@@ -52,27 +43,15 @@ class MassiveBlocksDataProviderHiveDb:
     _vop_types_dictionary = {}
     _op_types_dictionary = {}
 
-    def __init__(
-        self,
-        conf: Conf,
-        db_root: Db
-    ):
+    def __init__(self, conf: Conf, db_root: Db):
         self._conf = conf
         self._db = db_root
 
-        self._operations_provider = BlocksDataFromDbProvider(
-            sql_query=OPERATIONS_QUERY,
-            db=db_root,
-            strict = False
-        )
+        self._operations_provider = BlocksDataFromDbProvider(sql_query=OPERATIONS_QUERY, db=db_root, strict=False)
 
         # Because HAF returns range of available blocks, it is impossible
         # to get empty results for asking for blocks
-        self._blocks_data_provider = BlocksDataFromDbProvider(
-            sql_query=BLOCKS_QUERY,
-            db=db_root,
-            strict = True
-        )
+        self._blocks_data_provider = BlocksDataFromDbProvider(sql_query=BLOCKS_QUERY, db=db_root, strict=True)
 
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(

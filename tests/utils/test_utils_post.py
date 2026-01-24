@@ -1,5 +1,4 @@
 # pylint: disable=missing-docstring,line-too-long
-from decimal import Decimal
 
 from hive.utils.post import (
     mentions,

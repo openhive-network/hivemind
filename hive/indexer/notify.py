@@ -1,16 +1,17 @@
 """Handle notifications"""
+
 import logging
 
 from hive.conf import SCHEMA_NAME
-from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.utils.normalize import escape_characters
 from hive.indexer.notify_type import NotifyType
-from hive.utils.misc import chunks, UniqueCounter
+from hive.utils.misc import UniqueCounter, chunks
+from hive.utils.normalize import escape_characters
 
 # pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
+
 
 class Notify(DbAdapterHolder):
     """Handles writing notifications/messages."""
@@ -20,7 +21,6 @@ class Notify(DbAdapterHolder):
     _notifies = []
     _notification_first_block = None
     _counter = UniqueCounter()
-
 
     def __init__(
         self,
@@ -80,7 +80,7 @@ class Notify(DbAdapterHolder):
             self.post_id if self.post_id else "NULL",
             self.community_id if self.community_id else "NULL",
             escape_characters(str(self.payload)) if self.payload else "NULL",
-            self.counter
+            self.counter,
         )
 
     @classmethod
@@ -90,7 +90,9 @@ class Notify(DbAdapterHolder):
         n = len(Notify._notifies)
         if n > 0:
             if cls._notification_first_block is None:
-                cls._notification_first_block = cls.db.query_row("select hivemind_app.block_before_irreversible( '90 days' ) AS num")._mapping['num']
+                cls._notification_first_block = cls.db.query_row(
+                    "select hivemind_app.block_before_irreversible( '90 days' ) AS num"
+                )._mapping['num']
             max_block_num = max(n.block_num for n in Notify._notifies)
             cls.beginTx()
 

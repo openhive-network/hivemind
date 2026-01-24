@@ -4,13 +4,12 @@ import logging
 
 from funcy.seqs import first, second
 
-from hive.db.adapter import Db
 from hive.indexer.community import Community, process_json_community_op
+from hive.indexer.follow import Follow
 from hive.indexer.notify import Notify
 from hive.indexer.reblog import Reblog
 from hive.utils.json import valid_command, valid_date, valid_keys, valid_op_json
 from hive.utils.normalize import load_json_key
-from hive.indexer.follow import Follow
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class CustomOp:
 
     @classmethod
     def process_op(cls, op, block_num, block_date):
-        opName = str(op['id']) + ('-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '')
+        str(op['id']) + ('-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '')
 
         account = _get_auth(op)
         if not account:

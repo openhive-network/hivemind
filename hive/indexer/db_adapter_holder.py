@@ -2,9 +2,10 @@ import logging
 
 log = logging.getLogger(__name__)
 
-from hive.db.adapter import Db
+from hive.db.adapter import Db  # noqa: E402
 
-class DbLiveContextHolder(object):
+
+class DbLiveContextHolder:
     _live_context = None
 
     @classmethod
@@ -16,7 +17,7 @@ class DbLiveContextHolder(object):
         return cls._live_context
 
 
-class DbAdapterHolder(object):
+class DbAdapterHolder:
     db = None
     _block_processing_thread_sync_db = None
 

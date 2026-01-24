@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 Tool for Gitlab runner to read environment from project variable
@@ -16,9 +15,10 @@ echo "RUNNER_ID is $RUNNER_ID"
 ```
 """
 
+import argparse
 import logging
 import sys
-import argparse
+
 import yaml
 
 FORMAT = '# %(asctime)s - %(name)s - %(levelname)s - %(message)s '

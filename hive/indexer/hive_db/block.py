@@ -48,7 +48,7 @@ class TransactionHiveDb(Transaction):
 
         for operation in self._operations:
             operation_type = self._operation_id_to_enum(operation['operation_type_id'])
-            if type(operation_type) != OperationType:
+            if not isinstance(operation_type, OperationType):
                 continue
 
             ret_operation = OperationHiveDb(operation_type, operation['body'])
@@ -62,7 +62,7 @@ class BlockHiveDb(Block):
         opertion_id_to_enum,
     ):
         self._raw_block = block_raw
-        self._num  = self._raw_block['num']
+        self._num = self._raw_block['num']
         self._date = self._raw_block['date']
         self._hash = self._raw_block['hash'].hex()
         self._prev_hash = self._raw_block['prev'].hex()
@@ -75,7 +75,7 @@ class BlockHiveDb(Block):
         # WARNING: sql ensures that operations are never None, at least they are an empty array
         for virtual_operation in self._raw_block['operations']:
             operation_type = self._operation_id_to_enum(virtual_operation['operation_type_id'])
-            if type(operation_type) != VirtualOperationType:
+            if not isinstance(operation_type, VirtualOperationType):
                 continue
 
             virtual_op = VirtualOperationHiveDb(operation_type, virtual_operation['body'])
@@ -94,7 +94,5 @@ class BlockHiveDb(Block):
         if not self._raw_block:
             return None
 
-        trans = TransactionHiveDb(
-            self.get_num(), self._raw_block['operations'], self._operation_id_to_enum
-        )
+        trans = TransactionHiveDb(self.get_num(), self._raw_block['operations'], self._operation_id_to_enum)
         yield trans

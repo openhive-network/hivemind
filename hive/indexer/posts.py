@@ -4,20 +4,18 @@ import logging
 
 from diff_match_patch import diff_match_patch
 from ujson import dumps, loads
-from collections import OrderedDict
 
 from hive.conf import SCHEMA_NAME
-from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer import community
 from hive.indexer.block import VirtualOperationType
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.indexer.notification_cache import NotificationCache
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
-from hive.indexer.notification_cache import NotificationCache
-from hive.utils.misc import chunks, UniqueCounter
+from hive.utils.misc import UniqueCounter, chunks
 from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 
 log = logging.getLogger(__name__)
@@ -92,7 +90,7 @@ class Posts(DbAdapterHolder):
                 title=op['title'] if op['title'] else '',
                 body=op['body'] if op['body'] else '',
                 json=op['json_metadata'] if op['json_metadata'] else '',
-                is_root = 'true' if parent_author is None or parent_author == '' else 'false'
+                is_root='true' if parent_author is None or parent_author == '' else 'false',
             )
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
@@ -120,7 +118,7 @@ class Posts(DbAdapterHolder):
 
         # If muted_reasons is set here, it was caused by a post getting muted by a community type 2 or 3
         # if it's not a new post we skip this step as a notification would already be sent
-        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post == True:
+        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post is True:
             muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
             reasons = []
             if 1 in muted_reasons:
@@ -221,7 +219,9 @@ class Posts(DbAdapterHolder):
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()
 
-            cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update_posts_rshares in votes
+            cls.db.query_no_return(
+                'SELECT pg_advisory_xact_lock(777)'
+            )  # synchronise with update_posts_rshares in votes
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
@@ -234,8 +234,8 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def comment_payout_op(cls):
-        """ Process comment payment operations """
-        for k, v in cls.comment_payout_ops.items():
+        """Process comment payment operations"""
+        for _k, v in cls.comment_payout_ops.items():
             author = None
             permlink = None
 
@@ -302,7 +302,13 @@ class Posts(DbAdapterHolder):
                 curator_payout_value = value['curator_payout_value']
                 beneficiary_payout_value = value['beneficiary_payout_value']
 
-                payout = sum([sbd_amount(total_payout_value), sbd_amount(curator_payout_value), sbd_amount(beneficiary_payout_value)])
+                payout = sum(
+                    [
+                        sbd_amount(total_payout_value),
+                        sbd_amount(curator_payout_value),
+                        sbd_amount(beneficiary_payout_value),
+                    ]
+                )
                 pending_payout = 0
                 last_payout_at = date
 
@@ -319,8 +325,8 @@ class Posts(DbAdapterHolder):
                 "('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
                     author,
                     escape_characters(permlink),
-                    "NULL" if (total_payout_value is None) else ("'{}'".format(legacy_amount(total_payout_value))),
-                    "NULL" if (curator_payout_value is None) else ("'{}'".format(legacy_amount(curator_payout_value))),
+                    "NULL" if (total_payout_value is None) else (f"'{legacy_amount(total_payout_value)}'"),
+                    "NULL" if (curator_payout_value is None) else (f"'{legacy_amount(curator_payout_value)}'"),
                     author_rewards,
                     "NULL" if (author_rewards_hive is None) else author_rewards_hive,
                     "NULL" if (author_rewards_hbd is None) else author_rewards_hbd,
@@ -439,7 +445,7 @@ class Posts(DbAdapterHolder):
                 # new_body = new_utf8_body
             else:
                 new_body = new_body_def
-        except ValueError as e:
+        except ValueError:
             #            log.info("Merging a body post id: {} caused an ValueError exception {}".format(id, e))
             #            log.info("New body definition: {}".format(new_body_def))
             #            log.info("Old body definition: {}".format(old_body))

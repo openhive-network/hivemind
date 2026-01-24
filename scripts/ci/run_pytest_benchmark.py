@@ -4,7 +4,8 @@
 
 import os
 import subprocess
-from json import load, dump
+from json import dump, load
+
 from benchmark_generator import make_benchmark_test_file
 from json_report_parser import json_report_parser
 
@@ -30,7 +31,7 @@ def join_benchmark_data(file_name, json_files):
 
     jsons = []
     for json_file in json_files:
-        with open(json_file, "r") as src:
+        with open(json_file) as src:
             jsons.append(load(src))
     for benchmark in jsons[0]['benchmarks']:
         bmin = []

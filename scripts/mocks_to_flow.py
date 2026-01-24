@@ -1,45 +1,65 @@
 # This script parses a json mock file and outputs a flow.txt file
-import json
 import argparse
+import json
+
 
 def parse_custom_json(op):
     data = json.loads(op['json'].replace('\n', r'\n'))
     if data[0] == 'subscribe' or data[0] == 'unsubscribe':
         account = op['required_posting_auths'][0]
-        return r'custom_json_operation("%s" -> "%s")' % (account, json.dumps(data).replace('"', r'\"'))
+        return r'custom_json_operation("{}" -> "{}")'.format(account, json.dumps(data).replace('"', r'\"'))
     elif data[0] == 'updateProps':
         props = json.dumps(data[1]['props']).replace('"', r'\"')
-        return r'custom_json_operation("[\"updateProps\",{\"community\":\"%s\",\"props\":%s}]")' % (data[1]['community'], props)
+        return r'custom_json_operation("[\"updateProps\",{{\"community\":\"{}\",\"props\":{}}}]")'.format(
+            data[1]['community'],
+            props,
+        )
     else:
-        return 'custom_json_operation("%s")' % (json.dumps(data).replace('"', r'\"'))
+        return 'custom_json_operation("{}")'.format(json.dumps(data).replace('"', r'\"'))
 
 
 def parse_op(op):
     if op['type'] == 'account_create_operation':
         return 'account_create_operation( `{}` )'.format(op['value']['new_account_name'])
     elif op['type'] == 'comment_operation':
-        return 'comment_operation( `{}`, `{}`,`{}`)'.format(op['value']['parent_permlink'], op['value']['author'], op['value']['permlink'])
+        return 'comment_operation( `{}`, `{}`,`{}`)'.format(
+            op['value']['parent_permlink'], op['value']['author'], op['value']['permlink']
+        )
     elif op['type'] == 'transfer_operation':
-        return 'transfer_operation( `{}`, `{}`, `{}`, `{}` )'.format(op['value']['from'], op['value']['to'], op['value']['amount'], op['value']['memo'])
+        return 'transfer_operation( `{}`, `{}`, `{}`, `{}` )'.format(
+            op['value']['from'], op['value']['to'], op['value']['amount'], op['value']['memo']
+        )
     elif op['type'] == 'custom_json_operation':
         return parse_custom_json(op['value'])
     elif op['type'] == 'custom_json_operation':
         return parse_custom_json(op['value'])
     elif op['type'] == 'account_update2_operation':
-        json_metadata = json.dumps(op['value']['json_metadata'].replace('\n', '\\n')).replace('"', '\"')
-        return 'transfer_operation( `{}`, `{}`, `{}`)'.format(op['value']['account'], json_metadata, op['value']['posting_json_metadata'])
+        json_metadata = json.dumps(op['value']['json_metadata'].replace('\n', '\\n')).replace('"', '"')
+        return 'transfer_operation( `{}`, `{}`, `{}`)'.format(
+            op['value']['account'], json_metadata, op['value']['posting_json_metadata']
+        )
     elif op['type'] == 'delete_comment_operation':
         return 'delete_comment_operation( `{}`, `{}`)'.format(op['value']['author'], op['value']['permlink'])
     elif op['type'] == 'vote_operation':
-        return 'delete_comment_operation(`{}` -> `{}`, `{}`, `{}`)'.format(op['value']['voter'], op['value']['author'], op['value']['permlink'], op['value']['weight'])
+        return 'delete_comment_operation(`{}` -> `{}`, `{}`, `{}`)'.format(
+            op['value']['voter'], op['value']['author'], op['value']['permlink'], op['value']['weight']
+        )
     elif op['type'] == 'create_claimed_account_operation':
-        return 'create_claimed_account_operation(`{}` -> `{}`)'.format(op['value']['creator'], op['value']['new_account_name'])
+        return 'create_claimed_account_operation(`{}` -> `{}`)'.format(
+            op['value']['creator'], op['value']['new_account_name']
+        )
     elif op['type'] == 'comment_options_operation':
-        max_accepted_payout = '{} {} (precision: {})'.format(op['value']['max_accepted_payout']['amount'],
-                                                             op['value']['max_accepted_payout']['nai'],
-                                                             op['value']['max_accepted_payout']['precision'])
-        beneficiaries = ', '.join(['{} (weight: {})'.format(b['account'], b['weight'])
-                                   for b in op['value']['extensions'][0]['value']['beneficiaries']])
+        max_accepted_payout = '{} {} (precision: {})'.format(
+            op['value']['max_accepted_payout']['amount'],
+            op['value']['max_accepted_payout']['nai'],
+            op['value']['max_accepted_payout']['precision'],
+        )
+        beneficiaries = ', '.join(
+            [
+                '{} (weight: {})'.format(b['account'], b['weight'])
+                for b in op['value']['extensions'][0]['value']['beneficiaries']
+            ]
+        )
         return 'comment_options_operation( `{}`, `{}` -> max_accepted_payout: `{}`, percent_hbd: `{}`, allow_votes: `{}`, allow_curation_rewards: `{}`, beneficiaries: `{}`)'.format(
             op['value']['author'],
             op['value']['permlink'],
@@ -47,9 +67,11 @@ def parse_op(op):
             op['value']['percent_hbd'],
             op['value']['allow_votes'],
             op['value']['allow_curation_rewards'],
-            beneficiaries)
+            beneficiaries,
+        )
     else:
-        raise 'operation type not known'
+        raise ValueError('operation type not known')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -60,7 +82,7 @@ if __name__ == "__main__":
     flow_str = ''
 
     for block_id in data:
-        flow_str += '***block {}***\n'.format(block_id)
+        flow_str += f'***block {block_id}***\n'
         transactions = data[block_id]['transactions']
         if transactions:  # Check if transactions list is not empty
             operations = transactions[0]['operations']
@@ -69,4 +91,3 @@ if __name__ == "__main__":
         else:
             flow_str += 'No transactions in this block.\n'
     print(flow_str)
-

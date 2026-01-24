@@ -1,4 +1,5 @@
-""" Data provider for test operations """
+"""Data provider for test operations"""
+
 import datetime
 import logging
 
@@ -36,7 +37,7 @@ class MockBlockProvider(MockDataProvider):
         from json import load
 
         data = {}
-        with open(file_name, "r") as src:
+        with open(file_name) as src:
             data = load(src)
         for block_num, block_content in data.items():
             cls.add_block_data(block_num, block_content)

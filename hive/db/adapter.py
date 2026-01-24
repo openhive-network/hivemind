@@ -1,12 +1,11 @@
 """Wrapper for sqlalchemy, providing a simple interface."""
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
 from time import perf_counter as perf
 
-from funcy.seqs import first
 import sqlalchemy
-
+from funcy.seqs import first
 
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
@@ -85,7 +84,7 @@ class Db:
         return cloned
 
     def impersonated_clone(self, name, role):
-        role_url=self._engine.url.set(username=role)
+        role_url = self._engine.url.set(username=role)
 
         cloned = Db(role_url, name, self.__autoexplain)
 
@@ -124,6 +123,7 @@ class Db:
         """Lazy-loaded SQLAlchemy engine."""
         if self._engine is None:
             from sqlalchemy.pool import NullPool
+
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 poolclass=NullPool,
@@ -180,7 +180,7 @@ class Db:
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
-        res = self._query(sql,**kwargs)
+        res = self._query(sql, **kwargs)
         return res.fetchall()
 
     def query_row(self, sql, **kwargs):
@@ -213,7 +213,7 @@ class Db:
         """
         if trx:
             self.query("START TRANSACTION")
-        for (sql, params) in queries:
+        for sql, params in queries:
             self.query(sql, **params)
         if trx:
             self.query("COMMIT")
@@ -296,6 +296,18 @@ class Db:
         action = sql.strip()[0:6].strip()
         if action == 'SELECT':
             return False
-        if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START', 'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T', 'ROLLBACK']:
+        if action in [
+            'DELETE',
+            'UPDATE',
+            'INSERT',
+            'COMMIT',
+            'START',
+            'ALTER',
+            'TRUNCA',
+            'CREATE',
+            'DROP I',
+            'DROP T',
+            'ROLLBACK',
+        ]:
             return True
         raise Exception(f"unknown action: {sql}")

@@ -1,4 +1,4 @@
-""" Votes indexing and processing """
+"""Votes indexing and processing"""
 
 import collections
 import logging
@@ -7,8 +7,8 @@ from itertools import count
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
+from hive.utils.misc import UniqueCounter, chunks
 from hive.utils.normalize import escape_characters
-from hive.utils.misc import chunks, UniqueCounter
 
 log = logging.getLogger(__name__)
 
@@ -189,12 +189,17 @@ class Votes(DbAdapterHolder):
                         vd['num_changes'],
                         vd['block_num'],
                         vd['is_effective'],
-                    ) for k, vd in chunk.items()
+                    )
+                    for k, vd in chunk.items()
                 )
                 actual_query = sql.format(values_str)
                 post_ids = cls.db.query_prepared_all(actual_query)
-                cls.db.query_no_return('SELECT pg_advisory_xact_lock(777)')  # synchronise with update hive_posts in posts
-                cls.db.query_no_return("SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids])
+                cls.db.query_no_return(
+                    'SELECT pg_advisory_xact_lock(777)'
+                )  # synchronise with update hive_posts in posts
+                cls.db.query_no_return(
+                    "SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids]
+                )
                 cls.commitTx()
 
             n = len(cls._votes_data)

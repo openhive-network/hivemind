@@ -54,7 +54,7 @@ class PostDataCache(DbAdapterHolder):
             title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
             body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
             json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
-            is_root= data['is_root']
+            is_root = data['is_root']
             value = f"({k},{is_root},{title},{body},{json})"
             if data['is_new_post']:
                 values_insert.append(value)
@@ -74,14 +74,14 @@ class PostDataCache(DbAdapterHolder):
                             AS v(id, is_root, title, body, json)
                     ),
                     insert_post_data AS (
-                        INSERT INTO {SCHEMA_NAME}.hive_post_data 
+                        INSERT INTO {SCHEMA_NAME}.hive_post_data
                         SELECT id, title, body, json FROM insert_values
                         RETURNING id
                     ),
                     update_post_data AS (
-                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd 
+                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd
                         SET title = COALESCE( i.title, hpd.title ),
-                            body = COALESCE( i.body, hpd.body ), 
+                            body = COALESCE( i.body, hpd.body ),
                             json = COALESCE( i.json, hpd.json )
                         FROM update_values i
                         WHERE hpd.id = i.id AND i.id IS NOT NULL

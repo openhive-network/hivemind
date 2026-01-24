@@ -1,7 +1,7 @@
 """Timer for reporting progress on long batch operations."""
 
-from functools import wraps
 import logging
+from functools import wraps
 from time import perf_counter as perf
 
 from hive.utils.normalize import secs_to_str

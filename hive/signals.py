@@ -2,13 +2,14 @@
 
 import logging
 import threading
-from signal import SIGINT, signal, SIGTERM
+from signal import SIGINT, SIGTERM, signal
 
 log = logging.getLogger(__name__)
 
 
 class AtomicCounter:
     """Thread-safe counter using stdlib threading.Lock()."""
+
     def __init__(self, initial=0):
         self._value = initial
         self._lock = threading.Lock()

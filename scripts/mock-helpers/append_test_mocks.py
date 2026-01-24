@@ -1,28 +1,42 @@
-import logging
 import json
+import logging
 import os
 import sys
-from typing import Sequence
+from collections.abc import Sequence
+
 import configargparse
+
 from hive.db.adapter import Db
 from hive.indexer.mocking import populate_haf_with_mocked_data
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
+
 def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     parser = configargparse.ArgumentParser(
         description="Helper script to automatically change the block number in the provided mock file via --mock-block-data-paths to allow you to append extra ops and test indexing functions granularly without having to resync an entire db / updating your mocks files"
-                    "\n Example usage: python append_test_mocks.py --mock-block-data-paths=/home/howo/hivemind/scripts/mock-helpers/ops --database-url postgresql://postgres:root@localhost:5432/haf_block_log --mock-vops-data-paths=/home/howo/hivemind/scripts/mock-helpers/vops",
-        formatter_class=configargparse.RawTextHelpFormatter
+        "\n Example usage: python append_test_mocks.py --mock-block-data-paths=/home/howo/hivemind/scripts/mock-helpers/ops --database-url postgresql://postgres:root@localhost:5432/haf_block_log --mock-vops-data-paths=/home/howo/hivemind/scripts/mock-helpers/vops",
+        formatter_class=configargparse.RawTextHelpFormatter,
     )
 
     add = parser.add_argument
     add('--database-url', env_var='DATABASE_URL', type=str, required=True, help='database connection url')
-    add('--mock-block-data-paths', type=str, required=True, help='location of the mock path containing mocked_dev_ops.json')
-    add('--mock-vops-data-paths', type=str, required=True, help='location of the vops mock path containing mocked_dev_ops.json')
+    add(
+        '--mock-block-data-paths',
+        type=str,
+        required=True,
+        help='location of the mock path containing mocked_dev_ops.json',
+    )
+    add(
+        '--mock-vops-data-paths',
+        type=str,
+        required=True,
+        help='location of the vops mock path containing mocked_dev_ops.json',
+    )
 
     return parser.parse_args(args)
+
 
 def main():
     args = init_argparse(sys.argv[1:])
@@ -39,7 +53,7 @@ def main():
     mock_file_vops = os.path.join(args.mock_vops_data_paths, "mocked_dev_vops.json")
 
     try:
-        with open(mock_file_ops, 'r') as file:
+        with open(mock_file_ops) as file:
             data = json.load(file)
             # Assuming there is only one key at the top level
             old_key = next(iter(data))
@@ -47,7 +61,7 @@ def main():
         with open(mock_file_ops, 'w') as file:
             json.dump(data, file, indent=4)
 
-        with open(mock_file_vops, 'r') as file:
+        with open(mock_file_vops) as file:
             data = json.load(file)
             # Assuming there is only one key at the top level
             old_key = next(iter(data))
@@ -56,11 +70,12 @@ def main():
             json.dump(data, file, indent=4)
 
         log.info(f"Mocks updated with new block number: {new_block}")
-        log.info(f"Populating mocks")
+        log.info("Populating mocks")
         populate_haf_with_mocked_data.main()
 
     except Exception as e:
         log.error(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

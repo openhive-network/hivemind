@@ -1,26 +1,17 @@
 """Db schema definitions and setup routines."""
 
+import json
 import logging
 from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import text as sql_text
-from sqlalchemy.types import BOOLEAN
-from sqlalchemy.types import CHAR
-from sqlalchemy.types import SMALLINT
-from sqlalchemy.types import TEXT
-from sqlalchemy.types import VARCHAR
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.types import BOOLEAN, CHAR, SMALLINT, TEXT, VARCHAR
 
-
-from hive.conf import SCHEMA_NAME
-from hive.conf import SCHEMA_OWNER_NAME
-
+from hive.conf import SCHEMA_NAME, SCHEMA_OWNER_NAME
 from hive.indexer.hive_db.haf_functions import prepare_app_context
-
 from hive.version import GIT_DATE, GIT_REVISION, VERSION
-import json
 
 log = logging.getLogger(__name__)
 
@@ -34,8 +25,8 @@ def build_metadata():
     sa.Table(
         'hive_accounts',
         metadata,
-        sa.Column('id', sa.Integer, primary_key=True), # warning this ID does not match to hive.accounts::id
-        sa.Column('haf_id', sa.Integer, nullable=True), # Account ID matching hive.accounts::id
+        sa.Column('id', sa.Integer, primary_key=True),  # warning this ID does not match to hive.accounts::id
+        sa.Column('haf_id', sa.Integer, nullable=True),  # Account ID matching hive.accounts::id
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         # sa.Column('block_num', sa.Integer, nullable=False),
@@ -102,9 +93,15 @@ def build_metadata():
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('block_num_created', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(
+            ['author_id'], ['hive_accounts.id'], name='hive_posts_fk1', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['root_id'], ['hive_posts.id'], name='hive_posts_fk2', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['parent_id'], ['hive_posts.id'], name='hive_posts_fk3', deferrable=True, postgresql_not_valid=True
+        ),
         sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
         sa.Index('hive_posts_depth_idx', 'depth'),
         sa.Index('hive_posts_root_id_id_idx', 'root_id', 'id'),
@@ -114,24 +111,31 @@ def build_metadata():
             postgresql_include=['author_id'],
             postgresql_where=sql_text("counter_deleted = 0"),
         ),
-
         # used by i.e. bridge_get_ranked_post_by_created_for_observer_communities
-        sa.Index('hive_posts_community_id_id_idx', sa.text('community_id, id DESC'),
-            postgresql_where=sql_text("counter_deleted = 0")),
-
-        sa.Index('hive_posts_community_id_is_pinned_idx', 'community_id',
+        sa.Index(
+            'hive_posts_community_id_id_idx',
+            sa.text('community_id, id DESC'),
+            postgresql_where=sql_text("counter_deleted = 0"),
+        ),
+        sa.Index(
+            'hive_posts_community_id_is_pinned_idx',
+            'community_id',
             postgresql_include=['id'],
-            postgresql_where=sql_text("is_pinned AND counter_deleted = 0")),
-
+            postgresql_where=sql_text("is_pinned AND counter_deleted = 0"),
+        ),
         # dedicated to bridge_get_ranked_post_by_created_for_community
-        sa.Index('hive_posts_community_id_not_is_pinned_idx', sa.text('community_id, id DESC'),
-            postgresql_where=sql_text("NOT is_pinned and depth = 0 and counter_deleted = 0")),
-
+        sa.Index(
+            'hive_posts_community_id_not_is_pinned_idx',
+            sa.text('community_id, id DESC'),
+            postgresql_where=sql_text("NOT is_pinned and depth = 0 and counter_deleted = 0"),
+        ),
         # Specific to bridge_get_ranked_post_by_trends_for_community
-        sa.Index('hive_posts_community_id_not_is_paidout_idx', 'community_id',
+        sa.Index(
+            'hive_posts_community_id_not_is_paidout_idx',
+            'community_id',
             postgresql_include=['id'],
-            postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0")),
-
+            postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0"),
+        ),
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index(
             'hive_posts_sc_trend_id_idx',
@@ -147,10 +151,16 @@ def build_metadata():
         ),
         sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
         # bridge_get_account_posts_by_comments, bridge_get_account_posts_by_posts
-
-        sa.Index('hive_posts_author_id_id_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('counter_deleted = 0')),
-        sa.Index('hive_posts_author_id_id_depth0_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('depth = 0 AND counter_deleted = 0')),
-
+        sa.Index(
+            'hive_posts_author_id_id_idx',
+            sa.text('author_id, id DESC'),
+            postgresql_where=sql_text('counter_deleted = 0'),
+        ),
+        sa.Index(
+            'hive_posts_author_id_id_depth0_idx',
+            sa.text('author_id, id DESC'),
+            postgresql_where=sql_text('depth = 0 AND counter_deleted = 0'),
+        ),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index(
@@ -162,12 +172,14 @@ def build_metadata():
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             sa.text('category_id, (payout+pending_payout), depth'),
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        )
+        ),
     )
-    text_fields = json.dumps({
-        "title": {"record": "position"},
-        "body": {"record": "position"},
-    })
+    text_fields = json.dumps(
+        {
+            "title": {"record": "position"},
+            "body": {"record": "position"},
+        }
+    )
     sa.Table(
         'hive_post_data',
         metadata,
@@ -176,14 +188,15 @@ def build_metadata():
         sa.Column('body', TEXT, nullable=False, server_default=''),
         sa.Column('json', TEXT, nullable=False, server_default=''),
         # BM25 index for full-text search
-        sa.Index('hive_post_data_bm25_idx', 
-                 'id', 'title', 'body',
-                 postgresql_using='bm25',
-                 postgresql_with={
-                     'key_field': "'id'",
-                     'text_fields': f"'{text_fields}'"
-                 },
-                 postgresql_where=sql_text(f'{SCHEMA_NAME}.is_top_level_post(id)'))
+        sa.Index(
+            'hive_post_data_bm25_idx',
+            'id',
+            'title',
+            'body',
+            postgresql_using='bm25',
+            postgresql_with={'key_field': "'id'", 'text_fields': f"'{text_fields}'"},
+            postgresql_where=sql_text(f'{SCHEMA_NAME}.is_top_level_post(id)'),
+        ),
     )
 
     sa.Table(
@@ -220,10 +233,22 @@ def build_metadata():
         sa.UniqueConstraint(
             'voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_uk'
         ),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(
+            ['post_id'], ['hive_posts.id'], name='hive_votes_fk1', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['permlink_id'],
+            ['hive_permlink_data.id'],
+            name='hive_votes_fk4',
+            deferrable=True,
+            postgresql_not_valid=True,
+        ),
         sa.Index(
             'hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'
         ),  # this index is critical for hive_accounts_info_view performance
@@ -243,9 +268,13 @@ def build_metadata():
         metadata,
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.Index('hive_post_tags_idx', 'post_id', 'tag_id', postgresql_using='btree')
+        sa.ForeignKeyConstraint(
+            ['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.Index('hive_post_tags_idx', 'post_id', 'tag_id', postgresql_using='btree'),
     )
 
     sa.Table(
@@ -264,8 +293,12 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(
+            ['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', deferrable=True, postgresql_not_valid=True
+        ),
         sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'),  # core
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
@@ -283,8 +316,9 @@ def build_metadata():
         sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
         sa.Index('hive_feed_cache_post_id_idx', 'post_id'),
         # Dedicated index to bridge_get_account_posts_by_blog
-        sa.Index('hive_feed_cache_account_id_created_at_post_id_idx',
-          sa.text('account_id, created_at DESC, post_id DESC')),
+        sa.Index(
+            'hive_feed_cache_account_id_created_at_post_id_idx', sa.text('account_id, created_at DESC, post_id DESC')
+        ),
     )
 
     sa.Table(
@@ -304,61 +338,70 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1', deferrable=True, postgresql_not_valid=True),
-        sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(
+            ['post_id'], ['hive_posts.id'], name='hive_mentions_fk1', deferrable=True, postgresql_not_valid=True
+        ),
+        sa.ForeignKeyConstraint(
+            ['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2', deferrable=True, postgresql_not_valid=True
+        ),
         sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1'),
     )
 
     metadata = build_metadata_community(metadata)
 
     sa.Table(
-        'follows', metadata,
+        'follows',
+        metadata,
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follows_following_idx', 'following'),
         sa.Index('follows_block_num_idx', 'block_num'),
-        schema=SCHEMA_NAME
+        schema=SCHEMA_NAME,
     )
 
     sa.Table(
-        'muted', metadata,
+        'muted',
+        metadata,
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('muted_following_idx', 'following'),
         sa.Index('muted_block_num_idx', 'block_num'),
-        schema=SCHEMA_NAME
+        schema=SCHEMA_NAME,
     )
 
     sa.Table(
-        'blacklisted', metadata,
+        'blacklisted',
+        metadata,
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('blacklisted_following_idx', 'following'),
         sa.Index('blacklisted_block_num_idx', 'block_num'),
-        schema=SCHEMA_NAME
+        schema=SCHEMA_NAME,
     )
 
     sa.Table(
-        'follow_muted', metadata,
+        'follow_muted',
+        metadata,
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follow_muted_following_idx', 'following'),
         sa.Index('follow_muted_block_num_idx', 'block_num'),
-        schema=SCHEMA_NAME
+        schema=SCHEMA_NAME,
     )
 
     sa.Table(
-        'follow_blacklisted', metadata,
+        'follow_blacklisted',
+        metadata,
         sa.Column('follower', sa.Integer, primary_key=True, nullable=False),
         sa.Column('following', sa.Integer, primary_key=True, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Index('follow_blacklisted_following_idx', 'following'),
         sa.Index('follow_blacklisted_block_num_idx', 'block_num'),
-        schema=SCHEMA_NAME
+        schema=SCHEMA_NAME,
     )
 
     return metadata
@@ -437,7 +480,9 @@ def build_metadata_community(metadata=None):
         sa.Column('community', sa.String(16), nullable=True),
         sa.Column('payload', sa.String, nullable=True),
         sa.Index('hive_notification_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_notification_cache_src_dst_post_id', 'src', 'dst', 'type_id', 'post_id', 'block_num', unique=True),
+        sa.Index(
+            'hive_notification_cache_src_dst_post_id', 'src', 'dst', 'type_id', 'post_id', 'block_num', unique=True
+        ),
         sa.Index('hive_notification_cache_dst_score_idx', 'dst', 'score', postgresql_where=sql_text("dst IS NOT NULL")),
     )
 
@@ -457,16 +502,17 @@ def drop_fk(db):
 
 
 def create_fk(db):
-    from sqlalchemy.schema import AddConstraint
     from sqlalchemy.engine.reflection import Inspector
+    from sqlalchemy.schema import AddConstraint
 
-    inspector =  Inspector.from_engine( db.engine() )
+    inspector = Inspector.from_engine(db.engine())
 
     for table in build_metadata().sorted_tables:
-        if inspector.get_foreign_keys( table.name, SCHEMA_NAME ):
-            return # foreign keys already enabled
+        if inspector.get_foreign_keys(table.name, SCHEMA_NAME):
+            return  # foreign keys already enabled
         for fk in table.foreign_keys:
             db.query_no_return(AddConstraint(fk.constraint), is_prepared=True)
+
 
 def create_statistics(db):
     """Create extended statistics dependencies for various tables."""
@@ -500,7 +546,7 @@ def setup(db, admin_db):
     admin_db.query('CREATE EXTENSION IF NOT EXISTS plpython3u;')
 
     prepare_app_context(db=db)
-    
+
     # Create a dummy is_top_level_post function BEFORE table creation so the
     # BM25 index WHERE clause can refer to it
     sql = f"""
@@ -513,10 +559,10 @@ def setup(db, admin_db):
     $$;
     """
     db.query_no_return(sql)
-    
+
     build_metadata().create_all(db.engine())
 
-    # Now that tables exist, replace the function with its real implementation that 
+    # Now that tables exist, replace the function with its real implementation that
     # references the hive_posts table
     sql = f"""
     CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
@@ -531,14 +577,14 @@ def setup(db, admin_db):
     $$;
     """
     db.query_no_return(sql)
-    
+
     create_statistics(db)
 
-    reset_autovac(db) # tune auto vacuum/analyze
+    reset_autovac(db)  # tune auto vacuum/analyze
     set_fillfactor(db)
 
     # Uncomment tables registration when hivemind becomes forking application
-    #for table in build_metadata().sorted_tables:
+    # for table in build_metadata().sorted_tables:
     #    if table.name in ('hive_db_patch_level',):
     #        continue
     #
@@ -625,6 +671,7 @@ def setup(db, admin_db):
     ]
     for script in admin_sql_scripts:
         execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
+
 
 def setup_runtime_code(db):
     sql_scripts = [
@@ -793,27 +840,30 @@ def setup_runtime_code(db):
 
 
 def perform_db_upgrade(db, admin_db):
-    sql_scripts_dir_path = Path(__file__).parent /'sql_scripts'
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
 
     sql_scripts = [
         "postgres_handle_view_changes.sql",
         "upgrade/upgrade_table_schema.sql",
-        "upgrade/upgrade_runtime_migration.sql"
+        "upgrade/upgrade_runtime_migration.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
     for script in sql_scripts:
         execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
 
-    log.info(f"Database schema upgrade completed.")
+    log.info("Database schema upgrade completed.")
 
-    needs_vacuum = admin_db.query_one('SELECT COALESCE((SELECT hd.vacuum_needed FROM hivemind_app.hive_db_vacuum_needed hd WHERE hd.vacuum_needed LIMIT 1), False) AS needs_vacuum')
+    needs_vacuum = admin_db.query_one(
+        'SELECT COALESCE((SELECT hd.vacuum_needed FROM hivemind_app.hive_db_vacuum_needed hd WHERE hd.vacuum_needed LIMIT 1), False) AS needs_vacuum'
+    )
 
     if needs_vacuum:
-         log.info(f"Attempting to run VACUUM FULL on upgraded database")
-         admin_db.query_no_return("VACUUM FULL VERBOSE ANALYZE;")
+        log.info("Attempting to run VACUUM FULL on upgraded database")
+        admin_db.query_no_return("VACUUM FULL VERBOSE ANALYZE;")
     else:
-        log.info(f"Skipping VACUUM FULL on upgraded database (no vacuum request)")
+        log.info("Skipping VACUUM FULL on upgraded database (no vacuum request)")
+
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
@@ -825,8 +875,8 @@ def reset_autovac(db):
         'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
         'hive_post_tags': (5000, 10000),
-#        'hive_feed_cache': (5000, 5000),
-#        'hive_reblogs': (5000, 5000),
+        #        'hive_feed_cache': (5000, 5000),
+        #        'hive_reblogs': (5000, 5000),
     }
 
     for table, (n_vacuum, n_analyze) in autovac_config.items():
@@ -843,7 +893,7 @@ def set_fillfactor(db):
     """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
     # Lowered fillfactor for hive_votes table in attempt to speed up update_posts_rshares procedure
-    fillfactor_config = { 'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 90 }
+    fillfactor_config = {'hive_posts': 90, 'hive_post_data': 100, 'hive_votes': 90}
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
@@ -861,12 +911,12 @@ def set_logged_table_attribute(db, logged):
 
     # Ordered by size descending - largest tables start first for better parallelism
     logged_config = [
-        'hive_votes',         # ~319 GB
-        'hive_post_data',     # ~127 GB
-        'hive_posts',         # ~83 GB
-        'hive_permlink_data', # ~27 GB
-        'hive_post_tags',     # ~12 GB
-        'hive_accounts',      # ~748 MB
+        'hive_votes',  # ~319 GB
+        'hive_post_data',  # ~127 GB
+        'hive_posts',  # ~83 GB
+        'hive_permlink_data',  # ~27 GB
+        'hive_post_tags',  # ~12 GB
+        'hive_accounts',  # ~748 MB
     ]
 
     mode = 'LOGGED' if logged else 'UNLOGGED'
@@ -918,7 +968,7 @@ def execute_sql_script(query_executor, path_to_script):
     """
     try:
         sql_script = None
-        with open(path_to_script, 'r') as sql_script_file:
+        with open(path_to_script) as sql_script_file:
             sql_script = sql_script_file.read()
         if sql_script is not None:
             return query_executor(sql_script)

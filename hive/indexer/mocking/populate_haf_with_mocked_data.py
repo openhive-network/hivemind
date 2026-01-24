@@ -1,14 +1,12 @@
 import logging
 import sys
-from typing import List
+from collections.abc import Sequence
 from typing import Optional
-from typing import Sequence
 
 import configargparse
 
 from hive.db.adapter import Db
-from hive.indexer.mocking.mock_block import BlockMock
-from hive.indexer.mocking.mock_block import BlockMockAfterDb
+from hive.indexer.mocking.mock_block import BlockMock, BlockMockAfterDb
 from hive.indexer.mocking.mock_block_provider import MockBlockProvider
 from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 
@@ -46,7 +44,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     return parser.parse_args(args)
 
 
-def load_mock_data(mock_block_data_paths: Optional[List[str]] = None, mock_vops_data_paths: Optional[List[str]] = None):
+def load_mock_data(mock_block_data_paths: Optional[list[str]] = None, mock_vops_data_paths: Optional[list[str]] = None):
     log.info('Loading mock data')
     mock_block_data_paths = [] if not mock_block_data_paths else mock_block_data_paths
     mock_vops_data_paths = [] if not mock_vops_data_paths else mock_vops_data_paths
@@ -85,7 +83,6 @@ def main():
     log.info('Processing block data')
     blocks = []
     for block_number, data in block_data.items():
-
         if args.last_block_to_process and block_number > args.last_block_to_process:
             continue
 
@@ -102,7 +99,9 @@ def main():
     log.info(f'Last block to mock: {last_block_num_to_mock}')
 
     if last_block_in_db is None:
-        log.error('No blocks found in hafd.blocks table. The mocker requires an existing database with replayed blocks.')
+        log.error(
+            'No blocks found in hafd.blocks table. The mocker requires an existing database with replayed blocks.'
+        )
         log.error('Please ensure HAF has finished replaying before running the mocker.')
         sys.exit(1)
     else:

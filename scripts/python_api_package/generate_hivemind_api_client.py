@@ -6,14 +6,9 @@ from pathlib import Path
 from api_client_generator.rest import generate_api_client_from_swagger
 from beekeepy.handle.remote import AbstractAsyncApi
 
-
 if __name__ == "__main__":
-
     if len(sys.argv) != 3:
-        raise ValueError(
-            "Usage: python generate_hivemind_api_client.py <base_directory> <build_directory>"
-        )
-
+        raise ValueError("Usage: python generate_hivemind_api_client.py <base_directory> <build_directory>")
 
     base_directory = Path(sys.argv[1])
     build_directory = Path(sys.argv[2])

@@ -1,18 +1,18 @@
-""" Reputation update support """
+"""Reputation update support"""
 
 import logging
 
-from hive.conf import SCHEMA_NAME, REPTRACKER_SCHEMA_NAME
+from hive.conf import REPTRACKER_SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
 CACHED_ITEMS_LIMIT = 200
 
+
 class Reputations(DbAdapterHolder):
-    _from_block= 0
-    _to_block= 0
+    _from_block = 0
+    _to_block = 0
 
     @classmethod
     def flush(self):

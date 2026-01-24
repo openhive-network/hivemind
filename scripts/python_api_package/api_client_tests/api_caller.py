@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from beekeepy._communication import HttpUrl
-from beekeepy._remote_handle import AbstractAsyncHandle, RemoteHandleSettings, AsyncBatchHandle
+from beekeepy._remote_handle import AbstractAsyncHandle, AsyncBatchHandle, RemoteHandleSettings
 from beekeepy._runnable_handle.settings import Settings
 
 from api_client_tests.api_collection import HivemindApiCollection
@@ -13,12 +13,11 @@ class HivemindApiCaller(AbstractAsyncHandle[RemoteHandleSettings, HivemindApiCol
         settings.http_endpoint = endpoint_url
         super().__init__(settings=settings)
 
-
     @property
     def api(self) -> HivemindApiCollection:
         return super().api
 
-    async def batch(self, *, delay_error_on_data_access: bool = False) -> AsyncBatchHandle[BalanceApiCollection]:
+    async def batch(self, *, delay_error_on_data_access: bool = False) -> AsyncBatchHandle[HivemindApiCollection]:
         return AsyncBatchHandle(
             url=self.http_endpoint,
             overseer=self._overseer,

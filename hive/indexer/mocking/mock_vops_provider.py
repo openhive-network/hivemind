@@ -1,4 +1,5 @@
-""" Data provider for test vops """
+"""Data provider for test vops"""
+
 import json
 import logging
 from typing import Optional

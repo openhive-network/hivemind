@@ -1,16 +1,14 @@
-from abc import abstractmethod
 import datetime
 import hashlib
 import logging
-from typing import Iterator
-from typing import Optional
-from typing import Union
+from abc import abstractmethod
+from collections.abc import Iterator
+from typing import Optional, Union
 
 import ujson as json
 
 from hive.db.adapter import Db
-from hive.indexer.block import OperationType
-from hive.indexer.block import VirtualOperationType
+from hive.indexer.block import OperationType, VirtualOperationType
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +35,7 @@ class AccountMock:
 
     def push(self) -> None:
         sql = """
-INSERT INTO 
+INSERT INTO
     hafd.accounts (id, name, block_num)
 VALUES
     (:id, :name, :block_num);
@@ -85,17 +83,18 @@ class OperationBase:
 
     def push(self) -> None:
         sql = """
-INSERT INTO 
+INSERT INTO
     hafd.operations (id, trx_in_block, op_pos, body_binary)
 VALUES
     (:id, -2, -2, :body :: jsonb :: hafd.operation);
 """
         OperationBase.pos_in_block += 1
 
-        OperationBase.operation_id = Db.instance().query_one(sql='SELECT operation_id FROM hafd.operation_id(:block_num, :op_type_id, :pos_in_block);',
-        block_num=self.block_number,
-        op_type_id=self.type.value,
-        pos_in_block=OperationBase.pos_in_block,
+        OperationBase.operation_id = Db.instance().query_one(
+            sql='SELECT operation_id FROM hafd.operation_id(:block_num, :op_type_id, :pos_in_block);',
+            block_num=self.block_number,
+            op_type_id=self.type.value,
+            pos_in_block=OperationBase.pos_in_block,
         )
 
         log.info(
@@ -171,7 +170,7 @@ class TransactionMock:
 
     @property
     def hash(self) -> str:
-        to_hash = f'{self._block_number}{json.dumps(self._body)}'.encode('utf-8')
+        to_hash = f'{self._block_number}{json.dumps(self._body)}'.encode()
         sha1 = hashlib.sha1(to_hash)
         return sha1.hexdigest()
 
@@ -184,7 +183,7 @@ class TransactionMock:
 
     def push(self) -> None:
         sql = """
-INSERT INTO 
+INSERT INTO
     hafd.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
 VALUES
     (:block_num, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);

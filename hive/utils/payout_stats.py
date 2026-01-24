@@ -3,7 +3,6 @@
 import logging
 
 from hive.conf import SCHEMA_NAME
-from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
 

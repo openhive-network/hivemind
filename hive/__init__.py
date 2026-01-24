@@ -1,5 +1,3 @@
-# coding=utf-8
-
 """Hive: microservice powering social networks on the Steem blockchain.
 
 Hive is a "consensus interpretation" layer for the Steem blockchain,

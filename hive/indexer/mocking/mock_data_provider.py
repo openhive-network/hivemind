@@ -1,7 +1,8 @@
-""" Data provider for test operations """
-from json import dumps
+"""Data provider for test operations"""
+
 import logging
 import os
+from json import dumps
 from pathlib import Path
 
 log = logging.getLogger(__name__)

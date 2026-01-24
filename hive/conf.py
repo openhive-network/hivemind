@@ -8,7 +8,6 @@ import configargparse
 
 from hive.db.adapter import Db
 from hive.utils.normalize import int_log_level, strtobool
-from hive.utils.stats import DbStats
 
 log = logging.getLogger(__name__)
 
@@ -91,7 +90,7 @@ class Conf:
             env_var='LOG_REQUEST_TIMES_PATH',
             help='(debug) specifies path for the log containing request processing times (requires --log-request-times)',
             action='store',
-            default='./request_process_times.log'
+            default='./request_process_times.log',
         )
         add(
             '--log-op-calls',
@@ -212,7 +211,7 @@ class Conf:
 
         if self.mode() == 'server':
             # DbStats.SLOW_QUERY_MS = 750
-            #DbStats.SLOW_QUERY_MS = 200  # TODO
+            # DbStats.SLOW_QUERY_MS = 200  # TODO
             raise ValueError("server mode is not longer supported - postgrest server is used instead")
 
     def __enter__(self):
