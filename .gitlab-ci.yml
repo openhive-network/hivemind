@@ -430,9 +430,7 @@ prepare_haf_data:
   variables:
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
     CONFIG_INI_SOURCE: "/tmp/config_5M.ini"
-    # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by template
-    HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
-    HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
   before_script:
     # Fetch config_5M.ini from common-ci-configuration (no submodule needed)
     - curl -fsSL "${COMMON_CI_URL}/haf-app-tools/config/config_5M.ini" -o /tmp/config_5M.ini
@@ -554,9 +552,7 @@ sync:
     artifacts: true
   when: on_success
   variables:
-    # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
-    HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
-    HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     RUNNER_HIVEMIND_SYNC_IRREVERSIBLE_MAX_BLOCK: 4999979
     # Variables for copy_datadir.sh (like balance_tracker)
@@ -935,9 +931,7 @@ e2e_benchmark_on_postgrest:
     artifacts: true
   when: on_success
   variables:
-    # Map HAF_UPSTREAM_* from find_haf_image to HAF_* expected by job
-    HAF_IMAGE_NAME: "${HAF_UPSTREAM_IMAGE}"
-    HAF_COMMIT: "${HAF_UPSTREAM_COMMIT}"
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
     # DinD-specific variables (SHM_DIR is inside datadir/blockchain for hivemind)
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
