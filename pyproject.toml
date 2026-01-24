@@ -30,7 +30,7 @@ line-length = 120
 target-version = "py39"
 
 [tool.ruff.format]
-quote-style = "preserve"  # Matches black's skip-string-normalization
+quote-style = "preserve"  # Preserves existing quote style
 
 [tool.ruff.lint]
 select = [
