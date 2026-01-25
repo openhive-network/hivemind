@@ -1135,7 +1135,7 @@ python_api_client_test:
 publish_images:
   extends: .docker_publish_job_template
   variables:
-    PUBLISH_IMAGES: "hivemind minimal postgrest-rewriter"
+    PUBLISH_IMAGES: "hivemind postgrest-rewriter"
   tags: *shared_tags
 
 deploy_python_api_package_to_gitlab:
