@@ -55,6 +55,10 @@ class SyncHiveDb:
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
         self.rate = {}
 
+        # Speculative prefetch for next batch (overlaps with consume)
+        self._prefetched_blocks = None
+        self._prefetch_range = None
+
     def __enter__(self):
         if self._enter_sync:
             log.info("Entering HAF mode synchronization")
@@ -175,6 +179,9 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
+                # Clear any prefetched blocks from massive sync
+                self._prefetched_blocks = None
+                self._prefetch_range = None
                 DbState.set_massive_sync(False)
                 report_enter_to_stage(application_stage)
 
@@ -271,18 +278,40 @@ class SyncHiveDb:
 
     def _process_massive_blocks(self, lbound, ubound, active_connections_before):
         wait_blocks_time = WSM.start()
-        blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+
+        # Use prefetched blocks if available and matching
+        if self._prefetched_blocks is not None and self._prefetch_range == (lbound, ubound):
+            blocks = self._prefetched_blocks
+            self._prefetched_blocks = None
+            self._prefetch_range = None
+        else:
+            # Prefetch miss - fetch synchronously
+            blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+            # Clear any stale prefetch
+            self._prefetched_blocks = None
+            self._prefetch_range = None
+
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
-        # self._consume_massive_blocks(blocks, lbound, ubound)
-
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
             self._consume_massive_blocks, blocks
         )
+
+        # Speculative prefetch for next batch (overlaps with consume)
+        # Standard batch size is 1000 blocks
+        next_lbound = ubound + 1
+        next_ubound = next_lbound + 999
+        try:
+            self._prefetched_blocks = self._massive_blocks_data_provider.get_blocks(next_lbound, next_ubound)
+            self._prefetch_range = (next_lbound, next_ubound)
+        except Exception:
+            # Prefetch failed (e.g., blocks don't exist yet, stage transition) - not fatal
+            self._prefetched_blocks = None
+            self._prefetch_range = None
 
     def _on_stop_synchronization(self, active_connections_before):
         # Ensure tables are converted back to LOGGED before shutdown.
