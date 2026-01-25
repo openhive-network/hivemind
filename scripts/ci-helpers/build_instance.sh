@@ -166,6 +166,7 @@ echo "Done!"
 # Since CI pushes the image directly to the registry, it needs to be pulled to be tagged for publishing job
 if [[ -n "${CI:-}" ]]; then
  docker pull "$TAG"
+ docker pull "$MINIMAL_TAG"
  docker pull "$REWRITER_IMAGE_TAG"
 fi
 
@@ -181,11 +182,13 @@ fi
 # Tag with additional tag if specified.
 if [[ -n "$CI_COMMIT_TAG" ]]; then
   docker tag "$TAG" "$REGISTRY:$CI_COMMIT_TAG"
+  docker tag "$MINIMAL_TAG" "$REGISTRY/minimal:$CI_COMMIT_TAG"
   docker tag "$REWRITER_IMAGE_TAG" "$REGISTRY/postgrest-rewriter:$CI_COMMIT_TAG"
-  
+
   # On CI push new tags to registry.
   if [[ -n "${CI:-}" ]]; then
     docker push "$REGISTRY:$CI_COMMIT_TAG"
+    docker push "$REGISTRY/minimal:$CI_COMMIT_TAG"
     docker push "$REGISTRY/postgrest-rewriter:$CI_COMMIT_TAG"
   fi
 fi
