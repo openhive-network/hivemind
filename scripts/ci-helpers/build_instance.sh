@@ -77,7 +77,6 @@ CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.14-slim-1"} # see scripts/ci/build_ci_bas
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG_BUILD_ARGS=("--platform=linux/amd64" "--progress=plain")
 TAG="${REGISTRY}:$BUILD_IMAGE_TAG"
-MINIMAL_TAG="${REGISTRY}/minimal:$BUILD_IMAGE_TAG"
 REWRITER_IMAGE_TAG=${REGISTRY}/postgrest-rewriter:$BUILD_IMAGE_TAG
 
 # On CI push the images to the registry
@@ -126,9 +125,9 @@ if [[ -n "$BUILD_IMAGE_TAG" ]]; then
 fi
 
 # Build main image tags (always short SHA, 'latest' on develop, version on tags)
-MAIN_TAGS=("--tag" "$TAG" "--tag" "$MINIMAL_TAG")
+MAIN_TAGS=("--tag" "$TAG")
 if [[ "${CI_COMMIT_BRANCH:-}" == "${CI_DEFAULT_BRANCH:-develop}" ]]; then
-  MAIN_TAGS+=("--tag" "${REGISTRY}:latest" "--tag" "${REGISTRY}/minimal:latest")
+  MAIN_TAGS+=("--tag" "${REGISTRY}:latest")
 fi
 
 # Build rewriter image tags
@@ -137,7 +136,7 @@ if [[ "${CI_COMMIT_BRANCH:-}" == "${CI_DEFAULT_BRANCH:-develop}" ]]; then
   REWRITER_TAGS+=("--tag" "${REGISTRY}/postgrest-rewriter:latest")
 fi
 
-echo "Building Hivemind full and minimal images..."
+echo "Building Hivemind image..."
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
@@ -173,7 +172,6 @@ fi
 if [[ -n "${DOT_ENV_FILENAME:-}" ]]; then
   {
       echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}IMAGE=$TAG"
-      echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}MINIMAL_IMAGE=$MINIMAL_TAG"
       echo "${DOTENV_VAR_NAME_PREFIX:+"${DOTENV_VAR_NAME_PREFIX}_"}REWRITER_IMAGE=$REWRITER_IMAGE_TAG"
   } > "$DOT_ENV_FILENAME"
 fi
