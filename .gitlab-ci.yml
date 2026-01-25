@@ -107,7 +107,7 @@ variables:
   SYNC_CACHE_KEY: "${HAF_COMMIT}_${CI_COMMIT_SHORT_SHA}"
   SYNC_CACHE_TYPE: "haf_hivemind_sync"  # Must start with 'haf' for cache-manager pgdata permission handling
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
-  DATA_CACHE_HIVEMIND: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+  DATA_CACHE_HIVEMIND: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}_${CI_JOB_ID}"
   DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
   DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
   # FF:
