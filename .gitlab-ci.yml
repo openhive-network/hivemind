@@ -708,10 +708,13 @@ sync:
 
       # Validate local HAF cache - check for completeness, not just directory existence
       # This catches corrupted caches where directory exists but files are missing
+      # Must match cache-manager.sh CACHE_COMPLETION_MARKER
+      CACHE_COMPLETION_MARKER=".extraction_complete"
       validate_haf_cache() {
         local data_source="$1"
         local pgdata="${data_source}/datadir/haf_db_store/pgdata"
         [[ -d "${data_source}/datadir" ]] || return 1
+        [[ -f "${data_source}/${CACHE_COMPLETION_MARKER}" ]] || return 1
         [[ -d "$pgdata" ]] || return 1
         sudo test -f "${pgdata}/PG_VERSION" 2>/dev/null || return 1
         return 0
