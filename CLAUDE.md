@@ -308,3 +308,4 @@ The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
 - Benchmarking tests
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
+# Bisect test marker: race-fix 1769387431
