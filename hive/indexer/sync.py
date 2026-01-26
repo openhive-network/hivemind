@@ -15,7 +15,11 @@ from hive.indexer.block import BlocksProviderBase
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
-from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
+from hive.indexer.hive_db.massive_blocks_data_provider import (
+    BLOCKS_QUERY,
+    BlocksDataFromDbProvider,
+    MassiveBlocksDataProviderHiveDb,
+)
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
@@ -55,6 +59,12 @@ class SyncHiveDb:
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
         self.rate = {}
 
+        # Speculative prefetch for next batch (isolated connection)
+        self._prefetch_db = None
+        self._prefetch_blocks_provider = None
+        self._prefetched_blocks = None
+        self._prefetch_range = None
+
     def __enter__(self):
         if self._enter_sync:
             log.info("Entering HAF mode synchronization")
@@ -87,8 +97,19 @@ class SyncHiveDb:
 
             Blocks.close_own_db_access()
 
+        self._cleanup_prefetch()
+
         if self._databases:
             self._databases.close()
+
+    def _cleanup_prefetch(self):
+        """Clean up prefetch connection and state."""
+        self._prefetched_blocks = None
+        self._prefetch_range = None
+        if self._prefetch_db is not None:
+            self._prefetch_db.close()
+            self._prefetch_db = None
+            self._prefetch_blocks_provider = None
 
     def build_database_schema(self) -> None:
         # whole code building it is already placed inside __enter__ handler, here was added only explicit messaging
@@ -175,6 +196,7 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
+                self._cleanup_prefetch()  # Not used in live mode
                 DbState.set_massive_sync(False)
                 report_enter_to_stage(application_stage)
 
@@ -206,6 +228,7 @@ class SyncHiveDb:
         if not can_continue_thread():
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            self._cleanup_prefetch()
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
@@ -213,6 +236,7 @@ class SyncHiveDb:
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            self._cleanup_prefetch()
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
@@ -271,18 +295,46 @@ class SyncHiveDb:
 
     def _process_massive_blocks(self, lbound, ubound, active_connections_before):
         wait_blocks_time = WSM.start()
-        blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+
+        # Use prefetched blocks if available and matching
+        if self._prefetched_blocks is not None and self._prefetch_range == (lbound, ubound):
+            blocks = self._prefetched_blocks
+            self._prefetched_blocks = None
+            self._prefetch_range = None
+        else:
+            # Prefetch miss - fetch synchronously
+            blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+            self._prefetched_blocks = None
+            self._prefetch_range = None
+
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
-        # self._consume_massive_blocks(blocks, lbound, ubound)
-
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
             self._consume_massive_blocks, blocks
         )
+
+        # Speculative prefetch using ISOLATED connection
+        self._do_speculative_prefetch(ubound)
+
+    def _do_speculative_prefetch(self, current_ubound):
+        """Speculatively prefetch the next batch using isolated connection."""
+        if self._prefetch_blocks_provider is None:
+            return
+
+        next_lbound = current_ubound + 1
+        next_ubound = next_lbound + 999
+
+        try:
+            self._prefetched_blocks = self._prefetch_blocks_provider.get_data(next_lbound, next_ubound)
+            self._prefetch_range = (next_lbound, next_ubound)
+        except Exception:
+            # Prefetch failure is non-fatal
+            self._prefetched_blocks = None
+            self._prefetch_range = None
 
     def _on_stop_synchronization(self, active_connections_before):
         # Ensure tables are converted back to LOGGED before shutdown.
@@ -294,6 +346,14 @@ class SyncHiveDb:
     def _create_massive_provider_if_no_exist(self):
         if not self._massive_blocks_data_provider:
             self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(conf=self._conf, db_root=self._db)
+
+            # Create dedicated connection for speculative prefetch
+            self._prefetch_db = self._db.clone("prefetch")
+            self._prefetch_blocks_provider = BlocksDataFromDbProvider(
+                sql_query=BLOCKS_QUERY,
+                db=self._prefetch_db,
+                strict=False,  # Prefetch failures are non-fatal
+            )
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
