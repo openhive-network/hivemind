@@ -78,7 +78,7 @@ class VoteNotificationCache(NotificationCache):
                     AND score >= 0
                     AND hn.src IS DISTINCT FROM hn.dst
                     AND hn.rshares >= 10e9
-                    AND hn.vote_value > 0.02
+                    AND hn.vote_value >= 0.02
                 ORDER BY hn.block_num, created_at, hn.src, hn.dst
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
