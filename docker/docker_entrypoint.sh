@@ -143,7 +143,6 @@ setup() {
 
     # Install hafah application
     pushd "$hafah_dir"
-    ./scripts/setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}" --path-to-haf="${haf_dir}"
     ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
     popd
   fi

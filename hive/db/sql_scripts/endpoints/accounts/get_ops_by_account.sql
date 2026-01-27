@@ -174,9 +174,9 @@ DECLARE
 
   _result hivemind_endpoints.operation_history;
 BEGIN
-  PERFORM hafah_python.validate_limit("page-size", 1000, 'page-size');
-  PERFORM hafah_python.validate_negative_limit("page-size", 'page-size');
-  PERFORM hafah_python.validate_negative_page("page");
+  PERFORM hafah_backend.validate_limit("page-size", 1000, 'page-size');
+  PERFORM hafah_backend.validate_negative_limit("page-size", 'page-size');
+  PERFORM hafah_backend.validate_negative_page("page");
 
   IF (_block_range.last_block <= hive.app_get_irreversible_block() AND _block_range.last_block IS NOT NULL) THEN
     PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=31536000"}]', true);
