@@ -1068,6 +1068,24 @@ e2e_benchmark_on_postgrest:
     SQLEOF
     echo "=== END DB DEBUG ==="
   - |
+    # DIAGNOSTIC: Check cache staleness and reblog functions
+    echo "=== DIAGNOSTIC: Cache patch level and reblog function check ==="
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log << 'CACHE_DIAG'
+    SELECT 'patch_level:' AS check, patch_date, patched_to_revision
+    FROM hivemind_app.hive_db_patch_level
+    ORDER BY patch_date DESC LIMIT 5;
+    SELECT 'reblog_status type:' AS check, typname, typnamespace::regnamespace
+    FROM pg_type WHERE typname = 'reblog_status';
+    SELECT 'reblog utility functions:' AS check, routine_schema, routine_name
+    FROM information_schema.routines
+    WHERE routine_name LIKE 'get_reblogged_posts%'
+    ORDER BY routine_schema, routine_name;
+    SELECT 'endpoint function:' AS check, routine_schema, routine_name
+    FROM information_schema.routines
+    WHERE routine_name = 'get_reblogs';
+    CACHE_DIAG
+    echo "=== END CACHE DIAGNOSTIC ==="
+  - |
     # Debug: test API calls
     echo "=== DEBUG: Testing API responses ==="
     # In DinD, services are available via 'docker' hostname
