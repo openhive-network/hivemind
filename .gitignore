@@ -7,6 +7,7 @@ lint
 
 # openapi files
 endpoints_openapi
+process_openapi.py
 
 # OSX
 .DS_Store

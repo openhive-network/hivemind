@@ -9,10 +9,10 @@
       This is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.
 
       SQL example
-      * `SELECT * FROM hivemind_endpoints.get_reblogs('trending', '', 'alice', 20);`
+      * `SELECT * FROM hivemind_endpoints.get_reblogs(''trending'', '''', ''alice'', 20);`
 
       REST call example
-      * `GET 'https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&limit=20'`
+      * `GET ''https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&limit=20''`
     operationId: hivemind_endpoints.get_reblogs
     parameters:
       - in: query
@@ -29,12 +29,13 @@
           type: string
           default: ''
         description: |
-          Filter by tag, community name, 'my' for observer's subscribed communities, or empty/'all' for all posts
+          Filter by tag, community name, ''my'' for observer''s subscribed communities, or empty/''all'' for all posts
       - in: query
         name: observer
-        required: true
+        required: false
         schema:
           type: string
+          default: NULL
         description: Account name to check reblog status for (required)
       - in: query
         name: limit
@@ -67,9 +68,7 @@
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/hivemind_endpoints.reblog_status'
+              $ref: '#/components/schemas/hivemind_endpoints.array_of_reblog_status'
             example: [
               {
                 "post_id": 141560746,
@@ -87,9 +86,6 @@
       '400':
         description: Invalid parameters (missing observer or invalid sort)
  */
-
--- Type hivemind_endpoints.reblog_status is defined in postgrest/utilities/get_reblogged_posts.sql
-
 -- openapi-generated-code-begin
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_reblogs;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_reblogs(
@@ -100,8 +96,11 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_reblogs(
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL
 )
-RETURNS SETOF hivemind_endpoints.reblog_status
+RETURNS SETOF hivemind_endpoints.reblog_status 
 -- openapi-generated-code-end
+
+-- Type hivemind_endpoints.reblog_status is defined in postgrest/utilities/get_reblogged_posts.sql
+
 LANGUAGE 'plpgsql' STABLE
 AS
 $$
