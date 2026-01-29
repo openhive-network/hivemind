@@ -1,62 +1,6 @@
-[
-  {
-    "post_id": 1256960,
-    "author": "good-karma",
-    "permlink": "spider02",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256959,
-    "author": "good-karma",
-    "permlink": "spider01",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256958,
-    "author": "abit",
-    "permlink": "anaconda02",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256957,
-    "author": "abit",
-    "permlink": "anaconda01",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256898,
-    "author": "test-safari",
-    "permlink": "reblogged-and-recreated",
-    "reblogged": true
-  },
-  {
-    "post_id": 1256896,
-    "author": "test-safari",
-    "permlink": "muted-and-recreated",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256860,
-    "author": "test-safari",
-    "permlink": "reblogged-and-edited",
-    "reblogged": true
-  },
-  {
-    "post_id": 1256858,
-    "author": "test-safari",
-    "permlink": "muted-and-edited",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256855,
-    "author": "test-safari",
-    "permlink": "secrets5",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256854,
-    "author": "test-safari",
-    "permlink": "secrets4",
-    "reblogged": false
-  }
-]
+{
+  "code": "42883",
+  "details": null,
+  "hint": "No function matches the given name and argument types. You might need to add explicit type casts.",
+  "message": "function hivemind_postgrest_utilities.get_reblogged_posts_for_community(integer, integer, integer, text, hivemind_postgrest_utilities.ranked_post_sort_type) does not exist"
+}

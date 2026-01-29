@@ -114,7 +114,7 @@
   {
     "date": "2016-09-15T14:44:15",
     "id": "4057524126875653",
-    "msg": "@schro voted on your post ($0.04)",
+    "msg": "@schro voted on your post ($0.06)",
     "score": 25,
     "type": "vote",
     "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
@@ -138,7 +138,7 @@
   {
     "date": "2016-09-15T14:15:09",
     "id": "4057055438569475",
-    "msg": "@pfunk voted on your post ($0.22)",
+    "msg": "@pfunk voted on your post ($0.33)",
     "score": 50,
     "type": "vote",
     "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
@@ -170,18 +170,10 @@
   {
     "date": "2016-09-15T13:57:42",
     "id": "4056774386647046",
-    "msg": "@demotruk voted on your post ($0.04)",
+    "msg": "@demotruk voted on your post ($0.05)",
     "score": 25,
     "type": "vote",
     "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
-  },
-  {
-    "date": "2016-09-15T13:25:36",
-    "id": "4056257375764481",
-    "msg": "@beanz mentioned you and 16 others",
-    "score": 53,
-    "type": "mention",
-    "url": "@beanz/petition-to-take-down-earnest-fao-dan-and-ned"
   },
   {
     "date": "2016-09-15T12:43:12",
@@ -288,14 +280,6 @@
     "url": "@arhag/re-biophil-re-someguy123-seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer-20160915t010111085z"
   },
   {
-    "date": "2016-09-15T01:13:51",
-    "id": "4044471717068801",
-    "msg": "@arhag mentioned you and 0 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@arhag/re-biophil-re-someguy123-seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer-20160915t010111085z"
-  },
-  {
     "date": "2016-09-15T01:00:54",
     "id": "4044263142719489",
     "msg": "@kaylinart mentioned you and 3 others",
@@ -368,22 +352,6 @@
     "url": "@dolphindigest/learn-the-secrets-of-how-kaylinart-got-27-000-steem-power-and-you-can-too"
   },
   {
-    "date": "2016-09-14T19:23:30",
-    "id": "4038828935348225",
-    "msg": "@dolphindigest mentioned you and 12 others",
-    "score": 43,
-    "type": "mention",
-    "url": "@dolphindigest/learn-the-secrets-of-how-kaylinart-got-27-000-steem-power-and-you-can-too"
-  },
-  {
-    "date": "2016-09-14T19:11:48",
-    "id": "4038640493658113",
-    "msg": "@dolphindigest mentioned you and 10 others",
-    "score": 43,
-    "type": "mention",
-    "url": "@dolphindigest/learn-the-secrets-of-how-liberosist-got-15-000-steem-power-and-you-can-too"
-  },
-  {
     "date": "2016-09-14T18:46:39",
     "id": "4038235420360705",
     "msg": "@majes followed you",
@@ -454,14 +422,6 @@
     "score": 50,
     "type": "vote",
     "url": "@dantheman/scalability-of-individual-responsibility-in-anarchy"
-  },
-  {
-    "date": "2016-09-14T09:10:18",
-    "id": "4028952662245378",
-    "msg": "@senseiteekay voted on your post ($0.18)",
-    "score": 50,
-    "type": "vote",
-    "url": "@dantheman/censorship-is-impossible-in-a-free-society"
   },
   {
     "date": "2016-09-14T09:10:12",
@@ -594,22 +554,6 @@
   {
     "date": "2016-09-13T23:30:42",
     "id": "4019617534050305",
-    "msg": "@smooth replied to your comment",
-    "score": 59,
-    "type": "reply_comment",
-    "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
-  },
-  {
-    "date": "2016-09-13T22:56:12",
-    "id": "4019061885239297",
-    "msg": "@smooth mentioned you and 1 others",
-    "score": 59,
-    "type": "mention",
-    "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
-  },
-  {
-    "date": "2016-09-13T22:56:12",
-    "id": "4019061872656385",
     "msg": "@smooth replied to your comment",
     "score": 59,
     "type": "reply_comment",
@@ -792,11 +736,67 @@
     "url": "@frol/re-dantheman-re-cherryleaf-re-dantheman-censorship-is-impossible-in-a-free-society-20160913t145815191z"
   },
   {
-    "date": "2016-09-13T14:23:06",
-    "id": "4010797831290881",
-    "msg": "@rusteemitblog mentioned you and 3 others",
+    "date": "2016-09-13T13:45:57",
+    "id": "4010199488659457",
+    "msg": "@strangerarray mentioned you and 21 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@strangerarray/steemit-time-of-death-scheduled-tue-13-sep-2016-15-00-00-ut"
+  },
+  {
+    "date": "2016-09-13T12:59:48",
+    "id": "4009456190881793",
+    "msg": "@wadepaterson mentioned you and 19 others",
+    "score": 55,
+    "type": "mention",
+    "url": "@wadepaterson/20-questions-with-andrarchy"
+  },
+  {
+    "date": "2016-09-13T08:36:54",
+    "id": "4005221885804545",
+    "msg": "@summonerrk followed you",
+    "score": 52,
+    "type": "follow",
+    "url": "@summonerrk"
+  },
+  {
+    "date": "2016-09-13T05:09:24",
+    "id": "4001879851794433",
+    "msg": "@timcliff replied to your post",
+    "score": 52,
+    "type": "reply",
+    "url": "@timcliff/re-dantheman-censorship-is-impossible-in-a-free-society-20160913t050922610z"
+  },
+  {
+    "date": "2016-09-13T03:36:39",
+    "id": "4000386025259009",
+    "msg": "@williambanks mentioned you and 1 others",
+    "score": 56,
+    "type": "mention",
+    "url": "@williambanks/re-merej99-re-williambanks-goodbye-facebook-20160913t033639546z"
+  },
+  {
+    "date": "2016-09-13T01:41:33",
+    "id": "3998532205805569",
+    "msg": "@btcshare7 followed you",
+    "score": 34,
+    "type": "follow",
+    "url": "@btcshare7"
+  },
+  {
+    "date": "2016-09-13T01:31:33",
+    "id": "3998371144531969",
+    "msg": "@zapply followed you",
+    "score": 25,
+    "type": "follow",
+    "url": "@zapply"
+  },
+  {
+    "date": "2016-09-13T00:49:00",
+    "id": "3997685833007105",
+    "msg": "@rusteemitblog mentioned you and 4 others",
     "score": 46,
     "type": "mention",
-    "url": "@rusteemitblog/anons-proekta-rusteemitblog-rusteemitblog-project-announcement"
+    "url": "@rusteemitblog/novye-rasshirennye-vozmozhnosti-formatirovaniya-new-advanced-formatting-features-perevod-stati-steemitblog"
   }
 ]
