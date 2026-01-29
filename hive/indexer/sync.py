@@ -251,7 +251,12 @@ class SyncHiveDb:
             limit = self._last_block_to_process
 
         if self._max_batch:
-            batch = self._max_batch
+            effective_batch = self._max_batch
+            last_imported = Blocks.last_imported()
+            if last_imported and Community.start_block and last_imported >= Community.start_block - self._max_batch:
+                effective_batch = min(effective_batch, 1000)
+                log.info(f"Reducing batch size to {effective_batch} near community-start-block {Community.start_block}")
+            batch = effective_batch
 
         result = self._db.query_one(
             f"CALL hive.app_next_iteration( _contexts => ARRAY['{SCHEMA_NAME}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {limit}, _override_max_batch => {batch} )"
