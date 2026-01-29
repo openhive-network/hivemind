@@ -184,6 +184,13 @@ class Blocks:
 
         return first_block, last_num
 
+    # Sub-batch size for flushing during massive sync. Notification caches
+    # (vote_notifications, etc.) use dicts keyed by voter/author/permlink,
+    # so duplicate votes within a single flush window get deduplicated.
+    # Flushing every 1000 blocks keeps dedup behavior consistent regardless
+    # of the HAF --max-batch size.
+    _FLUSH_INTERVAL = 1000
+
     @classmethod
     def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
@@ -191,22 +198,20 @@ class Blocks:
 
         if is_massive_sync:
             DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
-
-        first_block, last_num = cls.process_blocks(blocks)
-
-        if is_massive_sync:
+            # Process and flush in sub-batches for consistent notification dedup
+            for i in range(0, len(blocks), cls._FLUSH_INTERVAL):
+                chunk = blocks[i : i + cls._FLUSH_INTERVAL]
+                first_block, last_num = cls.process_blocks(chunk)
+                cls.flush_data_in_n_threads()
             DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
-
-        if not is_massive_sync:
+        else:
+            first_block, last_num = cls.process_blocks(blocks)
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
                 cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
-
-        if is_massive_sync:
-            cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
