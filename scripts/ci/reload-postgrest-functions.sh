@@ -105,7 +105,7 @@ load_sql() {
 
     if [ -f "$script_path" ]; then
         echo "  Loading: $script"
-        if ! psql "$url" -v ON_ERROR_STOP=on -f "$script_path" > /dev/null 2>&1; then
+        if ! psql "$url" -v ON_ERROR_STOP=on -f "$script_path"; then
             echo "    WARNING: Error loading $script (may be expected for existing objects)"
         fi
     else
@@ -164,6 +164,29 @@ EOF
     echo ""
     echo "Function counts by schema:"
     psql "$POSTGRES_URL" -c "$COUNT_QUERY"
+
+    # Verify reblog functions specifically (critical for issue #326)
+    echo ""
+    echo "=== Verifying reblog utility functions ==="
+    REBLOG_QUERY=$(cat <<'REBLOG_EOF'
+SELECT routine_schema, routine_name
+FROM information_schema.routines
+WHERE routine_name LIKE 'get_reblogged_posts%'
+   OR routine_name = 'get_reblogs'
+ORDER BY routine_schema, routine_name;
+REBLOG_EOF
+)
+    psql "$POSTGRES_URL" -c "$REBLOG_QUERY"
+
+    REBLOG_COUNT=$(psql "$POSTGRES_URL" -t -c "SELECT COUNT(*) FROM information_schema.routines WHERE routine_name LIKE 'get_reblogged_posts%'")
+    REBLOG_COUNT=$(echo "$REBLOG_COUNT" | tr -d ' ')
+    if [ "$REBLOG_COUNT" -lt 5 ]; then
+        echo "ERROR: Expected at least 5 get_reblogged_posts functions, found $REBLOG_COUNT"
+        echo "The CASCADE DROP in operation.sql likely destroyed them"
+        exit 1
+    else
+        echo "OK: Found $REBLOG_COUNT get_reblogged_posts functions"
+    fi
 fi
 
 echo ""
