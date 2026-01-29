@@ -124,6 +124,13 @@ load_sql "$ADMIN_URL" "postgrest/utilities/preprocess_search_query.sql"
 echo ""
 echo "=== Loading PostgREST scripts (extracted from schema.py) ==="
 
+# DIAGNOSTIC: Show script ordering
+echo ""
+echo "=== DIAGNOSTIC: Script execution order ==="
+extract_postgrest_scripts | cat -n
+echo "=== END ORDERING DIAGNOSTIC ==="
+echo ""
+
 # Extract and load scripts
 SCRIPT_COUNT=0
 while IFS= read -r script; do
@@ -133,6 +140,24 @@ done < <(extract_postgrest_scripts)
 
 echo ""
 echo "Loaded $SCRIPT_COUNT PostgREST/endpoint scripts"
+
+# DIAGNOSTIC: Check reblog functions after reload
+echo ""
+echo "=== DIAGNOSTIC: Checking reblog utility functions after reload ==="
+psql "$POSTGRES_URL" <<'REBLOG_CHECK'
+SELECT 'reblog_status type:' AS check, typname, typnamespace::regnamespace
+FROM pg_type WHERE typname = 'reblog_status';
+
+SELECT 'reblog utility functions:' AS check, routine_schema, routine_name
+FROM information_schema.routines
+WHERE routine_name LIKE 'get_reblogged_posts%'
+ORDER BY routine_schema, routine_name;
+
+SELECT 'get_reblogs endpoint:' AS check, routine_schema, routine_name
+FROM information_schema.routines
+WHERE routine_name = 'get_reblogs';
+REBLOG_CHECK
+echo "=== END REBLOG DIAGNOSTIC ==="
 
 # Verification step
 if [ "$VERIFY" = true ]; then
