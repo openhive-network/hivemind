@@ -753,6 +753,10 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_unread_notifications.sql",
         "postgrest/utilities/find_tag_id.sql",
         "postgrest/utilities/get_ranked_posts.sql",
+        # operation.sql must run BEFORE get_reblogged_posts.sql so its CASCADE DROP
+        # fires before the utility functions exist (prevents destroying them)
+        "endpoints/endpoint_schema.sql",
+        "endpoints/types/operation.sql",
         "postgrest/utilities/get_reblogged_posts.sql",
         "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql",
@@ -790,8 +794,6 @@ def setup_runtime_code(db):
         "postgrest/utilities/valid_accounts.sql",
         # preprocess_search_query.sql moved to admin execution below
         "postgrest/search-api/find_text.sql",
-        "endpoints/endpoint_schema.sql",
-        "endpoints/types/operation.sql",
         "endpoints/accounts/get_ops_by_account.sql",
         "endpoints/blog/get_reblogs.sql",
     ]
