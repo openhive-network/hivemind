@@ -184,114 +184,16 @@ declare
             "description": "True if the observer has reblogged this post"
           }
         }
+      },
+      "hivemind_endpoints.array_of_reblog_status": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.reblog_status"
+        }
       }
     }
   },
   "paths": {
-    "/blog/reblogs": {
-      "get": {
-        "tags": [
-          "blog_api"
-        ],
-        "summary": "Get reblog status for ranked posts",
-        "description": "Returns reblog status for posts matching the same criteria as bridge.get_ranked_posts. This is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_reblogs(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&limit=20''`\n",
-        "operationId": "hivemind_endpoints.get_reblogs",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "sort",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": ["trending", "hot", "created", "payout", "payout_comments", "muted"]
-            },
-            "description": "Sorting method for posts"
-          },
-          {
-            "in": "query",
-            "name": "tag",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            },
-            "description": "Filter by tag, community name, ''my'' for observer''s subscribed communities, or empty/''all'' for all posts"
-          },
-          {
-            "in": "query",
-            "name": "observer",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Account name to check reblog status for (required)"
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 20,
-              "minimum": 1
-            },
-            "description": "Maximum number of posts to return"
-          },
-          {
-            "in": "query",
-            "name": "start-author",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": null
-            },
-            "description": "Author of post to start pagination from"
-          },
-          {
-            "in": "query",
-            "name": "start-permlink",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": null
-            },
-            "description": "Permlink of post to start pagination from"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of posts with reblog status\n\n* Returns `SETOF hivemind_endpoints.reblog_status`\n",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/hivemind_endpoints.reblog_status"
-                  }
-                },
-                "example": [
-                  {
-                    "post_id": 141560746,
-                    "author": "hiveio",
-                    "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
-                    "reblogged": true
-                  },
-                  {
-                    "post_id": 141559832,
-                    "author": "alice",
-                    "permlink": "my-awesome-post",
-                    "reblogged": false
-                  }
-                ]
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid parameters (missing observer or invalid sort)"
-          }
-        }
-      }
-    },
     "/accounts/{account-name}/operations": {
       "get": {
         "tags": [
@@ -427,6 +329,115 @@ declare
           },
           "404": {
             "description": "No such account in the database"
+          }
+        }
+      }
+    },
+    "/blog/reblogs": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get reblog status for ranked posts",
+        "description": "Returns reblog status for posts matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_reblogs(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_reblogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "trending",
+                "hot",
+                "created",
+                "payout",
+                "payout_comments",
+                "muted"
+              ]
+            },
+            "description": "Sorting method for posts"
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "description": "Filter by tag, community name, ''my'' for observer''s subscribed communities, or empty/''all'' for all posts\n"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account name to check reblog status for (required)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            },
+            "description": "Maximum number of posts to return"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of post to start pagination from"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of post to start pagination from"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of posts with reblog status\n\n* Returns `SETOF hivemind_endpoints.reblog_status`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_reblog_status"
+                },
+                "example": [
+                  {
+                    "post_id": 141560746,
+                    "author": "hiveio",
+                    "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
+                    "reblogged": true
+                  },
+                  {
+                    "post_id": 141559832,
+                    "author": "alice",
+                    "permlink": "my-awesome-post",
+                    "reblogged": false
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters (missing observer or invalid sort)"
           }
         }
       }

@@ -5,7 +5,16 @@ set -o pipefail
 
 SCRIPTDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit 1; pwd -P )"
 
-haf_dir="../haf"
+# Fetch process_openapi.py from common-ci-configuration if not available locally
+COMMON_CI_REF="${COMMON_CI_REF:-develop}"
+COMMON_CI_URL="${COMMON_CI_URL:-https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}}"
+PROCESS_OPENAPI="${SCRIPTDIR}/process_openapi.py"
+
+if [[ ! -f "$PROCESS_OPENAPI" ]]; then
+    echo "Fetching process_openapi.py from common-ci-configuration (ref: ${COMMON_CI_REF})..."
+    curl -fsSL "${COMMON_CI_URL}/haf-app-tools/python/process_openapi.py" -o "$PROCESS_OPENAPI"
+fi
+
 endpoints="hive/db/sql_scripts/endpoints"
 
 # endpoints="endpoints"
@@ -90,7 +99,7 @@ echo "$ENDPOINTS_IN_ORDER"
 
 # run openapi rewrite script
 # shellcheck disable=SC2086
-python3 $haf_dir/scripts/process_openapi.py $OUTPUT $ENDPOINTS_IN_ORDER --home-rewrite
+python3 "$PROCESS_OPENAPI" $OUTPUT $ENDPOINTS_IN_ORDER --home-rewrite
 
 # Create rewrite_rules.conf
 reverse_lines > "$temp_output_file"
