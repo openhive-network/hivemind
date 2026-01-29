@@ -1041,6 +1041,29 @@ e2e_benchmark_on_postgrest:
       sleep 2
     done
     echo "Hivemind server is ready"
+
+    # === DIAGNOSTIC: Check reblog_status type and utility functions ===
+    echo ""
+    echo "=== DIAGNOSTIC: Checking reblog_status type and reblog utility functions ==="
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log << 'DIAG_SQL'
+    SELECT 'reblog_status type:' AS check, typname, typnamespace::regnamespace
+    FROM pg_type WHERE typname = 'reblog_status';
+    SELECT 'reblog utility functions:' AS check, routine_schema, routine_name
+    FROM information_schema.routines
+    WHERE routine_name LIKE 'get_reblogged_posts%'
+    ORDER BY routine_schema, routine_name;
+    SELECT 'endpoint function:' AS check, routine_schema, routine_name
+    FROM information_schema.routines
+    WHERE routine_name = 'get_reblogs';
+    SELECT 'all endpoint types:' AS check, typname
+    FROM pg_type t
+    JOIN pg_namespace n ON t.typnamespace = n.oid
+    WHERE n.nspname = 'hivemind_endpoints' AND t.typtype = 'c'
+    ORDER BY typname;
+    DIAG_SQL
+    echo "=== END DIAGNOSTIC ==="
+    echo ""
+
     echo -e "\e[0Ksection_end:$(date +%s):wait_services\r\e[0K"
   - |
     # Initialize tests_api submodule for validate_response module
