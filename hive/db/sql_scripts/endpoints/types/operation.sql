@@ -116,36 +116,8 @@ CREATE TYPE hivemind_endpoints.operation_history AS (
 );
 -- openapi-generated-code-end
 
-/** openapi:components:schemas
-hivemind_endpoints.reblog_status:
-  type: object
-  properties:
-    post_id:
-      type: integer
-      description: Unique post identifier
-    author:
-      type: string
-      description: Post author account name
-    permlink:
-      type: string
-      description: Post permlink
-    reblogged:
-      type: boolean
-      description: True if the observer has reblogged this post
- */
--- openapi-generated-code-begin
-DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
-CREATE TYPE hivemind_endpoints.reblog_status AS (
-    "post_id" INT,
-    "author" TEXT,
-    "permlink" TEXT,
-    "reblogged" BOOLEAN
-);
--- openapi-generated-code-end
-
-/** openapi:components:schemas
-hivemind_endpoints.array_of_reblog_status:
-  type: array
-  items:
-    $ref: '#/components/schemas/hivemind_endpoints.reblog_status'
-*/
+-- Note: hivemind_endpoints.reblog_status type is defined in
+-- postgrest/utilities/get_reblogged_posts.sql (not here) to avoid
+-- CASCADE DROP destroying the utility functions that depend on it.
+-- The OpenAPI schema for reblog_status and array_of_reblog_status
+-- is defined in endpoint_schema.sql.
