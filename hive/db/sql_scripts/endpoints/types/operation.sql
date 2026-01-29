@@ -134,7 +134,7 @@ hivemind_endpoints.reblog_status:
       description: True if the observer has reblogged this post
  */
 -- openapi-generated-code-begin
-DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
+DROP TYPE IF EXISTS hivemind_endpoints.reblog_status;
 CREATE TYPE hivemind_endpoints.reblog_status AS (
     "post_id" INT,
     "author" TEXT,
