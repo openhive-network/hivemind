@@ -52,7 +52,7 @@ variables:
   QUICK_TEST_HIVEMIND_COMMIT: ""  # Required when QUICK_TEST=true (short SHA)
   # Auto-populated by detect_changes job (uses .haf_app_detect_changes template):
   AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
-  POSTGREST_ONLY_CHANGE: "false"  # Set to true when only PostgREST SQL code changed
+  POSTGREST_ONLY_CHANGE: "true"  # FORCED for debug/reblogs-error-visibility diagnostic
 
   # =============================================================================
   # PostgREST-Only Mode

@@ -105,7 +105,7 @@ load_sql() {
 
     if [ -f "$script_path" ]; then
         echo "  Loading: $script"
-        if ! psql "$url" -v ON_ERROR_STOP=on -f "$script_path" > /dev/null 2>&1; then
+        if ! psql "$url" -v ON_ERROR_STOP=on -f "$script_path"; then
             echo "    WARNING: Error loading $script (may be expected for existing objects)"
         fi
     else
@@ -133,6 +133,24 @@ done < <(extract_postgrest_scripts)
 
 echo ""
 echo "Loaded $SCRIPT_COUNT PostgREST/endpoint scripts"
+
+# Reblog function check (diagnostic)
+echo ""
+echo "=== DIAGNOSTIC: Checking reblog utility functions after reload ==="
+psql "$POSTGRES_URL" <<'REBLOG_CHECK'
+SELECT 'reblog_status type:' AS check, typname, typnamespace::regnamespace
+FROM pg_type WHERE typname = 'reblog_status';
+
+SELECT 'reblog utility functions:' AS check, routine_schema, routine_name
+FROM information_schema.routines
+WHERE routine_name LIKE 'get_reblogged_posts%'
+ORDER BY routine_schema, routine_name;
+
+SELECT 'get_reblogs endpoint:' AS check, routine_schema, routine_name
+FROM information_schema.routines
+WHERE routine_name = 'get_reblogs';
+REBLOG_CHECK
+echo "=== END REBLOG DIAGNOSTIC ==="
 
 # Verification step
 if [ "$VERIFY" = true ]; then
