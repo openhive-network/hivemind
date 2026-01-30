@@ -534,6 +534,14 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_follow_counts(cls, db):
+        with AutoDbDisposer(db, "finish_follow_counts") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.recalculate_follow_counts();"
+            db_mgr.db.query_no_return(sql)
+            log.info("[MASSIVE] recalculate_follow_counts executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
         func(*args)
@@ -582,6 +590,7 @@ class DbState:
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
             ),
+            ('follow_counts', cls._finish_follow_counts, [cls.db()]),
         ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
