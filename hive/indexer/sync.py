@@ -318,15 +318,16 @@ class SyncHiveDb:
         )
 
         # Speculative prefetch using ISOLATED connection
-        self._do_speculative_prefetch(ubound)
+        self._do_speculative_prefetch(lbound, ubound)
 
-    def _do_speculative_prefetch(self, current_ubound):
+    def _do_speculative_prefetch(self, current_lbound, current_ubound):
         """Speculatively prefetch the next batch using isolated connection."""
         if self._prefetch_blocks_provider is None:
             return
 
+        batch_size = current_ubound - current_lbound
         next_lbound = current_ubound + 1
-        next_ubound = next_lbound + 999
+        next_ubound = next_lbound + batch_size
 
         try:
             self._prefetched_blocks = self._prefetch_blocks_provider.get_data(next_lbound, next_ubound)

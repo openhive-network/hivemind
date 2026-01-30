@@ -10,10 +10,11 @@ def prepare_app_context(db: Db) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' and '{REPTRACKER_SCHEMA_NAME}' contexts.")
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
-        LIMIT_FOR_PROCESSED_BLOCKS = 1000
+        LIMIT_FOR_MASSIVE_WITHOUT_INDEXES = 2000
+        LIMIT_FOR_MASSIVE_WITH_INDEXES = 1000
         synchronization_stages = f"""ARRAY[
-              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
-            , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
+              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_MASSIVE_WITHOUT_INDEXES}, '20 seconds' )
+            , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_MASSIVE_WITH_INDEXES}, '20 seconds' )
             , hive.live_stage()
         ]::hive.application_stages"""
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
