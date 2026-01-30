@@ -1,18 +1,5 @@
-[
-  {
-    "date": "2016-07-18T19:53:12",
-    "id": "2694123517640705",
-    "msg": "@gopher replied to your comment",
-    "score": 29,
-    "type": "reply_comment",
-    "url": "@gopher/re-admin-firstpost-20160718t195306992z"
-  },
-  {
-    "date": "2016-07-17T19:38:12",
-    "id": "2670689102331905",
-    "msg": "@kingtylervvs replied to your comment",
-    "score": 44,
-    "type": "reply_comment",
-    "url": "@kingtylervvs/re-admin-firstpost-20160717t193811098z"
-  }
-]
+{
+  "id": "1",
+  "jsonrpc": "2.0",
+  "result": null
+}

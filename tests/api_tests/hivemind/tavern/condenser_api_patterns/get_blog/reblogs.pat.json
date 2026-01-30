@@ -6,74 +6,6 @@
       "author": "test-safari",
       "author_reputation": 999316,
       "beneficiaries": [],
-      "body": "This post should not be reblogged because even though it reuses permlink of reblogged post, it is separate new post.",
-      "body_length": 116,
-      "cashout_time": "2016-09-22T18:01:42",
-      "category": "hive-117600",
-      "children": 0,
-      "created": "2016-09-15T18:01:42",
-      "curator_payout_value": "0.000 HBD",
-      "depth": 0,
-      "json_metadata": "{}",
-      "last_payout": "1969-12-31T23:59:59",
-      "last_update": "2016-09-15T18:01:42",
-      "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 0,
-      "parent_author": "",
-      "parent_permlink": "hive-117600",
-      "pending_payout_value": "0.000 HBD",
-      "percent_hbd": 10000,
-      "permlink": "reblogged-and-recreated",
-      "replies": [],
-      "root_title": "The post was deleted and permlink reused",
-      "title": "The post was deleted and permlink reused",
-      "total_payout_value": "0.000 HBD",
-      "url": "/hive-117600/@test-safari/reblogged-and-recreated"
-    },
-    "entry_id": 25,
-    "reblogged_on": "1970-01-01T00:00:00"
-  },
-  {
-    "blog": "test-safari",
-    "comment": {
-      "active_votes": [],
-      "author": "test-safari",
-      "author_reputation": 999316,
-      "beneficiaries": [],
-      "body": "This post should not be muted because even though it reuses permlink of muted post, it is separate new post.",
-      "body_length": 108,
-      "cashout_time": "2016-09-22T18:01:39",
-      "category": "hive-117600",
-      "children": 0,
-      "created": "2016-09-15T18:01:39",
-      "curator_payout_value": "0.000 HBD",
-      "depth": 0,
-      "json_metadata": "{}",
-      "last_payout": "1969-12-31T23:59:59",
-      "last_update": "2016-09-15T18:01:39",
-      "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 0,
-      "parent_author": "",
-      "parent_permlink": "hive-117600",
-      "pending_payout_value": "0.000 HBD",
-      "percent_hbd": 10000,
-      "permlink": "muted-and-recreated",
-      "replies": [],
-      "root_title": "The post was deleted and permlink reused",
-      "title": "The post was deleted and permlink reused",
-      "total_payout_value": "0.000 HBD",
-      "url": "/hive-117600/@test-safari/muted-and-recreated"
-    },
-    "entry_id": 24,
-    "reblogged_on": "1970-01-01T00:00:00"
-  },
-  {
-    "blog": "test-safari",
-    "comment": {
-      "active_votes": [],
-      "author": "test-safari",
-      "author_reputation": 999316,
-      "beneficiaries": [],
       "body": "Comment my posts in this community.03",
       "body_length": 37,
       "cashout_time": "2016-09-22T18:01:36",
@@ -1010,5 +942,117 @@
     },
     "entry_id": 6,
     "reblogged_on": "2016-09-13T20:18:33"
+  },
+  {
+    "blog": "test-safari",
+    "comment": {
+      "active_votes": [
+        {
+          "percent": "10000",
+          "reputation": 686738916191,
+          "rshares": 128594988,
+          "voter": "sergey44"
+        },
+        {
+          "percent": "10000",
+          "reputation": 4218613550,
+          "rshares": 59129076,
+          "voter": "atle-v"
+        }
+      ],
+      "author": "atle-v",
+      "author_reputation": 4218613550,
+      "beneficiaries": [],
+      "body": "<html>\n<h1>A beautiful day in September</h1>\n<p>We went for a Sunday picnic in the nice weather on September 4 and it was so beautiful that I would like to share some pictures and a video with you good Steemit people.</p>\n<p><img src=\"http://home.lyse.net/atlev/steemit/Artikkel%204/20160904_135701.jpg\"/></p>\n<p>September is the beginning of fall here and the days are getting shorter and colder, but there can be some very nice and warm days too and this was one of those days.</p>\n<p>Being from Budapest, Anita knows what warm is, and what she felt that Sunday, she said, she'd been missing all summer. When the warm air gently stroked her cheek, it reminded her of spring in Hungary.</p>\n<p>Karoline does not like the car seat very much, so we don\u2019t go very far. We drove about 16 km from our house to a place I used to spend a lot of time growing up. From where we parked the car to where we had our picnic, is just a small walk in very flat terrain. It was so peaceful and quiet; we could hear the small bells on the sheep, and a stream and the nice breeze.</p>\n<p>I apologieses for my heavy breathing that is audible in the video. I was filming and taking pictures with my phone.</p>\n</html>",
+      "body_length": 1198,
+      "cashout_time": "2016-09-20T14:50:06",
+      "category": "photography",
+      "children": 1,
+      "created": "2016-09-13T14:50:06",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 0,
+      "json_metadata": "{\"tags\":[\"photography\",\"life\",\"picnic\",\"family\",\"beautiful\"],\"image\":[\"http://home.lyse.net/atlev/steemit/Artikkel%204/20160904_135701.jpg\"]}",
+      "last_payout": "1969-12-31T23:59:59",
+      "last_update": "2016-09-14T12:19:21",
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 187724064,
+      "parent_author": "",
+      "parent_permlink": "photography",
+      "pending_payout_value": "0.000 HBD",
+      "percent_hbd": 10000,
+      "permlink": "sunday-picnic",
+      "replies": [],
+      "root_title": "Sunday picnic",
+      "title": "Sunday picnic",
+      "total_payout_value": "0.000 HBD",
+      "url": "/photography/@atle-v/sunday-picnic"
+    },
+    "entry_id": 5,
+    "reblogged_on": "2016-09-13T14:52:48"
+  },
+  {
+    "blog": "test-safari",
+    "comment": {
+      "active_votes": [
+        {
+          "percent": "10000",
+          "reputation": 1510234773828,
+          "rshares": 2233757397,
+          "voter": "bitland"
+        },
+        {
+          "percent": "10000",
+          "reputation": 692826071687,
+          "rshares": 230234023,
+          "voter": "keyser"
+        },
+        {
+          "percent": "10000",
+          "reputation": 1916013022364,
+          "rshares": 706494264,
+          "voter": "wuyueling"
+        },
+        {
+          "percent": "10000",
+          "reputation": 1352601752373,
+          "rshares": 415840834,
+          "voter": "runrudy"
+        },
+        {
+          "percent": "10000",
+          "reputation": 0,
+          "rshares": 59566200,
+          "voter": "serikus"
+        }
+      ],
+      "author": "iamwne",
+      "author_reputation": 2440775410341,
+      "beneficiaries": [],
+      "body": "http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg\n\n**Process And Technique**\n\nI am constantly trying to grow as an artist. This often means using new techniques and tools. This time I have begin experimenting with Pixar Subdivsion Surface modeling. This was the first time that I had really used this method. It is great a making some rather complex forms with very little base geometry. Pretty powerful stuff. Not sure how well executed this model is but I thought it was an interesting start.\n\nThe geometric features in the front grate and along the side was from a displacement texture that was made in Zbrush. It is a, \"greeble\" generator and is great for scifi features like panels and such. The overall geometry was modeled in Modo. I tend to move in and out of Modo. For my main 3D tool I use 3DS Max. But Modo just has some interesting modeling tools that I rediscover from time to time.\n\nhttp://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg\n\n\n**The Concept**\n\nThe concept is something like the Star Wars land speeder. Luke's was more of a wreck. I was going for more of a \"downtown\" ride. Something more like a 70's Caddy or Lincoln. It was a interesting process to use the Pixar Subs it not only produces optimal geometry but can be fast to model with when you get used to it. \n\nhttp://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg\n\n\n**How Do You Get Into It**\n\nOkay I have to admit it was a good question that came from a posting someone made on my Deviant Art page http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798 The poster notices that there are no door seams. Oops I noticed that now. That I no longer have the scene files that I originally used to make this. \n\nhttp://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg",
+      "body_length": 1907,
+      "cashout_time": "2016-09-15T20:29:24",
+      "category": "art",
+      "children": 3,
+      "created": "2016-09-08T20:29:24",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 0,
+      "json_metadata": "{\"tags\":[\"art\",\"animation\",\"effects\",\"photography\"],\"image\":[\"http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg\",\"http://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg\",\"http://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg\",\"http://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg\"],\"links\":[\"http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798\"]}",
+      "last_payout": "1969-12-31T23:59:59",
+      "last_update": "2016-09-08T20:29:24",
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 3645892718,
+      "parent_author": "",
+      "parent_permlink": "art",
+      "pending_payout_value": "0.001 HBD",
+      "percent_hbd": 10000,
+      "permlink": "conceptualizing-a-scifi-land-speeder",
+      "replies": [],
+      "root_title": "Conceptualizing A SciFi Land Speeder",
+      "title": "Conceptualizing A SciFi Land Speeder",
+      "total_payout_value": "0.000 HBD",
+      "url": "/art/@iamwne/conceptualizing-a-scifi-land-speeder"
+    },
+    "entry_id": 4,
+    "reblogged_on": "2016-09-08T20:30:51"
   }
 ]
