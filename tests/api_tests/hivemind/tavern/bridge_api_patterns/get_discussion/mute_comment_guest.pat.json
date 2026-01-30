@@ -23,16 +23,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-member-comment-to-please-comment-hive2-02",
-    "post_id": 1256982,
+    "post_id": 1256909,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -63,16 +60,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive2-02",
-    "post_id": 1256927,
+    "post_id": 1256854,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -103,16 +97,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive2-02",
-    "post_id": 1256881,
+    "post_id": 1256808,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -141,7 +132,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "please-comment-hive2-02",
-    "post_id": 1256866,
+    "post_id": 1256795,
     "reblogs": 0,
     "replies": [
       "alice/comment-to-please-comment-hive2-02",

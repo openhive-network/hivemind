@@ -23,7 +23,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive3",
-    "post_id": 1256929,
+    "post_id": 1256856,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -60,7 +60,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive2-03",
-    "post_id": 1256928,
+    "post_id": 1256855,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -97,16 +97,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive2-02",
-    "post_id": 1256927,
+    "post_id": 1256854,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -137,7 +134,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive2",
-    "post_id": 1256926,
+    "post_id": 1256853,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -178,7 +175,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive1-03",
-    "post_id": 1256925,
+    "post_id": 1256852,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -219,16 +216,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive1-02",
-    "post_id": 1256924,
+    "post_id": 1256851,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post01",
@@ -263,7 +257,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive1",
-    "post_id": 1256923,
+    "post_id": 1256850,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -298,7 +292,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive3",
-    "post_id": 1256922,
+    "post_id": 1256849,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -333,7 +327,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive2",
-    "post_id": 1256921,
+    "post_id": 1256848,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -372,7 +366,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive1",
-    "post_id": 1256920,
+    "post_id": 1256847,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -407,16 +401,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive3",
-    "post_id": 1256919,
+    "post_id": 1256846,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -445,16 +436,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive2",
-    "post_id": 1256918,
+    "post_id": 1256845,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -487,16 +475,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive1",
-    "post_id": 1256917,
+    "post_id": 1256844,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -525,7 +510,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive3",
-    "post_id": 1256916,
+    "post_id": 1256843,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -560,7 +545,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive2",
-    "post_id": 1256915,
+    "post_id": 1256842,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -599,7 +584,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive1",
-    "post_id": 1256914,
+    "post_id": 1256841,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -634,7 +619,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-third-post-hive3",
-    "post_id": 1256894,
+    "post_id": 1256821,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -669,7 +654,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-third-post-hive2",
-    "post_id": 1256893,
+    "post_id": 1256820,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -708,7 +693,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-third-post-hive1",
-    "post_id": 1256892,
+    "post_id": 1256819,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -743,16 +728,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-second-post-hive3",
-    "post_id": 1256888,
+    "post_id": 1256815,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "Hello x2",
