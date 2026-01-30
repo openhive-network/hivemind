@@ -166,9 +166,10 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
-                NotificationCache.follow_notifications_to_flush.append(
-                    (follower, following, block_num, cls._counter.increment(block_num))
-                )
+                if not NotificationCache.should_skip():
+                    NotificationCache.follow_notifications_to_flush.append(
+                        (follower, following, block_num, cls._counter.increment(block_num))
+                    )
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)

@@ -102,7 +102,7 @@ class Posts(DbAdapterHolder):
 
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0:
+        if row['depth'] > 0 and not NotificationCache.should_skip():
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
             NotificationCache.comment_notifications[key] = {
