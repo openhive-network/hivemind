@@ -20,6 +20,7 @@ from hive.indexer.hive_db.massive_blocks_data_provider import (
     BlocksDataFromDbProvider,
     MassiveBlocksDataProviderHiveDb,
 )
+from hive.indexer.notification_cache import NotificationCache
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
@@ -173,6 +174,7 @@ class SyncHiveDb:
             self._db.query_no_return("COMMIT")
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync(True)
+                NotificationCache.set_skip_accumulation(True)
                 report_enter_to_stage(application_stage)
 
                 DbState.ensure_off_synchronous_commit()
@@ -183,6 +185,7 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "MASSIVE_WITH_INDEXES":
                 DbState.set_massive_sync(True)
+                NotificationCache.set_skip_accumulation(False)
                 if report_enter_to_stage(application_stage):
                     self.print_summary()
 
@@ -198,6 +201,7 @@ class SyncHiveDb:
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
                 self._cleanup_prefetch()  # Not used in live mode
                 DbState.set_massive_sync(False)
+                NotificationCache.set_skip_accumulation(False)
                 report_enter_to_stage(application_stage)
 
                 DbState.ensure_on_synchronous_commit()

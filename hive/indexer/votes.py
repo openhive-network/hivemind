@@ -38,14 +38,16 @@ class Votes(DbAdapterHolder):
         post_key = f"{author}/{permlink}"
         key = f"{voter}/{post_key}"
 
+        skip_notifications = NotificationCache.should_skip()
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]
             vote_data["vote_percent"] = weight
             vote_data["last_update"] = date
-            n = NotificationCache.vote_notifications[key]
-            n['last_update'] = date
-            n['block_num'] = block_num
-            n['counter'] = cls._counter.increment(block_num)
+            if not skip_notifications:
+                n = NotificationCache.vote_notifications[key]
+                n['last_update'] = date
+                n['block_num'] = block_num
+                n['counter'] = cls._counter.increment(block_num)
             # only effective vote edits increase num_changes counter
         else:
             if post_key not in cls._votes_per_post:
@@ -63,15 +65,16 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=block_num,
             )
-            NotificationCache.vote_notifications[key] = {
-                'block_num': block_num,
-                'voter': voter,
-                'author': author,
-                'permlink': permlink,
-                'last_update': date,
-                'rshares': 0,
-                'counter': cls._counter.increment(block_num),
-            }
+            if not skip_notifications:
+                NotificationCache.vote_notifications[key] = {
+                    'block_num': block_num,
+                    'voter': voter,
+                    'author': author,
+                    'permlink': permlink,
+                    'last_update': date,
+                    'rshares': 0,
+                    'counter': cls._counter.increment(block_num),
+                }
 
     @classmethod
     def drop_votes_of_deleted_comment(cls, comment_delete_operation):
@@ -83,10 +86,12 @@ class Votes(DbAdapterHolder):
         # database_api.list_votes so it is not entirely inconsequential)
         post_key = f"{comment_delete_operation['author']}/{comment_delete_operation['permlink']}"
         if post_key in cls._votes_per_post:
+            skip_notifications = NotificationCache.should_skip()
             for voter in cls._votes_per_post[post_key]:
                 key = f"{voter}/{post_key}"
                 del cls._votes_data[key]
-                del NotificationCache.vote_notifications[key]
+                if not skip_notifications:
+                    del NotificationCache.vote_notifications[key]
             del cls._votes_per_post[post_key]
 
     @classmethod
@@ -97,6 +102,7 @@ class Votes(DbAdapterHolder):
         post_key = f"{vop['author']}/{vop['permlink']}"
         key = f"{vop['voter']}/{post_key}"
 
+        skip_notifications = NotificationCache.should_skip()
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]
             vote_data["weight"] = vop["weight"]
@@ -104,10 +110,11 @@ class Votes(DbAdapterHolder):
             vote_data["is_effective"] = True
             vote_data["num_changes"] += 1
             vote_data["block_num"] = block_num
-            n = NotificationCache.vote_notifications[key]
-            n['rshares'] = vop["rshares"]
-            n['block_num'] = block_num
-            n['counter'] = cls._counter.increment(block_num)
+            if not skip_notifications:
+                n = NotificationCache.vote_notifications[key]
+                n['rshares'] = vop["rshares"]
+                n['block_num'] = block_num
+                n['counter'] = cls._counter.increment(block_num)
         else:
             if post_key not in cls._votes_per_post:
                 cls._votes_per_post[post_key] = []
@@ -124,15 +131,16 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=block_num,
             )
-            NotificationCache.vote_notifications[key] = {
-                'block_num': block_num,
-                'voter': vop["voter"],
-                'author': vop["author"],
-                'permlink': vop["permlink"],
-                'last_update': "1970-01-01 00:00:00",
-                'rshares': vop["rshares"],
-                'counter': cls._counter.increment(block_num),
-            }
+            if not skip_notifications:
+                NotificationCache.vote_notifications[key] = {
+                    'block_num': block_num,
+                    'voter': vop["voter"],
+                    'author': vop["author"],
+                    'permlink': vop["permlink"],
+                    'last_update': "1970-01-01 00:00:00",
+                    'rshares': vop["rshares"],
+                    'counter': cls._counter.increment(block_num),
+                }
 
     @classmethod
     def flush_votes(cls):
