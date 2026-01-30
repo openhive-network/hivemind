@@ -16,256 +16,664 @@
     "url": "c/hive-135485"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895946",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive3-03"
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120070",
+    "msg": "error: post does not exists alice/First-after-member-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120069",
+    "msg": "error: post does not exists alice/First-after-member-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120068",
+    "msg": "error: post does not exists alice/First-after-member-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120067",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120066",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:09",
+    "id": "4060711500120065",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813708",
+    "msg": "error: post does not exists alice/Second-after-member-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813707",
+    "msg": "error: post does not exists alice/Second-after-member-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813706",
+    "msg": "error: post does not exists alice/Second-after-member-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813705",
+    "msg": "error: post does not exists alice/First-after-member-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813704",
+    "msg": "error: post does not exists alice/First-after-member-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813703",
+    "msg": "error: post does not exists alice/First-after-member-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813702",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive3-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813701",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive2-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813700",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive1-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813699",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813698",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:02:06",
+    "id": "4060710694813697",
+    "msg": "error: post does not exists alice/after-member-comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895945",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive3-02"
+    "id": "4060709889507331",
+    "msg": "error: post does not exists test-safari/secrets6",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
     "date": "2016-09-15T18:02:03",
-    "id": "4060709897895944",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive3"
+    "id": "4060709889507330",
+    "msg": "error: post does not exists test-safari/secrets6",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895943",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive2-03"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894599",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895942",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive2-02"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894598",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895941",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive2"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894597",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895940",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive1-03"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894596",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895939",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive1-02"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894595",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
   },
   {
-    "date": "2016-09-15T18:02:03",
-    "id": "4060709897895938",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-member-comment-to-please-comment-hive1"
+    "date": "2016-09-15T18:01:57",
+    "id": "4060708278894594",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588237",
+    "msg": "error: post does not exists alice/Second-after-muted-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588236",
+    "msg": "error: post does not exists alice/Second-after-muted-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588235",
+    "msg": "error: post does not exists alice/Second-after-muted-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588234",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588233",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588232",
+    "msg": "error: post does not exists alice/First-after-muted-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588231",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive3-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588230",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive2-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588229",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive1-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588228",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588227",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:54",
+    "id": "4060707473588226",
+    "msg": "error: post does not exists alice/after-muted-comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670474",
-    "msg": "@test-creator replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@test-creator/re-community-135485-comment"
+    "id": "4060706668281870",
+    "msg": "error: post does not exists test-creator/pinpost12",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670473",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive3-03"
+    "id": "4060706668281869",
+    "msg": "error: post does not exists test-creator/pinpost11",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670472",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive3-02"
+    "id": "4060706668281868",
+    "msg": "error: post does not exists test-creator/pinpost10",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670471",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive3"
+    "id": "4060706668281867",
+    "msg": "error: post does not exists test-creator/pinpost9",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670470",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive2-03"
+    "id": "4060706668281866",
+    "msg": "error: post does not exists test-creator/pinpost8",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670469",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive2-02"
+    "id": "4060706668281865",
+    "msg": "error: post does not exists test-creator/pinpost7",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670468",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive2"
+    "id": "4060706668281864",
+    "msg": "error: post does not exists test-creator/pinpost6",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670467",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive1-03"
+    "id": "4060706668281863",
+    "msg": "error: post does not exists test-creator/pinpost5",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670466",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive1-02"
+    "id": "4060706668281862",
+    "msg": "error: post does not exists test-creator/pinpost4",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:51",
-    "id": "4060706676670465",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/after-muted-comment-to-please-comment-hive1"
+    "id": "4060706668281861",
+    "msg": "error: post does not exists test-creator/pinpost3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:51",
+    "id": "4060706668281860",
+    "msg": "error: post does not exists test-creator/pinpost2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:51",
+    "id": "4060706668281859",
+    "msg": "error: post does not exists test-creator/pinpost1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:51",
+    "id": "4060706668281858",
+    "msg": "error: post does not exists test-creator/pinned-post",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:51",
+    "id": "4060706668281857",
+    "msg": "error: post does not exists test-creator/muted-post",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669128",
+    "msg": "error: post does not exists test-safari/secrets6",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669127",
+    "msg": "error: post does not exists test-safari/secrets5",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669126",
+    "msg": "error: post does not exists alice/My-first-post-hive-1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669125",
+    "msg": "error: post does not exists alice/My-first-post-hive-2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669124",
+    "msg": "error: post does not exists alice/My-first-post-hive-3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669123",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669122",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:45",
+    "id": "4060705057669121",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
   },
   {
     "date": "2016-09-15T18:01:42",
-    "id": "4060704269139970",
-    "msg": "@agartha reblogged your post",
-    "score": 25,
-    "type": "reblog",
-    "url": "@test-safari/reblogged-and-edited"
+    "id": "4060704252362768",
+    "msg": "error: post does not exists test-safari/secrets5",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
     "date": "2016-09-15T18:01:42",
-    "id": "4060704269139969",
-    "msg": "@agartha reblogged your post",
-    "score": 25,
-    "type": "reblog",
-    "url": "@test-safari/reblogged-and-recreated"
+    "id": "4060704252362767",
+    "msg": "error: post does not exists test-safari/secrets4",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362766",
+    "msg": "error: post does not exists test-safari/secrets3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362765",
+    "msg": "error: post does not exists test-safari/secrets3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362764",
+    "msg": "error: post does not exists alice/My-second-post-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362763",
+    "msg": "error: post does not exists alice/My-second-post-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362762",
+    "msg": "error: post does not exists alice/My-second-post-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362761",
+    "msg": "error: post does not exists alice/My-first-post-hive-1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362760",
+    "msg": "error: post does not exists alice/My-first-post-hive-2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362759",
+    "msg": "error: post does not exists alice/My-first-post-hive-3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362758",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive3-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362757",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive2-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362756",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive1-02",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362755",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive3",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-198723"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362754",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704252362753",
+    "msg": "error: post does not exists alice/comment-to-please-comment-hive1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171487"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445002",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive3-03"
+    "id": "4060703447056390",
+    "msg": "error: post does not exists test-safari/muted-and-edited",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445001",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive3-02"
+    "id": "4060703447056389",
+    "msg": "error: post does not exists test-safari/muted-and-recreated",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455445000",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive3"
+    "id": "4060703447056388",
+    "msg": "error: post does not exists test-safari/secrets2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444999",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive2-03"
+    "id": "4060703447056387",
+    "msg": "error: post does not exists test-safari/secrets5",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-117600"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444998",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive2-02"
+    "id": "4060703447056386",
+    "msg": "error: post does not exists test-safari/secrets2",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:39",
-    "id": "4060703455444997",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive2"
-  },
-  {
-    "date": "2016-09-15T18:01:39",
-    "id": "4060703455444996",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive1-03"
-  },
-  {
-    "date": "2016-09-15T18:01:39",
-    "id": "4060703455444995",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive1-02"
-  },
-  {
-    "date": "2016-09-15T18:01:39",
-    "id": "4060703455444994",
-    "msg": "@steemit replied to your post",
-    "score": 33,
-    "type": "reply",
-    "url": "@steemit/comment-to-post-in-community-muted"
-  },
-  {
-    "date": "2016-09-15T18:01:39",
-    "id": "4060703455444993",
-    "msg": "@alice replied to your post",
-    "score": 25,
-    "type": "reply",
-    "url": "@alice/comment-to-please-comment-hive1"
+    "id": "4060703447056385",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443664",
+    "id": "4060701836443663",
     "msg": "error: only mods and up can alter roles",
     "score": 35,
     "type": "error",
@@ -273,7 +681,7 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443663",
+    "id": "4060701836443662",
     "msg": "error: cannot promote to or above own rank",
     "score": 35,
     "type": "error",
@@ -281,34 +689,50 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443662",
+    "id": "4060701836443661",
     "msg": "error: cannot promote to or above own rank",
     "score": 35,
     "type": "error",
     "url": "c/hive-157439"
   },
   {
-    "date": "2016-09-13T18:57:24",
-    "id": "4015215729442817",
-    "msg": "@mikerano replied to your comment",
-    "score": 47,
-    "type": "reply_comment",
-    "url": "@mikerano/re-test-safari-re-mikerano-i-need-an-explanation-steemit-repost-20160913t185808621z"
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701836443659",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
-    "date": "2016-09-13T18:46:15",
-    "id": "4015036146122753",
-    "msg": "@mikerano replied to your comment",
-    "score": 47,
-    "type": "reply_comment",
-    "url": "@mikerano/re-test-safari-re-mikerano-i-need-an-explanation-steemit-repost-20160913t184654906z"
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701836443658",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   },
   {
-    "date": "2016-08-31T18:55:36",
-    "id": "3713680042622977",
-    "msg": "@roadscape followed you",
-    "score": 55,
-    "type": "follow",
-    "url": "@roadscape"
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701836443657",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701836443656",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701836443655",
+    "msg": "error: post does not exists test-safari/secrets1",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-135485"
   }
 ]
