@@ -37,7 +37,6 @@ class DbState:
     _original_synchronous_commit_mode = None
     _original_fsync = None
     _original_full_page_writes = None
-    _rshares_recalculated = False
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
 
     @classmethod
@@ -142,15 +141,12 @@ class DbState:
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_author_id_created_at_id_idx',
             'hive_posts_author_id_id_idx',
-            'hive_posts_block_num_idx',
-            'hive_posts_author_id_id_depth0_idx',
             'hive_votes_voter_id_last_update_idx',
             'hive_votes_block_num_idx',
             'hive_subscriptions_block_num_idx',
             'hive_subscriptions_community_idx',
             'hive_communities_block_num_idx',
             'hive_votes_post_id_voter_id_idx',
-            'hive_votes_post_id_block_num_rshares_vote_is_effective_idx',
             'hive_notification_cache_block_num_idx',
             'hive_notification_cache_dst_score_idx',
             'follows_following_idx',
@@ -164,7 +160,6 @@ class DbState:
             'follow_muted_block_num_idx',
             'follow_blacklisted_block_num_idx',
             'hive_post_data_bm25_idx',
-            'hive_accounts_haf_id_idx',
         ]
 
         to_return = {}
@@ -531,14 +526,6 @@ class DbState:
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_posts_rshares(cls, db):
-        with AutoDbDisposer(db, "finish_posts_rshares") as db_mgr:
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.recalculate_all_posts_rshares();"
-            db_mgr.db.query_no_return(sql)
-            log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
-
-    @classmethod
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
@@ -547,12 +534,12 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_vote_notifications(cls, db):
-        from hive.indexer.notification_cache import VoteNotificationCache
-
-        time_start = perf_counter()
-        n = VoteNotificationCache.flush_vote_notifications(force=True)
-        log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
+    def _finish_follow_counts(cls, db):
+        with AutoDbDisposer(db, "finish_follow_counts") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.recalculate_follow_counts();"
+            db_mgr.db.query_no_return(sql)
+            log.info("[MASSIVE] recalculate_follow_counts executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def time_collector(cls, func, args):
@@ -589,17 +576,6 @@ class DbState:
 
         log.info("#############################################################################")
 
-        if not cls._rshares_recalculated:
-            # Run rshares recalculation first (creates ~54M dead tuples on hive_posts).
-            # Must complete before Part 0 so update_all_hive_posts_children_count doesn't
-            # scan a bloated table. Only needs to run once — subsequent finalization cycles
-            # during catch-up have negligible new votes handled by incremental live updates.
-            cls._finish_posts_rshares(cls.db())
-
-            # Vacuum hive_posts to clean dead tuples before Part 0 scans it
-            cls.vacuum_tables_in_threads([f"{SCHEMA_NAME}.hive_posts"])
-            cls._rshares_recalculated = True
-
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
@@ -619,9 +595,10 @@ class DbState:
 
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
-            ('vote_notifications', cls._finish_vote_notifications, [cls.db()]),
+            ('follow_counts', cls._finish_follow_counts, [cls.db()]),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
+        # Follow counts need recalculation after massive sync (deferred during flush_follows_massive)
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
