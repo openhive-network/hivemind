@@ -21,17 +21,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "spider02",
-    "post_id": 1256959,
+    "post_id": 1256886,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "is_pinned": true,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "powerful spider 02",
@@ -60,14 +56,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "spider01",
-    "post_id": 1256958,
+    "post_id": 1256885,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "is_pinned": true,
       "total_votes": 0
     },
     "title": "powerful spider 01",
@@ -96,14 +91,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "anaconda02",
-    "post_id": 1256957,
+    "post_id": 1256884,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "is_pinned": true,
       "total_votes": 0
     },
     "title": "powerful snake 02",
@@ -132,14 +126,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "anaconda01",
-    "post_id": 1256956,
+    "post_id": 1256883,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "is_pinned": true,
       "total_votes": 0
     },
     "title": "powerful snake 01",
@@ -153,10 +146,10 @@
     "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "tell me secret 05",
+    "body": "This post should remain reblogged even though its content was replaced.",
     "category": "hive-117600",
     "children": 0,
-    "created": "2016-09-15T18:01:30",
+    "created": "2016-09-15T18:01:33",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
     "is_paidout": false,
@@ -164,25 +157,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 0,
     "payout": 0.0,
-    "payout_at": "2016-09-22T18:01:30",
+    "payout_at": "2016-09-22T18:01:33",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "secrets5",
-    "post_id": 1256848,
-    "reblogs": 0,
+    "permlink": "reblogged-and-edited",
+    "post_id": 1256786,
+    "reblogs": 1,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "is_pinned": true,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
-    "title": "I love secrets 05",
-    "updated": "2016-09-15T18:01:30",
-    "url": "/hive-117600/@test-safari/secrets5"
+    "title": "The post was edited",
+    "updated": "2016-09-15T18:01:42",
+    "url": "/hive-117600/@test-safari/reblogged-and-edited"
   }
 ]

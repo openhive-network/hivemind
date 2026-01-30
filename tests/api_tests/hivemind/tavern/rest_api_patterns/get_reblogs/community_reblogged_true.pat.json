@@ -1,62 +1,50 @@
 [
   {
-    "post_id": 1256960,
     "author": "good-karma",
     "permlink": "spider02",
+    "post_id": 1256886,
     "reblogged": false
   },
   {
-    "post_id": 1256959,
     "author": "good-karma",
     "permlink": "spider01",
+    "post_id": 1256885,
     "reblogged": false
   },
   {
-    "post_id": 1256958,
     "author": "abit",
     "permlink": "anaconda02",
+    "post_id": 1256884,
     "reblogged": false
   },
   {
-    "post_id": 1256957,
     "author": "abit",
     "permlink": "anaconda01",
+    "post_id": 1256883,
     "reblogged": false
   },
   {
-    "post_id": 1256898,
-    "author": "test-safari",
-    "permlink": "reblogged-and-recreated",
-    "reblogged": true
-  },
-  {
-    "post_id": 1256896,
-    "author": "test-safari",
-    "permlink": "muted-and-recreated",
-    "reblogged": false
-  },
-  {
-    "post_id": 1256860,
     "author": "test-safari",
     "permlink": "reblogged-and-edited",
+    "post_id": 1256786,
     "reblogged": true
   },
   {
-    "post_id": 1256858,
     "author": "test-safari",
     "permlink": "muted-and-edited",
+    "post_id": 1256784,
     "reblogged": false
   },
   {
-    "post_id": 1256855,
     "author": "test-safari",
     "permlink": "secrets5",
+    "post_id": 1256781,
     "reblogged": false
   },
   {
-    "post_id": 1256854,
     "author": "test-safari",
     "permlink": "secrets4",
+    "post_id": 1256780,
     "reblogged": false
   }
 ]

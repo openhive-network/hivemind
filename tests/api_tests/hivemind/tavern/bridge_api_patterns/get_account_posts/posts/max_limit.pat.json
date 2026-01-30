@@ -25,7 +25,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile03",
-    "post_id": 1256966,
+    "post_id": 1256892,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -64,16 +64,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile02",
-    "post_id": 1256964,
+    "post_id": 1256890,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "powerful crocodile 02",
@@ -111,16 +108,13 @@
     "pending_payout_value": "0.004 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile01",
-    "post_id": 1256963,
+    "post_id": 1256889,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 1
     },
     "title": "powerful crocodile 01",
@@ -1365,7 +1359,7 @@
     "pending_payout_value": "493.573 HBD",
     "percent_hbd": 10000,
     "permlink": "witness-report-for-blocktrades-for-last-week-of-august",
-    "post_id": 1078306,
+    "post_id": 1078240,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -2765,7 +2759,7 @@
     "pending_payout_value": "1083.292 HBD",
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
-    "post_id": 896102,
+    "post_id": 896053,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -3716,7 +3710,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-2nd-week-of-august",
-    "post_id": 769702,
+    "post_id": 769657,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -5089,7 +5083,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "how-to-buy-crypto-in-20-seconds-with-your-bitcoin-litecoin-etc",
-    "post_id": 606656,
+    "post_id": 606617,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -6299,7 +6293,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "updates-to-bitshares-withdrawal-functionality-new-release-of-bitshares-gui-wallet",
-    "post_id": 586340,
+    "post_id": 586303,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -7730,7 +7724,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "important-news-about-using-eth-and-etc-from-vitalik",
-    "post_id": 374204,
+    "post_id": 374184,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -8798,7 +8792,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "blocktrades-has-re-enabled-steem-dollars-to-bitcoin-pair",
-    "post_id": 210850,
+    "post_id": 210840,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -10319,7 +10313,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "steem-deposits-withdrawals-re-enabled-on-openledger-for-decentralized-trading",
-    "post_id": 117822,
+    "post_id": 117819,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -11462,7 +11456,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "exchange-help-how-to-reliably-broadcast-transactions",
-    "post_id": 101597,
+    "post_id": 101594,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -11882,7 +11876,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notifications-when-steem-account-receives-money-from-someone",
-    "post_id": 76090,
+    "post_id": 76087,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -12369,7 +12363,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "limited-time-sale-high-steem-power-accounts-for-serious-investors-only",
-    "post_id": 71871,
+    "post_id": 71868,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -13283,7 +13277,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "blocktrades-adds-support-for-steem-dollars-greater-than-bitcoin-and-more",
-    "post_id": 58260,
+    "post_id": 58257,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -13769,7 +13763,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "bitcoin-payments-accepted-in-20s-soon-to-be-6s",
-    "post_id": 51772,
+    "post_id": 51769,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -14267,7 +14261,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "introducing-the-latest-dollar-stable-coin-trade-usdlabor",
-    "post_id": 50564,
+    "post_id": 50561,
     "reblogs": 0,
     "replies": [],
     "stats": {
