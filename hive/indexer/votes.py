@@ -5,6 +5,7 @@ import logging
 from itertools import count
 
 from hive.conf import SCHEMA_NAME
+from hive.db.db_state import DbState
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.misc import UniqueCounter, chunks
@@ -202,12 +203,14 @@ class Votes(DbAdapterHolder):
                 )
                 actual_query = sql.format(values_str)
                 post_ids = cls.db.query_prepared_all(actual_query)
-                cls.db.query_no_return(
-                    'SELECT pg_advisory_xact_lock(777)'
-                )  # synchronise with update hive_posts in posts
-                cls.db.query_no_return(
-                    "SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)", post_ids=[id[0] for id in post_ids]
-                )
+                if not DbState.is_massive_sync():
+                    cls.db.query_no_return(
+                        'SELECT pg_advisory_xact_lock(777)'
+                    )  # synchronise with update hive_posts in posts
+                    cls.db.query_no_return(
+                        "SELECT * FROM hivemind_app.update_posts_rshares(:post_ids)",
+                        post_ids=[id[0] for id in post_ids],
+                    )
                 cls.commitTx()
 
             n = len(cls._votes_data)
