@@ -31,11 +31,8 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        2
-      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
