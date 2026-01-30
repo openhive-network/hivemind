@@ -538,6 +538,14 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_follow_counts(cls, db):
+        with AutoDbDisposer(db, "finish_follow_counts") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.recalculate_follow_counts();"
+            db_mgr.db.query_no_return(sql)
+            log.info("[MASSIVE] recalculate_follow_counts executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
         func(*args)
@@ -591,8 +599,10 @@ class DbState:
 
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
+            ('follow_counts', cls._finish_follow_counts, [cls.db()]),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
+        # Follow counts need recalculation after massive sync (deferred during flush_follows_massive)
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
