@@ -37,6 +37,8 @@ class Posts(DbAdapterHolder):
     comment_payout_ops = {}
     _comment_payout_ops = []
     _pending_comment_ops = []  # Accumulated comment ops for batch processing
+    _pending_comment_option_ops = []  # Deferred comment_options during massive sync
+    _pending_delete_ops = []  # Deferred delete_comment during massive sync
     _counter = UniqueCounter()
 
     @classmethod
@@ -45,6 +47,10 @@ class Posts(DbAdapterHolder):
 
         Also remove it from post-cache and feed-cache.
         """
+        if DbState.is_massive_sync() and cls._pending_comment_ops:
+            # Defer until after batch comment ops are flushed to DB
+            cls._pending_delete_ops.append((op, block_date))
+            return
         cls.delete(op, block_date)
 
     @classmethod
@@ -179,7 +185,26 @@ class Posts(DbAdapterHolder):
                     )
 
         cls._pending_comment_ops.clear()
+
+        # Now apply deferred ops that depend on posts existing in hive_posts
+        cls._flush_deferred_comment_options()
+        cls._flush_deferred_deletes()
+
         return n
+
+    @classmethod
+    def _flush_deferred_comment_options(cls):
+        """Apply deferred comment_options ops after batch comment creation."""
+        for op in cls._pending_comment_option_ops:
+            cls._apply_comment_options(op)
+        cls._pending_comment_option_ops.clear()
+
+    @classmethod
+    def _flush_deferred_deletes(cls):
+        """Apply deferred delete_comment ops after batch comment creation."""
+        for op, block_date in cls._pending_delete_ops:
+            cls.delete(op, block_date)
+        cls._pending_delete_ops.clear()
 
     @classmethod
     def _process_single_comment_op(cls, op, block_date, tags):
@@ -502,6 +527,15 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_options_op(cls, op):
         """Process comment_options_operation"""
+        if DbState.is_massive_sync() and cls._pending_comment_ops:
+            # Defer until after batch comment ops are flushed to DB
+            cls._pending_comment_option_ops.append(op)
+            return
+        cls._apply_comment_options(op)
+
+    @classmethod
+    def _apply_comment_options(cls, op):
+        """Apply comment_options to hive_posts (immediate SQL)."""
         max_accepted_payout = (
             legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
         )
