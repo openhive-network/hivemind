@@ -27,16 +27,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-community-135485-comment",
-    "post_id": 1256954,
+    "post_id": 1256881,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        2
-      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
@@ -71,16 +68,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-community-135485-comment",
-    "post_id": 1256953,
+    "post_id": 1256880,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        2
-      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
@@ -111,7 +105,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-monkey-01",
-    "post_id": 1256908,
+    "post_id": 1256829,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -148,7 +142,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-monkey-01",
-    "post_id": 1256907,
+    "post_id": 1256828,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -185,7 +179,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-parrot-reblog-02",
-    "post_id": 1256875,
+    "post_id": 1256788,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -222,7 +216,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-parrot-reblog-01",
-    "post_id": 1256874,
+    "post_id": 1256787,
     "reblogs": 0,
     "replies": [],
     "stats": {

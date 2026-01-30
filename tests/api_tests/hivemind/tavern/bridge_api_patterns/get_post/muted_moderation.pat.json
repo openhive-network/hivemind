@@ -24,16 +24,13 @@
   "pending_payout_value": "0.000 HBD",
   "percent_hbd": 10000,
   "permlink": "secrets1",
-  "post_id": 1256849,
+  "post_id": 1256777,
   "reblogs": 0,
   "replies": [],
   "stats": {
     "flag_weight": 0.0,
-    "gray": true,
+    "gray": false,
     "hide": false,
-    "muted_reasons": [
-      0
-    ],
     "total_votes": 0
   },
   "title": "I love secrets 01",
