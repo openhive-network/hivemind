@@ -3,6 +3,7 @@ import logging
 
 from funcy.seqs import first
 
+from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
@@ -166,9 +167,10 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
-                NotificationCache.follow_notifications_to_flush.append(
-                    (follower, following, block_num, cls._counter.increment(block_num))
-                )
+                if not NotificationCache.should_skip():
+                    NotificationCache.follow_notifications_to_flush.append(
+                        (follower, following, block_num, cls._counter.increment(block_num))
+                    )
         elif action == FollowAction.Mute:
             for following in op.get('following', []):
                 cls.muted_batches_to_flush.add_insert(follower, following, block_num)
@@ -269,9 +271,12 @@ class Follow(DbAdapterHolder):
                 f"""({n}, '{mode}', array[{','.join([f"({r},{g or 'NULL'},{b})::hivemind_app.follow_blacklist" for r,g,b in batch])}])::hivemind_app.follow_blacklist_updates"""
             )
         if follows or muted or blacklisted or follow_muted or follow_blacklisted:
+            # Use the no-count-updates version during massive sync for performance.
+            # Account follower/following counts are recalculated after massive sync.
+            proc_name = 'flush_follows_massive' if DbState.is_massive_sync() else 'flush_follows'
             cls.db.query_no_return(
                 f"""
-                CALL hivemind_app.flush_follows(
+                CALL hivemind_app.{proc_name}(
                     array[{','.join(follows)}]::hivemind_app.follow_updates[],
                     array[{','.join(muted)}]::hivemind_app.mute_updates[],
                     array[{','.join(blacklisted)}]::hivemind_app.blacklist_updates[],

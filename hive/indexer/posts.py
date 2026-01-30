@@ -21,12 +21,23 @@ from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 log = logging.getLogger(__name__)
 
 
+def _sql_str(s):
+    """Escape a string for use in SQL VALUES, wrapping in single quotes.
+
+    Handles NULL (empty string) and single-quote escaping.
+    """
+    if s is None:
+        return 'NULL'
+    return "'" + str(s).replace("'", "''") + "'"
+
+
 class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
     comment_payout_ops = {}
     _comment_payout_ops = []
     _counter = UniqueCounter()
+    _pending_comment_ops = []  # Accumulated comment ops for batch processing
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -57,6 +68,123 @@ class Posts(DbAdapterHolder):
                 if tag and isinstance(tag, str):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
+        if DbState.is_massive_sync():
+            # During massive sync, accumulate ops for batch processing
+            cls._pending_comment_ops.append((op, block_date, tags))
+            return
+
+        cls._process_single_comment_op(op, block_date, tags)
+
+    @classmethod
+    def flush_pending_comment_ops(cls):
+        """Batch-process accumulated comment ops via single SQL calls.
+
+        Called after processing all blocks in a batch, before flushing data to DB.
+        Processes ops in chunks of 1000 to keep SQL query sizes manageable.
+        Returns the number of ops processed.
+        """
+        if not cls._pending_comment_ops:
+            return 0
+
+        n = len(cls._pending_comment_ops)
+        skip_notifications = NotificationCache.should_skip()
+
+        # Process in chunks to avoid overly large SQL strings
+        for chunk_start in range(0, n, 1000):
+            chunk_end = min(chunk_start + 1000, n)
+            chunk = cls._pending_comment_ops[chunk_start:chunk_end]
+
+            ops_params = []
+            for local_idx, (op, block_date, tags) in enumerate(chunk):
+                seq_id = chunk_start + local_idx
+                ops_params.append(
+                    f"({seq_id}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
+                    f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
+                    f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
+                    f"ARRAY[{','.join(_sql_str(t) for t in tags)}]::VARCHAR[])"
+                )
+
+            sql = f"""
+                SELECT seq_id, is_new_post, id, author_id, permlink_id, post_category,
+                       parent_id, parent_author_id, community_id, is_valid, is_post_muted,
+                       depth, muted_reasons
+                FROM {SCHEMA_NAME}.process_hive_post_operations_batch(
+                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
+                )
+            """
+
+            rows = DbAdapterHolder.common_block_processing_db().query_all(sql)
+
+            for row in rows:
+                row = row._mapping
+                seq_id = row['seq_id']
+                op, block_date, tags = cls._pending_comment_ops[seq_id]
+
+                is_new_post = row['is_new_post']
+                parent_author = op.get('parent_author')
+
+                if is_new_post:
+                    post_data = dict(
+                        title=op['title'] if op['title'] else '',
+                        body=op['body'] if op['body'] else '',
+                        json=op['json_metadata'] if op['json_metadata'] else '',
+                        is_root='true' if parent_author is None or parent_author == '' else 'false',
+                    )
+                else:
+                    new_body = cls._merge_post_body(id=row['id'], new_body_def=op['body']) if op['body'] else None
+                    new_title = op['title'] if op['title'] else None
+                    new_json = op['json_metadata'] if op['json_metadata'] else None
+                    post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
+
+                PostDataCache.add_data(row['id'], post_data, is_new_post)
+
+                if row['depth'] > 0 and not skip_notifications:
+                    type_id = 12 if row['depth'] == 1 else 13
+                    key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
+                    NotificationCache.comment_notifications[key] = {
+                        "block_num": op['block_num'],
+                        "type_id": type_id,
+                        "created_at": block_date,
+                        "src": row['author_id'],
+                        "dst": row['parent_author_id'],
+                        "dst_post_id": row['parent_id'],
+                        "post_id": row['id'],
+                        'counter': cls._counter.increment(op['block_num']),
+                    }
+
+                if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post is True:
+                    muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
+                    reasons = []
+                    if 1 in muted_reasons:
+                        if row['depth'] > 0:
+                            reasons.append("community type does not allow non members to post or comment")
+                        else:
+                            reasons.append("community type does not allow non members to post")
+                    if 2 in muted_reasons:
+                        reasons.append("parent post/comment is muted")
+
+                    if len(reasons) == 1:
+                        payload = f"Post is muted because {reasons[0]}"
+                    else:
+                        payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
+
+                    Notify(
+                        block_num=op['block_num'],
+                        type_id='error',
+                        dst_id=row['author_id'],
+                        when=block_date,
+                        post_id=row['id'],
+                        payload=payload,
+                        community_id=row['community_id'],
+                        src_id=row['community_id'],
+                    )
+
+        cls._pending_comment_ops.clear()
+        return n
+
+    @classmethod
+    def _process_single_comment_op(cls, op, block_date, tags):
+        """Process a single comment operation immediately (used in live mode)."""
         sql = f"""
             SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, parent_author_id, community_id, is_valid, is_post_muted, depth, muted_reasons
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
@@ -100,9 +228,8 @@ class Posts(DbAdapterHolder):
             new_json = op['json_metadata'] if op['json_metadata'] else None
             post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
 
-        #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0:
+        if row['depth'] > 0 and not NotificationCache.should_skip():
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
             NotificationCache.comment_notifications[key] = {
