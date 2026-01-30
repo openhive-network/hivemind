@@ -526,6 +526,14 @@ class DbState:
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_posts_rshares(cls, db):
+        with AutoDbDisposer(db, "finish_posts_rshares") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.recalculate_all_posts_rshares();"
+            db_mgr.db.query_no_return(sql)
+            log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
@@ -582,6 +590,7 @@ class DbState:
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
             ),
+            ('posts_rshares', cls._finish_posts_rshares, [cls.db()]),
         ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
