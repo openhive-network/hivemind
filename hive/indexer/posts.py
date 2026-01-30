@@ -21,6 +21,16 @@ from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 log = logging.getLogger(__name__)
 
 
+def _sql_str(s):
+    """Escape a string for use in SQL VALUES, wrapping in single quotes.
+
+    Handles NULL (empty string) and single-quote escaping.
+    """
+    if s is None:
+        return 'NULL'
+    return "'" + str(s).replace("'", "''") + "'"
+
+
 class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
@@ -28,8 +38,6 @@ class Posts(DbAdapterHolder):
     _comment_payout_ops = []
     _counter = UniqueCounter()
     _pending_comment_ops = []  # Accumulated comment ops for batch processing
-    _pending_comment_option_ops = []  # Deferred comment_options during massive sync
-    _pending_delete_ops = []  # Deferred delete_comment during massive sync
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -37,10 +45,6 @@ class Posts(DbAdapterHolder):
 
         Also remove it from post-cache and feed-cache.
         """
-        if DbState.is_massive_sync() and cls._pending_comment_ops:
-            # Defer until after batch comment ops are flushed to DB
-            cls._pending_delete_ops.append((op, block_date))
-            return
         cls.delete(op, block_date)
 
     @classmethod
@@ -83,29 +87,21 @@ class Posts(DbAdapterHolder):
             return 0
 
         n = len(cls._pending_comment_ops)
+        skip_notifications = NotificationCache.should_skip()
 
         # Process in chunks to avoid overly large SQL strings
         for chunk_start in range(0, n, 1000):
             chunk_end = min(chunk_start + 1000, n)
             chunk = cls._pending_comment_ops[chunk_start:chunk_end]
 
-            placeholders = []
-            params = []
+            ops_params = []
             for local_idx, (op, block_date, tags) in enumerate(chunk):
                 seq_id = chunk_start + local_idx
-                placeholders.append("(%s, %s, %s, %s, %s, %s::timestamp, %s, %s, %s::VARCHAR[])")
-                params.extend(
-                    [
-                        seq_id,
-                        op['author'],
-                        op['permlink'],
-                        op['parent_author'],
-                        op['parent_permlink'],
-                        str(block_date),
-                        Community.start_block,
-                        op['block_num'],
-                        tags,
-                    ]
+                ops_params.append(
+                    f"({seq_id}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
+                    f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
+                    f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
+                    f"ARRAY[{','.join(_sql_str(t) for t in tags)}]::VARCHAR[])"
                 )
 
             sql = f"""
@@ -113,11 +109,11 @@ class Posts(DbAdapterHolder):
                        parent_id, parent_author_id, community_id, is_valid, is_post_muted,
                        depth, muted_reasons
                 FROM {SCHEMA_NAME}.process_hive_post_operations_batch(
-                    ARRAY[{','.join(placeholders)}]::{SCHEMA_NAME}.hive_post_op_input[]
+                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
                 )
             """
 
-            rows = DbAdapterHolder.common_block_processing_db().query_all_raw(sql, tuple(params))
+            rows = DbAdapterHolder.common_block_processing_db().query_all(sql)
 
             for row in rows:
                 row = row._mapping
@@ -142,7 +138,7 @@ class Posts(DbAdapterHolder):
 
                 PostDataCache.add_data(row['id'], post_data, is_new_post)
 
-                if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
+                if row['depth'] > 0 and not skip_notifications:
                     type_id = 12 if row['depth'] == 1 else 13
                     key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
                     NotificationCache.comment_notifications[key] = {
@@ -184,123 +180,7 @@ class Posts(DbAdapterHolder):
                     )
 
         cls._pending_comment_ops.clear()
-
-        # Now apply deferred ops that depend on posts existing in hive_posts
-        cls._flush_deferred_comment_options()
-        cls._flush_deferred_deletes()
-
         return n
-
-    @classmethod
-    def _flush_deferred_comment_options(cls):
-        """Apply deferred comment_options ops after batch comment creation.
-
-        Uses a single UPDATE...FROM (VALUES...) query per chunk instead of
-        one query per op, matching the pattern used by flush_into_db().
-        """
-        if not cls._pending_comment_option_ops:
-            return
-
-        # Pre-process ops: extract beneficiaries and build values
-        processed = []
-        for op in cls._pending_comment_option_ops:
-            max_accepted_payout = (
-                legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
-            )
-            allow_votes = op['allow_votes'] if 'allow_votes' in op else True
-            allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
-            percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
-            extensions = op['extensions'] if 'extensions' in op else []
-            beneficiaries = []
-            for ex in extensions:
-                if 'type' in ex and ex['type'] == 'comment_payout_beneficiaries' and 'beneficiaries' in ex['value']:
-                    beneficiaries = ex['value']['beneficiaries']
-            processed.append(
-                (
-                    op['author'],
-                    op['permlink'],
-                    max_accepted_payout,
-                    percent_hbd,
-                    allow_votes,
-                    allow_curation_rewards,
-                    dumps(beneficiaries),
-                )
-            )
-
-        db = DbAdapterHolder.common_block_processing_db()
-        for chunk in chunks(processed, 1000):
-            placeholders = []
-            params = []
-            for author, permlink, max_payout, pct_hbd, allow_v, allow_cr, benef in chunk:
-                placeholders.append("(%s, %s, %s, %s, %s, %s, %s::json)")
-                params.extend([author, permlink, max_payout, pct_hbd, allow_v, allow_cr, benef])
-
-            sql = f"""
-                UPDATE {SCHEMA_NAME}.hive_posts AS hp SET
-                    max_accepted_payout = data_source.max_accepted_payout,
-                    percent_hbd = data_source.percent_hbd,
-                    allow_votes = data_source.allow_votes,
-                    allow_curation_rewards = data_source.allow_curation_rewards,
-                    beneficiaries = data_source.beneficiaries
-                FROM (
-                    SELECT ha.id AS author_id, hpd.id AS permlink_id,
-                           t.max_accepted_payout, t.percent_hbd, t.allow_votes,
-                           t.allow_curation_rewards, t.beneficiaries
-                    FROM (VALUES {','.join(placeholders)}) AS t(author, permlink, max_accepted_payout,
-                                            percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
-                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.name = t.author
-                    INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
-                ) AS data_source
-                WHERE hp.author_id = data_source.author_id
-                  AND hp.permlink_id = data_source.permlink_id
-                  AND hp.counter_deleted = 0
-            """
-            db.query_no_return_raw(sql, tuple(params))
-
-        cls._pending_comment_option_ops.clear()
-
-    @classmethod
-    def _flush_deferred_deletes(cls):
-        """Apply deferred delete_comment ops after batch comment creation.
-
-        Uses a single CTE-based batch query instead of one delete per op.
-        Deduplicates by author/permlink, keeping only the last delete per pair
-        (to ensure counter_deleted is computed correctly).
-        Votes.drop_votes_of_deleted_comment() must remain in Python since it
-        mutates the in-memory votes dict.
-        """
-        if not cls._pending_delete_ops:
-            return
-
-        # Deduplicate: keep only the last delete per author/permlink
-        seen = {}
-        for idx, (op, block_date) in enumerate(cls._pending_delete_ops):
-            key = (op['author'], op['permlink'])
-            seen[key] = (idx, op, block_date)
-
-        deduped = sorted(seen.values(), key=lambda x: x[0])
-
-        db = DbAdapterHolder.common_block_processing_db()
-        for chunk in chunks(deduped, 1000):
-            placeholders = []
-            params = []
-            for seq_id_local, (_orig_idx, op, block_date) in enumerate(chunk):
-                placeholders.append("(%s, %s, %s, %s, %s::timestamp)")
-                params.extend([seq_id_local, op['author'], op['permlink'], op['block_num'], str(block_date)])
-
-            sql = f"""
-                SELECT seq_id, author, permlink
-                FROM {SCHEMA_NAME}.delete_hive_posts_batch(
-                    ARRAY[{','.join(placeholders)}]::{SCHEMA_NAME}.delete_post_input[]
-                )
-            """
-            rows = db.query_all_raw(sql, tuple(params))
-
-            for row in rows:
-                row = row._mapping
-                Votes.drop_votes_of_deleted_comment({'author': row['author'], 'permlink': row['permlink']})
-
-        cls._pending_delete_ops.clear()
 
     @classmethod
     def _process_single_comment_op(cls, op, block_date, tags):
@@ -349,7 +229,7 @@ class Posts(DbAdapterHolder):
             post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
 
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
+        if row['depth'] > 0 and not NotificationCache.should_skip():
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
             NotificationCache.comment_notifications[key] = {
@@ -466,10 +346,9 @@ class Posts(DbAdapterHolder):
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()
 
-            if not DbState.is_massive_sync():
-                cls.db.query_no_return(
-                    'SELECT pg_advisory_xact_lock(777)'
-                )  # synchronise with update_posts_rshares in votes
+            cls.db.query_no_return(
+                'SELECT pg_advisory_xact_lock(777)'
+            )  # synchronise with update_posts_rshares in votes
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
@@ -623,15 +502,6 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_options_op(cls, op):
         """Process comment_options_operation"""
-        if DbState.is_massive_sync() and cls._pending_comment_ops:
-            # Defer until after batch comment ops are flushed to DB
-            cls._pending_comment_option_ops.append(op)
-            return
-        cls._apply_comment_options(op)
-
-    @classmethod
-    def _apply_comment_options(cls, op):
-        """Apply comment_options to hive_posts (immediate SQL)."""
         max_accepted_payout = (
             legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
         )
