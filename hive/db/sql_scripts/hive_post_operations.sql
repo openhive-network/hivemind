@@ -349,6 +349,66 @@ END
 $function$
 ;
 
+DROP TYPE IF EXISTS hivemind_app.hive_post_op_input CASCADE;
+CREATE TYPE hivemind_app.hive_post_op_input AS (
+    seq_id INTEGER,
+    author VARCHAR,
+    permlink VARCHAR,
+    parent_author VARCHAR,
+    parent_permlink VARCHAR,
+    date TIMESTAMP,
+    community_support_start_block INTEGER,
+    block_num INTEGER,
+    metadata_tags VARCHAR[]
+);
+
+DROP TYPE IF EXISTS hivemind_app.hive_post_op_result CASCADE;
+CREATE TYPE hivemind_app.hive_post_op_result AS (
+    seq_id INTEGER,
+    is_new_post BOOLEAN,
+    id INTEGER,
+    author_id INTEGER,
+    permlink_id INTEGER,
+    post_category VARCHAR,
+    parent_id INTEGER,
+    parent_author_id INTEGER,
+    community_id INTEGER,
+    is_valid BOOLEAN,
+    is_post_muted BOOLEAN,
+    depth SMALLINT,
+    muted_reasons INTEGER
+);
+
+DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_operations_batch;
+CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operations_batch(
+    _ops hivemind_app.hive_post_op_input[]
+)
+RETURNS SETOF hivemind_app.hive_post_op_result
+LANGUAGE plpgsql
+AS
+$function$
+DECLARE
+    _op hivemind_app.hive_post_op_input;
+    _row RECORD;
+BEGIN
+    FOREACH _op IN ARRAY _ops
+    LOOP
+        FOR _row IN
+            SELECT * FROM hivemind_app.process_hive_post_operation(
+                _op.author, _op.permlink, _op.parent_author, _op.parent_permlink,
+                _op.date, _op.community_support_start_block, _op.block_num, _op.metadata_tags
+            )
+        LOOP
+            RETURN NEXT ROW(
+                _op.seq_id, _row.is_new_post, _row.id, _row.author_id, _row.permlink_id,
+                _row.post_category, _row.parent_id, _row.parent_author_id, _row.community_id,
+                _row.is_valid, _row.is_post_muted, _row.depth, _row.muted_reasons
+            )::hivemind_app.hive_post_op_result;
+        END LOOP;
+    END LOOP;
+END
+$function$;
+
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
 CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
 RETURNS SETOF BIGINT

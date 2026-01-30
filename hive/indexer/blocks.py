@@ -195,6 +195,8 @@ class Blocks:
         first_block, last_num = cls.process_blocks(blocks)
 
         if is_massive_sync:
+            # Batch-process accumulated comment operations in a single SQL call
+            Posts.flush_pending_comment_ops()
             DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
 
         if not is_massive_sync:

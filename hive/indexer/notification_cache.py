@@ -25,6 +25,23 @@ class NotificationCache(DbAdapterHolder):
     follow_notifications_to_flush = []
     reblog_notifications_to_flush = collections.OrderedDict()
 
+    _skip_accumulation = False
+
+    @classmethod
+    def set_skip_accumulation(cls, skip):
+        """Enable/disable skipping notification cache accumulation.
+
+        During MASSIVE_WITHOUT_INDEXES, notifications are skipped because all blocks
+        are far below the 90-day irreversible threshold and would never be flushed.
+        Re-enabled when transitioning to MASSIVE_WITH_INDEXES or live mode.
+        """
+        cls._skip_accumulation = skip
+
+    @classmethod
+    def should_skip(cls):
+        """Check if notification accumulation should be skipped."""
+        return cls._skip_accumulation
+
     @classmethod
     def notification_first_block(cls, db):
         if cls._notification_first_block is None:

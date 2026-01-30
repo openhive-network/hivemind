@@ -57,14 +57,15 @@ class Reblog(DbAdapterHolder):
             cls.delete(op['author'], op['permlink'], op['account'])
         else:
             cls.reblog_items_to_flush[key] = {'op': op}
-            NotificationCache.reblog_notifications_to_flush[key] = {
-                "block_num": block_num,
-                "created_at": block_date,
-                "src": op['account'],
-                "dst": op['author'],
-                "permlink": op['permlink'],
-                'counter': cls._counter.increment(block_num),
-            }
+            if not NotificationCache.should_skip():
+                NotificationCache.reblog_notifications_to_flush[key] = {
+                    "block_num": block_num,
+                    "created_at": block_date,
+                    "src": op['account'],
+                    "dst": op['author'],
+                    "permlink": op['permlink'],
+                    'counter': cls._counter.increment(block_num),
+                }
 
     @classmethod
     def delete(cls, author, permlink, account):
