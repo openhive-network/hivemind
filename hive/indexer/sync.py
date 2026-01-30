@@ -284,9 +284,9 @@ class SyncHiveDb:
         if not DbLiveContextHolder.is_live_context():
             DbLiveContextHolder.set_live_context(True)
             Blocks.close_own_db_access()
-            # Get the expected baseline after closing massive sync connections
-            # (should only have hivemind_root remaining)
-            active_connections_before = self._get_active_db_connections()
+            # Wait for pg_stat_activity to reflect closed connections before
+            # establishing baseline (see hivemind issue #207)
+            active_connections_before = self._wait_for_stable_connections()
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
         Blocks.process_multi(blocks, is_massive_sync=False)
@@ -499,21 +499,24 @@ class SyncHiveDb:
 
         assert set(connections_before) == set(connections_after), assert_message
 
-    def _wait_for_connections_closed(self, connections_before: Iterable) -> None:
-        active_connections = []
-        for it in range(1, 11):
-            active_connections = self._get_active_db_connections()
-            if set(connections_before) == set(active_connections):
-                return
+    def _wait_for_stable_connections(self, timeout_seconds: float = 1.0) -> list:
+        """Poll pg_stat_activity until connection state stabilizes.
 
-            log.info(
-                f'Some db connections used in '
-                f'{"LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE"} sync were not closed!\n'
-                f'before: {connections_before}\n'
-                f'after: {active_connections}\n'
-                f'try: {it}'
-            )
+        After closing connections, pg_stat_activity may briefly show stale entries.
+        Waits until two consecutive reads agree, then returns the stable snapshot.
+        """
+        previous = self._get_active_db_connections()
+        interval = 0.1
+        elapsed = 0.0
 
-            time.sleep(0.1)
+        while elapsed < timeout_seconds:
+            time.sleep(interval)
+            elapsed += interval
+            current = self._get_active_db_connections()
+            if set(current) == set(previous):
+                return current
+            log.info(f'Waiting for pg_stat_activity to stabilize ' f'(elapsed: {elapsed:.1f}s): {current}')
+            previous = current
 
-        self._assert_connections_closed(connections_before, active_connections)
+        log.warning(f'pg_stat_activity did not stabilize within {timeout_seconds}s, using last snapshot: {previous}')
+        return previous
