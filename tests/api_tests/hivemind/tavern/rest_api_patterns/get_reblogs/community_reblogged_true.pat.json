@@ -21,16 +21,6 @@
   },
   {
     "author": "test-safari",
-    "permlink": "reblogged-and-recreated",
-    "reblogged": true
-  },
-  {
-    "author": "test-safari",
-    "permlink": "muted-and-recreated",
-    "reblogged": false
-  },
-  {
-    "author": "test-safari",
     "permlink": "reblogged-and-edited",
     "reblogged": true
   },
