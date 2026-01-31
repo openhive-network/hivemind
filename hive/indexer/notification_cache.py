@@ -57,10 +57,10 @@ class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
     @classmethod
-    def flush_vote_notifications(cls):
+    def flush_vote_notifications(cls, force=False):
         from hive.db.db_state import DbState
 
-        if DbState.is_massive_sync():
+        if not force and DbState.is_massive_sync():
             return 0  # Defer to finalization; keep accumulated data
 
         n = len(cls.vote_notifications)

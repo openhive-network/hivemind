@@ -26,3 +26,4 @@
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
             ignore_tags: "<notification details>"
+            allow_null_response: true
