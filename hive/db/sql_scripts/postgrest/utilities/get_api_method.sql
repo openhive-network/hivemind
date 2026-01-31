@@ -117,6 +117,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_payout_stats(__params);
     WHEN __method_type = 'get_account_posts' THEN
       result := hivemind_endpoints.bridge_api_get_account_posts(__params);
+    WHEN __method_type = 'get_account_posts_by_tag' THEN
+      result := hivemind_endpoints.bridge_api_get_account_posts_by_tag(__params);
     WHEN __method_type = 'get_relationship_between_accounts' THEN
       result := hivemind_endpoints.bridge_api_get_relationship_between_accounts(__params);
     WHEN __method_type = 'unread_notifications' THEN
