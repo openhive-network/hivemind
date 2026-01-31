@@ -34,8 +34,15 @@ class NotificationCache(DbAdapterHolder):
         During MASSIVE_WITHOUT_INDEXES, notifications are skipped because all blocks
         are far below the 90-day irreversible threshold and would never be flushed.
         Re-enabled when transitioning to MASSIVE_WITH_INDEXES or live mode.
+
+        Resets cached block thresholds on every transition so they are
+        recalculated fresh, preventing stale values during long syncs.
         """
         cls._skip_accumulation = skip
+        cls._notification_first_block = None
+        from hive.indexer.votes import Votes
+
+        Votes._notification_min_block = None
 
     @classmethod
     def should_skip(cls):
