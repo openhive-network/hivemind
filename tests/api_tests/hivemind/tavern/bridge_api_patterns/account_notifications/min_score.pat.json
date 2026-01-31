@@ -1,45 +1,5 @@
 [
   {
-    "date": "2016-09-15T19:41:33",
-    "id": "4062312478539778",
-    "msg": "@nippel66 voted on your post ($0.03)",
-    "score": 25,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T18:57:51",
-    "id": "4061608640774148",
-    "msg": "@edgeland voted on your post ($0.28)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T18:56:51",
-    "id": "4061592513675265",
-    "msg": "@kurtbeil replied to your post",
-    "score": 50,
-    "type": "reply",
-    "url": "@kurtbeil/re-richman-if-you-want-to-lose-a-friend-lend-him-money-my-life-story-20160915t185552409z"
-  },
-  {
-    "date": "2016-09-15T18:36:15",
-    "id": "4061260740034561",
-    "msg": "@pjheinz followed you",
-    "score": 54,
-    "type": "follow",
-    "url": "@pjheinz"
-  },
-  {
-    "date": "2016-09-15T18:09:45",
-    "id": "4060833919270913",
-    "msg": "@honeyscribe replied to your comment",
-    "score": 58,
-    "type": "reply_comment",
-    "url": "@honeyscribe/re-richman-re-honeyscribe-persisting-in-the-face-of-adversity-20160915t180944939z"
-  },
-  {
     "date": "2016-09-15T17:53:48",
     "id": "4060577039122435",
     "msg": "@curie mentioned you and 150 others",
@@ -48,115 +8,155 @@
     "url": "@curie/the-daily-curie-14th-sept-15th-sept-2016"
   },
   {
-    "date": "2016-09-15T17:38:42",
-    "id": "4060333840793604",
-    "msg": "@danknugs voted on your post ($0.02)",
-    "score": 25,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-15T13:32:54",
+    "id": "4056374950494209",
+    "msg": "@b0y2k mentioned you and 0 others",
+    "score": 59,
+    "type": "mention",
+    "url": "@b0y2k/re-richman-if-you-want-to-lose-a-friend-lend-him-money-my-life-story-20160915t133255048z"
   },
   {
-    "date": "2016-09-15T17:26:21",
-    "id": "4060134913343491",
-    "msg": "@burmik123 replied to your comment",
+    "date": "2016-09-15T10:10:06",
+    "id": "4053108627865640",
+    "msg": "@masteryoda mentioned you and 120 others",
+    "score": 63,
+    "type": "mention",
+    "url": "@masteryoda/weekly-payouts-leaderboards-september-week-2"
+  },
+  {
+    "date": "2016-09-14T11:16:27",
+    "id": "4030984446017537",
+    "msg": "@mindhunter mentioned you and 0 others",
+    "score": 51,
+    "type": "mention",
+    "url": "@mindhunter/re-mindhunter-re-richman-re-mindhunter-the-stealing-and-re-posting-of-steemit-ideas-by-certain-members-of-this-community-with-higher-reputations-20160914t111623477z"
+  },
+  {
+    "date": "2016-09-14T00:25:57",
+    "id": "4020507410169873",
+    "msg": "@masteryoda mentioned you and 61 others",
+    "score": 63,
+    "type": "mention",
+    "url": "@masteryoda/daily-payouts-leaderboards-september-13"
+  },
+  {
+    "date": "2016-09-13T13:32:21",
+    "id": "4009980445327361",
+    "msg": "@storyseeker mentioned you and 0 others",
+    "score": 54,
+    "type": "mention",
+    "url": "@storyseeker/re-richman-re-storyseeker-the-girl-who-saw-upside-down-a-drawing-with-digital-color-20160913t133220983z"
+  },
+  {
+    "date": "2016-09-13T11:27:09",
+    "id": "4007963958181889",
+    "msg": "@shadowspub mentioned you and 0 others",
+    "score": 50,
+    "type": "mention",
+    "url": "@shadowspub/re-richman-believe-in-yourself-and-step-out-of-the-worry-hole-featuring-alwayzgame-as-author-20160913t112704077z"
+  },
+  {
+    "date": "2016-09-13T10:48:21",
+    "id": "4007339040440321",
+    "msg": "@shadowspub mentioned you and 6 others",
+    "score": 50,
+    "type": "mention",
+    "url": "@shadowspub/monday-ramble-through-steem-notes-on-my-favourite-reads-sept-12th"
+  },
+  {
+    "date": "2016-09-13T07:36:03",
+    "id": "4004241832148993",
+    "msg": "@nekromarinist mentioned you and 0 others",
+    "score": 55,
+    "type": "mention",
+    "url": "@nekromarinist/re-richman-re-nekromarinist-mysterious-yohannisdahl-ghost-town-of-ingermanlandia-zagadochnyi-iokhannesdal-ischeznuvshii-gorod-ingermanlandii-20160913t073602054z"
+  },
+  {
+    "date": "2016-09-12T20:26:21",
+    "id": "3993455558656001",
+    "msg": "@richardcrill mentioned you and 1 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@richardcrill/re-richman-shred-of-hope-original-story-exclusive-for-steemit-featuring-mindfreak-20160912t202620776z"
+  },
+  {
+    "date": "2016-09-12T09:11:09",
+    "id": "3982580701462529",
+    "msg": "@alwayzgame mentioned you and 1 others",
+    "score": 49,
+    "type": "mention",
+    "url": "@alwayzgame/re-richman-re-funnyman-re-richman-believe-in-yourself-and-step-out-of-the-worry-hole-featuring-alwayzgame-as-author-20160912t091109060z"
+  },
+  {
+    "date": "2016-09-12T09:10:12",
+    "id": "3982565400641537",
+    "msg": "@alwayzgame mentioned you and 0 others",
+    "score": 49,
+    "type": "mention",
+    "url": "@alwayzgame/re-richman-believe-in-yourself-and-step-out-of-the-worry-hole-featuring-alwayzgame-as-author-20160912t091012927z"
+  },
+  {
+    "date": "2016-09-12T09:02:27",
+    "id": "3982440578154497",
+    "msg": "@funnyman mentioned you and 1 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@funnyman/re-richman-believe-in-yourself-and-step-out-of-the-worry-hole-featuring-alwayzgame-as-author-20160912t085338287z"
+  },
+  {
+    "date": "2016-09-11T20:13:24",
+    "id": "3970054160908289",
+    "msg": "@andrewawerdna mentioned you and 0 others",
     "score": 48,
-    "type": "reply_comment",
-    "url": "@burmik123/re-richman-re-gavvet-title-steel-monsters-tank-destroyers-of-ww-ii-eng-ua-featuring-burmik123-as-author-20160915t172620045z"
+    "type": "mention",
+    "url": "@andrewawerdna/re-iceet-re-richman-one-man-s-war-the-incredible-story-of-lieutenant-hiroo-onoda-featuring-andrewawerdna-as-author-20160911t201323169z"
   },
   {
-    "date": "2016-09-15T17:07:33",
-    "id": "4059832134926341",
-    "msg": "@thecurator voted on your post ($0.03)",
-    "score": 25,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-11T09:33:42",
+    "id": "3959751071236097",
+    "msg": "@ansharphoto mentioned you and 0 others",
+    "score": 51,
+    "type": "mention",
+    "url": "@ansharphoto/re-richman-re-ansharphoto-san-giacomo-di-rialto-square-venice-20160911t093341973z"
   },
   {
-    "date": "2016-09-15T17:06:42",
-    "id": "4059818423746562",
-    "msg": "@honeyscribe replied to your post",
-    "score": 58,
-    "type": "reply",
-    "url": "@honeyscribe/re-richman-if-you-want-to-lose-a-friend-lend-him-money-my-life-story-20160915t170643586z"
+    "date": "2016-09-11T08:32:00",
+    "id": "3958757323177997",
+    "msg": "@furion mentioned you and 45 others",
+    "score": 57,
+    "type": "mention",
+    "url": "@furion/a-quick-look-at-null-and-the-profitability-of-promoted-posts"
   },
   {
-    "date": "2016-09-15T17:06:03",
-    "id": "4059807975735299",
-    "msg": "@honeyscribe voted on your post ($0.03)",
-    "score": 25,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-11T00:30:27",
+    "id": "3951001417547801",
+    "msg": "@masteryoda mentioned you and 59 others",
+    "score": 63,
+    "type": "mention",
+    "url": "@masteryoda/daily-payouts-leaderboards-september-10"
   },
   {
-    "date": "2016-09-15T16:45:03",
-    "id": "4059469747060738",
-    "msg": "@ozchartart voted on your post ($0.48)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-10T21:44:21",
+    "id": "3948326189793281",
+    "msg": "@linkback-bot-v0 mentioned you and 1 others",
+    "score": 42,
+    "type": "mention",
+    "url": "@linkback-bot-v0/re-lifeisawesome-when-something-is-out-of-your-control-acceptance-linkbacks"
   },
   {
-    "date": "2016-09-15T16:44:36",
-    "id": "4059462499303429",
-    "msg": "@ozmaster voted on your post ($0.31)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-10T05:56:54",
+    "id": "3933066439426049",
+    "msg": "@kommienezuspadt mentioned you and 0 others",
+    "score": 54,
+    "type": "mention",
+    "url": "@kommienezuspadt/re-richman-re-kommienezuspadt-lady-death-started-following-you-20160910t055653964z"
   },
   {
-    "date": "2016-09-15T16:22:12",
-    "id": "4059101722050565",
-    "msg": "@nextgenwitness voted on your post ($0.14)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:22:09",
-    "id": "4059100916744197",
-    "msg": "@steemservices voted on your post ($0.32)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:22:06",
-    "id": "4059100111437830",
-    "msg": "@justin voted on your post ($0.46)",
-    "score": 50,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:22:03",
-    "id": "4059099306131460",
-    "msg": "@berniesanders voted on your post ($18.73)",
-    "score": 100,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:22:00",
-    "id": "4059098500825093",
-    "msg": "@nextgencrypto voted on your post ($3.64)",
-    "score": 75,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:21:57",
-    "id": "4059097695518724",
-    "msg": "@thedarkestplum voted on your post ($0.06)",
-    "score": 25,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
-  },
-  {
-    "date": "2016-09-15T16:21:57",
-    "id": "4059097695518723",
-    "msg": "@silversteem voted on your post ($3.09)",
-    "score": 75,
-    "type": "vote",
-    "url": "@richman/if-you-want-to-lose-a-friend-lend-him-money-my-life-story"
+    "date": "2016-09-08T04:44:03",
+    "id": "3885507461251110",
+    "msg": "@masteryoda mentioned you and 123 others",
+    "score": 63,
+    "type": "mention",
+    "url": "@masteryoda/weekly-payouts-leaderboards-september-week-1"
   }
 ]
