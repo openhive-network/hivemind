@@ -542,6 +542,14 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_vote_notifications(cls, db):
+        from hive.indexer.notification_cache import VoteNotificationCache
+
+        time_start = perf_counter()
+        n = VoteNotificationCache.flush_vote_notifications(force=True)
+        log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
+
+    @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
         func(*args)
@@ -596,6 +604,7 @@ class DbState:
 
         methods = [
             ('notification_cache', cls._finish_notification_cache, [cls.db()]),
+            ('vote_notifications', cls._finish_vote_notifications, [cls.db()]),
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)

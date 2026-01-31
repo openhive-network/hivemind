@@ -57,7 +57,10 @@ class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
     @classmethod
-    def flush_vote_notifications(cls):
+    def flush_vote_notifications(cls, force=False):
+        if not force and cls.should_skip():
+            return 0  # Defer to finalization; keep accumulated data
+
         n = len(cls.vote_notifications)
         max_block_num = max(n["block_num"] for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items())
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
