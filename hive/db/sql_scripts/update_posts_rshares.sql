@@ -86,7 +86,13 @@ SET LOCAL work_mem='4GB';
       GROUP BY hv.post_id
     ) as votes_rshares
   WHERE hp.id = votes_rshares.post_id
-  AND hp.counter_deleted = 0;
+  AND hp.counter_deleted = 0
+  AND (
+    hp.abs_rshares != votes_rshares.abs_rshares
+    OR hp.vote_rshares != votes_rshares.rshares
+    OR hp.total_votes != votes_rshares.total_votes
+    OR hp.net_votes != votes_rshares.net_votes
+  );
 
 RESET work_mem;
 
