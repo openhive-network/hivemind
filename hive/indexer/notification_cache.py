@@ -57,15 +57,17 @@ class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
     @classmethod
-    def flush_vote_notifications(cls, force=False):
+    def flush_vote_notifications(cls, force=False, db=None):
         from hive.db.db_state import DbState
 
         if not force and DbState.is_massive_sync():
             return 0  # Defer to finalization; keep accumulated data
 
+        _db = db or cls.db
+
         n = len(cls.vote_notifications)
         max_block_num = max(n["block_num"] for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items())
-        if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
+        if n > 0 and max_block_num > NotificationCache.notification_first_block(_db):
             sql = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -105,13 +107,13 @@ class VoteNotificationCache(NotificationCache):
                 ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
             """
             for chunk in chunks(cls.vote_notifications, 1000):
-                cls.beginTx()
+                _db.query("START TRANSACTION")
                 values_str = ",".join(
                     f"({n['block_num']}, {escape_characters(n['voter'])}, {escape_characters(n['author'])}, {escape_characters(n['permlink'])}, {escape_characters(n['last_update'])}::timestamp, {n['rshares']}, {n['counter']})"
                     for k, n in chunk.items()
                 )
-                cls.db.query_prepared(sql.format(values_str))
-                cls.commitTx()
+                _db.query_prepared(sql.format(values_str))
+                _db.query("COMMIT")
         else:
             n = 0
         cls.vote_notifications.clear()

@@ -545,9 +545,10 @@ class DbState:
     def _finish_vote_notifications(cls, db):
         from hive.indexer.notification_cache import VoteNotificationCache
 
-        time_start = perf_counter()
-        n = VoteNotificationCache.flush_vote_notifications(force=True)
-        log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
+        with AutoDbDisposer(db, "finish_vote_notifications") as db_mgr:
+            time_start = perf_counter()
+            n = VoteNotificationCache.flush_vote_notifications(force=True, db=db_mgr.db)
+            log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
 
     @classmethod
     def time_collector(cls, func, args):
