@@ -1,1 +1,10 @@
-null
+[
+  {
+    "date": "2016-09-10T07:34:30",
+    "id": "3934638401650691",
+    "msg": "@ekitcho voted on your post ($0.08)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  }
+]
