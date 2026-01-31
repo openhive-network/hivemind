@@ -58,6 +58,11 @@ class VoteNotificationCache(NotificationCache):
 
     @classmethod
     def flush_vote_notifications(cls):
+        from hive.db.db_state import DbState
+
+        if DbState.is_massive_sync():
+            return 0  # Defer to finalization; keep accumulated data
+
         n = len(cls.vote_notifications)
         max_block_num = max(n["block_num"] for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items())
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
