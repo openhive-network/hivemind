@@ -20,8 +20,25 @@ class Votes(DbAdapterHolder):
     _votes_data = collections.OrderedDict()
     _votes_per_post = {}
     _counter = UniqueCounter()
+    _notification_min_block = None
 
     inside_flush = False
+
+    @classmethod
+    def _should_accumulate_vote_notification(cls, block_num):
+        """Check if a vote at this block should accumulate a notification.
+
+        During massive sync, P8 skips all notification accumulation. But vote
+        notifications need to be accumulated regardless of sync stage so they
+        can be flushed at finalization with correct rshares. We limit to the
+        90-day notification window to bound memory usage.
+        """
+        if not NotificationCache.should_skip():
+            return True  # Normal mode or MASSIVE_WITH_INDEXES: accumulate all
+        # During MASSIVE_WITHOUT_INDEXES: only accumulate for recent blocks
+        if cls._notification_min_block is None:
+            cls._notification_min_block = NotificationCache.notification_first_block(NotificationCache.db)
+        return block_num > cls._notification_min_block
 
     @classmethod
     def vote_op(cls, vote_operation, date):
@@ -39,12 +56,12 @@ class Votes(DbAdapterHolder):
         post_key = f"{author}/{permlink}"
         key = f"{voter}/{post_key}"
 
-        skip_notifications = NotificationCache.should_skip()
+        accumulate_vote_notif = cls._should_accumulate_vote_notification(block_num)
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]
             vote_data["vote_percent"] = weight
             vote_data["last_update"] = date
-            if not skip_notifications:
+            if accumulate_vote_notif and key in NotificationCache.vote_notifications:
                 n = NotificationCache.vote_notifications[key]
                 n['last_update'] = date
                 n['block_num'] = block_num
@@ -66,7 +83,7 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=block_num,
             )
-            if not skip_notifications:
+            if accumulate_vote_notif:
                 NotificationCache.vote_notifications[key] = {
                     'block_num': block_num,
                     'voter': voter,
@@ -87,12 +104,10 @@ class Votes(DbAdapterHolder):
         # database_api.list_votes so it is not entirely inconsequential)
         post_key = f"{comment_delete_operation['author']}/{comment_delete_operation['permlink']}"
         if post_key in cls._votes_per_post:
-            skip_notifications = NotificationCache.should_skip()
             for voter in cls._votes_per_post[post_key]:
                 key = f"{voter}/{post_key}"
                 del cls._votes_data[key]
-                if not skip_notifications:
-                    del NotificationCache.vote_notifications[key]
+                NotificationCache.vote_notifications.pop(key, None)
             del cls._votes_per_post[post_key]
 
     @classmethod
@@ -103,7 +118,7 @@ class Votes(DbAdapterHolder):
         post_key = f"{vop['author']}/{vop['permlink']}"
         key = f"{vop['voter']}/{post_key}"
 
-        skip_notifications = NotificationCache.should_skip()
+        accumulate_vote_notif = cls._should_accumulate_vote_notification(block_num)
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]
             vote_data["weight"] = vop["weight"]
@@ -111,7 +126,7 @@ class Votes(DbAdapterHolder):
             vote_data["is_effective"] = True
             vote_data["num_changes"] += 1
             vote_data["block_num"] = block_num
-            if not skip_notifications:
+            if accumulate_vote_notif and key in NotificationCache.vote_notifications:
                 n = NotificationCache.vote_notifications[key]
                 n['rshares'] = vop["rshares"]
                 n['block_num'] = block_num
@@ -132,7 +147,7 @@ class Votes(DbAdapterHolder):
                 num_changes=0,
                 block_num=block_num,
             )
-            if not skip_notifications:
+            if accumulate_vote_notif:
                 NotificationCache.vote_notifications[key] = {
                     'block_num': block_num,
                     'voter': vop["voter"],
