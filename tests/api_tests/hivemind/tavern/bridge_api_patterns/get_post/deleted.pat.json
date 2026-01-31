@@ -1,9 +1,5 @@
 {
-  "error": {
-    "code": -31999,
-    "data": "Post testing001/testing6 was deleted 1 time(s)",
-    "message": "Invalid parameters"
-  },
-  "id": "1",
-  "jsonrpc": "2.0"
+  "code": -31999,
+  "data": "Post testing001/testing6 was deleted 1 time(s)",
+  "message": "Invalid parameters"
 }
