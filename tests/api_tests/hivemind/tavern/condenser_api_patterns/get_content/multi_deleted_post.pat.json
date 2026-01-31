@@ -1,9 +1,5 @@
 {
-  "error": {
-    "code": -31999,
-    "data": "Post murdock1/test1 was deleted 2 time(s)",
-    "message": "Invalid parameters"
-  },
-  "id": "1",
-  "jsonrpc": "2.0"
+  "code": -31999,
+  "data": "Post murdock1/test1 was deleted 2 time(s)",
+  "message": "Invalid parameters"
 }
