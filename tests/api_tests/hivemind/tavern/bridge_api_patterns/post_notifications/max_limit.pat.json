@@ -1,1 +1,786 @@
-null
+[
+  {
+    "date": "2016-09-10T07:34:30",
+    "id": "3934638401650691",
+    "msg": "@ekitcho voted on your post ($0.08)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-07T08:49:15",
+    "id": "3866263864475651",
+    "msg": "@kental voted on your post ($0.15)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-05T21:39:15",
+    "id": "3832279935746058",
+    "msg": "@thedashguy voted on your post ($1.25)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-03T19:30:09",
+    "id": "3783814987907074",
+    "msg": "@salva82 voted on your post ($0.28)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-02T23:56:00",
+    "id": "3764903978467334",
+    "msg": "@hitmeasap voted on your post ($0.25)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-02T03:37:03",
+    "id": "3745271414521858",
+    "msg": "@acassity voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-02T02:38:54",
+    "id": "3744334843215877",
+    "msg": "@paco voted on your post ($0.75)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T23:40:24",
+    "id": "3741459899482115",
+    "msg": "@donkeypong voted on your post ($0.39)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T22:56:00",
+    "id": "3740744787427333",
+    "msg": "@albertogm voted on your post ($0.51)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T22:43:12",
+    "id": "3740538628997128",
+    "msg": "@rawnetics voted on your post ($0.17)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T21:09:51",
+    "id": "3739035122008068",
+    "msg": "@allasyummyfood voted on your post ($0.29)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T20:58:06",
+    "id": "3738845875011589",
+    "msg": "@anastacia voted on your post ($23.77)",
+    "score": 100,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T20:57:57",
+    "id": "3738843459092487",
+    "msg": "@adrian voted on your post ($12.25)",
+    "score": 100,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T20:57:51",
+    "id": "3738841848479752",
+    "msg": "@arsahk voted on your post ($31.61)",
+    "score": 100,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T20:41:48",
+    "id": "3738583345135620",
+    "msg": "@kus-knee voted on your post ($0.35)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T20:17:42",
+    "id": "3738195187466248",
+    "msg": "@mindover voted on your post ($0.15)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T18:55:33",
+    "id": "3736872069103619",
+    "msg": "@zaebars voted on your post ($0.20)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T18:48:09",
+    "id": "3736752883761158",
+    "msg": "@biophil voted on your post ($0.25)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:38:18",
+    "id": "3735627870765060",
+    "msg": "@thorium2 voted on your post ($3.08)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:38:09",
+    "id": "3735625454845960",
+    "msg": "@minosman voted on your post ($0.38)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:38:06",
+    "id": "3735624649539590",
+    "msg": "@hephaestus voted on your post ($1.73)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:38:03",
+    "id": "3735623844233221",
+    "msg": "@thorium1 voted on your post ($3.52)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:38:00",
+    "id": "3735623038926852",
+    "msg": "@heracles voted on your post ($0.10)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:57",
+    "id": "3735622233620484",
+    "msg": "@aphrodite voted on your post ($1.08)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:48",
+    "id": "3735619817701380",
+    "msg": "@neominer2016 voted on your post ($0.10)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:45",
+    "id": "3735619012395011",
+    "msg": "@neogen1 voted on your post ($4.84)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:42",
+    "id": "3735618207088643",
+    "msg": "@hotels.com voted on your post ($0.13)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:18",
+    "id": "3735611764637700",
+    "msg": "@datasecuritynode voted on your post ($33.35)",
+    "score": 100,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:15",
+    "id": "3735610959331337",
+    "msg": "@peerplays voted on your post ($1.31)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:09",
+    "id": "3735609348718596",
+    "msg": "@bunkerchainlabs voted on your post ($0.15)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:06",
+    "id": "3735608543412232",
+    "msg": "@blocktech voted on your post ($0.37)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:03",
+    "id": "3735607738105863",
+    "msg": "@blockchainbunker voted on your post ($1.04)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:37:00",
+    "id": "3735606932799502",
+    "msg": "@bitshares.org voted on your post ($1.57)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:57",
+    "id": "3735606127493126",
+    "msg": "@hermes-miner voted on your post ($6.17)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:54",
+    "id": "3735605322186757",
+    "msg": "@aries.com voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:51",
+    "id": "3735604516880390",
+    "msg": "@aquarius.com voted on your post ($0.87)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:48",
+    "id": "3735603711574033",
+    "msg": "@abderus voted on your post ($1.56)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:48",
+    "id": "3735603711574030",
+    "msg": "@insurance.com voted on your post ($0.18)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:45",
+    "id": "3735602906267653",
+    "msg": "@hermes voted on your post ($5.11)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:42",
+    "id": "3735602100961285",
+    "msg": "@fund.com voted on your post ($0.78)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:39",
+    "id": "3735601295654918",
+    "msg": "@apollo voted on your post ($0.13)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:36",
+    "id": "3735600490348548",
+    "msg": "@athena voted on your post ($0.08)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:33",
+    "id": "3735599685042182",
+    "msg": "@rabbitminer voted on your post ($0.63)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T17:36:30",
+    "id": "3735598879735814",
+    "msg": "@bunkermining voted on your post ($3.65)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T13:07:24",
+    "id": "3731264720863234",
+    "msg": "@katyakov voted on your post ($0.13)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T10:06:12",
+    "id": "3728346290585604",
+    "msg": "@bonapartist voted on your post ($0.75)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T09:33:15",
+    "id": "3727815593689092",
+    "msg": "@icfiedler voted on your post ($0.61)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T08:40:24",
+    "id": "3726964384858114",
+    "msg": "@serejandmyself voted on your post ($0.51)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T08:19:15",
+    "id": "3726623740264451",
+    "msg": "@clayop voted on your post ($0.86)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T08:10:36",
+    "id": "3726484422262791",
+    "msg": "@igster voted on your post ($0.17)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T07:32:12",
+    "id": "3725865946972162",
+    "msg": "@lemooljiang voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T07:08:06",
+    "id": "3725477789302786",
+    "msg": "@juanmiguelsalas voted on your post ($0.39)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T06:35:09",
+    "id": "3724947092406276",
+    "msg": "@bycz voted on your post ($0.08)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T06:13:48",
+    "id": "3724603226587138",
+    "msg": "@jesta voted on your post ($1.40)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T06:11:24",
+    "id": "3724564571881476",
+    "msg": "@sweetsssj voted on your post ($0.37)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T05:55:21",
+    "id": "3724306068537348",
+    "msg": "@valtr voted on your post ($0.10)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T05:47:30",
+    "id": "3724179635437570",
+    "msg": "@konstantin voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T05:40:36",
+    "id": "3724068503158789",
+    "msg": "@smailer voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T04:48:24",
+    "id": "3723227763310597",
+    "msg": "@nippel66 voted on your post ($0.09)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T04:48:06",
+    "id": "3723222931472386",
+    "msg": "@ervin-lemark voted on your post ($0.09)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T04:29:33",
+    "id": "3722924162809859",
+    "msg": "@easteagle13 voted on your post ($0.57)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T04:08:54",
+    "id": "3722591571279874",
+    "msg": "@juneaugoldbuyer voted on your post ($4.26)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T02:37:36",
+    "id": "3721121081851910",
+    "msg": "@theshell voted on your post ($0.61)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T02:37:09",
+    "id": "3721113834094594",
+    "msg": "@boatymcboatface voted on your post ($2.82)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T02:36:54",
+    "id": "3721109807562756",
+    "msg": "@rossco99 voted on your post ($11.20)",
+    "score": 100,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T02:05:06",
+    "id": "3720597632712708",
+    "msg": "@hannixx42 voted on your post ($0.39)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:41:57",
+    "id": "3720224775864325",
+    "msg": "@vip voted on your post ($0.58)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:41:42",
+    "id": "3720220749332483",
+    "msg": "@watershed voted on your post ($0.16)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:32:48",
+    "id": "3720077404798982",
+    "msg": "@johnsmith voted on your post ($1.54)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:17:21",
+    "id": "3719828565131268",
+    "msg": "@myfirst voted on your post ($0.20)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:06:12",
+    "id": "3719648981811202",
+    "msg": "@robrigo voted on your post ($0.87)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:04:51",
+    "id": "3719627238539266",
+    "msg": "@teamsteem voted on your post ($2.40)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T01:00:33",
+    "id": "3719557982191620",
+    "msg": "@halo voted on your post ($0.16)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:53:06",
+    "id": "3719437991542788",
+    "msg": "@kaylinart voted on your post ($1.84)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:49:51",
+    "id": "3719385646628868",
+    "msg": "@dubi voted on your post ($0.18)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:45:12",
+    "id": "3719310753136646",
+    "msg": "@geoffrey voted on your post ($0.70)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:45:03",
+    "id": "3719308337217538",
+    "msg": "@taoteh1221 voted on your post ($2.52)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:42:57",
+    "id": "3719274514350086",
+    "msg": "@noaommerrr voted on your post ($0.41)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:42:42",
+    "id": "3719270487818246",
+    "msg": "@jademont voted on your post ($0.11)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:41:45",
+    "id": "3719255186997250",
+    "msg": "@asch voted on your post ($0.51)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:40:36",
+    "id": "3719236664950786",
+    "msg": "@norbu voted on your post ($0.44)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:39:57",
+    "id": "3719226195968004",
+    "msg": "@nabilov voted on your post ($2.46)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:39:03",
+    "id": "3719211700453384",
+    "msg": "@zer0sum voted on your post ($0.09)",
+    "score": 25,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:37:21",
+    "id": "3719184320036870",
+    "msg": "@will-zewe voted on your post ($1.42)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:35:57",
+    "id": "3719161771458568",
+    "msg": "@yef99 voted on your post ($0.12)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:34:00",
+    "id": "3719130364510210",
+    "msg": "@deanliu voted on your post ($0.17)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:32:00",
+    "id": "3719098152255494",
+    "msg": "@mrosenquist voted on your post ($0.20)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:31:39",
+    "id": "3719092515110920",
+    "msg": "@alexgr voted on your post ($0.28)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:30:36",
+    "id": "3719075603677191",
+    "msg": "@miacats voted on your post ($0.58)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:30:33",
+    "id": "3719074798370820",
+    "msg": "@cyber voted on your post ($3.63)",
+    "score": 75,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:30:21",
+    "id": "3719071577145347",
+    "msg": "@justtryme90 voted on your post ($0.25)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:28:09",
+    "id": "3719036143665154",
+    "msg": "@laoyao voted on your post ($0.16)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:25:51",
+    "id": "3718999099572230",
+    "msg": "@luminousvisions voted on your post ($0.14)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:23:09",
+    "id": "3718955613028359",
+    "msg": "@milestone voted on your post ($0.29)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:21:06",
+    "id": "3718922595467266",
+    "msg": "@papa-pepper voted on your post ($0.13)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:19:15",
+    "id": "3718892799131657",
+    "msg": "@grolelo voted on your post ($0.13)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:18:12",
+    "id": "3718875887697926",
+    "msg": "@joele voted on your post ($0.66)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  },
+  {
+    "date": "2016-09-01T00:16:54",
+    "id": "3718854949732356",
+    "msg": "@bue voted on your post ($0.38)",
+    "score": 50,
+    "type": "vote",
+    "url": "@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
+  }
+]
