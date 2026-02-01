@@ -119,7 +119,7 @@ class Posts(DbAdapterHolder):
                 )
             """
 
-            rows = DbAdapterHolder.common_block_processing_db().query_all(sql)
+            rows = DbAdapterHolder.common_block_processing_db().query_all_raw(sql)
 
             for row in rows:
                 row = row._mapping
