@@ -92,6 +92,10 @@
 \ir bridge_api/bridge_api_list_community_roles.sql
 \ir bridge_api/bridge_api_list_all_subscriptions.sql
 \ir bridge_api/bridge_api_list_pop_communities.sql
+\ir utilities/moderation_log.sql
+\ir bridge_api/bridge_api_get_community_moderation_log.sql
+\ir bridge_api/bridge_api_get_account_moderation_stats.sql
+\ir bridge_api/bridge_api_get_moderator_activity.sql
 \ir condenser_api/extract_parameters_for_get_following_and_followers.sql
 \ir condenser_api/condenser_api_get_followers.sql
 \ir condenser_api/condenser_api_get_following.sql

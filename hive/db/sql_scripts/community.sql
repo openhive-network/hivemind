@@ -85,7 +85,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_set_role(
     _date TIMESTAMP,
     _max_mod_nb INTEGER, -- maximum number of roles >= to mod in a community
     _mod_role_threshold INTEGER -- minimum role id to be counted as
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN, old_role_id INTEGER) AS $$
 DECLARE
     _actor_role INTEGER;
     _account_role INTEGER;
@@ -95,31 +95,31 @@ BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     IF _actor_role < 4 THEN  -- 4 = Role.mod
-        RETURN QUERY SELECT FALSE, 'only mods and up can alter roles'::TEXT, FALSE;
+        RETURN QUERY SELECT FALSE, 'only mods and up can alter roles'::TEXT, FALSE, NULL::INTEGER;
         RETURN;
     END IF;
 
     IF _actor_role <= _role_id THEN
-        RETURN QUERY SELECT FALSE, 'cannot promote to or above own rank'::TEXT, FALSE;
+        RETURN QUERY SELECT FALSE, 'cannot promote to or above own rank'::TEXT, FALSE, NULL::INTEGER;
         RETURN;
     END IF;
 
     _account_role := hivemind_app.get_community_role(_account_id, _community_id);
 
     IF _account_role = 8 THEN  -- 8 = Role.owner
-        RETURN QUERY SELECT FALSE, 'cant modify owner role'::TEXT, FALSE;
+        RETURN QUERY SELECT FALSE, 'cant modify owner role'::TEXT, FALSE, NULL::INTEGER;
         RETURN;
     END IF;
 
 
     IF _actor_id != _account_id THEN
         IF _account_role >= _actor_role THEN
-            RETURN QUERY SELECT FALSE, 'cant modify a user with a higher role'::TEXT, FALSE;
+            RETURN QUERY SELECT FALSE, 'cant modify a user with a higher role'::TEXT, FALSE, NULL::INTEGER;
             RETURN;
         END IF;
 
         IF _account_role = _role_id THEN
-            RETURN QUERY SELECT FALSE, 'role would not change'::TEXT, FALSE;
+            RETURN QUERY SELECT FALSE, 'role would not change'::TEXT, FALSE, NULL::INTEGER;
             RETURN;
         END IF;
     END IF;
@@ -133,7 +133,7 @@ BEGIN
           AND account_id != _account_id;
 
         IF _mod_count >= _max_mod_nb THEN
-            RETURN QUERY SELECT FALSE, 'moderator limit exceeded'::TEXT, FALSE;
+            RETURN QUERY SELECT FALSE, 'moderator limit exceeded'::TEXT, FALSE, NULL::INTEGER;
             RETURN;
         END IF;
     END IF;
@@ -145,7 +145,7 @@ BEGIN
 
     _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed;
+    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed, _account_role;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -199,18 +199,23 @@ CREATE OR REPLACE FUNCTION hivemind_app.community_set_title(
     _community_id INTEGER,
     _title VARCHAR,
     _date TIMESTAMP
-) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN) AS $$
+) RETURNS TABLE(success BOOLEAN, error_message TEXT, is_subscribed BOOLEAN, old_title VARCHAR) AS $$
 DECLARE
     _actor_role INTEGER;
     _is_subscribed BOOLEAN;
+    _old_title VARCHAR;
 BEGIN
     _actor_role := hivemind_app.get_community_role(_actor_id, _community_id);
 
     -- 4 is mod
     IF _actor_role < 4 THEN
-        RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT, FALSE;
+        RETURN QUERY SELECT FALSE, 'only mods can set user titles'::TEXT, FALSE, NULL::VARCHAR;
         RETURN;
     END IF;
+
+    SELECT title INTO _old_title
+    FROM hivemind_app.hive_roles
+    WHERE account_id = _account_id AND community_id = _community_id;
 
     INSERT INTO hivemind_app.hive_roles (account_id, community_id, title, created_at)
     VALUES (_account_id, _community_id, _title, _date)
@@ -219,7 +224,7 @@ BEGIN
 
     _is_subscribed := hivemind_app.community_is_subscribed(_account_id, _community_id);
 
-    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed;
+    RETURN QUERY SELECT TRUE, ''::TEXT, _is_subscribed, COALESCE(_old_title, ''::VARCHAR);
 END;
 $$ LANGUAGE plpgsql;
 
