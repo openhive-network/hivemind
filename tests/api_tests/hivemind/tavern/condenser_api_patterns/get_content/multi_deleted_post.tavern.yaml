@@ -25,4 +25,4 @@
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            error_response: true
+            ignore_tags: "<condenser content>"
