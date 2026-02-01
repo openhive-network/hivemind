@@ -194,9 +194,72 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _flush_deferred_comment_options(cls):
-        """Apply deferred comment_options ops after batch comment creation."""
+        """Apply deferred comment_options ops after batch comment creation.
+
+        Uses a single UPDATE...FROM (VALUES...) query per chunk instead of
+        one query per op, matching the pattern used by flush_into_db().
+        """
+        if not cls._pending_comment_option_ops:
+            return
+
+        # Pre-process ops: extract beneficiaries and build values
+        processed = []
         for op in cls._pending_comment_option_ops:
-            cls._apply_comment_options(op)
+            max_accepted_payout = (
+                legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
+            )
+            allow_votes = op['allow_votes'] if 'allow_votes' in op else True
+            allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
+            percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
+            extensions = op['extensions'] if 'extensions' in op else []
+            beneficiaries = []
+            for ex in extensions:
+                if 'type' in ex and ex['type'] == 'comment_payout_beneficiaries' and 'beneficiaries' in ex['value']:
+                    beneficiaries = ex['value']['beneficiaries']
+            processed.append(
+                (
+                    op['author'],
+                    op['permlink'],
+                    max_accepted_payout,
+                    percent_hbd,
+                    allow_votes,
+                    allow_curation_rewards,
+                    dumps(beneficiaries),
+                )
+            )
+
+        sql = f"""
+            UPDATE {SCHEMA_NAME}.hive_posts AS hp SET
+                max_accepted_payout = data_source.max_accepted_payout,
+                percent_hbd = data_source.percent_hbd,
+                allow_votes = data_source.allow_votes,
+                allow_curation_rewards = data_source.allow_curation_rewards,
+                beneficiaries = data_source.beneficiaries
+            FROM (
+                SELECT ha.id AS author_id, hpd.id AS permlink_id,
+                       t.max_accepted_payout, t.percent_hbd, t.allow_votes,
+                       t.allow_curation_rewards, t.beneficiaries
+                FROM (VALUES {{}}) AS t(author, permlink, max_accepted_payout,
+                                        percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
+                INNER JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.name = t.author
+                INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+            ) AS data_source
+            WHERE hp.author_id = data_source.author_id
+              AND hp.permlink_id = data_source.permlink_id
+              AND hp.counter_deleted = 0
+        """
+
+        db = DbAdapterHolder.common_block_processing_db()
+        for chunk in chunks(processed, 1000):
+            values = []
+            for author, permlink, max_payout, pct_hbd, allow_v, allow_cr, benef in chunk:
+                values.append(
+                    f"({_sql_str(author)}, {_sql_str(permlink)}, {_sql_str(max_payout)}, "
+                    f"{pct_hbd}, {allow_v}, {allow_cr}, {_sql_str(benef)}::json)"
+                )
+            actual_query = sql.format(','.join(values))
+            db.query_all_raw(actual_query)
+
         cls._pending_comment_option_ops.clear()
 
     @classmethod
