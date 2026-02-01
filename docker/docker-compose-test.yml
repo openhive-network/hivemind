@@ -5,7 +5,7 @@
 name: 'hivemind-test'
 services:
   haf:
-    image: ${HAF_IMAGE_NAME:-registry.gitlab.syncad.com/hive/haf/instance:latest}
+    image: ${HAF_IMAGE_NAME:-registry.gitlab.syncad.com/hive/haf:latest}
     entrypoint: /home/haf_admin/docker_entrypoint.sh
     command: ["--skip-hived"]
     environment:
@@ -35,7 +35,7 @@ services:
       start_period: 60s
 
   hivemind-server:
-    image: ${HIVEMIND_IMAGE:-registry.gitlab.syncad.com/hive/hivemind/instance:latest}
+    image: ${HIVEMIND_IMAGE:-registry.gitlab.syncad.com/hive/hivemind:latest}
     working_dir: /home/hivemind
     entrypoint: ["/bin/bash", "-c"]
     command:
