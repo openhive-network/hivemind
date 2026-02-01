@@ -21,7 +21,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-member-post-hive3",
-    "post_id": 1256904,
+    "post_id": 1256972,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -56,7 +56,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-member-post-hive2",
-    "post_id": 1256903,
+    "post_id": 1256971,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -95,7 +95,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-member-post-hive1",
-    "post_id": 1256902,
+    "post_id": 1256970,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -130,13 +130,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-member-post-hive3",
-    "post_id": 1256901,
+    "post_id": 1256969,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello",
@@ -165,13 +168,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-member-post-hive2",
-    "post_id": 1256900,
+    "post_id": 1256968,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello",
@@ -204,13 +210,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-member-post-hive1",
-    "post_id": 1256899,
+    "post_id": 1256967,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello",
@@ -239,7 +248,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-member-post-hive3",
-    "post_id": 1256898,
+    "post_id": 1256966,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -274,7 +283,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-member-post-hive2",
-    "post_id": 1256897,
+    "post_id": 1256965,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -313,7 +322,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-member-post-hive1",
-    "post_id": 1256895,
+    "post_id": 1256963,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -348,7 +357,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive3",
-    "post_id": 1256849,
+    "post_id": 1256917,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -383,7 +392,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive2",
-    "post_id": 1256848,
+    "post_id": 1256916,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -422,7 +431,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Third-after-muted-post-hive1",
-    "post_id": 1256847,
+    "post_id": 1256915,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -457,13 +466,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive3",
-    "post_id": 1256846,
+    "post_id": 1256914,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -492,13 +504,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive2",
-    "post_id": 1256845,
+    "post_id": 1256913,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -531,13 +546,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "Second-after-muted-post-hive1",
-    "post_id": 1256844,
+    "post_id": 1256912,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello x5",
@@ -566,7 +584,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive3",
-    "post_id": 1256843,
+    "post_id": 1256911,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -601,7 +619,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive2",
-    "post_id": 1256842,
+    "post_id": 1256910,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -640,7 +658,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "First-after-muted-post-hive1",
-    "post_id": 1256841,
+    "post_id": 1256909,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -675,7 +693,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-third-post-hive3",
-    "post_id": 1256821,
+    "post_id": 1256889,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -710,7 +728,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "My-third-post-hive2",
-    "post_id": 1256820,
+    "post_id": 1256888,
     "reblogs": 0,
     "replies": [],
     "stats": {

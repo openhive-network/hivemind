@@ -23,7 +23,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive3",
-    "post_id": 1256810,
+    "post_id": 1256878,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -60,7 +60,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive2-03",
-    "post_id": 1256809,
+    "post_id": 1256877,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -97,13 +97,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive2-02",
-    "post_id": 1256808,
+    "post_id": 1256876,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -134,7 +137,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive2",
-    "post_id": 1256807,
+    "post_id": 1256875,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -175,7 +178,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive1-03",
-    "post_id": 1256806,
+    "post_id": 1256874,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -216,13 +219,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive1-02",
-    "post_id": 1256805,
+    "post_id": 1256873,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post01",
@@ -257,7 +263,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive1",
-    "post_id": 1256803,
+    "post_id": 1256871,
     "reblogs": 0,
     "replies": [],
     "stats": {
