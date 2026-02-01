@@ -82,11 +82,50 @@ class Posts(DbAdapterHolder):
         cls._process_single_comment_op(op, block_date, tags)
 
     @classmethod
+    def _bulk_insert_permlinks_and_categories(cls):
+        """Bulk-insert all permlinks and categories for the pending ops batch.
+
+        Replaces N individual INSERT...ON CONFLICT DO NOTHING with 2 bulk operations.
+        Permlinks: all post permlinks plus parent permlinks (for comments).
+        Categories: parent_permlink of root posts (where parent_author is empty).
+        """
+        permlinks = set()
+        categories = set()
+        for op, _block_date, _tags in cls._pending_comment_ops:
+            permlinks.add(op['permlink'])
+            if op['parent_author']:
+                permlinks.add(op['parent_permlink'])
+            else:
+                categories.add(op['parent_permlink'])
+
+        db = DbAdapterHolder.common_block_processing_db()
+
+        if permlinks:
+            for chunk in chunks(list(permlinks), 5000):
+                values = ','.join(f"({_sql_str(p)})" for p in chunk)
+                db.query_no_return(
+                    f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (permlink) "
+                    f"SELECT v.p FROM (VALUES {values}) AS v(p) "
+                    f"ON CONFLICT DO NOTHING"
+                )
+
+        if categories:
+            for chunk in chunks(list(categories), 5000):
+                values = ','.join(f"({_sql_str(c)})" for c in chunk)
+                db.query_no_return(
+                    f"INSERT INTO {SCHEMA_NAME}.hive_category_data (category) "
+                    f"SELECT v.c FROM (VALUES {values}) AS v(c) "
+                    f"ON CONFLICT (category) DO NOTHING"
+                )
+
+    @classmethod
     def flush_pending_comment_ops(cls):
-        """Batch-process accumulated comment ops via single SQL calls.
+        """Batch-process accumulated comment ops via set-based SQL calls.
 
         Called after processing all blocks in a batch, before flushing data to DB.
-        Processes ops in chunks of 1000 to keep SQL query sizes manageable.
+        Splits ops into root posts and comments, processes each with dedicated
+        set-based SQL functions. Comments use wave-based resolution for
+        same-batch parent dependencies.
         Returns the number of ops processed.
         """
         if not cls._pending_comment_ops:
@@ -94,95 +133,35 @@ class Posts(DbAdapterHolder):
 
         n = len(cls._pending_comment_ops)
 
-        # Process in chunks to avoid overly large SQL strings
-        for chunk_start in range(0, n, 1000):
-            chunk_end = min(chunk_start + 1000, n)
-            chunk = cls._pending_comment_ops[chunk_start:chunk_end]
+        # Normalize parent_author/parent_permlink for edits.
+        first_parent = {}
+        for op, _block_date, _tags in cls._pending_comment_ops:
+            key = (op['author'], op['permlink'])
+            if key not in first_parent:
+                first_parent[key] = (op['parent_author'], op['parent_permlink'])
+            elif op['parent_author'] != first_parent[key][0]:
+                op['parent_author'] = first_parent[key][0]
+                op['parent_permlink'] = first_parent[key][1]
 
-            ops_params = []
-            for local_idx, (op, block_date, tags) in enumerate(chunk):
-                seq_id = chunk_start + local_idx
-                ops_params.append(
-                    f"({seq_id}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
-                    f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
-                    f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
-                    f"ARRAY[{','.join(_sql_str(t) for t in tags)}]::VARCHAR[])"
-                )
+        # Phase 3a: Bulk-insert all permlinks and categories before processing posts.
+        cls._bulk_insert_permlinks_and_categories()
 
-            sql = f"""
-                SELECT seq_id, is_new_post, id, author_id, permlink_id, post_category,
-                       parent_id, parent_author_id, community_id, is_valid, is_post_muted,
-                       depth, muted_reasons
-                FROM {SCHEMA_NAME}.process_hive_post_operations_batch(
-                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
-                )
-            """
+        # Split into root posts and comments, preserving original indices
+        root_ops = []
+        comment_ops = []
+        for idx, (op, block_date, tags) in enumerate(cls._pending_comment_ops):
+            if not op['parent_author']:
+                root_ops.append((idx, op, block_date, tags))
+            else:
+                comment_ops.append((idx, op, block_date, tags))
 
-            rows = DbAdapterHolder.common_block_processing_db().query_all_raw(sql)
+        db = DbAdapterHolder.common_block_processing_db()
 
-            for row in rows:
-                row = row._mapping
-                seq_id = row['seq_id']
-                op, block_date, tags = cls._pending_comment_ops[seq_id]
+        # Phase 3b: Process root posts with set-based function
+        cls._process_root_posts_batch(root_ops, db)
 
-                is_new_post = row['is_new_post']
-                parent_author = op.get('parent_author')
-
-                if is_new_post:
-                    post_data = dict(
-                        title=op['title'] if op['title'] else '',
-                        body=op['body'] if op['body'] else '',
-                        json=op['json_metadata'] if op['json_metadata'] else '',
-                        is_root='true' if parent_author is None or parent_author == '' else 'false',
-                    )
-                else:
-                    new_body = cls._merge_post_body(id=row['id'], new_body_def=op['body']) if op['body'] else None
-                    new_title = op['title'] if op['title'] else None
-                    new_json = op['json_metadata'] if op['json_metadata'] else None
-                    post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
-
-                PostDataCache.add_data(row['id'], post_data, is_new_post)
-
-                if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
-                    type_id = 12 if row['depth'] == 1 else 13
-                    key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
-                    NotificationCache.comment_notifications[key] = {
-                        "block_num": op['block_num'],
-                        "type_id": type_id,
-                        "created_at": block_date,
-                        "src": row['author_id'],
-                        "dst": row['parent_author_id'],
-                        "dst_post_id": row['parent_id'],
-                        "post_id": row['id'],
-                        'counter': cls._counter.increment(op['block_num']),
-                    }
-
-                if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post is True:
-                    muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
-                    reasons = []
-                    if 1 in muted_reasons:
-                        if row['depth'] > 0:
-                            reasons.append("community type does not allow non members to post or comment")
-                        else:
-                            reasons.append("community type does not allow non members to post")
-                    if 2 in muted_reasons:
-                        reasons.append("parent post/comment is muted")
-
-                    if len(reasons) == 1:
-                        payload = f"Post is muted because {reasons[0]}"
-                    else:
-                        payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
-
-                    Notify(
-                        block_num=op['block_num'],
-                        type_id='error',
-                        dst_id=row['author_id'],
-                        when=block_date,
-                        post_id=row['id'],
-                        payload=payload,
-                        community_id=row['community_id'],
-                        src_id=row['community_id'],
-                    )
+        # Phase 3c: Process comments with wave-based resolution
+        cls._process_comments_batch_waves(comment_ops, db)
 
         cls._pending_comment_ops.clear()
 
@@ -191,6 +170,202 @@ class Posts(DbAdapterHolder):
         cls._flush_deferred_deletes()
 
         return n
+
+    @classmethod
+    def _split_into_passes(cls, ops_list):
+        """Split ops into passes where each pass has unique (author, permlink)."""
+        passes = []
+        remaining = list(ops_list)
+        while remaining:
+            pass_ops = {}
+            next_remaining = []
+            for item in remaining:
+                key = (item[1]['author'], item[1]['permlink'])
+                if key not in pass_ops:
+                    pass_ops[key] = item
+                else:
+                    next_remaining.append(item)
+            passes.append(list(pass_ops.values()))
+            remaining = next_remaining
+        return passes
+
+    @classmethod
+    def _process_root_posts_batch(cls, root_ops, db):
+        """Process root posts using set-based SQL function with batch tag management."""
+        for chunk in chunks(root_ops, 1000):
+            chunk_list = list(chunk)
+            passes = cls._split_into_passes(chunk_list)
+
+            tag_post_ids = []
+            tag_arrays = []
+            tag_is_new = []
+
+            for pass_ops in passes:
+                ops_params = []
+                for _seq_local, (orig_idx, op, block_date, _tags) in enumerate(pass_ops):
+                    ops_params.append(
+                        f"({orig_idx}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
+                        f"'', {_sql_str(op['parent_permlink'])}, "
+                        f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
+                        f"ARRAY[]::VARCHAR[])"
+                    )
+
+                sql = f"""
+                    SELECT seq_id, is_new_post, id, author_id, permlink_id, post_category,
+                           parent_id, parent_author_id, community_id, is_valid, is_post_muted,
+                           depth, muted_reasons
+                    FROM {SCHEMA_NAME}.process_root_posts_batch(
+                        ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
+                    )
+                """
+                rows = db.query_all_raw(sql)
+
+                for row in rows:
+                    row = row._mapping
+                    seq_id = row['seq_id']
+                    op, block_date, tags = cls._pending_comment_ops[seq_id]
+                    is_new_post = row['is_new_post']
+
+                    full_tags = list(tags) + [op['parent_permlink']]
+                    tag_post_ids.append(row['id'])
+                    tag_arrays.append(full_tags)
+                    tag_is_new.append(is_new_post)
+
+                    cls._process_post_result(row, op, block_date, is_new_post)
+
+            if tag_post_ids:
+                cls._batch_process_tags(tag_post_ids, tag_arrays, tag_is_new, db)
+
+    @classmethod
+    def _process_comments_batch_waves(cls, comment_ops, db):
+        """Process comments using wave-based resolution."""
+        remaining = list(comment_ops)
+        max_waves = 20
+
+        for _wave in range(max_waves):
+            if not remaining:
+                break
+
+            processed_seq_ids = set()
+
+            for chunk in chunks(list(remaining), 1000):
+                chunk_list = list(chunk)
+                passes = cls._split_into_passes(chunk_list)
+
+                for pass_ops in passes:
+                    ops_params = []
+                    for _seq_local, (orig_idx, op, block_date, _tags) in enumerate(pass_ops):
+                        ops_params.append(
+                            f"({orig_idx}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
+                            f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
+                            f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
+                            f"ARRAY[]::VARCHAR[])"
+                        )
+
+                    sql = f"""
+                        SELECT seq_id, is_new_post, id, author_id, permlink_id, post_category,
+                               parent_id, parent_author_id, community_id, is_valid, is_post_muted,
+                               depth, muted_reasons
+                        FROM {SCHEMA_NAME}.process_comments_batch(
+                            ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
+                        )
+                    """
+                    rows = db.query_all_raw(sql)
+
+                    for row in rows:
+                        row = row._mapping
+                        seq_id = row['seq_id']
+                        processed_seq_ids.add(seq_id)
+                        op, block_date, tags = cls._pending_comment_ops[seq_id]
+                        is_new_post = row['is_new_post']
+
+                        cls._process_post_result(row, op, block_date, is_new_post)
+
+            remaining = [item for item in remaining if item[0] not in processed_seq_ids]
+
+        if remaining:
+            log.warning(f"[POSTS] {len(remaining)} comment ops could not be resolved after {max_waves} waves")
+
+    @classmethod
+    def _process_post_result(cls, row, op, block_date, is_new_post):
+        """Process a single result row from batch post/comment processing."""
+        parent_author = op.get('parent_author')
+
+        if is_new_post:
+            post_data = dict(
+                title=op['title'] if op['title'] else '',
+                body=op['body'] if op['body'] else '',
+                json=op['json_metadata'] if op['json_metadata'] else '',
+                is_root='true' if parent_author is None or parent_author == '' else 'false',
+            )
+        else:
+            new_body = cls._merge_post_body(id=row['id'], new_body_def=op['body']) if op['body'] else None
+            new_title = op['title'] if op['title'] else None
+            new_json = op['json_metadata'] if op['json_metadata'] else None
+            post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
+
+        PostDataCache.add_data(row['id'], post_data, is_new_post)
+
+        if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
+            type_id = 12 if row['depth'] == 1 else 13
+            key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
+            NotificationCache.comment_notifications[key] = {
+                "block_num": op['block_num'],
+                "type_id": type_id,
+                "created_at": block_date,
+                "src": row['author_id'],
+                "dst": row['parent_author_id'],
+                "dst_post_id": row['parent_id'],
+                "post_id": row['id'],
+                'counter': cls._counter.increment(op['block_num']),
+            }
+
+        if row['muted_reasons'] is not None and row['muted_reasons'] != 0 and is_new_post is True:
+            muted_reasons = community.decode_bitwise_mask(row['muted_reasons'])
+            reasons = []
+            if 1 in muted_reasons:
+                if row['depth'] > 0:
+                    reasons.append("community type does not allow non members to post or comment")
+                else:
+                    reasons.append("community type does not allow non members to post")
+            if 2 in muted_reasons:
+                reasons.append("parent post/comment is muted")
+
+            if len(reasons) == 1:
+                payload = f"Post is muted because {reasons[0]}"
+            else:
+                payload = f"Post is muted because {reasons[0]} and {reasons[1]}"
+
+            Notify(
+                block_num=op['block_num'],
+                type_id='error',
+                dst_id=row['author_id'],
+                when=block_date,
+                post_id=row['id'],
+                payload=payload,
+                community_id=row['community_id'],
+                src_id=row['community_id'],
+            )
+
+    @classmethod
+    def _batch_process_tags(cls, post_ids, tag_arrays, is_new_flags, db):
+        """Process tags for multiple posts in a single SQL call."""
+        tuples = []
+        for post_id, tags, is_new in zip(post_ids, tag_arrays, is_new_flags):
+            is_new_str = 'true' if is_new else 'false'
+            for tag in tags:
+                tuples.append(f"({post_id}, {_sql_str(tag)}, {is_new_str})")
+
+        if not tuples:
+            return
+
+        for chunk in chunks(tuples, 5000):
+            sql = f"""
+                SELECT {SCHEMA_NAME}.process_tags_batch(
+                    ARRAY[{','.join(chunk)}]::{SCHEMA_NAME}.post_tag_input[]
+                )
+            """
+            db.query_no_return(sql)
 
     @classmethod
     def _flush_deferred_comment_options(cls):

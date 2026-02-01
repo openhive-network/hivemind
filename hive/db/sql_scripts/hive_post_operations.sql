@@ -409,6 +409,365 @@ BEGIN
 END
 $function$;
 
+--- Set-based batch functions for root posts, comments, and tags.
+--- These replace the FOREACH loop in process_hive_post_operations_batch
+--- with true set operations for better performance during massive sync.
+
+DROP FUNCTION IF EXISTS hivemind_app.process_root_posts_batch;
+CREATE OR REPLACE FUNCTION hivemind_app.process_root_posts_batch(
+    _ops hivemind_app.hive_post_op_input[]
+)
+RETURNS SETOF hivemind_app.hive_post_op_result
+LANGUAGE plpgsql
+AS
+$function$
+DECLARE
+    __member_role CONSTANT SMALLINT := 2;
+    __community_type_topic CONSTANT SMALLINT := 1;
+    __community_type_journal CONSTANT SMALLINT := 2;
+    __community_type_council CONSTANT SMALLINT := 3;
+BEGIN
+    --- Permlinks and categories are assumed to already be inserted by the caller.
+
+    RETURN QUERY
+    WITH ops AS (
+        SELECT t.seq_id, t.author, t.permlink, t.parent_permlink,
+               t.date, t.community_support_start_block, t.block_num, t.metadata_tags
+        FROM unnest(_ops) AS t
+    ),
+    resolved AS (
+        SELECT o.seq_id, o.parent_permlink, o.date, o.block_num, o.metadata_tags,
+               o.community_support_start_block,
+               ha.id AS author_id,
+               hpd.id AS permlink_id,
+               hcd.id AS category_id,
+               hc.id AS community_id,
+               hc.type_id AS community_type_id,
+               hr.role_id AS role_id
+        FROM ops o
+        INNER JOIN hivemind_app.hive_accounts ha ON ha.name = o.author
+        INNER JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = o.permlink
+        LEFT JOIN hivemind_app.hive_category_data hcd ON hcd.category = o.parent_permlink
+        LEFT JOIN hivemind_app.hive_communities hc ON hc.name = o.parent_permlink
+                                                   AND o.block_num >= o.community_support_start_block
+        LEFT JOIN hivemind_app.hive_roles hr ON hr.community_id = hc.id AND hr.account_id = ha.id
+    ),
+    with_muting AS (
+        SELECT r.*,
+            CASE
+                WHEN r.community_id IS NULL THEN FALSE
+                WHEN r.community_type_id = __community_type_topic THEN FALSE
+                WHEN r.community_type_id = __community_type_journal
+                     AND r.role_id IS NOT NULL AND r.role_id >= __member_role THEN FALSE
+                WHEN r.community_type_id = __community_type_council
+                     AND r.role_id IS NOT NULL AND r.role_id >= __member_role THEN FALSE
+                WHEN r.community_id IS NOT NULL THEN TRUE
+                ELSE FALSE
+            END AS is_muted,
+            CASE
+                WHEN r.community_id IS NOT NULL
+                     AND r.community_type_id != __community_type_topic
+                     AND NOT (r.community_type_id = __community_type_journal
+                              AND r.role_id IS NOT NULL AND r.role_id >= __member_role)
+                     AND NOT (r.community_type_id = __community_type_council
+                              AND r.role_id IS NOT NULL AND r.role_id >= __member_role)
+                THEN hivemind_app.encode_bitwise_mask(ARRAY[1])
+                ELSE 0
+            END AS muted_reasons
+        FROM resolved r
+    ),
+    inserted AS (
+        INSERT INTO hivemind_app.hive_posts AS hp
+            (parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+             active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
+        SELECT
+            0, -- parent_id
+            0, -- depth
+            wm.community_id,
+            wm.category_id,
+            0, -- root_id (will use id as root)
+            wm.is_muted,
+            TRUE, -- is_valid
+            wm.author_id,
+            wm.permlink_id,
+            wm.date,
+            wm.date,
+            hivemind_app.calculate_time_part_of_hot(wm.date),
+            hivemind_app.calculate_time_part_of_trending(wm.date),
+            wm.date, -- active
+            wm.date + INTERVAL '7 days', -- payout_at
+            wm.date + INTERVAL '7 days', -- cashout_time
+            0, -- counter_deleted
+            wm.block_num,
+            wm.block_num, -- block_num_created
+            wm.muted_reasons
+        FROM with_muting wm
+        ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+            updated_at = EXCLUDED.updated_at,
+            active = EXCLUDED.active,
+            block_num = EXCLUDED.block_num
+        RETURNING
+            (xmax = 0) AS is_new_post,
+            hp.id,
+            hp.author_id,
+            hp.permlink_id,
+            hp.parent_id,
+            hp.community_id,
+            hp.is_valid,
+            hp.is_muted,
+            hp.depth,
+            hp.muted_reasons
+    )
+    SELECT
+        wm.seq_id,
+        ins.is_new_post,
+        ins.id,
+        ins.author_id,
+        ins.permlink_id,
+        wm.parent_permlink::VARCHAR AS post_category,
+        ins.parent_id,
+        0, -- parent_author_id (root posts have no parent author)
+        ins.community_id,
+        ins.is_valid,
+        ins.is_muted,
+        ins.depth,
+        ins.muted_reasons
+    FROM inserted ins
+    INNER JOIN with_muting wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
+END
+$function$;
+
+--- Batch prepare tags for multiple posts at once.
+--- Accepts a flat list of (post_id, raw_tag, is_new_post) tuples.
+--- Normalizes tags, inserts into hive_tag_data, then batch-inserts hive_post_tags
+--- and batch-deletes removed tags for edits.
+DROP TYPE IF EXISTS hivemind_app.post_tag_input CASCADE;
+CREATE TYPE hivemind_app.post_tag_input AS (
+    post_id INTEGER,
+    raw_tag VARCHAR,
+    is_new_post BOOLEAN
+);
+
+DROP FUNCTION IF EXISTS hivemind_app.process_tags_batch;
+CREATE OR REPLACE FUNCTION hivemind_app.process_tags_batch(
+    _tags hivemind_app.post_tag_input[]
+)
+RETURNS VOID
+LANGUAGE sql
+AS
+$function$
+--- Data-modifying CTEs must be at the top level (not inside a subquery),
+--- so we use LANGUAGE sql where the CTE is the top-level statement.
+WITH inputs AS (
+    SELECT t.post_id, t.is_new_post,
+           CAST(LEFT(LOWER(REGEXP_REPLACE(t.raw_tag, '[#\s]', '', 'g')), 32) AS VARCHAR) AS tag
+    FROM unnest(_tags) AS t
+),
+valid_tags AS (
+    SELECT DISTINCT i.post_id, i.is_new_post, i.tag
+    FROM inputs i
+    WHERE i.tag IS NOT NULL AND i.tag != ''
+),
+--- Ensure all tags exist in hive_tag_data
+inserted_tags AS (
+    INSERT INTO hivemind_app.hive_tag_data (tag)
+    SELECT DISTINCT vt.tag FROM valid_tags vt
+    ON CONFLICT (tag) DO NOTHING
+    RETURNING id, tag
+),
+all_tags AS (
+    SELECT htd.id, htd.tag
+    FROM hivemind_app.hive_tag_data htd
+    WHERE htd.tag IN (SELECT DISTINCT vt.tag FROM valid_tags vt)
+),
+--- Build new tag associations
+new_associations AS (
+    SELECT vt.post_id, at2.id AS tag_id, vt.is_new_post
+    FROM valid_tags vt
+    INNER JOIN all_tags at2 ON at2.tag = vt.tag
+),
+--- For edits: delete tags that are no longer present
+deleted_old_tags AS (
+    DELETE FROM hivemind_app.hive_post_tags hpt
+    USING (
+        SELECT DISTINCT na.post_id FROM new_associations na WHERE NOT na.is_new_post
+    ) AS edit_posts
+    WHERE hpt.post_id = edit_posts.post_id
+      AND hpt.tag_id NOT IN (
+          SELECT na2.tag_id FROM new_associations na2 WHERE na2.post_id = hpt.post_id
+      )
+    RETURNING hpt.post_id
+),
+--- Insert new tag associations (for both new posts and edits)
+inserted_post_tags AS (
+    INSERT INTO hivemind_app.hive_post_tags (post_id, tag_id)
+    SELECT na.post_id, na.tag_id
+    FROM new_associations na
+    ON CONFLICT (post_id, tag_id) DO NOTHING
+    RETURNING post_id
+)
+SELECT post_id FROM inserted_post_tags;
+$function$;
+
+--- Set-based comment processing with parent lookup via INNER JOIN.
+--- Comments whose parents don't exist yet are silently skipped (INNER JOIN
+--- filters them out), allowing wave-based resolution from the Python caller.
+DROP FUNCTION IF EXISTS hivemind_app.process_comments_batch;
+CREATE OR REPLACE FUNCTION hivemind_app.process_comments_batch(
+    _ops hivemind_app.hive_post_op_input[]
+)
+RETURNS SETOF hivemind_app.hive_post_op_result
+LANGUAGE plpgsql
+AS
+$function$
+DECLARE
+    __member_role CONSTANT SMALLINT := 2;
+    __community_type_topic CONSTANT SMALLINT := 1;
+    __community_type_journal CONSTANT SMALLINT := 2;
+    __community_type_council CONSTANT SMALLINT := 3;
+BEGIN
+    --- Permlinks are assumed to already be inserted by the caller.
+
+    RETURN QUERY
+    WITH ops AS (
+        SELECT t.seq_id, t.author, t.permlink, t.parent_author, t.parent_permlink,
+               t.date, t.community_support_start_block, t.block_num
+        FROM unnest(_ops) AS t
+    ),
+    resolved AS (
+        SELECT o.seq_id, o.date, o.block_num, o.community_support_start_block,
+               ha.id AS author_id,
+               hpd.id AS permlink_id,
+               php.id AS parent_id,
+               php.author_id AS parent_author_id,
+               php.depth + 1 AS depth,
+               COALESCE(php.category_id,
+                   (SELECT hcg.id FROM hivemind_app.hive_category_data hcg
+                    WHERE hcg.category = o.parent_permlink)) AS category_id,
+               CASE php.root_id WHEN 0 THEN php.id ELSE php.root_id END AS root_id,
+               php.is_valid AS is_valid,
+               php.community_id AS parent_community_id,
+               php.is_muted AS parent_is_muted,
+               o.parent_permlink
+        FROM ops o
+        INNER JOIN hivemind_app.hive_accounts ha ON ha.name = o.author
+        INNER JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = o.permlink
+        INNER JOIN hivemind_app.hive_accounts pha ON pha.name = o.parent_author
+        INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.permlink = o.parent_permlink
+        INNER JOIN hivemind_app.hive_posts php
+            ON php.author_id = pha.id AND php.permlink_id = phpd.id AND php.counter_deleted = 0
+    ),
+    with_community AS (
+        SELECT r.*,
+            CASE
+                WHEN r.block_num < r.community_support_start_block THEN NULL
+                ELSE r.parent_community_id
+            END AS community_id,
+            hc.type_id AS community_type_id,
+            hr.role_id AS role_id
+        FROM resolved r
+        LEFT JOIN hivemind_app.hive_communities hc
+            ON hc.id = r.parent_community_id AND r.block_num >= r.community_support_start_block
+        LEFT JOIN hivemind_app.hive_roles hr
+            ON hr.community_id = r.parent_community_id AND hr.account_id = r.author_id
+               AND r.block_num >= r.community_support_start_block
+    ),
+    with_muting AS (
+        SELECT wc.*,
+            CASE
+                --- If parent is muted, child is always muted
+                WHEN wc.parent_is_muted THEN TRUE
+                --- No community: not muted
+                WHEN wc.community_id IS NULL THEN FALSE
+                --- Topic communities: never muted
+                WHEN wc.community_type_id = __community_type_topic THEN FALSE
+                --- Journal communities: comments are never muted by community type
+                WHEN wc.community_type_id = __community_type_journal THEN FALSE
+                --- Council communities: members are not muted
+                WHEN wc.community_type_id = __community_type_council
+                     AND wc.role_id IS NOT NULL AND wc.role_id >= __member_role THEN FALSE
+                --- Council: non-members are muted
+                WHEN wc.community_type_id = __community_type_council THEN TRUE
+                ELSE FALSE
+            END AS is_muted,
+            hivemind_app.encode_bitwise_mask(
+                ARRAY_REMOVE(ARRAY[
+                    CASE
+                        WHEN wc.community_id IS NOT NULL
+                             AND wc.community_type_id = __community_type_council
+                             AND (wc.role_id IS NULL OR wc.role_id < __member_role)
+                        THEN 1 ELSE NULL
+                    END,
+                    CASE WHEN wc.parent_is_muted THEN 2 ELSE NULL END
+                ], NULL)
+            ) AS muted_reasons
+        FROM with_community wc
+    ),
+    inserted AS (
+        INSERT INTO hivemind_app.hive_posts AS hp
+            (parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+             active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
+        SELECT
+            wm.parent_id,
+            wm.depth::SMALLINT,
+            wm.community_id,
+            wm.category_id,
+            wm.root_id,
+            wm.is_muted,
+            wm.is_valid,
+            wm.author_id,
+            wm.permlink_id,
+            wm.date,
+            wm.date,
+            hivemind_app.calculate_time_part_of_hot(wm.date),
+            hivemind_app.calculate_time_part_of_trending(wm.date),
+            wm.date,
+            wm.date + INTERVAL '7 days',
+            wm.date + INTERVAL '7 days',
+            0,
+            wm.block_num,
+            wm.block_num,
+            wm.muted_reasons
+        FROM with_muting wm
+        ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+            updated_at = EXCLUDED.updated_at,
+            active = EXCLUDED.active,
+            block_num = EXCLUDED.block_num
+        RETURNING
+            (xmax = 0) AS is_new_post,
+            hp.id,
+            hp.author_id,
+            hp.permlink_id,
+            hp.parent_id,
+            hp.community_id,
+            hp.is_valid,
+            hp.is_muted,
+            hp.depth,
+            hp.muted_reasons
+    )
+    SELECT
+        wm.seq_id,
+        ins.is_new_post,
+        ins.id,
+        ins.author_id,
+        ins.permlink_id,
+        (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = wm.category_id) AS post_category,
+        ins.parent_id,
+        wm.parent_author_id
+        ins.community_id,
+        ins.is_valid,
+        ins.is_muted,
+        ins.depth,
+        ins.muted_reasons
+    FROM inserted ins
+    INNER JOIN with_muting wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
+END
+$function$;
+
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
 CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
 RETURNS SETOF BIGINT
