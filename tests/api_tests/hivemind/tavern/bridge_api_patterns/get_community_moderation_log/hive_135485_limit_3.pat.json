@@ -1,35 +1,35 @@
 [
   {
-    "action": "mute_post",
-    "actor": "test-safari",
+    "action": "pin_post",
+    "actor": "blocktrades",
+    "date": "2016-09-15T18:02:03",
+    "new_value": "pinned",
+    "notes": null,
+    "old_value": "unpinned",
     "target_account": "blocktrades",
     "target_post_author": "blocktrades",
-    "target_post_permlink": "elephant01",
-    "old_value": "unmuted",
+    "target_post_permlink": "elephant01"
+  },
+  {
+    "action": "mute_post",
+    "actor": "blocktrades",
+    "date": "2016-09-15T18:02:03",
     "new_value": "muted",
-    "notes": "Muting deleted post",
-    "date": "2016-09-15T19:31:42"
+    "notes": "I don't like elephants",
+    "old_value": "unmuted",
+    "target_account": "blocktrades",
+    "target_post_author": "blocktrades",
+    "target_post_permlink": "elephant01"
   },
   {
     "action": "pin_post",
     "actor": "blocktrades",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "elephant01",
-    "old_value": "unpinned",
+    "date": "2016-09-15T18:02:00",
     "new_value": "pinned",
     "notes": null,
-    "date": "2016-09-15T18:01:42"
-  },
-  {
-    "action": "mute_post",
-    "actor": "blocktrades",
+    "old_value": "unpinned",
     "target_account": "blocktrades",
     "target_post_author": "blocktrades",
-    "target_post_permlink": "elephant01",
-    "old_value": "unmuted",
-    "new_value": "muted",
-    "notes": "I don't like elephants",
-    "date": "2016-09-15T18:01:42"
+    "target_post_permlink": "crocodile03"
   }
 ]
