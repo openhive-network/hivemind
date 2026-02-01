@@ -36,6 +36,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 1
     },
     "title": "Pinpost 11",
@@ -77,8 +78,11 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 1
     },
     "title": "powerful crocodile 01",
@@ -165,6 +169,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 1
     },
     "title": "Pinpost 1",
@@ -337,6 +342,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 1
     },
     "title": "Pinpost 5",
@@ -411,8 +417,11 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "Hello",
@@ -489,6 +498,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "powerful crocodile 03",
@@ -525,8 +535,12 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "is_pinned": true,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "powerful crocodile 02",
@@ -565,6 +579,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 12",
@@ -603,6 +618,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 10",
@@ -641,6 +657,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 9",
@@ -679,6 +696,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 8",
@@ -717,6 +735,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 7",
@@ -755,6 +774,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "is_pinned": true,
       "total_votes": 0
     },
     "title": "Pinpost 6",

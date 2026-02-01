@@ -2,6 +2,20 @@
   {
     "author": "test-safari",
     "blog": "test-safari",
+    "entry_id": 25,
+    "permlink": "reblogged-and-recreated",
+    "reblogged_on": "1970-01-01T00:00:00"
+  },
+  {
+    "author": "test-safari",
+    "blog": "test-safari",
+    "entry_id": 24,
+    "permlink": "muted-and-recreated",
+    "reblogged_on": "1970-01-01T00:00:00"
+  },
+  {
+    "author": "test-safari",
+    "blog": "test-safari",
     "entry_id": 23,
     "permlink": "please-comment-hive3-03",
     "reblogged_on": "1970-01-01T00:00:00"

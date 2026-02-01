@@ -246,8 +246,11 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
@@ -286,8 +289,11 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
@@ -742,8 +748,11 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "My muted post",
