@@ -103,7 +103,7 @@ class Posts(DbAdapterHolder):
         if permlinks:
             for chunk in chunks(list(permlinks), 5000):
                 values = ','.join(f"({_sql_str(p)})" for p in chunk)
-                db.query_no_return(
+                db.query_no_return_raw(
                     f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (permlink) "
                     f"SELECT v.p FROM (VALUES {values}) AS v(p) "
                     f"ON CONFLICT DO NOTHING"
@@ -112,7 +112,7 @@ class Posts(DbAdapterHolder):
         if categories:
             for chunk in chunks(list(categories), 5000):
                 values = ','.join(f"({_sql_str(c)})" for c in chunk)
-                db.query_no_return(
+                db.query_no_return_raw(
                     f"INSERT INTO {SCHEMA_NAME}.hive_category_data (category) "
                     f"SELECT v.c FROM (VALUES {values}) AS v(c) "
                     f"ON CONFLICT (category) DO NOTHING"
@@ -365,7 +365,7 @@ class Posts(DbAdapterHolder):
                     ARRAY[{','.join(chunk)}]::{SCHEMA_NAME}.post_tag_input[]
                 )
             """
-            db.query_no_return(sql)
+            db.query_no_return_raw(sql)
 
     @classmethod
     def _flush_deferred_comment_options(cls):
