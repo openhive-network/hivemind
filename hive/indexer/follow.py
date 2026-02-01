@@ -166,7 +166,7 @@ class Follow(DbAdapterHolder):
                 cls.muted_batches_to_flush.add_delete(follower, following, block_num)
                 cls.affected_accounts.add(following)
                 cls.idx += 1
-                if not NotificationCache.should_skip():
+                if not NotificationCache.should_skip_for_block(block_num):
                     NotificationCache.follow_notifications_to_flush.append(
                         (follower, following, block_num, cls._counter.increment(block_num))
                     )
