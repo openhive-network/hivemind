@@ -117,7 +117,7 @@ class VoteNotificationCache(NotificationCache):
                     AND hn.rshares >= 10e9
                     AND hn.vote_value >= 0.02
                 ORDER BY hn.block_num, created_at, hn.src, hn.dst
-                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+                ON CONFLICT DO NOTHING
             """
             for chunk in chunks(cls.vote_notifications, 1000):
                 cls.beginTx()
@@ -180,7 +180,7 @@ class PostNotificationCache(NotificationCache):
                 AND n.src IS DISTINCT FROM n.dst
                 AND m.follower IS NULL AND mi.following IS NULL
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
-            ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+            ON CONFLICT DO NOTHING
             """
             for chunk in chunks(cls.comment_notifications, 1000):
                 cls.beginTx()
@@ -254,7 +254,7 @@ class FollowNotificationCache(NotificationCache):
                     AND nd.src IS DISTINCT FROM nd.dst
                     AND m.follower IS NULL AND mi.following IS NULL
                 ORDER BY nd.block_num, created_at, r.id, r.id
-                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+                ON CONFLICT DO NOTHING
             """
             for chunk in chunks(cls.follow_notifications_to_flush, 1000):
                 cls.beginTx()
@@ -323,7 +323,7 @@ class ReblogNotificationCache(NotificationCache):
                     AND n.src IS DISTINCT FROM n.dst
                     AND m.follower IS NULL AND mi.following IS NULL
                 ORDER BY n.block_num, n.created_at, r.id, g.id, pp.parent_id, pp.id
-                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+                ON CONFLICT DO NOTHING
             """
             for chunk in chunks(cls.reblog_notifications_to_flush, 1000):
                 cls.beginTx()
