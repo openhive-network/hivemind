@@ -188,11 +188,12 @@ class Db:
 
         Use for queries with string-interpolated content that may contain
         colon-prefixed words (e.g., ':kingdom') which text() would misinterpret
-        as bind parameters.
+        as bind parameters. Also escapes '%' to '%%' so psycopg2 doesn't
+        misinterpret percent signs in content as parameter placeholders.
         """
         try:
             start = perf()
-            result = self._basic_connection.exec_driver_sql(sql)
+            result = self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
             Stats.log_db(sql, perf() - start)
             return result.fetchall()
         except Exception as e:
