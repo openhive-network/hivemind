@@ -82,8 +82,7 @@ services:
           --test-profile=False \
           --prometheus-port 11011 \
           --database-url="$${HAF_POSTGRES_URL}" \
-          --community-start-block 4998000 \
-          --max-batch 4000
+          --community-start-block 4998000
 
         echo "Waiting for reputation_tracker to complete..."
         wait $$REP_TRACKER_PID
