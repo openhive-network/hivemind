@@ -1,5 +1,13 @@
 [
   {
+    "date": "2016-08-17T12:06:03",
+    "id": "3382384238002177",
+    "msg": "@okay replied to your post",
+    "score": 34,
+    "type": "reply",
+    "url": "@okay/re-gtg-heavy-duty-witness-node-infrastructure-20160817t120511092z"
+  },
+  {
     "date": "2016-08-17T11:19:12",
     "id": "3381629686906885",
     "msg": "@aizensou voted on your post ($0.39)",
@@ -22,6 +30,30 @@
     "score": 50,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-17T09:09:39",
+    "id": "3379543129718785",
+    "msg": "@roelandp followed you",
+    "score": 61,
+    "type": "follow",
+    "url": "@roelandp"
+  },
+  {
+    "date": "2016-08-17T07:03:33",
+    "id": "3377512134475777",
+    "msg": "@mammasitta replied to your post",
+    "score": 53,
+    "type": "reply",
+    "url": "@mammasitta/re-gtg-heavy-duty-witness-node-infrastructure-20160817t070329871z"
+  },
+  {
+    "date": "2016-08-17T07:02:15",
+    "id": "3377491209093121",
+    "msg": "@mammasitta followed you",
+    "score": 53,
+    "type": "follow",
+    "url": "@mammasitta"
   },
   {
     "date": "2016-08-17T07:01:54",
@@ -88,6 +120,22 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-17T04:31:12",
+    "id": "3375058378555393",
+    "msg": "@screasey followed you",
+    "score": 28,
+    "type": "follow",
+    "url": "@screasey"
+  },
+  {
+    "date": "2016-08-17T04:00:42",
+    "id": "3374567129088001",
+    "msg": "@dajohns1420 replied to your post",
+    "score": 46,
+    "type": "reply",
+    "url": "@dajohns1420/re-gtg-heavy-duty-witness-node-infrastructure-20160817t040038640z"
+  },
+  {
     "date": "2016-08-17T03:48:39",
     "id": "3374373071224835",
     "msg": "@showmethecoinz voted on your post ($0.23)",
@@ -96,12 +144,52 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-17T03:00:21",
+    "id": "3373595136884737",
+    "msg": "@doze49 followed you",
+    "score": 31,
+    "type": "follow",
+    "url": "@doze49"
+  },
+  {
+    "date": "2016-08-17T02:12:48",
+    "id": "3372829277945858",
+    "msg": "@dr2073 replied to your post",
+    "score": 42,
+    "type": "reply",
+    "url": "@dr2073/re-gtg-heavy-duty-witness-node-infrastructure-20160817t021249248z"
+  },
+  {
     "date": "2016-08-17T01:46:03",
     "id": "3372398460010502",
     "msg": "@chriscrypto voted on your post ($0.20)",
     "score": 50,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-17T00:46:45",
+    "id": "3371443358269441",
+    "msg": "@joele followed you",
+    "score": 39,
+    "type": "follow",
+    "url": "@joele"
+  },
+  {
+    "date": "2016-08-17T00:31:24",
+    "id": "3371196129214465",
+    "msg": "@keverw followed you",
+    "score": 41,
+    "type": "follow",
+    "url": "@keverw"
+  },
+  {
+    "date": "2016-08-17T00:08:12",
+    "id": "3370822467059713",
+    "msg": "@condra followed you",
+    "score": 57,
+    "type": "follow",
+    "url": "@condra"
   },
   {
     "date": "2016-08-16T23:28:39",
@@ -184,12 +272,36 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-16T21:33:33",
+    "id": "3368331654463489",
+    "msg": "@wackou followed you",
+    "score": 52,
+    "type": "follow",
+    "url": "@wackou"
+  },
+  {
     "date": "2016-08-16T21:32:45",
     "id": "3368318777950214",
     "msg": "@wackou voted on your post ($9.78)",
     "score": 75,
     "type": "vote",
     "url": "@gtg/re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z"
+  },
+  {
+    "date": "2016-08-16T21:28:48",
+    "id": "3368255137775617",
+    "msg": "@wackou replied to your post",
+    "score": 52,
+    "type": "reply",
+    "url": "@wackou/re-gtg-heavy-duty-witness-node-infrastructure-20160816t212848539z"
+  },
+  {
+    "date": "2016-08-16T21:21:30",
+    "id": "3368137575628801",
+    "msg": "@bdavid followed you",
+    "score": 50,
+    "type": "follow",
+    "url": "@bdavid"
   },
   {
     "date": "2016-08-16T21:03:45",
@@ -214,6 +326,14 @@
     "score": 50,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-16T20:31:06",
+    "id": "3367325818421249",
+    "msg": "@jesta replied to your comment",
+    "score": 59,
+    "type": "reply_comment",
+    "url": "@jesta/re-gtg-re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t203107019z"
   },
   {
     "date": "2016-08-16T20:30:48",
@@ -248,6 +368,14 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-16T20:01:27",
+    "id": "3366848267550721",
+    "msg": "@brandonp replied to your post",
+    "score": 51,
+    "type": "reply",
+    "url": "@brandonp/re-gtg-heavy-duty-witness-node-infrastructure-20160816t200131779z"
+  },
+  {
     "date": "2016-08-16T19:49:30",
     "id": "3366655820300290",
     "msg": "@craig-grant voted on your post ($1.42)",
@@ -256,12 +384,36 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-16T19:40:27",
+    "id": "3366510051459073",
+    "msg": "@rawnetics followed you",
+    "score": 40,
+    "type": "follow",
+    "url": "@rawnetics"
+  },
+  {
     "date": "2016-08-16T19:31:09",
     "id": "3366360272863242",
     "msg": "@thecryptofiend voted on your post ($0.18)",
     "score": 50,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-16T19:31:06",
+    "id": "3366359446585346",
+    "msg": "@thecryptofiend replied to your post",
+    "score": 57,
+    "type": "reply",
+    "url": "@thecryptofiend/re-gtg-heavy-duty-witness-node-infrastructure-20160816t193106395z"
+  },
+  {
+    "date": "2016-08-16T19:30:06",
+    "id": "3366343353040897",
+    "msg": "@thecryptofiend followed you",
+    "score": 57,
+    "type": "follow",
+    "url": "@thecryptofiend"
   },
   {
     "date": "2016-08-16T19:29:09",
@@ -278,6 +430,14 @@
     "score": 100,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-16T19:21:45",
+    "id": "3366208866877441",
+    "msg": "@thebluepanda followed you",
+    "score": 54,
+    "type": "follow",
+    "url": "@thebluepanda"
   },
   {
     "date": "2016-08-16T19:18:42",
@@ -312,12 +472,28 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-16T19:11:06",
+    "id": "3366037324038145",
+    "msg": "@jesta replied to your post",
+    "score": 59,
+    "type": "reply",
+    "url": "@jesta/re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z"
+  },
+  {
     "date": "2016-08-16T19:09:45",
     "id": "3366015601737736",
     "msg": "@complexring voted on your post ($1.72)",
     "score": 75,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-16T19:08:06",
+    "id": "3365989005656067",
+    "msg": "@thebluepanda replied to your post",
+    "score": 54,
+    "type": "reply",
+    "url": "@thebluepanda/re-gtg-heavy-duty-witness-node-infrastructure-20160816t190814180z"
   },
   {
     "date": "2016-08-16T19:07:27",
@@ -344,6 +520,14 @@
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
+    "date": "2016-08-16T18:52:48",
+    "id": "3365742581907457",
+    "msg": "@someguy123 replied to your post",
+    "score": 57,
+    "type": "reply",
+    "url": "@someguy123/re-gtg-heavy-duty-witness-node-infrastructure-20160816t185248185z"
+  },
+  {
     "date": "2016-08-16T18:51:54",
     "id": "3365728107364354",
     "msg": "@someguy123 voted on your post ($0.20)",
@@ -358,6 +542,14 @@
     "score": 75,
     "type": "vote",
     "url": "@gtg/heavy-duty-witness-node-infrastructure"
+  },
+  {
+    "date": "2016-08-16T18:44:48",
+    "id": "3365613745471489",
+    "msg": "@sponge-bob followed you",
+    "score": 47,
+    "type": "follow",
+    "url": "@sponge-bob"
   },
   {
     "date": "2016-08-16T18:43:27",
@@ -440,12 +632,60 @@
     "url": "@gtg/re-wackou-btstools-development-bounties-20160811t173426180z"
   },
   {
+    "date": "2016-08-15T14:54:36",
+    "id": "3338713291554817",
+    "msg": "@fyrstikken followed you",
+    "score": 63,
+    "type": "follow",
+    "url": "@fyrstikken"
+  },
+  {
+    "date": "2016-08-15T14:16:39",
+    "id": "3338102055632897",
+    "msg": "@dennygalindo replied to your comment",
+    "score": 50,
+    "type": "reply_comment",
+    "url": "@dennygalindo/re-gtg-re-liondani-don-t-remove-curation-rewards-just-stop-them-when-the-post-reach-the-trending-page-20160815t141541480z"
+  },
+  {
     "date": "2016-08-15T12:43:24",
     "id": "3336600176033799",
     "msg": "@liondani voted on your post ($0.50)",
     "score": 50,
     "type": "vote",
     "url": "@gtg/re-liondani-don-t-remove-curation-rewards-just-stop-them-when-the-post-reach-the-trending-page-20160815t123329115z"
+  },
+  {
+    "date": "2016-08-15T02:50:54",
+    "id": "3327057287184387",
+    "msg": "@steemzine followed you",
+    "score": 48,
+    "type": "follow",
+    "url": "@steemzine"
+  },
+  {
+    "date": "2016-08-14T20:41:24",
+    "id": "3321106073124865",
+    "msg": "@ben99 followed you",
+    "score": 50,
+    "type": "follow",
+    "url": "@ben99"
+  },
+  {
+    "date": "2016-08-13T17:59:51",
+    "id": "3295311304851458",
+    "msg": "@mefisto followed you",
+    "score": 34,
+    "type": "follow",
+    "url": "@mefisto"
+  },
+  {
+    "date": "2016-08-13T15:19:30",
+    "id": "3292728687329281",
+    "msg": "@steemlinks followed you",
+    "score": 46,
+    "type": "follow",
+    "url": "@steemlinks"
   },
   {
     "date": "2016-08-12T19:15:24",
@@ -456,12 +696,44 @@
     "url": "@gtg/witness-gtg"
   },
   {
+    "date": "2016-08-12T08:49:57",
+    "id": "3263261722017793",
+    "msg": "@sunnyray followed you",
+    "score": 45,
+    "type": "follow",
+    "url": "@sunnyray"
+  },
+  {
     "date": "2016-08-11T10:30:00",
     "id": "3241680325050374",
     "msg": "@arcurus voted on your post ($0.02)",
     "score": 25,
     "type": "vote",
     "url": "@gtg/re-heretickitten-re-cheetah-cheetah-bot-explained-20160811t093103978z"
+  },
+  {
+    "date": "2016-08-11T10:24:45",
+    "id": "3241595759493122",
+    "msg": "@alexoz followed you",
+    "score": 46,
+    "type": "follow",
+    "url": "@alexoz"
+  },
+  {
+    "date": "2016-08-10T21:50:24",
+    "id": "3229446102319105",
+    "msg": "@geoffrey followed you",
+    "score": 53,
+    "type": "follow",
+    "url": "@geoffrey"
+  },
+  {
+    "date": "2016-08-10T21:32:57",
+    "id": "3229165050396673",
+    "msg": "@edtorrez followed you",
+    "score": 47,
+    "type": "follow",
+    "url": "@edtorrez"
   },
   {
     "date": "2016-08-10T20:57:36",
@@ -472,331 +744,59 @@
     "url": "@inertia/you-should-follow"
   },
   {
-    "date": "2016-08-07T19:20:30",
-    "id": "3157453332021252",
-    "msg": "@arcurus voted on your post ($0.23)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
+    "date": "2016-08-09T21:51:27",
+    "id": "3206270190354433",
+    "msg": "@frol followed you",
+    "score": 42,
+    "type": "follow",
+    "url": "@frol"
   },
   {
-    "date": "2016-08-06T06:01:09",
-    "id": "3121386075717634",
-    "msg": "@johnsmith voted on your post ($1.55)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T05:24:54",
-    "id": "3120802228600836",
-    "msg": "@boatymcboatface voted on your post ($5.26)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T03:36:45",
-    "id": "3119060350926850",
-    "msg": "@pal voted on your post ($2.99)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T02:19:36",
-    "id": "3117817763201028",
-    "msg": "@roadscape voted on your post ($77.75)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T02:12:18",
-    "id": "3117700188471302",
-    "msg": "@taoteh1221 voted on your post ($3.14)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:16:03",
-    "id": "3115827851165700",
-    "msg": "@steemservices voted on your post ($3.02)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:15:57",
-    "id": "3115826240552967",
-    "msg": "@danknugs voted on your post ($0.22)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:15:45",
-    "id": "3115823019327492",
-    "msg": "@justin voted on your post ($4.64)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:15:06",
-    "id": "3115812550344710",
-    "msg": "@silver voted on your post ($13.22)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:14:27",
-    "id": "3115802081361923",
-    "msg": "@complexring voted on your post ($34.80)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-06T00:00:39",
-    "id": "3115579816804356",
-    "msg": "@steemship voted on your post ($11.94)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T23:43:36",
-    "id": "3115305207332868",
-    "msg": "@anyx voted on your post ($1.22)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T21:34:48",
-    "id": "3113230733934615",
-    "msg": "@clains mentioned you and 25 others",
-    "score": 60,
-    "type": "mention",
-    "url": "@clains/witnesses-exposed-what-witnesses-have-done-for-us-this-week-third-edition"
-  },
-  {
-    "date": "2016-08-05T21:02:48",
-    "id": "3112715342053383",
-    "msg": "@r4fken voted on your post ($0.23)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T19:55:21",
-    "id": "3111628983762954",
-    "msg": "@jparty voted on your post ($0.35)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T19:31:42",
-    "id": "3111248073850892",
-    "msg": "@inertia voted on your post ($0.36)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T19:16:57",
-    "id": "3111010508472331",
-    "msg": "@glitterfart voted on your post ($4.71)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T19:15:30",
-    "id": "3110987154587657",
-    "msg": "@geoffrey voted on your post ($0.49)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T18:50:09",
-    "id": "3110578864259078",
-    "msg": "@edgeland voted on your post ($1.58)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T17:20:30",
-    "id": "3109134949941263",
-    "msg": "@celebr1ty voted on your post ($0.31)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T16:25:27",
-    "id": "3108248307630088",
-    "msg": "@juanmiguelsalas voted on your post ($0.87)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T16:22:18",
-    "id": "3108197573328910",
-    "msg": "@kaylinart voted on your post ($3.10)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T16:01:27",
-    "id": "3107861760573445",
-    "msg": "@paco voted on your post ($1.83)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T15:55:27",
-    "id": "3107765123809299",
-    "msg": "@lauralemons voted on your post ($0.60)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T15:35:24",
-    "id": "3107442195955716",
-    "msg": "@hcf27 voted on your post ($0.33)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T15:27:09",
-    "id": "3107309320405006",
-    "msg": "@blocktrades voted on your post ($643.22)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-08-05T15:25:42",
-    "id": "3107285966520327",
-    "msg": "@steempty voted on your post ($113.99)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/witness-gtg"
-  },
-  {
-    "date": "2016-07-04T05:06:54",
-    "id": "2355149146161156",
-    "msg": "@joelinux voted on your post ($0.03)",
+    "date": "2016-08-09T19:19:39",
+    "id": "3203825280221185",
+    "msg": "@leticiapink followed you",
     "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
+    "type": "follow",
+    "url": "@leticiapink"
   },
   {
-    "date": "2016-07-04T03:47:12",
-    "id": "2353865487810562",
-    "msg": "@justtryme90 voted on your post ($0.06)",
+    "date": "2016-08-09T16:35:27",
+    "id": "3201180654108673",
+    "msg": "@bobo012 followed you",
+    "score": 35,
+    "type": "follow",
+    "url": "@bobo012"
+  },
+  {
+    "date": "2016-08-09T13:06:45",
+    "id": "3197819305328641",
+    "msg": "@mariadianaelaine followed you",
     "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
+    "type": "follow",
+    "url": "@mariadianaelaine"
   },
   {
-    "date": "2016-07-04T01:02:00",
-    "id": "2351204755570690",
-    "msg": "@murh voted on your post ($0.04)",
-    "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
+    "date": "2016-08-09T05:46:57",
+    "id": "3190735830515713",
+    "msg": "@youngkim followed you",
+    "score": 31,
+    "type": "follow",
+    "url": "@youngkim"
   },
   {
-    "date": "2016-07-03T19:49:21",
-    "id": "2346169174851586",
-    "msg": "@ajvest voted on your post ($0.55)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/hello-world"
+    "date": "2016-08-08T12:01:18",
+    "id": "3173572335894529",
+    "msg": "@spaninv followed you",
+    "score": 44,
+    "type": "follow",
+    "url": "@spaninv"
   },
   {
-    "date": "2016-07-03T19:48:45",
-    "id": "2346159511175170",
-    "msg": "@creator voted on your post ($1.52)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T19:40:18",
-    "id": "2346023414398978",
-    "msg": "@ned voted on your post ($133.73)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T19:22:30",
-    "id": "2345736725331971",
-    "msg": "@kushed voted on your post ($13.39)",
-    "score": 100,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T18:52:00",
-    "id": "2345245488447490",
-    "msg": "@benjojo voted on your post ($0.67)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T18:50:45",
-    "id": "2345225355788290",
-    "msg": "@hannixx42 voted on your post ($0.05)",
-    "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T18:10:48",
-    "id": "2344581916000258",
-    "msg": "@tuck-fheman voted on your post ($0.33)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T17:51:12",
-    "id": "2344266235904002",
-    "msg": "@trogdor voted on your post ($0.11)",
-    "score": 50,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T17:41:27",
-    "id": "2344109201162242",
-    "msg": "@steemship voted on your post ($0.10)",
-    "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
-  },
-  {
-    "date": "2016-07-03T17:06:15",
-    "id": "2343542265479172",
-    "msg": "@omarb voted on your post ($0.05)",
-    "score": 25,
-    "type": "vote",
-    "url": "@gtg/hello-world"
+    "date": "2016-08-08T04:46:21",
+    "id": "3166566975799297",
+    "msg": "@inertia followed you",
+    "score": 54,
+    "type": "follow",
+    "url": "@inertia"
   }
 ]
