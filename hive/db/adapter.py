@@ -208,6 +208,19 @@ class Db:
             log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
             raise e
 
+    def query_no_return_raw(self, sql):
+        """Execute raw SQL without text() bind parameter parsing, no result expected.
+
+        Like query_all_raw but for statements that don't return rows (UPDATE, DELETE, etc.).
+        """
+        try:
+            start = perf()
+            self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
+            Stats.log_db(sql, perf() - start)
+        except Exception as e:
+            log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
+            raise e
+
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
         res = self._query(sql, **kwargs)

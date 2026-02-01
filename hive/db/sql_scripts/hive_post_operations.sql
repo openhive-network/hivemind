@@ -528,7 +528,7 @@ BEGIN
                 AND m.follower IS NULL
                 AND mi.following IS NULL
               ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
-              ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+              ON CONFLICT DO NOTHING
               RETURNING id;
 END;
 $function$;

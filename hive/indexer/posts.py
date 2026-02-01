@@ -258,7 +258,7 @@ class Posts(DbAdapterHolder):
                     f"{pct_hbd}, {allow_v}, {allow_cr}, {_sql_str(benef)}::json)"
                 )
             actual_query = sql.format(','.join(values))
-            db.query_all_raw(actual_query)
+            db.query_no_return_raw(actual_query)
 
         cls._pending_comment_option_ops.clear()
 
