@@ -191,6 +191,22 @@ class Db:
         res = self._query(sql, **kwargs)
         return res.fetchall()
 
+    def query_all_raw(self, sql):
+        """Execute raw SQL without SQLAlchemy text() bind parameter parsing.
+
+        Use for queries with string-interpolated content that may contain
+        colon-prefixed words (e.g., ':kingdom') which text() would misinterpret
+        as bind parameters.
+        """
+        try:
+            start = perf()
+            result = self._basic_connection.exec_driver_sql(sql)
+            Stats.log_db(sql, perf() - start)
+            return result.fetchall()
+        except Exception as e:
+            log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
+            raise e
+
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
         res = self._query(sql, **kwargs)

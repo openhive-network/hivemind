@@ -124,6 +124,18 @@
 								"body": "Much testing",
 								"json_metadata": "{\"tags\":[\"taverntest\",\"TavernTest\",\"# TavernTest\",\"taverntest\"]}"
 							}
+						},
+						{
+							"type": "comment_operation",
+							"value": {
+								"parent_author": "",
+								"parent_permlink": "test",
+								"author": "jouchelle",
+								"permlink": "colon-tag-regression-test",
+								"title": "Colon tag test",
+								"body": "Regression test for SQLAlchemy bind parameter parsing",
+								"json_metadata": "{\"tags\":[\":kingdom hearts 3\",\"test\"]}"
+							}
 						}
 					]
 				}
