@@ -26,6 +26,7 @@ class NotificationCache(DbAdapterHolder):
     reblog_notifications_to_flush = collections.OrderedDict()
 
     _skip_accumulation = False
+    _notification_min_block = None
 
     @classmethod
     def set_skip_accumulation(cls, skip):
@@ -41,6 +42,20 @@ class NotificationCache(DbAdapterHolder):
     def should_skip(cls):
         """Check if notification accumulation should be skipped."""
         return cls._skip_accumulation
+
+    @classmethod
+    def should_skip_for_block(cls, block_num):
+        """Check if notification accumulation should be skipped for a given block.
+
+        During MASSIVE_WITHOUT_INDEXES, only skip blocks older than the 90-day
+        notification window. Recent blocks (e.g., mock data in CI) still need
+        notifications accumulated.
+        """
+        if not cls._skip_accumulation:
+            return False
+        if cls._notification_min_block is None:
+            cls._notification_min_block = cls.notification_first_block(cls.db)
+        return block_num <= cls._notification_min_block
 
     @classmethod
     def notification_first_block(cls, db):
