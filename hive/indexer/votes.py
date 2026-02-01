@@ -20,8 +20,6 @@ class Votes(DbAdapterHolder):
     _votes_data = collections.OrderedDict()
     _votes_per_post = {}
     _counter = UniqueCounter()
-    _notification_min_block = None
-
     inside_flush = False
 
     @classmethod
@@ -33,12 +31,7 @@ class Votes(DbAdapterHolder):
         can be flushed at finalization with correct rshares. We limit to the
         90-day notification window to bound memory usage.
         """
-        if not NotificationCache.should_skip():
-            return True  # Normal mode or MASSIVE_WITH_INDEXES: accumulate all
-        # During MASSIVE_WITHOUT_INDEXES: only accumulate for recent blocks
-        if cls._notification_min_block is None:
-            cls._notification_min_block = NotificationCache.notification_first_block(NotificationCache.db)
-        return block_num > cls._notification_min_block
+        return not NotificationCache.should_skip_for_block(block_num)
 
     @classmethod
     def vote_op(cls, vote_operation, date):
