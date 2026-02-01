@@ -37,7 +37,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "i-hack-monero-xmr",
-    "post_id": 1258006,
+    "post_id": 1258074,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -49,6 +49,44 @@
     "title": "I hack Monero (Xmr) ?",
     "updated": "2016-09-15T19:44:00",
     "url": "/steemit/@agartha/i-hack-monero-xmr"
+  },
+  {
+    "active_votes": [],
+    "author": "test-safari",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 25.0,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "This post should not be reblogged because even though it reuses permlink of reblogged post, it is separate new post.",
+    "category": "hive-117600",
+    "children": 0,
+    "created": "2016-09-15T18:01:42",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "payout": 0.0,
+    "payout_at": "2016-09-22T18:01:42",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "reblogged-and-recreated",
+    "post_id": 1256892,
+    "reblogged_by": [
+      "agartha"
+    ],
+    "reblogs": 1,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "The post was deleted and permlink reused",
+    "updated": "2016-09-15T18:01:42",
+    "url": "/hive-117600/@test-safari/reblogged-and-recreated"
   },
   {
     "active_votes": [],
@@ -72,7 +110,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "reblogged-and-edited",
-    "post_id": 1256786,
+    "post_id": 1256854,
     "reblogged_by": [
       "agartha"
     ],
@@ -127,7 +165,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "private-patment-cam",
-    "post_id": 1183512,
+    "post_id": 1183575,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -186,7 +224,7 @@
     "pending_payout_value": "0.011 HBD",
     "percent_hbd": 10000,
     "permlink": "poloniex-and-traders",
-    "post_id": 1183426,
+    "post_id": 1183489,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -237,7 +275,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "bitcoin-event-day-very-important",
-    "post_id": 1012390,
+    "post_id": 1012450,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -292,7 +330,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "4hxwdq-bitcoin-day-event-very-important",
-    "post_id": 990211,
+    "post_id": 990264,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -340,7 +378,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "bitcoin-day-event-very-important",
-    "post_id": 990103,
+    "post_id": 990156,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -395,7 +433,7 @@
     "pending_payout_value": "0.002 HBD",
     "percent_hbd": 10000,
     "permlink": "maybe-the-true-story-for-bitfinix",
-    "post_id": 989720,
+    "post_id": 989772,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -443,7 +481,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "china-bitfinix-chines-customer-war",
-    "post_id": 989648,
+    "post_id": 989700,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -498,7 +536,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "mad-media-future",
-    "post_id": 917787,
+    "post_id": 917832,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -565,7 +603,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "hej",
-    "post_id": 917707,
+    "post_id": 917752,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -613,7 +651,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "privet-cam-payment",
-    "post_id": 712893,
+    "post_id": 712926,
     "reblogs": 0,
     "replies": [],
     "stats": {

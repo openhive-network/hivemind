@@ -25,7 +25,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "flagtest",
-    "post_id": 1258064,
+    "post_id": 1258132,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -60,7 +60,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notmember-hive-111119-changed-type-3",
-    "post_id": 1258059,
+    "post_id": 1258127,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -98,7 +98,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-111119-changed-type-3",
-    "post_id": 1258058,
+    "post_id": 1258126,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -134,7 +134,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notmember-hive-311119",
-    "post_id": 1258054,
+    "post_id": 1258122,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -172,7 +172,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-311119",
-    "post_id": 1258053,
+    "post_id": 1258121,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -207,7 +207,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notmember-hive-211119",
-    "post_id": 1258044,
+    "post_id": 1258112,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -245,7 +245,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-211119",
-    "post_id": 1258043,
+    "post_id": 1258111,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -280,16 +280,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notmember-hive-111119",
-    "post_id": 1258039,
+    "post_id": 1258107,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        1
-      ],
       "total_votes": 0
     },
     "title": "notmember This post will not be muted",
@@ -318,7 +315,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-111119",
-    "post_id": 1258038,
+    "post_id": 1258106,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -367,7 +364,7 @@
     "pending_payout_value": "0.002 HBD",
     "percent_hbd": 10000,
     "permlink": "test-post-1",
-    "post_id": 1258037,
+    "post_id": 1258105,
     "reblogs": 2,
     "replies": [],
     "stats": {
@@ -429,7 +426,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "iconomi-why-we-need-found-management-explained-on-graphs",
-    "post_id": 1258032,
+    "post_id": 1258100,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -506,7 +503,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "origami-part-11-the-model-of-skeleton-hands",
-    "post_id": 1258025,
+    "post_id": 1258093,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -564,7 +561,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 0,
     "permlink": "rangers-record-in-one-run-games-nearing-truly-historic-level",
-    "post_id": 1258024,
+    "post_id": 1258092,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -615,7 +612,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "i-hack-monero-xmr",
-    "post_id": 1258006,
+    "post_id": 1258074,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -674,7 +671,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "my-day-hospital",
-    "post_id": 1258002,
+    "post_id": 1258070,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -734,7 +731,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "wanna-see-something-cool",
-    "post_id": 1257987,
+    "post_id": 1258055,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -804,7 +801,7 @@
     "pending_payout_value": "0.001 HBD",
     "percent_hbd": 10000,
     "permlink": "russian-roulette-a-memoir-part-2-under-the-table-tactics",
-    "post_id": 1257975,
+    "post_id": 1258043,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -937,7 +934,7 @@
     "pending_payout_value": "0.691 HBD",
     "percent_hbd": 10000,
     "permlink": "original-fiction-jacked-book-one-the-origin-dime-chronicles-episode-10",
-    "post_id": 1257971,
+    "post_id": 1258039,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -991,7 +988,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "so-uh-vape-tricks-are-cool-now",
-    "post_id": 1257970,
+    "post_id": 1258038,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1040,7 +1037,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "cover-your-laptop-and-phone-camera-comey-dir-of-the-fbi-does",
-    "post_id": 1257965,
+    "post_id": 1258033,
     "reblogs": 0,
     "replies": [],
     "stats": {
