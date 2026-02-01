@@ -1,0 +1,67 @@
+[
+  {
+    "action": "mute_post",
+    "community": "hive-198723",
+    "community_title": "",
+    "actor": "test-safari",
+    "target_account": "agartha",
+    "target_post_author": "agartha",
+    "target_post_permlink": "regular-post",
+    "old_value": "unmuted",
+    "new_value": "muted",
+    "notes": "Muting community post of different community",
+    "date": "2016-09-15T19:31:42"
+  },
+  {
+    "action": "mute_post",
+    "community": "hive-135485",
+    "community_title": "World News",
+    "actor": "test-safari",
+    "target_account": "blocktrades",
+    "target_post_author": "blocktrades",
+    "target_post_permlink": "elephant01",
+    "old_value": "unmuted",
+    "new_value": "muted",
+    "notes": "Muting deleted post",
+    "date": "2016-09-15T19:31:42"
+  },
+  {
+    "action": "unmute_post",
+    "community": "hive-198723",
+    "community_title": "",
+    "actor": "test-safari",
+    "target_account": "alice",
+    "target_post_author": "alice",
+    "target_post_permlink": "First-after-member-post-hive3",
+    "old_value": "muted",
+    "new_value": "unmuted",
+    "notes": "hive3 Unmute first post",
+    "date": "2016-09-15T18:01:48"
+  },
+  {
+    "action": "unmute_post",
+    "community": "hive-198723",
+    "community_title": "",
+    "actor": "test-safari",
+    "target_account": "alice",
+    "target_post_author": "alice",
+    "target_post_permlink": "after-member-comment-to-please-comment-hive3",
+    "old_value": "muted",
+    "new_value": "unmuted",
+    "notes": "hive3 Unmute first comment",
+    "date": "2016-09-15T18:01:48"
+  },
+  {
+    "action": "unmute_post",
+    "community": "hive-157439",
+    "community_title": "",
+    "actor": "test-safari",
+    "target_account": "alice",
+    "target_post_author": "alice",
+    "target_post_permlink": "First-after-member-post-hive2",
+    "old_value": "muted",
+    "new_value": "unmuted",
+    "notes": "hive2 Unmute first post",
+    "date": "2016-09-15T18:01:48"
+  }
+]
