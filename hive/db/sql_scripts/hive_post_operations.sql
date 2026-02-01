@@ -580,3 +580,73 @@ BEGIN
 END
 $function$
 ;
+
+--- Batch delete posts: input type and function for deleting multiple posts at once.
+DROP TYPE IF EXISTS hivemind_app.delete_post_input CASCADE;
+CREATE TYPE hivemind_app.delete_post_input AS (
+    seq_id INTEGER,
+    author VARCHAR,
+    permlink VARCHAR,
+    block_num INTEGER,
+    date TIMESTAMP
+);
+
+DROP FUNCTION IF EXISTS hivemind_app.delete_hive_posts_batch;
+CREATE OR REPLACE FUNCTION hivemind_app.delete_hive_posts_batch(
+    _ops hivemind_app.delete_post_input[]
+)
+RETURNS TABLE (seq_id INTEGER, author VARCHAR, permlink VARCHAR)
+LANGUAGE plpgsql
+AS
+$function$
+BEGIN
+    RETURN QUERY
+    WITH ops AS (
+        SELECT t.seq_id, t.author, t.permlink, t.block_num, t.date
+        FROM unnest(_ops) AS t
+    ),
+    targets AS (
+        SELECT o.seq_id, o.author, o.permlink, o.block_num, o.date,
+               ha.id AS author_id, hp.id AS post_id, hpd.id AS permlink_id
+        FROM ops o
+        INNER JOIN hivemind_app.hive_accounts ha ON ha.name = o.author
+        INNER JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = o.permlink
+        INNER JOIN hivemind_app.hive_posts hp
+            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+    ),
+    new_counters AS (
+        SELECT t.post_id, t.author_id, t.permlink_id, t.block_num, t.date, t.seq_id,
+               t.author AS author_name, t.permlink AS permlink_name,
+               (SELECT MAX(hps.counter_deleted) + 1
+                FROM hivemind_app.hive_posts hps
+                WHERE hps.author_id = t.author_id AND hps.permlink_id = t.permlink_id
+               ) AS new_counter_deleted
+        FROM targets t
+    ),
+    update_posts AS (
+        UPDATE hivemind_app.hive_posts hp SET
+            counter_deleted = nc.new_counter_deleted,
+            block_num = nc.block_num,
+            active = nc.date
+        FROM new_counters nc
+        WHERE hp.id = nc.post_id
+    ),
+    del_reblogs AS (
+        DELETE FROM hivemind_app.hive_reblogs hr
+        USING new_counters nc
+        WHERE hr.post_id = nc.post_id
+    ),
+    del_feed AS (
+        DELETE FROM hivemind_app.hive_feed_cache hfc
+        USING new_counters nc
+        WHERE hfc.post_id = nc.post_id AND hfc.account_id = nc.author_id
+    ),
+    del_tags AS (
+        DELETE FROM hivemind_app.hive_post_tags hpt
+        USING new_counters nc
+        WHERE hpt.post_id = nc.post_id
+    )
+    SELECT nc.seq_id, nc.author_name::VARCHAR, nc.permlink_name::VARCHAR
+    FROM new_counters nc;
+END
+$function$;

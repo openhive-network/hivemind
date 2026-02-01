@@ -201,9 +201,46 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _flush_deferred_deletes(cls):
-        """Apply deferred delete_comment ops after batch comment creation."""
-        for op, block_date in cls._pending_delete_ops:
-            cls.delete(op, block_date)
+        """Apply deferred delete_comment ops after batch comment creation.
+
+        Uses a single CTE-based batch query instead of one delete per op.
+        Deduplicates by author/permlink, keeping only the last delete per pair
+        (to ensure counter_deleted is computed correctly).
+        Votes.drop_votes_of_deleted_comment() must remain in Python since it
+        mutates the in-memory votes dict.
+        """
+        if not cls._pending_delete_ops:
+            return
+
+        # Deduplicate: keep only the last delete per author/permlink
+        seen = {}
+        for idx, (op, block_date) in enumerate(cls._pending_delete_ops):
+            key = (op['author'], op['permlink'])
+            seen[key] = (idx, op, block_date)
+
+        deduped = sorted(seen.values(), key=lambda x: x[0])
+
+        db = DbAdapterHolder.common_block_processing_db()
+        for chunk in chunks(deduped, 1000):
+            ops_params = []
+            for seq_id_local, (_orig_idx, op, block_date) in enumerate(chunk):
+                ops_params.append(
+                    f"({seq_id_local}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
+                    f"{op['block_num']}, '{block_date}'::timestamp)"
+                )
+
+            sql = f"""
+                SELECT seq_id, author, permlink
+                FROM {SCHEMA_NAME}.delete_hive_posts_batch(
+                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.delete_post_input[]
+                )
+            """
+            rows = db.query_all_raw(sql)
+
+            for row in rows:
+                row = row._mapping
+                Votes.drop_votes_of_deleted_comment({'author': row['author'], 'permlink': row['permlink']})
+
         cls._pending_delete_ops.clear()
 
     @classmethod
