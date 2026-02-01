@@ -158,6 +158,12 @@ BEGIN
       result := hivemind_endpoints.bridge_api_list_all_subscriptions(__params);
     WHEN __method_type = 'list_pop_communities' THEN
       result := hivemind_endpoints.bridge_api_list_pop_communities(__params);
+    WHEN __method_type = 'get_community_moderation_log' THEN
+      result := hivemind_endpoints.bridge_api_get_community_moderation_log(__params);
+    WHEN __method_type = 'get_account_moderation_stats' THEN
+      result := hivemind_endpoints.bridge_api_get_account_moderation_stats(__params);
+    WHEN __method_type = 'get_moderator_activity' THEN
+      result := hivemind_endpoints.bridge_api_get_moderator_activity(__params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('bridge_api' || __method_type);
   END CASE;
