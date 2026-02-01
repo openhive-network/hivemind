@@ -27,13 +27,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-community-135485-comment",
-    "post_id": 1256881,
+    "post_id": 1256949,
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: I love secrets 01",
@@ -64,7 +67,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-monkey-01",
-    "post_id": 1256829,
+    "post_id": 1256897,
     "reblogs": 0,
     "replies": [],
     "stats": {
