@@ -1,30 +1,94 @@
 {
   "account": "blocktrades",
-  "stats": {
-    "times_muted": 0,
-    "times_unmuted": 0,
-    "times_flagged": 0,
-    "posts_pinned": 0,
-    "posts_unpinned": 0,
-    "role_changes": 2,
-    "title_changes": 0
-  },
   "recent_actions": [
     {
-      "action": "set_role",
+      "action": "pin_post",
+      "actor": "blocktrades",
       "community": "hive-135485",
       "community_title": "World News",
+      "date": "2016-09-15T18:02:03",
+      "notes": null
+    },
+    {
+      "action": "mute_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:03",
+      "notes": "I don't like elephants"
+    },
+    {
+      "action": "pin_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": null
+    },
+    {
+      "action": "pin_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": null
+    },
+    {
+      "action": "unmute_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": "I hate crocodiles 03, but they are cool"
+    },
+    {
+      "action": "mute_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": "I hate crocodiles 03"
+    },
+    {
+      "action": "mute_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": "I hate crocodiles 02"
+    },
+    {
+      "action": "mute_post",
+      "actor": "blocktrades",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
+      "notes": "I hate crocodiles 01"
+    },
+    {
+      "action": "set_role",
       "actor": "hive-135485",
-      "date": "2016-09-15T18:01:42",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "date": "2016-09-15T18:02:00",
       "notes": null
     },
     {
       "action": "set_role",
+      "actor": "test-safari",
       "community": "hive-135485",
       "community_title": "World News",
-      "actor": "test-safari",
-      "date": "2016-09-15T18:01:21",
+      "date": "2016-09-15T18:01:33",
       "notes": null
     }
-  ]
+  ],
+  "stats": {
+    "posts_pinned": 3,
+    "posts_unpinned": 0,
+    "role_changes": 2,
+    "times_flagged": 0,
+    "times_muted": 4,
+    "times_unmuted": 1,
+    "title_changes": 0
+  }
 }

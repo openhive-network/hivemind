@@ -1,94 +1,94 @@
 {
   "account": "alice",
-  "stats": {
-    "times_muted": 8,
-    "times_unmuted": 4,
-    "times_flagged": 0,
-    "posts_pinned": 0,
-    "posts_unpinned": 0,
-    "role_changes": 2,
-    "title_changes": 0
-  },
   "recent_actions": [
     {
       "action": "unmute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:48",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:09",
       "notes": "hive1 Unmute first post"
     },
     {
       "action": "unmute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:48",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:09",
       "notes": "hive1 Unmute first comment"
     },
     {
       "action": "mute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:45",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:06",
       "notes": "hive1 I hate second posts too!"
     },
     {
       "action": "mute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:45",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:06",
       "notes": "hive1 I hate first posts!"
     },
     {
       "action": "mute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:45",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:06",
       "notes": "I hate second comments too hive1-!"
     },
     {
       "action": "mute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:45",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:06",
       "notes": "I hate first comments hive1-!"
     },
     {
       "action": "set_role",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "hive-171487",
-      "date": "2016-09-15T18:01:42",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:02:00",
       "notes": null
     },
     {
       "action": "unmute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:39",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:57",
       "notes": "Unmute first post hive1"
     },
     {
       "action": "unmute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:39",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:57",
       "notes": "Unmute first comment hive1"
     },
     {
       "action": "mute_post",
-      "community": "hive-171487",
-      "community_title": "",
       "actor": "test-safari",
-      "date": "2016-09-15T18:01:36",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:54",
       "notes": "I hate second posts too-hive1!"
     }
-  ]
+  ],
+  "stats": {
+    "posts_pinned": 0,
+    "posts_unpinned": 0,
+    "role_changes": 2,
+    "times_flagged": 0,
+    "times_muted": 12,
+    "times_unmuted": 6,
+    "title_changes": 0
+  }
 }
