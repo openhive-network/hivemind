@@ -1,7 +1,7 @@
 [
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088406",
+    "id": "4062414723088400",
     "msg": "error: Post is muted because community type does not allow non members to post or comment and parent post/comment is muted",
     "score": 35,
     "type": "error",
@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088405",
+    "id": "4062414723088399",
     "msg": "error: Post is muted because community type does not allow non members to post or comment",
     "score": 35,
     "type": "error",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088404",
+    "id": "4062414723088398",
     "msg": "error: Post is muted because community type does not allow non members to post",
     "score": 35,
     "type": "error",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088403",
+    "id": "4062414723088395",
     "msg": "error: Post is muted because community type does not allow non members to post or comment",
     "score": 35,
     "type": "error",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088402",
+    "id": "4062414723088394",
     "msg": "error: Post is muted because community type does not allow non members to post",
     "score": 35,
     "type": "error",
@@ -41,26 +41,10 @@
   },
   {
     "date": "2016-09-15T19:47:54",
-    "id": "4062414723088401",
+    "id": "4062414723088393",
     "msg": "error: Post is muted because community type does not allow non members to post",
     "score": 35,
     "type": "error",
     "url": "@notmember/notmember-hive-211119"
-  },
-  {
-    "date": "2016-09-15T19:47:54",
-    "id": "4062414723088400",
-    "msg": "error: Post is muted because community type does not allow non members to post or comment",
-    "score": 35,
-    "type": "error",
-    "url": "@notmember/re-2-ismember-hive-111119"
-  },
-  {
-    "date": "2016-09-15T19:47:54",
-    "id": "4062414723088399",
-    "msg": "error: Post is muted because community type does not allow non members to post",
-    "score": 35,
-    "type": "error",
-    "url": "@notmember/notmember-hive-111119"
   }
 ]

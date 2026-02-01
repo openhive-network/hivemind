@@ -375,6 +375,8 @@ class Blocks:
 
                 # misc ops
                 elif op_type == OperationType.CUSTOM_JSON:  # follow/reblog/community ops
+                    if DbState.is_massive_sync() and Posts._pending_comment_ops:
+                        Posts.flush_pending_comment_ops()
                     CustomOp.process_op(op, num, cls._head_block_date)
 
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
