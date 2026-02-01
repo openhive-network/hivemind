@@ -93,7 +93,6 @@ class Posts(DbAdapterHolder):
             return 0
 
         n = len(cls._pending_comment_ops)
-        skip_notifications = NotificationCache.should_skip()
 
         # Process in chunks to avoid overly large SQL strings
         for chunk_start in range(0, n, 1000):
@@ -144,7 +143,7 @@ class Posts(DbAdapterHolder):
 
                 PostDataCache.add_data(row['id'], post_data, is_new_post)
 
-                if row['depth'] > 0 and not skip_notifications:
+                if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
                     type_id = 12 if row['depth'] == 1 else 13
                     key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
                     NotificationCache.comment_notifications[key] = {
@@ -254,7 +253,7 @@ class Posts(DbAdapterHolder):
             post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
 
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-        if row['depth'] > 0 and not NotificationCache.should_skip():
+        if row['depth'] > 0 and not NotificationCache.should_skip_for_block(op['block_num']):
             type_id = 12 if row['depth'] == 1 else 13
             key = f"{row['author_id']}/{row['parent_author_id']}/{type_id}/{row['id']}"
             NotificationCache.comment_notifications[key] = {
