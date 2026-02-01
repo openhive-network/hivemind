@@ -385,6 +385,11 @@ class CommunityOp:
                     team_members=result['team_members'],
                     payload=json.dumps(read_key_dict(self.op, 'props')),
                 )
+                props_json = json.dumps(self.props)
+                self._log_moderation(
+                    self.MOD_ACTION_UPDATE_PROPS,
+                    new_value=props_json[:256] if len(props_json) > 256 else props_json,
+                )
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
@@ -422,7 +427,14 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
+            if self._handle_result(result, 'set_role', payload=Role(self.role_id).name):
+                old_role_id = result['old_role_id'] if result['old_role_id'] is not None else 0
+                self._log_moderation(
+                    self.MOD_ACTION_SET_ROLE,
+                    target_account_id=self.account_id,
+                    old_value=Role(old_role_id).name,
+                    new_value=Role(self.role_id).name,
+                )
         elif action == 'setUserTitle':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -434,7 +446,13 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'set_title', payload=self.title)
+            if self._handle_result(result, 'set_title', payload=self.title):
+                self._log_moderation(
+                    self.MOD_ACTION_SET_TITLE,
+                    target_account_id=self.account_id,
+                    old_value=result['old_title'] or '',
+                    new_value=self.title,
+                )
         # Post-level actions
         elif action == 'mutePost':
             result = (
@@ -451,7 +469,15 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'mute_post', payload=self.notes)
+            if self._handle_result(result, 'mute_post', payload=self.notes):
+                self._log_moderation(
+                    self.MOD_ACTION_MUTE_POST,
+                    target_account_id=self.account_id,
+                    target_post_id=result['post_id'],
+                    old_value='unmuted',
+                    new_value='muted',
+                    notes=self.notes,
+                )
 
         elif action == 'unmutePost':
             result = (
@@ -467,7 +493,15 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'unmute_post', payload=self.notes)
+            if self._handle_result(result, 'unmute_post', payload=self.notes):
+                self._log_moderation(
+                    self.MOD_ACTION_UNMUTE_POST,
+                    target_account_id=self.account_id,
+                    target_post_id=result['post_id'],
+                    old_value='muted',
+                    new_value='unmuted',
+                    notes=self.notes,
+                )
 
         elif action == 'pinPost':
             result = (
@@ -483,7 +517,14 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'pin_post', payload=self.notes)
+            if self._handle_result(result, 'pin_post', payload=self.notes):
+                self._log_moderation(
+                    self.MOD_ACTION_PIN_POST,
+                    target_account_id=self.account_id,
+                    target_post_id=result['post_id'],
+                    old_value='unpinned',
+                    new_value='pinned',
+                )
         elif action == 'unpinPost':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -498,7 +539,14 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            self._handle_result(result, 'unpin_post', payload=self.notes)
+            if self._handle_result(result, 'unpin_post', payload=self.notes):
+                self._log_moderation(
+                    self.MOD_ACTION_UNPIN_POST,
+                    target_account_id=self.account_id,
+                    target_post_id=result['post_id'],
+                    old_value='pinned',
+                    new_value='unpinned',
+                )
         elif action == 'flagPost':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -517,6 +565,13 @@ class CommunityOp:
             if self._handle_result(result):
                 self._notify_team(
                     'flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes
+                )
+                self._log_moderation(
+                    self.MOD_ACTION_FLAG_POST,
+                    target_account_id=self.account_id,
+                    target_post_id=result['post_id'],
+                    new_value='flagged',
+                    notes=self.notes,
                 )
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
@@ -562,6 +617,40 @@ class CommunityOp:
             community_id=self.community_id,
             score=score,
             **kwargs,
+        )
+
+    # Moderation log action type constants
+    MOD_ACTION_SET_ROLE = 1
+    MOD_ACTION_SET_TITLE = 2
+    MOD_ACTION_MUTE_POST = 3
+    MOD_ACTION_UNMUTE_POST = 4
+    MOD_ACTION_PIN_POST = 5
+    MOD_ACTION_UNPIN_POST = 6
+    MOD_ACTION_FLAG_POST = 7
+    MOD_ACTION_UPDATE_PROPS = 8
+
+    def _log_moderation(
+        self, action_type, target_account_id=None, target_post_id=None, old_value=None, new_value=None, notes=None
+    ):
+        """Insert a moderation audit log entry."""
+        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
+                  (community_id, action, actor_id, target_account_id, target_post_id,
+                   old_value, new_value, notes, block_num, created_at)
+                  VALUES (:community_id, :action, :actor_id, :target_account_id,
+                          :target_post_id, :old_value, :new_value, :notes,
+                          :block_num, :created_at)"""
+        DbAdapterHolder.common_block_processing_db().query_no_return(
+            sql,
+            community_id=self.community_id,
+            action=action_type,
+            actor_id=self.actor_id,
+            target_account_id=target_account_id,
+            target_post_id=target_post_id,
+            old_value=old_value,
+            new_value=new_value,
+            notes=notes,
+            block_num=self.block_num,
+            created_at=self.date,
         )
 
     def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
