@@ -1,0 +1,30 @@
+{
+  "account": "blocktrades",
+  "stats": {
+    "times_muted": 0,
+    "times_unmuted": 0,
+    "times_flagged": 0,
+    "posts_pinned": 0,
+    "posts_unpinned": 0,
+    "role_changes": 2,
+    "title_changes": 0
+  },
+  "recent_actions": [
+    {
+      "action": "set_role",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "actor": "hive-135485",
+      "date": "2016-09-15T18:01:42",
+      "notes": null
+    },
+    {
+      "action": "set_role",
+      "community": "hive-135485",
+      "community_title": "World News",
+      "actor": "test-safari",
+      "date": "2016-09-15T18:01:21",
+      "notes": null
+    }
+  ]
+}
