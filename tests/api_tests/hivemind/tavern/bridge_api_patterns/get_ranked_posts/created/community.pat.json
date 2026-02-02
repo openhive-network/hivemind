@@ -149,7 +149,7 @@
     "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "tell me secret 05",
+    "body": "tell me secret 04",
     "category": "hive-117600",
     "children": 0,
     "created": "2016-09-15T18:01:30",
@@ -163,21 +163,18 @@
     "payout_at": "2016-09-22T18:01:30",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "secrets5",
+    "permlink": "secrets4",
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
       "is_pinned": true,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
-    "title": "I love secrets 05",
+    "title": "I love secrets 04",
     "updated": "2016-09-15T18:01:30",
-    "url": "/hive-117600/@test-safari/secrets5"
+    "url": "/hive-117600/@test-safari/secrets4"
   }
 ]
