@@ -1,46 +1,5 @@
 [
   {
-    "active_votes": [
-      {
-        "rshares": 280688878115,
-        "voter": "liondani"
-      }
-    ],
-    "author": "donkeypong",
-    "author_payout_value": "0.046 HBD",
-    "author_reputation": 69.86,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Awesome! Thanks for posting. The \"Day With...\" video is pretty good, too. \nhttps://www.youtube.com/watch?v=3Upz8m00FXo",
-    "category": "videos",
-    "children": 0,
-    "created": "2016-05-08T03:42:54",
-    "curator_payout_value": "0.047 HBD",
-    "depth": 1,
-    "is_paidout": true,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 280688878115,
-    "parent_author": "liondani",
-    "parent_permlink": "28bdsg-matthew-silver-a-man-of-genius",
-    "payout": 0.093,
-    "payout_at": "2016-08-03T00:00:06",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-liondani-28bdsg-matthew-silver-a-man-of-genius-20160508t034252022z",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "RE: Matthew Silver a man of genius",
-    "updated": "2016-05-08T03:42:54",
-    "url": "/videos/@liondani/28bdsg-matthew-silver-a-man-of-genius#@donkeypong/re-liondani-28bdsg-matthew-silver-a-man-of-genius-20160508t034252022z"
-  },
-  {
     "active_votes": [],
     "author": "ash",
     "author_payout_value": "0.000 HBD",
