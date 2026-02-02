@@ -1,0 +1,30 @@
+{
+  "code": -32602,
+  "data": {
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "missing a required argument: 'account'"
+    },
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2026-02-02T06:12:52"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:missing a required argument: 'account'"
+}
