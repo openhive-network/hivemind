@@ -7107,17 +7107,6 @@
       "weight": 1211331479473638
     },
     {
-      "author": "ivanuralsky",
-      "id": 2219061,
-      "last_update": "2016-08-07T02:27:48",
-      "num_changes": 0,
-      "permlink": "photographer-s-friend-middle-finger",
-      "rshares": 4917226434,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8869579216043053
-    },
-    {
       "author": "timelapse",
       "id": 2207919,
       "last_update": "2016-08-06T22:13:15",
@@ -7127,6 +7116,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 199669825329781
+    },
+    {
+      "author": "ivanuralsky",
+      "id": 2219061,
+      "last_update": "2016-08-07T02:27:48",
+      "num_changes": 0,
+      "permlink": "photographer-s-friend-middle-finger",
+      "rshares": 4917226434,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8869579216043053
     },
     {
       "author": "bitcoinmeister",
@@ -7503,17 +7503,6 @@
       "weight": 1517693437695472
     },
     {
-      "author": "choupette",
-      "id": 2214246,
-      "last_update": "2016-08-07T00:18:42",
-      "num_changes": 0,
-      "permlink": "indeed-an-ordinary-girl-once-a-travel-agent-bitcoin-miner-bitcoin-trader-got-rekt-but-i-never-give-up-never-ever-steem-ahead",
-      "rshares": 5531845518,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 934174525415207
-    },
-    {
       "author": "jamtaylor",
       "id": 2218095,
       "last_update": "2016-08-07T02:05:45",
@@ -7523,6 +7512,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 3898956215071023
+    },
+    {
+      "author": "choupette",
+      "id": 2214246,
+      "last_update": "2016-08-07T00:18:42",
+      "num_changes": 0,
+      "permlink": "indeed-an-ordinary-girl-once-a-travel-agent-bitcoin-miner-bitcoin-trader-got-rekt-but-i-never-give-up-never-ever-steem-ahead",
+      "rshares": 5531845518,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 934174525415207
     },
     {
       "author": "modprobe",
@@ -10440,17 +10440,6 @@
       "weight": 1119383670425575
     },
     {
-      "author": "josepimpo",
-      "id": 2285714,
-      "last_update": "2016-08-08T02:52:51",
-      "num_changes": 0,
-      "permlink": "bitfinex-one-of-the-biggest-exchange-platform-hacked-what-will-happen-now-bitcoin-was-not-hacked",
-      "rshares": 1844939692,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 2553680378564745
-    },
-    {
       "author": "healthyfood",
       "id": 2256648,
       "last_update": "2016-08-07T18:30:18",
@@ -10460,6 +10449,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 7979436204602235
+    },
+    {
+      "author": "josepimpo",
+      "id": 2285714,
+      "last_update": "2016-08-08T02:52:51",
+      "num_changes": 0,
+      "permlink": "bitfinex-one-of-the-biggest-exchange-platform-hacked-what-will-happen-now-bitcoin-was-not-hacked",
+      "rshares": 1844939692,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2553680378564745
     },
     {
       "author": "meesterboom",
