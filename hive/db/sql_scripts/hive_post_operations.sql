@@ -504,6 +504,7 @@ BEGIN
             wm.block_num, -- block_num_created
             wm.muted_reasons
         FROM with_muting wm
+        ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,
             active = EXCLUDED.active,
@@ -726,6 +727,7 @@ BEGIN
             wm.block_num,
             wm.muted_reasons
         FROM with_muting wm
+        ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,
             active = EXCLUDED.active,
