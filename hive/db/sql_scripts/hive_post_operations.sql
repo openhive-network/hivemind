@@ -565,47 +565,40 @@ WITH inputs AS (
            CAST(LEFT(LOWER(REGEXP_REPLACE(t.raw_tag, '[#\s]', '', 'g')), 32) AS VARCHAR) AS tag
     FROM unnest(_tags) AS t
 ),
-valid_tags AS (
-    SELECT DISTINCT i.post_id, i.is_new_post, i.tag
-    FROM inputs i
-    WHERE i.tag IS NOT NULL AND i.tag != ''
+distinct_tags AS (
+    SELECT DISTINCT tag FROM inputs WHERE tag != ''
 ),
---- Ensure all tags exist in hive_tag_data
 inserted_tags AS (
-    INSERT INTO hivemind_app.hive_tag_data (tag)
-    SELECT DISTINCT vt.tag FROM valid_tags vt
-    ON CONFLICT (tag) DO NOTHING
-    RETURNING id, tag
+    INSERT INTO hivemind_app.hive_tag_data AS htd(tag)
+    SELECT tag FROM distinct_tags
+    ON CONFLICT("tag") DO UPDATE SET tag = EXCLUDED.tag
+    RETURNING htd.id, htd.tag
 ),
-all_tags AS (
-    SELECT htd.id, htd.tag
-    FROM hivemind_app.hive_tag_data htd
-    WHERE htd.tag IN (SELECT DISTINCT vt.tag FROM valid_tags vt)
+tag_map AS (
+    SELECT it.id AS tag_id, it.tag FROM inserted_tags it
 ),
---- Build new tag associations
-new_associations AS (
-    SELECT vt.post_id, at2.id AS tag_id, vt.is_new_post
-    FROM valid_tags vt
-    INNER JOIN all_tags at2 ON at2.tag = vt.tag
+resolved AS (
+    SELECT DISTINCT i.post_id, i.is_new_post, tm.tag_id
+    FROM inputs i
+    INNER JOIN tag_map tm ON tm.tag = i.tag
+    WHERE i.tag != ''
 ),
---- For edits: delete tags that are no longer present
-deleted_old_tags AS (
+wanted_tags AS (
+    SELECT post_id, array_agg(tag_id) AS tag_ids FROM resolved GROUP BY post_id
+),
+deleted_tags AS (
     DELETE FROM hivemind_app.hive_post_tags hpt
-    USING (
-        SELECT DISTINCT na.post_id FROM new_associations na WHERE NOT na.is_new_post
-    ) AS edit_posts
-    WHERE hpt.post_id = edit_posts.post_id
-      AND hpt.tag_id NOT IN (
-          SELECT na2.tag_id FROM new_associations na2 WHERE na2.post_id = hpt.post_id
-      )
+    USING wanted_tags wt
+    WHERE hpt.post_id = wt.post_id
+      AND hpt.tag_id != ALL(wt.tag_ids)
+      AND EXISTS (SELECT 1 FROM resolved r WHERE r.post_id = wt.post_id AND NOT r.is_new_post)
     RETURNING hpt.post_id
 ),
---- Insert new tag associations (for both new posts and edits)
 inserted_post_tags AS (
     INSERT INTO hivemind_app.hive_post_tags (post_id, tag_id)
-    SELECT na.post_id, na.tag_id
-    FROM new_associations na
-    ON CONFLICT (post_id, tag_id) DO NOTHING
+    SELECT r.post_id, r.tag_id FROM resolved r
+    LEFT JOIN deleted_tags dt ON dt.post_id = 0  -- force evaluation of deleted_tags
+    ON CONFLICT DO NOTHING
     RETURNING post_id
 )
 SELECT post_id FROM inserted_post_tags;
