@@ -282,49 +282,12 @@
   },
   {
     "active_votes": [],
-    "author": "steemit",
+    "author": "alice",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 35.01,
+    "author_reputation": 25,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "My role do not change",
-    "category": "hive-198723",
-    "children": 0,
-    "created": "2016-09-15T18:01:36",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "payout": 0.0,
-    "payout_at": "2016-09-22T18:01:36",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "muted-in-this-community",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": true,
-      "hide": false,
-      "muted_reasons": [
-        4
-      ],
-      "total_votes": 0
-    },
-    "title": "i am muted in this community",
-    "updated": "2016-09-15T18:01:36",
-    "url": "/hive-198723/@steemit/muted-in-this-community"
-  },
-  {
-    "active_votes": [],
-    "author": "test-safari",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "testing muted people in community",
+    "body": "EDITED. This is my first post in this community !",
     "category": "hive-198723",
     "children": 1,
     "created": "2016-09-15T18:01:36",
@@ -338,7 +301,7 @@
     "payout_at": "2016-09-22T18:01:36",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "parent-post-for-muted-steemit",
+    "permlink": "My-first-post-hive-3",
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -347,9 +310,9 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "steemit-will-comment-this-post",
-    "updated": "2016-09-15T18:01:36",
-    "url": "/hive-198723/@test-safari/parent-post-for-muted-steemit"
+    "title": "Hello",
+    "updated": "2016-09-15T18:01:48",
+    "url": "/hive-198723/@alice/My-first-post-hive-3"
   },
   {
     "active_votes": [],
@@ -358,7 +321,7 @@
     "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Comment my posts in this community.01",
+    "body": "Comment my posts in this community.03",
     "category": "hive-198723",
     "children": 3,
     "created": "2016-09-15T18:01:36",
@@ -372,7 +335,7 @@
     "payout_at": "2016-09-22T18:01:36",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "please-comment-hive3",
+    "permlink": "please-comment-hive3-03",
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -381,9 +344,9 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "Comment my post01",
+    "title": "Comment my post03",
     "updated": "2016-09-15T18:01:36",
-    "url": "/hive-198723/@test-safari/please-comment-hive3"
+    "url": "/hive-198723/@test-safari/please-comment-hive3-03"
   },
   {
     "active_votes": [],
@@ -426,7 +389,7 @@
     "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Comment my posts in this community.03",
+    "body": "Comment my posts in this community.01",
     "category": "hive-198723",
     "children": 3,
     "created": "2016-09-15T18:01:36",
@@ -440,7 +403,7 @@
     "payout_at": "2016-09-22T18:01:36",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "please-comment-hive3-03",
+    "permlink": "please-comment-hive3",
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -449,18 +412,18 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "Comment my post03",
+    "title": "Comment my post01",
     "updated": "2016-09-15T18:01:36",
-    "url": "/hive-198723/@test-safari/please-comment-hive3-03"
+    "url": "/hive-198723/@test-safari/please-comment-hive3"
   },
   {
     "active_votes": [],
-    "author": "alice",
+    "author": "test-safari",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25,
+    "author_reputation": 25.0,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "EDITED. This is my first post in this community !",
+    "body": "testing muted people in community",
     "category": "hive-198723",
     "children": 1,
     "created": "2016-09-15T18:01:36",
@@ -474,7 +437,7 @@
     "payout_at": "2016-09-22T18:01:36",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "My-first-post-hive-3",
+    "permlink": "parent-post-for-muted-steemit",
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -483,8 +446,45 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "Hello",
-    "updated": "2016-09-15T18:01:48",
-    "url": "/hive-198723/@alice/My-first-post-hive-3"
+    "title": "steemit-will-comment-this-post",
+    "updated": "2016-09-15T18:01:36",
+    "url": "/hive-198723/@test-safari/parent-post-for-muted-steemit"
+  },
+  {
+    "active_votes": [],
+    "author": "steemit",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 35.01,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "My role do not change",
+    "category": "hive-198723",
+    "children": 0,
+    "created": "2016-09-15T18:01:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "payout": 0.0,
+    "payout_at": "2016-09-22T18:01:36",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "muted-in-this-community",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        4
+      ],
+      "total_votes": 0
+    },
+    "title": "i am muted in this community",
+    "updated": "2016-09-15T18:01:36",
+    "url": "/hive-198723/@steemit/muted-in-this-community"
   }
 ]
