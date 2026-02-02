@@ -5457,6 +5457,17 @@
       "weight": 2289015598938203
     },
     {
+      "author": "lemooljiang",
+      "id": 1730006,
+      "last_update": "2016-08-02T08:27:06",
+      "num_changes": 0,
+      "permlink": "5esssi-steem",
+      "rshares": 7974728083,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6013208078231606
+    },
+    {
       "author": "thepixelprincess",
       "id": 1726816,
       "last_update": "2016-08-02T06:55:24",
@@ -5477,17 +5488,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 3646164646743090
-    },
-    {
-      "author": "lemooljiang",
-      "id": 1730006,
-      "last_update": "2016-08-02T08:27:06",
-      "num_changes": 0,
-      "permlink": "5esssi-steem",
-      "rshares": 7974728083,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6013208078231606
     },
     {
       "author": "anonymint",
@@ -6348,17 +6348,6 @@
       "weight": 2731855987705138
     },
     {
-      "author": "mrs.steemit",
-      "id": 1757960,
-      "last_update": "2016-08-02T18:24:09",
-      "num_changes": 0,
-      "permlink": "3-things-about-negative-energy-you-need-to-know",
-      "rshares": 5521240646,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "15465146284777779"
-    },
-    {
       "author": "robrigo",
       "id": 1738696,
       "last_update": "2016-08-02T12:25:54",
@@ -6368,6 +6357,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": "9532247187694332"
+    },
+    {
+      "author": "mrs.steemit",
+      "id": 1757960,
+      "last_update": "2016-08-02T18:24:09",
+      "num_changes": 0,
+      "permlink": "3-things-about-negative-energy-you-need-to-know",
+      "rshares": 5521240646,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "15465146284777779"
     },
     {
       "author": "cwmyao1",
@@ -7426,17 +7426,6 @@
       "weight": "17263811576896594"
     },
     {
-      "author": "claudiop63",
-      "id": 1758216,
-      "last_update": "2016-08-02T18:28:06",
-      "num_changes": 0,
-      "permlink": "portrait-of-an-innovation-addict-my-journey-from-quantum-chromodynamics-to-cryptos-going-through-cern-and-lots-of-other-places",
-      "rshares": 5521240646,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5932296425589420
-    },
-    {
       "author": "mynameisbrian",
       "id": 1757546,
       "last_update": "2016-08-02T18:17:27",
@@ -7446,6 +7435,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": "9630900086915118"
+    },
+    {
+      "author": "claudiop63",
+      "id": 1758216,
+      "last_update": "2016-08-02T18:28:06",
+      "num_changes": 0,
+      "permlink": "portrait-of-an-innovation-addict-my-journey-from-quantum-chromodynamics-to-cryptos-going-through-cern-and-lots-of-other-places",
+      "rshares": 5521240646,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5932296425589420
     },
     {
       "author": "coinbitgold",
@@ -7459,17 +7459,6 @@
       "weight": 3091449019267969
     },
     {
-      "author": "itsnicoletv",
-      "id": 1759078,
-      "last_update": "2016-08-02T18:42:24",
-      "num_changes": 0,
-      "permlink": "dream-hotels-and-beaches-in-thailand-a-steemit-photo-gif-story-part-1",
-      "rshares": 4907769463,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 245029504817358
-    },
-    {
       "author": "kaylinart",
       "id": 1757934,
       "last_update": "2016-08-02T18:23:48",
@@ -7479,6 +7468,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 3007707513306743
+    },
+    {
+      "author": "itsnicoletv",
+      "id": 1759078,
+      "last_update": "2016-08-02T18:42:24",
+      "num_changes": 0,
+      "permlink": "dream-hotels-and-beaches-in-thailand-a-steemit-photo-gif-story-part-1",
+      "rshares": 4907769463,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 245029504817358
     },
     {
       "author": "desmonid",
@@ -7503,17 +7503,6 @@
       "weight": 168179827935926
     },
     {
-      "author": "satoshifpv",
-      "id": 1759170,
-      "last_update": "2016-08-02T18:43:33",
-      "num_changes": 0,
-      "permlink": "alert-bitfinex-hacked-security-breach-major-bitcoin-exchange-down",
-      "rshares": 4907769463,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3795284576104075
-    },
-    {
       "author": "nanzo-scoop",
       "id": 1757358,
       "last_update": "2016-08-02T18:15:15",
@@ -7523,6 +7512,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 494851784686466
+    },
+    {
+      "author": "satoshifpv",
+      "id": 1759170,
+      "last_update": "2016-08-02T18:43:33",
+      "num_changes": 0,
+      "permlink": "alert-bitfinex-hacked-security-breach-major-bitcoin-exchange-down",
+      "rshares": 4907769463,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3795284576104075
     },
     {
       "author": "recursive",
@@ -7800,6 +7800,17 @@
       "weight": "16086092786108758"
     },
     {
+      "author": "sexysaffa",
+      "id": 1784268,
+      "last_update": "2016-08-03T04:24:06",
+      "num_changes": 0,
+      "permlink": "photography-challenge-guess-the-city",
+      "rshares": 4295047574,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2546897555529229
+    },
+    {
       "author": "the-alien",
       "id": 1764461,
       "last_update": "2016-08-02T20:31:18",
@@ -7820,17 +7831,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1429255359635458
-    },
-    {
-      "author": "sexysaffa",
-      "id": 1784268,
-      "last_update": "2016-08-03T04:24:06",
-      "num_changes": 0,
-      "permlink": "photography-challenge-guess-the-city",
-      "rshares": 4295047574,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 2546897555529229
     },
     {
       "author": "jenelyn",
@@ -9285,17 +9285,6 @@
       "weight": 5217749376866845
     },
     {
-      "author": "steemship",
-      "id": 1793001,
-      "last_update": "2016-08-03T08:24:09",
-      "num_changes": 0,
-      "permlink": "shit-that-sparkles-on-the-value-of-whale-and-dog-poop",
-      "rshares": 4909374414,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 382857388900541
-    },
-    {
       "author": "penambang",
       "id": 1793095,
       "last_update": "2016-08-03T08:25:30",
@@ -9305,6 +9294,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 26519029980490
+    },
+    {
+      "author": "steemship",
+      "id": 1793001,
+      "last_update": "2016-08-03T08:24:09",
+      "num_changes": 0,
+      "permlink": "shit-that-sparkles-on-the-value-of-whale-and-dog-poop",
+      "rshares": 4909374414,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 382857388900541
     },
     {
       "author": "coinfox",
@@ -10198,17 +10198,6 @@
       "weight": 7316022250862153
     },
     {
-      "author": "xtester",
-      "id": 1811134,
-      "last_update": "2016-08-03T14:48:24",
-      "num_changes": 0,
-      "permlink": "perhaps-one-of-our-most-remarkable-achievements",
-      "rshares": 4297774598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 291655592423869
-    },
-    {
       "author": "shiba",
       "id": 1811832,
       "last_update": "2016-08-03T14:59:12",
@@ -10218,6 +10207,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 8879826574555492
+    },
+    {
+      "author": "xtester",
+      "id": 1811134,
+      "last_update": "2016-08-03T14:48:24",
+      "num_changes": 0,
+      "permlink": "perhaps-one-of-our-most-remarkable-achievements",
+      "rshares": 4297774598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 291655592423869
     },
     {
       "author": "timsaid",
@@ -10957,17 +10957,6 @@
       "weight": 0
     },
     {
-      "author": "brunopro",
-      "id": 1828703,
-      "last_update": "2016-08-03T20:17:03",
-      "num_changes": 0,
-      "permlink": "preaching-the-word-of-steemit-first-crowdspeaking-campaign-with-thunderclap-500-supporters-needed-to-go-live",
-      "rshares": 4298789640,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1520894124842846
-    },
-    {
       "author": "zorro",
       "id": 1828876,
       "last_update": "2016-08-03T20:19:24",
@@ -10988,6 +10977,17 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 923456364391738
+    },
+    {
+      "author": "brunopro",
+      "id": 1828703,
+      "last_update": "2016-08-03T20:17:03",
+      "num_changes": 0,
+      "permlink": "preaching-the-word-of-steemit-first-crowdspeaking-campaign-with-thunderclap-500-supporters-needed-to-go-live",
+      "rshares": 4298789640,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1520894124842846
     },
     {
       "author": "dantheman",
