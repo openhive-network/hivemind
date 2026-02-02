@@ -30,6 +30,10 @@ BEGIN
     WHERE name = _tag
     LIMIT 1;
 
+    IF _community_id IS NULL THEN
+      RETURN '[]'::jsonb;
+    END IF;
+
     -- Query for community posts
     _result = (
       SELECT jsonb_agg (
@@ -92,7 +96,11 @@ BEGIN
     );
   ELSE
     -- Resolve tag_id
-    _tag_id = hivemind_postgrest_utilities.find_tag_id(_tag, True);
+    _tag_id = hivemind_postgrest_utilities.find_tag_id(_tag, False);
+
+    IF _tag_id = 0 THEN
+      RETURN '[]'::jsonb;
+    END IF;
 
     -- Query for tag posts
     _result = (
@@ -103,10 +111,12 @@ BEGIN
         (
           SELECT hp.id, hp.author_id
           FROM hivemind_app.live_posts_view hp
-          JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
           WHERE hp.author_id = _account_id
-            AND hpt.tag_id = _tag_id
             AND (_post_id = 0 OR hp.id < _post_id)
+            AND EXISTS (
+              SELECT 1 FROM hivemind_app.hive_post_tags hpt
+              WHERE hpt.post_id = hp.id AND hpt.tag_id = _tag_id
+            )
           ORDER BY hp.id DESC
           LIMIT _limit
         )
