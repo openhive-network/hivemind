@@ -10,13 +10,15 @@ _account TEXT;
 _account_id INT;
 _community TEXT;
 _community_id INT;
+_last_id BIGINT;
+_limit INT;
 _stats JSONB;
-_recent_actions JSONB;
+_actions JSONB;
 _result JSONB;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(
     _params,
-    '{"account": "string", "community": "string"}',
+    '{"account": "string", "community": "string", "last_id": "number", "limit": "number"}',
     1,
     NULL
   );
@@ -35,6 +37,11 @@ BEGIN
     );
   END IF;
 
+  _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'last_id', False);
+
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
+  _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 1000, 'limit');
+
   SELECT jsonb_build_object(
     'times_muted', COALESCE(SUM(CASE WHEN action = 3 THEN 1 ELSE 0 END), 0),
     'times_unmuted', COALESCE(SUM(CASE WHEN action = 4 THEN 1 ELSE 0 END), 0),
@@ -48,7 +55,7 @@ BEGIN
   WHERE target_account_id = _account_id
     AND (_community_id IS NULL OR community_id = _community_id);
 
-  SELECT COALESCE(jsonb_agg(row_json), '[]'::jsonb) INTO _recent_actions FROM (
+  SELECT COALESCE(jsonb_agg(row_json), '[]'::jsonb) INTO _actions FROM (
     SELECT jsonb_build_object(
       'id', ml.id::TEXT,
       'action', hivemind_postgrest_utilities.get_moderation_action_name(ml.action),
@@ -63,14 +70,15 @@ BEGIN
     JOIN hivemind_app.hive_communities hc ON hc.id = ml.community_id
     WHERE ml.target_account_id = _account_id
       AND (_community_id IS NULL OR ml.community_id = _community_id)
+      AND (_last_id IS NULL OR ml.id < _last_id)
     ORDER BY ml.id DESC
-    LIMIT 10
+    LIMIT _limit
   ) sub;
 
   _result = jsonb_build_object(
     'account', _account,
     'stats', _stats,
-    'recent_actions', _recent_actions
+    'actions', _actions
   );
 
   RETURN _result;
