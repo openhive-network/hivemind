@@ -85,11 +85,9 @@ BEGIN
     (id, child_count)
       SELECT
         h1.parent_id AS queried_parent,
-        SUM(COALESCE((SELECT pc.child_count FROM hivemind_app.__post_children pc WHERE pc.id = h1.id),
-                      0
-                    ) + 1
-        ) AS count
+        SUM(COALESCE(pc.child_count, 0) + 1) AS count
       FROM hivemind_app.hive_posts h1
+      LEFT JOIN hivemind_app.__post_children pc ON pc.id = h1.id
       WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
       GROUP BY h1.parent_id
 
