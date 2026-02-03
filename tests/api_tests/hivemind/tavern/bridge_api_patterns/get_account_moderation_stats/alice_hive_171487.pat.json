@@ -7,7 +7,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:09",
-      "id": "0",
       "notes": "hive1 Unmute first post"
     },
     {
@@ -16,7 +15,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:09",
-      "id": "0",
       "notes": "hive1 Unmute first comment"
     },
     {
@@ -25,7 +23,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:06",
-      "id": "0",
       "notes": "hive1 I hate second posts too!"
     },
     {
@@ -34,7 +31,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:06",
-      "id": "0",
       "notes": "hive1 I hate first posts!"
     },
     {
@@ -43,7 +39,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:06",
-      "id": "0",
       "notes": "I hate second comments too hive1-!"
     },
     {
@@ -52,7 +47,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:06",
-      "id": "0",
       "notes": "I hate first comments hive1-!"
     },
     {
@@ -61,7 +55,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:00",
-      "id": "0",
       "notes": null
     },
     {
@@ -70,7 +63,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:01:57",
-      "id": "0",
       "notes": "Unmute first post hive1"
     },
     {
@@ -79,7 +71,6 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:01:57",
-      "id": "0",
       "notes": "Unmute first comment hive1"
     },
     {
@@ -88,8 +79,87 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:01:54",
-      "id": "0",
       "notes": "I hate second posts too-hive1!"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:54",
+      "notes": "I hate first posts-hive1!"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:54",
+      "notes": "I hate second comments too-hive1!"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:54",
+      "notes": "I hate first comments-hive1!"
+    },
+    {
+      "action": "unmute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:45",
+      "notes": "Unmuted her first post-hive-1"
+    },
+    {
+      "action": "unmute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:45",
+      "notes": "Unmuted her first comment-hive1"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:42",
+      "notes": "second muted post-01"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:42",
+      "notes": "first muted post-1"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:42",
+      "notes": "first muted comment01"
+    },
+    {
+      "action": "mute_post",
+      "actor": "test-safari",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:42",
+      "notes": "first muted comment"
+    },
+    {
+      "action": "set_role",
+      "actor": "hive-171487",
+      "community": "hive-171487",
+      "community_title": "Banana",
+      "date": "2016-09-15T18:01:33",
+      "notes": null
     }
   ],
   "stats": {
