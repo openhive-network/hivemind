@@ -34,7 +34,6 @@ class CustomOp:
 
     @classmethod
     def process_op(cls, op, block_num, block_date):
-        str(op['id']) + ('-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '')
 
         account = _get_auth(op)
         if not account:
