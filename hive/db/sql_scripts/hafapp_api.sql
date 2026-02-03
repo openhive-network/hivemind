@@ -44,6 +44,9 @@ BEGIN
                AND (ho.op_type_id < 50
                  OR ho.op_type_id in (51, 53, 61, 72, 73)
                  )
+               AND (ho.op_type_id != 18
+                 OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
+                 )
             ) as op
         GROUP BY op.block_num
     ;
@@ -90,6 +93,9 @@ BEGIN
                  WHERE ho.block_num BETWEEN _first_block AND _last_block
                    AND (ho.op_type_id < 50
                      OR ho.op_type_id in (51, 53, 61, 72, 73)
+                     )
+                   AND (ho.op_type_id != 18
+                     OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
                      )
                 ) as op
             GROUP BY op.block_num
