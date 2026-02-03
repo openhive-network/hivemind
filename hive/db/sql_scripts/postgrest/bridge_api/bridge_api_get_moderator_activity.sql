@@ -47,7 +47,6 @@ BEGIN
         'action', hivemind_postgrest_utilities.get_moderation_action_name(ml.action),
         'community', hc.name,
         'community_title', hc.title,
-        'actor', actor_acc.name,
         'target_account', target_acc.name,
         'target_post_author', post_author.name,
         'target_post_permlink', pd.permlink,
@@ -57,7 +56,6 @@ BEGIN
         'date', hivemind_postgrest_utilities.json_date(ml.created_at)
       ) AS row_json
       FROM hivemind_app.hive_moderation_log ml
-      JOIN hivemind_app.hive_accounts actor_acc ON actor_acc.id = ml.actor_id
       JOIN hivemind_app.hive_communities hc ON hc.id = ml.community_id
       LEFT JOIN hivemind_app.hive_accounts target_acc ON target_acc.id = ml.target_account_id
       LEFT JOIN hivemind_app.hive_posts hp ON hp.id = ml.target_post_id

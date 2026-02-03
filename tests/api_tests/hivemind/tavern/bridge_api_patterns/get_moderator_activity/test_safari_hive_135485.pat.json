@@ -1,7 +1,6 @@
 [
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -15,7 +14,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -29,7 +27,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -43,7 +40,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -57,7 +53,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -71,7 +66,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -85,7 +79,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -99,7 +92,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -113,7 +105,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -127,7 +118,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -141,7 +131,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -155,7 +144,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -169,7 +157,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -183,7 +170,6 @@
   },
   {
     "action": "mute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:51",
@@ -197,7 +183,6 @@
   },
   {
     "action": "unmute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:39",
@@ -211,7 +196,6 @@
   },
   {
     "action": "mute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:39",
@@ -225,7 +209,6 @@
   },
   {
     "action": "mute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:39",
@@ -239,7 +222,6 @@
   },
   {
     "action": "flag_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -253,7 +235,6 @@
   },
   {
     "action": "unpin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -267,7 +248,6 @@
   },
   {
     "action": "pin_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -281,7 +261,6 @@
   },
   {
     "action": "unmute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -295,7 +274,6 @@
   },
   {
     "action": "mute_post",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -309,7 +287,6 @@
   },
   {
     "action": "set_title",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
@@ -323,7 +300,6 @@
   },
   {
     "action": "set_role",
-    "actor": "test-safari",
     "community": "hive-135485",
     "community_title": "World News",
     "date": "2016-09-15T18:01:33",
