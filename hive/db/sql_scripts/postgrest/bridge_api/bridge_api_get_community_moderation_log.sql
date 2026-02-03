@@ -59,6 +59,7 @@ BEGIN
       LEFT JOIN hivemind_app.hive_accounts post_author ON post_author.id = hp.author_id
       LEFT JOIN hivemind_app.hive_permlink_data pd ON pd.id = hp.permlink_id
       WHERE ml.community_id = _community_id
+        AND ml.action <> 8
         AND (_action_id IS NULL OR ml.action = _action_id)
         AND (_last_id IS NULL OR ml.id < _last_id)
       ORDER BY ml.id DESC

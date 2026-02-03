@@ -385,11 +385,6 @@ class CommunityOp:
                     team_members=result['team_members'],
                     payload=json.dumps(read_key_dict(self.op, 'props')),
                 )
-                props_json = json.dumps(self.props)
-                self._log_moderation(
-                    self.MOD_ACTION_UPDATE_PROPS,
-                    new_value=props_json[:256] if len(props_json) > 256 else props_json,
-                )
 
         elif action == 'subscribe':
             params['counter'] = CommunityOp._counter.increment(self.block_num)
@@ -627,7 +622,6 @@ class CommunityOp:
     MOD_ACTION_PIN_POST = 5
     MOD_ACTION_UNPIN_POST = 6
     MOD_ACTION_FLAG_POST = 7
-    MOD_ACTION_UPDATE_PROPS = 8
 
     def _log_moderation(
         self, action_type, target_account_id=None, target_post_id=None, old_value=None, new_value=None, notes=None
