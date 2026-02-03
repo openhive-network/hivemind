@@ -1,6 +1,6 @@
 {
   "account": "alice",
-  "recent_actions": [
+  "actions": [
     {
       "action": "unmute_post",
       "actor": "test-safari",
