@@ -13,7 +13,8 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
-from hive.utils.misc import UniqueCounter
+from hive.utils.misc import UniqueCounter, chunks
+from hive.utils.normalize import escape_characters
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
@@ -257,6 +258,11 @@ class CommunityOp:
 
     _notification_first_block = None
     _counter = UniqueCounter()
+    _moderation_log_buffer = []
+
+    @classmethod
+    def sync_tx_active(cls):
+        return False
 
     # pylint: disable=too-many-instance-attributes
 
@@ -626,26 +632,78 @@ class CommunityOp:
     def _log_moderation(
         self, action_type, target_account_id=None, target_post_id=None, old_value=None, new_value=None, notes=None
     ):
-        """Insert a moderation audit log entry."""
-        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
-                  (community_id, action, actor_id, target_account_id, target_post_id,
-                   old_value, new_value, notes, block_num, created_at)
-                  VALUES (:community_id, :action, :actor_id, :target_account_id,
-                          :target_post_id, :old_value, :new_value, :notes,
-                          :block_num, :created_at)"""
-        DbAdapterHolder.common_block_processing_db().query_no_return(
-            sql,
-            community_id=self.community_id,
-            action=action_type,
-            actor_id=self.actor_id,
-            target_account_id=target_account_id,
-            target_post_id=target_post_id,
-            old_value=old_value,
-            new_value=new_value,
-            notes=notes,
-            block_num=self.block_num,
-            created_at=self.date,
+        """Buffer or insert a moderation audit log entry."""
+        from hive.db.db_state import DbState
+
+        entry = (
+            self.community_id,
+            action_type,
+            self.actor_id,
+            target_account_id,
+            target_post_id,
+            old_value,
+            new_value,
+            notes,
+            self.block_num,
+            self.date,
         )
+
+        if DbState.is_massive_sync():
+            CommunityOp._moderation_log_buffer.append(entry)
+        else:
+            sql = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
+                      (community_id, action, actor_id, target_account_id, target_post_id,
+                       old_value, new_value, notes, block_num, created_at)
+                      VALUES (:community_id, :action, :actor_id, :target_account_id,
+                              :target_post_id, :old_value, :new_value, :notes,
+                              :block_num, :created_at)"""
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                sql,
+                community_id=self.community_id,
+                action=action_type,
+                actor_id=self.actor_id,
+                target_account_id=target_account_id,
+                target_post_id=target_post_id,
+                old_value=old_value,
+                new_value=new_value,
+                notes=notes,
+                block_num=self.block_num,
+                created_at=self.date,
+            )
+
+    @classmethod
+    def flush_moderation_log(cls):
+        """Flush buffered moderation log entries in bulk."""
+        n = len(cls._moderation_log_buffer)
+        if n == 0:
+            return n
+
+        def _to_sql_values(entry):
+            community_id, action, actor_id, target_account_id, target_post_id, old_value, new_value, notes, block_num, created_at = entry
+            return "({}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp)".format(
+                community_id,
+                action,
+                actor_id,
+                target_account_id if target_account_id is not None else "NULL",
+                target_post_id if target_post_id is not None else "NULL",
+                escape_characters(old_value) if old_value is not None else "NULL",
+                escape_characters(new_value) if new_value is not None else "NULL",
+                escape_characters(notes) if notes is not None else "NULL",
+                block_num,
+                created_at,
+            )
+
+        sql_template = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
+                           (community_id, action, actor_id, target_account_id, target_post_id,
+                            old_value, new_value, notes, block_num, created_at)
+                           VALUES {{}}"""
+
+        values = [_to_sql_values(entry) for entry in cls._moderation_log_buffer]
+        for chunk in chunks(values, 1000):
+            DbAdapterHolder.common_block_processing_db().query_no_return(sql_template.format(','.join(chunk)))
+
+        cls._moderation_log_buffer.clear()
+        return n
 
     def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
