@@ -363,17 +363,6 @@
     "target_post_permlink": null
   },
   {
-    "action": "update_props",
-    "actor": "test-safari",
-    "date": "2016-09-15T18:01:33",
-    "new_value": "{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":\"{\\\"streams\\\":[[\\\"Say It Here\\\",\\\"0\\\",[\\\"member\\\"],[\\\"member\\\"]],[\\\"About\\\",\\\"\\\\\\/about\\\",null,null],[\\\"Visit Community\\",
-    "notes": null,
-    "old_value": null,
-    "target_account": null,
-    "target_post_author": null,
-    "target_post_permlink": null
-  },
-  {
     "action": "set_role",
     "actor": "hive-135485",
     "date": "2016-09-15T18:01:30",

@@ -14,7 +14,6 @@ BEGIN
     WHEN 5 THEN RETURN 'pin_post';
     WHEN 6 THEN RETURN 'unpin_post';
     WHEN 7 THEN RETURN 'flag_post';
-    WHEN 8 THEN RETURN 'update_props';
     ELSE RETURN 'unknown';
   END CASE;
 END
@@ -37,7 +36,6 @@ BEGIN
     WHEN 'pin_post' THEN RETURN 5;
     WHEN 'unpin_post' THEN RETURN 6;
     WHEN 'flag_post' THEN RETURN 7;
-    WHEN 'update_props' THEN RETURN 8;
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid moderation action type: ' || _action_name);
   END CASE;
