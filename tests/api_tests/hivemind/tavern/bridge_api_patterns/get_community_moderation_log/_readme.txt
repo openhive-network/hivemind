@@ -10,7 +10,7 @@ params:
   "action_type":"{string}",
 
     optional, filter by action: "set_role", "set_title", "mute_post",
-    "unmute_post", "pin_post", "unpin_post", "flag_post", "update_props"
+    "unmute_post", "pin_post", "unpin_post", "flag_post"
 
   "last_id":{number},
 
