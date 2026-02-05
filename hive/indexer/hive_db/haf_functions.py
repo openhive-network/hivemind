@@ -5,6 +5,9 @@ from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
+# Custom JSON types that Hivemind processes
+HIVEMIND_CUSTOM_JSON_TYPES = ['follow', 'reblog', 'community', 'notify']
+
 
 def prepare_app_context(db: Db) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' and '{REPTRACKER_SCHEMA_NAME}' contexts.")
@@ -28,3 +31,15 @@ def prepare_app_context(db: Db) -> None:
         )  # if existing context, make it non-forking
         is_forking = db.query_one(f"SELECT hive.app_is_forking('{SCHEMA_NAME}') as is_forking;")
         log.info(f"is_forking={is_forking}")
+
+    # Create optimized partial index for Hivemind's custom_json types
+    # This index only includes follow/reblog/community/notify, excluding high-volume
+    # types like Splinterlands that Hivemind doesn't process
+    _ensure_custom_json_type_index(db)
+
+
+def _ensure_custom_json_type_index(db: Db) -> None:
+    """Create partial index on hafd.operations for Hivemind's custom_json types."""
+    types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]"
+    log.info(f"Ensuring custom_json_type index exists for types: {HIVEMIND_CUSTOM_JSON_TYPES}")
+    db.query_no_return(f"SELECT hive.create_custom_json_type_index({types_array});")
