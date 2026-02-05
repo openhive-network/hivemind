@@ -183,8 +183,8 @@ ruff = "0.11.5"
 
 [package.source]
 type = "legacy"
-url = "https://gitlab.syncad.com/api/v4/projects/484/packages/pypi/simple"
-reference = "gitlab-api_client_generator"
+url = "https://gitlab.syncad.com/api/v4/groups/136/-/packages/pypi/simple"
+reference = "gitlab-hive"
 
 [[package]]
 name = "argcomplete"
@@ -1586,8 +1586,8 @@ msgspec = "0.18.6"
 
 [package.source]
 type = "legacy"
-url = "https://gitlab.syncad.com/api/v4/projects/362/packages/pypi/simple"
-reference = "gitlab-schemas"
+url = "https://gitlab.syncad.com/api/v4/groups/136/-/packages/pypi/simple"
+reference = "gitlab-hive"
 
 [[package]]
 name = "six"
@@ -1811,4 +1811,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "04fe33055f3f99d25d47780505437d34544904fc778a2626a34459c5d2fec2f5"
+content-hash = "151266c15c03f857fb8ce8e6b3bd8d5f4abed2bc24165d1fb03925c42107dc97"
