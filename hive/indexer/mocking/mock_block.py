@@ -81,13 +81,41 @@ class OperationBase:
     def body(self) -> dict:
         return self._body
 
+    _custom_json_seq_synced = False
+
+    def _resolve_custom_json_type_id(self):
+        """For custom_json operations, resolve or insert the custom_json_type_id."""
+        if self.type != OperationType.CUSTOM_JSON:
+            return None
+        cj_id = self.body.get('value', {}).get('id')
+        if not cj_id:
+            return None
+        # Try to find existing type first (populated by hived during replay)
+        type_id = Db.instance().query_one(
+            sql="SELECT id FROM hafd.custom_json_types WHERE custom_json_id = :cj_id",
+            cj_id=cj_id,
+        )
+        if type_id is not None:
+            return type_id
+        # Sync the identity sequence once before first insert — hived uses
+        # OVERRIDING SYSTEM VALUE which doesn't advance the sequence
+        if not OperationBase._custom_json_seq_synced:
+            Db.instance().query_one(
+                sql="SELECT setval(pg_get_serial_sequence('hafd.custom_json_types', 'id'), GREATEST(COALESCE(MAX(id), 0), 1)) FROM hafd.custom_json_types"
+            )
+            OperationBase._custom_json_seq_synced = True
+        # Insert new type for mock-only custom_json ids not seen during replay
+        return Db.instance().query_one(
+            sql="""
+                INSERT INTO hafd.custom_json_types(custom_json_id)
+                VALUES (:cj_id)
+                ON CONFLICT (custom_json_id) DO NOTHING
+                RETURNING id
+            """,
+            cj_id=cj_id,
+        )
+
     def push(self) -> None:
-        sql = """
-INSERT INTO
-    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_binary)
-VALUES
-    (:id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation);
-"""
         OperationBase.pos_in_block += 1
 
         OperationBase.operation_id = Db.instance().query_one(
@@ -100,11 +128,20 @@ VALUES
             f'Attempting to push mocked {self.__class__.__name__} - type: {self.type} id: {OperationBase.operation_id}'
         )
 
+        custom_json_type_id = self._resolve_custom_json_type_id()
+
+        sql = """
+INSERT INTO
+    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_binary, custom_json_type_id)
+VALUES
+    (:id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation, :cj_type_id);
+"""
         Db.instance().query(
             sql=sql,
             id=OperationBase.operation_id,
             op_type_id=self.type.value,
             body=json.dumps(self.body),
+            cj_type_id=custom_json_type_id,
         )
 
         # account ops
