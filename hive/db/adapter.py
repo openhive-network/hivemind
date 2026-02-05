@@ -183,31 +183,36 @@ class Db:
         res = self._query(sql, **kwargs)
         return res.fetchall()
 
-    def query_all_raw(self, sql):
-        """Execute raw SQL without SQLAlchemy text() bind parameter parsing.
+    def query_all_raw(self, sql, params=None):
+        """Execute raw SQL via the DBAPI driver, bypassing SQLAlchemy text() parsing.
 
-        Use for queries with string-interpolated content that may contain
-        colon-prefixed words (e.g., ':kingdom') which text() would misinterpret
-        as bind parameters. Also escapes '%' to '%%' so psycopg2 doesn't
-        misinterpret percent signs in content as parameter placeholders.
+        When params is provided, uses psycopg2's native %s parameterization for
+        safe value binding.  When params is None, escapes '%' to '%%' so psycopg2
+        doesn't misinterpret stray percent signs in pre-built SQL strings.
         """
         try:
             start = perf()
-            result = self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
+            if params is not None:
+                result = self._basic_connection.exec_driver_sql(sql, params)
+            else:
+                result = self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
             Stats.log_db(sql, perf() - start)
             return result.fetchall()
         except Exception as e:
             log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
             raise e
 
-    def query_no_return_raw(self, sql):
-        """Execute raw SQL without text() bind parameter parsing, no result expected.
+    def query_no_return_raw(self, sql, params=None):
+        """Execute raw SQL via the DBAPI driver, no result expected.
 
         Like query_all_raw but for statements that don't return rows (UPDATE, DELETE, etc.).
         """
         try:
             start = perf()
-            self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
+            if params is not None:
+                self._basic_connection.exec_driver_sql(sql, params)
+            else:
+                self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
             Stats.log_db(sql, perf() - start)
         except Exception as e:
             log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
