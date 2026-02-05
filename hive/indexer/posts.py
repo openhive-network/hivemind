@@ -21,16 +21,6 @@ from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
 log = logging.getLogger(__name__)
 
 
-def _sql_str(s):
-    """Escape a string for use in SQL VALUES, wrapping in single quotes.
-
-    Handles NULL (empty string) and single-quote escaping.
-    """
-    if s is None:
-        return 'NULL'
-    return "'" + str(s).replace("'", "''") + "'"
-
-
 class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
@@ -99,14 +89,23 @@ class Posts(DbAdapterHolder):
             chunk_end = min(chunk_start + 1000, n)
             chunk = cls._pending_comment_ops[chunk_start:chunk_end]
 
-            ops_params = []
+            placeholders = []
+            params = []
             for local_idx, (op, block_date, tags) in enumerate(chunk):
                 seq_id = chunk_start + local_idx
-                ops_params.append(
-                    f"({seq_id}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
-                    f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
-                    f"'{block_date}'::timestamp, {Community.start_block}, {op['block_num']}, "
-                    f"ARRAY[{','.join(_sql_str(t) for t in tags)}]::VARCHAR[])"
+                placeholders.append("(%s, %s, %s, %s, %s, %s::timestamp, %s, %s, %s::VARCHAR[])")
+                params.extend(
+                    [
+                        seq_id,
+                        op['author'],
+                        op['permlink'],
+                        op['parent_author'],
+                        op['parent_permlink'],
+                        str(block_date),
+                        Community.start_block,
+                        op['block_num'],
+                        tags,
+                    ]
                 )
 
             sql = f"""
@@ -114,11 +113,11 @@ class Posts(DbAdapterHolder):
                        parent_id, parent_author_id, community_id, is_valid, is_post_muted,
                        depth, muted_reasons
                 FROM {SCHEMA_NAME}.process_hive_post_operations_batch(
-                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.hive_post_op_input[]
+                    ARRAY[{','.join(placeholders)}]::{SCHEMA_NAME}.hive_post_op_input[]
                 )
             """
 
-            rows = DbAdapterHolder.common_block_processing_db().query_all_raw(sql)
+            rows = DbAdapterHolder.common_block_processing_db().query_all_raw(sql, tuple(params))
 
             for row in rows:
                 row = row._mapping
@@ -228,37 +227,35 @@ class Posts(DbAdapterHolder):
                 )
             )
 
-        sql = f"""
-            UPDATE {SCHEMA_NAME}.hive_posts AS hp SET
-                max_accepted_payout = data_source.max_accepted_payout,
-                percent_hbd = data_source.percent_hbd,
-                allow_votes = data_source.allow_votes,
-                allow_curation_rewards = data_source.allow_curation_rewards,
-                beneficiaries = data_source.beneficiaries
-            FROM (
-                SELECT ha.id AS author_id, hpd.id AS permlink_id,
-                       t.max_accepted_payout, t.percent_hbd, t.allow_votes,
-                       t.allow_curation_rewards, t.beneficiaries
-                FROM (VALUES {{}}) AS t(author, permlink, max_accepted_payout,
-                                        percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
-                INNER JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.name = t.author
-                INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
-            ) AS data_source
-            WHERE hp.author_id = data_source.author_id
-              AND hp.permlink_id = data_source.permlink_id
-              AND hp.counter_deleted = 0
-        """
-
         db = DbAdapterHolder.common_block_processing_db()
         for chunk in chunks(processed, 1000):
-            values = []
+            placeholders = []
+            params = []
             for author, permlink, max_payout, pct_hbd, allow_v, allow_cr, benef in chunk:
-                values.append(
-                    f"({_sql_str(author)}, {_sql_str(permlink)}, {_sql_str(max_payout)}, "
-                    f"{pct_hbd}, {allow_v}, {allow_cr}, {_sql_str(benef)}::json)"
-                )
-            actual_query = sql.format(','.join(values))
-            db.query_no_return_raw(actual_query)
+                placeholders.append("(%s, %s, %s, %s, %s, %s, %s::json)")
+                params.extend([author, permlink, max_payout, pct_hbd, allow_v, allow_cr, benef])
+
+            sql = f"""
+                UPDATE {SCHEMA_NAME}.hive_posts AS hp SET
+                    max_accepted_payout = data_source.max_accepted_payout,
+                    percent_hbd = data_source.percent_hbd,
+                    allow_votes = data_source.allow_votes,
+                    allow_curation_rewards = data_source.allow_curation_rewards,
+                    beneficiaries = data_source.beneficiaries
+                FROM (
+                    SELECT ha.id AS author_id, hpd.id AS permlink_id,
+                           t.max_accepted_payout, t.percent_hbd, t.allow_votes,
+                           t.allow_curation_rewards, t.beneficiaries
+                    FROM (VALUES {','.join(placeholders)}) AS t(author, permlink, max_accepted_payout,
+                                            percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
+                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.name = t.author
+                    INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+                ) AS data_source
+                WHERE hp.author_id = data_source.author_id
+                  AND hp.permlink_id = data_source.permlink_id
+                  AND hp.counter_deleted = 0
+            """
+            db.query_no_return_raw(sql, tuple(params))
 
         cls._pending_comment_option_ops.clear()
 
@@ -285,20 +282,19 @@ class Posts(DbAdapterHolder):
 
         db = DbAdapterHolder.common_block_processing_db()
         for chunk in chunks(deduped, 1000):
-            ops_params = []
+            placeholders = []
+            params = []
             for seq_id_local, (_orig_idx, op, block_date) in enumerate(chunk):
-                ops_params.append(
-                    f"({seq_id_local}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
-                    f"{op['block_num']}, '{block_date}'::timestamp)"
-                )
+                placeholders.append("(%s, %s, %s, %s, %s::timestamp)")
+                params.extend([seq_id_local, op['author'], op['permlink'], op['block_num'], str(block_date)])
 
             sql = f"""
                 SELECT seq_id, author, permlink
                 FROM {SCHEMA_NAME}.delete_hive_posts_batch(
-                    ARRAY[{','.join(ops_params)}]::{SCHEMA_NAME}.delete_post_input[]
+                    ARRAY[{','.join(placeholders)}]::{SCHEMA_NAME}.delete_post_input[]
                 )
             """
-            rows = db.query_all_raw(sql)
+            rows = db.query_all_raw(sql, tuple(params))
 
             for row in rows:
                 row = row._mapping
