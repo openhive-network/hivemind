@@ -587,10 +587,10 @@
     "blacklists": [
       "my blacklist"
     ],
-    "body": "You need to remove the # sign (used for quoting the specified line) only in front of the lines in the config with the parameters you set, it seems there is a problem with your witness account in the config.\n\nCan you please upload and post a link to your config.ini file with the WIF key removed, so I can check what is wrong with it?",
+    "body": "You need to remove the # sign (used for quoting the specified line) only in front of the parameters you set, it seems there is a problem with your witness account in the config.\n\nCan you please upload and post a link to your config.ini file with the WIF key removed, so I can check what is wrong with it?",
     "category": "steemit",
     "children": 0,
-    "created": "2016-07-30T14:52:21",
+    "created": "2016-07-30T14:52:57",
     "curator_payout_value": "0.000 HBD",
     "depth": 5,
     "is_paidout": true,
@@ -617,7 +617,7 @@
       "total_votes": 0
     },
     "title": "RE: Getting Started Mining Steem on Windows [Step by Step Guide]",
-    "updated": "2016-07-30T14:52:57",
+    "updated": "2016-07-30T14:52:21",
     "url": "/steemit/@cryptos/getting-started-mining-steem-on-windows#@cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t145217174z"
   },
   "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t153332450z": {
@@ -1222,8 +1222,8 @@
     "permlink": "re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t143643564z",
     "reblogs": 0,
     "replies": [
-      "knozaki2015/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t144432622z",
       "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t145217174z",
+      "knozaki2015/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t144432622z",
       "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t153332450z",
       "knozaki2015/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t154110979z"
     ],
@@ -2642,7 +2642,7 @@
     "author_reputation": 32.72,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Fantastic Guide!  I \"voted\" for this (although, I must admit I don't really know too much about this steemit stuff yet to know what that does for you and/or me).  Miner seems to be running fine.\nTwo questions though...\n#1 - I already have 3 Steem Power in my account (it was in there before the miner even got synchronized).  Is that normal?  \n#2 - You stated \"– All you have to do now is to wait for your miner to first find a POW block and then put you in the Miner-witness queue until your turn comes in to confirm a block in order to get your reward transferred to your steemit.com account\".  What do I need to do when this happens?  Do I somehow have to \"confirm\" the block?  I can see the current list of Witnesses and the Queue -- but once I find a block and get on there, is there something more I need to do?  \n\nThanks for giving me something new to mess with on a Friday night.  Staring at my Ethereum miners was getting a little boring.  \nTGIF!!",
+    "body": "Fantastic Guide!  I \"voted\" for this (although, I must admit I don't really know too much about this steemit stuff yet to know what that does for you and/or me).  Miner seems to be running fine.\nTwo questions though...\n#1 - I already have 3 Steem Power in my account (it was in there before the miner even got synchronized).  Is that normal?  \n#2 - You stated \"\u2013 All you have to do now is to wait for your miner to first find a POW block and then put you in the Miner-witness queue until your turn comes in to confirm a block in order to get your reward transferred to your steemit.com account\".  What do I need to do when this happens?  Do I somehow have to \"confirm\" the block?  I can see the current list of Witnesses and the Queue -- but once I find a block and get on there, is there something more I need to do?  \n\nThanks for giving me something new to mess with on a Friday night.  Staring at my Ethereum miners was getting a little boring.  \nTGIF!!",
     "category": "steemit",
     "children": 2,
     "created": "2016-07-30T05:01:06",
@@ -3317,7 +3317,7 @@
     "author_reputation": 69.9,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "ok, Intel® Core™ i5-6300HQ Processor\n(6M Cache, up to 3.20 GHz) \nit has 4 physical cores. how many threads would be the optimum to get the best performance?\n\nthis it what at 4 thread it is now displayed\n388643ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 18443 hps  target: 31 queue: 110 estimated time to produce: 1940 minutes\n388737ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 16950 hps  target: 31 queue: 110 estimated time to produce: 2111 minutes\n388738ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 8974 hps  target: 31 queue: 110 estimated time to produce: 3988 minutes\n392151ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26948 hps  target: 31 queue: 110 estimated time to produce: 1328 minutes\n401999ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26868 hps  target: 31 queue: 110 estimated time to produce: 1332 minutes\n402038ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26579 hps  target: 31 queue: 110 estimated time to produce: 1346 minutes\n402041ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 23929 hps  target: 31 queue: 110 estimated time to produce: 1495 minutes",
+    "body": "ok, Intel\u00ae Core\u2122 i5-6300HQ Processor\n(6M Cache, up to 3.20 GHz) \nit has 4 physical cores. how many threads would be the optimum to get the best performance?\n\nthis it what at 4 thread it is now displayed\n388643ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 18443 hps  target: 31 queue: 110 estimated time to produce: 1940 minutes\n388737ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 16950 hps  target: 31 queue: 110 estimated time to produce: 2111 minutes\n388738ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 8974 hps  target: 31 queue: 110 estimated time to produce: 3988 minutes\n392151ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26948 hps  target: 31 queue: 110 estimated time to produce: 1328 minutes\n401999ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26868 hps  target: 31 queue: 110 estimated time to produce: 1332 minutes\n402038ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 26579 hps  target: 31 queue: 110 estimated time to produce: 1346 minutes\n402041ms th_a       witness.cpp:430               on_applied_block     ] hash rate: 23929 hps  target: 31 queue: 110 estimated time to produce: 1495 minutes",
     "category": "steemit",
     "children": 0,
     "created": "2016-07-31T22:06:21",
