@@ -18,7 +18,7 @@ from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import (
     BLOCKS_QUERY,
     FLAT_BLOCKS_QUERY,
-    FLAT_OPS_QUERY,
+    FLAT_OPS_EXTENDED_QUERY,
     BlocksDataFromDbProvider,
     MassiveBlocksDataProviderHiveDb,
 )
@@ -68,8 +68,8 @@ class SyncHiveDb:
         self._prefetched_blocks = None
         self._prefetch_range = None
 
-        # Flat-row prefetch providers (for massive sync)
-        self._prefetch_flat_ops_provider = None
+        # Flat-row prefetch providers (for massive sync with extended vote fields)
+        self._prefetch_flat_ops_ext_provider = None
         self._prefetch_flat_blocks_provider = None
         self._prefetched_flat_data = None  # (op_rows, block_date_rows) tuple
         self._prefetch_flat_range = None
@@ -121,7 +121,7 @@ class SyncHiveDb:
             self._prefetch_db.close()
             self._prefetch_db = None
             self._prefetch_blocks_provider = None
-            self._prefetch_flat_ops_provider = None
+            self._prefetch_flat_ops_ext_provider = None
             self._prefetch_flat_blocks_provider = None
 
     def build_database_schema(self) -> None:
@@ -318,8 +318,8 @@ class SyncHiveDb:
             self._prefetched_flat_data = None
             self._prefetch_flat_range = None
         else:
-            # Prefetch miss - fetch synchronously
-            op_rows = self._massive_blocks_data_provider.get_flat_ops(lbound, ubound)
+            # Prefetch miss - fetch synchronously (extended query with vote fields)
+            op_rows = self._massive_blocks_data_provider.get_flat_ops_extended(lbound, ubound)
             block_date_rows = self._massive_blocks_data_provider.get_flat_block_dates(lbound, ubound)
             self._prefetched_flat_data = None
             self._prefetch_flat_range = None
@@ -354,15 +354,15 @@ class SyncHiveDb:
             self._prefetch_range = None
 
     def _do_speculative_prefetch_flat(self, current_ubound):
-        """Speculatively prefetch the next batch of flat ops + block dates."""
-        if self._prefetch_flat_ops_provider is None:
+        """Speculatively prefetch the next batch of flat ops (extended) + block dates."""
+        if self._prefetch_flat_ops_ext_provider is None:
             return
 
         next_lbound = current_ubound + 1
         next_ubound = next_lbound + 999
 
         try:
-            op_rows = self._prefetch_flat_ops_provider.get_data(next_lbound, next_ubound)
+            op_rows = self._prefetch_flat_ops_ext_provider.get_data(next_lbound, next_ubound)
             block_date_rows = self._prefetch_flat_blocks_provider.get_data(next_lbound, next_ubound)
             self._prefetched_flat_data = (op_rows, block_date_rows)
             self._prefetch_flat_range = (next_lbound, next_ubound)
@@ -390,9 +390,9 @@ class SyncHiveDb:
                 strict=False,  # Prefetch failures are non-fatal
             )
 
-            # Flat-row prefetch providers for massive sync
-            self._prefetch_flat_ops_provider = BlocksDataFromDbProvider(
-                sql_query=FLAT_OPS_QUERY,
+            # Extended flat-row prefetch provider (with vote fields extracted)
+            self._prefetch_flat_ops_ext_provider = BlocksDataFromDbProvider(
+                sql_query=FLAT_OPS_EXTENDED_QUERY,
                 db=self._prefetch_db,
                 strict=False,
             )
@@ -405,9 +405,7 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, (
-                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
-            )
+            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
     @staticmethod
     def _show_info(database: Db) -> None:
@@ -558,7 +556,7 @@ class SyncHiveDb:
             timer.batch_start()
 
             block_start = perf()
-            Blocks.process_multi_flat(op_rows, block_dates, num_blocks)
+            Blocks.process_multi_flat_extended(op_rows, block_dates, num_blocks)
             block_end = perf()
 
             timer.batch_lap()

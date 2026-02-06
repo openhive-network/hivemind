@@ -17,6 +17,9 @@ BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:fir
 FLAT_OPS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_ops_for_hivemind(:first, :last)"
 FLAT_BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_block_dates_for_hivemind(:first, :last)"
 
+# Extended query with extracted vote/effective_comment_vote fields as separate columns
+FLAT_OPS_EXTENDED_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_ops_for_hivemind_v2(:first, :last)"
+
 
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
@@ -61,6 +64,11 @@ class MassiveBlocksDataProviderHiveDb:
         self._flat_ops_provider = BlocksDataFromDbProvider(sql_query=FLAT_OPS_QUERY, db=db_root, strict=False)
         self._flat_blocks_provider = BlocksDataFromDbProvider(sql_query=FLAT_BLOCKS_QUERY, db=db_root, strict=True)
 
+        # Extended provider with extracted vote fields
+        self._flat_ops_extended_provider = BlocksDataFromDbProvider(
+            sql_query=FLAT_OPS_EXTENDED_QUERY, db=db_root, strict=False
+        )
+
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(
                 "SELECT id, name FROM hafd.operation_types WHERE is_virtual  = true"
@@ -104,3 +112,6 @@ class MassiveBlocksDataProviderHiveDb:
 
     def get_flat_block_dates(self, lbound, ubound):
         return self._flat_blocks_provider.get_data(lbound, ubound)
+
+    def get_flat_ops_extended(self, lbound, ubound):
+        return self._flat_ops_extended_provider.get_data(lbound, ubound)

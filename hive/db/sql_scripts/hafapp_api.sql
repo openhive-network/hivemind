@@ -176,3 +176,60 @@ $function$
     LANGUAGE plpgsql STABLE
 ;
 
+--- Extended flat-row function with extracted vote fields ---
+
+DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended CASCADE;
+CREATE TYPE hivemind_app.hivemind_flat_op_extended AS (
+    block_num INT,
+    op_type_id INT,
+    body JSONB,
+    -- Extracted fields for vote (0) and effective_comment_vote (72) ops.
+    -- NULL for all other op types.
+    f_voter TEXT,
+    f_author TEXT,
+    f_permlink TEXT,
+    f_weight BIGINT,
+    f_rshares BIGINT
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_ops_for_hivemind_v2(in _first_block INT, in _last_block INT)
+    RETURNS SETOF hivemind_app.hivemind_flat_op_extended
+AS
+$function$
+BEGIN
+    /** Like get_ops_for_hivemind but extracts vote fields as separate columns.
+        For vote (0) and effective_comment_vote (72) ops, body is NULL and the
+        individual fields are populated. For all other ops, body contains the
+        inner 'value' payload and the field columns are NULL.
+
+        Uses a CTE so body_binary::jsonb->'value' is computed exactly once per row.
+    */
+    RETURN QUERY
+        WITH op_values AS (
+            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body->'value' as val
+            FROM hivemind_app.operations_view ho
+            WHERE ho.block_num BETWEEN _first_block AND _last_block
+              AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
+              AND (ho.op_type_id != 18
+                OR ho.custom_json_type_id IN (
+                    SELECT id FROM hafd.custom_json_types
+                    WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+                ))
+        )
+        SELECT
+            ov.block_num,
+            ov.op_type_id,
+            CASE WHEN ov.op_type_id NOT IN (0, 72) THEN ov.val END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'voter' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'author' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'permlink' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::BIGINT END,
+            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'rshares')::BIGINT END
+        FROM op_values ov
+        ORDER BY ov.id
+    ;
+END
+$function$
+    LANGUAGE plpgsql STABLE
+;
+
