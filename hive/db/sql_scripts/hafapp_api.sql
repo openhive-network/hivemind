@@ -180,3 +180,45 @@ $function$
     LANGUAGE plpgsql STABLE
 ;
 
+--- Combined single-query function: ops with block dates in one round-trip ---
+
+DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_with_date CASCADE;
+CREATE TYPE hivemind_app.hivemind_flat_op_with_date AS (
+    block_num INT,
+    date TEXT,
+    op_type_id INT,
+    body JSONB
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_blocks_and_ops_for_hivemind(in _first_block INT, in _last_block INT)
+    RETURNS SETOF hivemind_app.hivemind_flat_op_with_date
+AS
+$function$
+BEGIN
+    /** Single-query alternative: returns block date with each operation row.
+        Blocks with no operations get a single row with op_type_id = NULL and body = NULL.
+        Ordered by block_num first, then ops within each block by operation id.
+    */
+    RETURN QUERY
+        SELECT
+            hb.num,
+            to_char( hb.created_at, 'YYYY-MM-DDThh24:MI:SS' ),
+            ho.op_type_id,
+            ho.body->'value'
+        FROM hivemind_app.blocks_view hb
+        LEFT JOIN hivemind_app.operations_view ho
+            ON ho.block_num = hb.num
+           AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
+           AND (ho.op_type_id != 18
+             OR ho.custom_json_type_id IN (
+                 SELECT id FROM hafd.custom_json_types
+                 WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+             ))
+        WHERE hb.num BETWEEN _first_block AND _last_block
+        ORDER BY hb.num, ho.id
+    ;
+END
+$function$
+    LANGUAGE plpgsql STABLE
+;
+

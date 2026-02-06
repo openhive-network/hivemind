@@ -17,6 +17,9 @@ BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:fir
 FLAT_OPS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_ops_for_hivemind(:first, :last)"
 FLAT_BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_block_dates_for_hivemind(:first, :last)"
 
+# Single combined query: ops with block dates in one round-trip
+COMBINED_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_blocks_and_ops_for_hivemind(:first, :last)"
+
 
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
@@ -61,6 +64,9 @@ class MassiveBlocksDataProviderHiveDb:
         self._flat_ops_provider = BlocksDataFromDbProvider(sql_query=FLAT_OPS_QUERY, db=db_root, strict=False)
         self._flat_blocks_provider = BlocksDataFromDbProvider(sql_query=FLAT_BLOCKS_QUERY, db=db_root, strict=True)
 
+        # Combined single-query provider
+        self._combined_provider = BlocksDataFromDbProvider(sql_query=COMBINED_QUERY, db=db_root, strict=True)
+
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(
                 "SELECT id, name FROM hafd.operation_types WHERE is_virtual  = true"
@@ -104,3 +110,6 @@ class MassiveBlocksDataProviderHiveDb:
 
     def get_flat_block_dates(self, lbound, ubound):
         return self._flat_blocks_provider.get_data(lbound, ubound)
+
+    def get_combined_blocks_and_ops(self, lbound, ubound):
+        return self._combined_provider.get_data(lbound, ubound)

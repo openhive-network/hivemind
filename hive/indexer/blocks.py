@@ -206,36 +206,12 @@ class Blocks:
         return first_block, last_num
 
     @classmethod
-    def process_blocks_flat(cls, op_rows, block_dates: dict) -> tuple[int, int]:
-        """Process flat operation rows for massive sync - no wrapper objects.
+    def _process_grouped_ops(cls, block_vops: dict, block_ops: dict, block_dates: dict) -> tuple[int, int]:
+        """Common processing loop for pre-grouped operations.
 
-        op_rows: flat rows from get_ops_for_hivemind(), each with (block_num, op_type_id, body).
-                 body is already a Python dict (psycopg2 jsonb→dict), the 'value' payload only.
-                 Rows are sorted by operation ID (regular ops before virtual ops within each block).
-        block_dates: dict of {block_num: date_string} from get_block_dates_for_hivemind().
+        Used by both flat (two-query) and combined (single-query) paths.
+        Processes virtual ops before regular ops per block.
         """
-        if not block_dates:
-            return -1, 0
-
-        # Group operations by block_num, partitioned into virtual and regular
-        block_vops = {}  # block_num -> [(op_type_id, body), ...]
-        block_ops = {}  # block_num -> [(op_type_id, body), ...]
-
-        for row in op_rows:
-            row_m = row._mapping
-            block_num = row_m['block_num']
-            op_type_id = row_m['op_type_id']
-            body = row_m['body']
-
-            if op_type_id >= 50:
-                if block_num not in block_vops:
-                    block_vops[block_num] = []
-                block_vops[block_num].append((op_type_id, body))
-            else:
-                if block_num not in block_ops:
-                    block_ops[block_num] = []
-                block_ops[block_num].append((op_type_id, body))
-
         sorted_blocks = sorted(block_dates.keys())
         first_block = sorted_blocks[0]
         last_num = first_block
@@ -266,6 +242,77 @@ class Blocks:
             raise e
 
         return first_block, last_num
+
+    @classmethod
+    def process_blocks_flat(cls, op_rows, block_dates: dict) -> tuple[int, int]:
+        """Process flat operation rows for massive sync - no wrapper objects.
+
+        op_rows: flat rows from get_ops_for_hivemind(), each with (block_num, op_type_id, body).
+                 body is already a Python dict (psycopg2 jsonb→dict), the 'value' payload only.
+                 Rows are sorted by operation ID (regular ops before virtual ops within each block).
+        block_dates: dict of {block_num: date_string} from get_block_dates_for_hivemind().
+        """
+        if not block_dates:
+            return -1, 0
+
+        # Group operations by block_num, partitioned into virtual and regular
+        block_vops = {}  # block_num -> [(op_type_id, body), ...]
+        block_ops = {}  # block_num -> [(op_type_id, body), ...]
+
+        for row in op_rows:
+            row_m = row._mapping
+            block_num = row_m['block_num']
+            op_type_id = row_m['op_type_id']
+            body = row_m['body']
+
+            if op_type_id >= 50:
+                if block_num not in block_vops:
+                    block_vops[block_num] = []
+                block_vops[block_num].append((op_type_id, body))
+            else:
+                if block_num not in block_ops:
+                    block_ops[block_num] = []
+                block_ops[block_num].append((op_type_id, body))
+
+        return cls._process_grouped_ops(block_vops, block_ops, block_dates)
+
+    @classmethod
+    def process_blocks_combined(cls, combined_rows) -> tuple[int, int, int]:
+        """Process combined (ops + block dates) rows from single-query path.
+
+        combined_rows: rows from get_blocks_and_ops_for_hivemind(), each with
+                       (block_num, date, op_type_id, body). Blocks with no operations
+                       have a single row with op_type_id=NULL and body=NULL (LEFT JOIN).
+        Returns (first_block, last_num, num_blocks).
+        """
+        block_dates = {}
+        block_vops = {}
+        block_ops = {}
+
+        for row in combined_rows:
+            row_m = row._mapping
+            block_num = row_m['block_num']
+            block_dates[block_num] = row_m['date']
+
+            op_type_id = row_m['op_type_id']
+            if op_type_id is None:
+                continue  # Block with no operations (LEFT JOIN null)
+
+            body = row_m['body']
+            if op_type_id >= 50:
+                if block_num not in block_vops:
+                    block_vops[block_num] = []
+                block_vops[block_num].append((op_type_id, body))
+            else:
+                if block_num not in block_ops:
+                    block_ops[block_num] = []
+                block_ops[block_num].append((op_type_id, body))
+
+        if not block_dates:
+            return -1, 0, 0
+
+        first_block, last_num = cls._process_grouped_ops(block_vops, block_ops, block_dates)
+        return first_block, last_num, len(block_dates)
 
     @classmethod
     def _process_vops_flat(
@@ -409,6 +456,23 @@ class Blocks:
         cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI FLAT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
+
+    @classmethod
+    def process_multi_combined(cls, combined_rows) -> int:
+        """Batch-process combined (ops + dates) rows for massive sync. Returns num_blocks."""
+        time_start = OPSM.start()
+
+        DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
+
+        first_block, last_num, num_blocks = cls.process_blocks_combined(combined_rows)
+
+        Posts.flush_pending_comment_ops()
+        DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
+
+        cls.flush_data_in_n_threads()
+
+        log.info(f"[PROCESS MULTI COMBINED] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
+        return num_blocks
 
     @classmethod
     def _periodic_actions(cls, block_raw) -> None:

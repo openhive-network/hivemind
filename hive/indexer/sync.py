@@ -17,8 +17,7 @@ from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import (
     BLOCKS_QUERY,
-    FLAT_BLOCKS_QUERY,
-    FLAT_OPS_QUERY,
+    COMBINED_QUERY,
     BlocksDataFromDbProvider,
     MassiveBlocksDataProviderHiveDb,
 )
@@ -68,11 +67,10 @@ class SyncHiveDb:
         self._prefetched_blocks = None
         self._prefetch_range = None
 
-        # Flat-row prefetch providers (for massive sync)
-        self._prefetch_flat_ops_provider = None
-        self._prefetch_flat_blocks_provider = None
-        self._prefetched_flat_data = None  # (op_rows, block_date_rows) tuple
-        self._prefetch_flat_range = None
+        # Combined prefetch for massive sync (single query: ops + dates)
+        self._prefetch_combined_provider = None
+        self._prefetched_combined_rows = None
+        self._prefetch_combined_range = None
 
     def __enter__(self):
         if self._enter_sync:
@@ -115,14 +113,13 @@ class SyncHiveDb:
         """Clean up prefetch connection and state."""
         self._prefetched_blocks = None
         self._prefetch_range = None
-        self._prefetched_flat_data = None
-        self._prefetch_flat_range = None
+        self._prefetched_combined_rows = None
+        self._prefetch_combined_range = None
         if self._prefetch_db is not None:
             self._prefetch_db.close()
             self._prefetch_db = None
             self._prefetch_blocks_provider = None
-            self._prefetch_flat_ops_provider = None
-            self._prefetch_flat_blocks_provider = None
+            self._prefetch_combined_provider = None
 
     def build_database_schema(self) -> None:
         # whole code building it is already placed inside __enter__ handler, here was added only explicit messaging
@@ -312,17 +309,16 @@ class SyncHiveDb:
     def _process_massive_blocks(self, lbound, ubound, active_connections_before):
         wait_blocks_time = WSM.start()
 
-        # Use prefetched flat data if available and matching
-        if self._prefetched_flat_data is not None and self._prefetch_flat_range == (lbound, ubound):
-            op_rows, block_date_rows = self._prefetched_flat_data
-            self._prefetched_flat_data = None
-            self._prefetch_flat_range = None
+        # Use prefetched combined data if available and matching
+        if self._prefetched_combined_rows is not None and self._prefetch_combined_range == (lbound, ubound):
+            combined_rows = self._prefetched_combined_rows
+            self._prefetched_combined_rows = None
+            self._prefetch_combined_range = None
         else:
             # Prefetch miss - fetch synchronously
-            op_rows = self._massive_blocks_data_provider.get_flat_ops(lbound, ubound)
-            block_date_rows = self._massive_blocks_data_provider.get_flat_block_dates(lbound, ubound)
-            self._prefetched_flat_data = None
-            self._prefetch_flat_range = None
+            combined_rows = self._massive_blocks_data_provider.get_combined_blocks_and_ops(lbound, ubound)
+            self._prefetched_combined_rows = None
+            self._prefetch_combined_range = None
 
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
@@ -331,11 +327,11 @@ class SyncHiveDb:
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
-            self._consume_massive_blocks_flat, op_rows, block_date_rows, lbound, ubound
+            self._consume_massive_blocks_combined, combined_rows, lbound, ubound
         )
 
         # Speculative prefetch using ISOLATED connection
-        self._do_speculative_prefetch_flat(ubound)
+        self._do_speculative_prefetch_combined(ubound)
 
     def _do_speculative_prefetch(self, current_ubound):
         """Speculatively prefetch the next batch using isolated connection."""
@@ -353,23 +349,21 @@ class SyncHiveDb:
             self._prefetched_blocks = None
             self._prefetch_range = None
 
-    def _do_speculative_prefetch_flat(self, current_ubound):
-        """Speculatively prefetch the next batch of flat ops + block dates."""
-        if self._prefetch_flat_ops_provider is None:
+    def _do_speculative_prefetch_combined(self, current_ubound):
+        """Speculatively prefetch the next batch using combined single query."""
+        if self._prefetch_combined_provider is None:
             return
 
         next_lbound = current_ubound + 1
         next_ubound = next_lbound + 999
 
         try:
-            op_rows = self._prefetch_flat_ops_provider.get_data(next_lbound, next_ubound)
-            block_date_rows = self._prefetch_flat_blocks_provider.get_data(next_lbound, next_ubound)
-            self._prefetched_flat_data = (op_rows, block_date_rows)
-            self._prefetch_flat_range = (next_lbound, next_ubound)
+            self._prefetched_combined_rows = self._prefetch_combined_provider.get_data(next_lbound, next_ubound)
+            self._prefetch_combined_range = (next_lbound, next_ubound)
         except Exception:
             # Prefetch failure is non-fatal
-            self._prefetched_flat_data = None
-            self._prefetch_flat_range = None
+            self._prefetched_combined_rows = None
+            self._prefetch_combined_range = None
 
     def _on_stop_synchronization(self, active_connections_before):
         # Ensure tables are converted back to LOGGED before shutdown.
@@ -390,14 +384,9 @@ class SyncHiveDb:
                 strict=False,  # Prefetch failures are non-fatal
             )
 
-            # Flat-row prefetch providers for massive sync
-            self._prefetch_flat_ops_provider = BlocksDataFromDbProvider(
-                sql_query=FLAT_OPS_QUERY,
-                db=self._prefetch_db,
-                strict=False,
-            )
-            self._prefetch_flat_blocks_provider = BlocksDataFromDbProvider(
-                sql_query=FLAT_BLOCKS_QUERY,
+            # Combined single-query prefetch provider for massive sync
+            self._prefetch_combined_provider = BlocksDataFromDbProvider(
+                sql_query=COMBINED_QUERY,
                 db=self._prefetch_db,
                 strict=False,
             )
@@ -405,9 +394,7 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, (
-                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
-            )
+            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
     @staticmethod
     def _show_info(database: Db) -> None:
@@ -570,6 +557,59 @@ class SyncHiveDb:
 
             log.info(timer.batch_status(prefix))
             self.rate = minmax(self.rate, num_blocks, time_current - time_before_waiting_for_data, lbound)
+
+            if block_end - block_start > 1.0 or is_debug:
+                otm = OPSM.log_current("Operations present in the processed blocks")
+                ftm = FSM.log_current("Flushing times")
+                wtm = WSM.log_current("Waiting times")
+                log.info(f"Calculated time: {otm + ftm + wtm:.4f} s.")
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+            WSM.next_blocks()
+
+            PC.broadcast(BroadcastObject('sync_current_block', ubound + 1, 'blocks'))
+        except Exception:
+            log.exception("Exception caught during processing blocks...")
+            set_exception_thrown()
+            raise
+
+        return 1
+
+    def _consume_massive_blocks_combined(self, combined_rows, lbound, ubound) -> int:
+        from hive.utils.stats import minmax
+
+        if not combined_rows:
+            log.info("No blocks to consume")
+            return 0
+
+        num_blocks = ubound - lbound + 1
+        is_debug = log.isEnabledFor(10)
+
+        self.rate = minmax(self.rate, 0, 1.0, 0)
+
+        try:
+            Blocks.set_end_of_sync_lib()
+            timer = Timer(num_blocks, entity='block', laps=['rps', 'wps'])
+
+            time_before = perf()
+            timer.batch_start()
+
+            block_start = perf()
+            actual_blocks = Blocks.process_multi_combined(combined_rows)
+            block_end = perf()
+
+            timer.batch_lap()
+            timer.batch_finish(actual_blocks)
+            time_current = perf()
+
+            # Get last date from last row for logging
+            last_row = combined_rows[-1]._mapping
+            last_date = last_row['date']
+
+            prefix = f"[MASSIVE] Got block {ubound} @ {last_date}"
+            log.info(timer.batch_status(prefix))
+            self.rate = minmax(self.rate, actual_blocks, time_current - time_before, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
                 otm = OPSM.log_current("Operations present in the processed blocks")
