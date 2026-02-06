@@ -252,9 +252,22 @@ class Posts(DbAdapterHolder):
                 chunk_list = list(chunk)
                 passes = cls._split_into_passes(chunk_list)
 
+                # Track (author, permlink) keys whose create failed in an earlier
+                # pass (parent not yet in DB).  Later-pass edits for the same key
+                # must be deferred to the next wave, otherwise the edit would be
+                # treated as the initial INSERT and timestamps would be swapped.
+                deferred_keys = set()
+
                 for pass_ops in passes:
+                    active_ops = [
+                        item for item in pass_ops if (item[1]['author'], item[1]['permlink']) not in deferred_keys
+                    ]
+
+                    if not active_ops:
+                        continue
+
                     ops_params = []
-                    for _seq_local, (orig_idx, op, block_date, _tags) in enumerate(pass_ops):
+                    for _seq_local, (orig_idx, op, block_date, _tags) in enumerate(active_ops):
                         ops_params.append(
                             f"({orig_idx}, {_sql_str(op['author'])}, {_sql_str(op['permlink'])}, "
                             f"{_sql_str(op['parent_author'])}, {_sql_str(op['parent_permlink'])}, "
@@ -272,14 +285,22 @@ class Posts(DbAdapterHolder):
                     """
                     rows = db.query_all_raw(sql)
 
+                    returned_seq_ids = set()
                     for row in rows:
                         row = row._mapping
                         seq_id = row['seq_id']
+                        returned_seq_ids.add(seq_id)
                         processed_seq_ids.add(seq_id)
                         op, block_date, tags = cls._pending_comment_ops[seq_id]
                         is_new_post = row['is_new_post']
 
                         cls._process_post_result(row, op, block_date, is_new_post)
+
+                    # Ops not returned = parent not found. Defer their edits
+                    # in subsequent passes to prevent out-of-order insertion.
+                    for orig_idx, op, _block_date, _tags in active_ops:
+                        if orig_idx not in returned_seq_ids:
+                            deferred_keys.add((op['author'], op['permlink']))
 
             remaining = [item for item in remaining if item[0] not in processed_seq_ids]
 
