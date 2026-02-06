@@ -13,6 +13,10 @@ log = logging.getLogger(__name__)
 OPERATIONS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_operations4hivemind(:first, :last)"
 BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last)"
 
+# Flat-row queries for massive sync (no ARRAY_AGG, no type wrapper, no hash/prev)
+FLAT_OPS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_ops_for_hivemind(:first, :last)"
+FLAT_BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.get_block_dates_for_hivemind(:first, :last)"
+
 
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
@@ -53,6 +57,10 @@ class MassiveBlocksDataProviderHiveDb:
         # to get empty results for asking for blocks
         self._blocks_data_provider = BlocksDataFromDbProvider(sql_query=BLOCKS_QUERY, db=db_root, strict=True)
 
+        # Flat-row providers for massive sync
+        self._flat_ops_provider = BlocksDataFromDbProvider(sql_query=FLAT_OPS_QUERY, db=db_root, strict=False)
+        self._flat_blocks_provider = BlocksDataFromDbProvider(sql_query=FLAT_BLOCKS_QUERY, db=db_root, strict=True)
+
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(
                 "SELECT id, name FROM hafd.operation_types WHERE is_virtual  = true"
@@ -90,3 +98,9 @@ class MassiveBlocksDataProviderHiveDb:
 
     def get_blocks(self, lbound, ubound):
         return self._blocks_data_provider.get_data(lbound, ubound)
+
+    def get_flat_ops(self, lbound, ubound):
+        return self._flat_ops_provider.get_data(lbound, ubound)
+
+    def get_flat_block_dates(self, lbound, ubound):
+        return self._flat_blocks_provider.get_data(lbound, ubound)

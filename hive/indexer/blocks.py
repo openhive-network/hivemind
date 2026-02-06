@@ -165,6 +165,27 @@ class Blocks:
         process_flush_items(cls._concurrent_flush_1)
         process_flush_items(cls._concurrent_flush_2)
 
+    # Op type ID → OPSM stat name mapping (matches str(enum_value) for consistency)
+    _OP_STAT_NAMES = {
+        0: 'OperationType.VOTE',
+        1: 'OperationType.COMMENT',
+        9: 'OperationType.ACCOUNT_CREATE',
+        10: 'OperationType.ACCOUNT_UPDATE',
+        14: 'OperationType.POW',
+        17: 'OperationType.DELETE_COMMENT',
+        18: 'OperationType.CUSTOM_JSON',
+        19: 'OperationType.COMMENT_OPTION',
+        23: 'OperationType.CREATE_CLAIMED_ACCOUNT',
+        30: 'OperationType.POW_2',
+        41: 'OperationType.ACCOUNT_CREATE_WITH_DELEGATION',
+        43: 'OperationType.ACCOUNT_UPDATE_2',
+        51: 'VirtualOperationType.AUTHOR_REWARD',
+        53: 'VirtualOperationType.COMMENT_REWARD',
+        61: 'VirtualOperationType.COMMENT_PAYOUT_UPDATE',
+        72: 'VirtualOperationType.EFFECTIVE_COMMENT_VOTE',
+        73: 'VirtualOperationType.INEFFECTIVE_DELETE_COMMENT',
+    }
+
     @classmethod
     def process_blocks(cls, blocks) -> tuple[int, int]:
         last_num = 0
@@ -183,6 +204,167 @@ class Blocks:
         # deltas in memory and update follow/er counts in bulk.
 
         return first_block, last_num
+
+    @classmethod
+    def process_blocks_flat(cls, op_rows, block_dates: dict) -> tuple[int, int]:
+        """Process flat operation rows for massive sync - no wrapper objects.
+
+        op_rows: flat rows from get_ops_for_hivemind(), each with (block_num, op_type_id, body).
+                 body is already a Python dict (psycopg2 jsonb→dict), the 'value' payload only.
+                 Rows are sorted by operation ID (regular ops before virtual ops within each block).
+        block_dates: dict of {block_num: date_string} from get_block_dates_for_hivemind().
+        """
+        if not block_dates:
+            return -1, 0
+
+        # Group operations by block_num, partitioned into virtual and regular
+        block_vops = {}  # block_num -> [(op_type_id, body), ...]
+        block_ops = {}  # block_num -> [(op_type_id, body), ...]
+
+        for row in op_rows:
+            row_m = row._mapping
+            block_num = row_m['block_num']
+            op_type_id = row_m['op_type_id']
+            body = row_m['body']
+
+            if op_type_id >= 50:
+                if block_num not in block_vops:
+                    block_vops[block_num] = []
+                block_vops[block_num].append((op_type_id, body))
+            else:
+                if block_num not in block_ops:
+                    block_ops[block_num] = []
+                block_ops[block_num].append((op_type_id, body))
+
+        sorted_blocks = sorted(block_dates.keys())
+        first_block = sorted_blocks[0]
+        last_num = first_block
+
+        try:
+            for block_num in sorted_blocks:
+                date = block_dates[block_num]
+                cls._current_block_date = date
+
+                if cls._head_block_date is None:
+                    cls._head_block_date = cls._current_block_date
+
+                vops = block_vops.get(block_num)
+                ops = block_ops.get(block_num)
+
+                if vops or ops:
+                    is_safe_cashout = block_num <= cls._last_safe_cashout_block
+                    ineffective_deleted_ops = cls._process_vops_flat(
+                        Posts.comment_payout_ops, vops or [], date, block_num, is_safe_cashout
+                    )
+                    if ops:
+                        cls._process_ops_flat(ops, block_num, ineffective_deleted_ops)
+
+                cls._head_block_date = cls._current_block_date
+                last_num = block_num
+        except Exception as e:
+            log.error("exception encountered block %d", last_num + 1)
+            raise e
+
+        return first_block, last_num
+
+    @classmethod
+    def _process_vops_flat(
+        cls, comment_payout_ops: dict, vops: list, date: str, block_num: int, is_safe_cashout: bool
+    ) -> dict:
+        """Process virtual operations from flat rows. Equivalent to prepare_vops()."""
+
+        def get_empty_ops():
+            return {
+                VirtualOperationType.AUTHOR_REWARD: None,
+                VirtualOperationType.COMMENT_REWARD: None,
+                VirtualOperationType.EFFECTIVE_COMMENT_VOTE: None,
+                VirtualOperationType.COMMENT_PAYOUT_UPDATE: None,
+            }
+
+        ineffective_deleted_ops = {}
+
+        for op_type_id, op_value in vops:
+            start = OPSM.start()
+
+            op_value['block_num'] = block_num
+            key = f"{op_value['author']}/{op_value['permlink']}"
+
+            if op_type_id == 51:  # AUTHOR_REWARD
+                if key not in comment_payout_ops:
+                    comment_payout_ops[key] = get_empty_ops()
+                comment_payout_ops[key][VirtualOperationType.AUTHOR_REWARD] = (op_value, date)
+
+            elif op_type_id == 53:  # COMMENT_REWARD
+                if key not in comment_payout_ops:
+                    comment_payout_ops[key] = get_empty_ops()
+                comment_payout_ops[key][VirtualOperationType.EFFECTIVE_COMMENT_VOTE] = None
+                comment_payout_ops[key][VirtualOperationType.COMMENT_REWARD] = (op_value, date)
+
+            elif op_type_id == 72:  # EFFECTIVE_COMMENT_VOTE
+                if block_num < 905693:
+                    op_value["rshares"] *= 1000000
+                Votes.effective_comment_vote_op(op_value)
+
+                if not is_safe_cashout:
+                    if key not in comment_payout_ops:
+                        comment_payout_ops[key] = get_empty_ops()
+                    comment_payout_ops[key][VirtualOperationType.EFFECTIVE_COMMENT_VOTE] = (op_value, date)
+
+            elif op_type_id == 61:  # COMMENT_PAYOUT_UPDATE
+                if key not in comment_payout_ops:
+                    comment_payout_ops[key] = get_empty_ops()
+                comment_payout_ops[key][VirtualOperationType.COMMENT_PAYOUT_UPDATE] = (op_value, date)
+
+            elif op_type_id == 73:  # INEFFECTIVE_DELETE_COMMENT
+                ineffective_deleted_ops[key] = {}
+
+            OPSM.op_stats(cls._OP_STAT_NAMES.get(op_type_id, str(op_type_id)), OPSM.stop(start))
+
+        return ineffective_deleted_ops
+
+    @classmethod
+    def _process_ops_flat(cls, ops: list, block_num: int, ineffective_deleted_ops: dict) -> None:
+        """Process regular operations from flat rows. Equivalent to the inner loop of _process()."""
+
+        def try_register_account(account_name, op, op_details):
+            if not Accounts.register(account_name, op_details, cls._head_block_date, block_num):
+                log.error(f"Failed to register account {account_name} from operation: {op}")
+
+        for op_type_id, op in ops:
+            start = OPSM.start()
+
+            op['block_num'] = block_num
+
+            if op_type_id == 14:  # POW
+                try_register_account(op['worker_account'], op, None)
+            elif op_type_id == 30:  # POW_2
+                try_register_account(op['work']['value']['input']['worker_account'], op, None)
+            elif op_type_id == 9:  # ACCOUNT_CREATE
+                try_register_account(op['new_account_name'], op, op)
+            elif op_type_id == 41:  # ACCOUNT_CREATE_WITH_DELEGATION
+                try_register_account(op['new_account_name'], op, op)
+            elif op_type_id == 23:  # CREATE_CLAIMED_ACCOUNT
+                try_register_account(op['new_account_name'], op, op)
+            elif op_type_id == 10:  # ACCOUNT_UPDATE
+                Accounts.update_op(op, False)
+            elif op_type_id == 43:  # ACCOUNT_UPDATE_2
+                Accounts.update_op(op, True)
+            elif op_type_id == 1:  # COMMENT
+                Posts.comment_op(op, cls._head_block_date)
+            elif op_type_id == 17:  # DELETE_COMMENT
+                key = f"{op['author']}/{op['permlink']}"
+                if key not in ineffective_deleted_ops:
+                    Posts.delete_op(op, cls._head_block_date)
+            elif op_type_id == 19:  # COMMENT_OPTION
+                Posts.comment_options_op(op)
+            elif op_type_id == 0:  # VOTE
+                Votes.vote_op(op, cls._head_block_date)
+            elif op_type_id == 18:  # CUSTOM_JSON
+                if Posts._pending_comment_ops and op.get('id') == 'community':
+                    Posts.flush_pending_comment_ops()
+                CustomOp.process_op(op, block_num, cls._head_block_date)
+
+            OPSM.op_stats(cls._OP_STAT_NAMES.get(op_type_id, str(op_type_id)), OPSM.stop(start))
 
     @classmethod
     def process_multi(cls, blocks, is_massive_sync: bool) -> None:
@@ -210,7 +392,23 @@ class Blocks:
         if is_massive_sync:
             cls.flush_data_in_n_threads()
 
-        log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
+        log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start):.4f}s")
+
+    @classmethod
+    def process_multi_flat(cls, op_rows, block_dates: dict, num_blocks: int) -> None:
+        """Batch-process flat operation rows for massive sync."""
+        time_start = OPSM.start()
+
+        DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
+
+        first_block, last_num = cls.process_blocks_flat(op_rows, block_dates)
+
+        Posts.flush_pending_comment_ops()
+        DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
+
+        cls.flush_data_in_n_threads()
+
+        log.info(f"[PROCESS MULTI FLAT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
 
     @classmethod
     def _periodic_actions(cls, block_raw) -> None:
