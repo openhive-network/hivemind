@@ -10,6 +10,7 @@ _account_id INT;
 _observer_id INT;
 _post_id INT;
 _limit INT;
+_muted_reasons_filter_mask INT;
 _tag TEXT;
 
 _account TEXT;
@@ -17,7 +18,7 @@ _permlink TEXT;
 
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
-                                                                 '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string"}',
+                                                                 '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "muted_reasons_filter": "array"}',
                                                                  2,
                                                                  '{"start_permlink": "permlink must be string"}');
 
@@ -49,7 +50,11 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
-  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit);
+  _muted_reasons_filter_mask := hivemind_postgrest_utilities.create_muted_reasons_bitmask(
+    hivemind_postgrest_utilities.parse_integer_array_argument_from_json(_params, 'muted_reasons_filter', False)
+  );
+
+  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit, _muted_reasons_filter_mask);
 END
 $$
 ;
