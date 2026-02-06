@@ -229,10 +229,13 @@ BEGIN
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'voter' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'author' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'permlink' END,
-            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::BIGINT END,
-            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'rshares')::BIGINT END,
+            CASE WHEN ov.op_type_id IN (0, 72) AND (ov.val->>'weight') ~ '^-?\d+$'
+                 THEN (ov.val->>'weight')::BIGINT END,
+            CASE WHEN ov.op_type_id = 72 AND (ov.val->>'rshares') ~ '^-?\d+$'
+                 THEN (ov.val->>'rshares')::BIGINT END,
             CASE WHEN ov.op_type_id = 72 THEN ov.val->'pending_payout' END,
-            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'total_vote_weight')::BIGINT END
+            CASE WHEN ov.op_type_id = 72 AND (ov.val->>'total_vote_weight') ~ '^-?\d+$'
+                 THEN (ov.val->>'total_vote_weight')::BIGINT END
         FROM op_values ov
         ORDER BY ov.id
     ;
