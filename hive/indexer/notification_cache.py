@@ -71,13 +71,88 @@ class NotificationCache(DbAdapterHolder):
 class VoteNotificationCache(NotificationCache):
     """Handles flushing vote notifications."""
 
+    _staging_table_created = False
+    _STAGING_TABLE = f"{SCHEMA_NAME}._vote_notifications_staging"
+    _SPILL_BATCH_SIZE = 5000
+
+    @classmethod
+    def _ensure_staging_table(cls):
+        """Create the UNLOGGED staging table if it doesn't exist yet."""
+        if cls._staging_table_created:
+            return
+        cls.db.query(
+            f"""CREATE UNLOGGED TABLE IF NOT EXISTS {cls._STAGING_TABLE} (
+                voter TEXT NOT NULL,
+                author TEXT NOT NULL,
+                permlink TEXT NOT NULL,
+                block_num INT NOT NULL,
+                last_update TIMESTAMP NOT NULL,
+                rshares BIGINT NOT NULL,
+                counter INT NOT NULL,
+                PRIMARY KEY (voter, author, permlink)
+            )"""
+        )
+        cls._staging_table_created = True
+
+    @classmethod
+    def _spill_to_staging(cls):
+        """Bulk-insert current vote_notifications dict into staging table and clear it."""
+        if not cls.vote_notifications:
+            return
+        cls._ensure_staging_table()
+        entries = list(cls.vote_notifications.values())
+        count = len(entries)
+        for i in range(0, count, cls._SPILL_BATCH_SIZE):
+            batch = entries[i : i + cls._SPILL_BATCH_SIZE]
+            placeholders = ",".join(["(%s, %s, %s, %s, %s, %s, %s)"] * len(batch))
+            params = []
+            for n in batch:
+                params.extend(
+                    [
+                        n['voter'],
+                        n['author'],
+                        n['permlink'],
+                        n['block_num'],
+                        n['last_update'],
+                        n['rshares'],
+                        n['counter'],
+                    ]
+                )
+            sql = f"""INSERT INTO {cls._STAGING_TABLE} (voter, author, permlink, block_num, last_update, rshares, counter)
+                VALUES {placeholders}
+                ON CONFLICT (voter, author, permlink) DO UPDATE SET
+                    block_num = EXCLUDED.block_num,
+                    last_update = EXCLUDED.last_update,
+                    rshares = EXCLUDED.rshares,
+                    counter = EXCLUDED.counter"""
+            cls.db.query_no_return_raw(sql, tuple(params))
+        log.info("[VOTES] Spilled %d vote notifications to staging table", count)
+        cls.vote_notifications.clear()
+
+    @classmethod
+    def _cleanup_staging(cls):
+        """Truncate and drop the staging table."""
+        if cls._staging_table_created:
+            cls.db.query(f"DROP TABLE IF EXISTS {cls._STAGING_TABLE}")
+            cls._staging_table_created = False
+
     @classmethod
     def flush_vote_notifications(cls, force=False):
         from hive.db.db_state import DbState
 
         if not force and DbState.is_massive_sync():
-            return 0  # Defer to finalization; keep accumulated data
+            # During massive sync, spill accumulated entries to staging table
+            # to keep memory bounded, but defer final flush to finalization.
+            cls._spill_to_staging()
+            return 0
 
+        if force and cls._staging_table_created:
+            # Finalization path: spill any remaining dict entries, then
+            # INSERT...SELECT from the staging table in a single query.
+            cls._spill_to_staging()
+            return cls._flush_from_staging()
+
+        # Live sync path: flush directly from the in-memory dict using VALUES.
         n = len(cls.vote_notifications)
         max_block_num = max(n["block_num"] for k, n in (cls.vote_notifications or {"": {"block_num": 0}}).items())
         if n > 0 and max_block_num > NotificationCache.notification_first_block(cls.db):
@@ -129,6 +204,63 @@ class VoteNotificationCache(NotificationCache):
                 cls.commitTx()
         else:
             n = 0
+        cls.vote_notifications.clear()
+        return n
+
+    @classmethod
+    def _flush_from_staging(cls):
+        """Flush vote notifications from staging table to hive_notification_cache.
+
+        Replaces the chunked VALUES-based INSERT with a single INSERT...SELECT
+        from the staging table, allowing PostgreSQL to optimize the full join plan.
+        """
+        n = cls.db.query_row(f"SELECT COUNT(*) AS cnt FROM {cls._STAGING_TABLE}")._mapping['cnt']
+        if n == 0:
+            cls._cleanup_staging()
+            return 0
+
+        cls.beginTx()
+        cls.db.query_prepared(
+            f"""
+            INSERT INTO {SCHEMA_NAME}.hive_notification_cache
+            (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            SELECT hn.id, hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id,
+                   hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
+            FROM (
+                SELECT DISTINCT
+                  {SCHEMA_NAME}.notification_id(n.last_update, 17, n.counter) AS id,
+                  n.block_num, n.voter, n.author, n.permlink, n.last_update, n.rshares, n.counter,
+                  hv.id AS src,
+                  hpv.author_id AS dst,
+                  hpv.id AS post_id,
+                  {SCHEMA_NAME}.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
+                  {SCHEMA_NAME}.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
+                FROM {cls._STAGING_TABLE} AS n
+                JOIN {SCHEMA_NAME}.hive_accounts AS hv ON n.voter = hv.name
+                JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
+                JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
+                LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = ha.id AND m.following = hv.id
+                LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = ha.id
+                LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = hv.id
+                JOIN (
+                    SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
+                    FROM {SCHEMA_NAME}.hive_posts hpvi
+                    WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
+                        AND hpvi.counter_deleted = 0
+                ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
+                WHERE m.follower IS NULL AND mi.following IS NULL
+            ) AS hn
+            WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
+                AND score >= 0
+                AND hn.src IS DISTINCT FROM hn.dst
+                AND hn.rshares >= 10e9
+                AND hn.vote_value >= 0.02
+            ORDER BY hn.block_num, created_at, hn.src, hn.dst
+            ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+            """
+        )
+        cls.commitTx()
+        cls._cleanup_staging()
         cls.vote_notifications.clear()
         return n
 
