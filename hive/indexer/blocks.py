@@ -373,7 +373,12 @@ class Blocks:
             elif op_type_id == 18:  # CUSTOM_JSON
                 op_id = op.get('id')
                 if op_id == 'follow':
-                    pass  # Follow ops processed entirely in SQL via process_follows_for_blocks()
+                    # Follow and reblog ops share custom_json id='follow'.
+                    # SQL handles follows; reblogs still need Python processing.
+                    json_str = op.get('json', '')
+                    if isinstance(json_str, str) and json_str.lstrip().startswith('["reblog"'):
+                        CustomOp.process_op(op, block_num, cls._head_block_date)
+                    # else: follow op, handled by SQL procedure
                 elif op_id == 'community':
                     # Community ops need the flush — they do immediate SQL lookups on posts
                     if Posts._pending_comment_ops:
