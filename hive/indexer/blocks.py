@@ -360,7 +360,7 @@ class Blocks:
             elif op_type_id == 0:  # VOTE
                 Votes.vote_op(op, cls._head_block_date)
             elif op_type_id == 18:  # CUSTOM_JSON
-                if Posts._pending_comment_ops and op.get('id') == 'community':
+                if Posts._pending_comment_ops:
                     Posts.flush_pending_comment_ops()
                 CustomOp.process_op(op, block_num, cls._head_block_date)
 
