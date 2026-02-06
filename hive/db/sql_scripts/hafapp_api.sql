@@ -152,6 +152,290 @@ $function$
     LANGUAGE plpgsql STABLE
 ;
 
+--- Process follow operations entirely in SQL for massive sync ---
+
+DROP TYPE IF EXISTS hivemind_app.follow_notification CASCADE;
+CREATE TYPE hivemind_app.follow_notification AS (
+    follower_name TEXT,
+    following_name TEXT,
+    block_num INT
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.process_follows_for_blocks(
+    _first_block INT, _last_block INT
+) RETURNS SETOF hivemind_app.follow_notification
+AS $function$
+DECLARE
+    rec RECORD;
+    _val JSONB;
+    _inner_json JSONB;
+    _data JSONB;
+    _auth_account TEXT;
+    _follower_name TEXT;
+    _following_raw JSONB;
+    _what_action TEXT;
+    _follower_id INT;
+    _following_name TEXT;
+    _following_id INT;
+    _following_arr TEXT[];
+    _i INT;
+BEGIN
+    CREATE TEMP TABLE IF NOT EXISTS _follow_notifications (
+        follower_name TEXT,
+        following_name TEXT,
+        block_num INT
+    ) ON COMMIT DROP;
+
+    FOR rec IN
+        SELECT
+            ho.id AS op_id,
+            ho.block_num,
+            ho.body->'value' AS val
+        FROM hivemind_app.operations_view ho
+        WHERE ho.block_num BETWEEN _first_block AND _last_block
+          AND ho.op_type_id = 18
+          AND ho.custom_json_type_id IN (
+              SELECT id FROM hafd.custom_json_types
+              WHERE custom_json_id = 'follow'
+          )
+        ORDER BY ho.id
+    LOOP
+        _val := rec.val;
+
+        -- Auth validation: required_auths must be empty, required_posting_auths must have exactly 1
+        IF jsonb_array_length(COALESCE(_val->'required_auths', '[]'::jsonb)) != 0 THEN
+            CONTINUE;
+        END IF;
+        IF jsonb_array_length(COALESCE(_val->'required_posting_auths', '[]'::jsonb)) != 1 THEN
+            CONTINUE;
+        END IF;
+        _auth_account := _val->'required_posting_auths'->>0;
+
+        -- Parse inner JSON (double-encoded: the 'json' field is a JSON string)
+        BEGIN
+            _inner_json := (_val->>'json')::jsonb;
+        EXCEPTION WHEN OTHERS THEN
+            CONTINUE;  -- Invalid JSON, skip
+        END;
+
+        -- Legacy compat: if not array and block < 6M, wrap as ['follow', data]
+        IF jsonb_typeof(_inner_json) != 'array' THEN
+            IF rec.block_num < 6000000 THEN
+                _inner_json := jsonb_build_array('follow', _inner_json);
+            ELSE
+                CONTINUE;
+            END IF;
+        END IF;
+
+        -- Must be array of length 2
+        IF jsonb_array_length(_inner_json) != 2 THEN
+            CONTINUE;
+        END IF;
+
+        -- First element must be 'follow' (skip 'reblog' — handled by Python)
+        IF _inner_json->>0 != 'follow' THEN
+            CONTINUE;
+        END IF;
+
+        -- Second element must be an object
+        _data := _inner_json->1;
+        IF jsonb_typeof(_data) != 'object' THEN
+            CONTINUE;
+        END IF;
+
+        -- Must have 'follower', 'following', 'what' keys; 'what' must be array
+        IF NOT (_data ? 'follower' AND _data ? 'following' AND _data ? 'what') THEN
+            CONTINUE;
+        END IF;
+        IF jsonb_typeof(_data->'what') != 'array' THEN
+            CONTINUE;
+        END IF;
+
+        _what_action := COALESCE(_data->'what'->>0, '');
+        _follower_name := _data->>'follower';
+
+        -- Follower must match auth account
+        IF _follower_name IS NULL OR _follower_name = '' OR _follower_name != _auth_account THEN
+            CONTINUE;
+        END IF;
+
+        -- Resolve follower to account ID
+        SELECT id INTO _follower_id FROM hivemind_app.hive_accounts WHERE name = _follower_name;
+        IF _follower_id IS NULL THEN
+            CONTINUE;
+        END IF;
+
+        -- Normalize 'following' to array of names
+        _following_raw := _data->'following';
+        IF jsonb_typeof(_following_raw) = 'array' THEN
+            SELECT array_agg(elem) INTO _following_arr
+            FROM jsonb_array_elements_text(_following_raw) AS elem
+            WHERE elem IS NOT NULL AND elem != '' AND elem != _follower_name;
+        ELSIF jsonb_typeof(_following_raw) = 'string' THEN
+            _following_name := _following_raw #>> '{}';
+            IF _following_name IS NOT NULL AND _following_name != '' AND _following_name != _follower_name THEN
+                _following_arr := ARRAY[_following_name];
+            ELSE
+                _following_arr := '{}';
+            END IF;
+        ELSE
+            CONTINUE;
+        END IF;
+
+        -- Map action type and process
+        IF _what_action IN ('blog', 'follow') THEN
+            -- Follow: insert into follows + delete from muted
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+
+                -- Insert follow (update block_num if exists, insert if not)
+                IF EXISTS (SELECT 1 FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id) THEN
+                    UPDATE hivemind_app.follows SET block_num = rec.block_num
+                    WHERE follower = _follower_id AND following = _following_id;
+                ELSE
+                    INSERT INTO hivemind_app.follows (follower, following, block_num)
+                    VALUES (_follower_id, _following_id, rec.block_num)
+                    ON CONFLICT (follower, following) DO NOTHING;
+                    -- Update counters only for genuinely new follows
+                    IF FOUND THEN
+                        UPDATE hivemind_app.hive_accounts SET following = following + 1 WHERE id = _follower_id;
+                        UPDATE hivemind_app.hive_accounts SET followers = followers + 1 WHERE id = _following_id;
+                    END IF;
+                END IF;
+
+                -- Delete from muted
+                DELETE FROM hivemind_app.muted WHERE follower = _follower_id AND following = _following_id;
+
+                -- Accumulate notification
+                INSERT INTO _follow_notifications VALUES (_follower_name, _following_name, rec.block_num);
+            END LOOP;
+
+        ELSIF _what_action = 'ignore' THEN
+            -- Mute: insert into muted + delete from follows
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+
+                INSERT INTO hivemind_app.muted (follower, following, block_num)
+                VALUES (_follower_id, _following_id, rec.block_num)
+                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+
+                -- Delete from follows + update counters
+                DELETE FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id;
+                IF FOUND THEN
+                    UPDATE hivemind_app.hive_accounts SET following = following - 1 WHERE id = _follower_id;
+                    UPDATE hivemind_app.hive_accounts SET followers = followers - 1 WHERE id = _following_id;
+                END IF;
+            END LOOP;
+
+        ELSIF _what_action = '' THEN
+            -- Nothing: delete from both follows and muted
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+
+                DELETE FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id;
+                IF FOUND THEN
+                    UPDATE hivemind_app.hive_accounts SET following = following - 1 WHERE id = _follower_id;
+                    UPDATE hivemind_app.hive_accounts SET followers = followers - 1 WHERE id = _following_id;
+                END IF;
+
+                DELETE FROM hivemind_app.muted WHERE follower = _follower_id AND following = _following_id;
+            END LOOP;
+
+        ELSIF _what_action = 'blacklist' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                INSERT INTO hivemind_app.blacklisted (follower, following, block_num)
+                VALUES (_follower_id, _following_id, rec.block_num)
+                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+            END LOOP;
+
+        ELSIF _what_action = 'unblacklist' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                DELETE FROM hivemind_app.blacklisted WHERE follower = _follower_id AND following = _following_id;
+            END LOOP;
+
+        ELSIF _what_action = 'follow_blacklist' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                INSERT INTO hivemind_app.follow_blacklisted (follower, following, block_num)
+                VALUES (_follower_id, _following_id, rec.block_num)
+                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+            END LOOP;
+
+        ELSIF _what_action = 'unfollow_blacklist' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                DELETE FROM hivemind_app.follow_blacklisted WHERE follower = _follower_id AND following = _following_id;
+            END LOOP;
+
+        ELSIF _what_action = 'follow_muted' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                INSERT INTO hivemind_app.follow_muted (follower, following, block_num)
+                VALUES (_follower_id, _following_id, rec.block_num)
+                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+            END LOOP;
+
+        ELSIF _what_action = 'unfollow_muted' THEN
+            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
+                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
+                IF _following_id IS NULL THEN CONTINUE; END IF;
+                DELETE FROM hivemind_app.follow_muted WHERE follower = _follower_id AND following = _following_id;
+            END LOOP;
+
+        ELSIF _what_action = 'reset_blacklist' THEN
+            PERFORM hivemind_app.reset_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
+
+        ELSIF _what_action = 'reset_following_list' THEN
+            PERFORM hivemind_app.reset_follows(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
+
+        ELSIF _what_action = 'reset_muted_list' THEN
+            PERFORM hivemind_app.reset_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
+
+        ELSIF _what_action = 'reset_follow_blacklist' THEN
+            PERFORM hivemind_app.reset_follow_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
+
+        ELSIF _what_action = 'reset_follow_muted_list' THEN
+            PERFORM hivemind_app.reset_follow_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+
+        ELSIF _what_action = 'reset_all_lists' THEN
+            PERFORM hivemind_app.reset_follows(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
+            PERFORM hivemind_app.reset_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
+            PERFORM hivemind_app.reset_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
+            PERFORM hivemind_app.reset_follow_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
+            PERFORM hivemind_app.reset_follow_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+
+        END IF;
+        -- Unknown action types are silently ignored (matching Python behavior)
+    END LOOP;
+
+    -- Return notification data for Follow actions
+    RETURN QUERY SELECT * FROM _follow_notifications;
+END
+$function$
+    LANGUAGE plpgsql VOLATILE
+;
+
+
 DROP TYPE IF EXISTS hivemind_app.hivemind_block_date CASCADE;
 CREATE TYPE hivemind_app.hivemind_block_date AS (
     num INT,
