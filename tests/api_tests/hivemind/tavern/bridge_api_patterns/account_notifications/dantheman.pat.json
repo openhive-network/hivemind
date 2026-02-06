@@ -345,7 +345,7 @@
   },
   {
     "date": "2016-09-14T20:15:48",
-    "id": "4039671273226242",
+    "id": "4039671273226241",
     "msg": "@james-show replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -528,8 +528,8 @@
     "url": "@yuli7376"
   },
   {
-    "date": "2016-09-14T00:33:24",
-    "id": "4020627400818689",
+    "date": "2016-09-14T00:32:12",
+    "id": "4020608073465857",
     "msg": "@cjclaro mentioned you and 0 others",
     "score": 52,
     "type": "mention",
@@ -696,14 +696,6 @@
     "url": "@masteryoda/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t165008420z"
   },
   {
-    "date": "2016-09-13T16:40:27",
-    "id": "4013009995300865",
-    "msg": "@shenanigator replied to your comment",
-    "score": 53,
-    "type": "reply_comment",
-    "url": "@shenanigator/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t163845836z"
-  },
-  {
     "date": "2016-09-13T16:33:42",
     "id": "4012901291524097",
     "msg": "@rusteemitblog mentioned you and 3 others",
@@ -737,7 +729,7 @@
   },
   {
     "date": "2016-09-13T15:55:12",
-    "id": "4012281193037826",
+    "id": "4012281193037825",
     "msg": "@sigmajin replied to your comment",
     "score": 55,
     "type": "reply_comment",
@@ -794,6 +786,14 @@
   {
     "date": "2016-09-13T13:45:57",
     "id": "4010199488659457",
+    "msg": "@strangerarray mentioned you and 21 others",
+    "score": 52,
+    "type": "mention",
+    "url": "@strangerarray/steemit-time-of-death-scheduled-tue-13-sep-2016-15-00-00-ut"
+  },
+  {
+    "date": "2016-09-13T13:00:57",
+    "id": "4009474712928257",
     "msg": "@strangerarray mentioned you and 21 others",
     "score": 52,
     "type": "mention",
