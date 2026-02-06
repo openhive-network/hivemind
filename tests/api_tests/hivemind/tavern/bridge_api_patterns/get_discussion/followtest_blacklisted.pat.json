@@ -587,10 +587,10 @@
     "blacklists": [
       "my blacklist"
     ],
-    "body": "You need to remove the # sign (used for quoting the specified line) only in front of the parameters you set, it seems there is a problem with your witness account in the config.\n\nCan you please upload and post a link to your config.ini file with the WIF key removed, so I can check what is wrong with it?",
+    "body": "You need to remove the # sign (used for quoting the specified line) only in front of the lines in the config with the parameters you set, it seems there is a problem with your witness account in the config.\n\nCan you please upload and post a link to your config.ini file with the WIF key removed, so I can check what is wrong with it?",
     "category": "steemit",
     "children": 0,
-    "created": "2016-07-30T14:52:57",
+    "created": "2016-07-30T14:52:21",
     "curator_payout_value": "0.000 HBD",
     "depth": 5,
     "is_paidout": true,
@@ -617,7 +617,7 @@
       "total_votes": 0
     },
     "title": "RE: Getting Started Mining Steem on Windows [Step by Step Guide]",
-    "updated": "2016-07-30T14:52:21",
+    "updated": "2016-07-30T14:52:57",
     "url": "/steemit/@cryptos/getting-started-mining-steem-on-windows#@cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t145217174z"
   },
   "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t153332450z": {
@@ -1222,8 +1222,8 @@
     "permlink": "re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t143643564z",
     "reblogs": 0,
     "replies": [
-      "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t145217174z",
       "knozaki2015/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t144432622z",
+      "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t145217174z",
       "cryptos/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t153332450z",
       "knozaki2015/re-cryptos-re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t154110979z"
     ],
