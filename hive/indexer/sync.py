@@ -25,6 +25,7 @@ from hive.indexer.hive_db.massive_blocks_data_provider import (
 from hive.indexer.notification_cache import NotificationCache
 from hive.signals import (
     can_continue_thread,
+    clear_exception_thrown,
     restore_default_signal_handlers,
     set_custom_signal_handlers,
     set_exception_thrown,
@@ -349,7 +350,8 @@ class SyncHiveDb:
             self._prefetched_blocks = self._prefetch_blocks_provider.get_data(next_lbound, next_ubound)
             self._prefetch_range = (next_lbound, next_ubound)
         except Exception:
-            # Prefetch failure is non-fatal
+            # Prefetch failure is non-fatal; undo the set_exception_thrown() from get_data()
+            clear_exception_thrown()
             self._prefetched_blocks = None
             self._prefetch_range = None
 
@@ -367,7 +369,8 @@ class SyncHiveDb:
             self._prefetched_flat_data = (op_rows, block_date_rows)
             self._prefetch_flat_range = (next_lbound, next_ubound)
         except Exception:
-            # Prefetch failure is non-fatal
+            # Prefetch failure is non-fatal; undo the set_exception_thrown() from get_data()
+            clear_exception_thrown()
             self._prefetched_flat_data = None
             self._prefetch_flat_range = None
 
