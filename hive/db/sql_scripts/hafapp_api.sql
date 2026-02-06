@@ -189,9 +189,9 @@ CREATE TYPE hivemind_app.hivemind_flat_op_extended AS (
     f_author TEXT,
     f_permlink TEXT,
     f_weight BIGINT,
-    f_rshares BIGINT,
+    f_rshares NUMERIC,
     f_pending_payout JSONB,
-    f_total_vote_weight BIGINT
+    f_total_vote_weight NUMERIC
 );
 
 CREATE OR REPLACE FUNCTION hivemind_app.get_ops_for_hivemind_v2(in _first_block INT, in _last_block INT)
@@ -225,13 +225,10 @@ BEGIN
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'voter' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'author' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'permlink' END,
-            CASE WHEN ov.op_type_id IN (0, 72) AND (ov.val->>'weight') ~ '^-?\d+$'
-                 THEN (ov.val->>'weight')::BIGINT END,
-            CASE WHEN ov.op_type_id = 72 AND (ov.val->>'rshares') ~ '^-?\d+$'
-                 THEN (ov.val->>'rshares')::BIGINT END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::BIGINT END,
+            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'rshares')::NUMERIC END,
             CASE WHEN ov.op_type_id = 72 THEN ov.val->'pending_payout' END,
-            CASE WHEN ov.op_type_id = 72 AND (ov.val->>'total_vote_weight') ~ '^-?\d+$'
-                 THEN (ov.val->>'total_vote_weight')::BIGINT END
+            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'total_vote_weight')::NUMERIC END
         FROM op_values ov
         ORDER BY ov.id
     ;
