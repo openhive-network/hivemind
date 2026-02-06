@@ -528,3 +528,66 @@ $function$
     LANGUAGE plpgsql STABLE
 ;
 
+--- Combined single-query: extended ops with block dates in one round-trip ---
+
+DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended_with_date CASCADE;
+CREATE TYPE hivemind_app.hivemind_flat_op_extended_with_date AS (
+    block_num INT,
+    date TEXT,
+    op_type_id INT,
+    body JSONB,
+    f_voter TEXT,
+    f_author TEXT,
+    f_permlink TEXT,
+    f_weight NUMERIC,
+    f_rshares NUMERIC,
+    f_pending_payout JSONB,
+    f_total_vote_weight NUMERIC
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_blocks_and_ops_for_hivemind_v2(in _first_block INT, in _last_block INT)
+    RETURNS SETOF hivemind_app.hivemind_flat_op_extended_with_date
+AS
+$function$
+BEGIN
+    /** Combined single-query: returns block date with each operation row, including
+        extracted vote fields. Blocks with no operations get a single row with
+        op_type_id = NULL (LEFT JOIN). Ordered by block_num, then operation id.
+
+        Like get_ops_for_hivemind_v2 but includes block dates, eliminating the
+        need for a separate get_block_dates_for_hivemind() call.
+    */
+    RETURN QUERY
+        WITH op_values AS (
+            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body->'value' as val
+            FROM hivemind_app.operations_view ho
+            WHERE ho.block_num BETWEEN _first_block AND _last_block
+              AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
+              AND (ho.op_type_id != 18
+                OR ho.custom_json_type_id IN (
+                    SELECT id FROM hafd.custom_json_types
+                    WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+                ))
+        )
+        SELECT
+            hb.num,
+            to_char( hb.created_at, 'YYYY-MM-DDThh24:MI:SS' ),
+            ov.op_type_id,
+            CASE WHEN ov.op_type_id NOT IN (0, 72) THEN ov.val END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'voter' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'author' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'permlink' END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::NUMERIC END,
+            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'rshares')::NUMERIC END,
+            CASE WHEN ov.op_type_id = 72 THEN ov.val->'pending_payout' END,
+            CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'total_vote_weight')::NUMERIC END
+        FROM hivemind_app.blocks_view hb
+        LEFT JOIN op_values ov ON ov.block_num = hb.num
+        WHERE hb.num BETWEEN _first_block AND _last_block
+        ORDER BY hb.num, ov.id
+    ;
+END
+$function$
+    LANGUAGE plpgsql STABLE
+;
+
