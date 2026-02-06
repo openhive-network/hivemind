@@ -269,7 +269,42 @@ BEGIN
             CONTINUE;
         END IF;
 
-        -- Normalize 'following' to array of names
+        -- Handle reset actions first (they don't need a valid 'following' field)
+        IF _what_action = 'reset_blacklist' THEN
+            PERFORM hivemind_app.reset_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
+            CONTINUE;
+        ELSIF _what_action = 'reset_following_list' THEN
+            PERFORM hivemind_app.reset_follows(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
+            CONTINUE;
+        ELSIF _what_action = 'reset_muted_list' THEN
+            PERFORM hivemind_app.reset_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
+            CONTINUE;
+        ELSIF _what_action = 'reset_follow_blacklist' THEN
+            PERFORM hivemind_app.reset_follow_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
+            CONTINUE;
+        ELSIF _what_action = 'reset_follow_muted_list' THEN
+            PERFORM hivemind_app.reset_follow_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+            CONTINUE;
+        ELSIF _what_action = 'reset_all_lists' THEN
+            PERFORM hivemind_app.reset_follows(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
+            PERFORM hivemind_app.reset_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
+            PERFORM hivemind_app.reset_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
+            PERFORM hivemind_app.reset_follow_blacklisted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
+            PERFORM hivemind_app.reset_follow_muted(
+                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+            CONTINUE;
+        END IF;
+
+        -- Normalize 'following' to array of names (required for non-reset actions)
         _following_raw := _data->'following';
         IF jsonb_typeof(_following_raw) = 'array' THEN
             SELECT array_agg(elem) INTO _following_arr
@@ -395,38 +430,6 @@ BEGIN
                 IF _following_id IS NULL THEN CONTINUE; END IF;
                 DELETE FROM hivemind_app.follow_muted WHERE follower = _follower_id AND following = _following_id;
             END LOOP;
-
-        ELSIF _what_action = 'reset_blacklist' THEN
-            PERFORM hivemind_app.reset_blacklisted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
-
-        ELSIF _what_action = 'reset_following_list' THEN
-            PERFORM hivemind_app.reset_follows(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
-
-        ELSIF _what_action = 'reset_muted_list' THEN
-            PERFORM hivemind_app.reset_muted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
-
-        ELSIF _what_action = 'reset_follow_blacklist' THEN
-            PERFORM hivemind_app.reset_follow_blacklisted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
-
-        ELSIF _what_action = 'reset_follow_muted_list' THEN
-            PERFORM hivemind_app.reset_follow_muted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
-
-        ELSIF _what_action = 'reset_all_lists' THEN
-            PERFORM hivemind_app.reset_follows(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
-            PERFORM hivemind_app.reset_muted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
-            PERFORM hivemind_app.reset_blacklisted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
-            PERFORM hivemind_app.reset_follow_blacklisted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
-            PERFORM hivemind_app.reset_follow_muted(
-                ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
 
         END IF;
         -- Unknown action types are silently ignored (matching Python behavior)
