@@ -24,6 +24,11 @@ class AtomicCounter:
             self._value += other
         return self
 
+    def decrement(self):
+        with self._lock:
+            if self._value > 0:
+                self._value -= 1
+
 
 EXCEPTION_THROWN = AtomicCounter(0)
 FINISH_SIGNAL_DURING_SYNC = AtomicCounter(0)
@@ -60,6 +65,11 @@ def custom_signals_handler(signal, frame):
 def set_exception_thrown():
     global EXCEPTION_THROWN
     EXCEPTION_THROWN += 1
+
+
+def clear_exception_thrown():
+    """Undo one set_exception_thrown() call (e.g. for non-fatal prefetch errors)."""
+    EXCEPTION_THROWN.decrement()
 
 
 def can_continue_thread():
