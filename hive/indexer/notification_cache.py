@@ -207,59 +207,72 @@ class VoteNotificationCache(NotificationCache):
         cls.vote_notifications.clear()
         return n
 
+    _FLUSH_BATCH_SIZE = 100_000
+
     @classmethod
     def _flush_from_staging(cls):
         """Flush vote notifications from staging table to hive_notification_cache.
 
-        Replaces the chunked VALUES-based INSERT with a single INSERT...SELECT
-        from the staging table, allowing PostgreSQL to optimize the full join plan.
+        Processes the staging table in batches using DELETE...RETURNING CTEs
+        to keep each query's join scope manageable for the planner.
         """
         n = cls.db.query_row(f"SELECT COUNT(*) AS cnt FROM {cls._STAGING_TABLE}")._mapping['cnt']
         if n == 0:
             cls._cleanup_staging()
             return 0
 
-        cls.beginTx()
-        cls.db.query_prepared(
-            f"""
-            INSERT INTO {SCHEMA_NAME}.hive_notification_cache
-            (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-            SELECT hn.id, hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id,
-                   hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
-            FROM (
-                SELECT DISTINCT
-                  {SCHEMA_NAME}.notification_id(n.last_update, 17, n.counter) AS id,
-                  n.block_num, n.voter, n.author, n.permlink, n.last_update, n.rshares, n.counter,
-                  hv.id AS src,
-                  hpv.author_id AS dst,
-                  hpv.id AS post_id,
-                  {SCHEMA_NAME}.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
-                  {SCHEMA_NAME}.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
-                FROM {cls._STAGING_TABLE} AS n
-                JOIN {SCHEMA_NAME}.hive_accounts AS hv ON n.voter = hv.name
-                JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
-                JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
-                LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = ha.id AND m.following = hv.id
-                LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = ha.id
-                LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = hv.id
-                JOIN (
-                    SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
-                    FROM {SCHEMA_NAME}.hive_posts hpvi
-                    WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
-                        AND hpvi.counter_deleted = 0
-                ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
-                WHERE m.follower IS NULL AND mi.following IS NULL
-            ) AS hn
-            WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
-                AND score >= 0
-                AND hn.src IS DISTINCT FROM hn.dst
-                AND hn.rshares >= 10e9
-                AND hn.vote_value >= 0.02
-            ORDER BY hn.block_num, created_at, hn.src, hn.dst
-            ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
-            """
-        )
-        cls.commitTx()
+        batches = (n + cls._FLUSH_BATCH_SIZE - 1) // cls._FLUSH_BATCH_SIZE
+        log.info("[VOTES] Flushing %d vote notifications from staging in %d batches", n, batches)
+
+        for batch_num in range(batches):
+            cls.beginTx()
+            cls.db.query_prepared(
+                f"""
+                WITH batch AS (
+                    DELETE FROM {cls._STAGING_TABLE}
+                    WHERE ctid = ANY(ARRAY(SELECT ctid FROM {cls._STAGING_TABLE} LIMIT {cls._FLUSH_BATCH_SIZE}))
+                    RETURNING *
+                )
+                INSERT INTO {SCHEMA_NAME}.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                SELECT hn.id, hn.block_num, 17, hn.last_update AS created_at, hn.src, hn.dst, hn.post_id, hn.post_id,
+                       hn.score, {SCHEMA_NAME}.format_vote_value_payload(vote_value) as payload, '', ''
+                FROM (
+                    SELECT DISTINCT
+                      {SCHEMA_NAME}.notification_id(n.last_update, 17, n.counter) AS id,
+                      n.block_num, n.voter, n.author, n.permlink, n.last_update, n.rshares, n.counter,
+                      hv.id AS src,
+                      hpv.author_id AS dst,
+                      hpv.id AS post_id,
+                      {SCHEMA_NAME}.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, n.rshares) AS vote_value,
+                      {SCHEMA_NAME}.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, n.rshares) AS score
+                    FROM batch AS n
+                    JOIN {SCHEMA_NAME}.hive_accounts AS hv ON n.voter = hv.name
+                    JOIN {SCHEMA_NAME}.hive_accounts AS ha ON n.author = ha.name
+                    JOIN {SCHEMA_NAME}.hive_permlink_data AS pd ON n.permlink = pd.permlink
+                    LEFT JOIN {SCHEMA_NAME}.muted AS m ON m.follower = ha.id AND m.following = hv.id
+                    LEFT JOIN {SCHEMA_NAME}.follow_muted AS fm ON fm.follower = ha.id
+                    LEFT JOIN {SCHEMA_NAME}.muted AS mi ON mi.follower = fm.following AND mi.following = hv.id
+                    JOIN (
+                        SELECT hpvi.id, hpvi.permlink_id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares, hpvi.vote_rshares as rshares
+                        FROM {SCHEMA_NAME}.hive_posts hpvi
+                        WHERE hpvi.block_num > {SCHEMA_NAME}.block_before_head('97 days'::interval)
+                            AND hpvi.counter_deleted = 0
+                    ) AS hpv ON pd.id = hpv.permlink_id AND ha.id = hpv.author_id
+                    WHERE m.follower IS NULL AND mi.following IS NULL
+                ) AS hn
+                WHERE hn.block_num > {SCHEMA_NAME}.block_before_irreversible( '90 days' )
+                    AND score >= 0
+                    AND hn.src IS DISTINCT FROM hn.dst
+                    AND hn.rshares >= 10e9
+                    AND hn.vote_value >= 0.02
+                ORDER BY hn.block_num, created_at, hn.src, hn.dst
+                ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+                """
+            )
+            cls.commitTx()
+            log.info("[VOTES] Flushed batch %d/%d from staging", batch_num + 1, batches)
+
         cls._cleanup_staging()
         cls.vote_notifications.clear()
         return n
