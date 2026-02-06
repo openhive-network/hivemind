@@ -202,7 +202,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
