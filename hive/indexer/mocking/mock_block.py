@@ -109,7 +109,7 @@ class OperationBase:
             sql="""
                 INSERT INTO hafd.custom_json_types(custom_json_id)
                 VALUES (:cj_id)
-                ON CONFLICT (custom_json_id) DO NOTHING
+                ON CONFLICT (custom_json_id) DO UPDATE SET custom_json_id = EXCLUDED.custom_json_id
                 RETURNING id
             """,
             cj_id=cj_id,
