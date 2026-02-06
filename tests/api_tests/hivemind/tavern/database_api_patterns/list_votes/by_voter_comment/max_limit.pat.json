@@ -6081,16 +6081,6 @@
       "weight": "29997755820849979"
     },
     {
-      "author": "earnest",
-      "last_update": "2016-07-24T00:39:03",
-      "num_changes": 0,
-      "permlink": "re-mrrobot-re-stellabelle-re-doe-hi-steemit--i-m-doe-a-cartoon-animator-storyboarder-illustrator-and-all-things-related-or-20160724t001147131z",
-      "rshares": 10384543743,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "43384021829812124"
-    },
-    {
       "author": "jlwkolb",
       "last_update": "2016-07-24T10:49:18",
       "num_changes": 0,
@@ -6099,6 +6089,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 6160891087030917
+    },
+    {
+      "author": "earnest",
+      "last_update": "2016-07-24T00:39:03",
+      "num_changes": 0,
+      "permlink": "re-mrrobot-re-stellabelle-re-doe-hi-steemit--i-m-doe-a-cartoon-animator-storyboarder-illustrator-and-all-things-related-or-20160724t001147131z",
+      "rshares": 10384543743,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "43384021829812124"
     },
     {
       "author": "earnest",
@@ -9852,16 +9852,6 @@
     },
     {
       "author": "mauricemikkers",
-      "last_update": "2016-07-24T11:56:39",
-      "num_changes": 0,
-      "permlink": "re-yuhhans-re-mauricemikkers-steem-coin-symbol-presenting-you-the-first-steem-coin-symbol-design-20160724t115323206z",
-      "rshares": 1832684084,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 816841396656190
-    },
-    {
-      "author": "mauricemikkers",
       "last_update": "2016-07-24T11:56:48",
       "num_changes": 0,
       "permlink": "re-rectusfemoris-re-mauricemikkers-steem-coin-symbol-presenting-you-the-first-steem-coin-symbol-design-20160724t115052791z",
@@ -9869,6 +9859,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1495448095416718
+    },
+    {
+      "author": "mauricemikkers",
+      "last_update": "2016-07-24T11:56:39",
+      "num_changes": 0,
+      "permlink": "re-yuhhans-re-mauricemikkers-steem-coin-symbol-presenting-you-the-first-steem-coin-symbol-design-20160724t115323206z",
+      "rshares": 1832684084,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 816841396656190
     },
     {
       "author": "mauricemikkers",
