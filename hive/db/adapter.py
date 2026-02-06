@@ -5,7 +5,10 @@ from collections import OrderedDict
 from time import perf_counter as perf
 
 import sqlalchemy
+import ujson
 from funcy.seqs import first
+from psycopg2.extras import register_default_jsonb
+from sqlalchemy import event
 
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
@@ -56,7 +59,7 @@ class Db:
         instance before config is loaded.
         """
         assert url, (
-            '--database-url (or DATABASE_URL env) not specified; ' 'e.g. postgresql://user:pass@localhost:5432/hive'
+            '--database-url (or DATABASE_URL env) not specified; e.g. postgresql://user:pass@localhost:5432/hive'
         )
         self._url = url
         self._conn = []
@@ -130,6 +133,11 @@ class Db:
                 echo=False,
                 connect_args={'application_name': f'hivemind_{self.name}'},
             )
+
+            @event.listens_for(self._engine, "connect")
+            def _register_ujson_adapter(dbapi_conn, connection_record):
+                register_default_jsonb(dbapi_conn, loads=ujson.loads)
+
         return self._engine
 
     def get_dialect(self):
