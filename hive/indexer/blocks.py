@@ -302,6 +302,8 @@ class Blocks:
                     'permlink': row_m['f_permlink'],
                     'weight': row_m['f_weight'],
                     'rshares': row_m['f_rshares'],
+                    'pending_payout': row_m['f_pending_payout'],
+                    'total_vote_weight': row_m['f_total_vote_weight'],
                 }
             else:
                 body = row_m['body']
