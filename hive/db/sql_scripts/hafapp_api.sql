@@ -188,7 +188,7 @@ CREATE TYPE hivemind_app.hivemind_flat_op_extended AS (
     f_voter TEXT,
     f_author TEXT,
     f_permlink TEXT,
-    f_weight BIGINT,
+    f_weight NUMERIC,
     f_rshares NUMERIC,
     f_pending_payout JSONB,
     f_total_vote_weight NUMERIC
@@ -225,7 +225,7 @@ BEGIN
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'voter' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'author' END,
             CASE WHEN ov.op_type_id IN (0, 72) THEN ov.val->>'permlink' END,
-            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::BIGINT END,
+            CASE WHEN ov.op_type_id IN (0, 72) THEN (ov.val->>'weight')::NUMERIC END,
             CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'rshares')::NUMERIC END,
             CASE WHEN ov.op_type_id = 72 THEN ov.val->'pending_payout' END,
             CASE WHEN ov.op_type_id = 72 THEN (ov.val->>'total_vote_weight')::NUMERIC END
