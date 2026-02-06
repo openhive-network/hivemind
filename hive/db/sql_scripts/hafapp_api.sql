@@ -112,3 +112,71 @@ $function$
     LANGUAGE plpgsql STABLE
 ;
 
+--- Flat-row functions for massive sync (no ARRAY_AGG, no type wrapper, no hash/prev) ---
+
+DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op CASCADE;
+CREATE TYPE hivemind_app.hivemind_flat_op AS (
+    block_num INT,
+    op_type_id INT,
+    body JSONB
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_ops_for_hivemind(in _first_block INT, in _last_block INT)
+    RETURNS SETOF hivemind_app.hivemind_flat_op
+AS
+$function$
+BEGIN
+    /** Flat-row query for massive sync - returns only the op types hivemind processes.
+        Regular ops:  0=vote, 1=comment, 9=account_create, 10=account_update,
+                      14=pow, 17=delete_comment, 18=custom_json, 19=comment_option,
+                      23=create_claimed_account, 30=pow2, 41=account_create_with_delegation,
+                      43=account_update2
+        Virtual ops:  51=author_reward, 53=comment_reward, 61=comment_payout_update,
+                      72=effective_comment_vote, 73=ineffective_delete_comment
+
+        Body is returned as jsonb->'value' (the inner payload, no type wrapper).
+    */
+    RETURN QUERY
+        SELECT
+            ho.block_num,
+            ho.op_type_id,
+            ho.body->'value'
+        FROM hivemind_app.operations_view ho
+        WHERE ho.block_num BETWEEN _first_block AND _last_block
+          AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
+          AND (ho.op_type_id != 18
+            OR ho.custom_json_type_id IN (
+                SELECT id FROM hafd.custom_json_types
+                WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+            ))
+        ORDER BY ho.id
+    ;
+END
+$function$
+    LANGUAGE plpgsql STABLE
+;
+
+DROP TYPE IF EXISTS hivemind_app.hivemind_block_date CASCADE;
+CREATE TYPE hivemind_app.hivemind_block_date AS (
+    num INT,
+    date TEXT
+);
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_block_dates_for_hivemind(in _first_block INT, in _last_block INT)
+    RETURNS SETOF hivemind_app.hivemind_block_date
+AS
+$function$
+BEGIN
+    RETURN QUERY
+        SELECT
+            hb.num,
+            to_char( hb.created_at, 'YYYY-MM-DDThh24:MI:SS' )
+        FROM hivemind_app.blocks_view hb
+        WHERE hb.num BETWEEN _first_block AND _last_block
+        ORDER BY hb.num
+    ;
+END
+$function$
+    LANGUAGE plpgsql STABLE
+;
+
