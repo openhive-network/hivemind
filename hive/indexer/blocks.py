@@ -268,87 +268,6 @@ class Blocks:
         return first_block, last_num
 
     @classmethod
-    def process_blocks_flat_extended(cls, op_rows, block_dates: dict) -> tuple[int, int]:
-        """Like process_blocks_flat but for extended rows with extracted vote fields.
-
-        op_rows: rows from get_ops_for_hivemind_v2(), each with (block_num, op_type_id, body,
-                 f_voter, f_author, f_permlink, f_weight, f_rshares).
-                 For vote (0) and effective_comment_vote (72) ops, body is NULL and the
-                 f_* fields contain the extracted values. For all other ops, body is the
-                 jsonb payload and f_* fields are NULL.
-        """
-        if not block_dates:
-            return -1, 0
-
-        block_vops = {}
-        block_ops = {}
-
-        for row in op_rows:
-            row_m = row._mapping
-            block_num = row_m['block_num']
-            op_type_id = row_m['op_type_id']
-
-            if op_type_id == 0:  # VOTE - build dict from extracted columns
-                body = {
-                    'voter': row_m['f_voter'],
-                    'author': row_m['f_author'],
-                    'permlink': row_m['f_permlink'],
-                    'weight': row_m['f_weight'],
-                }
-            elif op_type_id == 72:  # EFFECTIVE_COMMENT_VOTE
-                body = {
-                    'voter': row_m['f_voter'],
-                    'author': row_m['f_author'],
-                    'permlink': row_m['f_permlink'],
-                    'weight': row_m['f_weight'],
-                    'rshares': row_m['f_rshares'],
-                    'pending_payout': row_m['f_pending_payout'],
-                    'total_vote_weight': row_m['f_total_vote_weight'],
-                }
-            else:
-                body = row_m['body']
-
-            if op_type_id >= 50:
-                if block_num not in block_vops:
-                    block_vops[block_num] = []
-                block_vops[block_num].append((op_type_id, body))
-            else:
-                if block_num not in block_ops:
-                    block_ops[block_num] = []
-                block_ops[block_num].append((op_type_id, body))
-
-        sorted_blocks = sorted(block_dates.keys())
-        first_block = sorted_blocks[0]
-        last_num = first_block
-
-        try:
-            for block_num in sorted_blocks:
-                date = block_dates[block_num]
-                cls._current_block_date = date
-
-                if cls._head_block_date is None:
-                    cls._head_block_date = cls._current_block_date
-
-                vops = block_vops.get(block_num)
-                ops = block_ops.get(block_num)
-
-                if vops or ops:
-                    is_safe_cashout = block_num <= cls._last_safe_cashout_block
-                    ineffective_deleted_ops = cls._process_vops_flat(
-                        Posts.comment_payout_ops, vops or [], date, block_num, is_safe_cashout
-                    )
-                    if ops:
-                        cls._process_ops_flat(ops, block_num, ineffective_deleted_ops)
-
-                cls._head_block_date = cls._current_block_date
-                last_num = block_num
-        except Exception as e:
-            log.error("exception encountered block %d", last_num + 1)
-            raise e
-
-        return first_block, last_num
-
-    @classmethod
     def _process_vops_flat(
         cls, comment_payout_ops: dict, vops: list, date: str, block_num: int, is_safe_cashout: bool
     ) -> dict:
@@ -433,26 +352,15 @@ class Blocks:
             elif op_type_id == 1:  # COMMENT
                 Posts.comment_op(op, cls._head_block_date)
             elif op_type_id == 17:  # DELETE_COMMENT
-                # Flush pending comment ops first: delete_op defers when
-                # _pending_comment_ops is non-empty, which breaks
-                # create/delete/recreate ordering.
-                if Posts._pending_comment_ops:
-                    Posts.flush_pending_comment_ops()
                 key = f"{op['author']}/{op['permlink']}"
                 if key not in ineffective_deleted_ops:
                     Posts.delete_op(op, cls._head_block_date)
             elif op_type_id == 19:  # COMMENT_OPTION
-                # comment_options_op also defers when pending comment ops exist
-                if Posts._pending_comment_ops:
-                    Posts.flush_pending_comment_ops()
                 Posts.comment_options_op(op)
             elif op_type_id == 0:  # VOTE
                 Votes.vote_op(op, cls._head_block_date)
             elif op_type_id == 18:  # CUSTOM_JSON
-                # Only community ops need the flush — they do immediate SQL
-                # lookups on posts (mutePost, pinPost, etc.). Follow/reblog/notify
-                # only accumulate in memory and flush later.
-                if Posts._pending_comment_ops and op.get('id') == 'community':
+                if Posts._pending_comment_ops:
                     Posts.flush_pending_comment_ops()
                 CustomOp.process_op(op, block_num, cls._head_block_date)
 
@@ -501,22 +409,6 @@ class Blocks:
         cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI FLAT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
-
-    @classmethod
-    def process_multi_flat_extended(cls, op_rows, block_dates: dict, num_blocks: int) -> None:
-        """Batch-process extended flat rows (with extracted vote fields) for massive sync."""
-        time_start = OPSM.start()
-
-        DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
-
-        first_block, last_num = cls.process_blocks_flat_extended(op_rows, block_dates)
-
-        Posts.flush_pending_comment_ops()
-        DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
-
-        cls.flush_data_in_n_threads()
-
-        log.info(f"[PROCESS MULTI FLAT EXT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
 
     @classmethod
     def _periodic_actions(cls, block_raw) -> None:
