@@ -399,15 +399,26 @@ class Blocks:
             elif op_type_id == 1:  # COMMENT
                 Posts.comment_op(op, cls._head_block_date)
             elif op_type_id == 17:  # DELETE_COMMENT
+                # Flush pending comment ops first: delete_op defers when
+                # _pending_comment_ops is non-empty, which breaks
+                # create/delete/recreate ordering.
+                if Posts._pending_comment_ops:
+                    Posts.flush_pending_comment_ops()
                 key = f"{op['author']}/{op['permlink']}"
                 if key not in ineffective_deleted_ops:
                     Posts.delete_op(op, cls._head_block_date)
             elif op_type_id == 19:  # COMMENT_OPTION
+                # comment_options_op also defers when pending comment ops exist
+                if Posts._pending_comment_ops:
+                    Posts.flush_pending_comment_ops()
                 Posts.comment_options_op(op)
             elif op_type_id == 0:  # VOTE
                 Votes.vote_op(op, cls._head_block_date)
             elif op_type_id == 18:  # CUSTOM_JSON
-                if Posts._pending_comment_ops:
+                # Only community ops need the flush — they do immediate SQL
+                # lookups on posts (mutePost, pinPost, etc.). Follow/reblog/notify
+                # only accumulate in memory and flush later.
+                if Posts._pending_comment_ops and op.get('id') == 'community':
                     Posts.flush_pending_comment_ops()
                 CustomOp.process_op(op, block_num, cls._head_block_date)
 
