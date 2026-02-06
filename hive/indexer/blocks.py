@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from time import perf_counter
 
+from sqlalchemy import text
+
 from hive.conf import ONE_WEEK_IN_BLOCKS, SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
@@ -29,6 +31,7 @@ from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
 from hive.utils.communities_rank import update_communities_posts_and_rank
+from hive.utils.normalize import escape_characters
 from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
@@ -368,12 +371,16 @@ class Blocks:
             elif op_type_id == 0:  # VOTE
                 Votes.vote_op(op, cls._head_block_date)
             elif op_type_id == 18:  # CUSTOM_JSON
-                # Only community ops need the flush — they do immediate SQL
-                # lookups on posts (mutePost, pinPost, etc.). Follow/reblog/notify
-                # only accumulate in memory and flush later.
-                if Posts._pending_comment_ops and op.get('id') == 'community':
-                    Posts.flush_pending_comment_ops()
-                CustomOp.process_op(op, block_num, cls._head_block_date)
+                op_id = op.get('id')
+                if op_id == 'follow':
+                    pass  # Follow ops processed entirely in SQL via process_follows_for_blocks()
+                elif op_id == 'community':
+                    # Community ops need the flush — they do immediate SQL lookups on posts
+                    if Posts._pending_comment_ops:
+                        Posts.flush_pending_comment_ops()
+                    CustomOp.process_op(op, block_num, cls._head_block_date)
+                else:
+                    CustomOp.process_op(op, block_num, cls._head_block_date)
 
             OPSM.op_stats(cls._OP_STAT_NAMES.get(op_type_id, str(op_type_id)), OPSM.stop(start))
 
@@ -410,16 +417,45 @@ class Blocks:
         """Batch-process flat operation rows for massive sync."""
         time_start = OPSM.start()
 
-        DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
+        db = DbAdapterHolder.common_block_processing_db()
+        db.query_no_return("START TRANSACTION")
 
         first_block, last_num = cls.process_blocks_flat(op_rows, block_dates)
 
         Posts.flush_pending_comment_ops()
-        DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
+
+        # Process follow operations entirely in SQL (after accounts are created)
+        if first_block > -1:
+            cls._process_follows_in_sql(db, first_block, last_num)
+
+        db.query_no_return("COMMIT")
 
         cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI FLAT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
+
+    @classmethod
+    def _process_follows_in_sql(cls, db, first_block: int, last_block: int) -> None:
+        """Process follow operations entirely in SQL, returning notification data."""
+        start = OPSM.start()
+        notification_rows = db.query_all(
+            text("SELECT * FROM hivemind_app.process_follows_for_blocks(:first, :last)").bindparams(
+                first=first_block, last=last_block
+            ),
+            is_prepared=True,
+        )
+        for row in notification_rows:
+            m = row._mapping
+            if not NotificationCache.should_skip_for_block(m['block_num']):
+                NotificationCache.follow_notifications_to_flush.append(
+                    (
+                        escape_characters(m['follower_name']),
+                        escape_characters(m['following_name']),
+                        m['block_num'],
+                        Follow._counter.increment(m['block_num']),
+                    )
+                )
+        OPSM.op_stats('follow_sql', OPSM.stop(start))
 
     @classmethod
     def _periodic_actions(cls, block_raw) -> None:
