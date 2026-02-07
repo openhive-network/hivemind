@@ -18,7 +18,6 @@ BEGIN
     );
   ELSIF _presentation_mode = 'database_api' THEN
     RETURN jsonb_build_object(
-      'id', _vote.id,
       'voter', _vote.voter,
       'author', _vote.author,
       'permlink', _vote.permlink,
@@ -71,7 +70,6 @@ BEGIN
         hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode)
       ) FROM (
       SELECT
-        v.id,
         v.voter,
         v.author,
         v.permlink,

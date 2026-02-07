@@ -24,7 +24,6 @@ BEGIN
   END IF;
 
   _result = jsonb_build_object(
-    'post_id', _row.id,
     'author', _row.author,
     'permlink', _row.permlink,
     'category', (CASE

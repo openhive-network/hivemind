@@ -71,13 +71,11 @@
               $ref: '#/components/schemas/hivemind_endpoints.array_of_reblog_status'
             example: [
               {
-                "post_id": 141560746,
                 "author": "hiveio",
                 "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
                 "reblogged": true
               },
               {
-                "post_id": 141559832,
                 "author": "alice",
                 "permlink": "my-awesome-post",
                 "reblogged": false

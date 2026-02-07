@@ -11,7 +11,6 @@ _tmp_currency hivemind_postgrest_utilities.currency;
 _tmp_amount NUMERIC;
 BEGIN
   _result = jsonb_build_object(
-    'id', _row.id,
     'author_rewards', _row.author_rewards,
     'author', _row.author,
     'permlink', _row.permlink,

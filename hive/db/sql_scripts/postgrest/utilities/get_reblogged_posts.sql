@@ -4,7 +4,6 @@
 -- Define the return type for reblog status (must be created before the functions that use it)
 DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
 CREATE TYPE hivemind_endpoints.reblog_status AS (
-    post_id INT,
     author TEXT,
     permlink TEXT,
     reblogged BOOLEAN
@@ -40,7 +39,6 @@ BEGIN
 
   RETURN QUERY
     SELECT
-      posts.id::INT AS post_id,
       ha.name::TEXT AS author,
       hpd.permlink::TEXT AS permlink,
       (hr.post_id IS NOT NULL) AS reblogged  -- LEFT JOIN is more efficient than correlated EXISTS

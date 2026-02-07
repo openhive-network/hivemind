@@ -58,7 +58,6 @@
     "pending_payout_value": "0.001 HBD",
     "percent_hbd": 10000,
     "permlink": "conceptualizing-a-scifi-land-speeder",
-    "post_id": 1176607,
     "reblogged_by": [
       "test-safari"
     ],
@@ -284,7 +283,6 @@
     "pending_payout_value": "5.888 HBD",
     "percent_hbd": 10000,
     "permlink": "chop-veggies-like-a-ninja-it-s-easy",
-    "post_id": 1175966,
     "reblogged_by": [
       "test-safari"
     ],
@@ -404,7 +402,7 @@
     "author_reputation": 50.83,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Science too can be beautiful.\n>\u041d\u0430\u0443\u043a\u0430 \u0442\u043e\u0436\u0435 \u043c\u043e\u0436\u0435\u0442 \u0431\u044b\u0442\u044c \u043f\u0440\u0435\u043a\u0440\u0430\u0441\u043d\u043e\u0439.\n\n<center>![](https://ipfs.pics/ipfs/Qmdr3TXnYv86QkaCqPz7uHZurCAy2JPQfBeV3RY2iykPRy)</center>\n\n*performed by the author\n\u0430\u0432\u0442\u043e\u0440\u0441\u043a\u0438\u0439 \u0444\u0440\u0430\u043a\u0442\u0430\u043b*",
+    "body": "Science too can be beautiful.\n>Наука тоже может быть прекрасной.\n\n<center>![](https://ipfs.pics/ipfs/Qmdr3TXnYv86QkaCqPz7uHZurCAy2JPQfBeV3RY2iykPRy)</center>\n\n*performed by the author\nавторский фрактал*",
     "category": "art",
     "children": 5,
     "created": "2016-09-08T19:12:18",
@@ -429,7 +427,6 @@
     "pending_payout_value": "0.058 HBD",
     "percent_hbd": 10000,
     "permlink": "simple-fractal-prostoi-fraktal",
-    "post_id": 1175624,
     "reblogged_by": [
       "test-safari"
     ],
@@ -441,7 +438,7 @@
       "hide": false,
       "total_votes": 24
     },
-    "title": "Fractal - mood (\u0424\u0440\u0430\u043a\u0442\u0430\u043b-\u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043d\u0438\u0435)",
+    "title": "Fractal - mood (Фрактал-настроение)",
     "updated": "2016-09-08T19:32:18",
     "url": "/art/@smolalit/simple-fractal-prostoi-fraktal"
   }
