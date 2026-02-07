@@ -10,7 +10,7 @@ _account TEXT;
 _account_id INT;
 _community TEXT;
 _community_id INT;
-_last_id BIGINT;
+_last_date TIMESTAMP;
 _limit INT;
 _stats JSONB;
 _actions JSONB;
@@ -18,7 +18,7 @@ _result JSONB;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(
     _params,
-    '{"account": "string", "community": "string", "last_id": "number", "limit": "number"}',
+    '{"account": "string", "community": "string", "last_date": "string", "limit": "number"}',
     1,
     NULL
   );
@@ -37,7 +37,7 @@ BEGIN
     );
   END IF;
 
-  _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'last_id', False);
+  _last_date = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'last_date', False)::TIMESTAMP;
 
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 1000, 'limit');
@@ -57,7 +57,6 @@ BEGIN
 
   SELECT COALESCE(jsonb_agg(row_json), '[]'::jsonb) INTO _actions FROM (
     SELECT jsonb_build_object(
-      'id', ml.id::TEXT,
       'action', hivemind_postgrest_utilities.get_moderation_action_name(ml.action),
       'community', hc.name,
       'community_title', hc.title,
@@ -70,8 +69,8 @@ BEGIN
     JOIN hivemind_app.hive_communities hc ON hc.id = ml.community_id
     WHERE ml.target_account_id = _account_id
       AND (_community_id IS NULL OR ml.community_id = _community_id)
-      AND (_last_id IS NULL OR ml.id < _last_id)
-    ORDER BY ml.id DESC
+      AND (_last_date IS NULL OR ml.created_at < _last_date)
+    ORDER BY ml.created_at DESC
     LIMIT _limit
   ) sub;
 
