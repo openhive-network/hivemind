@@ -6,10 +6,10 @@ from itertools import count
 
 from hive.conf import SCHEMA_NAME
 from hive.db.db_state import DbState
+from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notification_cache import NotificationCache
 from hive.utils.misc import UniqueCounter, chunks
-from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -66,8 +66,10 @@ class Votes(DbAdapterHolder):
             cls._votes_per_post[post_key].append(voter)
             cls._votes_data[key] = dict(
                 voter=voter,
+                voter_id=Accounts.get_id(voter),
                 author=author,
-                permlink=escape_characters(permlink),
+                author_id=Accounts.get_id(author),
+                permlink=permlink,
                 vote_percent=weight,
                 weight=0,
                 rshares=0,
@@ -130,8 +132,10 @@ class Votes(DbAdapterHolder):
             cls._votes_per_post[post_key].append(vop['voter'])
             cls._votes_data[key] = dict(
                 voter=vop["voter"],
+                voter_id=Accounts.get_id(vop["voter"]),
                 author=vop["author"],
-                permlink=escape_characters(vop["permlink"]),
+                author_id=Accounts.get_id(vop["author"]),
+                permlink=vop["permlink"],
                 vote_percent=0,
                 weight=vop["weight"],
                 rshares=vop["rshares"],
@@ -158,22 +162,17 @@ class Votes(DbAdapterHolder):
         cls.inside_flush = True
         n = 0
         if cls._votes_data:
-            sql = f"""
+            sql_template = f"""
                 INSERT INTO {SCHEMA_NAME}.hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
 
-                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id,
+                SELECT hp.id, t.voter_id, t.author_id, hpd_p.id,
                 t.weight, t.rshares, t.vote_percent, t.last_update, t.num_changes, t.block_num, t.is_effective
                 FROM
-                (
-                VALUES
-                  -- order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective
-                  {{}}
-                ) AS T(order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
-                INNER JOIN {SCHEMA_NAME}.hive_accounts ha_v ON ha_v.name = t.voter
-                INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.name = t.author
+                (VALUES {{}})
+                AS t(order_id, voter_id, author_id, permlink, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
                 INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-                INNER JOIN {SCHEMA_NAME}.hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
+                INNER JOIN {SCHEMA_NAME}.hive_posts hp ON hp.author_id = t.author_id AND hp.permlink_id = hpd_p.id
                 WHERE hp.counter_deleted = 0
                 ORDER BY t.order_id
                 ON CONFLICT ON CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk DO
@@ -185,32 +184,34 @@ class Votes(DbAdapterHolder):
                     last_update = EXCLUDED.last_update,
                     num_changes = {SCHEMA_NAME}.hive_votes.num_changes + EXCLUDED.num_changes + 1,
                     block_num = EXCLUDED.block_num
-                  WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id and {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id and {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id
+                  WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id AND {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id AND {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id
                 RETURNING post_id
                 """
-            # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
             cnt = count()
             for chunk in chunks(cls._votes_data, 1000):
-                cls.beginTx()
-                values_str = ','.join(
-                    "({}, '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
-                        next(cnt),  # for ordering
-                        vd['voter'],
-                        vd['author'],
-                        vd['permlink'],
-                        vd['weight'],
-                        vd['rshares'],
-                        vd['vote_percent'],
-                        vd['last_update'],
-                        vd['num_changes'],
-                        vd['block_num'],
-                        vd['is_effective'],
+                items = list(chunk.values())
+                placeholders = ','.join(['(%s, %s, %s, %s, %s, %s, %s, %s::timestamp, %s, %s, %s)'] * len(items))
+                params = []
+                for vd in items:
+                    params.extend(
+                        [
+                            next(cnt),
+                            vd['voter_id'],
+                            vd['author_id'],
+                            vd['permlink'],
+                            vd['weight'],
+                            vd['rshares'],
+                            vd['vote_percent'],
+                            vd['last_update'],
+                            vd['num_changes'],
+                            vd['block_num'],
+                            vd['is_effective'],
+                        ]
                     )
-                    for k, vd in chunk.items()
-                )
-                actual_query = sql.format(values_str)
-                post_ids = cls.db.query_prepared_all(actual_query)
+                cls.beginTx()
+                actual_query = sql_template.format(placeholders)
+                post_ids = cls.db.query_all_raw(actual_query, tuple(params))
                 if not DbState.is_massive_sync():
                     cls.db.query_no_return(
                         'SELECT pg_advisory_xact_lock(777)'
