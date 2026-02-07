@@ -6,6 +6,13 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 log = logging.getLogger(__name__)
 
 
+def _sanitize_nul(val):
+    """Replace NUL chars with spaces — PostgreSQL text columns cannot store \\x00."""
+    if val is None:
+        return None
+    return val.replace('\x00', ' ') if '\x00' in val else val
+
+
 class PostDataCache(DbAdapterHolder):
     """Provides cache for DB operations on post data table in order to speed up massive sync"""
 
@@ -50,7 +57,13 @@ class PostDataCache(DbAdapterHolder):
         insert_items = []
         update_items = []
         for k, data in cls._data.items():
-            item = (k, data['is_root'], data['title'], data['body'], data['json'])
+            item = (
+                k,
+                data['is_root'],
+                _sanitize_nul(data['title']),
+                _sanitize_nul(data['body']),
+                _sanitize_nul(data['json']),
+            )
             if data['is_new_post']:
                 insert_items.append(item)
             else:
