@@ -511,7 +511,8 @@ BEGIN
         SELECT
           id,
           author_id,
-          is_pinned
+          is_pinned,
+          muted_reasons
         FROM hivemind_app.live_posts_view
         WHERE
           community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
@@ -613,6 +614,9 @@ BEGIN
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id)) --DLN I didn't invert last term, as it seems right, which would mean original was wrong....
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1174,6 +1178,9 @@ BEGIN
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1438,6 +1445,9 @@ BEGIN
             hp.community_id = communities.community_id
             AND NOT ha.is_grayed
             AND (_post_id = 0 OR hp.id < _post_id)
+            AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+                OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                    AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
           ORDER BY id DESC
           LIMIT _limit
         ) posts
@@ -1707,6 +1717,9 @@ BEGIN
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2249,6 +2262,9 @@ BEGIN
         WHERE
           NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
         ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
       )

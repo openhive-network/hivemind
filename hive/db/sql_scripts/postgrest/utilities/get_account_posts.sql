@@ -138,7 +138,10 @@ BEGIN
         FROM hivemind_app.live_comments_view hp1
         WHERE hp1.author_id = _account_id
           AND (_post_id = 0 OR hp1.id < _post_id)
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hp1.muted_reasons & _muted_reasons_filter_mask) = 0)
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp1.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0
+                           AND EXISTS (SELECT 1 FROM hivemind_app.hive_accounts_view ha WHERE ha.id = _account_id AND ha.is_grayed))))
         ORDER BY hp1.id DESC
         LIMIT _limit
       )
@@ -326,7 +329,10 @@ BEGIN
         WHERE  -- use new hive_posts_author_id_id_depth0_idx
           hp.author_id = _account_id
           AND ( _post_id = 0 OR hp.id < _post_id )
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0
+                           AND EXISTS (SELECT 1 FROM hivemind_app.hive_accounts_view ha WHERE ha.id = _account_id AND ha.is_grayed))))
         ORDER BY hp.id DESC
         LIMIT _limit
       )
