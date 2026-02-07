@@ -14,11 +14,6 @@ from hive.utils.misc import UniqueCounter, chunks
 log = logging.getLogger(__name__)
 
 
-def _sanitize_nul(val):
-    """Replace NUL chars with spaces — PostgreSQL text columns cannot store \\x00."""
-    return val.replace('\x00', ' ') if '\x00' in val else val
-
-
 class Votes(DbAdapterHolder):
     """Class for managing posts votes"""
 
@@ -74,7 +69,7 @@ class Votes(DbAdapterHolder):
                 voter_id=Accounts.get_id(voter),
                 author=author,
                 author_id=Accounts.get_id(author),
-                permlink=_sanitize_nul(permlink),
+                permlink=permlink,
                 vote_percent=weight,
                 weight=0,
                 rshares=0,
@@ -140,7 +135,7 @@ class Votes(DbAdapterHolder):
                 voter_id=Accounts.get_id(vop["voter"]),
                 author=vop["author"],
                 author_id=Accounts.get_id(vop["author"]),
-                permlink=_sanitize_nul(vop["permlink"]),
+                permlink=vop["permlink"],
                 vote_percent=0,
                 weight=vop["weight"],
                 rshares=vop["rshares"],
