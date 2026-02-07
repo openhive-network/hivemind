@@ -127,7 +127,10 @@ class SyncHiveDb:
         log.info("Attempting to build Hivemind database schema if needed")
 
     def run(self) -> None:
+        from hive.indexer.hive_db.haf_functions import ensure_custom_json_type_index
+
         start_time = perf()
+        ensure_custom_json_type_index(self._db)
         Blocks.set_head_date()
 
         def report_enter_to_stage(current_stage) -> bool:
