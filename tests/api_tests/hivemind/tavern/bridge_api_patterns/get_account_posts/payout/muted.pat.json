@@ -713,7 +713,7 @@
     "blacklists": [
       "my blacklist"
     ],
-    "body": "As you know, witness nodes are an essential part of the STEEM universe.\n\nIf I have a witness node with as much as (or as little as) 3% of witness approval, I can choose the right time to shut it down, listen to my favourite music album, walk my cat, and then start it up again, most probably without missing a block.\nA full-time witness, or one of the top19 witnesses, needs to produce blocks 1600 times more frequently.\nMaintaining such a server in the long run is not an easy task.\n\nWitnesses are vulnerable to DDoS attacks. An attacker who knows the network location of your witness node can saturate your uplink to a level that makes you unable to produce blocks on time. Effectively, this means **voting the witness out using a network-level attack**. Finding the IP address of your witness node is easier than you might think. Even if you follow the guidelines for setting up your public seed node on a different machine than the one you used to get your witness running, your witness still needs to connect to other nodes in the network.\nSo what does this mean? Take a look at: http://seeds.quisquis.de/steem.html\n(service provided by cyrano.witness)\n\nDoes any of these IP addresses look familiar?\nThe attacker still doesn't know which of them is yours, right?\n\nAn attack that makes the target IP unavailable for 3 seconds? Not exactly a difficult thing to do, right? So the attacker needs to make a guess by choosing from a set of suspected IP addresses he has obtained. Guessing doesn't cost him much. Neither does a high volume, short period DDoS attack. After that, he can see that your `total_missed` count increases, and he knows he guessed correctly. And then you are out.\n\n![witness](https://grey.house/img/witness2.jpg)\n\n## A concept of infrastructure: ##\n\n2 witness nodes (primary and backup)\n4 dedicated seed nodes\n\nOne witness node has your current signing key and does its job. The other is for failover, backup purposes. For example, whenever you need to upgrade your witness binary, you do that on the backup witness node, then change your signing key, so the backup node and the primary node switch their roles.  \n**(Never leave your current signing key on two nodes at the same time!)**\n\nThese 4 seed nodes mentioned here only work on behalf of your witness i.e. they don\u2019t provide seed service on public network interfaces. \n_Your public seed node is not within the scope of this document._\n\nYour witness node connects **ONLY** to your seed nodes using VLAN or another private, low latency network solution of your choice. All other incoming/outgoing connections should be blocked except for the secure shell, preferably limited to access only from your IPs.\n\nEach seed node should be in a separate datacenter, ideally in a different part of the world, never in the same location as any of your (primary/backup) witness nodes. The purpose is to minimize the effects of a successful DDoS attack.\n\n_Please note that setting up all seed nodes in a single data center won\u2019t help. A DDoS attack targeted at that particular network will bring all your nodes down anyway._\n\n```\n                      +---+\n         +  +----+    |   |\n         |  |    |<-->| B |\n         +--+ S1 |<-->| i |\n         |  |    |<-->| g |\n         |  +----+    |   |\n+------+ |            | B |\n|      +-+  +----+    | a |\n| W(p) | |  |    |<-->| d |\n|      | +--+ S2 |<-->|   |\n+------+ |  |    |<-->| U |\n         |  +----+    | g |\n     VLAN|            | l |\n         |  +----+    | y |\n+------+ |  |    |<-->|   |\n|      | +--+ S3 |<-->| I |\n| W(b) | |  |    |<-->| n |\n|      +-+  +----+    | t |\n+------+ |            | e |\n         |  +----+    | r |\n         |  |    |<-->| n |\n         +--+ S4 |<-->| e |\n         |  |    |<-->| t |\n         +  +----+    |   |\n                      +---+\n```\n```\nW(p) - primary witness\nW(b) - backup witness\nS1-4 - seed nodes\n```\nOf course, you need to keep your seed nodes (at least one of them) running all the time, otherwise your witness will not be able to sync the blockchain.\nBut if you do the math, you will see that the odds that all your seed nodes stop working at the same time are much lower than the chances that this happens to your witness node. \n\n\nIf one of your seed nodes falls victim to a DDoS attack, you can, depending on the features offered by your infrastructure provider:\n- do nothing (until most of them are targeted at the same time)\n- change its external interface IP address, routing the old one to a black hole\n- set up a new, additional, temporary seed node somewhere else\n- replace that seed node with a new one in another location\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
+    "body": "As you know, witness nodes are an essential part of the STEEM universe.\n\nIf I have a witness node with as much as (or as little as) 3% of witness approval, I can choose the right time to shut it down, listen to my favourite music album, walk my cat, and then start it up again, most probably without missing a block.\nA full-time witness, or one of the top19 witnesses, needs to produce blocks 1600 times more frequently.\nMaintaining such a server in the long run is not an easy task.\n\nWitnesses are vulnerable to DDoS attacks. An attacker who knows the network location of your witness node can saturate your uplink to a level that makes you unable to produce blocks on time. Effectively, this means **voting the witness out using a network-level attack**. Finding the IP address of your witness node is easier than you might think. Even if you follow the guidelines for setting up your public seed node on a different machine than the one you used to get your witness running, your witness still needs to connect to other nodes in the network.\nSo what does this mean? Take a look at: http://seeds.quisquis.de/steem.html\n(service provided by cyrano.witness)\n\nDoes any of these IP addresses look familiar?\nThe attacker still doesn't know which of them is yours, right?\n\nAn attack that makes the target IP unavailable for 3 seconds? Not exactly a difficult thing to do, right? So the attacker needs to make a guess by choosing from a set of suspected IP addresses he has obtained. Guessing doesn't cost him much. Neither does a high volume, short period DDoS attack. After that, he can see that your `total_missed` count increases, and he knows he guessed correctly. And then you are out.\n\n![witness](https://grey.house/img/witness2.jpg)\n\n## A concept of infrastructure: ##\n\n2 witness nodes (primary and backup)\n4 dedicated seed nodes\n\nOne witness node has your current signing key and does its job. The other is for failover, backup purposes. For example, whenever you need to upgrade your witness binary, you do that on the backup witness node, then change your signing key, so the backup node and the primary node switch their roles.  \n**(Never leave your current signing key on two nodes at the same time!)**\n\nThese 4 seed nodes mentioned here only work on behalf of your witness i.e. they don’t provide seed service on public network interfaces. \n_Your public seed node is not within the scope of this document._\n\nYour witness node connects **ONLY** to your seed nodes using VLAN or another private, low latency network solution of your choice. All other incoming/outgoing connections should be blocked except for the secure shell, preferably limited to access only from your IPs.\n\nEach seed node should be in a separate datacenter, ideally in a different part of the world, never in the same location as any of your (primary/backup) witness nodes. The purpose is to minimize the effects of a successful DDoS attack.\n\n_Please note that setting up all seed nodes in a single data center won’t help. A DDoS attack targeted at that particular network will bring all your nodes down anyway._\n\n```\n                      +---+\n         +  +----+    |   |\n         |  |    |<-->| B |\n         +--+ S1 |<-->| i |\n         |  |    |<-->| g |\n         |  +----+    |   |\n+------+ |            | B |\n|      +-+  +----+    | a |\n| W(p) | |  |    |<-->| d |\n|      | +--+ S2 |<-->|   |\n+------+ |  |    |<-->| U |\n         |  +----+    | g |\n     VLAN|            | l |\n         |  +----+    | y |\n+------+ |  |    |<-->|   |\n|      | +--+ S3 |<-->| I |\n| W(b) | |  |    |<-->| n |\n|      +-+  +----+    | t |\n+------+ |            | e |\n         |  +----+    | r |\n         |  |    |<-->| n |\n         +--+ S4 |<-->| e |\n         |  |    |<-->| t |\n         +  +----+    |   |\n                      +---+\n```\n```\nW(p) - primary witness\nW(b) - backup witness\nS1-4 - seed nodes\n```\nOf course, you need to keep your seed nodes (at least one of them) running all the time, otherwise your witness will not be able to sync the blockchain.\nBut if you do the math, you will see that the odds that all your seed nodes stop working at the same time are much lower than the chances that this happens to your witness node. \n\n\nIf one of your seed nodes falls victim to a DDoS attack, you can, depending on the features offered by your infrastructure provider:\n- do nothing (until most of them are targeted at the same time)\n- change its external interface IP address, routing the old one to a black hole\n- set up a new, additional, temporary seed node somewhere else\n- replace that seed node with a new one in another location\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
     "category": "witness-category",
     "children": 14,
     "created": "2016-08-16T18:11:03",
@@ -738,7 +738,6 @@
     "pending_payout_value": "988.456 HBD",
     "percent_hbd": 10000,
     "permlink": "heavy-duty-witness-node-infrastructure",
-    "post_id": 838527,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -813,7 +812,6 @@
     "pending_payout_value": "10.116 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z",
-    "post_id": 840712,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -962,7 +960,6 @@
     "pending_payout_value": "0.432 HBD",
     "percent_hbd": 10000,
     "permlink": "missing-rewards-while-mining",
-    "post_id": 919311,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1017,7 +1014,6 @@
     "pending_payout_value": "0.281 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
-    "post_id": 1254338,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1029,7 +1025,7 @@
       ],
       "total_votes": 2
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T14:15:51",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@gtg/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z"
   },
@@ -1077,7 +1073,6 @@
     "pending_payout_value": "0.277 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
-    "post_id": 920538,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1135,7 +1130,6 @@
     "pending_payout_value": "0.039 HBD",
     "percent_hbd": 10000,
     "permlink": "re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z",
-    "post_id": 919363,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1195,7 +1189,6 @@
     "pending_payout_value": "0.037 HBD",
     "percent_hbd": 10000,
     "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
-    "post_id": 1057820,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1247,7 +1240,6 @@
     "pending_payout_value": "0.028 HBD",
     "percent_hbd": 10000,
     "permlink": "re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z",
-    "post_id": 1011534,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1296,7 +1288,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
-    "post_id": 1257401,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1308,7 +1299,7 @@
       ],
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
     "updated": "2016-09-15T18:43:51",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@gtg/re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z"
   },
@@ -1342,7 +1333,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
-    "post_id": 1254288,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1388,7 +1378,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
-    "post_id": 1253721,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1440,7 +1429,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
-    "post_id": 1253587,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1486,7 +1474,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
-    "post_id": 1251612,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1532,7 +1519,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
-    "post_id": 1251593,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1578,7 +1564,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-eleanorp-the-best-adventures-start-with-rabbit-holes-eleanor-20160907t185449429z",
-    "post_id": 1162358,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1624,7 +1609,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-lara2016-my-favorite-cat-20160907t184824412z",
-    "post_id": 1162279,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1678,7 +1662,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-dan-wilson-i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification-20160907t184055495z",
-    "post_id": 1162194,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1727,7 +1710,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-cwbrooch-teacher-story-teller-cat-lover-about-me-20160904t093005596z",
-    "post_id": 1120694,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1773,7 +1755,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-amcq-hello-steemit-i-m-alex-a-new-member-of-the-steemit-team-20160831t205719836z",
-    "post_id": 1076080,
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -1823,7 +1804,6 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-djm34-re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t184729782z",
-    "post_id": 1059890,
     "reblogs": 0,
     "replies": [],
     "stats": {

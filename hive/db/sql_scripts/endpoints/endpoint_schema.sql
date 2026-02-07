@@ -167,10 +167,6 @@ declare
       "hivemind_endpoints.reblog_status": {
         "type": "object",
         "properties": {
-          "post_id": {
-            "type": "integer",
-            "description": "Unique post identifier"
-          },
           "author": {
             "type": "string",
             "description": "Post author account name"
@@ -421,13 +417,11 @@ declare
                 },
                 "example": [
                   {
-                    "post_id": 141560746,
                     "author": "hiveio",
                     "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
                     "reblogged": true
                   },
                   {
-                    "post_id": 141559832,
                     "author": "alice",
                     "permlink": "my-awesome-post",
                     "reblogged": false

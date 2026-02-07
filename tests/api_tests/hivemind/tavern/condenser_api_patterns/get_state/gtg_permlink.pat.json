@@ -107,7 +107,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-gtg-witness-gtg-20160805t154528701z",
-      "post_id": 627215,
       "replies": [
         "steemship/re-cire81-re-gtg-witness-gtg-20160806t000205772z"
       ],
@@ -139,7 +138,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-iaco-re-gtg-witness-gtg-20160806t024840679z",
-      "post_id": 638937,
       "replies": [],
       "root_title": "Witness \"gtg\"",
       "title": "",
@@ -176,7 +174,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-steemship-re-cire81-re-gtg-witness-gtg-20160806t024925166z",
-      "post_id": 638943,
       "replies": [],
       "root_title": "Witness \"gtg\"",
       "title": "",
@@ -711,7 +708,7 @@
       "author": "gtg",
       "author_reputation": 3924899966690,
       "beneficiaries": [],
-      "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I\u2019ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I\u2019ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
+      "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I’ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I’ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
       "body_length": 1023,
       "cashout_time": "1969-12-31T23:59:59",
       "category": "witness-category",
@@ -729,7 +726,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "witness-gtg",
-      "post_id": 624896,
       "replies": [
         "cire81/re-gtg-witness-gtg-20160805t154528701z",
         "iaco/re-gtg-witness-gtg-20160805t161219379z",
@@ -771,7 +767,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-gtg-witness-gtg-20160805t161219379z",
-      "post_id": 627877,
       "replies": [
         "earnest/re-iaco-re-gtg-witness-gtg-20160806t024840679z"
       ],
@@ -834,7 +829,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-witness-gtg",
-      "post_id": 1073194,
       "replies": [],
       "root_title": "Witness \"gtg\"",
       "title": "",
@@ -846,7 +840,7 @@
       "author": "mammasitta",
       "author_reputation": 5571311902261,
       "beneficiaries": [],
-      "body": "I think you would be a great witness . I appreciate your time helping me \ud83d\ude4c",
+      "body": "I think you would be a great witness . I appreciate your time helping me 🙌",
       "body_length": 74,
       "cashout_time": "1969-12-31T23:59:59",
       "category": "witness-category",
@@ -864,7 +858,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-gtg-witness-gtg-20160826t052714859z",
-      "post_id": 993508,
       "replies": [],
       "root_title": "Witness \"gtg\"",
       "title": "",
@@ -919,7 +912,6 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "re-cire81-re-gtg-witness-gtg-20160806t000205772z",
-      "post_id": 637232,
       "replies": [
         "earnest/re-steemship-re-cire81-re-gtg-witness-gtg-20160806t024925166z"
       ],

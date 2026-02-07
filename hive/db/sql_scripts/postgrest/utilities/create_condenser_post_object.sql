@@ -65,7 +65,6 @@ BEGIN
   END IF;
 
   IF _content_additions THEN
-    _result = jsonb_set(_result, '{id}', to_jsonb(_row.id));
     _result = jsonb_set(_result, '{author_rewards}', to_jsonb(_row.author_rewards));
     _result = jsonb_set(_result, '{max_cashout_time}', to_jsonb(hivemind_postgrest_utilities.json_date()));
 
@@ -98,7 +97,6 @@ BEGIN
       _result = jsonb_set(_result, '{vote_rshares}', hivemind_app.json_stringify_numeric(_tmp_amount));
     END IF;
   ELSE
-    _result = jsonb_set(_result, '{post_id}', to_jsonb(_row.id));
     _result = jsonb_set(_result, '{net_rshares}', hivemind_app.json_stringify_numeric(_row.rshares));
     IF _row.is_paidout THEN
       _result = jsonb_set(_result, '{curator_payout_value}', to_jsonb(_row.curator_payout_value));

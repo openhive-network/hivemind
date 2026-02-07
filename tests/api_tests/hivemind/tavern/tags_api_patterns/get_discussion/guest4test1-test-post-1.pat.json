@@ -1,6 +1,5 @@
 {
-  "active_votes": [
-  ],
+  "active_votes": [],
   "author": "guest4test1",
   "author_reputation": 31250000,
   "beneficiaries": [],
@@ -22,7 +21,6 @@
   "pending_payout_value": "0.002 HBD",
   "percent_hbd": 10000,
   "permlink": "test-post-1",
-  "post_id": 1258111,
   "replies": [],
   "root_title": "Test Post",
   "title": "Test Post",
