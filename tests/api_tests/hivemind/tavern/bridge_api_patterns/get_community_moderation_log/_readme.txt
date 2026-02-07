@@ -12,9 +12,9 @@ params:
     optional, filter by action: "set_role", "set_title", "mute_post",
     "unmute_post", "pin_post", "unpin_post", "flag_post"
 
-  "last_id":{number},
+  "last_date":"{datetime}",
 
-    optional, cursor for keyset pagination (entries with id < last_id)
+    optional, cursor for keyset pagination (entries with date < last_date)
 
   "limit":{number}
 
