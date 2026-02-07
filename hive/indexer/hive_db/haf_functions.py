@@ -38,6 +38,11 @@ def prepare_app_context(db: Db) -> None:
 
 def ensure_custom_json_type_index(db: Db) -> None:
     """Create partial index on hafd.operations for Hivemind's custom_json types."""
+    from time import perf_counter
+
     types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]"
-    log.info(f"Ensuring custom_json_type index exists for types: {HIVEMIND_CUSTOM_JSON_TYPES}")
+    log.info(f"Creating custom_json_type index for types: {HIVEMIND_CUSTOM_JSON_TYPES} ...")
+    t0 = perf_counter()
     db.query_no_return(f"SELECT hive.create_custom_json_type_index({types_array});")
+    elapsed = perf_counter() - t0
+    log.info(f"custom_json_type index ready in {elapsed:.1f}s")
