@@ -21,6 +21,7 @@ class Notify(DbAdapterHolder):
     _notifies = []
     _notification_first_block = None
     _counter = UniqueCounter()
+    _pending_lastread = {}  # {account_name: date_string} for batched massive sync updates
 
     def __init__(
         self,
@@ -65,8 +66,31 @@ class Notify(DbAdapterHolder):
     @classmethod
     def set_lastread(cls, account, date):
         """Update `lastread` column for a named account."""
-        sql = f"UPDATE {SCHEMA_NAME}.hive_accounts SET lastread_at = :date WHERE name = :name"
-        DbAdapterHolder.common_block_processing_db().query(sql, date=date, name=account)
+        from hive.db.db_state import DbState
+
+        if DbState.is_massive_sync():
+            cls._pending_lastread[account] = date
+        else:
+            sql = f"UPDATE {SCHEMA_NAME}.hive_accounts SET lastread_at = :date WHERE name = :name"
+            DbAdapterHolder.common_block_processing_db().query(sql, date=date, name=account)
+
+    @classmethod
+    def flush_lastread(cls):
+        """Flush batched lastread updates in a single UPDATE."""
+        if not cls._pending_lastread:
+            return 0
+        n = len(cls._pending_lastread)
+        placeholders = ','.join(['(%s, %s::timestamp)'] * n)
+        params = []
+        for name, date in cls._pending_lastread.items():
+            params.extend([name, date])
+        sql = f"""UPDATE {SCHEMA_NAME}.hive_accounts ha
+                  SET lastread_at = t.date
+                  FROM (VALUES {placeholders}) AS t(name, date)
+                  WHERE ha.name = t.name"""
+        DbAdapterHolder.common_block_processing_db().query_no_return_raw(sql, tuple(params))
+        cls._pending_lastread.clear()
+        return n
 
     def to_db_values(self):
         """Generate a db row."""

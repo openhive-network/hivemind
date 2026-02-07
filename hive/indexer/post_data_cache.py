@@ -2,7 +2,6 @@ import logging
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -48,61 +47,75 @@ class PostDataCache(DbAdapterHolder):
         if not cls._data:
             return 0
 
-        values_insert = []
-        values_update = []
+        insert_items = []
+        update_items = []
         for k, data in cls._data.items():
-            title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
-            body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
-            json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
-            is_root = data['is_root']
-            value = f"({k},{is_root},{title},{body},{json})"
+            item = (k, data['is_root'], data['title'], data['body'], data['json'])
             if data['is_new_post']:
-                values_insert.append(value)
+                insert_items.append(item)
             else:
-                values_update.append(value)
+                update_items.append(item)
 
         cls.beginTx()
+
+        insert_ph = (
+            ','.join(['(%s, %s, %s, %s, %s)'] * len(insert_items))
+            if insert_items
+            else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'
+        )
+        update_ph = (
+            ','.join(['(%s, %s, %s, %s, %s)'] * len(update_items))
+            if update_items
+            else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'
+        )
+
         sql = f"""
-                    WITH insert_values(id, is_root, title, body, json) AS (
-                        SELECT * FROM
-                        (VALUES {','.join(values_insert) if values_insert else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'}) AS v(id, is_root, title, body, json)
-                        WHERE v.id IS NOT NULL
-                    ),
-                    update_values(id, is_root, title, body, json) AS (
-                            SELECT *
-                            FROM (VALUES {','.join(values_update) if values_update else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'})
-                            AS v(id, is_root, title, body, json)
-                    ),
-                    insert_post_data AS (
-                        INSERT INTO {SCHEMA_NAME}.hive_post_data
-                        SELECT id, title, body, json FROM insert_values
-                        RETURNING id
-                    ),
-                    update_post_data AS (
-                        UPDATE {SCHEMA_NAME}.hive_post_data AS hpd
-                        SET title = COALESCE( i.title, hpd.title ),
-                            body = COALESCE( i.body, hpd.body ),
-                            json = COALESCE( i.json, hpd.json )
-                        FROM update_values i
-                        WHERE hpd.id = i.id AND i.id IS NOT NULL
-                        RETURNING hpd.id
-                    ),
-                    combined AS (
-                        SELECT id FROM insert_post_data
-                        UNION ALL
-                        SELECT id FROM update_post_data
-                    )
-                    SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id))
-                    FROM combined
+            WITH insert_values(id, is_root, title, body, json) AS (
+                SELECT * FROM (VALUES {insert_ph}) AS v(id, is_root, title, body, json)
+                WHERE v.id IS NOT NULL
+            ),
+            update_values(id, is_root, title, body, json) AS (
+                SELECT * FROM (VALUES {update_ph}) AS v(id, is_root, title, body, json)
+            ),
+            insert_post_data AS (
+                INSERT INTO {SCHEMA_NAME}.hive_post_data
+                SELECT id, title, body, json FROM insert_values
+                RETURNING id
+            ),
+            update_post_data AS (
+                UPDATE {SCHEMA_NAME}.hive_post_data AS hpd
+                SET title = COALESCE( i.title, hpd.title ),
+                    body = COALESCE( i.body, hpd.body ),
+                    json = COALESCE( i.json, hpd.json )
+                FROM update_values i
+                WHERE hpd.id = i.id AND i.id IS NOT NULL
+                RETURNING hpd.id
+            ),
+            combined AS (
+                SELECT id FROM insert_post_data
+                UNION ALL
+                SELECT id FROM update_post_data
+            )
+            SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id))
+            FROM combined
         """
+
+        params = []
+        for item in insert_items:
+            params.extend(item)
+        for item in update_items:
+            params.extend(item)
+
         if print_query:
             log.info(f"Executing query:\n{sql}")
-        cls.db.query_prepared(sql)
-        values_insert.clear()
-        values_update.clear()
+
+        if params:
+            cls.db.query_all_raw(sql, tuple(params))
+        else:
+            cls.db.query_all_raw(sql)
 
         cls.commitTx()
 
-        n = len(cls._data.keys())
+        n = len(cls._data)
         cls._data.clear()
         return n

@@ -569,6 +569,7 @@ class Blocks:
         if is_massive_sync:
             # Batch-process accumulated comment operations in a single SQL call
             Posts.flush_pending_comment_ops()
+            Notify.flush_lastread()
             DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
 
         if not is_massive_sync:
@@ -600,6 +601,7 @@ class Blocks:
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
 
+        Notify.flush_lastread()
         db.query_no_return("COMMIT")
 
         cls.flush_data_in_n_threads()
@@ -622,6 +624,7 @@ class Blocks:
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
 
+        Notify.flush_lastread()
         db.query_no_return("COMMIT")
 
         cls.flush_data_in_n_threads()
@@ -644,6 +647,7 @@ class Blocks:
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
 
+        Notify.flush_lastread()
         db.query_no_return("COMMIT")
 
         cls.flush_data_in_n_threads()
