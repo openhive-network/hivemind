@@ -531,7 +531,7 @@ class Blocks:
                 if key not in ineffective_deleted_ops:
                     Posts.delete_op(op, cls._head_block_date)
             elif op_type_id == 19:  # COMMENT_OPTION
-                # comment_options_op also defers when pending comment ops exist
+                # Flush pending comments first so they get stable post IDs
                 if Posts._pending_comment_ops:
                     Posts.flush_pending_comment_ops()
                 Posts.comment_options_op(op)
