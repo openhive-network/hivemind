@@ -8,6 +8,7 @@ from ujson import dumps, loads
 from hive.conf import SCHEMA_NAME
 from hive.db.db_state import DbState
 from hive.indexer import community
+from hive.indexer.accounts import Accounts
 from hive.indexer.block import VirtualOperationType
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -17,6 +18,7 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.votes import Votes
 from hive.utils.misc import UniqueCounter, chunks
 from hive.utils.normalize import escape_characters, legacy_amount, sbd_amount
+from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
 
@@ -390,10 +392,61 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _flush_deferred_comment_options(cls):
-        """Apply deferred comment_options ops after batch comment creation."""
+        """Apply deferred comment_options ops as a single batch UPDATE."""
+        if not cls._pending_comment_option_ops:
+            return
+
+        from time import perf_counter
+
+        t0 = perf_counter()
+
+        items = []
         for op in cls._pending_comment_option_ops:
-            cls._apply_comment_options(op)
+            author_id = Accounts.get_id(op['author'])
+            max_accepted_payout = (
+                legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
+            )
+            allow_votes = op['allow_votes'] if 'allow_votes' in op else True
+            allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
+            percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
+            beneficiaries = []
+            for ex in op.get('extensions') or []:
+                if ex.get('type') == 'comment_payout_beneficiaries' and 'beneficiaries' in ex.get('value', {}):
+                    beneficiaries = ex['value']['beneficiaries']
+            items.append(
+                (
+                    author_id,
+                    op['permlink'],
+                    max_accepted_payout,
+                    percent_hbd,
+                    allow_votes,
+                    allow_curation_rewards,
+                    dumps(beneficiaries),
+                )
+            )
+
+        n = len(items)
+        placeholders = ','.join(['(%s::int, %s, %s, %s::int, %s::boolean, %s::boolean, %s::json)'] * n)
+        params = []
+        for item in items:
+            params.extend(item)
+
+        db = DbAdapterHolder.common_block_processing_db()
+        sql = f"""
+            UPDATE {SCHEMA_NAME}.hive_posts hp
+            SET max_accepted_payout = t.max_accepted_payout,
+                percent_hbd = t.percent_hbd,
+                allow_votes = t.allow_votes,
+                allow_curation_rewards = t.allow_curation_rewards,
+                beneficiaries = t.beneficiaries
+            FROM (VALUES {placeholders}) AS t(author_id, permlink, max_accepted_payout, percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
+            JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+            WHERE hp.author_id = t.author_id AND hp.permlink_id = hpd.id
+        """
+        db.query_no_return_raw(sql, tuple(params))
         cls._pending_comment_option_ops.clear()
+
+        FSM.flush_stat('comment_options_batch', perf_counter() - t0, n)
 
     @classmethod
     def _flush_deferred_deletes(cls):
@@ -723,8 +776,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_options_op(cls, op):
         """Process comment_options_operation"""
-        if DbState.is_massive_sync() and cls._pending_comment_ops:
-            # Defer until after batch comment ops are flushed to DB
+        if DbState.is_massive_sync():
             cls._pending_comment_option_ops.append(op)
             return
         cls._apply_comment_options(op)
