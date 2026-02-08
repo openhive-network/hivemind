@@ -51,10 +51,14 @@ class Posts(DbAdapterHolder):
         Also remove it from post-cache and feed-cache.
         """
         if DbState.is_massive_sync():
-            # Only flush if this delete conflicts with a pending create/edit
             if (op['author'], op['permlink']) in cls._pending_comment_keys:
+                # Conflicting delete: flush pending creates, then delete
+                # immediately to preserve create/delete/recreate ordering.
                 cls.flush_pending_comment_ops()
-            cls._pending_delete_ops.append((op, block_date))
+                cls.delete(op, block_date)
+            else:
+                # Non-conflicting: defer for batch processing
+                cls._pending_delete_ops.append((op, block_date))
             return
         cls.delete(op, block_date)
 
