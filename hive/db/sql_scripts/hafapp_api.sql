@@ -350,6 +350,12 @@ BEGIN
                 _op_seq := _op_seq + 1;
                 INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq)
                 VALUES (_follower_name, _following_name, _what_action, rec.block_num, _op_seq);
+                -- Collect follow notifications inline (Phase 1) to match old Python path where
+                -- every follow/blog op generates a notification before dedup, preserving counter values
+                IF _what_action IN ('blog', 'follow') THEN
+                    INSERT INTO _follow_notifications (follower_name, following_name, block_num, op_seq)
+                    VALUES (_follower_name, _following_name, rec.block_num, _op_seq);
+                END IF;
             END LOOP;
         END IF;
         -- Unknown action types are silently ignored (matching Python behavior)
@@ -431,10 +437,8 @@ BEGIN
     FROM (SELECT following, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY following) delta
     WHERE ha.id = delta.following;
 
-    -- Accumulate follow notifications (for ALL follow actions, not just new ones)
-    INSERT INTO _follow_notifications
-    SELECT follower_name, following_name, block_num, op_seq
-    FROM _final_actions WHERE action IN ('blog', 'follow');
+    -- Follow notifications were already collected in Phase 1 (inline with _follow_actions)
+    -- to match old Python path's per-operation notification generation before dedup.
 
     DROP TABLE _new_follows;
 
