@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_blog;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_blog(IN _account TEXT, IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_blog(IN _account TEXT, IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -47,10 +47,6 @@ BEGIN
                         AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id)
                        )
           )
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
-               OR NOT EXISTS (SELECT 1 FROM hivemind_app.hive_posts hp_filter
-                              WHERE hp_filter.id = hfc.post_id
-                              AND (hp_filter.muted_reasons & _muted_reasons_filter_mask) <> 0))
         ORDER BY hfc.created_at DESC, hfc.post_id DESC
         LIMIT _limit
       )
@@ -107,7 +103,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_comments;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_comments(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_comments(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -138,10 +134,6 @@ BEGIN
         FROM hivemind_app.live_comments_view hp1
         WHERE hp1.author_id = _account_id
           AND (_post_id = 0 OR hp1.id < _post_id)
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
-              OR ((hp1.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0
-                           AND EXISTS (SELECT 1 FROM hivemind_app.hive_accounts_view ha WHERE ha.id = _account_id AND ha.is_grayed))))
         ORDER BY hp1.id DESC
         LIMIT _limit
       )
@@ -198,7 +190,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_feed;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -239,10 +231,6 @@ BEGIN
           JOIN hivemind_app.hive_accounts ha ON ha.id = f.following
           WHERE hfc.block_num > _cutoff AND f.follower = _account_id
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
-               OR NOT EXISTS (SELECT 1 FROM hivemind_app.hive_posts hp_filter
-                              WHERE hp_filter.id = hfc.post_id
-                              AND (hp_filter.muted_reasons & _muted_reasons_filter_mask) <> 0))
           GROUP BY hfc.post_id
           HAVING (_post_id = 0 OR MIN(hfc.created_at) < _min_date OR ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
           ORDER BY min_created DESC, hfc.post_id DESC
@@ -301,7 +289,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_posts(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_posts(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -329,10 +317,6 @@ BEGIN
         WHERE  -- use new hive_posts_author_id_id_depth0_idx
           hp.author_id = _account_id
           AND ( _post_id = 0 OR hp.id < _post_id )
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
-              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0
-                           AND EXISTS (SELECT 1 FROM hivemind_app.hive_accounts_view ha WHERE ha.id = _account_id AND ha.is_grayed))))
         ORDER BY hp.id DESC
         LIMIT _limit
       )
@@ -389,7 +373,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_replies;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _permlink_was_not_empty BOOLEAN, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _permlink_was_not_empty BOOLEAN, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 
 LANGUAGE 'plpgsql'
@@ -437,7 +421,6 @@ BEGIN
         WHERE
           (_post_id = 0 OR hpr.id < _post_id )
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hpr.muted_reasons & _muted_reasons_filter_mask) = 0)
         ORDER BY hpr.id DESC
         LIMIT _limit
       )      
@@ -496,7 +479,7 @@ ALTER FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies SET ena
 ALTER FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies SET enable_hashjoin = off;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_payout;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_payout(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_payout(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -530,7 +513,6 @@ BEGIN
         hp.author_id = _account_id
         AND NOT hp.is_paidout
         AND ( _post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id) )
-        AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
       ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
       LIMIT _limit
       )

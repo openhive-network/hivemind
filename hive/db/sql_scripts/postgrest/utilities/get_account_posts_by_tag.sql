@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_tag(IN _account_id INT, IN _tag TEXT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_tag(IN _account_id INT, IN _tag TEXT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -46,7 +46,6 @@ BEGIN
           WHERE hp.author_id = _account_id
             AND hp.community_id = _community_id
             AND (_post_id = 0 OR hp.id < _post_id)
-            AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
           ORDER BY hp.id DESC
           LIMIT _limit
         )
@@ -118,7 +117,6 @@ BEGIN
               SELECT 1 FROM hivemind_app.hive_post_tags hpt
               WHERE hpt.post_id = hp.id AND hpt.tag_id = _tag_id
             )
-            AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
           ORDER BY hp.id DESC
           LIMIT _limit
         )
