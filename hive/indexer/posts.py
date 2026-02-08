@@ -411,7 +411,11 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _flush_deferred_comment_options(cls):
-        """Apply deferred comment_options ops as a single batch UPDATE."""
+        """Apply deferred comment_options ops as a single batch UPDATE.
+
+        Uses _permlink_id_cache to resolve permlink strings to integer IDs,
+        avoiding the expensive string JOIN on hive_permlink_data (37M+ rows).
+        """
         if not cls._pending_comment_option_ops:
             return
 
@@ -419,9 +423,14 @@ class Posts(DbAdapterHolder):
 
         t0 = perf_counter()
 
+        # Phase 1: Parse ops and collect permlink cache misses
+        needed = set()
         items = []
         for op in cls._pending_comment_option_ops:
             author_id = Accounts.get_id(op['author'])
+            permlink = op['permlink']
+            if permlink not in cls._permlink_id_cache:
+                needed.add(permlink)
             max_accepted_payout = (
                 legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
             )
@@ -435,7 +444,7 @@ class Posts(DbAdapterHolder):
             items.append(
                 (
                     author_id,
-                    op['permlink'],
+                    permlink,
                     max_accepted_payout,
                     percent_hbd,
                     allow_votes,
@@ -444,11 +453,24 @@ class Posts(DbAdapterHolder):
                 )
             )
 
-        n = len(items)
-        placeholders = ','.join(['(%s::int, %s, %s, %s::int, %s::boolean, %s::boolean, %s::json)'] * n)
+        # Phase 2: Bulk-resolve cache misses
+        if needed:
+            cls._resolve_permlink_ids(needed)
+
+        # Phase 3: Build VALUES with integer permlink_ids
         params = []
+        value_placeholders = []
         for item in items:
-            params.extend(item)
+            permlink_id = cls._permlink_id_cache.get(item[1])
+            if permlink_id is None:
+                continue  # permlink not in DB yet (shouldn't happen, but safe)
+            value_placeholders.append('(%s::int, %s::int, %s, %s::int, %s::boolean, %s::boolean, %s::json)')
+            params.extend([item[0], permlink_id, item[2], item[3], item[4], item[5], item[6]])
+
+        n = len(value_placeholders)
+        if n == 0:
+            cls._pending_comment_option_ops.clear()
+            return
 
         db = DbAdapterHolder.common_block_processing_db()
         sql = f"""
@@ -458,9 +480,8 @@ class Posts(DbAdapterHolder):
                 allow_votes = t.allow_votes,
                 allow_curation_rewards = t.allow_curation_rewards,
                 beneficiaries = t.beneficiaries
-            FROM (VALUES {placeholders}) AS t(author_id, permlink, max_accepted_payout, percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
-            JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
-            WHERE hp.author_id = t.author_id AND hp.permlink_id = hpd.id
+            FROM (VALUES {','.join(value_placeholders)}) AS t(author_id, permlink_id, max_accepted_payout, percent_hbd, allow_votes, allow_curation_rewards, beneficiaries)
+            WHERE hp.author_id = t.author_id AND hp.permlink_id = t.permlink_id
         """
         db.query_no_return_raw(sql, tuple(params))
         cls._pending_comment_option_ops.clear()

@@ -183,6 +183,7 @@ DECLARE
     _following_id INT;
     _following_arr TEXT[];
     _i INT;
+    _op_seq BIGINT := 0;
 BEGIN
     CREATE TEMP TABLE IF NOT EXISTS _follow_notifications (
         follower_name TEXT,
@@ -190,6 +191,17 @@ BEGIN
         block_num INT
     ) ON COMMIT DROP;
 
+    -- Temp table for collecting parsed follow actions (Phase 1 output)
+    CREATE TEMP TABLE IF NOT EXISTS _follow_actions (
+        follower_name TEXT NOT NULL,
+        following_name TEXT NOT NULL,
+        action TEXT NOT NULL,  -- 'follow','ignore','','blacklist','unblacklist','follow_blacklist','unfollow_blacklist','follow_muted','unfollow_muted'
+        block_num INT NOT NULL,
+        op_seq BIGINT NOT NULL  -- global ordering to deduplicate within batch
+    ) ON COMMIT DROP;
+    TRUNCATE _follow_actions;
+
+    -- ========== PHASE 1: Parse JSON and collect actions ==========
     FOR rec IN
         SELECT
             ho.id AS op_id,
@@ -263,13 +275,15 @@ BEGIN
             CONTINUE;
         END IF;
 
-        -- Resolve follower to account ID
-        SELECT id INTO _follower_id FROM hivemind_app.hive_accounts WHERE name = _follower_name;
-        IF _follower_id IS NULL THEN
-            CONTINUE;
+        -- Handle reset actions immediately (they're rare and affect all rows for a follower)
+        -- These need follower_id resolved upfront; non-reset actions defer to Phase 2 bulk JOIN
+        IF _what_action LIKE 'reset_%' THEN
+            SELECT id INTO _follower_id FROM hivemind_app.hive_accounts WHERE name = _follower_name;
+            IF _follower_id IS NULL THEN
+                CONTINUE;
+            END IF;
         END IF;
 
-        -- Handle reset actions first (they don't need a valid 'following' field)
         IF _what_action = 'reset_blacklist' THEN
             PERFORM hivemind_app.reset_blacklisted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
@@ -321,119 +335,184 @@ BEGIN
             CONTINUE;
         END IF;
 
-        -- Map action type and process
-        IF _what_action IN ('blog', 'follow') THEN
-            -- Follow: insert into follows + delete from muted
+        -- Collect actions into temp table instead of executing DML per-row
+        IF _what_action IN ('blog', 'follow', 'ignore', '', 'blacklist', 'unblacklist',
+                            'follow_blacklist', 'unfollow_blacklist', 'follow_muted', 'unfollow_muted') THEN
             FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-
-                -- Insert follow (update block_num if exists, insert if not)
-                IF EXISTS (SELECT 1 FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id) THEN
-                    UPDATE hivemind_app.follows SET block_num = rec.block_num
-                    WHERE follower = _follower_id AND following = _following_id;
-                ELSE
-                    INSERT INTO hivemind_app.follows (follower, following, block_num)
-                    VALUES (_follower_id, _following_id, rec.block_num)
-                    ON CONFLICT (follower, following) DO NOTHING;
-                    -- Update counters only for genuinely new follows
-                    IF FOUND THEN
-                        UPDATE hivemind_app.hive_accounts SET following = following + 1 WHERE id = _follower_id;
-                        UPDATE hivemind_app.hive_accounts SET followers = followers + 1 WHERE id = _following_id;
-                    END IF;
-                END IF;
-
-                -- Delete from muted
-                DELETE FROM hivemind_app.muted WHERE follower = _follower_id AND following = _following_id;
-
-                -- Accumulate notification
-                INSERT INTO _follow_notifications VALUES (_follower_name, _following_name, rec.block_num);
+                _op_seq := _op_seq + 1;
+                INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq)
+                VALUES (_follower_name, _following_name, _what_action, rec.block_num, _op_seq);
             END LOOP;
-
-        ELSIF _what_action = 'ignore' THEN
-            -- Mute: insert into muted + delete from follows
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-
-                INSERT INTO hivemind_app.muted (follower, following, block_num)
-                VALUES (_follower_id, _following_id, rec.block_num)
-                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
-
-                -- Delete from follows + update counters
-                DELETE FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id;
-                IF FOUND THEN
-                    UPDATE hivemind_app.hive_accounts SET following = following - 1 WHERE id = _follower_id;
-                    UPDATE hivemind_app.hive_accounts SET followers = followers - 1 WHERE id = _following_id;
-                END IF;
-            END LOOP;
-
-        ELSIF _what_action = '' THEN
-            -- Nothing: delete from both follows and muted
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-
-                DELETE FROM hivemind_app.follows WHERE follower = _follower_id AND following = _following_id;
-                IF FOUND THEN
-                    UPDATE hivemind_app.hive_accounts SET following = following - 1 WHERE id = _follower_id;
-                    UPDATE hivemind_app.hive_accounts SET followers = followers - 1 WHERE id = _following_id;
-                END IF;
-
-                DELETE FROM hivemind_app.muted WHERE follower = _follower_id AND following = _following_id;
-            END LOOP;
-
-        ELSIF _what_action = 'blacklist' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                INSERT INTO hivemind_app.blacklisted (follower, following, block_num)
-                VALUES (_follower_id, _following_id, rec.block_num)
-                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
-            END LOOP;
-
-        ELSIF _what_action = 'unblacklist' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                DELETE FROM hivemind_app.blacklisted WHERE follower = _follower_id AND following = _following_id;
-            END LOOP;
-
-        ELSIF _what_action = 'follow_blacklist' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                INSERT INTO hivemind_app.follow_blacklisted (follower, following, block_num)
-                VALUES (_follower_id, _following_id, rec.block_num)
-                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
-            END LOOP;
-
-        ELSIF _what_action = 'unfollow_blacklist' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                DELETE FROM hivemind_app.follow_blacklisted WHERE follower = _follower_id AND following = _following_id;
-            END LOOP;
-
-        ELSIF _what_action = 'follow_muted' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                INSERT INTO hivemind_app.follow_muted (follower, following, block_num)
-                VALUES (_follower_id, _following_id, rec.block_num)
-                ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
-            END LOOP;
-
-        ELSIF _what_action = 'unfollow_muted' THEN
-            FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
-                SELECT id INTO _following_id FROM hivemind_app.hive_accounts WHERE name = _following_name;
-                IF _following_id IS NULL THEN CONTINUE; END IF;
-                DELETE FROM hivemind_app.follow_muted WHERE follower = _follower_id AND following = _following_id;
-            END LOOP;
-
         END IF;
         -- Unknown action types are silently ignored (matching Python behavior)
     END LOOP;
+
+    -- ========== PHASE 2: Bulk DML using set-based operations ==========
+
+    -- Exit early if no actions collected
+    IF NOT EXISTS (SELECT 1 FROM _follow_actions LIMIT 1) THEN
+        RETURN QUERY SELECT * FROM _follow_notifications;
+        RETURN;
+    END IF;
+
+    -- 2a. Resolve all names to IDs in bulk and deduplicate:
+    --     For each (follower, following) pair, keep only the LAST action (highest op_seq)
+    DROP TABLE IF EXISTS _final_actions;
+    CREATE TEMP TABLE _final_actions AS
+    SELECT DISTINCT ON (fa.follower_name, fa.following_name)
+           fr.id AS follower_id, fa.follower_name,
+           fo.id AS following_id, fa.following_name,
+           fa.action, fa.block_num
+    FROM _follow_actions fa
+    JOIN hivemind_app.hive_accounts fr ON fr.name = fa.follower_name
+    JOIN hivemind_app.hive_accounts fo ON fo.name = fa.following_name
+    ORDER BY fa.follower_name, fa.following_name, fa.op_seq DESC;
+
+    -- Add index for efficient lookups in subsequent operations
+    CREATE INDEX ON _final_actions (action);
+
+    -- ---- FOLLOW actions ('blog', 'follow') ----
+
+    -- Insert new follows, update block_num for existing ones
+    -- Track which ones are genuinely new (for counter updates)
+    CREATE TEMP TABLE _new_follows AS
+    INSERT INTO hivemind_app.follows (follower, following, block_num)
+    SELECT follower_id, following_id, block_num
+    FROM _final_actions WHERE action IN ('blog', 'follow')
+    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num
+    RETURNING follower, following,
+              -- xmax = 0 means it was a fresh insert, not an update of existing row
+              (xmax = 0) AS is_new;
+
+    -- Delete from muted for all new follows (regardless of whether follow was new or existing)
+    DELETE FROM hivemind_app.muted m
+    USING _final_actions fa
+    WHERE fa.action IN ('blog', 'follow')
+      AND m.follower = fa.follower_id AND m.following = fa.following_id;
+
+    -- Update following counters for genuinely new follows
+    UPDATE hivemind_app.hive_accounts ha
+    SET following = following + delta.cnt
+    FROM (SELECT follower, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY follower) delta
+    WHERE ha.id = delta.follower;
+
+    -- Update followers counters for genuinely new follows
+    UPDATE hivemind_app.hive_accounts ha
+    SET followers = followers + delta.cnt
+    FROM (SELECT following, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY following) delta
+    WHERE ha.id = delta.following;
+
+    -- Accumulate follow notifications (for ALL follow actions, not just new ones)
+    INSERT INTO _follow_notifications
+    SELECT follower_name, following_name, block_num
+    FROM _final_actions WHERE action IN ('blog', 'follow');
+
+    DROP TABLE _new_follows;
+
+    -- ---- IGNORE (mute) actions ----
+
+    -- Insert/update muted
+    INSERT INTO hivemind_app.muted (follower, following, block_num)
+    SELECT follower_id, following_id, block_num
+    FROM _final_actions WHERE action = 'ignore'
+    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+
+    -- Delete from follows + track which were actually deleted (for counter updates)
+    CREATE TEMP TABLE _deleted_follows_ignore AS
+    DELETE FROM hivemind_app.follows f
+    USING _final_actions fa
+    WHERE fa.action = 'ignore'
+      AND f.follower = fa.follower_id AND f.following = fa.following_id
+    RETURNING f.follower, f.following;
+
+    -- Decrement following counters
+    UPDATE hivemind_app.hive_accounts ha
+    SET following = following - delta.cnt
+    FROM (SELECT follower, count(*) AS cnt FROM _deleted_follows_ignore GROUP BY follower) delta
+    WHERE ha.id = delta.follower;
+
+    -- Decrement followers counters
+    UPDATE hivemind_app.hive_accounts ha
+    SET followers = followers - delta.cnt
+    FROM (SELECT following, count(*) AS cnt FROM _deleted_follows_ignore GROUP BY following) delta
+    WHERE ha.id = delta.following;
+
+    DROP TABLE _deleted_follows_ignore;
+
+    -- ---- UNFOLLOW actions (action = '') ----
+
+    -- Delete from follows + track deletions for counter updates
+    CREATE TEMP TABLE _deleted_follows_unfollow AS
+    DELETE FROM hivemind_app.follows f
+    USING _final_actions fa
+    WHERE fa.action = ''
+      AND f.follower = fa.follower_id AND f.following = fa.following_id
+    RETURNING f.follower, f.following;
+
+    -- Decrement following counters
+    UPDATE hivemind_app.hive_accounts ha
+    SET following = following - delta.cnt
+    FROM (SELECT follower, count(*) AS cnt FROM _deleted_follows_unfollow GROUP BY follower) delta
+    WHERE ha.id = delta.follower;
+
+    -- Decrement followers counters
+    UPDATE hivemind_app.hive_accounts ha
+    SET followers = followers - delta.cnt
+    FROM (SELECT following, count(*) AS cnt FROM _deleted_follows_unfollow GROUP BY following) delta
+    WHERE ha.id = delta.following;
+
+    DROP TABLE _deleted_follows_unfollow;
+
+    -- Delete from muted for unfollow actions
+    DELETE FROM hivemind_app.muted m
+    USING _final_actions fa
+    WHERE fa.action = ''
+      AND m.follower = fa.follower_id AND m.following = fa.following_id;
+
+    -- ---- BLACKLIST actions ----
+
+    INSERT INTO hivemind_app.blacklisted (follower, following, block_num)
+    SELECT follower_id, following_id, block_num
+    FROM _final_actions WHERE action = 'blacklist'
+    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+
+    -- ---- UNBLACKLIST actions ----
+
+    DELETE FROM hivemind_app.blacklisted b
+    USING _final_actions fa
+    WHERE fa.action = 'unblacklist'
+      AND b.follower = fa.follower_id AND b.following = fa.following_id;
+
+    -- ---- FOLLOW_BLACKLIST actions ----
+
+    INSERT INTO hivemind_app.follow_blacklisted (follower, following, block_num)
+    SELECT follower_id, following_id, block_num
+    FROM _final_actions WHERE action = 'follow_blacklist'
+    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+
+    -- ---- UNFOLLOW_BLACKLIST actions ----
+
+    DELETE FROM hivemind_app.follow_blacklisted fb
+    USING _final_actions fa
+    WHERE fa.action = 'unfollow_blacklist'
+      AND fb.follower = fa.follower_id AND fb.following = fa.following_id;
+
+    -- ---- FOLLOW_MUTED actions ----
+
+    INSERT INTO hivemind_app.follow_muted (follower, following, block_num)
+    SELECT follower_id, following_id, block_num
+    FROM _final_actions WHERE action = 'follow_muted'
+    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num;
+
+    -- ---- UNFOLLOW_MUTED actions ----
+
+    DELETE FROM hivemind_app.follow_muted fm
+    USING _final_actions fa
+    WHERE fa.action = 'unfollow_muted'
+      AND fm.follower = fa.follower_id AND fm.following = fa.following_id;
+
+    DROP TABLE _final_actions;
+    DROP TABLE _follow_actions;
 
     -- Return notification data for Follow actions
     RETURN QUERY SELECT * FROM _follow_notifications;
