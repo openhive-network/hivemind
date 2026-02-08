@@ -347,7 +347,7 @@ BEGIN
 
     -- Exit early if no actions collected
     IF NOT EXISTS (SELECT 1 FROM _follow_actions LIMIT 1) THEN
-        RETURN QUERY SELECT * FROM _follow_notifications;
+        RETURN QUERY SELECT * FROM _follow_notifications ORDER BY block_num;
         RETURN;
     END IF;
 
@@ -516,8 +516,9 @@ BEGIN
     DROP TABLE _final_actions;
     DROP TABLE _follow_actions;
 
-    -- Return notification data for Follow actions
-    RETURN QUERY SELECT * FROM _follow_notifications;
+    -- Return notification data for Follow actions (ordered by block_num for correct
+    -- notification counter generation in Python's UniqueCounter)
+    RETURN QUERY SELECT * FROM _follow_notifications ORDER BY block_num;
 END
 $function$
     LANGUAGE plpgsql VOLATILE
