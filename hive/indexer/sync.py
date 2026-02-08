@@ -148,6 +148,7 @@ class SyncHiveDb:
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
         self._massive_blocks_data_provider = None
+        self._terminate_stale_connections()
         active_connections_before = self._get_active_db_connections()
         SyncHiveDb.time_start = OPSM.start()
 
@@ -298,6 +299,7 @@ class SyncHiveDb:
         if not DbLiveContextHolder.is_live_context():
             DbLiveContextHolder.set_live_context(True)
             Blocks.close_own_db_access()
+            self._terminate_stale_connections()
             # Wait for pg_stat_activity to reflect closed connections before
             # establishing baseline (see hivemind issue #207)
             active_connections_before = self._wait_for_stable_connections()
@@ -397,7 +399,9 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            assert is_superuser, (
+                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            )
 
     @staticmethod
     def _show_info(database: Db) -> None:
@@ -578,6 +582,35 @@ class SyncHiveDb:
         sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
         active_connections = self._db.query_all(sql)
         return active_connections
+
+    def _terminate_stale_connections(self):
+        """Terminate lingering hivemind connections from previous crashed instances.
+
+        When hivemind crashes, its PostgreSQL connections remain in pg_stat_activity
+        until TCP keepalive timeout (~2h). These zombies cause the connection
+        assertion to fail when compared against the post-processing snapshot.
+        """
+        our_pid = self._db.query_one("SELECT pg_backend_pid();")
+        terminated = self._db.query_all(
+            f"SELECT pg_terminate_backend(pid), application_name "
+            f"FROM pg_stat_activity "
+            f"WHERE application_name LIKE 'hivemind_%%' "
+            f"AND pid != {our_pid};"
+        )
+        if terminated:
+            log.info(f"Terminated {len(terminated)} stale hivemind connection(s): {[t[1] for t in terminated]}")
+            # Wait for terminated backends to fully disappear from pg_stat_activity
+            for _ in range(50):
+                time.sleep(0.1)
+                remaining = self._db.query_all(
+                    f"SELECT application_name FROM pg_stat_activity "
+                    f"WHERE application_name LIKE 'hivemind_%%' "
+                    f"AND pid != {our_pid};"
+                )
+                if not remaining:
+                    break
+            if remaining:
+                log.warning(f"Connections still present after termination: {remaining}")
 
     @staticmethod
     def _assert_connections_closed(connections_before: Iterable, connections_after: Iterable) -> None:

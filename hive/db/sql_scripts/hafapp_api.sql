@@ -184,7 +184,8 @@ BEGIN
     CREATE TEMP TABLE IF NOT EXISTS _follow_notifications (
         follower_name TEXT,
         following_name TEXT,
-        block_num INT
+        block_num INT,
+        op_seq BIGINT
     ) ON COMMIT DROP;
 
     -- Temp table for collecting parsed follow actions (Phase 1 output)
@@ -283,22 +284,32 @@ BEGIN
         IF _what_action = 'reset_blacklist' THEN
             PERFORM hivemind_app.reset_blacklisted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.blacklist_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name
+                AND action IN ('blacklist', 'unblacklist');
             CONTINUE;
         ELSIF _what_action = 'reset_following_list' THEN
             PERFORM hivemind_app.reset_follows(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name
+                AND action IN ('blog', 'follow');
             CONTINUE;
         ELSIF _what_action = 'reset_muted_list' THEN
             PERFORM hivemind_app.reset_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name
+                AND action = 'ignore';
             CONTINUE;
         ELSIF _what_action = 'reset_follow_blacklist' THEN
             PERFORM hivemind_app.reset_follow_blacklisted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name
+                AND action IN ('follow_blacklist', 'unfollow_blacklist');
             CONTINUE;
         ELSIF _what_action = 'reset_follow_muted_list' THEN
             PERFORM hivemind_app.reset_follow_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name
+                AND action IN ('follow_muted', 'unfollow_muted');
             CONTINUE;
         ELSIF _what_action = 'reset_all_lists' THEN
             PERFORM hivemind_app.reset_follows(
@@ -311,6 +322,7 @@ BEGIN
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_blacklist_ids]);
             PERFORM hivemind_app.reset_follow_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
+            DELETE FROM _follow_actions WHERE follower_name = _follower_name;
             CONTINUE;
         END IF;
 
@@ -347,7 +359,7 @@ BEGIN
 
     -- Exit early if no actions collected
     IF NOT EXISTS (SELECT 1 FROM _follow_actions LIMIT 1) THEN
-        RETURN QUERY SELECT * FROM _follow_notifications ORDER BY block_num;
+        RETURN QUERY SELECT follower_name, following_name, block_num FROM _follow_notifications ORDER BY block_num, op_seq;
         RETURN;
     END IF;
 
@@ -372,13 +384,13 @@ BEGIN
     ),
     deduped AS (
         SELECT DISTINCT ON (ag.follower_name, ag.following_name, ag.action_group)
-               ag.follower_name, ag.following_name, ag.action, ag.block_num, ag.action_group
+               ag.follower_name, ag.following_name, ag.action, ag.block_num, ag.action_group, ag.op_seq
         FROM action_groups ag
         ORDER BY ag.follower_name, ag.following_name, ag.action_group, ag.op_seq DESC
     )
     SELECT fr.id AS follower_id, d.follower_name,
            fo.id AS following_id, d.following_name,
-           d.action, d.block_num
+           d.action, d.block_num, d.op_seq
     FROM deduped d
     JOIN hivemind_app.hive_accounts fr ON fr.name = d.follower_name
     JOIN hivemind_app.hive_accounts fo ON fo.name = d.following_name;
@@ -421,7 +433,7 @@ BEGIN
 
     -- Accumulate follow notifications (for ALL follow actions, not just new ones)
     INSERT INTO _follow_notifications
-    SELECT follower_name, following_name, block_num
+    SELECT follower_name, following_name, block_num, op_seq
     FROM _final_actions WHERE action IN ('blog', 'follow');
 
     DROP TABLE _new_follows;
@@ -537,7 +549,7 @@ BEGIN
 
     -- Return notification data for Follow actions (ordered by block_num for correct
     -- notification counter generation in Python's UniqueCounter)
-    RETURN QUERY SELECT * FROM _follow_notifications ORDER BY block_num;
+    RETURN QUERY SELECT follower_name, following_name, block_num FROM _follow_notifications ORDER BY block_num, op_seq;
 END
 $function$
     LANGUAGE plpgsql VOLATILE
