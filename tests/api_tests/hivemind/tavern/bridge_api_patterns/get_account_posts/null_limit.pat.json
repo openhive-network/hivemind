@@ -246,46 +246,6 @@
     "author_reputation": 69.12,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "I think you're missing a key point with this statement: \" This is why cryptocurrency cannot stand on it's one without a fiat currency\". Ask yourself, why is fiat money worth anything, and I think you will eventually come to the conclusion that the answer is no different than the answer for cryptocurrency (hint: it's the first statement in your thesis).",
-    "category": "money",
-    "children": 7,
-    "created": "2016-09-14T16:49:03",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "money"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "parent_author": "funny",
-    "parent_permlink": "why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money",
-    "payout": 0.0,
-    "payout_at": "2016-09-21T16:49:03",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-funny-why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money-20160914t164907864z",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 0
-    },
-    "title": "RE: Why Are Bitcoin, Steem And Other Cryptocoins Worth \"Real\" Money?",
-    "updated": "2016-09-14T16:49:03",
-    "url": "/money/@funny/why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money#@blocktrades/re-funny-why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money-20160914t164907864z"
-  },
-  {
-    "active_votes": [],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 69.12,
-    "beneficiaries": [],
-    "blacklists": [],
     "body": "Great, thank you! I looked through a couple of your posts including that one, just missed it in the comments :-)",
     "category": "adolf",
     "children": 1,
@@ -318,6 +278,46 @@
     "title": "RE: If The Whole Earth Would Speak Like Adolf Hitler!",
     "updated": "2016-09-14T16:42:12",
     "url": "/adolf/@lenatramper/if-the-whole-earth-would-speak-like-adolf-hitler#@blocktrades/re-lenatramper-re-blocktrades-re-lenatramper-if-the-whole-earth-would-speak-like-adolf-hitler-20160914t164216448z"
+  },
+  {
+    "active_votes": [],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 69.12,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I think you're missing a key point with this statement: \" This is why cryptocurrency cannot stand on it's one without a fiat currency\". Ask yourself, why is fiat money worth anything, and I think you will eventually come to the conclusion that the answer is no different than the answer for cryptocurrency (hint: it's the first statement in your thesis).",
+    "category": "money",
+    "children": 7,
+    "created": "2016-09-14T16:49:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "money"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "funny",
+    "parent_permlink": "why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money",
+    "payout": 0.0,
+    "payout_at": "2016-09-21T16:49:03",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-funny-why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money-20160914t164907864z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Why Are Bitcoin, Steem And Other Cryptocoins Worth \"Real\" Money?",
+    "updated": "2016-09-14T16:49:03",
+    "url": "/money/@funny/why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money#@blocktrades/re-funny-why-are-bitcoin-steem-and-other-cryptocoins-worth-real-money-20160914t164907864z"
   },
   {
     "active_votes": [],
@@ -734,7 +734,7 @@
       "hide": false,
       "total_votes": 2
     },
-    "title": "RE: BREXIT RAP BATTLES OF HISTORY 🎶 The Irony of it all [New original rap!]",
+    "title": "RE: BREXIT RAP BATTLES OF HISTORY \ud83c\udfb6 The Irony of it all [New original rap!]",
     "updated": "2016-09-10T18:55:12",
     "url": "/hugothepoet/@hugothepoet/brexit-rap-battles-of-history-the-irony-of-it-all-new-original-rap#@blocktrades/re-krystle-re-blocktrades-re-eight-rad-re-hugothepoet-brexit-rap-battles-of-history-the-irony-of-it-all-new-original-rap-20160910t185524205z"
   },
