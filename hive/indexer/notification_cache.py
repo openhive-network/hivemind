@@ -241,7 +241,7 @@ class FollowNotificationCache(NotificationCache):
                         n.counter,
                         hb.created_at
                     FROM (VALUES {{}}) AS n(src, dst, block_num, counter)
-                    JOIN {SCHEMA_NAME}.blocks_view hb ON hb.num = (n.block_num - 1)
+                    LEFT JOIN {SCHEMA_NAME}.blocks_view hb ON hb.num = (n.block_num - 1)
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)

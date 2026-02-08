@@ -1191,16 +1191,6 @@
       "weight": 0
     },
     {
-      "author": "steemswede",
-      "last_update": "2016-08-28T21:32:54",
-      "num_changes": 0,
-      "permlink": "re-pigatto-guardians-of-nowhere-an-original-poem-20160828t212945637z",
-      "rshares": 2578232670,
-      "vote_percent": 10000,
-      "voter": "pigatto",
-      "weight": 1247645773158393
-    },
-    {
       "author": "kommienezuspadt",
       "last_update": "2016-08-28T21:45:51",
       "num_changes": 0,
@@ -1209,6 +1199,16 @@
       "vote_percent": 10000,
       "voter": "pigatto",
       "weight": 2446856492891009
+    },
+    {
+      "author": "steemswede",
+      "last_update": "2016-08-28T21:32:54",
+      "num_changes": 0,
+      "permlink": "re-pigatto-guardians-of-nowhere-an-original-poem-20160828t212945637z",
+      "rshares": 2578232670,
+      "vote_percent": 10000,
+      "voter": "pigatto",
+      "weight": 1247645773158393
     },
     {
       "author": "lukestokes",
@@ -1441,16 +1441,6 @@
       "weight": 705201243007298
     },
     {
-      "author": "jlufer",
-      "last_update": "2016-08-29T20:39:48",
-      "num_changes": 0,
-      "permlink": "re-pigatto-lost-in-despair-part-2-an-original-poem-20160829t203455197z",
-      "rshares": 2814015905,
-      "vote_percent": 10000,
-      "voter": "pigatto",
-      "weight": 2096531260351871
-    },
-    {
       "author": "knozaki2015",
       "last_update": "2016-08-29T21:44:33",
       "num_changes": 0,
@@ -1469,6 +1459,16 @@
       "vote_percent": 10000,
       "voter": "pigatto",
       "weight": 3937904822044072
+    },
+    {
+      "author": "jlufer",
+      "last_update": "2016-08-29T20:39:48",
+      "num_changes": 0,
+      "permlink": "re-pigatto-lost-in-despair-part-2-an-original-poem-20160829t203455197z",
+      "rshares": 2814015905,
+      "vote_percent": 10000,
+      "voter": "pigatto",
+      "weight": 2096531260351871
     },
     {
       "author": "pgarcgo",
