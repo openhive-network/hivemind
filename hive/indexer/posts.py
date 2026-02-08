@@ -139,6 +139,8 @@ class Posts(DbAdapterHolder):
         Returns the number of ops processed.
         """
         if not cls._pending_comment_ops:
+            # Still flush any deferred deletes even without pending comments
+            cls._flush_deferred_deletes()
             return 0
 
         n = len(cls._pending_comment_ops)
