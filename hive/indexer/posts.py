@@ -43,6 +43,7 @@ class Posts(DbAdapterHolder):
     _pending_comment_keys = set()  # Track (author, permlink) for conflict detection with deletes
     _pending_comment_option_ops = []  # Deferred comment_options during massive sync
     _pending_delete_ops = []  # Deferred delete_comment during massive sync
+    _pending_delete_keys = set()  # Track (author, permlink) of deferred deletes
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -59,6 +60,7 @@ class Posts(DbAdapterHolder):
             else:
                 # Non-conflicting: defer for batch processing
                 cls._pending_delete_ops.append((op, block_date))
+                cls._pending_delete_keys.add((op['author'], op['permlink']))
             return
         cls.delete(op, block_date)
 
@@ -84,6 +86,10 @@ class Posts(DbAdapterHolder):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
         if DbState.is_massive_sync():
+            # If this create/edit conflicts with a deferred delete, flush
+            # the deletes first to preserve delete-before-recreate ordering.
+            if (op['author'], op['permlink']) in cls._pending_delete_keys:
+                cls._flush_deferred_deletes()
             # During massive sync, accumulate ops for batch processing
             cls._pending_comment_ops.append((op, block_date, tags))
             cls._pending_comment_keys.add((op['author'], op['permlink']))
@@ -506,6 +512,7 @@ class Posts(DbAdapterHolder):
 
         n = len(cls._pending_delete_ops)
         cls._pending_delete_ops.clear()
+        cls._pending_delete_keys.clear()
 
         FSM.flush_stat('delete_comment_batch', perf_counter() - t0, n)
 
