@@ -355,18 +355,37 @@ BEGIN
         RETURN;
     END IF;
 
-    -- 2a. Resolve all names to IDs in bulk and deduplicate:
-    --     For each (follower, following) pair, keep only the LAST action (highest op_seq)
+    -- 2a. Resolve all names to IDs in bulk and deduplicate per action group.
+    --     Different action groups target different tables and are independent:
+    --       - follow group: blog/follow, ignore, '' (mutually exclusive)
+    --       - blacklist group: blacklist, unblacklist
+    --       - follow_blacklist group: follow_blacklist, unfollow_blacklist
+    --       - follow_muted group: follow_muted, unfollow_muted
+    --     Within each group, for each (follower, following) pair keep only the LAST action.
     DROP TABLE IF EXISTS _final_actions;
     CREATE TEMP TABLE _final_actions AS
-    SELECT DISTINCT ON (fa.follower_name, fa.following_name)
-           fr.id AS follower_id, fa.follower_name,
-           fo.id AS following_id, fa.following_name,
-           fa.action, fa.block_num
-    FROM _follow_actions fa
-    JOIN hivemind_app.hive_accounts fr ON fr.name = fa.follower_name
-    JOIN hivemind_app.hive_accounts fo ON fo.name = fa.following_name
-    ORDER BY fa.follower_name, fa.following_name, fa.op_seq DESC;
+    WITH action_groups AS (
+        SELECT fa.*,
+               CASE
+                   WHEN fa.action IN ('blog', 'follow', 'ignore', '') THEN 'follow_group'
+                   WHEN fa.action IN ('blacklist', 'unblacklist') THEN 'blacklist_group'
+                   WHEN fa.action IN ('follow_blacklist', 'unfollow_blacklist') THEN 'follow_blacklist_group'
+                   WHEN fa.action IN ('follow_muted', 'unfollow_muted') THEN 'follow_muted_group'
+               END AS action_group
+        FROM _follow_actions fa
+    ),
+    deduped AS (
+        SELECT DISTINCT ON (ag.follower_name, ag.following_name, ag.action_group)
+               ag.follower_name, ag.following_name, ag.action, ag.block_num, ag.action_group
+        FROM action_groups ag
+        ORDER BY ag.follower_name, ag.following_name, ag.action_group, ag.op_seq DESC
+    )
+    SELECT fr.id AS follower_id, d.follower_name,
+           fo.id AS following_id, d.following_name,
+           d.action, d.block_num
+    FROM deduped d
+    JOIN hivemind_app.hive_accounts fr ON fr.name = d.follower_name
+    JOIN hivemind_app.hive_accounts fo ON fo.name = d.following_name;
 
     -- Add index for efficient lookups in subsequent operations
     CREATE INDEX ON _final_actions (action);

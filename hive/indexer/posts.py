@@ -453,9 +453,24 @@ class Posts(DbAdapterHolder):
                 )
             )
 
-        # Phase 2: Bulk-resolve cache misses
+        db = DbAdapterHolder.common_block_processing_db()
+
+        # Phase 2: Bulk-resolve cache misses using the same db connection that
+        # created the posts (cls.db is a different connection and can't see
+        # uncommitted permlink_data rows from post creation)
         if needed:
-            cls._resolve_permlink_ids(needed)
+            needed_list = list(needed)
+            for i in range(0, len(needed_list), 2000):
+                batch = needed_list[i : i + 2000]
+                placeholders = ','.join(['(%s)'] * len(batch))
+                sql = f"""
+                    SELECT hpd.permlink, hpd.id
+                    FROM (VALUES {placeholders}) AS t(permlink)
+                    INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+                """
+                rows = db.query_all_raw(sql, tuple(batch))
+                for row in rows:
+                    cls._permlink_id_cache[row[0]] = row[1]
 
         # Phase 3: Build VALUES with integer permlink_ids
         params = []
@@ -472,7 +487,6 @@ class Posts(DbAdapterHolder):
             cls._pending_comment_option_ops.clear()
             return
 
-        db = DbAdapterHolder.common_block_processing_db()
         sql = f"""
             UPDATE {SCHEMA_NAME}.hive_posts hp
             SET max_accepted_payout = t.max_accepted_payout,
