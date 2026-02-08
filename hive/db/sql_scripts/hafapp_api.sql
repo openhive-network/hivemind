@@ -376,13 +376,15 @@ BEGIN
     -- Insert new follows, update block_num for existing ones
     -- Track which ones are genuinely new (for counter updates)
     CREATE TEMP TABLE _new_follows AS
-    INSERT INTO hivemind_app.follows (follower, following, block_num)
-    SELECT follower_id, following_id, block_num
-    FROM _final_actions WHERE action IN ('blog', 'follow')
-    ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num
-    RETURNING follower, following,
-              -- xmax = 0 means it was a fresh insert, not an update of existing row
-              (xmax = 0) AS is_new;
+    WITH ins AS (
+        INSERT INTO hivemind_app.follows (follower, following, block_num)
+        SELECT follower_id, following_id, block_num
+        FROM _final_actions WHERE action IN ('blog', 'follow')
+        ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num
+        RETURNING follower, following,
+                  -- xmax = 0 means it was a fresh insert, not an update of existing row
+                  (xmax = 0) AS is_new
+    ) SELECT * FROM ins;
 
     -- Delete from muted for all new follows (regardless of whether follow was new or existing)
     DELETE FROM hivemind_app.muted m
@@ -419,11 +421,13 @@ BEGIN
 
     -- Delete from follows + track which were actually deleted (for counter updates)
     CREATE TEMP TABLE _deleted_follows_ignore AS
-    DELETE FROM hivemind_app.follows f
-    USING _final_actions fa
-    WHERE fa.action = 'ignore'
-      AND f.follower = fa.follower_id AND f.following = fa.following_id
-    RETURNING f.follower, f.following;
+    WITH del AS (
+        DELETE FROM hivemind_app.follows f
+        USING _final_actions fa
+        WHERE fa.action = 'ignore'
+          AND f.follower = fa.follower_id AND f.following = fa.following_id
+        RETURNING f.follower, f.following
+    ) SELECT * FROM del;
 
     -- Decrement following counters
     UPDATE hivemind_app.hive_accounts ha
@@ -443,11 +447,13 @@ BEGIN
 
     -- Delete from follows + track deletions for counter updates
     CREATE TEMP TABLE _deleted_follows_unfollow AS
-    DELETE FROM hivemind_app.follows f
-    USING _final_actions fa
-    WHERE fa.action = ''
-      AND f.follower = fa.follower_id AND f.following = fa.following_id
-    RETURNING f.follower, f.following;
+    WITH del AS (
+        DELETE FROM hivemind_app.follows f
+        USING _final_actions fa
+        WHERE fa.action = ''
+          AND f.follower = fa.follower_id AND f.following = fa.following_id
+        RETURNING f.follower, f.following
+    ) SELECT * FROM del;
 
     -- Decrement following counters
     UPDATE hivemind_app.hive_accounts ha
