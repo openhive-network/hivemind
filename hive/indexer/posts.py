@@ -38,6 +38,8 @@ class Posts(DbAdapterHolder):
 
     comment_payout_ops = {}
     _comment_payout_ops = []
+    _comment_payout_ops_structured = []  # massive sync: list of tuples with resolved IDs
+    _permlink_id_cache = {}  # permlink -> permlink_id; massive sync only
     _counter = UniqueCounter()
     _pending_comment_ops = []  # Accumulated comment ops for batch processing
     _pending_comment_keys = set()  # Track (author, permlink) for conflict detection with deletes
@@ -621,6 +623,132 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush_into_db(cls):
+        if DbState.is_massive_sync():
+            return cls._flush_into_db_massive()
+        if cls._permlink_id_cache:
+            cls._permlink_id_cache.clear()  # free memory when entering live sync
+        return cls._flush_into_db_live()
+
+    @classmethod
+    def _resolve_permlink_ids(cls, needed):
+        """Bulk-resolve permlink strings to permlink_ids via DB.
+
+        Updates _permlink_id_cache with results.
+        """
+        if not needed:
+            return
+        needed_list = list(needed)
+        for i in range(0, len(needed_list), 2000):
+            batch = needed_list[i : i + 2000]
+            placeholders = ','.join(['(%s)'] * len(batch))
+            sql = f"""
+                SELECT hpd.permlink, hpd.id
+                FROM (VALUES {placeholders}) AS t(permlink)
+                INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+            """
+            rows = cls.db.query_all_raw(sql, tuple(batch))
+            for row in rows:
+                cls._permlink_id_cache[row[0]] = row[1]
+
+    @classmethod
+    def _flush_into_db_massive(cls):
+        """Flush payout data during massive sync using cached permlink_ids to avoid JOINs."""
+        if not cls._comment_payout_ops_structured:
+            return 0
+
+        # Collect cache misses
+        needed = set()
+        for op in cls._comment_payout_ops_structured:
+            permlink = op[1]
+            if permlink not in cls._permlink_id_cache:
+                needed.add(permlink)
+
+        if needed:
+            cls._resolve_permlink_ids(needed)
+
+        sql_template = f"""
+            UPDATE {SCHEMA_NAME}.hive_posts AS ihp SET
+                total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
+                curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
+                author_rewards        = CAST( data_source.author_rewards as BIGINT ) + ihp.author_rewards,
+                author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as BIGINT ),  ihp.author_rewards_hive ),
+                author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as BIGINT ),   ihp.author_rewards_hbd ),
+                author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as BIGINT ), ihp.author_rewards_vests ),
+                payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
+                pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
+                payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
+                last_payout_at        = COALESCE( CAST( data_source.last_payout_at as TIMESTAMP ),    ihp.last_payout_at ),
+                cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
+                is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout ),
+                total_vote_weight     = COALESCE( CAST( data_source.total_vote_weight as NUMERIC ),   ihp.total_vote_weight )
+            FROM
+            (VALUES {{}})
+            AS data_source(author_id, permlink_id,
+                    total_payout_value,
+                    curator_payout_value,
+                    author_rewards,
+                    author_rewards_hive,
+                    author_rewards_hbd,
+                    author_rewards_vests,
+                    payout,
+                    pending_payout,
+                    payout_at,
+                    last_payout_at,
+                    cashout_time,
+                    is_paidout,
+                    total_vote_weight)
+            WHERE ihp.author_id = data_source.author_id AND ihp.permlink_id = data_source.permlink_id
+        """
+
+        batch_values = []
+        batch_params = []
+        for op in cls._comment_payout_ops_structured:
+            author_id = op[0]
+            permlink = op[1]
+            permlink_id = cls._permlink_id_cache.get(permlink)
+            if permlink_id is None:
+                continue  # permlink not in DB (shouldn't happen for payouts, but safe)
+            batch_values.append(
+                '(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::timestamp, %s::timestamp, %s::timestamp, %s, %s)'
+            )
+            batch_params.extend(
+                [
+                    author_id,
+                    permlink_id,
+                    op[2],  # total_payout_value
+                    op[3],  # curator_payout_value
+                    op[4],  # author_rewards
+                    op[5],  # author_rewards_hive
+                    op[6],  # author_rewards_hbd
+                    op[7],  # author_rewards_vests
+                    op[8],  # payout
+                    op[9],  # pending_payout
+                    op[10],  # payout_at
+                    op[11],  # last_payout_at
+                    op[12],  # cashout_time
+                    op[13],  # is_paidout
+                    op[14],  # total_vote_weight
+                ]
+            )
+            if len(batch_values) >= 2000:
+                cls.beginTx()
+                cls.db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
+                cls.commitTx()
+                batch_values = []
+                batch_params = []
+
+        if batch_values:
+            cls.beginTx()
+            cls.db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
+            cls.commitTx()
+
+        n = len(cls._comment_payout_ops_structured)
+        cls._comment_payout_ops_structured.clear()
+        return n
+
+    @classmethod
+    def _flush_into_db_live(cls):
+        """Flush payout data during live sync (original logic with JOINs)."""
         sql = f"""
               UPDATE {SCHEMA_NAME}.hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
@@ -679,15 +807,12 @@ class Posts(DbAdapterHolder):
 
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()
-
-            if not DbState.is_massive_sync():
-                cls.db.query_no_return(
-                    'SELECT pg_advisory_xact_lock(777)'
-                )  # synchronise with update_posts_rshares in votes
+            cls.db.query_no_return(
+                'SELECT pg_advisory_xact_lock(777)'
+            )  # synchronise with update_posts_rshares in votes
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
-
             cls.commitTx()
 
         n = len(cls._comment_payout_ops)
@@ -783,25 +908,46 @@ class Posts(DbAdapterHolder):
                 pending_payout = sbd_amount(value['pending_payout'])
                 total_vote_weight = value['total_vote_weight']
 
-            cls._comment_payout_ops.append(
-                "('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
-                    author,
-                    escape_characters(permlink),
-                    "NULL" if (total_payout_value is None) else (f"'{legacy_amount(total_payout_value)}'"),
-                    "NULL" if (curator_payout_value is None) else (f"'{legacy_amount(curator_payout_value)}'"),
-                    author_rewards,
-                    "NULL" if (author_rewards_hive is None) else author_rewards_hive,
-                    "NULL" if (author_rewards_hbd is None) else author_rewards_hbd,
-                    "NULL" if (author_rewards_vests is None) else author_rewards_vests,
-                    "NULL" if (payout is None) else payout,
-                    "NULL" if (pending_payout is None) else pending_payout,
-                    "NULL" if (payout_at is None) else (f"'{payout_at}'::timestamp"),
-                    "NULL" if (last_payout_at is None) else (f"'{last_payout_at}'::timestamp"),
-                    "NULL" if (cashout_time is None) else (f"'{cashout_time}'::timestamp"),
-                    "NULL" if (is_paidout is None) else is_paidout,
-                    "NULL" if (total_vote_weight is None) else total_vote_weight,
+            if DbState.is_massive_sync():
+                cls._comment_payout_ops_structured.append(
+                    (
+                        Accounts.get_id(author),
+                        permlink,
+                        None if total_payout_value is None else legacy_amount(total_payout_value),
+                        None if curator_payout_value is None else legacy_amount(curator_payout_value),
+                        author_rewards,
+                        author_rewards_hive,
+                        author_rewards_hbd,
+                        author_rewards_vests,
+                        payout,
+                        pending_payout,
+                        payout_at,
+                        last_payout_at,
+                        cashout_time,
+                        is_paidout,
+                        total_vote_weight,
+                    )
                 )
-            )
+            else:
+                cls._comment_payout_ops.append(
+                    "('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+                        author,
+                        escape_characters(permlink),
+                        "NULL" if (total_payout_value is None) else (f"'{legacy_amount(total_payout_value)}'"),
+                        "NULL" if (curator_payout_value is None) else (f"'{legacy_amount(curator_payout_value)}'"),
+                        author_rewards,
+                        "NULL" if (author_rewards_hive is None) else author_rewards_hive,
+                        "NULL" if (author_rewards_hbd is None) else author_rewards_hbd,
+                        "NULL" if (author_rewards_vests is None) else author_rewards_vests,
+                        "NULL" if (payout is None) else payout,
+                        "NULL" if (pending_payout is None) else pending_payout,
+                        "NULL" if (payout_at is None) else (f"'{payout_at}'::timestamp"),
+                        "NULL" if (last_payout_at is None) else (f"'{last_payout_at}'::timestamp"),
+                        "NULL" if (cashout_time is None) else (f"'{cashout_time}'::timestamp"),
+                        "NULL" if (is_paidout is None) else is_paidout,
+                        "NULL" if (total_vote_weight is None) else total_vote_weight,
+                    )
+                )
 
         n = len(cls.comment_payout_ops)
         cls.comment_payout_ops.clear()
