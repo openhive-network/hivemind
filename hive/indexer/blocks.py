@@ -522,11 +522,6 @@ class Blocks:
             elif op_type_id == 1:  # COMMENT
                 Posts.comment_op(op, cls._head_block_date)
             elif op_type_id == 17:  # DELETE_COMMENT
-                # Flush pending comment ops first: delete_op defers when
-                # _pending_comment_ops is non-empty, which breaks
-                # create/delete/recreate ordering.
-                if Posts._pending_comment_ops:
-                    Posts.flush_pending_comment_ops()
                 key = f"{op['author']}/{op['permlink']}"
                 if key not in ineffective_deleted_ops:
                     Posts.delete_op(op, cls._head_block_date)
