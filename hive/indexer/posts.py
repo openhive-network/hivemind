@@ -40,6 +40,7 @@ class Posts(DbAdapterHolder):
     _comment_payout_ops = []
     _counter = UniqueCounter()
     _pending_comment_ops = []  # Accumulated comment ops for batch processing
+    _pending_comment_keys = set()  # Track (author, permlink) for conflict detection with deletes
     _pending_comment_option_ops = []  # Deferred comment_options during massive sync
     _pending_delete_ops = []  # Deferred delete_comment during massive sync
 
@@ -49,8 +50,10 @@ class Posts(DbAdapterHolder):
 
         Also remove it from post-cache and feed-cache.
         """
-        if DbState.is_massive_sync() and cls._pending_comment_ops:
-            # Defer until after batch comment ops are flushed to DB
+        if DbState.is_massive_sync():
+            # Only flush if this delete conflicts with a pending create/edit
+            if (op['author'], op['permlink']) in cls._pending_comment_keys:
+                cls.flush_pending_comment_ops()
             cls._pending_delete_ops.append((op, block_date))
             return
         cls.delete(op, block_date)
@@ -79,6 +82,7 @@ class Posts(DbAdapterHolder):
         if DbState.is_massive_sync():
             # During massive sync, accumulate ops for batch processing
             cls._pending_comment_ops.append((op, block_date, tags))
+            cls._pending_comment_keys.add((op['author'], op['permlink']))
             return
 
         cls._process_single_comment_op(op, block_date, tags)
@@ -166,6 +170,7 @@ class Posts(DbAdapterHolder):
         cls._process_comments_batch_waves(comment_ops, db)
 
         cls._pending_comment_ops.clear()
+        cls._pending_comment_keys.clear()
 
         # Now apply deferred ops that depend on posts existing in hive_posts
         cls._flush_deferred_comment_options()
@@ -450,10 +455,53 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _flush_deferred_deletes(cls):
-        """Apply deferred delete_comment ops after batch comment creation."""
-        for op, block_date in cls._pending_delete_ops:
-            cls.delete(op, block_date)
+        """Apply deferred delete_comment ops after batch comment creation.
+
+        Uses a single CTE-based batch query instead of one delete per op.
+        Deduplicates by author/permlink, keeping only the last delete per pair
+        (to ensure counter_deleted is computed correctly).
+        Votes.drop_votes_of_deleted_comment() must remain in Python since it
+        mutates the in-memory votes dict.
+        """
+        if not cls._pending_delete_ops:
+            return
+
+        from time import perf_counter
+
+        t0 = perf_counter()
+
+        # Deduplicate: keep only the last delete per author/permlink
+        seen = {}
+        for idx, (op, block_date) in enumerate(cls._pending_delete_ops):
+            key = (op['author'], op['permlink'])
+            seen[key] = (idx, op, block_date)
+
+        deduped = sorted(seen.values(), key=lambda x: x[0])
+
+        db = DbAdapterHolder.common_block_processing_db()
+        for chunk in chunks(deduped, 1000):
+            placeholders = []
+            params = []
+            for seq_id_local, (_orig_idx, op, block_date) in enumerate(chunk):
+                placeholders.append("(%s, %s, %s, %s, %s::timestamp)")
+                params.extend([seq_id_local, op['author'], op['permlink'], op['block_num'], str(block_date)])
+
+            sql = f"""
+                SELECT seq_id, author, permlink
+                FROM {SCHEMA_NAME}.delete_hive_posts_batch(
+                    ARRAY[{','.join(placeholders)}]::{SCHEMA_NAME}.delete_post_input[]
+                )
+            """
+            rows = db.query_all_raw(sql, tuple(params))
+
+            for row in rows:
+                row = row._mapping
+                Votes.drop_votes_of_deleted_comment({'author': row['author'], 'permlink': row['permlink']})
+
+        n = len(cls._pending_delete_ops)
         cls._pending_delete_ops.clear()
+
+        FSM.flush_stat('delete_comment_batch', perf_counter() - t0, n)
 
     @classmethod
     def _process_single_comment_op(cls, op, block_date, tags):

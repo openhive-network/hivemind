@@ -73,6 +73,9 @@ class VoteNotificationCache(NotificationCache):
 
     @classmethod
     def flush_vote_notifications(cls, force=False):
+        if not force and not cls.vote_notifications and not cls._staging_table_created:
+            return 0
+
         from hive.db.db_state import DbState
 
         if not force and DbState.is_massive_sync():
@@ -182,7 +185,7 @@ class PostNotificationCache(NotificationCache):
             ORDER BY n.block_num, n.type_id, n.created_at, n.src, n.dst, n.dst_post_id, n.post_id
             ON CONFLICT DO NOTHING
             """
-            for chunk in chunks(cls.comment_notifications, 1000):
+            for chunk in chunks(cls.comment_notifications, 10000):
                 cls.beginTx()
                 values_str = ",".join(
                     f"({n['block_num']}, {n['type_id']}, {escape_characters(n['created_at'])}::timestamp, {n['src']}, {n['dst']}, {n['dst_post_id']}, {n['post_id']}, {n['counter']})"
@@ -236,8 +239,9 @@ class FollowNotificationCache(NotificationCache):
                         n.dst,
                         n.block_num,
                         n.counter,
-                        (SELECT hb.created_at FROM {SCHEMA_NAME}.blocks_view hb WHERE hb.num = (n.block_num - 1)) AS created_at
+                        hb.created_at
                     FROM (VALUES {{}}) AS n(src, dst, block_num, counter)
+                    JOIN {SCHEMA_NAME}.blocks_view hb ON hb.num = (n.block_num - 1)
                 )
                 INSERT INTO {SCHEMA_NAME}.hive_notification_cache
                 (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -256,7 +260,7 @@ class FollowNotificationCache(NotificationCache):
                 ORDER BY nd.block_num, created_at, r.id, r.id
                 ON CONFLICT DO NOTHING
             """
-            for chunk in chunks(cls.follow_notifications_to_flush, 1000):
+            for chunk in chunks(cls.follow_notifications_to_flush, 10000):
                 cls.beginTx()
                 values_str = ",".join(
                     f"({follower}, {following}, {block_num}, {counter})"
