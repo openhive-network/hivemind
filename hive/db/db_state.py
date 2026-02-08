@@ -550,6 +550,45 @@ class DbState:
         log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
 
     @classmethod
+    def _finish_reputation_notification_scores(cls, db):
+        """Recalculate reputation-based notification scores using final reputation data.
+
+        During massive sync, post/follow/reblog notification scores are computed
+        from reptracker_app.account_reputations at flush time. Since the reputation
+        tracker runs concurrently, scores may reflect incomplete reputation data.
+        This finalization step corrects them using the final values.
+        """
+        with AutoDbDisposer(db, "finish_reputation_notification_scores") as db_mgr:
+            time_start = perf_counter()
+            sql = f"""
+                WITH log_account_rep AS (
+                    SELECT account_id,
+                        LOG(10, ABS(nullif(reputation, 0))) AS rep,
+                        (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
+                    FROM {REPTRACKER_SCHEMA_NAME}.account_reputations
+                ),
+                calculate_rep AS (
+                    SELECT account_id, GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
+                    FROM log_account_rep lar
+                ),
+                final_rep AS (
+                    SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep cr
+                )
+                UPDATE {SCHEMA_NAME}.hive_notification_cache hnc
+                SET score = COALESCE(fr.rep, 25)
+                FROM {SCHEMA_NAME}.hive_accounts ha
+                JOIN final_rep fr ON ha.haf_id = fr.account_id
+                WHERE hnc.src = ha.id
+                    AND hnc.type_id IN (12, 13, 14, 15)
+                    AND hnc.score != COALESCE(fr.rep, 25)
+            """
+            db_mgr.db.query_no_return(sql)
+            log.info(
+                "[MASSIVE] finish_reputation_notification_scores executed in %.4fs",
+                perf_counter() - time_start,
+            )
+
+    @classmethod
     def time_collector(cls, func, args):
         startTime = FOSM.start()
         func(*args)
@@ -608,6 +647,11 @@ class DbState:
         ]
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
+
+        # Recalculate reputation-based notification scores after all notifications are
+        # flushed and muted ones cleared. Runs sequentially to avoid concurrent access
+        # to hive_notification_cache with the tasks above.
+        cls._finish_reputation_notification_scores(cls.db())
 
         real_time = FOSM.stop(start_time)
 
