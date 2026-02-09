@@ -34,7 +34,7 @@ BEGIN
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
 
   RETURN (
-    SELECT jsonb_agg(to_jsonb(row)) FROM
+    SELECT jsonb_agg(to_jsonb(row) ORDER BY row.id::BIGINT DESC) FROM
     (
       WITH notifications AS  -- bridge_api_post_notifications
       (

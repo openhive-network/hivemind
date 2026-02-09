@@ -45,7 +45,7 @@ BEGIN
                   WHEN hive_notification_cache.src <> '' THEN '@' || hive_notification_cache.src
                   WHEN hive_notification_cache.dst <> '' THEN '@' || hive_notification_cache.dst
                 END
-      )
+      ) ORDER BY hive_notification_cache.id DESC
     ) FROM (
       SELECT
         hnv.id,

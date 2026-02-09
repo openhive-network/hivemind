@@ -32,7 +32,7 @@ BEGIN
         SELECT hb.num
         FROM hive.blocks_view hb -- very important for performance (originally it was a hivemind_app_blocks_view)
         WHERE hb.created_at <= _last_read_at
-      ORDER by hb.created_at desc
+      ORDER by hb.created_at desc, hb.num DESC
       LIMIT 1
       ),
     _limit_block)
