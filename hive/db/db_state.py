@@ -637,6 +637,7 @@ class DbState:
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
             ),
+            ('posts_rshares', cls._finish_posts_rshares, [cls.db()]),
         ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
