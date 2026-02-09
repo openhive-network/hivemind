@@ -73,7 +73,7 @@ class VoteNotificationCache(NotificationCache):
 
     @classmethod
     def flush_vote_notifications(cls, force=False):
-        if not force and not cls.vote_notifications and not cls._staging_table_created:
+        if not force and not cls.vote_notifications:
             return 0
 
         from hive.db.db_state import DbState
