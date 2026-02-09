@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS hivemind_app.hive_api_operation CASCADE;
 CREATE TYPE hivemind_app.hive_api_operation AS (
     id BIGINT,
     block_num INT,
-    operation_type_id INTEGER,
+    operation_type_id SMALLINT,
     is_virtual BOOLEAN,
     body VARCHAR
 );
@@ -117,7 +117,7 @@ $function$
 DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op AS (
     block_num INT,
-    op_type_id INT,
+    op_type_id SMALLINT,
     body JSONB
 );
 
@@ -593,7 +593,7 @@ $function$
 DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op_extended AS (
     block_num INT,
-    op_type_id INT,
+    op_type_id SMALLINT,
     body JSONB,
     -- Extracted fields for vote (0) and effective_comment_vote (72) ops.
     -- NULL for all other op types.
@@ -655,7 +655,7 @@ DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended_with_date CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op_extended_with_date AS (
     block_num INT,
     date TEXT,
-    op_type_id INT,
+    op_type_id SMALLINT,
     body JSONB,
     f_voter TEXT,
     f_author TEXT,
