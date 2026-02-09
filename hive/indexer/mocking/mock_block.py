@@ -84,16 +84,15 @@ class OperationBase:
     def push(self) -> None:
         sql = """
 INSERT INTO
-    hafd.operations (id, trx_in_block, op_pos, body_binary)
+    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_binary)
 VALUES
-    (:id, -2, -2, :body :: jsonb :: hafd.operation);
+    (:id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation);
 """
         OperationBase.pos_in_block += 1
 
         OperationBase.operation_id = Db.instance().query_one(
-            sql='SELECT operation_id FROM hafd.operation_id(:block_num, :op_type_id, :pos_in_block);',
+            sql='SELECT operation_id FROM hafd.operation_id(:block_num, :pos_in_block);',
             block_num=self.block_number,
-            op_type_id=self.type.value,
             pos_in_block=OperationBase.pos_in_block,
         )
 
@@ -104,6 +103,7 @@ VALUES
         Db.instance().query(
             sql=sql,
             id=OperationBase.operation_id,
+            op_type_id=self.type.value,
             body=json.dumps(self.body),
         )
 
