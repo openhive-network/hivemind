@@ -109,7 +109,10 @@ declare
             "description": "block containing the operation"
           },
           "trx_id": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "hash of the transaction"
           },
           "op_pos": {
