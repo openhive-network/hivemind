@@ -1128,7 +1128,6 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
-  # Override image to use Python 3.12 - pydantic-core doesn't support Python 3.14 yet
   image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client
