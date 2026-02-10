@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 import aiohttp
-from beekeepy._communication import HttpUrl
+from beekeepy.interfaces import HttpUrl
 
 from api_client_tests.api_caller import HivemindApiCaller
 

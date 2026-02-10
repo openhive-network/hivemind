@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from beekeepy._apis.abc.sendable import AsyncSendable
+from beekeepy.handle.remote import AsyncSendable
 from hivemind_api.hivemind_api_client.hivemind_api_client import HivemindApi
 
 
