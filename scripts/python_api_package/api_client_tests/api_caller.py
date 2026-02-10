@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from beekeepy._communication import HttpUrl
-from beekeepy._remote_handle import AbstractAsyncHandle, AsyncBatchHandle, RemoteHandleSettings
-from beekeepy._runnable_handle.settings import Settings
+from beekeepy.handle.remote import AbstractAsyncHandle, AsyncBatchHandle, RemoteHandleSettings
+from beekeepy.handle.runnable import RunnableHandleSettings
+from beekeepy.interfaces import HttpUrl
 
 from api_client_tests.api_collection import HivemindApiCollection
 
 
 class HivemindApiCaller(AbstractAsyncHandle[RemoteHandleSettings, HivemindApiCollection]):
     def __init__(self, endpoint_url: HttpUrl) -> None:
-        settings = Settings()
+        settings = RunnableHandleSettings()
         settings.http_endpoint = endpoint_url
         super().__init__(settings=settings)
 
