@@ -28,6 +28,7 @@ source = [
 python = ">=3.14,<4"
 hiveio-beekeepy = ">=1.28.6"
 api_client_generator = ">=1.7.1"
+pydantic = ">=2.12.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.5"
