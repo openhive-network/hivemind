@@ -39,16 +39,20 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.poetry-dynamic-versioning]
 enable = true
-pattern = '''^v?(?P<base>\d+\.\d+\.\d+)(?:(?P<stage>[a-zA-Z]+)(?P<revision>\d+))?$'''
+pattern = "default-unprefixed"
 format-jinja = """
-    {%- set dirty_postfix = '.dirty' if dirty else '' -%}
-    {%- if distance == 0 and not dirty -%}
-        {{ serialize_pep440(base, stage, revision) }}
-    {%- elif revision is not none -%}
-        {{ serialize_pep440(base, stage, revision + 1, dev=distance, metadata=[commit]) }}{{ dirty_postfix }}
-    {%- else -%}
-        {{ serialize_pep440(bump_version(base), stage, revision, dev=distance, metadata=[commit]) }}{{ dirty_postfix }}
-    {%- endif -%}
+    {%- set STABLE_BRANCHES = ['develop', 'master', 'main'] -%}
+    {%- set effective_branch = branch or env.get('CI_COMMIT_REF_NAME') -%}
+    {%- set is_on_tag = distance == 0 -%}
+    {%- set is_after_tag = distance > 0 -%}
+    {%- set is_tag_checkout = branch is none and is_on_tag -%}
+    {%- set is_stable = effective_branch in STABLE_BRANCHES or is_tag_checkout -%}
+    {%- set is_feature_branch = is_after_tag and not is_stable -%}
+    {%- set post = timestamp|int if is_after_tag else none -%}
+    {%- set dev = 0 if is_feature_branch else none -%}
+    {%- set local_parts = ['unstable'] if is_feature_branch else [] -%}
+    {%- set local_parts = local_parts + ['dirty'] if dirty else local_parts -%}
+    {{- serialize_pep440(base, stage, revision, post=post, dev=dev, metadata=local_parts) -}}
 """
 
 [tool.poetry-dynamic-versioning.substitution]
