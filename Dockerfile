@@ -80,9 +80,8 @@ SHELL ["/bin/bash", "-c"]
 
 COPY --chown=hivemind:hivemind . /home/hivemind/app
 
+ARG API_VERSION="dev"
 RUN cd /home/hivemind/app \
-    && git fetch --tags --quiet 2>/dev/null || true \
-    && API_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \
     && find . -name 'endpoint_schema.sql' -o -name 'hafah_openapi.sql' | while read -r f; do \
          sed -i 's|"version": "[^"]*"|"version": "'"$API_VERSION"'"|' "$f"; \
          sed -i 's|^  version: .*|  version: '"$API_VERSION"'|' "$f"; \

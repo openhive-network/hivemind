@@ -118,6 +118,10 @@ if [ -z "$GIT_LAST_COMMIT_DATE" ]; then
   GIT_LAST_COMMIT_DATE="[unknown]"
 fi
 
+# Resolve API version from git tags for OpenAPI spec injection
+git fetch --tags --quiet 2>/dev/null || true
+API_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"
+
 REWRITER_TARGET=without_tag
 if [[ -n "$BUILD_IMAGE_TAG" ]]; then
   REWRITER_TARGET=with_tag
@@ -139,6 +143,7 @@ fi
 echo "Building Hivemind image..."
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
+  --build-arg API_VERSION="$API_VERSION" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
   --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
   --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
