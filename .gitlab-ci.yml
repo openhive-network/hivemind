@@ -31,6 +31,8 @@ variables:
   # Cache manager configuration (from common-ci-configuration)
   CACHE_MANAGER: "/tmp/cache-manager.sh"
   CACHE_MANAGER_REF: "develop"
+  # Dependency testing: when "true", poetry update is run before install to test latest versions
+  TEST_WITH_LATEST_DEPENDENCIES: "false"
   # =============================================================================
   # Quick Test / Auto-Skip Mode
   # =============================================================================
@@ -78,10 +80,9 @@ variables:
   DOCKER_DIND_TAG: "3dd346380da7f28cdaf3ef3955559c905d94bd1c"
   IMAGE_REMOVER_TAG: "latest"
   # CI base image from common-ci-configuration (Python 3.14)
-  BUILDER_IMAGE_TAG: ":ubuntu24.04-py3.14-2"
+  BUILDER_IMAGE_TAG: ":pypa_2_28-2"
   HIVE_CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image${BUILDER_IMAGE_TAG}"
-  # Python 3.12 image for pydantic-core based tools (pydantic-core doesn't support 3.14 yet)
-  PYTHON_COMPAT_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/python:3.12.9-1"
+  PYTHON_COMPAT_IMAGE: "${HIVE_CI_BASE_IMAGE}"
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
@@ -1135,7 +1136,11 @@ python_api_client_test:
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   before_script:
-  - poetry -C "${PYPROJECT_DIR}" lock
+  - |
+    if [[ "${TEST_WITH_LATEST_DEPENDENCIES}" == "true" ]]; then
+      echo "Updating dependencies to latest versions..."
+      poetry -C "${PYPROJECT_DIR}" update --lock
+    fi
   - poetry -C "${PYPROJECT_DIR}" install
   script:
   - poetry run -C "${PYPROJECT_DIR}" pytest "${PYPROJECT_DIR}/api_client_tests"
