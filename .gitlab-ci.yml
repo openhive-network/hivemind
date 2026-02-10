@@ -1142,6 +1142,7 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
+  image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client
     artifacts: true
