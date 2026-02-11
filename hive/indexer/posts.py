@@ -213,7 +213,7 @@ class Posts(DbAdapterHolder):
               INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.name = t.author
               INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
               ) as data_source
-              WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
+              WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id and ihp.counter_deleted = 0
         """
 
         for chunk in chunks(cls._comment_payout_ops, 1000):
