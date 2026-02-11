@@ -159,6 +159,13 @@ BEGIN
     RETURN _result;
   END IF;
 
+  -- Limit array size to prevent abuse
+  IF jsonb_array_length(_params->_arg_name) > 5 THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+      FORMAT('Array %s has too many elements (max 5)', _arg_name)
+    );
+  END IF;
+
   -- Convert each element to integer
   FOR _elem IN SELECT jsonb_array_elements(_params->_arg_name)
   LOOP

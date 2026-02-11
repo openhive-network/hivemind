@@ -410,7 +410,7 @@ BEGIN
       ) ,
       all_replies AS MATERIALIZED
       (
-        SELECT hpr.id, hpr.author_id, hpr.muted_reasons
+        SELECT hpr.id, hpr.author_id
         FROM posts_comment_by_author hp1
         JOIN hivemind_app.live_posts_comments_view hpr ON hp1.id = hpr.parent_id   --hive_posts_parent_id_id_idx INDEX ONLY
       ),
