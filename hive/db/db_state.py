@@ -141,12 +141,15 @@ class DbState:
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_author_id_created_at_id_idx',
             'hive_posts_author_id_id_idx',
+            'hive_posts_block_num_idx',
+            'hive_posts_author_id_id_depth0_idx',
             'hive_votes_voter_id_last_update_idx',
             'hive_votes_block_num_idx',
             'hive_subscriptions_block_num_idx',
             'hive_subscriptions_community_idx',
             'hive_communities_block_num_idx',
             'hive_votes_post_id_voter_id_idx',
+            'hive_votes_post_id_block_num_rshares_vote_is_effective_idx',
             'hive_notification_cache_block_num_idx',
             'hive_notification_cache_dst_score_idx',
             'follows_following_idx',
@@ -160,6 +163,7 @@ class DbState:
             'follow_muted_block_num_idx',
             'follow_blacklisted_block_num_idx',
             'hive_post_data_bm25_idx',
+            'hive_accounts_haf_id_idx',
         ]
 
         to_return = {}
