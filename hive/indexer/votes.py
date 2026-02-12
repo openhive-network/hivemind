@@ -226,6 +226,7 @@ class Votes(DbAdapterHolder):
             VALUES {{}}
             ON CONFLICT ON CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk DO
             UPDATE SET
+              post_id = EXCLUDED.post_id,
               weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE {SCHEMA_NAME}.hive_votes.weight END,
               rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE {SCHEMA_NAME}.hive_votes.rshares END,
               vote_percent = EXCLUDED.vote_percent,
@@ -294,6 +295,7 @@ class Votes(DbAdapterHolder):
             ON CONFLICT ON CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk DO
             UPDATE
               SET
+                post_id = EXCLUDED.post_id,
                 weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE {SCHEMA_NAME}.hive_votes.weight END,
                 rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE {SCHEMA_NAME}.hive_votes.rshares END,
                 vote_percent = EXCLUDED.vote_percent,
