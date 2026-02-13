@@ -785,6 +785,10 @@ DECLARE
     _processed_count INT;
     _remaining INT;
 BEGIN
+    -- Drop leftover temp tables from previous calls (avoids stale OID in PL/pgSQL plan cache)
+    DROP TABLE IF EXISTS _comment_staging;
+    DROP TABLE IF EXISTS _post_results;
+
     -- Step 1: Collect ineffective delete keys (type 73)
     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
     INTO _ineffective_keys
@@ -796,7 +800,7 @@ BEGIN
     -- (HAF operation IDs are BIGINT and overflow hive_post_op_input.seq_id INTEGER)
     -- is_first marks the first occurrence per (author, permlink) — only these go to batch functions.
     -- Subsequent occurrences are edits that need PostDataCache body merging but not re-insertion.
-    CREATE TEMP TABLE _comment_staging ON COMMIT DROP AS
+    CREATE TEMP TABLE _comment_staging AS
     SELECT
         ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
         (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
@@ -817,7 +821,7 @@ BEGIN
         parent_id INT, parent_author_id INT,
         community_id INT, is_post_muted BOOLEAN, muted_reasons INT,
         block_num INT, block_date TIMESTAMP, op_body JSONB
-    ) ON COMMIT DROP;
+    );
 
     -- Normalize parent_author/parent_permlink for edits (first occurrence determines parent)
     UPDATE _comment_staging cs
