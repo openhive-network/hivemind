@@ -704,6 +704,7 @@ def setup_runtime_code(db):
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
+        "massive_sync.sql",
         "grant_hivemind_user.sql",
         "community.sql",
         "community_utils.sql",
