@@ -794,9 +794,12 @@ BEGIN
 
     -- Step 2: Collect all comment ops (type 1) with INT seq_id for hive_post_op_input
     -- (HAF operation IDs are BIGINT and overflow hive_post_op_input.seq_id INTEGER)
+    -- is_first marks the first occurrence per (author, permlink) — only these go to batch functions.
+    -- Subsequent occurrences are edits that need PostDataCache body merging but not re-insertion.
     CREATE TEMP TABLE _comment_staging ON COMMIT DROP AS
     SELECT
         ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
+        (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
         s.block_num,
         s.block_date,
         s.val->>'author' AS author,
@@ -846,7 +849,8 @@ BEGIN
     WHERE parent_author IS NULL OR parent_author = ''
     ON CONFLICT (category) DO NOTHING;
 
-    -- Step 4: Process root posts via batch function (single call with all root ops)
+    -- Step 4: Process root posts via batch function (first-occurrence only to avoid
+    -- ON CONFLICT DO UPDATE affecting the same row twice)
     INSERT INTO _post_results
     SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
            br.depth, br.parent_id, br.parent_author_id, br.community_id,
@@ -858,24 +862,25 @@ BEGIN
                        cs.block_date, _community_support_start_block,
                        cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
             FROM _comment_staging cs
-            WHERE cs.parent_author IS NULL OR cs.parent_author = ''
+            WHERE cs.is_first
+              AND (cs.parent_author IS NULL OR cs.parent_author = '')
             ORDER BY cs.seq_id
         )
     ) br
     JOIN _comment_staging cs ON cs.seq_id = br.seq_id;
 
-    -- Step 5: Process comments with wave-based resolution
+    -- Step 5: Process comments with wave-based resolution (first-occurrence only)
     FOR _wave IN 1..20 LOOP
-        -- Count unprocessed comments (not yet in results)
+        -- Count unprocessed first-occurrence comments (not yet in results)
         SELECT count(*) INTO _remaining
         FROM _comment_staging cs
-        WHERE cs.parent_author IS NOT NULL AND cs.parent_author != ''
+        WHERE cs.is_first
+          AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
           AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id);
 
         EXIT WHEN _remaining = 0;
 
-        -- Process batch: pass all unprocessed comments, function returns only those
-        -- whose parent is now resolvable (exists in hive_posts)
+        -- Process batch: pass unprocessed first-occurrence comments only
         INSERT INTO _post_results
         SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
                br.depth, br.parent_id, br.parent_author_id, br.community_id,
@@ -887,7 +892,8 @@ BEGIN
                            cs.block_date, _community_support_start_block,
                            cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
                 FROM _comment_staging cs
-                WHERE cs.parent_author IS NOT NULL AND cs.parent_author != ''
+                WHERE cs.is_first
+                  AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
                   AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id)
                 ORDER BY cs.seq_id
             )
@@ -897,6 +903,19 @@ BEGIN
         GET DIAGNOSTICS _processed_count = ROW_COUNT;
         EXIT WHEN _processed_count = 0;
     END LOOP;
+
+    -- Step 5b: Generate results for edit ops (is_first = false)
+    -- These share post_id and metadata with the first occurrence but have their own op_body
+    INSERT INTO _post_results
+    SELECT cs.seq_id, pr_first.post_id, false, pr_first.author_id, pr_first.permlink_id,
+           pr_first.depth, pr_first.parent_id, pr_first.parent_author_id,
+           pr_first.community_id, pr_first.is_post_muted, pr_first.muted_reasons,
+           cs.block_num, cs.block_date, cs.op_body
+    FROM _comment_staging cs
+    JOIN _comment_staging cs_first
+        ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+    JOIN _post_results pr_first ON pr_first.seq_id = cs_first.seq_id
+    WHERE NOT cs.is_first;
 
     -- Step 6: Process comment_options (type 19) - update hive_posts columns
     WITH co_ops AS (
