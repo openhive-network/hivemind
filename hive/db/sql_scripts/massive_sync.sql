@@ -786,7 +786,7 @@ DECLARE
     _remaining INT;
 BEGIN
     -- Step 1: Collect ineffective delete keys (type 73)
-    SELECT array_agg(s.val->>'author' || '/' || s.val->>'permlink')
+    SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
     INTO _ineffective_keys
     FROM hivemind_app._ops_staging s
     WHERE s.op_type_id = 73;
@@ -939,7 +939,7 @@ BEGIN
             s.block_date
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 17
-          AND NOT (s.val->>'author' || '/' || s.val->>'permlink' = ANY(_ineffective_keys))
+          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
     LOOP
         PERFORM hivemind_app.delete_hive_post(
             _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
