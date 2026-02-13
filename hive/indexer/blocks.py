@@ -194,11 +194,9 @@ class Blocks:
         cls._run_parallel_sql(phase4_tasks)
         log.info("[SQL] Phase 4 (parallel entities): %.4fs", perf_counter() - phase_start)
 
-        # Phase 5: PostDataCache flush (on its own connection)
+        # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
         phase_start = perf_counter()
-        PostDataCache.beginTx()
         PostDataCache.flush()
-        PostDataCache.commitTx()
         log.info("[SQL] Phase 5 (PostDataCache flush): %.4fs", perf_counter() - phase_start)
 
         # Phase 6: Parallel notification flush
