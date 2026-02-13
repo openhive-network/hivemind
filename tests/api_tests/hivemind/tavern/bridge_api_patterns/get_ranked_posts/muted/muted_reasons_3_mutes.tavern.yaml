@@ -2,11 +2,11 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
-
+    - patterntest # see also tag_all.tavern.yaml; ignoreall ignores r4fken (mock data) but it has no influence on results
+    
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -18,11 +18,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_discussion"
-          params: {"author": "zaitsevalesyaa", "permlink": "good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself", "observer": "buildawhale", "muted_reasons_filter":[3]}
+          method: "bridge.get_ranked_posts"
+          params: {"sort":"muted","observer":"ignoreall", "muted_reasons_filter":[3]}
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            ignore_tags: "<bridge discussion>"
+            ignore_tags: "<bridge posts>"

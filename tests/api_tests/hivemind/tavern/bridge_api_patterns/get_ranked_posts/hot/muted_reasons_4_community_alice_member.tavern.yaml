@@ -2,7 +2,12 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # alice is member before answering posts in this community - mock_data (hive-198723)
+                  # -> several of her posts are muted -> she is muted in community
+                  # -> few comment are unmuted -> alice become member
+                  # -> new comments muted -> few of them are unmuted
+                  # steemit is muted and test-safari is admin in this community
+    
 
   includes:
     - !include ../../../common.yaml
@@ -18,7 +23,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_ranked_posts"
-          params: {"sort":"muted","observer":"ignoreall","muted_reasons_filter":[0]}
+          params: {"sort": "hot", "tag": "hive-198723", "muted_reasons_filter":[4]}
       response:
         status_code: 200
         verify_response_with:

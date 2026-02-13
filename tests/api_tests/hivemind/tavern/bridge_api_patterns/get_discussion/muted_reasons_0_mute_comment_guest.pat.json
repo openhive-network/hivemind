@@ -1,5 +1,5 @@
 {
-  "test-safari/please-comment-hive3-02": {
+  "test-safari/please-comment-hive2-02": {
     "active_votes": [],
     "author": "test-safari",
     "author_payout_value": "0.000 HBD",
@@ -7,7 +7,7 @@
     "beneficiaries": [],
     "blacklists": [],
     "body": "Comment my posts in this community.02",
-    "category": "hive-198723",
+    "category": "hive-157439",
     "children": 3,
     "created": "2016-09-15T18:01:36",
     "curator_payout_value": "0.000 HBD",
@@ -20,12 +20,12 @@
     "payout_at": "2016-09-22T18:01:36",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "please-comment-hive3-02",
+    "permlink": "please-comment-hive2-02",
     "reblogs": 0,
     "replies": [
-      "alice/comment-to-please-comment-hive3-02",
-      "alice/after-muted-comment-to-please-comment-hive3-02",
-      "alice/after-member-comment-to-please-comment-hive3-02"
+      "alice/comment-to-please-comment-hive2-02",
+      "alice/after-muted-comment-to-please-comment-hive2-02",
+      "alice/after-member-comment-to-please-comment-hive2-02"
     ],
     "stats": {
       "flag_weight": 0.0,
@@ -35,6 +35,6 @@
     },
     "title": "Comment my post02",
     "updated": "2016-09-15T18:01:36",
-    "url": "/hive-198723/@test-safari/please-comment-hive3-02"
+    "url": "/hive-157439/@test-safari/please-comment-hive2-02"
   }
 }

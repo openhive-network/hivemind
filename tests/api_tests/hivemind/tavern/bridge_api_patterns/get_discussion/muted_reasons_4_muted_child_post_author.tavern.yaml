@@ -2,9 +2,9 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
-
-
+    - patterntest # child post author steemit is muted in this commmunity - mock_data (hive-198723)
+    
+    
   includes:
     - !include ../../common.yaml
 
@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_discussion"
-          params: {"author":"ismember", "permlink":"ismember-hive-111119-changed-type-3", "muted_reasons_filter":[1]}
+          params: {"author":"test-safari", "permlink":"parent-post-for-muted-steemit", "muted_reasons_filter":[4]}
       response:
         status_code: 200
         verify_response_with:

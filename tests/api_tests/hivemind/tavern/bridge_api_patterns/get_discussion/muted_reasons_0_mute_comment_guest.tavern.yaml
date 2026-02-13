@@ -2,10 +2,12 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
-
+    - patterntest # alice is guest before answering parent post in this community - mock_data (hive-157439)
+                  # muted all comments (not unmuted later)
+    
+    
   includes:
-    - !include ../../../common.yaml
+    - !include ../../common.yaml
 
   stages:
     - name: test
@@ -17,11 +19,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_ranked_posts"
-          params: {"sort":"muted","observer":"ignoreall","muted_reasons_filter":[1]}
+          method: "bridge.get_discussion"
+          params: {"author":"test-safari", "permlink":"please-comment-hive2-02", "muted_reasons_filter":[0]}
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            ignore_tags: "<bridge posts>"
+            ignore_tags: "<bridge discussion>"
