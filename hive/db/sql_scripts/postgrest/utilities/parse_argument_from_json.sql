@@ -122,3 +122,64 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_integer_array_argument_from_json;
+CREATE FUNCTION hivemind_postgrest_utilities.parse_integer_array_argument_from_json(
+  _params JSONB,
+  _arg_name TEXT,
+  _exception_on_unset_field BOOLEAN
+)
+RETURNS INTEGER[]
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+DECLARE
+  _result INTEGER[] DEFAULT '{}';
+  _elem JSONB;
+BEGIN
+  -- Handle missing/null parameter
+  IF _params->_arg_name IS NULL THEN
+    IF _exception_on_unset_field THEN
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+    ELSE
+      RETURN NULL;
+    END IF;
+  END IF;
+
+  -- Validate it's an array
+  IF jsonb_typeof(_params->_arg_name) != 'array' THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+      FORMAT('Parameter %s must be an array', _arg_name)
+    );
+  END IF;
+
+  -- Empty array is valid
+  IF jsonb_array_length(_params->_arg_name) = 0 THEN
+    RETURN _result;
+  END IF;
+
+  -- Limit array size to prevent abuse
+  IF jsonb_array_length(_params->_arg_name) > 5 THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+      FORMAT('Array %s has too many elements (max 5)', _arg_name)
+    );
+  END IF;
+
+  -- Convert each element to integer
+  FOR _elem IN SELECT jsonb_array_elements(_params->_arg_name)
+  LOOP
+    -- Validate element is a number
+    IF jsonb_typeof(_elem) != 'number' THEN
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+        FORMAT('Array element in %s must be a number, got: %s', _arg_name, _elem)
+      );
+    END IF;
+
+    _result := array_append(_result, (_elem#>>'{}')::INTEGER);
+  END LOOP;
+
+  RETURN _result;
+END
+$$
+;
