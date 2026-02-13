@@ -179,13 +179,15 @@ class Votes(DbAdapterHolder):
         return n
 
     @classmethod
-    def _resolve_post_ids(cls, needed):
+    def _resolve_post_ids(cls, needed, db=None):
         """Bulk-resolve (author_id, permlink) pairs to (post_id, permlink_id) via DB.
 
         Updates _post_id_cache with results. Pairs not found (deleted posts) are not cached.
         """
         if not needed:
             return
+        if db is None:
+            db = cls.db
         needed_list = list(needed)
         for i in range(0, len(needed_list), 2000):
             batch = needed_list[i : i + 2000]
@@ -200,13 +202,40 @@ class Votes(DbAdapterHolder):
                 INNER JOIN {SCHEMA_NAME}.hive_posts hp
                   ON hp.author_id = t.author_id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
             """
-            rows = cls.db.query_all_raw(sql, tuple(params))
+            rows = db.query_all_raw(sql, tuple(params))
             for row in rows:
                 cls._post_id_cache[(row[0], row[1])] = (row[2], row[3])
 
     @classmethod
     def _flush_votes_massive(cls):
         """Flush votes during massive sync using post_id cache to avoid JOINs."""
+        return cls._do_flush_votes_massive(cls.db, use_own_tx=True)
+
+    @classmethod
+    def flush_votes_in_existing_tx(cls, db):
+        """Flush accumulated votes inside an existing transaction (no BEGIN/COMMIT).
+
+        Called from the main batch transaction in process_multi_* methods.
+        Clears _votes_data after flushing so the concurrent flush is a no-op.
+        """
+        cls.inside_flush = True
+        n = 0
+        if cls._votes_data:
+            n = cls._do_flush_votes_massive(db, use_own_tx=False)
+            cls._votes_data.clear()
+            cls._votes_per_post.clear()
+        cls.inside_flush = False
+        return n
+
+    @classmethod
+    def _do_flush_votes_massive(cls, db, use_own_tx: bool):
+        """Core massive sync vote flush logic.
+
+        Args:
+            db: Database adapter to use for queries.
+            use_own_tx: If True, wrap each chunk in BEGIN/COMMIT (old behavior).
+                       If False, assume caller manages the transaction.
+        """
         # Collect unique (author_id, permlink) pairs and find cache misses
         needed = set()
         for vd in cls._votes_data.values():
@@ -216,7 +245,7 @@ class Votes(DbAdapterHolder):
 
         # Bulk-resolve cache misses
         if needed:
-            cls._resolve_post_ids(needed)
+            cls._resolve_post_ids(needed, db)
 
         # Build direct INSERT values (no JOINs)
         sql_template = f"""
@@ -263,16 +292,20 @@ class Votes(DbAdapterHolder):
                 ]
             )
             if len(batch_values) >= 2000:
-                cls.beginTx()
-                cls.db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
-                cls.commitTx()
+                if use_own_tx:
+                    cls.beginTx()
+                db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
+                if use_own_tx:
+                    cls.commitTx()
                 batch_values = []
                 batch_params = []
 
         if batch_values:
-            cls.beginTx()
-            cls.db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
-            cls.commitTx()
+            if use_own_tx:
+                cls.beginTx()
+            db.query_no_return_raw(sql_template.format(','.join(batch_values)), tuple(batch_params))
+            if use_own_tx:
+                cls.commitTx()
 
         return len(cls._votes_data)
 

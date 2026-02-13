@@ -593,6 +593,9 @@ class Blocks:
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
 
+        # Flush votes inside the batch transaction
+        cls._flush_votes_in_transaction(db)
+
         Notify.flush_lastread()
         db.query_no_return("COMMIT")
 
@@ -615,6 +618,9 @@ class Blocks:
         # Process follow operations entirely in SQL (after accounts are created)
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
+
+        # Flush votes inside the batch transaction
+        cls._flush_votes_in_transaction(db)
 
         Notify.flush_lastread()
         db.query_no_return("COMMIT")
@@ -639,12 +645,22 @@ class Blocks:
         if first_block > -1:
             cls._process_follows_in_sql(db, first_block, last_num)
 
+        # Flush votes inside the batch transaction (single transaction, no per-chunk BEGIN/COMMIT)
+        cls._flush_votes_in_transaction(db)
+
         Notify.flush_lastread()
         db.query_no_return("COMMIT")
 
         cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI COMBINED EXT] {num_blocks} blocks in {OPSM.stop(time_start):.4f}s")
+
+    @classmethod
+    def _flush_votes_in_transaction(cls, db) -> None:
+        """Flush accumulated votes inside the current transaction (no separate BEGIN/COMMIT)."""
+        start = OPSM.start()
+        Votes.flush_votes_in_existing_tx(db)
+        OPSM.op_stats('votes_flush_intx', OPSM.stop(start))
 
     @classmethod
     def _process_follows_in_sql(cls, db, first_block: int, last_block: int) -> None:
