@@ -735,7 +735,7 @@ EXCEPTION WHEN OTHERS THEN
 END
 $function$ LANGUAGE plpgsql IMMUTABLE;
 
--- Helper: extract numeric value from JSON amount object like {"amount":"1234","precision":3,"nai":"@@000000013"}
+-- Helper: extract numeric value from JSON amount object (amount, precision, nai fields)
 CREATE OR REPLACE FUNCTION hivemind_app.sbd_amount_from_json(_amount JSONB)
 RETURNS DECIMAL AS $function$
 DECLARE
