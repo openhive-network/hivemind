@@ -527,6 +527,7 @@ BEGIN
           id,
           author_id,
           is_pinned,
+          community_id,
           muted_reasons
         FROM hivemind_app.live_posts_view
         WHERE
