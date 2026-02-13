@@ -1,56 +1,24 @@
-"""Accounts indexer."""
+"""Accounts indexer — registration and updates now handled by SQL.
+
+Retains in-memory id map (load_ids/get_id) used by PostDataCache and live sync.
+"""
 
 import logging
 
 from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.utils.account import get_profile_str
-from hive.utils.misc import chunks
-from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
 
 class Accounts(DbAdapterHolder):
-    """Manages account id map, dirty queue, and `hive_accounts` table."""
-
-    _updates_data = {}
-
-    inside_flush = False
+    """Manages account id map and `hive_accounts` table."""
 
     # name->id map
-    # name->id mapdb
     _ids = {}
 
     # in-mem id->rank map
     _ranks = {}
-
-    # account core methods
-    # --------------------
-
-    @classmethod
-    def update_op(cls, update_operation, allow_change_posting):
-        """Save json_metadata."""
-
-        if cls.inside_flush:
-            log.exception("Adding new update-account-info into '_updates_data' dict")
-            raise RuntimeError("Fatal error")
-
-        key = update_operation['account']
-        (_posting_json_metadata, _json_metadata) = get_profile_str(update_operation)
-
-        if key in cls._updates_data:
-            if allow_change_posting:
-                cls._updates_data[key]['allow_change_posting'] = True
-                cls._updates_data[key]['posting_json_metadata'] = _posting_json_metadata
-
-            cls._updates_data[key]['json_metadata'] = _json_metadata
-        else:
-            cls._updates_data[key] = {
-                'allow_change_posting': allow_change_posting,
-                'posting_json_metadata': _posting_json_metadata,
-                'json_metadata': _json_metadata,
-            }
 
     @classmethod
     def load_ids(cls):
@@ -64,23 +32,6 @@ class Accounts(DbAdapterHolder):
     def clear_ids(cls):
         """Wipe id map. Only used for db migration #5."""
         cls._ids = None
-
-    @classmethod
-    def default_score(cls, name):
-        """Return default notification score based on rank."""
-        _id = cls.get_id(name)
-        rank = cls._ranks[_id] if _id in cls._ranks else 1000000
-        if rank < 200:
-            return 70  # 0.02% 100k
-        if rank < 1000:
-            return 60  # 0.1%  10k
-        if rank < 6500:
-            return 50  # 0.5%  1k
-        if rank < 25000:
-            return 40  # 2.0%  100
-        if rank < 100000:
-            return 30  # 8.0%  15
-        return 20
 
     @classmethod
     def get_id(cls, name):
@@ -107,99 +58,3 @@ class Accounts(DbAdapterHolder):
         """Check which names from name list does not exists in the database"""
         assert isinstance(names, list), "Expecting list as argument"
         return [name for name in names if name not in cls._ids]
-
-    @classmethod
-    def get_json_data(cls, source):
-        """json-data preprocessing."""
-        return escape_characters(source)
-
-    @classmethod
-    def register(cls, name, op_details, block_date, block_num):
-        """Block processing: register "candidate" names.
-
-        There are four ops which can result in account creation:
-        *account_create*, *account_create_with_delegation*, *pow*,
-        and *pow2*. *pow* ops result in account creation only when
-        the account they name does not already exist!
-        """
-
-        if name is None:
-            return False
-
-        # filter out names which already registered
-        if cls.exists(name):
-            return True
-
-        (_posting_json_metadata, _json_metadata) = get_profile_str(op_details)
-
-        sql = f"""
-                  INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at, posting_json_metadata, json_metadata, haf_id )
-                  VALUES ( '{name}', '{block_date}', {cls.get_json_data(_posting_json_metadata)}, {cls.get_json_data(_json_metadata)}, (select ha.id from hivemind_app.accounts_view ha where ha.name = '{name}') )
-                  RETURNING id
-              """
-
-        new_id = DbAdapterHolder.common_block_processing_db().query_one(sql)
-        if new_id is None:
-            return False
-        cls._ids[name] = new_id
-
-        # post-insert: pass to communities to check for new registrations
-        from hive.indexer.community import Community
-
-        if block_num > Community.start_block:
-            Community.register(name, block_date, block_num)
-
-        return True
-
-    @classmethod
-    def flush(cls):
-        """Flush json_metadatafrom cache to database"""
-
-        cls.inside_flush = True
-        n = 0
-
-        if cls._updates_data:
-            cls.beginTx()
-
-            sql = f"""
-                    UPDATE {SCHEMA_NAME}.hive_accounts ha
-                    SET
-                    posting_json_metadata =
-                            (
-                                CASE T2.allow_change_posting
-                                    WHEN True THEN T2.posting_json_metadata
-                                    ELSE ha.posting_json_metadata
-                                END
-                            ),
-                    json_metadata = T2.json_metadata
-                    FROM
-                    (
-                      SELECT
-                        allow_change_posting,
-                        posting_json_metadata,
-                        json_metadata,
-                        name
-                      FROM
-                      (
-                      VALUES
-                        -- allow_change_posting, posting_json_metadata, json_metadata, name
-                        {{}}
-                      )T( allow_change_posting, posting_json_metadata, json_metadata, name )
-                    )T2
-                    WHERE ha.name = T2.name
-                """
-
-            for chunk in chunks(cls._updates_data, 1000):
-                values = [
-                    f"({data['allow_change_posting']}, {cls.get_json_data(data['posting_json_metadata'])}, {cls.get_json_data(data['json_metadata'])}, '{name}')"
-                    for name, data in chunk.items()
-                ]
-                cls.db.query_prepared(sql.format(','.join(values)))
-
-            cls.commitTx()
-            n = len(cls._updates_data)
-            cls._updates_data.clear()
-
-        cls.inside_flush = False
-
-        return n
