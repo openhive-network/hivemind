@@ -344,8 +344,9 @@ class SyncHiveDb:
         if self._prefetch_blocks_provider is None:
             return
 
+        batch_size = self._max_batch if self._max_batch else 1000
         next_lbound = current_ubound + 1
-        next_ubound = next_lbound + 999
+        next_ubound = next_lbound + batch_size - 1
 
         try:
             self._prefetched_blocks = self._prefetch_blocks_provider.get_data(next_lbound, next_ubound)
@@ -361,8 +362,9 @@ class SyncHiveDb:
         if self._prefetch_combined_provider is None:
             return
 
+        batch_size = self._max_batch if self._max_batch else 1000
         next_lbound = current_ubound + 1
-        next_ubound = next_lbound + 999
+        next_ubound = next_lbound + batch_size - 1
 
         try:
             self._prefetched_combined_rows = self._prefetch_combined_provider.get_data(next_lbound, next_ubound)
