@@ -41,3 +41,38 @@ BEGIN
 END;
 $BODY$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_muted_reasons_bitmask;
+CREATE FUNCTION hivemind_postgrest_utilities.create_muted_reasons_bitmask(IN _reasons INT[])
+RETURNS INTEGER
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$BODY$
+DECLARE
+  _mask INT DEFAULT 0;
+  _reason INT;
+BEGIN
+  -- NULL or empty array means no filter
+  IF _reasons IS NULL OR array_length(_reasons, 1) IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  -- Build bitmask from array
+  FOREACH _reason IN ARRAY _reasons
+  LOOP
+    -- Validate range 0-4
+    IF _reason < 0 OR _reason > 4 THEN
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+        FORMAT('Invalid muted reason: %s. Must be between 0-4.', _reason)
+      );
+    END IF;
+
+    -- Set the bit
+    _mask := _mask | (1 << _reason);
+  END LOOP;
+
+  RETURN _mask;
+END
+$BODY$
+;

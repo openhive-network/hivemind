@@ -45,7 +45,7 @@ BEGIN
             NOT EXISTS (SELECT NULL FROM hivemind_app.live_posts_view hp1
                         WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
                         AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id)
-                       )            
+                       )
           )
         ORDER BY hfc.created_at DESC, hfc.post_id DESC
         LIMIT _limit
@@ -314,7 +314,7 @@ BEGIN
       (
         SELECT id, author_id
         FROM hivemind_app.live_posts_view hp
-        WHERE  -- use new hive_posts_author_id_id_depth0_idx 
+        WHERE  -- use new hive_posts_author_id_id_depth0_idx
           hp.author_id = _account_id
           AND ( _post_id = 0 OR hp.id < _post_id )
         ORDER BY hp.id DESC
@@ -408,7 +408,7 @@ BEGIN
         FROM hivemind_app.live_posts_comments_view
         WHERE author_id = _account_id       --hive_posts_author_id_id_idx will be used because hp1.counter_deleted = 0 INDEX ONLY
       ) ,
-      all_replies AS MATERIALIZED 
+      all_replies AS MATERIALIZED
       (
         SELECT hpr.id, hpr.author_id
         FROM posts_comment_by_author hp1

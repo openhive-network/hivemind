@@ -8,8 +8,9 @@ $$
 DECLARE
   _post_id  INT;
   _observer_id INT;
+  _muted_reasons_filter_mask INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer":"string"}', 2, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array"}', 2, NULL);
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
@@ -25,6 +26,10 @@ BEGIN
     hivemind_postgrest_utilities.valid_account(
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
+
+  _muted_reasons_filter_mask := hivemind_postgrest_utilities.create_muted_reasons_bitmask(
+    hivemind_postgrest_utilities.parse_integer_array_argument_from_json(_params, 'muted_reasons_filter', False)
+  );
 
   RETURN COALESCE(
   (
@@ -112,6 +117,12 @@ BEGIN
           ORDER BY cp.id
         ) ds,
           LATERAL hivemind_app.get_full_post_view_by_id(ds.id, _observer_id) hpv
+        WHERE
+          (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (
+            (hpv.muted_reasons & _muted_reasons_filter_mask) = 0
+            AND NOT (hpv.is_grayed AND (_muted_reasons_filter_mask & 8) != 0)
+            AND NOT (hpv.role_id = -2 AND (_muted_reasons_filter_mask & 16) != 0)
+          ))
         ORDER BY ds.id
         LIMIT 2000
     ) row),

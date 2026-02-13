@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS hivemind_postgrest_utilities.ranked_post_sort_type CASCADE;
 CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'created', 'muted', 'payout', 'payout_comments');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type)
+CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -33,6 +33,10 @@ BEGIN
             AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
             AND (_post_id = 0 OR hp.id < _post_id)
             AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+            AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
           ORDER BY hp.id DESC
           LIMIT _limit
         )
@@ -91,12 +95,12 @@ BEGIN
 
   IF _limit > 0 THEN
     CASE _sort_type
-      WHEN 'trending' THEN _result = _result || hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'hot' THEN _result = _result || hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
-      WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
+      WHEN 'trending' THEN _result = _result || hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
+      WHEN 'hot' THEN _result = _result || hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
+      WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
+      WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
+      WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
+      WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask);
     END CASE;
   END IF;
 
@@ -106,7 +110,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -137,12 +141,16 @@ BEGIN
         SELECT hp.id 
         FROM hivemind_app.live_posts_view hp
         JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
-        WHERE 
+        WHERE
           hc.name = _tag
           AND NOT hp.is_paidout --use index hive_posts_community_id_is_paidout_idx
           AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -200,7 +208,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -238,6 +246,10 @@ BEGIN
           hc.name = _tag AND NOT hp.is_paidout AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
           AND (_post_id = 0 OR hp.payout + hp.pending_payout < _payout_limit OR (hp.payout + hp.pending_payout = _payout_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -295,7 +307,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -330,6 +342,10 @@ BEGIN
           hc.name = _tag AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ( (hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id ))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -387,7 +403,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -421,6 +437,10 @@ BEGIN
           hc.name = _tag AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -478,7 +498,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -506,7 +526,9 @@ BEGIN
         SELECT
           id,
           author_id,
-          is_pinned
+          is_pinned,
+          community_id,
+          muted_reasons
         FROM hivemind_app.live_posts_view
         WHERE
           community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1)
@@ -520,6 +542,10 @@ BEGIN
         WHERE
           (_post_id = 0 OR hp.id < _post_id)
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.id DESC
         LIMIT _limit
@@ -577,7 +603,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -607,6 +633,10 @@ BEGIN
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id)) --DLN I didn't invert last term, as it seems right, which would mean original was wrong....
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -664,7 +694,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -693,6 +723,10 @@ BEGIN
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
       AND (_post_id = 0 OR hp.sc_trend < __trending_limit OR (hp.sc_trend = __trending_limit AND hp.id < _post_id))
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
     ORDER BY
       hp.sc_trend DESC, hp.id DESC
     LIMIT _limit
@@ -757,7 +791,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -786,6 +820,10 @@ BEGIN
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
       AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
       ORDER BY hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
     )
@@ -850,7 +888,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -884,6 +922,8 @@ BEGIN
           AND (_post_id = 0 OR hp.id < _post_id)
           AND NOT ha.is_grayed
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
         ORDER BY hp.id DESC
         LIMIT _limit
       )
@@ -940,7 +980,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -979,6 +1019,10 @@ BEGIN
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1036,7 +1080,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1073,6 +1117,10 @@ BEGIN
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1130,7 +1178,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1163,6 +1211,10 @@ BEGIN
         WHERE
           hpt.tag_id = _tag_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1220,7 +1272,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1249,6 +1301,10 @@ BEGIN
           AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -1306,7 +1362,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1335,6 +1391,10 @@ BEGIN
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -1392,7 +1452,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1425,6 +1485,8 @@ BEGIN
             hp.community_id = communities.community_id
             AND NOT ha.is_grayed
             AND (_post_id = 0 OR hp.id < _post_id)
+            AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+                OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
           ORDER BY id DESC
           LIMIT _limit
         ) posts
@@ -1484,7 +1546,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1518,6 +1580,10 @@ BEGIN
           AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1575,7 +1641,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1605,6 +1671,10 @@ BEGIN
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1662,7 +1732,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1692,6 +1762,10 @@ BEGIN
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1749,7 +1823,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_trending_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_trending_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_trending_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1782,6 +1856,10 @@ BEGIN
           NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -1839,7 +1917,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_hot_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_hot_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_hot_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1871,6 +1949,10 @@ BEGIN
           NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -1928,7 +2010,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_created_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_created_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_created_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1957,6 +2039,10 @@ BEGIN
           NOT ha.is_grayed
           AND (_post_id = 0 OR hp.id < _post_id)
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.id DESC
         LIMIT _limit
@@ -2014,7 +2100,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_payout_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2052,6 +2138,10 @@ BEGIN
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2109,7 +2199,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2143,6 +2233,10 @@ BEGIN
           NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2200,7 +2294,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_muted_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_muted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_muted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2229,6 +2323,10 @@ BEGIN
         WHERE
           NOT hp.is_paidout AND ha.is_grayed AND (hp.payout + hp.pending_payout) > 0
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
       )
