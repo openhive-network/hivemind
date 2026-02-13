@@ -792,10 +792,11 @@ BEGIN
     WHERE s.op_type_id = 73;
     _ineffective_keys := COALESCE(_ineffective_keys, '{}');
 
-    -- Step 2: Collect all comment ops (type 1) with their original staging ID for ordering
+    -- Step 2: Collect all comment ops (type 1) with INT seq_id for hive_post_op_input
+    -- (HAF operation IDs are BIGINT and overflow hive_post_op_input.seq_id INTEGER)
     CREATE TEMP TABLE _comment_staging ON COMMIT DROP AS
     SELECT
-        s.id AS staging_id,
+        ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
         s.block_num,
         s.block_date,
         s.val->>'author' AS author,
@@ -804,8 +805,7 @@ BEGIN
         s.val->>'parent_permlink' AS parent_permlink,
         s.val AS op_body
     FROM hivemind_app._ops_staging s
-    WHERE s.op_type_id = 1
-    ORDER BY s.id;
+    WHERE s.op_type_id = 1;
 
     -- Results accumulator (used across waves)
     CREATE TEMP TABLE _post_results (
@@ -824,7 +824,7 @@ BEGIN
         SELECT DISTINCT ON (author, permlink)
             author, permlink, parent_author, parent_permlink
         FROM _comment_staging
-        ORDER BY author, permlink, staging_id
+        ORDER BY author, permlink, seq_id
     ) first_parent
     WHERE cs.author = first_parent.author
       AND cs.permlink = first_parent.permlink
@@ -853,16 +853,16 @@ BEGIN
            br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
     FROM hivemind_app.process_root_posts_batch(
         ARRAY(
-            SELECT ROW(cs.staging_id, cs.author, cs.permlink,
+            SELECT ROW(cs.seq_id, cs.author, cs.permlink,
                        ''::VARCHAR, cs.parent_permlink,
                        cs.block_date, _community_support_start_block,
                        cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
             FROM _comment_staging cs
             WHERE cs.parent_author IS NULL OR cs.parent_author = ''
-            ORDER BY cs.staging_id
+            ORDER BY cs.seq_id
         )
     ) br
-    JOIN _comment_staging cs ON cs.staging_id = br.seq_id;
+    JOIN _comment_staging cs ON cs.seq_id = br.seq_id;
 
     -- Step 5: Process comments with wave-based resolution
     FOR _wave IN 1..20 LOOP
@@ -870,7 +870,7 @@ BEGIN
         SELECT count(*) INTO _remaining
         FROM _comment_staging cs
         WHERE cs.parent_author IS NOT NULL AND cs.parent_author != ''
-          AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.staging_id);
+          AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id);
 
         EXIT WHEN _remaining = 0;
 
@@ -882,17 +882,17 @@ BEGIN
                br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
         FROM hivemind_app.process_comments_batch(
             ARRAY(
-                SELECT ROW(cs.staging_id, cs.author, cs.permlink,
+                SELECT ROW(cs.seq_id, cs.author, cs.permlink,
                            cs.parent_author, cs.parent_permlink,
                            cs.block_date, _community_support_start_block,
                            cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
                 FROM _comment_staging cs
                 WHERE cs.parent_author IS NOT NULL AND cs.parent_author != ''
-                  AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.staging_id)
-                ORDER BY cs.staging_id
+                  AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id)
+                ORDER BY cs.seq_id
             )
         ) br
-        JOIN _comment_staging cs ON cs.staging_id = br.seq_id;
+        JOIN _comment_staging cs ON cs.seq_id = br.seq_id;
 
         GET DIAGNOSTICS _processed_count = ROW_COUNT;
         EXIT WHEN _processed_count = 0;
