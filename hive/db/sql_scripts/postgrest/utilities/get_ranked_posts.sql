@@ -35,7 +35,8 @@ BEGIN
             AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
             AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
           ORDER BY hp.id DESC
           LIMIT _limit
         )
@@ -148,7 +149,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -246,7 +248,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -341,7 +344,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -435,7 +439,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -538,7 +543,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.id DESC
         LIMIT _limit
@@ -628,7 +634,8 @@ BEGIN
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id)) --DLN I didn't invert last term, as it seems right, which would mean original was wrong....
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -717,7 +724,8 @@ BEGIN
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
     ORDER BY
       hp.sc_trend DESC, hp.id DESC
     LIMIT _limit
@@ -813,7 +821,8 @@ BEGIN
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
       ORDER BY hp.sc_hot DESC, hp.id DESC
       LIMIT _limit
     )
@@ -1011,7 +1020,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1108,7 +1118,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1201,7 +1212,8 @@ BEGIN
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1290,7 +1302,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -1379,7 +1392,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -1567,7 +1581,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1657,7 +1672,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1747,7 +1763,8 @@ BEGIN
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -1840,7 +1857,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_trend DESC, hp.id DESC
         LIMIT _limit
@@ -1932,7 +1950,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.sc_hot DESC, hp.id DESC
         LIMIT _limit
@@ -2021,7 +2040,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           hp.id DESC
         LIMIT _limit
@@ -2119,7 +2139,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2213,7 +2234,8 @@ BEGIN
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY
           (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
@@ -2302,7 +2324,8 @@ BEGIN
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
-                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)))
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND ha.is_grayed)
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
         ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
         LIMIT _limit
       )
