@@ -1,7 +1,15 @@
 [
   {
     "date": "2016-09-15T19:47:57",
-    "id": "4062415524200649",
+    "id": "4062415528394852",
+    "msg": "error: moderator limit exceeded",
+    "score": 35,
+    "type": "error",
+    "url": "c/hive-171744"
+  },
+  {
+    "date": "2016-09-15T19:47:57",
+    "id": "4062415524200548",
     "msg": "@miners flagged a post - This is a bad post",
     "score": 35,
     "type": "flag_post",
