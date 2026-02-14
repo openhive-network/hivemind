@@ -548,11 +548,9 @@ class DbState:
 
     @classmethod
     def _finish_vote_notifications(cls, db):
-        from hive.indexer.notification_cache import VoteNotificationCache
-
-        time_start = perf_counter()
-        n = VoteNotificationCache.flush_vote_notifications(force=True)
-        log.info("[MASSIVE] flush_vote_notifications executed in %.4fs, flushed %d", perf_counter() - time_start, n)
+        # Vote notifications are now flushed per-batch in Phase 6 via SQL
+        # (flush_vote_notifications_for_blocks). Nothing left to finalize.
+        pass
 
     @classmethod
     def _finish_reputation_notification_scores(cls, db):
