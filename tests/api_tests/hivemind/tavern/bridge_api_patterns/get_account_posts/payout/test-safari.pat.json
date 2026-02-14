@@ -59,11 +59,8 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": true,
+      "gray": false,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "The post was deleted and permlink reused",
