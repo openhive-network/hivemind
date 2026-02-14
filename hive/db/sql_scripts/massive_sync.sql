@@ -314,7 +314,7 @@ BEGIN
     last_ecv AS (
         SELECT DISTINCT ON (voter, author, permlink)
             voter, author, permlink, weight, rshares, block_num,
-            count(*) OVER (PARTITION BY voter, author, permlink) AS num_changes
+            count(*) OVER (PARTITION BY voter, author, permlink) - 1 AS num_changes
         FROM ecv_ops
         ORDER BY voter, author, permlink, id DESC
     ),
@@ -367,7 +367,9 @@ BEGIN
         -- Filter out votes cast before the post was recreated (delete/recreate cycle).
         -- The old Python code removed in-memory votes on delete, preventing stale votes
         -- from being flushed for recreated posts.
-        WHERE vb.block_num >= hp.block_num
+        -- Use block_num_created (not block_num) because block_num is updated on edits,
+        -- which would incorrectly filter out votes cast between creation and edit.
+        WHERE vb.block_num >= hp.block_num_created
     ),
     upserted AS (
         INSERT INTO hivemind_app.hive_votes
