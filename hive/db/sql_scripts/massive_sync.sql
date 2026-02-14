@@ -1608,17 +1608,23 @@ BEGIN
             CONTINUE;
         END IF;
 
-        _is_state_action := _action IN ('subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle');
+        -- mutePost/unmutePost are classified as state actions because new child posts
+        -- need to see the parent's muted state during Phase 3 (process_community_post
+        -- checks is_muted on the parent for MUTED_PARENT propagation).
+        _is_state_action := _action IN (
+            'subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle',
+            'mutePost', 'unmutePost'
+        );
 
         -- Phase filtering
         IF _phase = 1 THEN
-            -- Phase 1: ALL state actions (subscribe, setRole, updateProps, etc.)
-            -- These must be applied before posts so that role lookups and community
-            -- metadata are correct during post muting decisions.
+            -- Phase 1: State actions + mute/unmute ops
+            -- These must be applied before posts so that role lookups, community
+            -- metadata, and parent muting are correct during post muting decisions.
             IF NOT _is_state_action THEN CONTINUE; END IF;
         END IF;
         IF _phase = 2 THEN
-            -- Phase 2: ONLY post-targeting ops (mutePost, pinPost, flagPost, etc.)
+            -- Phase 2: ONLY post-targeting ops (pinPost, unpinPost, flagPost)
             IF _is_state_action THEN CONTINUE; END IF;
         END IF;
 
