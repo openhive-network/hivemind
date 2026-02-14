@@ -558,7 +558,7 @@ class DbState:
         with AutoDbDisposer(db, "finish_vote_notifications") as db_mgr:
             time_start = perf_counter()
             last_block = db_mgr.db.query_one(
-                f"SELECT hive.app_get_current_block_num('hivemind_app')"
+                "SELECT hive.app_get_current_block_num('hivemind_app')"
             )
             sql = f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks(1, {last_block})"
             result = db_mgr.db.query_one(sql)

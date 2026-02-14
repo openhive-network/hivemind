@@ -163,6 +163,12 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
         db.query_no_return("COMMIT")
 
+        # Phase 2.5: Community state changes (subscribe, setRole, updateProps, setUserTitle)
+        # Must commit before posts because muting logic depends on community type and member roles
+        db.query_no_return("START TRANSACTION")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1)")
+        db.query_no_return("COMMIT")
+
         # Phase 3: Post/comment processing (must commit before votes/reblogs)
         db.query_no_return("START TRANSACTION")
         post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})")
@@ -179,7 +185,7 @@ class Blocks:
             (Accounts.db, f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()"),
             (Notify.db, f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()"),
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
-            (NotificationCache.db, f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block})"),
+            (NotificationCache.db, f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)"),
         ]
         cls._run_parallel_sql(phase4_tasks)
 
