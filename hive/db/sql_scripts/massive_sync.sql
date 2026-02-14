@@ -20,6 +20,36 @@ DROP INDEX IF EXISTS hivemind_app._ops_staging_block_num_id_idx;
 CREATE INDEX _ops_staging_op_type_id_idx ON hivemind_app._ops_staging (op_type_id);
 CREATE INDEX _ops_staging_block_num_id_idx ON hivemind_app._ops_staging (block_num, id);
 
+-- Persistent unlogged tables for process_posts_from_staging (avoids PL/pgSQL stale OID with temp tables)
+CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._comment_staging (
+    seq_id      INT NOT NULL,
+    is_first    BOOLEAN NOT NULL,
+    block_num   INT NOT NULL,
+    block_date  TIMESTAMP NOT NULL,
+    author      TEXT,
+    permlink    TEXT,
+    parent_author TEXT,
+    parent_permlink TEXT,
+    op_body     JSONB
+);
+
+CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._post_results (
+    seq_id      INT,
+    post_id     INT,
+    is_new_post BOOLEAN,
+    author_id   INT,
+    permlink_id INT,
+    depth       SMALLINT,
+    parent_id   INT,
+    parent_author_id INT,
+    community_id INT,
+    is_post_muted BOOLEAN,
+    muted_reasons INT,
+    block_num   INT,
+    block_date  TIMESTAMP,
+    op_body     JSONB
+);
+
 
 -- ============================================================================
 -- 2. load_ops_staging(_first_block, _last_block)
@@ -785,9 +815,9 @@ DECLARE
     _processed_count INT;
     _remaining INT;
 BEGIN
-    -- Drop leftover temp tables from previous calls (avoids stale OID in PL/pgSQL plan cache)
-    DROP TABLE IF EXISTS _comment_staging;
-    DROP TABLE IF EXISTS _post_results;
+    -- Truncate persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
+    TRUNCATE hivemind_app._comment_staging;
+    TRUNCATE hivemind_app._post_results;
 
     -- Step 1: Collect ineffective delete keys (type 73)
     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
@@ -800,7 +830,7 @@ BEGIN
     -- (HAF operation IDs are BIGINT and overflow hive_post_op_input.seq_id INTEGER)
     -- is_first marks the first occurrence per (author, permlink) — only these go to batch functions.
     -- Subsequent occurrences are edits that need PostDataCache body merging but not re-insertion.
-    CREATE TEMP TABLE _comment_staging AS
+    INSERT INTO hivemind_app._comment_staging (seq_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body)
     SELECT
         ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
         (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
@@ -814,23 +844,14 @@ BEGIN
     FROM hivemind_app._ops_staging s
     WHERE s.op_type_id = 1;
 
-    -- Results accumulator (used across waves)
-    CREATE TEMP TABLE _post_results (
-        seq_id INT, post_id INT, is_new_post BOOLEAN,
-        author_id INT, permlink_id INT, depth SMALLINT,
-        parent_id INT, parent_author_id INT,
-        community_id INT, is_post_muted BOOLEAN, muted_reasons INT,
-        block_num INT, block_date TIMESTAMP, op_body JSONB
-    );
-
     -- Normalize parent_author/parent_permlink for edits (first occurrence determines parent)
-    UPDATE _comment_staging cs
+    UPDATE hivemind_app._comment_staging cs
     SET parent_author = first_parent.parent_author,
         parent_permlink = first_parent.parent_permlink
     FROM (
         SELECT DISTINCT ON (author, permlink)
             author, permlink, parent_author, parent_permlink
-        FROM _comment_staging
+        FROM hivemind_app._comment_staging
         ORDER BY author, permlink, seq_id
     ) first_parent
     WHERE cs.author = first_parent.author
@@ -841,21 +862,21 @@ BEGIN
     -- Step 3: Bulk-insert permlinks and categories
     INSERT INTO hivemind_app.hive_permlink_data (permlink)
     SELECT DISTINCT p FROM (
-        SELECT permlink AS p FROM _comment_staging
+        SELECT permlink AS p FROM hivemind_app._comment_staging
         UNION
-        SELECT parent_permlink AS p FROM _comment_staging WHERE parent_author != ''
+        SELECT parent_permlink AS p FROM hivemind_app._comment_staging WHERE parent_author != ''
     ) sub
     ON CONFLICT DO NOTHING;
 
     INSERT INTO hivemind_app.hive_category_data (category)
     SELECT DISTINCT parent_permlink
-    FROM _comment_staging
+    FROM hivemind_app._comment_staging
     WHERE parent_author IS NULL OR parent_author = ''
     ON CONFLICT (category) DO NOTHING;
 
     -- Step 4: Process root posts via batch function (first-occurrence only to avoid
     -- ON CONFLICT DO UPDATE affecting the same row twice)
-    INSERT INTO _post_results
+    INSERT INTO hivemind_app._post_results
     SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
            br.depth, br.parent_id, br.parent_author_id, br.community_id,
            br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
@@ -865,27 +886,27 @@ BEGIN
                        ''::VARCHAR, cs.parent_permlink,
                        cs.block_date, _community_support_start_block,
                        cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
-            FROM _comment_staging cs
+            FROM hivemind_app._comment_staging cs
             WHERE cs.is_first
               AND (cs.parent_author IS NULL OR cs.parent_author = '')
             ORDER BY cs.seq_id
         )
     ) br
-    JOIN _comment_staging cs ON cs.seq_id = br.seq_id;
+    JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id;
 
     -- Step 5: Process comments with wave-based resolution (first-occurrence only)
     FOR _wave IN 1..20 LOOP
         -- Count unprocessed first-occurrence comments (not yet in results)
         SELECT count(*) INTO _remaining
-        FROM _comment_staging cs
+        FROM hivemind_app._comment_staging cs
         WHERE cs.is_first
           AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
-          AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id);
+          AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id);
 
         EXIT WHEN _remaining = 0;
 
         -- Process batch: pass unprocessed first-occurrence comments only
-        INSERT INTO _post_results
+        INSERT INTO hivemind_app._post_results
         SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
                br.depth, br.parent_id, br.parent_author_id, br.community_id,
                br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
@@ -895,14 +916,14 @@ BEGIN
                            cs.parent_author, cs.parent_permlink,
                            cs.block_date, _community_support_start_block,
                            cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
-                FROM _comment_staging cs
+                FROM hivemind_app._comment_staging cs
                 WHERE cs.is_first
                   AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
-                  AND NOT EXISTS (SELECT 1 FROM _post_results pr WHERE pr.seq_id = cs.seq_id)
+                  AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
                 ORDER BY cs.seq_id
             )
         ) br
-        JOIN _comment_staging cs ON cs.seq_id = br.seq_id;
+        JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id;
 
         GET DIAGNOSTICS _processed_count = ROW_COUNT;
         EXIT WHEN _processed_count = 0;
@@ -910,15 +931,15 @@ BEGIN
 
     -- Step 5b: Generate results for edit ops (is_first = false)
     -- These share post_id and metadata with the first occurrence but have their own op_body
-    INSERT INTO _post_results
+    INSERT INTO hivemind_app._post_results
     SELECT cs.seq_id, pr_first.post_id, false, pr_first.author_id, pr_first.permlink_id,
            pr_first.depth, pr_first.parent_id, pr_first.parent_author_id,
            pr_first.community_id, pr_first.is_post_muted, pr_first.muted_reasons,
            cs.block_num, cs.block_date, cs.op_body
-    FROM _comment_staging cs
-    JOIN _comment_staging cs_first
+    FROM hivemind_app._comment_staging cs
+    JOIN hivemind_app._comment_staging cs_first
         ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
-    JOIN _post_results pr_first ON pr_first.seq_id = cs_first.seq_id
+    JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
     WHERE NOT cs.is_first;
 
     -- Step 6: Process comment_options (type 19) - update hive_posts columns
@@ -970,10 +991,10 @@ BEGIN
     END LOOP;
 
     -- Return all post results
-    RETURN QUERY SELECT * FROM _post_results ORDER BY seq_id;
+    RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
 
-    DROP TABLE IF EXISTS _post_results;
-    DROP TABLE IF EXISTS _comment_staging;
+    -- Tables are truncated at start of next call, no drop needed
+    -- comment_staging is truncated at start of next call
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
