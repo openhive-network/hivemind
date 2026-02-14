@@ -523,7 +523,8 @@ BEGIN
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
         -- Filter out reblogs from before post was recreated (delete/recreate cycle)
-        WHERE d.block_num >= hp.block_num
+        -- Use block_num_created (not block_num) because block_num is updated on edits
+        WHERE d.block_num >= hp.block_num_created
     )
     INSERT INTO hivemind_app.hive_reblogs (blogger_id, post_id, created_at, block_num)
     SELECT blogger_id, post_id, created_at, block_num FROM validated
@@ -1191,8 +1192,14 @@ BEGIN
     UPDATE hivemind_app.hive_posts hp
     SET counter_deleted = 0,
         block_num = r.block_num,
+        block_num_created = r.block_num,
+        created_at = r.block_date,
         active = r.block_date,
         updated_at = r.block_date,
+        payout_at = r.block_date + INTERVAL '7 days',
+        cashout_time = r.block_date + INTERVAL '7 days',
+        sc_hot = hivemind_app.calculate_time_part_of_hot(r.block_date),
+        sc_trend = hivemind_app.calculate_time_part_of_trending(r.block_date),
         is_muted = FALSE,
         muted_reasons = 0
     FROM recreate_ops r
