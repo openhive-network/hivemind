@@ -24,8 +24,10 @@ CREATE INDEX _ops_staging_op_type_id_idx ON hivemind_app._ops_staging (op_type_i
 CREATE INDEX _ops_staging_block_num_id_idx ON hivemind_app._ops_staging (block_num, id);
 
 -- Persistent unlogged tables for process_posts_from_staging (avoids PL/pgSQL stale OID with temp tables)
-CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._comment_staging (
+DROP TABLE IF EXISTS hivemind_app._comment_staging;
+CREATE UNLOGGED TABLE hivemind_app._comment_staging (
     seq_id      INT NOT NULL,
+    staging_id  BIGINT NOT NULL,   -- original _ops_staging.id for delete-create cycle detection
     is_first    BOOLEAN NOT NULL,
     block_num   INT NOT NULL,
     block_date  TIMESTAMP NOT NULL,
@@ -928,6 +930,19 @@ DECLARE
     _wave INT;
     _processed_count INT;
     _remaining INT;
+    -- Step 7b: delete-create cycle handling
+    _delete_create_pairs TEXT[];
+    _after_delete BOOLEAN;
+    _current_pair TEXT;
+    _author_id INT;
+    _permlink_id INT;
+    _parent_id INT;
+    _depth SMALLINT;
+    _community_id INT;
+    _category_id INT;
+    _root_id INT;
+    _is_valid BOOLEAN;
+    _new_post_id INT;
 BEGIN
     -- Truncate persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
     TRUNCATE hivemind_app._comment_staging;
@@ -944,9 +959,10 @@ BEGIN
     -- (HAF operation IDs are BIGINT and overflow hive_post_op_input.seq_id INTEGER)
     -- is_first marks the first occurrence per (author, permlink) — only these go to batch functions.
     -- Subsequent occurrences are edits that need PostDataCache body merging but not re-insertion.
-    INSERT INTO hivemind_app._comment_staging (seq_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body)
+    INSERT INTO hivemind_app._comment_staging (seq_id, staging_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body)
     SELECT
         ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
+        s.id AS staging_id,
         (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
         s.block_num,
         s.block_date,
@@ -1141,9 +1157,32 @@ BEGIN
     FROM co_ops co
     JOIN hivemind_app.hive_accounts ha ON ha.name = co.author
     JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = co.permlink
-    WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id;
+    WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0;
 
-    -- Step 7: Process deletes (type 17), filtering against ineffective set
+    -- Step 7: Process deletes (type 17) and handle delete-create cycles.
+    -- When a post is created, deleted, and re-created within the same batch,
+    -- the old code processes these sequentially: each recreate gets a NEW row with
+    -- a new post_id (so old votes don't carry over). We replicate this by:
+    --   (a) simple deletes: no create follows → just delete as before
+    --   (b) delete-create cycles: iterate ops chronologically, alternating
+    --       delete_hive_post and INSERT of new rows
+
+    -- Identify author/permlink pairs that have delete-create cycles
+    _delete_create_pairs := COALESCE(ARRAY(
+        SELECT DISTINCT (s_del.val->>'author') || '/' || (s_del.val->>'permlink')
+        FROM hivemind_app._ops_staging s_del
+        WHERE s_del.op_type_id = 17
+          AND NOT ((s_del.val->>'author') || '/' || (s_del.val->>'permlink') = ANY(_ineffective_keys))
+          AND EXISTS (
+              SELECT 1 FROM hivemind_app._ops_staging s_cr
+              WHERE s_cr.op_type_id = 1
+                AND s_cr.val->>'author' = s_del.val->>'author'
+                AND s_cr.val->>'permlink' = s_del.val->>'permlink'
+                AND s_cr.id > s_del.id
+          )
+    ), '{}');
+
+    -- (a) Simple deletes: no create follows any delete for this pair
     FOR _rec IN
         SELECT
             s.val->>'author' AS author,
@@ -1153,67 +1192,187 @@ BEGIN
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 17
           AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
     LOOP
         PERFORM hivemind_app.delete_hive_post(
             _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
         );
     END LOOP;
 
-    -- Step 7b: Handle post recreates after deletes within the same batch
-    -- When a post is created, deleted, and re-created in the same batch,
-    -- the delete increments counter_deleted but the second create was treated
-    -- as an edit (is_first=false). We need to reset counter_deleted=0 for posts
-    -- where a comment op exists AFTER the LAST delete for that author/permlink.
-    WITH last_delete_per_post AS (
-        -- Get the LAST (highest op_id) delete per (author, permlink)
-        SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
-            s.val->>'author' AS author,
-            s.val->>'permlink' AS permlink,
-            s.id AS last_delete_op_id
+    -- (b) Delete-create cycles: iterate ALL ops for affected pairs in chronological order.
+    -- Skip creates before any delete (already handled in Steps 3-5).
+    -- On delete: call delete_hive_post.
+    -- On create after a delete: INSERT a new row with fresh post_id.
+    _current_pair := '';
+    _after_delete := FALSE;
+
+    FOR _rec IN
+        SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink,
+               s.op_type_id, s.block_num, s.block_date, s.id AS staging_id
         FROM hivemind_app._ops_staging s
-        WHERE s.op_type_id = 17
-          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
-        ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
-    ),
-    recreate_ops AS (
-        -- Find the FIRST create op that occurs AFTER the LAST delete
-        SELECT DISTINCT ON (ld.author, ld.permlink)
-            ld.author,
-            ld.permlink,
-            s_create.block_num,
-            s_create.block_date
-        FROM last_delete_per_post ld
-        JOIN hivemind_app._ops_staging s_create ON s_create.op_type_id = 1
-            AND s_create.val->>'author' = ld.author
-            AND s_create.val->>'permlink' = ld.permlink
-            AND s_create.id > ld.last_delete_op_id
-        ORDER BY ld.author, ld.permlink, s_create.id ASC
-    )
-    UPDATE hivemind_app.hive_posts hp
-    SET counter_deleted = 0,
-        block_num = r.block_num,
-        block_num_created = r.block_num,
-        created_at = r.block_date,
-        active = r.block_date,
-        updated_at = r.block_date,
-        payout_at = r.block_date + INTERVAL '7 days',
-        cashout_time = r.block_date + INTERVAL '7 days',
-        sc_hot = hivemind_app.calculate_time_part_of_hot(r.block_date),
-        sc_trend = hivemind_app.calculate_time_part_of_trending(r.block_date),
-        is_muted = FALSE,
-        muted_reasons = 0
-    FROM recreate_ops r
-    JOIN hivemind_app.hive_accounts ha ON ha.name = r.author
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = r.permlink
-    WHERE hp.author_id = ha.id
-      AND hp.permlink_id = hpd.id
-      AND hp.counter_deleted > 0
-      -- Find the most recently deleted version (highest counter_deleted)
-      AND hp.counter_deleted = (
-          SELECT MAX(hp2.counter_deleted)
-          FROM hivemind_app.hive_posts hp2
-          WHERE hp2.author_id = ha.id AND hp2.permlink_id = hpd.id
-      );
+        WHERE ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
+          AND s.op_type_id IN (1, 17)
+        ORDER BY (s.val->>'author') || '/' || (s.val->>'permlink'), s.id
+    LOOP
+        -- Reset state when switching to a new (author, permlink) pair
+        IF (_rec.author || '/' || _rec.permlink) != _current_pair THEN
+            _current_pair := _rec.author || '/' || _rec.permlink;
+            _after_delete := FALSE;
+        END IF;
+
+        IF _rec.op_type_id = 17 AND NOT ((_rec.author || '/' || _rec.permlink) = ANY(_ineffective_keys)) THEN
+            -- Delete op
+            PERFORM hivemind_app.delete_hive_post(
+                _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
+            );
+            _after_delete := TRUE;
+
+        ELSIF _rec.op_type_id = 1 AND _after_delete THEN
+            -- Recreate after delete: INSERT a new row with a new post_id.
+            -- Copy structural fields (depth, parent, community, category) from the
+            -- most recently deleted version, use fresh timestamps from the create op.
+            _author_id := hivemind_app.find_account_id(_rec.author, FALSE);
+            SELECT hpd.id INTO _permlink_id
+            FROM hivemind_app.hive_permlink_data hpd WHERE hpd.permlink = _rec.permlink;
+
+            SELECT hp.parent_id, hp.depth, hp.community_id, hp.category_id, hp.root_id, hp.is_valid
+            INTO _parent_id, _depth, _community_id, _category_id, _root_id, _is_valid
+            FROM hivemind_app.hive_posts hp
+            WHERE hp.author_id = _author_id AND hp.permlink_id = _permlink_id
+              AND hp.counter_deleted > 0
+            ORDER BY hp.counter_deleted DESC LIMIT 1;
+
+            INSERT INTO hivemind_app.hive_posts
+                (parent_id, depth, community_id, category_id, root_id,
+                 is_muted, is_valid, author_id, permlink_id,
+                 created_at, updated_at, active, payout_at, cashout_time,
+                 counter_deleted, block_num, block_num_created,
+                 sc_hot, sc_trend, muted_reasons)
+            VALUES
+                (_parent_id, _depth, _community_id, _category_id,
+                 CASE WHEN _depth = 0 THEN 0 ELSE _root_id END,
+                 FALSE, _is_valid, _author_id, _permlink_id,
+                 _rec.block_date, _rec.block_date, _rec.block_date,
+                 _rec.block_date + INTERVAL '7 days', _rec.block_date + INTERVAL '7 days',
+                 0, _rec.block_num, _rec.block_num,
+                 hivemind_app.calculate_time_part_of_hot(_rec.block_date),
+                 hivemind_app.calculate_time_part_of_trending(_rec.block_date), 0)
+            RETURNING id INTO _new_post_id;
+
+            _after_delete := FALSE;
+        END IF;
+        -- If op_type_id = 1 AND NOT _after_delete: edit, already handled in Steps 3-5
+    END LOOP;
+
+    -- Step 7c: Update _post_results for recreated posts.
+    -- Creates that came after the LAST delete should point to the final new post_id
+    -- and the first such create should be marked is_new_post=TRUE (for PostDataCache).
+    IF array_length(_delete_create_pairs, 1) > 0 THEN
+        WITH last_delete_per_pair AS (
+            SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+                s.val->>'author' AS author, s.val->>'permlink' AS permlink,
+                s.id AS last_delete_staging_id
+            FROM hivemind_app._ops_staging s
+            WHERE s.op_type_id = 17
+              AND ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
+              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+        ),
+        final_active AS (
+            -- The newly created active row (counter_deleted=0, highest id) for each pair
+            SELECT DISTINCT ON (ha.name, hpd.permlink)
+                ha.name AS author, hpd.permlink, hp.id AS new_post_id
+            FROM hivemind_app.hive_posts hp
+            JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+            JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
+            WHERE hp.counter_deleted = 0
+              AND EXISTS (
+                  SELECT 1 FROM last_delete_per_pair ld
+                  WHERE ld.author = ha.name AND ld.permlink = hpd.permlink
+              )
+            ORDER BY ha.name, hpd.permlink, hp.id DESC
+        ),
+        first_recreate AS (
+            -- The seq_id of the FIRST create after the LAST delete (mark as is_new_post)
+            SELECT DISTINCT ON (cs.author, cs.permlink)
+                cs.author, cs.permlink, cs.seq_id AS first_seq_id
+            FROM hivemind_app._comment_staging cs
+            JOIN last_delete_per_pair ld ON ld.author = cs.author AND ld.permlink = cs.permlink
+            WHERE cs.staging_id > ld.last_delete_staging_id
+            ORDER BY cs.author, cs.permlink, cs.seq_id
+        )
+        UPDATE hivemind_app._post_results pr
+        SET post_id = fa.new_post_id,
+            is_new_post = (pr.seq_id = fr.first_seq_id)
+        FROM hivemind_app._comment_staging cs
+        JOIN last_delete_per_pair ld ON ld.author = cs.author AND ld.permlink = cs.permlink
+        JOIN final_active fa ON fa.author = cs.author AND fa.permlink = cs.permlink
+        JOIN first_recreate fr ON fr.author = cs.author AND fr.permlink = cs.permlink
+        WHERE cs.seq_id = pr.seq_id
+          AND cs.staging_id > ld.last_delete_staging_id;
+
+        -- Step 7d: Re-process tags for recreated root posts.
+        -- Tags for the old post_id were deleted by delete_hive_post; add them for the new post_id.
+        -- CTEs are re-derived since they were scoped to the Step 7c UPDATE statement.
+        PERFORM hivemind_app.process_tags_batch(
+            ARRAY(
+                WITH ld AS (
+                    SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+                        s.val->>'author' AS author, s.val->>'permlink' AS permlink,
+                        s.id AS last_delete_staging_id
+                    FROM hivemind_app._ops_staging s
+                    WHERE s.op_type_id = 17
+                      AND ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
+                      AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+                    ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+                ),
+                fa AS (
+                    SELECT DISTINCT ON (ha.name, hpd.permlink)
+                        ha.name AS author, hpd.permlink, hp.id AS new_post_id
+                    FROM hivemind_app.hive_posts hp
+                    JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+                    JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
+                    WHERE hp.counter_deleted = 0
+                      AND EXISTS (SELECT 1 FROM ld WHERE ld.author = ha.name AND ld.permlink = hpd.permlink)
+                    ORDER BY ha.name, hpd.permlink, hp.id DESC
+                )
+                SELECT ROW(
+                    fa.new_post_id,
+                    sub.tag_val::VARCHAR,
+                    TRUE
+                )::hivemind_app.post_tag_input
+                FROM fa
+                JOIN hivemind_app.hive_posts hp ON hp.id = fa.new_post_id AND hp.depth = 0
+                JOIN ld ON ld.author = fa.author AND ld.permlink = fa.permlink
+                CROSS JOIN LATERAL (
+                    SELECT unnest(
+                        COALESCE(
+                            ARRAY(
+                                SELECT jsonb_array_elements_text(parsed.md->'tags')
+                                FROM (
+                                    SELECT hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS md
+                                    FROM hivemind_app._comment_staging cs
+                                    WHERE cs.author = fa.author AND cs.permlink = fa.permlink
+                                      AND cs.staging_id > ld.last_delete_staging_id
+                                    ORDER BY cs.seq_id DESC LIMIT 1
+                                ) parsed
+                                WHERE parsed.md IS NOT NULL
+                                  AND parsed.md->'tags' IS NOT NULL
+                                  AND jsonb_typeof(parsed.md->'tags') = 'array'
+                            ),
+                            '{}'::TEXT[]
+                        )
+                        ||
+                        ARRAY[(SELECT cs2.parent_permlink
+                               FROM hivemind_app._comment_staging cs2
+                               WHERE cs2.author = fa.author AND cs2.permlink = fa.permlink
+                                 AND cs2.is_first LIMIT 1)]
+                    ) AS tag_val
+                ) sub
+                WHERE sub.tag_val IS NOT NULL
+            )
+        );
+    END IF;
 
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'
