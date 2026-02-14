@@ -9,7 +9,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": "4060705867169805",
+    "id": "4060705867169808",
     "msg": "@roadscape subscribed to World News",
     "score": 55,
     "type": "subscribe",
@@ -17,7 +17,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": "4060705867169800",
+    "id": "4060705867169803",
     "msg": "@gtg subscribed to World News",
     "score": 52,
     "type": "subscribe",
@@ -25,7 +25,7 @@
   },
   {
     "date": "2016-09-15T18:01:48",
-    "id": "4060705867169795",
+    "id": "4060705867169798",
     "msg": "@test-safari subscribed to World News",
     "score": 25,
     "type": "subscribe",
@@ -33,7 +33,7 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701840637953",
+    "id": "4060701840637959",
     "msg": "@test-safari subscribed to World News",
     "score": 25,
     "type": "subscribe",
@@ -41,7 +41,7 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701832249356",
+    "id": "4060701832249350",
     "msg": "@test-safari flagged a post - This is not a kitten..",
     "score": 35,
     "type": "flag_post",
@@ -50,9 +50,17 @@
   {
     "date": "2016-09-15T18:01:33",
     "id": "4060701807083521",
-    "msg": "@test-safari set properties {\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\",\"settings\":{\"streams\":[[\"Say It Here\",\"0\",[\"member\"],[\"member\"]],[\"About\",\"\\/about\",null,null],[\"Visit Community\",\"\\/created\",null,null]],\"emotes\":{},\"avatar_url\":\"http:\\/\\/example.com\",\"cover_url\":\"http:\\/\\/exa.com\"}}",
+    "msg": "@test-safari set properties {\"about\": \"A place for major news from around the world.\", \"title\": \"World News\", \"is_nsfw\": true, \"settings\": {\"emotes\": {}, \"streams\": [[\"Say It Here\", \"0\", [\"member\"], [\"member\"]], [\"About\", \"/about\", null, null], [\"Visit Community\", \"/created\", null, null]], \"cover_url\": \"http://exa.com\", \"avatar_url\": \"http://example.com\"}, \"flag_text\": \"\", \"description\": \"\"}",
     "score": 35,
     "type": "set_props",
+    "url": "c/hive-135485"
+  },
+  {
+    "date": "2016-09-15T18:01:30",
+    "id": "4060701031137282",
+    "msg": "error: cant modify owner role",
+    "score": 35,
+    "type": "error",
     "url": "c/hive-135485"
   },
   {

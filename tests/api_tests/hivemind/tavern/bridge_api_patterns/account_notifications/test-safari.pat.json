@@ -1,21 +1,5 @@
 [
   {
-    "date": "2016-09-15T19:47:48",
-    "id": "4062413112475650",
-    "msg": "error: post does not belong to a community",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-198723"
-  },
-  {
-    "date": "2016-09-15T19:47:48",
-    "id": "4062413112475649",
-    "msg": "error: post does not exists blocktrades/elephant01",
-    "score": 35,
-    "type": "error",
-    "url": "c/hive-135485"
-  },
-  {
     "date": "2016-09-15T18:02:03",
     "id": "4060709897895946",
     "msg": "@alice replied to your post",
@@ -173,7 +157,7 @@
     "msg": "@agartha reblogged your post",
     "score": 25,
     "type": "reblog",
-    "url": "@test-safari/reblogged-and-edited"
+    "url": "@test-safari/reblogged-and-recreated"
   },
   {
     "date": "2016-09-15T18:01:42",
@@ -181,7 +165,23 @@
     "msg": "@agartha reblogged your post",
     "score": 25,
     "type": "reblog",
-    "url": "@test-safari/reblogged-and-recreated"
+    "url": "@test-safari/reblogged-and-edited"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704239779854",
+    "msg": "@test-safari pinned your post",
+    "score": 35,
+    "type": "pin_post",
+    "url": "@test-safari/secrets5"
+  },
+  {
+    "date": "2016-09-15T18:01:42",
+    "id": "4060704239779853",
+    "msg": "@test-safari pinned your post",
+    "score": 35,
+    "type": "pin_post",
+    "url": "@test-safari/secrets4"
   },
   {
     "date": "2016-09-15T18:01:39",
@@ -264,8 +264,48 @@
     "url": "@alice/comment-to-please-comment-hive1"
   },
   {
+    "date": "2016-09-15T18:01:39",
+    "id": "4060703430279172",
+    "msg": "@test-safari unmuted your post - secrets1 are a spam, but I love them",
+    "score": 35,
+    "type": "unmute_post",
+    "url": "@test-safari/secrets2"
+  },
+  {
+    "date": "2016-09-15T18:01:39",
+    "id": "4060703426084869",
+    "msg": "@test-safari muted your post - Test",
+    "score": 35,
+    "type": "mute_post",
+    "url": "@test-safari/muted-and-edited"
+  },
+  {
+    "date": "2016-09-15T18:01:39",
+    "id": "4060703426084867",
+    "msg": "@test-safari muted your post - secret5 are a spam",
+    "score": 35,
+    "type": "mute_post",
+    "url": "@test-safari/secrets5"
+  },
+  {
+    "date": "2016-09-15T18:01:39",
+    "id": "4060703426084866",
+    "msg": "@test-safari muted your post - secrets2 are a spam",
+    "score": 35,
+    "type": "mute_post",
+    "url": "@test-safari/secrets2"
+  },
+  {
+    "date": "2016-09-15T18:01:39",
+    "id": "4060703426084865",
+    "msg": "@test-safari muted your post - secrets1 are a spam",
+    "score": 35,
+    "type": "mute_post",
+    "url": "@test-safari/secrets1"
+  },
+  {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443664",
+    "id": "4060701836443659",
     "msg": "error: only mods and up can alter roles",
     "score": 35,
     "type": "error",
@@ -273,7 +313,7 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443663",
+    "id": "4060701836443658",
     "msg": "error: cannot promote to or above own rank",
     "score": 35,
     "type": "error",
@@ -281,11 +321,43 @@
   },
   {
     "date": "2016-09-15T18:01:33",
-    "id": "4060701836443662",
+    "id": "4060701836443657",
     "msg": "error: cannot promote to or above own rank",
     "score": 35,
     "type": "error",
     "url": "c/hive-157439"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701828055044",
+    "msg": "@test-safari unpinned your post",
+    "score": 35,
+    "type": "unpin_post",
+    "url": "@test-safari/secrets1"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701823860739",
+    "msg": "@test-safari pinned your post",
+    "score": 35,
+    "type": "pin_post",
+    "url": "@test-safari/secrets1"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701819666434",
+    "msg": "@test-safari unmuted your post - testibgn",
+    "score": 35,
+    "type": "unmute_post",
+    "url": "@test-safari/secrets1"
+  },
+  {
+    "date": "2016-09-15T18:01:33",
+    "id": "4060701815472129",
+    "msg": "@test-safari muted your post - spamming",
+    "score": 35,
+    "type": "mute_post",
+    "url": "@test-safari/secrets1"
   },
   {
     "date": "2016-09-13T18:57:24",
