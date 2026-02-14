@@ -1080,7 +1080,7 @@ BEGIN
             COALESCE((s.val->>'allow_votes')::BOOLEAN, TRUE) AS allow_votes,
             COALESCE((s.val->>'allow_curation_rewards')::BOOLEAN, TRUE) AS allow_curation_rewards,
             COALESCE(
-                (SELECT jsonb_agg(elem->'value'->'beneficiaries')
+                (SELECT elem->'value'->'beneficiaries'
                  FROM jsonb_array_elements(s.val->'extensions') elem
                  WHERE elem->>'type' = 'comment_payout_beneficiaries'
                  LIMIT 1),
@@ -1121,32 +1121,40 @@ BEGIN
     -- When a post is created, deleted, and re-created in the same batch,
     -- the delete increments counter_deleted but the second create was treated
     -- as an edit (is_first=false). We need to reset counter_deleted=0 for posts
-    -- where a comment op exists AFTER the last delete.
-    WITH delete_ops AS (
-        SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink, s.id AS op_id
+    -- where a comment op exists AFTER the LAST delete for that author/permlink.
+    WITH last_delete_per_post AS (
+        -- Get the LAST (highest op_id) delete per (author, permlink)
+        SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+            s.val->>'author' AS author,
+            s.val->>'permlink' AS permlink,
+            s.id AS last_delete_op_id
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 17
           AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+        ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
     ),
     recreate_ops AS (
-        -- Find comment ops that occur AFTER a delete for the same author/permlink
-        SELECT DISTINCT ON (cs.author, cs.permlink)
-            cs.author, cs.permlink, cs.block_date, cs.block_num
-        FROM hivemind_app._comment_staging cs
-        JOIN delete_ops d ON d.author = cs.author AND d.permlink = cs.permlink
-        -- The comment staging seq_id maps to ordinal position; use HAF op id from _ops_staging
+        -- Find the FIRST create op that occurs AFTER the LAST delete
+        SELECT DISTINCT ON (ld.author, ld.permlink)
+            ld.author,
+            ld.permlink,
+            s_create.block_num,
+            s_create.block_date
+        FROM last_delete_per_post ld
         JOIN hivemind_app._ops_staging s_create ON s_create.op_type_id = 1
-            AND s_create.val->>'author' = cs.author
-            AND s_create.val->>'permlink' = cs.permlink
-            AND s_create.id > d.op_id
-        ORDER BY cs.author, cs.permlink, s_create.id DESC
+            AND s_create.val->>'author' = ld.author
+            AND s_create.val->>'permlink' = ld.permlink
+            AND s_create.id > ld.last_delete_op_id
+        ORDER BY ld.author, ld.permlink, s_create.id ASC
     )
     UPDATE hivemind_app.hive_posts hp
     SET counter_deleted = 0,
         block_num = r.block_num,
         active = r.block_date,
         updated_at = r.block_date,
-        created_at = r.block_date
+        created_at = r.block_date,
+        is_muted = FALSE,
+        muted_reasons = 0
     FROM recreate_ops r
     JOIN hivemind_app.hive_accounts ha ON ha.name = r.author
     JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = r.permlink
@@ -1480,7 +1488,8 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_from_staging(
-    _community_support_start_block INT
+    _community_support_start_block INT,
+    _phase INT DEFAULT 0
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
@@ -1493,6 +1502,11 @@ DECLARE
 BEGIN
     -- Process community custom_json ops from staging (type 18, custom_json_id = 'community')
     -- Each action type dispatches to an existing SQL function
+    --
+    -- _phase controls which actions to process:
+    --   0 = all actions (default, used by live sync)
+    --   1 = community state only (subscribe, unsubscribe, setRole, updateProps, setUserTitle)
+    --   2 = post operations only (mutePost, unmutePost, pinPost, unpinPost, flagPost)
 
     FOR _rec IN
         SELECT
@@ -1533,6 +1547,14 @@ BEGIN
         _data := _inner_json->1;
 
         IF jsonb_typeof(_data) != 'object' THEN
+            CONTINUE;
+        END IF;
+
+        -- Phase filtering: skip actions not in the requested phase
+        IF _phase = 1 AND _action NOT IN ('subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle') THEN
+            CONTINUE;
+        END IF;
+        IF _phase = 2 AND _action NOT IN ('mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost') THEN
             CONTINUE;
         END IF;
 
