@@ -152,36 +152,26 @@ class Blocks:
         """
         time_start = OPSM.start()
         db = DbAdapterHolder.common_block_processing_db()
-        num_blocks = last_block - first_block + 1
 
         # Phase 1: Load staging table (single scan of operations_view)
-        phase_start = perf_counter()
         db.query_no_return("START TRANSACTION")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
         db.query_no_return("COMMIT")
-        log.info("[SQL] Phase 1 (load staging): %.4fs", perf_counter() - phase_start)
 
         # Phase 2: Account registration (must commit before posts)
-        phase_start = perf_counter()
         db.query_no_return("START TRANSACTION")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
         db.query_no_return("COMMIT")
-        log.info("[SQL] Phase 2 (accounts): %.4fs", perf_counter() - phase_start)
 
         # Phase 3: Post/comment processing (must commit before votes/reblogs)
-        phase_start = perf_counter()
         db.query_no_return("START TRANSACTION")
         post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})")
         db.query_no_return("COMMIT")
-        log.info("[SQL] Phase 3 (posts): %.4fs, %d results", perf_counter() - phase_start, len(post_results))
 
         # Phase 3b: Process post results for PostDataCache (Python body merging)
-        phase_start = perf_counter()
         cls._process_post_results_for_cache(post_results)
-        log.info("[SQL] Phase 3b (PostDataCache accumulate): %.4fs", perf_counter() - phase_start)
 
         # Phase 4: Parallel entity processing on separate connections
-        phase_start = perf_counter()
         phase4_tasks = [
             (Votes.db, f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})"),
             (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()"),
@@ -192,15 +182,11 @@ class Blocks:
             (NotificationCache.db, f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block})"),
         ]
         cls._run_parallel_sql(phase4_tasks)
-        log.info("[SQL] Phase 4 (parallel entities): %.4fs", perf_counter() - phase_start)
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
-        phase_start = perf_counter()
         PostDataCache.flush()
-        log.info("[SQL] Phase 5 (PostDataCache flush): %.4fs", perf_counter() - phase_start)
 
         # Phase 6: Parallel notification flush
-        phase_start = perf_counter()
         phase6_tasks = [
             (
                 VoteNotificationCache.db,
@@ -220,11 +206,8 @@ class Blocks:
             ),
         ]
         cls._run_parallel_sql(phase6_tasks)
-        log.info("[SQL] Phase 6 (notifications): %.4fs", perf_counter() - phase_start)
 
-        log.info(
-            "[PROCESS MULTI SQL] %d blocks (%d-%d) in %.4fs", num_blocks, first_block, last_block, OPSM.stop(time_start)
-        )
+        OPSM.stop(time_start)
 
     @classmethod
     def process_live_block_sql(cls, first_block: int, last_block: int) -> None:
