@@ -424,20 +424,26 @@ BEGIN
       -- account must match auth
       AND rd.data->>'account' = rd.auth_account;
 
-    -- Process deletes
+    -- Determine final action per (author, permlink, account): last op wins
+    -- This handles create→delete→create within the same batch correctly.
+    CREATE TEMP TABLE _reblog_final ON COMMIT DROP AS
+    SELECT DISTINCT ON (author, permlink, account)
+        id, account, author, permlink, block_date, block_num, is_delete
+    FROM _reblog_ops
+    ORDER BY author, permlink, account, id DESC;
+
+    -- Process deletes: delete entries where ANY delete exists in this batch
+    -- (covers entries from previous batches that need cleanup)
     PERFORM hivemind_app.delete_reblog_feed_cache(
         ro.author::VARCHAR, ro.permlink::VARCHAR, ro.account::VARCHAR
     )
-    FROM _reblog_ops ro
-    WHERE ro.is_delete;
+    FROM (SELECT DISTINCT author, permlink, account FROM _reblog_ops WHERE is_delete) ro;
 
-    -- Process creates: deduplicate per (author, permlink, account), last action wins
+    -- Process creates: only insert where the FINAL action is a create
     WITH deduped AS (
-        SELECT DISTINCT ON (author, permlink, account)
-            account, author, permlink, block_date, block_num
-        FROM _reblog_ops
+        SELECT account, author, permlink, block_date, block_num
+        FROM _reblog_final
         WHERE NOT is_delete
-        ORDER BY author, permlink, account, id DESC
     ),
     validated AS (
         SELECT
