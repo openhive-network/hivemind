@@ -178,9 +178,15 @@ class Blocks:
         # Phase 3b: Process post results for PostDataCache (Python body merging)
         cls._process_post_results_for_cache(post_results)
 
+        # Phase 3.5: Votes + rshares update (must run BEFORE payouts which set is_paidout).
+        # update_posts_rshares() zeroes sc_hot/sc_trend for paidout posts, so it must see
+        # is_paidout=FALSE. Running votes sequentially here avoids deadlocks with payouts.
+        Votes.db.query_no_return("START TRANSACTION")
+        Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
+        Votes.db.query_no_return("COMMIT")
+
         # Phase 4: Parallel entity processing on separate connections
         phase4_tasks = [
-            (Votes.db, f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})"),
             (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()"),
             (Follow.db, f"SELECT * FROM {SCHEMA_NAME}.process_follows_for_blocks({first_block}, {last_block})"),
             (Accounts.db, f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()"),
@@ -192,20 +198,6 @@ class Blocks:
             ),
         ]
         cls._run_parallel_sql(phase4_tasks)
-
-        # Phase 4.5: Update post rshares aggregates after votes AND payouts have committed.
-        # This must run after Phase 4 to avoid deadlocks (both votes and payouts update hive_posts).
-        affected_posts = db.query_col(
-            f"SELECT DISTINCT post_id FROM {SCHEMA_NAME}.hive_votes "
-            f"WHERE block_num BETWEEN {first_block} AND {last_block}"
-        )
-        if affected_posts:
-            db.query_no_return("START TRANSACTION")
-            db.query_no_return(
-                f"SELECT * FROM {SCHEMA_NAME}.update_posts_rshares(:post_ids)",
-                post_ids=affected_posts,
-            )
-            db.query_no_return("COMMIT")
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
         PostDataCache.flush()
