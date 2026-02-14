@@ -2,63 +2,6 @@
   {
     "active_votes": [
       {
-        "rshares": 167583535821,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 66269561540,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 99810337,
-        "voter": "cheetah63"
-      },
-      {
-        "rshares": 99799751,
-        "voter": "cheetah64"
-      },
-      {
-        "rshares": 120614958,
-        "voter": "cheetah65"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay, I have banned @labradorsem.",
-    "category": "food",
-    "children": 0,
-    "created": "2016-09-11T19:29:54",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 234173322407,
-    "parent_author": "anyx",
-    "parent_permlink": "re-labradorsem-diet-apple-pie-with-apples-and-pears-20160911t192856906z",
-    "payout": 0.079,
-    "payout_at": "2016-09-18T19:29:54",
-    "pending_payout_value": "0.079 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-re-labradorsem-diet-apple-pie-with-apples-and-pears-20160911t192856906z-20160911t192943",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: Diet apple pie with apples and pears",
-    "updated": "2016-09-11T19:29:54",
-    "url": "/food/@labradorsem/diet-apple-pie-with-apples-and-pears#@cheetah/re-re-labradorsem-diet-apple-pie-with-apples-and-pears-20160911t192856906z-20160911t192943"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 17230086000,
         "voter": "cheetah"
       },
@@ -561,7 +504,7 @@
       "hide": false,
       "total_votes": 5
     },
-    "title": "RE: Всё ещё баните? Мерзавчики? :)",
+    "title": "RE: \u0412\u0441\u0451 \u0435\u0449\u0451 \u0431\u0430\u043d\u0438\u0442\u0435? \u041c\u0435\u0440\u0437\u0430\u0432\u0447\u0438\u043a\u0438? :)",
     "updated": "2016-09-11T16:44:42",
     "url": "/wtf/@dicov/vsyo-eshyo-banite-merzavchiki#@cheetah/re-vsyo-eshyo-banite-merzavchiki-20160911t164435"
   },
@@ -1158,5 +1101,62 @@
     "title": "RE: I love steem @cheetah true apology",
     "updated": "2016-09-11T08:14:57",
     "url": "/art/@kyleb15/i-love-steem-cheetah-true-apology#@cheetah/re-i-love-steem-cheetah-true-apology-20160911t081449"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 182035444113,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 15897791194,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 141989550,
+        "voter": "cheetah50"
+      },
+      {
+        "rshares": 121050357,
+        "voter": "cheetah48"
+      },
+      {
+        "rshares": 99997502,
+        "voter": "cheetah49"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Okay, I have banned @yanik.",
+    "category": "creative",
+    "children": 0,
+    "created": "2016-09-11T07:33:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 198296272716,
+    "parent_author": "predator",
+    "parent_permlink": "re-yanik-girl-painting-20160911t073141227z",
+    "payout": 0.061,
+    "payout_at": "2016-09-18T07:33:18",
+    "pending_payout_value": "0.061 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-yanik-girl-painting-20160911t073141227z-20160911t073308",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "RE: Girl Painting",
+    "updated": "2016-09-11T07:33:18",
+    "url": "/creative/@yanik/girl-painting#@cheetah/re-re-yanik-girl-painting-20160911t073141227z-20160911t073308"
   }
 ]

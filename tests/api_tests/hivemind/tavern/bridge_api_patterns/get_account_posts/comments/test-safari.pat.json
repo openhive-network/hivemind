@@ -23,8 +23,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-first-post-hive-3",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -59,8 +59,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-first-post-hive-2",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -99,8 +99,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-first-post-hive-1",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -135,12 +135,15 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-second-post-hive3",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: Hello x2",
@@ -171,12 +174,15 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-second-post-hive2",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: Hello x2",
@@ -211,12 +217,15 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-My-second-post-hive1",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
+      "muted_reasons": [
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: Hello x2",
@@ -259,8 +268,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-mikerano-i-need-an-explanation-steemit-repost-20160913t183724659z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -299,8 +308,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-test-safari-re-pioner-testing-steem-20160912t195500875z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -339,8 +348,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-pioner-testing-steem-20160912t195124160z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

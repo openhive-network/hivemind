@@ -1114,6 +1114,48 @@ BEGIN
         )
     );
 
+    -- Step 5e: Process tags for EDITED root posts (last edit overrides creation tags).
+    -- When a root post is created and then edited within the same batch, Step 5d only
+    -- processes the first occurrence's tags. If the edit changes json_metadata.tags, those
+    -- changes are lost. The old Python code processed each edit's tags via _split_into_passes,
+    -- so subsequent passes overwrote the creation's tags via process_tags_batch(is_new_post=false).
+    -- Here we process the LAST occurrence's tags for posts that have edits.
+    PERFORM hivemind_app.process_tags_batch(
+        ARRAY(
+            SELECT ROW(
+                base.post_id,
+                tags.tag_val::VARCHAR,
+                false  -- is_new_post = false so deleted_tags CTE removes stale tags
+            )::hivemind_app.post_tag_input
+            FROM (
+                SELECT pr.post_id,
+                       cs_first.parent_permlink,
+                       hivemind_app.safe_parse_jsonb(cs_last.op_body->>'json_metadata') AS parsed_md
+                FROM hivemind_app._comment_staging cs_first
+                JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
+                JOIN LATERAL (
+                    SELECT cs2.op_body
+                    FROM hivemind_app._comment_staging cs2
+                    WHERE cs2.author = cs_first.author
+                      AND cs2.permlink = cs_first.permlink
+                      AND NOT cs2.is_first
+                    ORDER BY cs2.seq_id DESC
+                    LIMIT 1
+                ) cs_last ON true
+                WHERE cs_first.is_first
+                  AND (cs_first.parent_author IS NULL OR cs_first.parent_author = '')
+            ) base,
+            LATERAL (
+                SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
+                WHERE base.parsed_md IS NOT NULL
+                  AND base.parsed_md->'tags' IS NOT NULL
+                  AND jsonb_typeof(base.parsed_md->'tags') = 'array'
+                UNION ALL
+                SELECT base.parent_permlink
+            ) tags
+        )
+    );
+
     -- Step 6: Process comment_options (type 19) - update hive_posts columns
     WITH co_ops AS (
         SELECT
