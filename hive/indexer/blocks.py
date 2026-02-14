@@ -163,20 +163,11 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
         db.query_no_return("COMMIT")
 
-        # Get the minimum post op ID from staging to use as cutoff for community state ops.
-        # Community state changes (subscribe, setRole, updateProps) that occur BEFORE the first
-        # post op are processed in Phase 2.5. Those that come AFTER are deferred to Phase 4
-        # to preserve operation ordering (e.g., a community type change AFTER posts shouldn't
-        # retroactively mute those posts).
-        min_post_op_id = (
-            db.query_one(f"SELECT COALESCE(MIN(id), 0) FROM {SCHEMA_NAME}._ops_staging WHERE op_type_id = 1") or 0
-        )
-
-        # Phase 2.5: Community state changes that occur BEFORE the first post op
+        # Phase 2.5: Community state changes (subscribe, setRole, updateProps, etc.)
+        # ALL state actions must be committed before posts, so that role lookups and
+        # community metadata are correct during post muting decisions.
         db.query_no_return("START TRANSACTION")
-        db.query_no_return(
-            f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1, {min_post_op_id})"
-        )
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1)")
         db.query_no_return("COMMIT")
 
         # Phase 3: Post/comment processing (must commit before votes/reblogs)
@@ -197,7 +188,7 @@ class Blocks:
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
             (
                 NotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2, {min_post_op_id})",
+                f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)",
             ),
         ]
         cls._run_parallel_sql(phase4_tasks)
