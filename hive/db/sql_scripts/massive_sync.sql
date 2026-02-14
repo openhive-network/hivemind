@@ -73,7 +73,18 @@ CREATE OR REPLACE FUNCTION hivemind_app.safe_parse_jsonb(_text TEXT)
 RETURNS JSONB AS $function$
 BEGIN
     IF _text IS NULL THEN RETURN NULL; END IF;
-    RETURN _text::jsonb;
+    -- The ->> operator resolves JSON escapes (\n → literal newline, \t → literal tab, etc.)
+    -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
+    -- Re-escape them so the text is valid JSON again.
+    RETURN REPLACE(
+        REPLACE(
+            REPLACE(
+                REPLACE(
+                    REPLACE(_text, E'\b', '\b'),
+                E'\f', '\f'),
+            E'\n', '\n'),
+        E'\r', '\r'),
+    E'\t', '\t')::jsonb;
 EXCEPTION WHEN OTHERS THEN
     RETURN NULL;
 END
@@ -236,6 +247,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_votes_from_staging(
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
+    _affected_post_ids INT[];
 BEGIN
     -- Process vote ops (type 0) and effective_comment_vote ops (type 72)
     -- from the staging table.
@@ -383,13 +395,16 @@ BEGIN
           AND hivemind_app.hive_votes.permlink_id = EXCLUDED.permlink_id
         RETURNING post_id
     )
-    SELECT count(*)
-    INTO _count
+    SELECT count(*), array_agg(DISTINCT post_id)
+    INTO _count, _affected_post_ids
     FROM upserted;
 
-    -- NOTE: update_posts_rshares() is NOT called here to avoid deadlocks
-    -- with process_payouts_from_staging() which also updates hive_posts.
-    -- The caller (blocks.py) runs update_posts_rshares() after Phase 4 completes.
+    -- Update rshares aggregates (sc_hot, sc_trend, etc.) for affected posts.
+    -- This MUST run before payouts set is_paidout=TRUE, because update_posts_rshares
+    -- zeroes sc_hot/sc_trend for paidout posts.
+    IF _affected_post_ids IS NOT NULL THEN
+        PERFORM hivemind_app.update_posts_rshares(_affected_post_ids);
+    END IF;
 
     DROP TABLE IF EXISTS _vote_batch;
 
@@ -1544,13 +1559,6 @@ BEGIN
     --       Must be committed before posts so role/metadata lookups are correct
     --   2 = post-targeting ops only (mutePost, unmutePost, pinPost, unpinPost, flagPost)
 
-    -- Debug: count total community ops in staging for this phase
-    RAISE WARNING 'process_community_from_staging: phase=% start_block=% community_ops_in_staging=%',
-        _phase, _community_support_start_block,
-        (SELECT count(*) FROM hivemind_app._ops_staging s
-         WHERE s.op_type_id = 18 AND (s.val->>'id') = 'community'
-           AND s.block_num > _community_support_start_block);
-
     FOR _rec IN
         SELECT
             s.id,
@@ -1574,12 +1582,10 @@ BEGIN
         END IF;
         _auth_account := _val->'required_posting_auths'->>0;
 
-        -- Parse inner JSON
-        BEGIN
-            _inner_json := (_val->>'json')::jsonb;
-        EXCEPTION WHEN OTHERS THEN
-            CONTINUE;
-        END;
+        -- Parse inner JSON (use safe_parse_jsonb to handle control characters
+        -- that ->> resolves from JSON escapes like \n → literal newline)
+        _inner_json := hivemind_app.safe_parse_jsonb(_val->>'json');
+        IF _inner_json IS NULL THEN CONTINUE; END IF;
 
         -- Must be array of length 2: ['action', {data}]
         IF jsonb_typeof(_inner_json) != 'array' OR jsonb_array_length(_inner_json) != 2 THEN
