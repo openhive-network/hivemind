@@ -65,7 +65,7 @@
   },
   {
     "date": "2016-09-15T16:25:21",
-    "id": "4059152456351755",
+    "id": "4059152456351746",
     "msg": "@bacchist voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -89,7 +89,7 @@
   },
   {
     "date": "2016-09-15T15:40:15",
-    "id": "4058426070007812",
+    "id": "4058426070007814",
     "msg": "@stellabelle voted on your post ($0.98)",
     "score": 50,
     "type": "vote",
@@ -97,7 +97,7 @@
   },
   {
     "date": "2016-09-15T15:38:30",
-    "id": "4058397867507714",
+    "id": "4058397867507713",
     "msg": "@stellabelle replied to your comment",
     "score": 65,
     "type": "reply_comment",
@@ -113,7 +113,7 @@
   },
   {
     "date": "2016-09-15T14:44:15",
-    "id": "4057524126875653",
+    "id": "4057524126875652",
     "msg": "@schro voted on your post ($0.05)",
     "score": 25,
     "type": "vote",
@@ -137,7 +137,7 @@
   },
   {
     "date": "2016-09-15T14:15:09",
-    "id": "4057055438569475",
+    "id": "4057055438569474",
     "msg": "@pfunk voted on your post ($0.33)",
     "score": 50,
     "type": "vote",
@@ -161,7 +161,7 @@
   },
   {
     "date": "2016-09-15T13:58:03",
-    "id": "4056780007014401",
+    "id": "4056780007014402",
     "msg": "@beanz replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -169,7 +169,7 @@
   },
   {
     "date": "2016-09-15T13:57:42",
-    "id": "4056774386647046",
+    "id": "4056774386647044",
     "msg": "@demotruk voted on your post ($0.05)",
     "score": 25,
     "type": "vote",
@@ -345,7 +345,7 @@
   },
   {
     "date": "2016-09-14T20:15:48",
-    "id": "4039671273226241",
+    "id": "4039671273226242",
     "msg": "@james-show replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -432,16 +432,8 @@
     "url": "@timcliff/20-questions-for-dan-and-ned-community-participation-game"
   },
   {
-    "date": "2016-09-14T11:16:33",
-    "id": "4030986044047361",
-    "msg": "@beanz replied to your comment",
-    "score": 53,
-    "type": "reply_comment",
-    "url": "@beanz/re-dantheman-re-arcange-the-end-of-steem-cpu-mining-update-2-20160914t022436008z"
-  },
-  {
     "date": "2016-09-14T09:12:51",
-    "id": "4028993732870150",
+    "id": "4028993732870154",
     "msg": "@senseiteekay voted on your post ($0.15)",
     "score": 50,
     "type": "vote",
@@ -449,7 +441,7 @@
   },
   {
     "date": "2016-09-14T09:11:12",
-    "id": "4028967157760004",
+    "id": "4028967157760002",
     "msg": "@senseiteekay voted on your post ($0.17)",
     "score": 50,
     "type": "vote",
@@ -561,7 +553,7 @@
   },
   {
     "date": "2016-09-13T23:51:06",
-    "id": "4019946115825667",
+    "id": "4019946115825666",
     "msg": "@albensilverberg voted on your post ($0.38)",
     "score": 50,
     "type": "vote",
@@ -581,14 +573,6 @@
     "msg": "@smooth mentioned you and 1 others",
     "score": 59,
     "type": "mention",
-    "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
-  },
-  {
-    "date": "2016-09-13T23:30:42",
-    "id": "4019617534050305",
-    "msg": "@smooth replied to your comment",
-    "score": 59,
-    "type": "reply_comment",
     "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
   },
   {
@@ -657,7 +641,7 @@
   },
   {
     "date": "2016-09-13T17:44:54",
-    "id": "4014048051986437",
+    "id": "4014048051986436",
     "msg": "@samether voted on your post ($0.03)",
     "score": 25,
     "type": "vote",
@@ -673,7 +657,7 @@
   },
   {
     "date": "2016-09-13T16:50:27",
-    "id": "4013171073351688",
+    "id": "4013171073351684",
     "msg": "@masteryoda voted on your post ($0.17)",
     "score": 50,
     "type": "vote",
@@ -694,6 +678,14 @@
     "score": 63,
     "type": "reply_comment",
     "url": "@masteryoda/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t165008420z"
+  },
+  {
+    "date": "2016-09-13T16:40:27",
+    "id": "4013009995300865",
+    "msg": "@shenanigator replied to your comment",
+    "score": 53,
+    "type": "reply_comment",
+    "url": "@shenanigator/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t163845836z"
   },
   {
     "date": "2016-09-13T16:33:42",
@@ -737,7 +729,7 @@
   },
   {
     "date": "2016-09-13T15:52:45",
-    "id": "4012241749803012",
+    "id": "4012241749803014",
     "msg": "@will-zewe voted on your post ($0.04)",
     "score": 25,
     "type": "vote",
@@ -798,5 +790,13 @@
     "score": 52,
     "type": "mention",
     "url": "@strangerarray/steemit-time-of-death-scheduled-tue-13-sep-2016-15-00-00-ut"
+  },
+  {
+    "date": "2016-09-13T12:59:48",
+    "id": "4009456190881793",
+    "msg": "@wadepaterson mentioned you and 19 others",
+    "score": 55,
+    "type": "mention",
+    "url": "@wadepaterson/20-questions-with-andrarchy"
   }
 ]
