@@ -236,7 +236,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_votes_from_staging(
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
-    _affected_post_ids INT[];
 BEGIN
     -- Process vote ops (type 0) and effective_comment_vote ops (type 72)
     -- from the staging table.
@@ -384,16 +383,13 @@ BEGIN
           AND hivemind_app.hive_votes.permlink_id = EXCLUDED.permlink_id
         RETURNING post_id
     )
-    SELECT count(*), array_agg(DISTINCT post_id)
-    INTO _count, _affected_post_ids
+    SELECT count(*)
+    INTO _count
     FROM upserted;
 
-    -- Update post rshares aggregates (vote_rshares, abs_rshares, sc_hot, sc_trend,
-    -- total_votes, net_votes) for all posts affected by this batch.
-    -- The old Python code called update_posts_rshares() after every vote flush.
-    IF _affected_post_ids IS NOT NULL THEN
-        PERFORM hivemind_app.update_posts_rshares(_affected_post_ids);
-    END IF;
+    -- NOTE: update_posts_rshares() is NOT called here to avoid deadlocks
+    -- with process_payouts_from_staging() which also updates hive_posts.
+    -- The caller (blocks.py) runs update_posts_rshares() after Phase 4 completes.
 
     DROP TABLE IF EXISTS _vote_batch;
 
@@ -1330,6 +1326,10 @@ BEGIN
             _props := _data->'props';
             IF _props IS NULL OR jsonb_typeof(_props) != 'object' THEN RETURN _counter_in; END IF;
             SELECT * INTO _result FROM hivemind_app.update_community_props(_actor_id, _community_id, _props);
+            IF NOT _result.success THEN
+                RAISE WARNING 'updateProps failed: community=% actor=% actor_id=% community_id=% error=%',
+                    _community_name, _auth_account, _actor_id, _community_id, _result.error_message;
+            END IF;
             -- Notify team on success
             IF _result.success AND _block_num > _notification_first_block THEN
                 SELECT hivemind_app._community_notify_team(
@@ -1543,6 +1543,13 @@ BEGIN
     --   1 = ALL state ops (subscribe, unsubscribe, setRole, updateProps, setUserTitle)
     --       Must be committed before posts so role/metadata lookups are correct
     --   2 = post-targeting ops only (mutePost, unmutePost, pinPost, unpinPost, flagPost)
+
+    -- Debug: count total community ops in staging for this phase
+    RAISE WARNING 'process_community_from_staging: phase=% start_block=% community_ops_in_staging=%',
+        _phase, _community_support_start_block,
+        (SELECT count(*) FROM hivemind_app._ops_staging s
+         WHERE s.op_type_id = 18 AND (s.val->>'id') = 'community'
+           AND s.block_num > _community_support_start_block);
 
     FOR _rec IN
         SELECT
