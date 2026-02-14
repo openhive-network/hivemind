@@ -1115,7 +1115,7 @@ BEGIN
             hp.id AS post_id,
             hv.rshares,
             hivemind_app.calculate_value_of_vote_on_post(
-                hp.payout + hp.pending_payout, hp.rshares, hv.rshares
+                hp.payout + hp.pending_payout, hp.vote_rshares, hv.rshares
             ) AS vote_value,
             hivemind_app.calculate_notify_vote_score(
                 hp.payout + hp.pending_payout, hp.abs_rshares, hv.rshares
