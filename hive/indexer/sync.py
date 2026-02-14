@@ -283,7 +283,9 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            assert is_superuser, (
+                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            )
 
     @staticmethod
     def _show_info(database: Db) -> None:
@@ -301,6 +303,8 @@ class SyncHiveDb:
         show_app_version(log, blocks_info, patch_level_info)
 
     def print_summary(self):
+        import json as json_module
+
         if SyncHiveDb.time_start is None:
             return
 
@@ -326,6 +330,20 @@ class SyncHiveDb:
                 self.rate['min_to'],
             )
         log.info("=== TOTAL STATS ===")
+
+        log.info("=== SYNC_TIMING_JSON ===")
+        log.info(
+            json_module.dumps(
+                {
+                    "elapsed_s": round(stop, 3),
+                    "waiting_s": round(wtm, 3),
+                    "flushing_s": round(ftm, 3),
+                    "ops_s": round(otm, 3),
+                }
+            )
+        )
+        log.info("=== SYNC_TIMING_JSON ===")
+
         self.rate = {}
 
     def _consume_massive_blocks_sql(self, lbound, ubound) -> int:

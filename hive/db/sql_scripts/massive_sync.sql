@@ -55,6 +55,13 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._post_results (
     op_body     JSONB
 );
 
+-- Indexes on persistent staging tables for wave loop performance
+DROP INDEX IF EXISTS hivemind_app._post_results_seq_id_idx;
+CREATE INDEX _post_results_seq_id_idx ON hivemind_app._post_results (seq_id);
+
+DROP INDEX IF EXISTS hivemind_app._comment_staging_author_permlink_idx;
+CREATE INDEX _comment_staging_author_permlink_idx ON hivemind_app._comment_staging (author, permlink);
+
 
 -- Staging table for follow notification events (populated by process_follows_for_blocks,
 -- read by flush_follow_notifications_for_blocks). Tracks individual follow events
@@ -105,18 +112,26 @@ BEGIN
     TRUNCATE hivemind_app._follow_notification_events;
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
+    WITH block_dates AS (
+        -- Single scan of blocks_view; lag() gives us the previous block's date
+        -- without a second join. Include _first_block - 1 so that lag() has a
+        -- predecessor for the first block in the range.
+        SELECT num, created_at,
+               COALESCE(lag(created_at) OVER (ORDER BY num), created_at) AS prev_date
+        FROM hivemind_app.blocks_view
+        WHERE num BETWEEN (_first_block - 1) AND _last_block
+    )
     SELECT ho.id, ho.block_num,
            -- Old Python used _head_block_date (previous block's date) for regular ops,
            -- but the current block's date for virtual ops (payouts processed in _process_vops_flat
            -- received date=block_dates[block_num]). Match that behavior.
            CASE WHEN ho.op_type_id >= 50
-               THEN hb.created_at
-               ELSE COALESCE(hb_prev.created_at, hb.created_at)
+               THEN bd.created_at
+               ELSE bd.prev_date
            END AS block_date,
            ho.op_type_id, ho.body->'value'
     FROM hivemind_app.operations_view ho
-    JOIN hivemind_app.blocks_view hb ON hb.num = ho.block_num
-    LEFT JOIN hivemind_app.blocks_view hb_prev ON hb_prev.num = ho.block_num - 1
+    JOIN block_dates bd ON bd.num = ho.block_num
     WHERE ho.block_num BETWEEN _first_block AND _last_block
       AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43,51,53,61,72,73)
       AND (ho.op_type_id != 18
@@ -125,7 +140,8 @@ BEGIN
             WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
         ));
 
-    ANALYZE hivemind_app._ops_staging;
+    -- Partial ANALYZE: skip the expensive val JSONB column
+    ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
