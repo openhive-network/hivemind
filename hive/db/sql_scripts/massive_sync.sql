@@ -1100,7 +1100,7 @@ BEGIN
     INSERT INTO hivemind_app.hive_notification_cache
     (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
     SELECT
-        hivemind_app.notification_id(hn.last_update, 17, hn.counter) AS id,
+        hivemind_app.notification_id(hn.last_update, 17, hn.counter::INT) AS id,
         hn.block_num, 17, hn.last_update, hn.src, hn.dst, hn.post_id, hn.post_id,
         hn.score,
         hivemind_app.format_vote_value_payload(hn.vote_value),
