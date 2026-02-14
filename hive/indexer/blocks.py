@@ -144,9 +144,12 @@ class Blocks:
         Phases:
           1. Load staging table (single scan of operations_view)
           2. Account registration (must commit before posts)
+          2.5. Community state changes (subscribe, setRole, updateProps)
           3. Post/comment processing (must commit before votes/reblogs)
+          3a. Community post-targeting ops (mutePost, unmutePost, pinPost) + mute propagation
           3b. Process post results for PostDataCache (Python body merging)
-          4. Parallel entity processing (votes, reblogs, follows, etc.)
+          3.5. Votes + rshares update
+          4. Parallel entity processing (reblogs, follows, payouts, etc.)
           5. PostDataCache flush
           6. Parallel notification flush
         """
@@ -175,6 +178,14 @@ class Blocks:
         post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})")
         db.query_no_return("COMMIT")
 
+        # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
+        # Must run AFTER posts exist (Phase 3) so the UPDATE can find them.
+        # Then propagate MUTED_PARENT to children of newly-muted posts.
+        db.query_no_return("START TRANSACTION")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.propagate_muted_parent_for_batch({first_block}, {last_block})")
+        db.query_no_return("COMMIT")
+
         # Phase 3b: Process post results for PostDataCache (Python body merging)
         cls._process_post_results_for_cache(post_results)
 
@@ -192,10 +203,6 @@ class Blocks:
             (Accounts.db, f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()"),
             (Notify.db, f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()"),
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
-            (
-                NotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)",
-            ),
         ]
         cls._run_parallel_sql(phase4_tasks)
 
