@@ -931,14 +931,6 @@ DECLARE
     _delete_create_pairs TEXT[];
     _after_delete BOOLEAN;
     _current_pair TEXT;
-    _author_id INT;
-    _permlink_id INT;
-    _parent_id INT;
-    _depth SMALLINT;
-    _community_id INT;
-    _category_id INT;
-    _root_id INT;
-    _is_valid BOOLEAN;
     _new_post_id INT;
 BEGIN
     -- Truncate persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
@@ -1069,14 +1061,17 @@ BEGIN
     JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
     WHERE NOT cs.is_first;
 
-    -- Step 5c: Update updated_at for edit ops
-    -- Edits (is_first=false) don't go through the batch functions, so updated_at is
-    -- stuck at the creation timestamp. Update it to the last edit's block_date.
+    -- Step 5c: Update updated_at and block_num for edit ops
+    -- Edits (is_first=false) don't go through the batch functions, so updated_at and
+    -- block_num are stuck at the creation values. Update them to the last edit's values.
+    -- block_num must be updated because notification timestamps use hp.block_num - 1
+    -- (matching old Python behavior where edits updated block_num via ON CONFLICT).
     UPDATE hivemind_app.hive_posts hp
-    SET updated_at = last_edit.block_date
+    SET updated_at = last_edit.block_date,
+        block_num = last_edit.block_num
     FROM (
         SELECT DISTINCT ON (pr.post_id)
-            pr.post_id, cs.block_date
+            pr.post_id, cs.block_date, cs.block_num
         FROM hivemind_app._comment_staging cs
         JOIN hivemind_app._comment_staging cs_first
             ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
@@ -1091,11 +1086,13 @@ BEGIN
     -- Only root posts (parent_author is empty) get tags.
     -- json_metadata can be a JSON string (double-encoded) or an object; handle both.
     -- Malformed json_metadata is silently ignored (matching old Python try/except).
+    -- Uses UNION ALL instead of nested ARRAY(SELECT...) inside LATERAL to avoid
+    -- potential planner issues with deeply nested correlated subqueries.
     PERFORM hivemind_app.process_tags_batch(
         ARRAY(
             SELECT ROW(
                 base.post_id,
-                sub.tag_val::VARCHAR,
+                tags.tag_val::VARCHAR,
                 base.is_new_post
             )::hivemind_app.post_tag_input
             FROM (
@@ -1105,22 +1102,15 @@ BEGIN
                 JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
                 WHERE cs.is_first
                   AND (cs.parent_author IS NULL OR cs.parent_author = '')
-            ) base
-            CROSS JOIN LATERAL (
-                SELECT unnest(
-                    COALESCE(
-                        ARRAY(
-                            SELECT jsonb_array_elements_text(base.parsed_md->'tags')
-                            WHERE base.parsed_md IS NOT NULL
-                              AND base.parsed_md->'tags' IS NOT NULL
-                              AND jsonb_typeof(base.parsed_md->'tags') = 'array'
-                        ),
-                        '{}'::TEXT[]
-                    )
-                    ||
-                    ARRAY[base.parent_permlink]
-                ) AS tag_val
-            ) sub
+            ) base,
+            LATERAL (
+                SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
+                WHERE base.parsed_md IS NOT NULL
+                  AND base.parsed_md->'tags' IS NOT NULL
+                  AND jsonb_typeof(base.parsed_md->'tags') = 'array'
+                UNION ALL
+                SELECT base.parent_permlink
+            ) tags
         )
     );
 
@@ -1205,6 +1195,8 @@ BEGIN
 
     FOR _rec IN
         SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink,
+               s.val->>'parent_author' AS parent_author,
+               s.val->>'parent_permlink' AS parent_permlink,
                s.op_type_id, s.block_num, s.block_date, s.id AS staging_id
         FROM hivemind_app._ops_staging s
         WHERE ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
@@ -1226,35 +1218,16 @@ BEGIN
 
         ELSIF _rec.op_type_id = 1 AND _after_delete THEN
             -- Recreate after delete: INSERT a new row with a new post_id.
-            -- Copy structural fields (depth, parent, community, category) from the
-            -- most recently deleted version, use fresh timestamps from the create op.
-            _author_id := hivemind_app.find_account_id(_rec.author, FALSE);
-            SELECT hpd.id INTO _permlink_id
-            FROM hivemind_app.hive_permlink_data hpd WHERE hpd.permlink = _rec.permlink;
-
-            SELECT hp.parent_id, hp.depth, hp.community_id, hp.category_id, hp.root_id, hp.is_valid
-            INTO _parent_id, _depth, _community_id, _category_id, _root_id, _is_valid
-            FROM hivemind_app.hive_posts hp
-            WHERE hp.author_id = _author_id AND hp.permlink_id = _permlink_id
-              AND hp.counter_deleted > 0
-            ORDER BY hp.counter_deleted DESC LIMIT 1;
-
-            INSERT INTO hivemind_app.hive_posts
-                (parent_id, depth, community_id, category_id, root_id,
-                 is_muted, is_valid, author_id, permlink_id,
-                 created_at, updated_at, active, payout_at, cashout_time,
-                 counter_deleted, block_num, block_num_created,
-                 sc_hot, sc_trend, muted_reasons)
-            VALUES
-                (_parent_id, _depth, _community_id, _category_id,
-                 CASE WHEN _depth = 0 THEN 0 ELSE _root_id END,
-                 FALSE, _is_valid, _author_id, _permlink_id,
-                 _rec.block_date, _rec.block_date, _rec.block_date,
-                 _rec.block_date + INTERVAL '7 days', _rec.block_date + INTERVAL '7 days',
-                 0, _rec.block_num, _rec.block_num,
-                 hivemind_app.calculate_time_part_of_hot(_rec.block_date),
-                 hivemind_app.calculate_time_part_of_trending(_rec.block_date), 0)
-            RETURNING id INTO _new_post_id;
+            -- Resolve structural fields from the NEW create op's parent_author/parent_permlink
+            -- (not from the deleted row — the recreated post may have different structure,
+            -- e.g., root post deleted and recreated as a comment or vice versa).
+            SELECT id INTO _new_post_id
+            FROM hivemind_app.process_hive_post_operation(
+                _rec.author, _rec.permlink,
+                COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
+                _rec.block_date, _community_support_start_block, _rec.block_num,
+                '{}'::VARCHAR[]  -- tags handled separately in Step 7d
+            );
 
             _after_delete := FALSE;
         END IF;
@@ -1335,38 +1308,31 @@ BEGIN
                 )
                 SELECT ROW(
                     fa.new_post_id,
-                    sub.tag_val::VARCHAR,
+                    tags.tag_val::VARCHAR,
                     TRUE
                 )::hivemind_app.post_tag_input
                 FROM fa
                 JOIN hivemind_app.hive_posts hp ON hp.id = fa.new_post_id AND hp.depth = 0
                 JOIN ld ON ld.author = fa.author AND ld.permlink = fa.permlink
                 CROSS JOIN LATERAL (
-                    SELECT unnest(
-                        COALESCE(
-                            ARRAY(
-                                SELECT jsonb_array_elements_text(parsed.md->'tags')
-                                FROM (
-                                    SELECT hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS md
-                                    FROM hivemind_app._comment_staging cs
-                                    WHERE cs.author = fa.author AND cs.permlink = fa.permlink
-                                      AND cs.staging_id > ld.last_delete_staging_id
-                                    ORDER BY cs.seq_id DESC LIMIT 1
-                                ) parsed
-                                WHERE parsed.md IS NOT NULL
-                                  AND parsed.md->'tags' IS NOT NULL
-                                  AND jsonb_typeof(parsed.md->'tags') = 'array'
-                            ),
-                            '{}'::TEXT[]
-                        )
-                        ||
-                        ARRAY[(SELECT cs2.parent_permlink
-                               FROM hivemind_app._comment_staging cs2
-                               WHERE cs2.author = fa.author AND cs2.permlink = fa.permlink
-                                 AND cs2.is_first LIMIT 1)]
-                    ) AS tag_val
-                ) sub
-                WHERE sub.tag_val IS NOT NULL
+                    SELECT jsonb_array_elements_text(parsed.md->'tags') AS tag_val
+                    FROM (
+                        SELECT hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS md
+                        FROM hivemind_app._comment_staging cs
+                        WHERE cs.author = fa.author AND cs.permlink = fa.permlink
+                          AND cs.staging_id > ld.last_delete_staging_id
+                        ORDER BY cs.seq_id DESC LIMIT 1
+                    ) parsed
+                    WHERE parsed.md IS NOT NULL
+                      AND parsed.md->'tags' IS NOT NULL
+                      AND jsonb_typeof(parsed.md->'tags') = 'array'
+                    UNION ALL
+                    SELECT cs2.parent_permlink
+                    FROM hivemind_app._comment_staging cs2
+                    WHERE cs2.author = fa.author AND cs2.permlink = fa.permlink
+                      AND cs2.is_first LIMIT 1
+                ) tags
+                WHERE tags.tag_val IS NOT NULL
             )
         );
     END IF;
@@ -1989,6 +1955,9 @@ BEGIN
         SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep cr
     ),
     -- Find new comments in this block range with depth > 0
+    -- Use blocks_view with block_num - 1 for timestamp (matching old Python behavior
+    -- where notifications used _head_block_date = previous block's timestamp).
+    -- hp.block_num may differ from block_num_created if the post was edited.
     new_comments AS (
         SELECT
             hp.id AS post_id,
@@ -1997,10 +1966,11 @@ BEGIN
             hp.parent_id AS dst_post_id,
             hp.depth,
             hp.block_num,
-            hp.created_at,
+            hb.created_at,
             ROW_NUMBER() OVER (PARTITION BY hp.block_num ORDER BY hp.id) AS counter
         FROM hivemind_app.hive_posts hp
         JOIN hivemind_app.hive_posts hp_parent ON hp.parent_id = hp_parent.id
+        JOIN hivemind_app.blocks_view hb ON hb.num = hp.block_num - 1
         WHERE hp.block_num_created BETWEEN _first_block AND _last_block
           AND hp.depth > 0
           AND hp.counter_deleted = 0
