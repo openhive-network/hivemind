@@ -290,7 +290,7 @@ BEGIN
     last_ecv AS (
         SELECT DISTINCT ON (voter, author, permlink)
             voter, author, permlink, weight, rshares, block_num,
-            count(*) OVER (PARTITION BY voter, author, permlink) AS num_changes
+            count(*) OVER (PARTITION BY voter, author, permlink) - 1 AS num_changes
         FROM ecv_ops
         ORDER BY voter, author, permlink, id DESC
     ),
@@ -1014,6 +1014,61 @@ BEGIN
     JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
     WHERE NOT cs.is_first;
 
+    -- Step 5c: Update updated_at for edit ops
+    -- Edits (is_first=false) don't go through the batch functions, so updated_at is
+    -- stuck at the creation timestamp. Update it to the last edit's block_date.
+    UPDATE hivemind_app.hive_posts hp
+    SET updated_at = last_edit.block_date
+    FROM (
+        SELECT DISTINCT ON (pr.post_id)
+            pr.post_id, cs.block_date
+        FROM hivemind_app._comment_staging cs
+        JOIN hivemind_app._comment_staging cs_first
+            ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
+        WHERE NOT cs.is_first
+        ORDER BY pr.post_id, cs.seq_id DESC
+    ) last_edit
+    WHERE hp.id = last_edit.post_id;
+
+    -- Step 5d: Process tags for root posts
+    -- Tags come from json_metadata.tags array + parent_permlink (category).
+    -- Only root posts (parent_author is empty) get tags.
+    -- json_metadata can be a JSON string (double-encoded) or an object; handle both.
+    -- Malformed json_metadata is silently ignored (matching old Python try/except).
+    PERFORM hivemind_app.process_tags_batch(
+        ARRAY(
+            SELECT ROW(
+                sub.post_id,
+                sub.tag_val::VARCHAR,
+                sub.is_new_post
+            )::hivemind_app.post_tag_input
+            FROM (
+                SELECT pr.post_id, pr.is_new_post, cs.parent_permlink,
+                       hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS parsed_md
+                FROM hivemind_app._comment_staging cs
+                JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+                WHERE cs.is_first
+                  AND (cs.parent_author IS NULL OR cs.parent_author = '')
+            ) base
+            CROSS JOIN LATERAL (
+                SELECT unnest(
+                    COALESCE(
+                        ARRAY(
+                            SELECT jsonb_array_elements_text(base.parsed_md->'tags')
+                            WHERE base.parsed_md IS NOT NULL
+                              AND base.parsed_md->'tags' IS NOT NULL
+                              AND jsonb_typeof(base.parsed_md->'tags') = 'array'
+                        ),
+                        '{}'::TEXT[]
+                    )
+                    ||
+                    ARRAY[base.parent_permlink]
+                ) AS tag_val
+            ) sub
+        )
+    );
+
     -- Step 6: Process comment_options (type 19) - update hive_posts columns
     WITH co_ops AS (
         SELECT
@@ -1061,6 +1116,49 @@ BEGIN
             _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
         );
     END LOOP;
+
+    -- Step 8: Generate muted post error notifications
+    -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'
+    -- notification (type 10) for the post author, explaining why it was muted.
+    INSERT INTO hivemind_app.hive_notification_cache
+        (id, block_num, type_id, score, created_at, src, dst, post_id, dst_post_id,
+         community, community_title, payload)
+    SELECT
+        hivemind_app.notification_id(pr.block_date, 10, pr.seq_id % 4194303),
+        pr.block_num,
+        10,  -- error
+        35,  -- default score
+        pr.block_date,
+        pr.community_id,  -- src = community
+        pr.author_id,     -- dst = post author
+        pr.post_id,
+        pr.post_id,
+        hc.name,
+        hc.title,
+        CASE
+            WHEN pr.muted_reasons & 3 = 3 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment and parent post/comment is muted'
+                    ELSE 'Post is muted because community type does not allow non members to post and parent post/comment is muted'
+                END
+            WHEN pr.muted_reasons & 1 = 1 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment'
+                    ELSE 'Post is muted because community type does not allow non members to post'
+                END
+            WHEN pr.muted_reasons & 2 = 2 THEN
+                'Post is muted because parent post/comment is muted'
+            ELSE ''
+        END
+    FROM hivemind_app._post_results pr
+    JOIN hivemind_app.hive_communities hc ON hc.id = pr.community_id
+    WHERE pr.is_new_post
+      AND pr.muted_reasons IS NOT NULL
+      AND pr.muted_reasons != 0
+      AND pr.community_id IS NOT NULL
+      AND pr.block_num > hivemind_app.block_before_irreversible('90 days')
+      AND pr.community_id IS DISTINCT FROM pr.author_id
+    ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING;
 
     -- Return all post results
     RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
