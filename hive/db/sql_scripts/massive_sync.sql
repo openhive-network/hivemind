@@ -78,7 +78,13 @@ BEGIN
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
     SELECT ho.id, ho.block_num,
-           COALESCE(hb_prev.created_at, hb.created_at) AS block_date,
+           -- Old Python used _head_block_date (previous block's date) for regular ops,
+           -- but the current block's date for virtual ops (payouts processed in _process_vops_flat
+           -- received date=block_dates[block_num]). Match that behavior.
+           CASE WHEN ho.op_type_id >= 50
+               THEN hb.created_at
+               ELSE COALESCE(hb_prev.created_at, hb.created_at)
+           END AS block_date,
            ho.op_type_id, ho.body->'value'
     FROM hivemind_app.operations_view ho
     JOIN hivemind_app.blocks_view hb ON hb.num = ho.block_num
@@ -110,17 +116,12 @@ BEGIN
     -- Types: 9=ACCOUNT_CREATE, 14=POW, 23=CREATE_CLAIMED_ACCOUNT,
     --        30=POW_2, 41=ACCOUNT_CREATE_WITH_DELEGATION
     WITH new_accounts AS (
-        SELECT DISTINCT acct_name, first_block_date, first_block_num,
-               -- Get metadata from the first occurrence (for types that carry it)
-               first_value(posting_json_metadata) OVER (
-                   PARTITION BY acct_name ORDER BY id
-               ) AS posting_json_metadata,
-               first_value(json_metadata) OVER (
-                   PARTITION BY acct_name ORDER BY id
-               ) AS json_metadata
+        SELECT DISTINCT ON (acct_name)
+               acct_name, first_block_date, first_block_num, first_op_id,
+               posting_json_metadata, json_metadata
         FROM (
             SELECT
-                s.id,
+                s.id AS first_op_id,
                 CASE s.op_type_id
                     WHEN 9  THEN s.val->>'new_account_name'
                     WHEN 41 THEN s.val->>'new_account_name'
@@ -140,16 +141,13 @@ BEGIN
             WHERE s.op_type_id IN (9, 14, 23, 30, 41)
         ) sub
         WHERE acct_name IS NOT NULL
+        ORDER BY acct_name, first_op_id
     ),
     -- Only insert accounts that don't already exist
     to_insert AS (
         SELECT na.acct_name, na.first_block_date, na.first_block_num,
-               na.posting_json_metadata, na.json_metadata
-        FROM (
-            SELECT DISTINCT ON (acct_name) acct_name, first_block_date, first_block_num,
-                   posting_json_metadata, json_metadata
-            FROM new_accounts
-        ) na
+               na.first_op_id, na.posting_json_metadata, na.json_metadata
+        FROM new_accounts na
         WHERE NOT EXISTS (
             SELECT 1 FROM hivemind_app.hive_accounts ha WHERE ha.name = na.acct_name
         )
@@ -159,6 +157,7 @@ BEGIN
         SELECT ti.acct_name, ti.first_block_date, ti.posting_json_metadata, ti.json_metadata,
                (SELECT av.id FROM hivemind_app.accounts_view av WHERE av.name = ti.acct_name)
         FROM to_insert ti
+        ORDER BY ti.first_op_id  -- Match old Python registration order (by HAF op id)
         ON CONFLICT (name) DO NOTHING
         RETURNING id, name
     )
@@ -179,12 +178,36 @@ $function$ LANGUAGE plpgsql VOLATILE;
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_registrations_from_staging(
     _community_support_start_block INT
 ) RETURNS VOID AS $function$
+DECLARE
+    _rec RECORD;
+    _counter INT;
 BEGIN
-    -- Community registration happens when an account name matches hive-XXXXX pattern
-    -- and the block is after community_support_start_block.
-    -- The existing community.sql handles this via community_check_account_name().
-    -- We call it for each newly created account that matches the pattern.
-    NULL; -- Placeholder: community registration is handled in process_community_from_staging
+    -- For each newly created account matching hive-[123]\d{4,6}$ pattern that was
+    -- created at or after the community support start block, register a community.
+    -- This mirrors the old Python Community.register() called from Accounts.register().
+    FOR _rec IN
+        SELECT ha.name, ha.id AS account_id, s.block_date, s.block_num,
+               ROW_NUMBER() OVER (PARTITION BY s.block_num ORDER BY s.id)::INT AS counter
+        FROM hivemind_app._ops_staging s
+        JOIN hivemind_app.hive_accounts ha ON ha.name = CASE s.op_type_id
+            WHEN 9  THEN s.val->>'new_account_name'
+            WHEN 41 THEN s.val->>'new_account_name'
+            WHEN 23 THEN s.val->>'new_account_name'
+            WHEN 14 THEN s.val->>'worker_account'
+            WHEN 30 THEN s.val->'work'->'value'->'input'->>'worker_account'
+        END
+        WHERE s.op_type_id IN (9, 14, 23, 30, 41)
+          AND s.block_num >= _community_support_start_block
+          AND ha.name ~ '^hive-[123]\d{4,6}$'
+          AND NOT EXISTS (
+              SELECT 1 FROM hivemind_app.hive_communities hc WHERE hc.name = ha.name
+          )
+        ORDER BY s.id
+    LOOP
+        PERFORM hivemind_app.register_community(
+            _rec.name, _rec.account_id, _rec.block_date, _rec.block_num, _rec.counter
+        );
+    END LOOP;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
