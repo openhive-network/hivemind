@@ -77,9 +77,12 @@ BEGIN
     TRUNCATE hivemind_app._ops_staging;
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
-    SELECT ho.id, ho.block_num, hb.created_at, ho.op_type_id, ho.body->'value'
+    SELECT ho.id, ho.block_num,
+           COALESCE(hb_prev.created_at, hb.created_at) AS block_date,
+           ho.op_type_id, ho.body->'value'
     FROM hivemind_app.operations_view ho
     JOIN hivemind_app.blocks_view hb ON hb.num = ho.block_num
+    LEFT JOIN hivemind_app.blocks_view hb_prev ON hb_prev.num = ho.block_num - 1
     WHERE ho.block_num BETWEEN _first_block AND _last_block
       AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43,51,53,61,72,73)
       AND (ho.op_type_id != 18
