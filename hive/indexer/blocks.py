@@ -193,6 +193,20 @@ class Blocks:
         ]
         cls._run_parallel_sql(phase4_tasks)
 
+        # Phase 4.5: Update post rshares aggregates after votes AND payouts have committed.
+        # This must run after Phase 4 to avoid deadlocks (both votes and payouts update hive_posts).
+        affected_posts = db.query_col(
+            f"SELECT DISTINCT post_id FROM {SCHEMA_NAME}.hive_votes "
+            f"WHERE block_num BETWEEN {first_block} AND {last_block}"
+        )
+        if affected_posts:
+            db.query_no_return("START TRANSACTION")
+            db.query_no_return(
+                f"SELECT * FROM {SCHEMA_NAME}.update_posts_rshares(:post_ids)",
+                post_ids=affected_posts,
+            )
+            db.query_no_return("COMMIT")
+
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
         PostDataCache.flush()
 
