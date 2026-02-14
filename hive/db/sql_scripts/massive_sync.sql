@@ -236,6 +236,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_votes_from_staging(
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
+    _affected_post_ids INT[];
 BEGIN
     -- Process vote ops (type 0) and effective_comment_vote ops (type 72)
     -- from the staging table.
@@ -302,7 +303,7 @@ BEGIN
     last_ecv AS (
         SELECT DISTINCT ON (voter, author, permlink)
             voter, author, permlink, weight, rshares, block_num,
-            count(*) OVER (PARTITION BY voter, author, permlink) - 1 AS num_changes
+            count(*) OVER (PARTITION BY voter, author, permlink) AS num_changes
         FROM ecv_ops
         ORDER BY voter, author, permlink, id DESC
     ),
@@ -352,6 +353,10 @@ BEGIN
             ON hp.author_id = vb.author_id
             AND hp.permlink_id = hpd.id
             AND hp.counter_deleted = 0
+        -- Filter out votes cast before the post was recreated (delete/recreate cycle).
+        -- The old Python code removed in-memory votes on delete, preventing stale votes
+        -- from being flushed for recreated posts.
+        WHERE vb.block_num >= hp.block_num
     ),
     upserted AS (
         INSERT INTO hivemind_app.hive_votes
@@ -379,7 +384,16 @@ BEGIN
           AND hivemind_app.hive_votes.permlink_id = EXCLUDED.permlink_id
         RETURNING post_id
     )
-    SELECT count(*) INTO _count FROM upserted;
+    SELECT count(*), array_agg(DISTINCT post_id)
+    INTO _count, _affected_post_ids
+    FROM upserted;
+
+    -- Update post rshares aggregates (vote_rshares, abs_rshares, sc_hot, sc_trend,
+    -- total_votes, net_votes) for all posts affected by this batch.
+    -- The old Python code called update_posts_rshares() after every vote flush.
+    IF _affected_post_ids IS NOT NULL THEN
+        PERFORM hivemind_app.update_posts_rshares(_affected_post_ids);
+    END IF;
 
     DROP TABLE IF EXISTS _vote_batch;
 
@@ -495,6 +509,8 @@ BEGIN
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = d.permlink
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+        -- Filter out reblogs from before post was recreated (delete/recreate cycle)
+        WHERE d.block_num >= hp.block_num
     )
     INSERT INTO hivemind_app.hive_reblogs (blogger_id, post_id, created_at, block_num)
     SELECT blogger_id, post_id, created_at, block_num FROM validated
@@ -1636,9 +1652,11 @@ BEGIN
         hivemind_app.format_vote_value_payload(hn.vote_value),
         '', ''
     FROM (
-        SELECT DISTINCT
+        SELECT
             hv.last_update,
-            ROW_NUMBER() OVER (PARTITION BY hv.block_num ORDER BY hv.id) AS counter,
+            -- Counter must be 2*N to match old Python behavior: vote_op increments counter,
+            -- then ecv_op increments again, so each vote uses 2 counter slots.
+            2 * ROW_NUMBER() OVER (PARTITION BY hv.block_num ORDER BY hv.id) AS counter,
             hv.block_num,
             hv.voter_id AS src,
             hp.author_id AS dst,
@@ -1793,7 +1811,7 @@ BEGIN
         FROM hivemind_app._follow_notification_events fe
         JOIN hivemind_app.hive_accounts ha_f ON ha_f.name = fe.follower_name
         JOIN hivemind_app.hive_accounts ha_g ON ha_g.name = fe.following_name
-        JOIN hivemind_app.blocks_view hb ON hb.num = (fe.block_num - 1)
+        JOIN hivemind_app.blocks_view hb ON hb.num = fe.block_num
         WHERE fe.block_num BETWEEN _first_block AND _last_block
     )
     INSERT INTO hivemind_app.hive_notification_cache
