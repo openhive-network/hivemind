@@ -1767,23 +1767,21 @@ BEGIN
             CONTINUE;
         END IF;
 
-        -- mutePost/unmutePost are classified as state actions because new child posts
-        -- need to see the parent's muted state during Phase 3 (process_community_post
-        -- checks is_muted on the parent for MUTED_PARENT propagation).
+        -- State actions must run before posts (Phase 2.5) so role/metadata lookups
+        -- are correct during post creation. mutePost/unmutePost are NOT state actions —
+        -- they target existing posts and must run AFTER posts are created (Phase 3a).
         _is_state_action := _action IN (
-            'subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle',
-            'mutePost', 'unmutePost'
+            'subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle'
         );
 
-        -- Phase filtering
+        -- Phase filtering:
+        --   0 = all actions (default, used by live sync)
+        --   1 = state actions only (before posts: subscribe, setRole, updateProps, etc.)
+        --   2 = post-targeting ops only (after posts: mutePost, unmutePost, pinPost, etc.)
         IF _phase = 1 THEN
-            -- Phase 1: State actions + mute/unmute ops
-            -- These must be applied before posts so that role lookups, community
-            -- metadata, and parent muting are correct during post muting decisions.
             IF NOT _is_state_action THEN CONTINUE; END IF;
         END IF;
         IF _phase = 2 THEN
-            -- Phase 2: ONLY post-targeting ops (pinPost, unpinPost, flagPost)
             IF _is_state_action THEN CONTINUE; END IF;
         END IF;
 
@@ -1806,6 +1804,52 @@ BEGIN
         END;
     END LOOP;
 
+    RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- ============================================================================
+-- 10b. propagate_muted_parent_for_batch
+-- After mutePost/unmutePost are applied (Phase 3a), child posts created in
+-- the same batch don't yet know their parent was muted (because mutePost runs
+-- AFTER all posts are created in Phase 3). This function recursively propagates
+-- MUTED_PARENT (muted_reasons bit 2 = value 4) to descendants of newly-muted posts.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION hivemind_app.propagate_muted_parent_for_batch(
+    _first_block INT, _last_block INT
+) RETURNS INT AS $function$
+DECLARE
+    _count INT;
+BEGIN
+    -- Recursively find all descendants of posts that were muted by community
+    -- moderation (mutePost) in the current batch and propagate MUTED_PARENT.
+    WITH RECURSIVE muted_descendants AS (
+        -- Seed: posts muted by community moderation (bit 0) in this batch
+        SELECT hp.id
+        FROM hivemind_app.hive_posts hp
+        WHERE hp.is_muted = true
+          AND hp.muted_reasons & 1 = 1  -- MUTED_COMMUNITY_MODERATION
+          AND hp.block_num BETWEEN _first_block AND _last_block
+
+        UNION ALL
+
+        -- Recurse: direct children of any muted post
+        SELECT child.id
+        FROM hivemind_app.hive_posts child
+        JOIN muted_descendants parent ON child.parent_id = parent.id
+        WHERE child.counter_deleted = 0
+    )
+    UPDATE hivemind_app.hive_posts hp
+    SET is_muted = true,
+        muted_reasons = hp.muted_reasons | 4  -- add MUTED_PARENT bit
+    FROM muted_descendants md
+    WHERE hp.id = md.id
+      AND hp.muted_reasons & 1 = 0  -- Don't modify the root muted posts themselves
+      AND (hp.is_muted = false OR hp.muted_reasons & 4 = 0);  -- Only if not already propagated
+
+    GET DIAGNOSTICS _count = ROW_COUNT;
     RETURN _count;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
