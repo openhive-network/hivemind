@@ -142,15 +142,14 @@ class Blocks:
         a staging table. Only PostDataCache body merging remains in Python.
 
         Phases:
-          1. Load staging table (single scan of operations_view)
-          2. Account registration + community state changes (single transaction)
-          3. Post/comment processing (must commit before votes/reblogs)
-          3a. Community post-targeting ops (mutePost, unmutePost, pinPost) + mute propagation
-          3b. Process post results for PostDataCache (Python body merging)
-          3.5. Votes + rshares update
-          4. Parallel entity processing (reblogs, follows, payouts, etc.)
-          5. PostDataCache flush
-          6. Parallel notification flush
+          1.    Load staging table (single scan of operations_view)
+          2.    Account registration + community state changes (single transaction)
+          3.    Post/comment processing (must commit before votes/reblogs)
+          3a.   Community post-targeting ops + mute propagation
+          3.5.  Votes + rshares update (must complete before payouts)
+          4+3b. Parallel: SQL entity processing + Python body merging (overlapped)
+          5.    PostDataCache flush
+          6.    Parallel notification flush
         """
         time_start = OPSM.start()
         phase_times = {}
@@ -164,8 +163,6 @@ class Blocks:
         phase_times['load'] = perf_counter() - t0
 
         # Phase 2: Account registration + community state changes (single transaction)
-        # Both must commit before posts. No cross-dependency between accounts and
-        # community state, so they can share a transaction to save round-trips.
         t0 = perf_counter()
         db.query_no_return("START TRANSACTION")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
@@ -181,8 +178,6 @@ class Blocks:
         phase_times['posts'] = perf_counter() - t0
 
         # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
-        # Must run AFTER posts exist (Phase 3) so the UPDATE can find them.
-        # Then propagate MUTED_PARENT to children of newly-muted posts.
         t0 = perf_counter()
         db.query_no_return("START TRANSACTION")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
@@ -190,21 +185,16 @@ class Blocks:
         db.query_no_return("COMMIT")
         phase_times['community_post'] = perf_counter() - t0
 
-        # Phase 3b: Process post results for PostDataCache (Python body merging)
-        t0 = perf_counter()
-        cls._process_post_results_for_cache(post_results)
-        phase_times['cache_merge'] = perf_counter() - t0
-
         # Phase 3.5: Votes + rshares update (must run BEFORE payouts which set is_paidout).
-        # update_posts_rshares() zeroes sc_hot/sc_trend for paidout posts, so it must see
-        # is_paidout=FALSE. Running votes sequentially here avoids deadlocks with payouts.
         t0 = perf_counter()
         Votes.db.query_no_return("START TRANSACTION")
         Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
         Votes.db.query_no_return("COMMIT")
         phase_times['votes'] = perf_counter() - t0
 
-        # Phase 4: Parallel entity processing on separate connections
+        # Phase 4+3b: Overlap Python body merging with parallel SQL entity processing.
+        # PostDataCache._data is only accessed by the main thread; Phase 4 tasks use
+        # separate DB connections and don't touch hive_post_data, so no conflict.
         t0 = perf_counter()
         phase4_tasks = [
             (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()"),
@@ -213,7 +203,35 @@ class Blocks:
             (Notify.db, f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()"),
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
         ]
-        cls._run_parallel_sql(phase4_tasks)
+
+        # Launch Phase 4 SQL tasks in background threads
+        pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
+        futures = []
+
+        def run_one_task(db_conn, sql):
+            db_conn.query_no_return("START TRANSACTION")
+            try:
+                db_conn.query_all_raw(sql)
+                db_conn.query_no_return("COMMIT")
+            except Exception:
+                try:
+                    db_conn.query_no_return("ROLLBACK")
+                except Exception:
+                    pass
+                raise
+
+        for db_conn, sql in phase4_tasks:
+            futures.append(pool.submit(run_one_task, db_conn, sql))
+
+        # Phase 3b: Process post results on main thread while Phase 4 runs in parallel
+        t0_cache = perf_counter()
+        cls._process_post_results_for_cache(post_results)
+        phase_times['cache_merge'] = perf_counter() - t0_cache
+
+        # Wait for all Phase 4 tasks to complete
+        for f in futures:
+            f.result()
+        pool.shutdown(wait=False)
         phase_times['parallel'] = perf_counter() - t0
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
