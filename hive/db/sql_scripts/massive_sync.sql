@@ -1039,9 +1039,9 @@ BEGIN
     PERFORM hivemind_app.process_tags_batch(
         ARRAY(
             SELECT ROW(
-                sub.post_id,
+                base.post_id,
                 sub.tag_val::VARCHAR,
-                sub.is_new_post
+                base.is_new_post
             )::hivemind_app.post_tag_input
             FROM (
                 SELECT pr.post_id, pr.is_new_post, cs.parent_permlink,
@@ -1116,6 +1116,49 @@ BEGIN
             _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
         );
     END LOOP;
+
+    -- Step 7b: Handle post recreates after deletes within the same batch
+    -- When a post is created, deleted, and re-created in the same batch,
+    -- the delete increments counter_deleted but the second create was treated
+    -- as an edit (is_first=false). We need to reset counter_deleted=0 for posts
+    -- where a comment op exists AFTER the last delete.
+    WITH delete_ops AS (
+        SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink, s.id AS op_id
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 17
+          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+    ),
+    recreate_ops AS (
+        -- Find comment ops that occur AFTER a delete for the same author/permlink
+        SELECT DISTINCT ON (cs.author, cs.permlink)
+            cs.author, cs.permlink, cs.block_date, cs.block_num
+        FROM hivemind_app._comment_staging cs
+        JOIN delete_ops d ON d.author = cs.author AND d.permlink = cs.permlink
+        -- The comment staging seq_id maps to ordinal position; use HAF op id from _ops_staging
+        JOIN hivemind_app._ops_staging s_create ON s_create.op_type_id = 1
+            AND s_create.val->>'author' = cs.author
+            AND s_create.val->>'permlink' = cs.permlink
+            AND s_create.id > d.op_id
+        ORDER BY cs.author, cs.permlink, s_create.id DESC
+    )
+    UPDATE hivemind_app.hive_posts hp
+    SET counter_deleted = 0,
+        block_num = r.block_num,
+        active = r.block_date,
+        updated_at = r.block_date,
+        created_at = r.block_date
+    FROM recreate_ops r
+    JOIN hivemind_app.hive_accounts ha ON ha.name = r.author
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = r.permlink
+    WHERE hp.author_id = ha.id
+      AND hp.permlink_id = hpd.id
+      AND hp.counter_deleted > 0
+      -- Find the most recently deleted version (highest counter_deleted)
+      AND hp.counter_deleted = (
+          SELECT MAX(hp2.counter_deleted)
+          FROM hivemind_app.hive_posts hp2
+          WHERE hp2.author_id = ha.id AND hp2.permlink_id = hpd.id
+      );
 
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'

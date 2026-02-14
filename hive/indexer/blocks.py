@@ -187,11 +187,10 @@ class Blocks:
         PostDataCache.flush()
 
         # Phase 6: Parallel notification flush
+        # Vote notifications are deferred to finalization (_finish_vote_notifications)
+        # because scoring uses payout data that isn't available during massive sync
+        # (payouts arrive ~7 days after the vote).
         phase6_tasks = [
-            (
-                VoteNotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks({first_block}, {last_block})",
-            ),
             (
                 PostNotificationCache.db,
                 f"SELECT {SCHEMA_NAME}.flush_post_notifications_for_blocks({first_block}, {last_block})",
