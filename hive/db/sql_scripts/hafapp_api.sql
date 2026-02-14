@@ -365,6 +365,9 @@ BEGIN
 
     -- Exit early if no actions collected
     IF NOT EXISTS (SELECT 1 FROM _follow_actions LIMIT 1) THEN
+        -- Persist follow events for notification flush (survives cross-connection Phase 4→6)
+        INSERT INTO hivemind_app._follow_notification_events (follower_name, following_name, block_num, op_seq)
+        SELECT fn.follower_name, fn.following_name, fn.block_num, fn.op_seq FROM _follow_notifications fn;
         RETURN QUERY SELECT follower_name, following_name, block_num FROM _follow_notifications ORDER BY block_num, op_seq;
         RETURN;
     END IF;
@@ -550,6 +553,10 @@ BEGIN
 
     DROP TABLE _final_actions;
     DROP TABLE _follow_actions;
+
+    -- Persist follow events for notification flush (survives cross-connection Phase 4→6)
+    INSERT INTO hivemind_app._follow_notification_events (follower_name, following_name, block_num, op_seq)
+    SELECT fn.follower_name, fn.following_name, fn.block_num, fn.op_seq FROM _follow_notifications fn;
 
     -- Return notification data for Follow actions (ordered by block_num for correct
     -- notification counter generation in Python's UniqueCounter)
