@@ -1164,7 +1164,6 @@ BEGIN
         block_num = r.block_num,
         active = r.block_date,
         updated_at = r.block_date,
-        created_at = r.block_date,
         is_muted = FALSE,
         muted_reasons = 0
     FROM recreate_ops r
@@ -1525,12 +1524,9 @@ BEGIN
     --
     -- _phase controls which actions to process:
     --   0 = all actions (default, used by live sync)
-    --   1 = community state ops that come BEFORE posts (subscribe, setRole, updateProps, etc.)
-    --       Only processes ops with id < _cutoff_op_id (the first post op in the batch)
-    --       This ensures operation ordering: state changes before posts are applied first,
-    --       while state changes after posts are deferred to phase 2.
-    --   2 = remaining community ops: post-targeting ops (mutePost, etc.) plus any
-    --       state ops that came AFTER the first post op in the batch
+    --   1 = ALL state ops (subscribe, unsubscribe, setRole, updateProps, setUserTitle)
+    --       Must be committed before posts so role/metadata lookups are correct
+    --   2 = post-targeting ops only (mutePost, unmutePost, pinPost, unpinPost, flagPost)
 
     FOR _rec IN
         SELECT
@@ -1578,13 +1574,14 @@ BEGIN
 
         -- Phase filtering
         IF _phase = 1 THEN
-            -- Phase 1: only state actions that come before the first post op
+            -- Phase 1: ALL state actions (subscribe, setRole, updateProps, etc.)
+            -- These must be applied before posts so that role lookups and community
+            -- metadata are correct during post muting decisions.
             IF NOT _is_state_action THEN CONTINUE; END IF;
-            IF _cutoff_op_id > 0 AND _rec.id >= _cutoff_op_id THEN CONTINUE; END IF;
         END IF;
         IF _phase = 2 THEN
-            -- Phase 2: post-targeting ops (any id) + state ops that came after the first post op
-            IF _is_state_action AND (_cutoff_op_id <= 0 OR _rec.id < _cutoff_op_id) THEN CONTINUE; END IF;
+            -- Phase 2: ONLY post-targeting ops (mutePost, pinPost, flagPost, etc.)
+            IF _is_state_action THEN CONTINUE; END IF;
         END IF;
 
         -- Per-block counter for community notifications (resets when block changes)
