@@ -547,9 +547,22 @@ class DbState:
 
     @classmethod
     def _finish_vote_notifications(cls, db):
-        # Vote notifications are now flushed per-batch in Phase 6 via SQL
-        # (flush_vote_notifications_for_blocks). Nothing left to finalize.
-        pass
+        """Flush vote notifications for the entire sync range at finalization.
+
+        Vote notification scoring uses payout + pending_payout from hive_posts,
+        which is only fully available after all payout virtual ops are processed.
+        During massive sync batches, vote notifications are skipped because payout
+        data for recent posts hasn't arrived yet (payouts come ~7 days after the post).
+        At finalization, all payout data is available, so we flush all vote notifications.
+        """
+        with AutoDbDisposer(db, "finish_vote_notifications") as db_mgr:
+            time_start = perf_counter()
+            last_block = db_mgr.db.query_one(
+                f"SELECT hive.app_get_current_block_num('hivemind_app')"
+            )
+            sql = f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks(1, {last_block})"
+            result = db_mgr.db.query_one(sql)
+            log.info("[MASSIVE] flush_vote_notifications: %s notifications in %.4fs", result, perf_counter() - time_start)
 
     @classmethod
     def _finish_reputation_notification_scores(cls, db):
