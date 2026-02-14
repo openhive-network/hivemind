@@ -1788,6 +1788,22 @@ BEGIN
             IF _is_state_action THEN CONTINUE; END IF;
         END IF;
 
+        -- For mutePost/unmutePost in Phase 2: skip if a delete_comment for the same
+        -- (author, permlink) exists AFTER this op in the batch. The mute was targeting
+        -- a post that gets deleted; the recreated post shouldn't inherit the mute.
+        -- Without this, Phase 3a applies mutePost to the recreated post (only active row).
+        IF _phase = 2 AND _action IN ('mutePost', 'unmutePost') THEN
+            IF EXISTS (
+                SELECT 1 FROM hivemind_app._ops_staging d
+                WHERE d.op_type_id = 17  -- delete_comment
+                  AND d.val->>'author' = _data->>'account'
+                  AND d.val->>'permlink' = _data->>'permlink'
+                  AND d.id > _rec.id
+            ) THEN
+                CONTINUE;
+            END IF;
+        END IF;
+
         -- Per-block counter for community notifications (resets when block changes)
         IF _rec.block_num != _last_counter_block THEN
             _community_counter := 0;
