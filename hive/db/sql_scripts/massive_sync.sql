@@ -52,6 +52,20 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._post_results (
 
 
 -- ============================================================================
+-- Helper: safe_parse_jsonb — parse text as jsonb, return NULL on failure
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION hivemind_app.safe_parse_jsonb(_text TEXT)
+RETURNS JSONB AS $function$
+BEGIN
+    IF _text IS NULL THEN RETURN NULL; END IF;
+    RETURN _text::jsonb;
+EXCEPTION WHEN OTHERS THEN
+    RETURN NULL;
+END
+$function$ LANGUAGE plpgsql IMMUTABLE;
+
+-- ============================================================================
 -- 2. load_ops_staging(_first_block, _last_block)
 -- ============================================================================
 
@@ -364,7 +378,7 @@ BEGIN
             -- Get auth account
             ro.val->'required_posting_auths'->>0 AS auth_account,
             -- Parse inner JSON
-            (ro.val->>'json')::jsonb AS inner_json
+            hivemind_app.safe_parse_jsonb(ro.val->>'json') AS inner_json
         FROM raw_ops ro
         WHERE jsonb_array_length(COALESCE(ro.val->'required_auths', '[]'::jsonb)) = 0
           AND jsonb_array_length(COALESCE(ro.val->'required_posting_auths', '[]'::jsonb)) = 1
@@ -515,7 +529,7 @@ BEGIN
             s.block_num,
             s.block_date,
             s.val->'required_posting_auths'->>0 AS account,
-            (s.val->>'json')::jsonb AS inner_json
+            hivemind_app.safe_parse_jsonb(s.val->>'json') AS inner_json
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 18
           AND (s.val->>'id') = 'notify'
