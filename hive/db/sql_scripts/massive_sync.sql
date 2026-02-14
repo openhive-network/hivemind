@@ -63,6 +63,46 @@ DROP INDEX IF EXISTS hivemind_app._comment_staging_author_permlink_idx;
 CREATE INDEX _comment_staging_author_permlink_idx ON hivemind_app._comment_staging (author, permlink);
 
 
+-- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead)
+DROP TABLE IF EXISTS hivemind_app._vote_batch;
+CREATE UNLOGGED TABLE hivemind_app._vote_batch (
+    voter       TEXT,
+    voter_id    INT,
+    author      TEXT,
+    author_id   INT,
+    permlink    TEXT,
+    vote_percent INT,
+    last_update TIMESTAMP,
+    weight      NUMERIC,
+    rshares     BIGINT,
+    is_effective BOOLEAN,
+    num_changes INT,
+    block_num   INT
+);
+
+-- Persistent staging tables for reblog processing
+DROP TABLE IF EXISTS hivemind_app._reblog_final;
+DROP TABLE IF EXISTS hivemind_app._reblog_ops;
+CREATE UNLOGGED TABLE hivemind_app._reblog_ops (
+    id           BIGINT,
+    block_num    INT,
+    block_date   TIMESTAMP,
+    auth_account TEXT,
+    account      TEXT,
+    author       TEXT,
+    permlink     TEXT,
+    is_delete    BOOLEAN
+);
+CREATE UNLOGGED TABLE hivemind_app._reblog_final (
+    id           BIGINT,
+    account      TEXT,
+    author       TEXT,
+    permlink     TEXT,
+    block_date   TIMESTAMP,
+    block_num    INT,
+    is_delete    BOOLEAN
+);
+
 -- Staging table for follow notification events (populated by process_follows_for_blocks,
 -- read by flush_follow_notifications_for_blocks). Tracks individual follow events
 -- including re-follows after unfollow, which the follows table (final state) doesn't preserve.
@@ -280,7 +320,8 @@ BEGIN
     --   - num_changes = count of effective_comment_vote ops
 
     -- Step 1: Collect and deduplicate vote data
-    CREATE TEMP TABLE _vote_batch ON COMMIT DROP AS
+    TRUNCATE hivemind_app._vote_batch;
+    INSERT INTO hivemind_app._vote_batch
     WITH vote_ops AS (
         -- Regular votes (type 0)
         SELECT
@@ -376,7 +417,7 @@ BEGIN
             vb.*,
             hp.id AS post_id,
             hpd.id AS permlink_id
-        FROM _vote_batch vb
+        FROM hivemind_app._vote_batch vb
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = vb.permlink
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = vb.author_id
@@ -426,8 +467,7 @@ BEGIN
         PERFORM hivemind_app.update_posts_rshares(_affected_post_ids);
     END IF;
 
-    DROP TABLE IF EXISTS _vote_batch;
-
+    -- Table is truncated at start of next call, no drop needed
     RETURN _count;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
@@ -445,7 +485,10 @@ BEGIN
     -- Extract reblog custom_json ops from staging (type 18, custom_json_id = 'reblog' or 'follow')
     -- Reblogs come as custom_json with id='follow' or id='reblog' containing ["reblog", {...}]
 
-    CREATE TEMP TABLE _reblog_ops ON COMMIT DROP AS
+    TRUNCATE hivemind_app._reblog_ops;
+    TRUNCATE hivemind_app._reblog_final;
+
+    INSERT INTO hivemind_app._reblog_ops
     WITH raw_ops AS (
         SELECT
             s.id,
@@ -509,10 +552,10 @@ BEGIN
 
     -- Determine final action per (author, permlink, account): last op wins
     -- This handles create→delete→create within the same batch correctly.
-    CREATE TEMP TABLE _reblog_final ON COMMIT DROP AS
+    INSERT INTO hivemind_app._reblog_final
     SELECT DISTINCT ON (author, permlink, account)
         id, account, author, permlink, block_date, block_num, is_delete
-    FROM _reblog_ops
+    FROM hivemind_app._reblog_ops
     ORDER BY author, permlink, account, id DESC;
 
     -- Process deletes: delete entries where ANY delete exists in this batch
@@ -520,12 +563,12 @@ BEGIN
     PERFORM hivemind_app.delete_reblog_feed_cache(
         ro.author::VARCHAR, ro.permlink::VARCHAR, ro.account::VARCHAR
     )
-    FROM (SELECT DISTINCT author, permlink, account FROM _reblog_ops WHERE is_delete) ro;
+    FROM (SELECT DISTINCT author, permlink, account FROM hivemind_app._reblog_ops WHERE is_delete) ro;
 
     -- Process creates: only insert where the FINAL action is a create
     WITH deduped AS (
         SELECT account, author, permlink, block_date, block_num
-        FROM _reblog_final
+        FROM hivemind_app._reblog_final
         WHERE NOT is_delete
     ),
     validated AS (
@@ -547,8 +590,7 @@ BEGIN
 
     GET DIAGNOSTICS _count = ROW_COUNT;
 
-    DROP TABLE IF EXISTS _reblog_ops;
-
+    -- Tables are truncated at start of next call, no drop needed
     RETURN _count;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
@@ -678,111 +720,57 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_payouts_from_staging(
 DECLARE
     _count INT := 0;
 BEGIN
-    -- Collect payout virtual ops (types 51, 53, 61, 72) from staging
-    -- Aggregate per (author, permlink): combine AUTHOR_REWARD, COMMENT_REWARD,
-    -- COMMENT_PAYOUT_UPDATE, EFFECTIVE_COMMENT_VOTE values
+    -- Collect payout virtual ops (types 51, 53, 61, 72) from staging.
+    -- Single-pass aggregation: GROUP BY (author, permlink) with FILTER extracts
+    -- per-type "last row" values using array_agg(...ORDER BY id DESC)[1].
+    -- Replaces 4 separate DISTINCT ON CTEs + 4-way UNION + 4-way LEFT JOIN.
     --
-    -- When COMMENT_REWARD exists for a post, EFFECTIVE_COMMENT_VOTE payout data
-    -- is discarded (nullified).
+    -- When COMMENT_REWARD (type 53) exists for a post, EFFECTIVE_COMMENT_VOTE
+    -- payout data is discarded (nullified via has_cr flag).
 
-    WITH payout_ops AS (
+    WITH payout_agg AS (
         SELECT
-            s.id,
-            s.block_num,
-            s.block_date,
-            s.op_type_id,
             s.val->>'author' AS author,
             s.val->>'permlink' AS permlink,
-            s.val
+            -- COMMENT_PAYOUT_UPDATE (type 61) - last occurrence
+            (array_agg(s.block_date ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 61))[1] AS cpu_payout_date,
+            -- AUTHOR_REWARD (type 51) - last occurrence
+            (array_agg((s.val->'hive_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_hive,
+            (array_agg((s.val->'hbd_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_hbd,
+            (array_agg((s.val->'vesting_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_vests,
+            -- COMMENT_REWARD (type 53) - last occurrence
+            (array_agg((s.val->>'author_rewards')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS author_rewards,
+            (array_agg(s.val->'total_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS total_payout_value,
+            (array_agg(s.val->'curator_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS curator_payout_value,
+            (array_agg(s.val->'beneficiary_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS beneficiary_payout_value,
+            (array_agg(s.block_date ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS cr_payout_date,
+            -- EFFECTIVE_COMMENT_VOTE (type 72) - last occurrence, only if beyond safe cashout
+            (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json_raw,
+            (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight_raw,
+            -- Flag: has COMMENT_REWARD? (used to nullify ECV data)
+            bool_or(s.op_type_id = 53) AS has_cr
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (51, 53, 61, 72)
+        GROUP BY s.val->>'author', s.val->>'permlink'
     ),
-    -- Check which (author, permlink) pairs have COMMENT_REWARD (type 53)
-    has_comment_reward AS (
-        SELECT DISTINCT author, permlink
-        FROM payout_ops WHERE op_type_id = 53
-    ),
-    -- COMMENT_PAYOUT_UPDATE (type 61) - "final" payout marker
-    cpu_data AS (
-        SELECT DISTINCT ON (author, permlink)
-            author, permlink, block_date AS payout_date
-        FROM payout_ops WHERE op_type_id = 61
-        ORDER BY author, permlink, id DESC
-    ),
-    -- AUTHOR_REWARD (type 51)
-    ar_data AS (
-        SELECT DISTINCT ON (author, permlink)
-            author, permlink,
-            (val->'hive_payout'->>'amount')::BIGINT AS author_rewards_hive,
-            (val->'hbd_payout'->>'amount')::BIGINT AS author_rewards_hbd,
-            (val->'vesting_payout'->>'amount')::BIGINT AS author_rewards_vests,
-            block_date AS payout_date
-        FROM payout_ops WHERE op_type_id = 51
-        ORDER BY author, permlink, id DESC
-    ),
-    -- COMMENT_REWARD (type 53)
-    cr_data AS (
-        SELECT DISTINCT ON (author, permlink)
-            author, permlink,
-            (val->>'author_rewards')::BIGINT AS author_rewards,
-            val->'total_payout_value' AS total_payout_value,
-            val->'curator_payout_value' AS curator_payout_value,
-            val->'beneficiary_payout_value' AS beneficiary_payout_value,
-            block_date AS payout_date
-        FROM payout_ops WHERE op_type_id = 53
-        ORDER BY author, permlink, id DESC
-    ),
-    -- EFFECTIVE_COMMENT_VOTE (type 72) - only if NOT safe cashout and no COMMENT_REWARD
-    ecv_data AS (
-        SELECT DISTINCT ON (po.author, po.permlink)
-            po.author, po.permlink,
-            po.val->'pending_payout' AS pending_payout_json,
-            (po.val->>'total_vote_weight')::NUMERIC AS total_vote_weight
-        FROM payout_ops po
-        WHERE po.op_type_id = 72
-          AND po.block_num > _last_safe_cashout_block
-          AND NOT EXISTS (
-              SELECT 1 FROM has_comment_reward hcr
-              WHERE hcr.author = po.author AND hcr.permlink = po.permlink
-          )
-        ORDER BY po.author, po.permlink, po.id DESC
-    ),
-    -- Collect all unique (author, permlink) pairs that have any payout data
-    all_keys AS (
-        SELECT author, permlink FROM cpu_data
-        UNION
-        SELECT author, permlink FROM ar_data
-        UNION
-        SELECT author, permlink FROM cr_data
-        UNION
-        SELECT author, permlink FROM ecv_data
-    ),
-    -- Merge all payout data
     merged AS (
         SELECT
-            ak.author, ak.permlink,
+            pa.author, pa.permlink,
             ha.id AS author_id,
-            -- From COMMENT_PAYOUT_UPDATE
-            cpu.payout_date AS cpu_payout_date,
-            -- From AUTHOR_REWARD
-            ar.author_rewards_hive,
-            ar.author_rewards_hbd,
-            ar.author_rewards_vests,
-            -- From COMMENT_REWARD
-            cr.author_rewards,
-            cr.total_payout_value,
-            cr.curator_payout_value,
-            cr.beneficiary_payout_value,
-            cr.payout_date AS cr_payout_date,
-            -- From EFFECTIVE_COMMENT_VOTE (only if no COMMENT_REWARD)
-            ecv.pending_payout_json,
-            ecv.total_vote_weight
-        FROM all_keys ak
-        JOIN hivemind_app.hive_accounts ha ON ha.name = ak.author
-        LEFT JOIN cpu_data cpu ON cpu.author = ak.author AND cpu.permlink = ak.permlink
-        LEFT JOIN ar_data ar ON ar.author = ak.author AND ar.permlink = ak.permlink
-        LEFT JOIN cr_data cr ON cr.author = ak.author AND cr.permlink = ak.permlink
-        LEFT JOIN ecv_data ecv ON ecv.author = ak.author AND ecv.permlink = ak.permlink
+            pa.cpu_payout_date,
+            pa.author_rewards_hive,
+            pa.author_rewards_hbd,
+            pa.author_rewards_vests,
+            pa.author_rewards,
+            pa.total_payout_value,
+            pa.curator_payout_value,
+            pa.beneficiary_payout_value,
+            pa.cr_payout_date,
+            -- Nullify ECV data when COMMENT_REWARD exists (it supersedes pending payout)
+            CASE WHEN pa.has_cr THEN NULL ELSE pa.pending_payout_json_raw END AS pending_payout_json,
+            CASE WHEN pa.has_cr THEN NULL ELSE pa.total_vote_weight_raw END AS total_vote_weight
+        FROM payout_agg pa
+        JOIN hivemind_app.hive_accounts ha ON ha.name = pa.author
     )
     UPDATE hivemind_app.hive_posts hp
     SET
@@ -2218,5 +2206,42 @@ BEGIN
 
     GET DIAGNOSTICS _count = ROW_COUNT;
     RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- ============================================================================
+-- Server-side wrapper: process_batch_phases_1_to_3a
+-- Runs Phases 1 through 3a in a single function call, eliminating ~8
+-- Python→DB round-trips (START TRANSACTION/COMMIT pairs for each sub-phase).
+-- Within a single function, all statements share the same snapshot and can
+-- see each other's writes without explicit COMMIT.
+-- Returns the post_staging_result set needed by Python for body merging.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION hivemind_app.process_batch_phases_1_to_3a(
+    _first_block INT,
+    _last_block INT,
+    _community_support_start_block INT
+) RETURNS SETOF hivemind_app.post_staging_result AS $function$
+BEGIN
+    -- Phase 1: Load staging table
+    PERFORM hivemind_app.load_ops_staging(_first_block, _last_block);
+
+    -- Phase 2: Account registration
+    PERFORM hivemind_app.process_accounts_from_staging(_community_support_start_block);
+
+    -- Phase 2.5: Community state changes (subscribe, setRole, updateProps)
+    PERFORM hivemind_app.process_community_from_staging(_community_support_start_block, 1);
+
+    -- Phase 3: Post/comment processing
+    -- Must return results for Python body merging (Phase 3b)
+    RETURN QUERY SELECT * FROM hivemind_app.process_posts_from_staging(_community_support_start_block);
+
+    -- Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost)
+    PERFORM hivemind_app.process_community_from_staging(_community_support_start_block, 2);
+
+    -- Phase 3a continued: Propagate MUTED_PARENT to children of newly-muted posts
+    PERFORM hivemind_app.propagate_muted_parent_for_batch(_first_block, _last_block);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
