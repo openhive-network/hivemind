@@ -524,9 +524,6 @@ BEGIN
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = d.permlink
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
-        -- Filter out reblogs from before post was recreated (delete/recreate cycle)
-        -- Use block_num_created (not block_num) because block_num is updated on edits
-        WHERE d.block_num >= hp.block_num_created
     )
     INSERT INTO hivemind_app.hive_reblogs (blogger_id, post_id, created_at, block_num)
     SELECT blogger_id, post_id, created_at, block_num FROM validated
@@ -1771,13 +1768,13 @@ BEGIN
         -- are correct during post creation. mutePost/unmutePost are NOT state actions —
         -- they target existing posts and must run AFTER posts are created (Phase 3a).
         _is_state_action := _action IN (
-            'subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle'
+            'subscribe', 'unsubscribe', 'setRole', 'setUserTitle'
         );
 
         -- Phase filtering:
         --   0 = all actions (default, used by live sync)
-        --   1 = state actions only (before posts: subscribe, setRole, updateProps, etc.)
-        --   2 = post-targeting ops only (after posts: mutePost, unmutePost, pinPost, etc.)
+        --   1 = state actions only (before posts: subscribe, setRole, setUserTitle)
+        --   2 = post-targeting ops only (after posts: mutePost, unmutePost, pinPost, updateProps, etc.)
         IF _phase = 1 THEN
             IF NOT _is_state_action THEN CONTINUE; END IF;
         END IF;
@@ -2042,7 +2039,7 @@ BEGIN
         FROM hivemind_app._follow_notification_events fe
         JOIN hivemind_app.hive_accounts ha_f ON ha_f.name = fe.follower_name
         JOIN hivemind_app.hive_accounts ha_g ON ha_g.name = fe.following_name
-        JOIN hivemind_app.blocks_view hb ON hb.num = fe.block_num
+        JOIN hivemind_app.blocks_view hb ON hb.num = fe.block_num - 1
         WHERE fe.block_num BETWEEN _first_block AND _last_block
     )
     INSERT INTO hivemind_app.hive_notification_cache
