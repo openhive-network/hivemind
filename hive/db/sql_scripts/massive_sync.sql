@@ -5,6 +5,9 @@
 -- 1. Staging Table DDL
 -- ============================================================================
 
+-- Sequence for community op notification counter (avoids collisions across ops)
+CREATE SEQUENCE IF NOT EXISTS hivemind_app.community_op_counter;
+
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
     id          BIGINT NOT NULL,       -- HAF operation ID (ordering)
     block_num   INT NOT NULL,
@@ -1067,6 +1070,269 @@ BEGIN
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
+
+-- ============================================================================
+-- 9b. process_community_op — dispatch a single community custom_json action
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION hivemind_app.process_community_op(
+    _auth_account TEXT,
+    _action TEXT,
+    _data JSONB,
+    _date TIMESTAMP,
+    _block_num INT
+) RETURNS VOID AS $function$
+DECLARE
+    _actor_id INT;
+    _community_name TEXT;
+    _community_id INT;
+    _account_name TEXT;
+    _account_id INT;
+    _permlink TEXT;
+    _role TEXT;
+    _role_id INT;
+    _notes TEXT;
+    _title TEXT;
+    _props JSONB;
+    _result RECORD;
+    _notification_first_block INT;
+    _counter INT;
+    _score INT := 35;
+    _type_id INT;
+    _post_id INT;
+BEGIN
+    -- Resolve actor
+    SELECT id INTO _actor_id FROM hivemind_app.hive_accounts WHERE name = _auth_account;
+    IF _actor_id IS NULL THEN RETURN; END IF;
+
+    -- Read community name (required for all actions)
+    _community_name := _data->>'community';
+    IF _community_name IS NULL OR _community_name = '' THEN RETURN; END IF;
+
+    -- Validate community exists
+    SELECT id INTO _community_id FROM hivemind_app.hive_communities WHERE name = _community_name;
+    IF _community_id IS NULL THEN
+        -- Generate error notification
+        SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
+        IF _block_num > _notification_first_block THEN
+            _counter := nextval('hivemind_app.community_op_counter');
+            INSERT INTO hivemind_app.hive_notification_cache
+            (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            VALUES (
+                hivemind_app.notification_id(_date, 10, _counter::INT % 4194303),
+                _block_num, 10, _date, _community_id, _actor_id, NULL, NULL, 35,
+                'Community ''' || _community_name || ''' does not exist', '', ''
+            );
+        END IF;
+        RETURN;
+    END IF;
+
+    -- Read action-specific fields
+    IF _action IN ('setRole', 'setUserTitle', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost') THEN
+        _account_name := _data->>'account';
+        IF _account_name IS NULL OR _account_name = '' THEN RETURN; END IF;
+        SELECT id INTO _account_id FROM hivemind_app.hive_accounts WHERE name = _account_name;
+        IF _account_id IS NULL THEN RETURN; END IF;
+    END IF;
+
+    IF _action IN ('mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost') THEN
+        _permlink := _data->>'permlink';
+        IF _permlink IS NULL OR _permlink = '' THEN RETURN; END IF;
+    END IF;
+
+    IF _action IN ('mutePost', 'unmutePost', 'flagPost') THEN
+        _notes := _data->>'notes';
+    END IF;
+
+    -- Get notification threshold
+    SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
+
+    -- Dispatch
+    CASE _action
+        WHEN 'updateProps' THEN
+            _props := _data->'props';
+            IF _props IS NULL OR jsonb_typeof(_props) != 'object' THEN RETURN; END IF;
+            SELECT * INTO _result FROM hivemind_app.update_community_props(_actor_id, _community_id, _props);
+            -- Notify team on success
+            IF _result.success AND _block_num > _notification_first_block THEN
+                PERFORM hivemind_app._community_notify_team(
+                    _block_num, 3, _actor_id, _community_id, _date, NULL, _result.team_members, _props::TEXT
+                );
+            END IF;
+
+        WHEN 'subscribe' THEN
+            _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+            SELECT * INTO _result FROM hivemind_app.community_subscribe(
+                _actor_id, _community_id, _date, _block_num, _counter
+            );
+
+        WHEN 'unsubscribe' THEN
+            SELECT * INTO _result FROM hivemind_app.community_unsubscribe(_actor_id, _community_id);
+
+        WHEN 'setRole' THEN
+            _role := _data->>'role';
+            IF _role IS NULL OR _role = '' THEN RETURN; END IF;
+            _role_id := CASE _role
+                WHEN 'muted' THEN -2
+                WHEN 'guest' THEN 0
+                WHEN 'member' THEN 2
+                WHEN 'mod' THEN 4
+                WHEN 'admin' THEN 6
+                WHEN 'owner' THEN 8
+                ELSE NULL
+            END;
+            IF _role_id IS NULL THEN RETURN; END IF;
+            SELECT * INTO _result FROM hivemind_app.community_set_role(
+                _actor_id, _account_id, _community_id, _role_id, _date, 100, 4
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 2, _counter),
+                    _block_num, 2, _date, _actor_id, _account_id, NULL, NULL, _score, _role, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'setUserTitle' THEN
+            _title := COALESCE(TRIM(_data->>'title'), '');
+            SELECT * INTO _result FROM hivemind_app.community_set_title(
+                _actor_id, _account_id, _community_id, _title, _date
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 4, _counter),
+                    _block_num, 4, _date, _actor_id, _account_id, NULL, NULL, _score, _title, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'mutePost' THEN
+            SELECT * INTO _result FROM hivemind_app.community_mute_post(
+                _actor_id, _community_id, _account_id, _permlink, 1  -- muted_reasons bitmask: bit 0 = community moderation
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 5, _counter),
+                    _block_num, 5, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'unmutePost' THEN
+            SELECT * INTO _result FROM hivemind_app.community_unmute_post(
+                _actor_id, _community_id, _account_id, _permlink
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 6, _counter),
+                    _block_num, 6, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'pinPost' THEN
+            SELECT * INTO _result FROM hivemind_app.community_pin_post(
+                _actor_id, _community_id, _account_id, _permlink
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 7, _counter),
+                    _block_num, 7, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'unpinPost' THEN
+            SELECT * INTO _result FROM hivemind_app.community_unpin_post(
+                _actor_id, _community_id, _account_id, _permlink
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+                INSERT INTO hivemind_app.hive_notification_cache
+                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                VALUES (
+                    hivemind_app.notification_id(_date, 8, _counter),
+                    _block_num, 8, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                );
+            END IF;
+
+        WHEN 'flagPost' THEN
+            SELECT * INTO _result FROM hivemind_app.community_flag_post(
+                _actor_id, _community_id, _account_id, _permlink, _community_name
+            );
+            IF _result.success AND _block_num > _notification_first_block THEN
+                PERFORM hivemind_app._community_notify_team(
+                    _block_num, 9, _actor_id, _community_id, _date, _result.post_id, _result.team_members, _notes
+                );
+            END IF;
+
+        ELSE
+            RETURN;  -- Unknown action
+    END CASE;
+
+    -- Generate error notification on failure
+    IF _result IS NOT NULL AND NOT _result.success AND _result.error_message IS NOT NULL AND _result.error_message != '' THEN
+        IF _block_num > _notification_first_block THEN
+            _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+            INSERT INTO hivemind_app.hive_notification_cache
+            (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            VALUES (
+                hivemind_app.notification_id(_date, 10, _counter),
+                _block_num, 10, _date, _community_id, _actor_id, NULL, NULL, 35,
+                _result.error_message, _community_name, ''
+            ) ON CONFLICT DO NOTHING;
+        END IF;
+    END IF;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- Helper: notify team members (mods/admins/owners) about a community action
+CREATE OR REPLACE FUNCTION hivemind_app._community_notify_team(
+    _block_num INT,
+    _type_id INT,
+    _actor_id INT,
+    _community_id INT,
+    _date TIMESTAMP,
+    _post_id INT,
+    _team_members INT[],
+    _payload TEXT
+) RETURNS VOID AS $function$
+DECLARE
+    _member_id INT;
+    _counter INT;
+    _community_name TEXT;
+BEGIN
+    SELECT name INTO _community_name FROM hivemind_app.hive_communities WHERE id = _community_id;
+    FOREACH _member_id IN ARRAY COALESCE(_team_members, ARRAY[]::INT[])
+    LOOP
+        IF _member_id = _actor_id THEN CONTINUE; END IF;
+        _counter := nextval('hivemind_app.community_op_counter')::INT % 4194303;
+        INSERT INTO hivemind_app.hive_notification_cache
+        (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+        VALUES (
+            hivemind_app.notification_id(_date, _type_id, _counter),
+            _block_num, _type_id, _date, _actor_id, _member_id, _post_id, _post_id, 35,
+            COALESCE(_payload, ''), COALESCE(_community_name, ''), ''
+        ) ON CONFLICT DO NOTHING;
+    END LOOP;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
 
 -- ============================================================================
 -- 10. process_community_from_staging()
