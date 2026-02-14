@@ -619,9 +619,9 @@ BEGIN
         SELECT DISTINCT ON (author, permlink)
             author, permlink,
             (val->>'author_rewards')::BIGINT AS author_rewards,
-            val->>'total_payout_value' AS total_payout_value,
-            val->>'curator_payout_value' AS curator_payout_value,
-            val->>'beneficiary_payout_value' AS beneficiary_payout_value,
+            val->'total_payout_value' AS total_payout_value,
+            val->'curator_payout_value' AS curator_payout_value,
+            val->'beneficiary_payout_value' AS beneficiary_payout_value,
             block_date AS payout_date
         FROM payout_ops WHERE op_type_id = 53
         ORDER BY author, permlink, id DESC
@@ -746,20 +746,43 @@ $function$ LANGUAGE plpgsql VOLATILE;
 
 
 -- Helper: parse legacy amount string like "1.234 HBD" -> numeric
-CREATE OR REPLACE FUNCTION hivemind_app.legacy_amount(_amount TEXT)
+CREATE OR REPLACE FUNCTION hivemind_app.legacy_amount(_amount JSONB)
 RETURNS TEXT AS $function$
+DECLARE
+    _raw BIGINT;
+    _precision INT;
+    _nai TEXT;
+    _asset TEXT;
+    _val DECIMAL;
 BEGIN
-    -- Pass-through: already in the correct format for hive_posts columns
-    RETURN _amount;
+    IF _amount IS NULL OR _amount = 'null'::jsonb THEN RETURN NULL; END IF;
+    _raw := (_amount->>'amount')::BIGINT;
+    _precision := COALESCE((_amount->>'precision')::INT, 3);
+    _nai := _amount->>'nai';
+    _asset := CASE _nai
+        WHEN '@@000000021' THEN 'HIVE'
+        WHEN '@@000000013' THEN 'HBD'
+        WHEN '@@000000037' THEN 'VESTS'
+        ELSE 'UNKNOWN'
+    END;
+    _val := _raw::DECIMAL / power(10, _precision);
+    RETURN trim(to_char(_val, 'FM999999999990.' || repeat('0', _precision))) || ' ' || _asset;
+EXCEPTION WHEN OTHERS THEN
+    RETURN NULL;
 END
 $function$ LANGUAGE plpgsql IMMUTABLE;
 
--- Helper: extract numeric value from HBD amount string
-CREATE OR REPLACE FUNCTION hivemind_app.sbd_amount(_amount TEXT)
+-- Helper: extract numeric HBD value from NAI JSONB amount object
+CREATE OR REPLACE FUNCTION hivemind_app.sbd_amount(_amount JSONB)
 RETURNS DECIMAL AS $function$
+DECLARE
+    _raw BIGINT;
+    _precision INT;
 BEGIN
-    IF _amount IS NULL THEN RETURN 0; END IF;
-    RETURN split_part(_amount, ' ', 1)::DECIMAL;
+    IF _amount IS NULL OR _amount = 'null'::jsonb THEN RETURN 0; END IF;
+    _raw := (_amount->>'amount')::BIGINT;
+    _precision := COALESCE((_amount->>'precision')::INT, 3);
+    RETURN _raw::DECIMAL / power(10, _precision);
 EXCEPTION WHEN OTHERS THEN
     RETURN 0;
 END
