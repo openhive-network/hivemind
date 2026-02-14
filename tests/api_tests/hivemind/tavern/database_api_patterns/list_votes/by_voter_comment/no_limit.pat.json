@@ -2791,16 +2791,6 @@
       "weight": 0
     },
     {
-      "author": "anns",
-      "last_update": "2016-09-04T01:27:45",
-      "num_changes": 0,
-      "permlink": "re-pigatto-storm-an-original-poem-20160904t001045175z",
-      "rshares": 2727450548,
-      "vote_percent": 10000,
-      "voter": "pigatto",
-      "weight": "12569574834720945"
-    },
-    {
       "author": "knozaki2015",
       "last_update": "2016-09-04T01:21:54",
       "num_changes": 0,
@@ -2819,6 +2809,16 @@
       "vote_percent": 10000,
       "voter": "pigatto",
       "weight": 207563571569463
+    },
+    {
+      "author": "anns",
+      "last_update": "2016-09-04T01:27:45",
+      "num_changes": 0,
+      "permlink": "re-pigatto-storm-an-original-poem-20160904t001045175z",
+      "rshares": 2727450548,
+      "vote_percent": 10000,
+      "voter": "pigatto",
+      "weight": "12569574834720945"
     },
     {
       "author": "lauralemons",

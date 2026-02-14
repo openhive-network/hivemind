@@ -1371,6 +1371,46 @@ BEGIN
         );
     END IF;
 
+    -- Step 7e: Correct community type muting for posts created BEFORE updateProps.
+    -- When updateProps runs in Phase 2.5 (before posts), ALL posts in blocks with
+    -- a type-changing updateProps see the new type and get muted. But posts created
+    -- BEFORE updateProps in the same block should NOT be muted by the new type —
+    -- at their creation time the old type was still in effect (matching old Python
+    -- behavior which processed ops in chronological order).
+    -- Posts before updateProps can only have type muting (bit 1) and parent cascade
+    -- (bit 2) — mutePost (bit 0) hasn't run yet — so clearing all muting is safe.
+    WITH updateprops_type_changes AS (
+        SELECT s.block_num, s.id AS staging_id,
+               hivemind_app.safe_parse_jsonb(s.val->>'json')->1->>'community' AS community_name
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 18
+          AND s.val->>'id' = 'community'
+          AND hivemind_app.safe_parse_jsonb(s.val->>'json')->>0 = 'updateProps'
+          AND hivemind_app.safe_parse_jsonb(s.val->>'json')->1->'props'->>'type_id' IS NOT NULL
+    ),
+    posts_before_updateprops AS (
+        SELECT pr.post_id
+        FROM updateprops_type_changes utc
+        JOIN hivemind_app.hive_communities hc ON hc.name = utc.community_name
+        JOIN hivemind_app._comment_staging cs ON cs.block_num = utc.block_num
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+        WHERE cs.staging_id < utc.staging_id
+          AND pr.is_new_post
+          AND pr.community_id = hc.id
+          AND pr.muted_reasons != 0
+    ),
+    unmuted_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET is_muted = FALSE, muted_reasons = 0
+        FROM posts_before_updateprops pbu
+        WHERE hp.id = pbu.post_id
+        RETURNING hp.id
+    )
+    UPDATE hivemind_app._post_results pr
+    SET is_post_muted = FALSE, muted_reasons = 0
+    FROM unmuted_posts u
+    WHERE pr.post_id = u.id;
+
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'
     -- notification (type 10) for the post author, explaining why it was muted.
@@ -1768,13 +1808,13 @@ BEGIN
         -- are correct during post creation. mutePost/unmutePost are NOT state actions —
         -- they target existing posts and must run AFTER posts are created (Phase 3a).
         _is_state_action := _action IN (
-            'subscribe', 'unsubscribe', 'setRole', 'setUserTitle'
+            'subscribe', 'unsubscribe', 'setRole', 'updateProps', 'setUserTitle'
         );
 
         -- Phase filtering:
         --   0 = all actions (default, used by live sync)
-        --   1 = state actions only (before posts: subscribe, setRole, setUserTitle)
-        --   2 = post-targeting ops only (after posts: mutePost, unmutePost, pinPost, updateProps, etc.)
+        --   1 = state actions only (before posts: subscribe, setRole, updateProps, setUserTitle)
+        --   2 = post-targeting ops only (after posts: mutePost, unmutePost, pinPost, etc.)
         IF _phase = 1 THEN
             IF NOT _is_state_action THEN CONTINUE; END IF;
         END IF;

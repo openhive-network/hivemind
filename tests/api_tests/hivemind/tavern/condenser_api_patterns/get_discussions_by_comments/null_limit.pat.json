@@ -219,60 +219,6 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 22504728466704,
-        "rshares": 66397090281,
-        "voter": "cheetah"
-      },
-      {
-        "percent": "10000",
-        "reputation": 1432707350,
-        "rshares": 268918927,
-        "voter": "cheetah00"
-      },
-      {
-        "percent": "10000",
-        "reputation": 19396838,
-        "rshares": 99482726,
-        "voter": "cheetah98"
-      },
-      {
-        "percent": "10000",
-        "reputation": 866537264,
-        "rshares": 99684049,
-        "voter": "cheetah99"
-      }
-    ],
-    "author": "cheetah",
-    "author_reputation": 22504728466704,
-    "beneficiaries": [],
-    "body": "Hi! I am a content-detection robot. This post is to help manual curators; I have NOT flagged you.\nHere is similar content:\nhttp://fizhnews.com/news/How-Sony’s-New-Show-‘Startup’-Gets-Bitcoin-Right",
-    "body_length": 196,
-    "cashout_time": "2016-09-22T18:46:30",
-    "category": "bitcoin",
-    "children": 0,
-    "created": "2016-09-15T18:46:30",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "json_metadata": "",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T18:46:30",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 66865175983,
-    "parent_author": "owaisted",
-    "parent_permlink": "sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work",
-    "pending_payout_value": "0.015 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work-20160915t184630",
-    "replies": [],
-    "root_title": "Sony’s New Show ‘Startup’ Gets Bitcoin Right but other parts of the program can use some work",
-    "title": "",
-    "total_payout_value": "0.000 HBD",
-    "url": "/bitcoin/@owaisted/sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work#@cheetah/re-sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work-20160915t184630"
-  },
-  {
-    "active_votes": [
-      {
-        "percent": "10000",
         "reputation": 25849925929525,
         "rshares": 185277296967,
         "voter": "anyx"
@@ -328,6 +274,60 @@
     "title": "",
     "total_payout_value": "0.000 HBD",
     "url": "/mindfulness/@eneismijmich/journey-of-life#@cheetah/re-re-eneismijmich-journey-of-life-20160915t181935060z-20160915t182017"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 22504728466704,
+        "rshares": 66397090281,
+        "voter": "cheetah"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1432707350,
+        "rshares": 268918927,
+        "voter": "cheetah00"
+      },
+      {
+        "percent": "10000",
+        "reputation": 19396838,
+        "rshares": 99482726,
+        "voter": "cheetah98"
+      },
+      {
+        "percent": "10000",
+        "reputation": 866537264,
+        "rshares": 99684049,
+        "voter": "cheetah99"
+      }
+    ],
+    "author": "cheetah",
+    "author_reputation": 22504728466704,
+    "beneficiaries": [],
+    "body": "Hi! I am a content-detection robot. This post is to help manual curators; I have NOT flagged you.\nHere is similar content:\nhttp://fizhnews.com/news/How-Sony\u2019s-New-Show-\u2018Startup\u2019-Gets-Bitcoin-Right",
+    "body_length": 196,
+    "cashout_time": "2016-09-22T18:46:30",
+    "category": "bitcoin",
+    "children": 0,
+    "created": "2016-09-15T18:46:30",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T18:46:30",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 66865175983,
+    "parent_author": "owaisted",
+    "parent_permlink": "sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work",
+    "pending_payout_value": "0.015 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work-20160915t184630",
+    "replies": [],
+    "root_title": "Sony\u2019s New Show \u2018Startup\u2019 Gets Bitcoin Right but other parts of the program can use some work",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/bitcoin/@owaisted/sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work#@cheetah/re-sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work-20160915t184630"
   },
   {
     "active_votes": [

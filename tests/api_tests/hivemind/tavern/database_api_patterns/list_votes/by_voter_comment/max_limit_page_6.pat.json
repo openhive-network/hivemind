@@ -11,6 +11,36 @@
       "weight": 0
     },
     {
+      "author": "nanzo-scoop",
+      "last_update": "2016-08-10T10:41:48",
+      "num_changes": 0,
+      "permlink": "when-your-useful-writing-tips-are-overshadowed-by-a-title-and-pic-that-looks-like-loadsamoney",
+      "rshares": 3694009108,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1166980302667616
+    },
+    {
+      "author": "dragonho",
+      "last_update": "2016-08-10T10:53:39",
+      "num_changes": 0,
+      "permlink": "the-secret-of-how-to-focus-on-yourself",
+      "rshares": 3078392981,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 222820646691403
+    },
+    {
+      "author": "jacor",
+      "last_update": "2016-08-10T12:26:42",
+      "num_changes": 0,
+      "permlink": "five-5-s-of-my-college-life-featuring-babybear-as-author",
+      "rshares": 3694073808,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 37863182268915
+    },
+    {
       "author": "anduweb",
       "last_update": "2016-08-10T08:40:57",
       "num_changes": 0,
@@ -49,36 +79,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
-    },
-    {
-      "author": "nanzo-scoop",
-      "last_update": "2016-08-10T10:41:48",
-      "num_changes": 0,
-      "permlink": "when-your-useful-writing-tips-are-overshadowed-by-a-title-and-pic-that-looks-like-loadsamoney",
-      "rshares": 3694009108,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1166980302667616
-    },
-    {
-      "author": "dragonho",
-      "last_update": "2016-08-10T10:53:39",
-      "num_changes": 0,
-      "permlink": "the-secret-of-how-to-focus-on-yourself",
-      "rshares": 3078392981,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 222820646691403
-    },
-    {
-      "author": "jacor",
-      "last_update": "2016-08-10T12:26:42",
-      "num_changes": 0,
-      "permlink": "five-5-s-of-my-college-life-featuring-babybear-as-author",
-      "rshares": 3694073808,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 37863182268915
     },
     {
       "author": "saulius",
@@ -121,36 +121,6 @@
       "weight": 1751425916470789
     },
     {
-      "author": "piedpiper",
-      "last_update": "2016-08-10T08:29:54",
-      "num_changes": 0,
-      "permlink": "re-naiya-cassidy-my-introduction-to-steemit-open-source-terraforming-and-how-i-became-a-voluntaryist-20160810t082322337z",
-      "rshares": 3078300008,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 336767081780044
-    },
-    {
-      "author": "piedpiper",
-      "last_update": "2016-08-10T08:35:57",
-      "num_changes": 0,
-      "permlink": "re-moonjelly-the-dollar-vigilante-exposed-god-s-gonna-cut-you-down-20160810t082907045z",
-      "rshares": 3078300008,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 451960133035830
-    },
-    {
-      "author": "karnal",
-      "last_update": "2016-08-10T08:44:12",
-      "num_changes": 0,
-      "permlink": "re-littlekitty-fetch-a-short-introspection-on-submission-20160810t083612900z",
-      "rshares": 3078300008,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 188093986212319
-    },
-    {
       "author": "rznag",
       "last_update": "2016-08-10T08:46:54",
       "num_changes": 0,
@@ -189,6 +159,36 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
+    },
+    {
+      "author": "piedpiper",
+      "last_update": "2016-08-10T08:29:54",
+      "num_changes": 0,
+      "permlink": "re-naiya-cassidy-my-introduction-to-steemit-open-source-terraforming-and-how-i-became-a-voluntaryist-20160810t082322337z",
+      "rshares": 3078300008,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 336767081780044
+    },
+    {
+      "author": "piedpiper",
+      "last_update": "2016-08-10T08:35:57",
+      "num_changes": 0,
+      "permlink": "re-moonjelly-the-dollar-vigilante-exposed-god-s-gonna-cut-you-down-20160810t082907045z",
+      "rshares": 3078300008,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 451960133035830
+    },
+    {
+      "author": "karnal",
+      "last_update": "2016-08-10T08:44:12",
+      "num_changes": 0,
+      "permlink": "re-littlekitty-fetch-a-short-introspection-on-submission-20160810t083612900z",
+      "rshares": 3078300008,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 188093986212319
     },
     {
       "author": "jacor",
@@ -341,6 +341,26 @@
       "weight": 1959737232941456
     },
     {
+      "author": "oaldamster",
+      "last_update": "2016-08-10T10:57:24",
+      "num_changes": 0,
+      "permlink": "steem-on-graphene-song-for-short-statue-3d-printable-maybe-even-in-concrete",
+      "rshares": 3078392981,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1795424632585395
+    },
+    {
+      "author": "blackjincrypto",
+      "last_update": "2016-08-10T16:15:30",
+      "num_changes": 0,
+      "permlink": "simple-trading-techniques-using-4h-macd-huobi",
+      "rshares": 3078457990,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2141846665519711
+    },
+    {
       "author": "tmendieta",
       "last_update": "2016-08-11T02:52:39",
       "num_changes": 0,
@@ -399,26 +419,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 127671891412222
-    },
-    {
-      "author": "oaldamster",
-      "last_update": "2016-08-10T10:57:24",
-      "num_changes": 0,
-      "permlink": "steem-on-graphene-song-for-short-statue-3d-printable-maybe-even-in-concrete",
-      "rshares": 3078392981,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1795424632585395
-    },
-    {
-      "author": "blackjincrypto",
-      "last_update": "2016-08-10T16:15:30",
-      "num_changes": 0,
-      "permlink": "simple-trading-techniques-using-4h-macd-huobi",
-      "rshares": 3078457990,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 2141846665519711
     },
     {
       "author": "tmendieta",
@@ -539,16 +539,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 903055433233649
-    },
-    {
-      "author": "smooth",
-      "last_update": "2016-08-10T22:10:36",
-      "num_changes": 0,
-      "permlink": "re-ervin-lemark-re-blakemiles84-re-ervin-lemark-re-fyrstikken-have-you-checked-steemit-s-daemon-lately-20160810t114012800z",
-      "rshares": 2462856953,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1758700569728558
     },
     {
       "author": "mada",
@@ -679,6 +669,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1763586428949218
+    },
+    {
+      "author": "smooth",
+      "last_update": "2016-08-10T22:10:36",
+      "num_changes": 0,
+      "permlink": "re-ervin-lemark-re-blakemiles84-re-ervin-lemark-re-fyrstikken-have-you-checked-steemit-s-daemon-lately-20160810t114012800z",
+      "rshares": 2462856953,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1758700569728558
     },
     {
       "author": "sethlinson",
@@ -901,16 +901,6 @@
       "weight": 1164930006798160
     },
     {
-      "author": "infovore",
-      "last_update": "2016-08-10T14:51:12",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-secret-writer-the-woman-of-my-dreams-cheated-on-me-and-nearly-destroyed-my-life-20160810t133302006z",
-      "rshares": 3078450564,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5970681838585255
-    },
-    {
       "author": "clayop",
       "last_update": "2016-08-10T14:06:45",
       "num_changes": 0,
@@ -961,16 +951,6 @@
       "weight": 1782588296427617
     },
     {
-      "author": "karnal",
-      "last_update": "2016-08-10T14:12:03",
-      "num_changes": 0,
-      "permlink": "re-creator-bitcoin-turbulence-it-goes-on-and-on-20160810t135952600z",
-      "rshares": 3078424561,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3308748333041110
-    },
-    {
       "author": "rok-sivante",
       "last_update": "2016-08-10T14:07:03",
       "num_changes": 0,
@@ -989,6 +969,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 218412314861381
+    },
+    {
+      "author": "infovore",
+      "last_update": "2016-08-10T14:51:12",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-secret-writer-the-woman-of-my-dreams-cheated-on-me-and-nearly-destroyed-my-life-20160810t133302006z",
+      "rshares": 3078450564,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5970681838585255
+    },
+    {
+      "author": "karnal",
+      "last_update": "2016-08-10T14:12:03",
+      "num_changes": 0,
+      "permlink": "re-creator-bitcoin-turbulence-it-goes-on-and-on-20160810t135952600z",
+      "rshares": 3078424561,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3308748333041110
     },
     {
       "author": "hulkhobo",
@@ -1039,16 +1039,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1439971128756536
-    },
-    {
-      "author": "bergy",
-      "last_update": "2016-08-10T16:50:06",
-      "num_changes": 0,
-      "permlink": "re-steempower-marketing-campaign-completed-big-success-tips-for-drawing-in-a-crowd-on-the-cheap-and-some-overall-statistics-20160810t141117847z",
-      "rshares": 3078483978,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8368282835183153
     },
     {
       "author": "kingscrown",
@@ -1111,16 +1101,6 @@
       "weight": 8505393048134201
     },
     {
-      "author": "limitless",
-      "last_update": "2016-08-11T02:09:39",
-      "num_changes": 0,
-      "permlink": "re-mammasitta-why-did-i-stop-following-trends-on-steemit-and-rather-focus-on-topics-i-am-interested-in-looking-for-real-people-20160810t142412014z",
-      "rshares": 3078715688,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8474893151419714
-    },
-    {
       "author": "jamtaylor",
       "last_update": "2016-08-10T14:55:18",
       "num_changes": 0,
@@ -1159,6 +1139,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 142656339520615
+    },
+    {
+      "author": "bergy",
+      "last_update": "2016-08-10T16:50:06",
+      "num_changes": 0,
+      "permlink": "re-steempower-marketing-campaign-completed-big-success-tips-for-drawing-in-a-crowd-on-the-cheap-and-some-overall-statistics-20160810t141117847z",
+      "rshares": 3078483978,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8368282835183153
+    },
+    {
+      "author": "limitless",
+      "last_update": "2016-08-11T02:09:39",
+      "num_changes": 0,
+      "permlink": "re-mammasitta-why-did-i-stop-following-trends-on-steemit-and-rather-focus-on-topics-i-am-interested-in-looking-for-real-people-20160810t142412014z",
+      "rshares": 3078715688,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8474893151419714
     },
     {
       "author": "steempower",
@@ -1209,16 +1209,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 132186903306626
-    },
-    {
-      "author": "applecrisp",
-      "last_update": "2016-08-10T16:52:33",
-      "num_changes": 0,
-      "permlink": "re-steempower-marketing-campaign-completed-big-success-tips-for-drawing-in-a-crowd-on-the-cheap-and-some-overall-statistics-20160810t150906643z",
-      "rshares": 2462787182,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6789460225993011
     },
     {
       "author": "zorro",
@@ -1291,16 +1281,6 @@
       "weight": 1054376267000315
     },
     {
-      "author": "mammasitta",
-      "last_update": "2016-08-11T02:10:00",
-      "num_changes": 0,
-      "permlink": "re-limitless-re-mammasitta-why-did-i-stop-following-trends-on-steemit-and-rather-focus-on-topics-i-am-interested-in-looking-for-real-people-20160810t152157244z",
-      "rshares": 3078715688,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8212742986738747
-    },
-    {
       "author": "nonlinearone",
       "last_update": "2016-08-10T22:54:27",
       "num_changes": 0,
@@ -1311,6 +1291,26 @@
       "weight": 639238503137668
     },
     {
+      "author": "applecrisp",
+      "last_update": "2016-08-10T16:52:33",
+      "num_changes": 0,
+      "permlink": "re-steempower-marketing-campaign-completed-big-success-tips-for-drawing-in-a-crowd-on-the-cheap-and-some-overall-statistics-20160810t150906643z",
+      "rshares": 2462787182,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6789460225993011
+    },
+    {
+      "author": "mammasitta",
+      "last_update": "2016-08-11T02:10:00",
+      "num_changes": 0,
+      "permlink": "re-limitless-re-mammasitta-why-did-i-stop-following-trends-on-steemit-and-rather-focus-on-topics-i-am-interested-in-looking-for-real-people-20160810t152157244z",
+      "rshares": 3078715688,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8212742986738747
+    },
+    {
       "author": "lukewearechange",
       "last_update": "2016-08-10T16:09:00",
       "num_changes": 0,
@@ -1319,16 +1319,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 966845691882124
-    },
-    {
-      "author": "jpiper20",
-      "last_update": "2016-08-10T16:05:33",
-      "num_changes": 0,
-      "permlink": "re-berniesanders-re-jpiper20-re-berniesanders-re-jpiper20-they-fucked-bernie-up-20160810t155834639z",
-      "rshares": 3078454277,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 40432260162376
     },
     {
       "author": "queenmountain",
@@ -1451,6 +1441,16 @@
       "weight": 702969796590351
     },
     {
+      "author": "jpiper20",
+      "last_update": "2016-08-10T16:05:33",
+      "num_changes": 0,
+      "permlink": "re-berniesanders-re-jpiper20-re-berniesanders-re-jpiper20-they-fucked-bernie-up-20160810t155834639z",
+      "rshares": 3078454277,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 40432260162376
+    },
+    {
       "author": "cryptoctopus",
       "last_update": "2016-08-10T16:42:00",
       "num_changes": 0,
@@ -1479,16 +1479,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1724974209555896
-    },
-    {
-      "author": "donkeypong",
-      "last_update": "2016-08-10T16:43:00",
-      "num_changes": 0,
-      "permlink": "re-cryptoctopus-re-corbettreport-the-corbett-report-is-here-here-s-how-i-introduced-steemit-to-my-150-000-youtube-subscribers-20160810t164124256z",
-      "rshares": 3078470984,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 168311107130045
     },
     {
       "author": "dragonanarchist",
@@ -1621,6 +1611,46 @@
       "weight": 117463469435411
     },
     {
+      "author": "xbananax",
+      "last_update": "2016-08-10T18:21:00",
+      "num_changes": 0,
+      "permlink": "when-it-rains-in-aruba",
+      "rshares": 3078554498,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 119061503107463
+    },
+    {
+      "author": "riverhead",
+      "last_update": "2016-08-11T02:16:15",
+      "num_changes": 0,
+      "permlink": "witness-riverhead-update-week-of-august-1st-2016",
+      "rshares": 2462972550,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 155533643533671
+    },
+    {
+      "author": "andrarchy",
+      "last_update": "2016-08-10T20:06:36",
+      "num_changes": 0,
+      "permlink": "competition-good-or-bad",
+      "rshares": 2462855470,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 105080208180458
+    },
+    {
+      "author": "donkeypong",
+      "last_update": "2016-08-10T16:43:00",
+      "num_changes": 0,
+      "permlink": "re-cryptoctopus-re-corbettreport-the-corbett-report-is-here-here-s-how-i-introduced-steemit-to-my-150-000-youtube-subscribers-20160810t164124256z",
+      "rshares": 3078470984,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 168311107130045
+    },
+    {
       "author": "james212",
       "last_update": "2016-08-10T18:29:06",
       "num_changes": 0,
@@ -1679,46 +1709,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 5800528478143024
-    },
-    {
-      "author": "xbananax",
-      "last_update": "2016-08-10T18:21:00",
-      "num_changes": 0,
-      "permlink": "when-it-rains-in-aruba",
-      "rshares": 3078554498,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 119061503107463
-    },
-    {
-      "author": "riverhead",
-      "last_update": "2016-08-11T02:16:15",
-      "num_changes": 0,
-      "permlink": "witness-riverhead-update-week-of-august-1st-2016",
-      "rshares": 2462972550,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 155533643533671
-    },
-    {
-      "author": "andrarchy",
-      "last_update": "2016-08-10T20:06:36",
-      "num_changes": 0,
-      "permlink": "competition-good-or-bad",
-      "rshares": 2462855470,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 105080208180458
-    },
-    {
-      "author": "demotruk",
-      "last_update": "2016-08-11T04:49:12",
-      "num_changes": 0,
-      "permlink": "re-anonymint-re-modprobe-how-the-steem-dollar-peg-works-20160810t173808657z",
-      "rshares": 2463022888,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6859288466902375
     },
     {
       "author": "jamtaylor",
@@ -1791,26 +1781,6 @@
       "weight": 523346476739147
     },
     {
-      "author": "dwinblood",
-      "last_update": "2016-08-10T18:38:57",
-      "num_changes": 0,
-      "permlink": "re-clevecross-re-lukewearechange-my-1st-video-about-steem-to-my-384-177-youtube-subscribers-lmk-what-you-think-20160810t174233235z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1541558636468895
-    },
-    {
-      "author": "lukewearechange",
-      "last_update": "2016-08-10T18:29:24",
-      "num_changes": 0,
-      "permlink": "re-venuspcs-re-dollarvigilante-re-lukewearechange-my-1st-video-about-steem-to-my-384-177-youtube-subscribers-lmk-what-you-think-20160810t175145730z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1541543460843388
-    },
-    {
       "author": "andu",
       "last_update": "2016-08-10T18:24:36",
       "num_changes": 0,
@@ -1831,14 +1801,74 @@
       "weight": 1998019013704516
     },
     {
-      "author": "celsius100",
-      "last_update": "2016-08-10T18:22:57",
+      "author": "opheliafu",
+      "last_update": "2016-08-10T18:17:57",
       "num_changes": 0,
-      "permlink": "re-stellabelle-re-celsius100-re-stellabelle-the-founder-of-the-secret-writer-reveals-her-broken-heart-romantic-love-is-a-lie-20160810t175745968z",
+      "permlink": "how-does-your-steemit-creativity-grow",
       "rshares": 3078554498,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 5070495758946838
+      "weight": 1663124263197293
+    },
+    {
+      "author": "zivile",
+      "last_update": "2016-08-10T18:39:57",
+      "num_changes": 0,
+      "permlink": "this-is-what-you-did-not-know-about-tea-2-recipes",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 88080722936386
+    },
+    {
+      "author": "inertia",
+      "last_update": "2016-08-11T16:58:06",
+      "num_changes": 0,
+      "permlink": "dilution-not-a-tax-not-theft",
+      "rshares": 3080176495,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1104167767430252
+    },
+    {
+      "author": "drdastardly",
+      "last_update": "2016-08-20T14:26:48",
+      "num_changes": 0,
+      "permlink": "october-evening-in-bassett-creek-park",
+      "rshares": 3709208577,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 0
+    },
+    {
+      "author": "justinlaak",
+      "last_update": "2016-08-10T20:18:42",
+      "num_changes": 0,
+      "permlink": "why-drink-stale-coffee-part-2-roasting",
+      "rshares": 2462855470,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 50120736853035
+    },
+    {
+      "author": "demotruk",
+      "last_update": "2016-08-11T04:49:12",
+      "num_changes": 0,
+      "permlink": "re-anonymint-re-modprobe-how-the-steem-dollar-peg-works-20160810t173808657z",
+      "rshares": 2463022888,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6859288466902375
+    },
+    {
+      "author": "lukewearechange",
+      "last_update": "2016-08-10T18:29:24",
+      "num_changes": 0,
+      "permlink": "re-venuspcs-re-dollarvigilante-re-lukewearechange-my-1st-video-about-steem-to-my-384-177-youtube-subscribers-lmk-what-you-think-20160810t175145730z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1541543460843388
     },
     {
       "author": "edgeland",
@@ -1891,16 +1921,6 @@
       "weight": 6794299417954605
     },
     {
-      "author": "opheliafu",
-      "last_update": "2016-08-10T18:17:57",
-      "num_changes": 0,
-      "permlink": "how-does-your-steemit-creativity-grow",
-      "rshares": 3078554498,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1663124263197293
-    },
-    {
       "author": "cryptoctopus",
       "last_update": "2016-08-10T18:29:45",
       "num_changes": 0,
@@ -1909,66 +1929,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 6918910305909610
-    },
-    {
-      "author": "dollarvigilante",
-      "last_update": "2016-08-10T18:25:33",
-      "num_changes": 0,
-      "permlink": "re-winstonwolfe-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180214056z",
-      "rshares": 3078554498,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3941907029283941
-    },
-    {
-      "author": "dollarvigilante",
-      "last_update": "2016-08-10T18:30:42",
-      "num_changes": 0,
-      "permlink": "re-futurism-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180241144z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 7447819418926434
-    },
-    {
-      "author": "zivile",
-      "last_update": "2016-08-10T18:39:57",
-      "num_changes": 0,
-      "permlink": "this-is-what-you-did-not-know-about-tea-2-recipes",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 88080722936386
-    },
-    {
-      "author": "inertia",
-      "last_update": "2016-08-11T16:58:06",
-      "num_changes": 0,
-      "permlink": "dilution-not-a-tax-not-theft",
-      "rshares": 3080176495,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1104167767430252
-    },
-    {
-      "author": "drdastardly",
-      "last_update": "2016-08-20T14:26:48",
-      "num_changes": 0,
-      "permlink": "october-evening-in-bassett-creek-park",
-      "rshares": 3709208577,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 0
-    },
-    {
-      "author": "justinlaak",
-      "last_update": "2016-08-10T20:18:42",
-      "num_changes": 0,
-      "permlink": "why-drink-stale-coffee-part-2-roasting",
-      "rshares": 2462855470,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 50120736853035
     },
     {
       "author": "harshalh",
@@ -2011,16 +1971,6 @@
       "weight": 5995012320044983
     },
     {
-      "author": "dollarvigilante",
-      "last_update": "2016-08-10T18:27:42",
-      "num_changes": 0,
-      "permlink": "re-thedashguy-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180839116z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3865333543886594
-    },
-    {
       "author": "blakemiles84",
       "last_update": "2016-08-10T18:28:27",
       "num_changes": 0,
@@ -2039,6 +1989,56 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 2704237933293001
+    },
+    {
+      "author": "dwinblood",
+      "last_update": "2016-08-10T18:38:57",
+      "num_changes": 0,
+      "permlink": "re-clevecross-re-lukewearechange-my-1st-video-about-steem-to-my-384-177-youtube-subscribers-lmk-what-you-think-20160810t174233235z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1541558636468895
+    },
+    {
+      "author": "celsius100",
+      "last_update": "2016-08-10T18:22:57",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-re-celsius100-re-stellabelle-the-founder-of-the-secret-writer-reveals-her-broken-heart-romantic-love-is-a-lie-20160810t175745968z",
+      "rshares": 3078554498,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5070495758946838
+    },
+    {
+      "author": "dollarvigilante",
+      "last_update": "2016-08-10T18:25:33",
+      "num_changes": 0,
+      "permlink": "re-winstonwolfe-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180214056z",
+      "rshares": 3078554498,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3941907029283941
+    },
+    {
+      "author": "dollarvigilante",
+      "last_update": "2016-08-10T18:30:42",
+      "num_changes": 0,
+      "permlink": "re-futurism-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180241144z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 7447819418926434
+    },
+    {
+      "author": "dollarvigilante",
+      "last_update": "2016-08-10T18:27:42",
+      "num_changes": 0,
+      "permlink": "re-thedashguy-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t180839116z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3865333543886594
     },
     {
       "author": "winstonwolfe",
@@ -2111,66 +2111,6 @@
       "weight": 1779327993881913
     },
     {
-      "author": "chaospoet",
-      "last_update": "2016-08-10T18:52:54",
-      "num_changes": 0,
-      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t182543404z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4911481278477514
-    },
-    {
-      "author": "recursive",
-      "last_update": "2016-08-10T18:33:33",
-      "num_changes": 0,
-      "permlink": "re-berniesanders-re-freedomengineer-re-dollarvigilante-want-to-be-a-steemillionaire-here-are-the-crucial-things-to-do-for-newbies-on-steemit-20160810t183348841z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 139840954275026
-    },
-    {
-      "author": "cryptoctopus",
-      "last_update": "2016-08-10T18:35:15",
-      "num_changes": 0,
-      "permlink": "re-princewahaj-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t183313441z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 396245093916768
-    },
-    {
-      "author": "nanzo-scoop",
-      "last_update": "2016-08-10T18:35:48",
-      "num_changes": 0,
-      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t183430605z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 359843218524028
-    },
-    {
-      "author": "akareyon",
-      "last_update": "2016-08-10T18:39:18",
-      "num_changes": 0,
-      "permlink": "re-corbettreport-the-corbett-report-is-here-here-s-how-i-introduced-steemit-to-my-150-000-youtube-subscribers-20160810t183503548z",
-      "rshares": 2462843598,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 801924594831555
-    },
-    {
-      "author": "faraz",
-      "last_update": "2016-08-10T20:05:36",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-re-stellabelle-secret-writer-my-old-lover-a-chest-cavity-that-s-where-my-feelings-drown-20160810t183603121z",
-      "rshares": 2462855470,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5094432400086236
-    },
-    {
       "author": "bacchist",
       "last_update": "2016-08-10T20:52:24",
       "num_changes": 0,
@@ -2241,6 +2181,76 @@
       "weight": 296824377770875
     },
     {
+      "author": "razvanelulmarin",
+      "last_update": "2016-08-10T20:52:42",
+      "num_changes": 0,
+      "permlink": "the-amazing-and-unexpected-benefit-of-taking-a-cold-shower-every-day-my-experience-original-crazy-art-by-klye",
+      "rshares": 2462855470,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 955470468950640
+    },
+    {
+      "author": "chaospoet",
+      "last_update": "2016-08-10T18:52:54",
+      "num_changes": 0,
+      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t182543404z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4911481278477514
+    },
+    {
+      "author": "recursive",
+      "last_update": "2016-08-10T18:33:33",
+      "num_changes": 0,
+      "permlink": "re-berniesanders-re-freedomengineer-re-dollarvigilante-want-to-be-a-steemillionaire-here-are-the-crucial-things-to-do-for-newbies-on-steemit-20160810t183348841z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 139840954275026
+    },
+    {
+      "author": "cryptoctopus",
+      "last_update": "2016-08-10T18:35:15",
+      "num_changes": 0,
+      "permlink": "re-princewahaj-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t183313441z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 396245093916768
+    },
+    {
+      "author": "nanzo-scoop",
+      "last_update": "2016-08-10T18:35:48",
+      "num_changes": 0,
+      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t183430605z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 359843218524028
+    },
+    {
+      "author": "akareyon",
+      "last_update": "2016-08-10T18:39:18",
+      "num_changes": 0,
+      "permlink": "re-corbettreport-the-corbett-report-is-here-here-s-how-i-introduced-steemit-to-my-150-000-youtube-subscribers-20160810t183503548z",
+      "rshares": 2462843598,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 801924594831555
+    },
+    {
+      "author": "faraz",
+      "last_update": "2016-08-10T20:05:36",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-re-stellabelle-secret-writer-my-old-lover-a-chest-cavity-that-s-where-my-feelings-drown-20160810t183603121z",
+      "rshares": 2462855470,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5094432400086236
+    },
+    {
       "author": "demotruk",
       "last_update": "2016-08-10T18:45:09",
       "num_changes": 0,
@@ -2289,16 +2299,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 4062276001117298
-    },
-    {
-      "author": "razvanelulmarin",
-      "last_update": "2016-08-10T20:52:42",
-      "num_changes": 0,
-      "permlink": "the-amazing-and-unexpected-benefit-of-taking-a-cold-shower-every-day-my-experience-original-crazy-art-by-klye",
-      "rshares": 2462855470,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 955470468950640
     },
     {
       "author": "alexc",
@@ -2359,16 +2359,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 195401587512828
-    },
-    {
-      "author": "moonjelly",
-      "last_update": "2016-08-11T00:29:45",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-7-reasons-the-dollar-vigilante-should-do-a-male-makeup-tutorial-to-redeem-himself-on-steemit-20160810t193921707z",
-      "rshares": 2462934027,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8911414853072788
     },
     {
       "author": "robreardon6",
@@ -2441,16 +2431,6 @@
       "weight": 3775261197384065
     },
     {
-      "author": "chitty",
-      "last_update": "2016-08-10T20:35:57",
-      "num_changes": 0,
-      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t195005817z",
-      "rshares": 2462855470,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3564601990457007
-    },
-    {
       "author": "alexbeyman",
       "last_update": "2016-08-11T06:07:45",
       "num_changes": 0,
@@ -2479,6 +2459,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1964920655269460
+    },
+    {
+      "author": "moonjelly",
+      "last_update": "2016-08-11T00:29:45",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-7-reasons-the-dollar-vigilante-should-do-a-male-makeup-tutorial-to-redeem-himself-on-steemit-20160810t193921707z",
+      "rshares": 2462934027,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8911414853072788
+    },
+    {
+      "author": "chitty",
+      "last_update": "2016-08-10T20:35:57",
+      "num_changes": 0,
+      "permlink": "re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t195005817z",
+      "rshares": 2462855470,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3564601990457007
     },
     {
       "author": "piedpiper",
@@ -2541,16 +2541,6 @@
       "weight": 1401060788136665
     },
     {
-      "author": "ervin-lemark",
-      "last_update": "2016-08-11T02:13:42",
-      "num_changes": 0,
-      "permlink": "re-rok-sivante-free-will-and-the-illusion-of-control-love-hate-god-the-devil-and-the-collusion-of-it-all-20160810t201710623z",
-      "rshares": 3078715688,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8965989484498908
-    },
-    {
       "author": "inboundinken",
       "last_update": "2016-08-10T20:45:36",
       "num_changes": 0,
@@ -2601,6 +2591,16 @@
       "weight": 94286234221841
     },
     {
+      "author": "ervin-lemark",
+      "last_update": "2016-08-11T02:13:42",
+      "num_changes": 0,
+      "permlink": "re-rok-sivante-free-will-and-the-illusion-of-control-love-hate-god-the-devil-and-the-collusion-of-it-all-20160810t201710623z",
+      "rshares": 3078715688,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8965989484498908
+    },
+    {
       "author": "fungusmonk",
       "last_update": "2016-08-11T10:30:54",
       "num_changes": 0,
@@ -2621,16 +2621,6 @@
       "weight": 1706100538949477
     },
     {
-      "author": "neilstrauss",
-      "last_update": "2016-08-11T14:53:45",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-the-founder-of-the-secret-writer-reveals-her-broken-heart-romantic-love-is-a-lie-20160810t210755364z",
-      "rshares": 3080130385,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 0
-    },
-    {
       "author": "patrice",
       "last_update": "2016-08-10T22:29:03",
       "num_changes": 0,
@@ -2646,6 +2636,16 @@
       "num_changes": 0,
       "permlink": "all-the-money-from-this-post-will-go-to-the-leave-no-paws-behind-charity-usd5-from-me-for-each-usd100",
       "rshares": 3079999304,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 0
+    },
+    {
+      "author": "neilstrauss",
+      "last_update": "2016-08-11T14:53:45",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-the-founder-of-the-secret-writer-reveals-her-broken-heart-romantic-love-is-a-lie-20160810t210755364z",
+      "rshares": 3080130385,
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
@@ -2709,16 +2709,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1340124408052005
-    },
-    {
-      "author": "timsaid",
-      "last_update": "2016-08-10T22:42:51",
-      "num_changes": 0,
-      "permlink": "re-timsaid-steem-survivors-fictional-series-episode-1-20160810t215645297z",
-      "rshares": 2462868814,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1691418264831616
     },
     {
       "author": "coliraver",
@@ -2811,6 +2801,16 @@
       "weight": 1339994650641670
     },
     {
+      "author": "timsaid",
+      "last_update": "2016-08-10T22:42:51",
+      "num_changes": 0,
+      "permlink": "re-timsaid-steem-survivors-fictional-series-episode-1-20160810t215645297z",
+      "rshares": 2462868814,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1691418264831616
+    },
+    {
       "author": "piedpiper",
       "last_update": "2016-08-10T22:28:06",
       "num_changes": 0,
@@ -2849,16 +2849,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 933499068991306
-    },
-    {
-      "author": "cryptobarry",
-      "last_update": "2016-08-11T02:18:18",
-      "num_changes": 0,
-      "permlink": "re-eneismijmich-why-do-20-posts-get-80-of-payout-20160810t223311769z",
-      "rshares": 2462972550,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 3887822402164030
     },
     {
       "author": "thebluepanda",
@@ -2941,6 +2931,16 @@
       "weight": 219345953299594
     },
     {
+      "author": "cryptobarry",
+      "last_update": "2016-08-11T02:18:18",
+      "num_changes": 0,
+      "permlink": "re-eneismijmich-why-do-20-posts-get-80-of-payout-20160810t223311769z",
+      "rshares": 2462972550,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 3887822402164030
+    },
+    {
       "author": "nords",
       "last_update": "2016-08-19T06:21:36",
       "num_changes": 0,
@@ -3001,26 +3001,6 @@
       "weight": 4845181080826851
     },
     {
-      "author": "markrmorrisjr",
-      "last_update": "2016-08-11T00:23:54",
-      "num_changes": 0,
-      "permlink": "re-ronintetsuro-re-piedpiper-re-markrmorrisjr-re-hilarski-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t234114869z",
-      "rshares": 2462934027,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8911420777600371
-    },
-    {
-      "author": "dollarvigilante",
-      "last_update": "2016-08-11T02:32:18",
-      "num_changes": 0,
-      "permlink": "re-pressfortruth-press-for-truth-on-steemit-so-long-shadowban-smashing-the-pyramid-one-block-at-a-time-20160810t234735974z",
-      "rshares": 2462972550,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1429541765626881
-    },
-    {
       "author": "vivianupman",
       "last_update": "2016-08-11T00:33:42",
       "num_changes": 0,
@@ -3059,6 +3039,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 59216644306138
+    },
+    {
+      "author": "dollarvigilante",
+      "last_update": "2016-08-11T02:32:18",
+      "num_changes": 0,
+      "permlink": "re-pressfortruth-press-for-truth-on-steemit-so-long-shadowban-smashing-the-pyramid-one-block-at-a-time-20160810t234735974z",
+      "rshares": 2462972550,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1429541765626881
+    },
+    {
+      "author": "markrmorrisjr",
+      "last_update": "2016-08-11T00:23:54",
+      "num_changes": 0,
+      "permlink": "re-ronintetsuro-re-piedpiper-re-markrmorrisjr-re-hilarski-re-dollarvigilante-steemit-is-a-scam-how-bernie-sanders-screwed-me-20160810t234114869z",
+      "rshares": 2462934027,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8911420777600371
     },
     {
       "author": "kopasi",
@@ -3121,6 +3121,16 @@
       "weight": 1748777943014940
     },
     {
+      "author": "lasvegasgirl",
+      "last_update": "2016-08-11T04:48:00",
+      "num_changes": 0,
+      "permlink": "my-visit-to-sake-rok-in-las-vegas-its-a-unique-sushi-experience-and-a-lot-of-fun",
+      "rshares": 2463022888,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 90827743370373
+    },
+    {
       "author": "acidyo",
       "last_update": "2016-08-11T00:27:57",
       "num_changes": 0,
@@ -3139,16 +3149,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 544005560430618
-    },
-    {
-      "author": "lasvegasgirl",
-      "last_update": "2016-08-11T04:48:00",
-      "num_changes": 0,
-      "permlink": "my-visit-to-sake-rok-in-las-vegas-its-a-unique-sushi-experience-and-a-lot-of-fun",
-      "rshares": 2463022888,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 90827743370373
     },
     {
       "author": "fingolfin",
@@ -3551,26 +3551,6 @@
       "weight": 6685868989525017
     },
     {
-      "author": "bendjmiller222",
-      "last_update": "2016-08-11T02:58:12",
-      "num_changes": 0,
-      "permlink": "re-condra-re-dantheman-people-rank-using-page-rank-algorithm-for-better-curation-and-rewards-20160811t025416082z",
-      "rshares": 2462982917,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 533287538413317
-    },
-    {
-      "author": "steemship",
-      "last_update": "2016-08-11T04:08:42",
-      "num_changes": 0,
-      "permlink": "re-mada-re-steemship-prove-it-s-not-you-case-raises-dangerous-precedent-for-artists-and-content-creators-20160811t030217231z",
-      "rshares": 2462996241,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4181601262189861
-    },
-    {
       "author": "cheetah",
       "last_update": "2016-08-11T04:15:24",
       "num_changes": 0,
@@ -3589,6 +3569,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 87876394334370
+    },
+    {
+      "author": "bendjmiller222",
+      "last_update": "2016-08-11T02:58:12",
+      "num_changes": 0,
+      "permlink": "re-condra-re-dantheman-people-rank-using-page-rank-algorithm-for-better-curation-and-rewards-20160811t025416082z",
+      "rshares": 2462982917,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 533287538413317
+    },
+    {
+      "author": "steemship",
+      "last_update": "2016-08-11T04:08:42",
+      "num_changes": 0,
+      "permlink": "re-mada-re-steemship-prove-it-s-not-you-case-raises-dangerous-precedent-for-artists-and-content-creators-20160811t030217231z",
+      "rshares": 2462996241,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4181601262189861
     },
     {
       "author": "anthonyj",
@@ -3691,6 +3691,26 @@
       "weight": 563693963573686
     },
     {
+      "author": "katecloud",
+      "last_update": "2016-08-11T06:49:21",
+      "num_changes": 0,
+      "permlink": "i-cashing-in-steem-hiking-the-appalachian-trail-and-body-painting-a-maxium-model",
+      "rshares": 2463869332,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 133228736032788
+    },
+    {
+      "author": "mrkuujo",
+      "last_update": "2016-08-11T06:48:21",
+      "num_changes": 0,
+      "permlink": "one-change-that-could-drastically-improve-the-streemit-experience-a-notification-centre",
+      "rshares": 2463869332,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6264973166234199
+    },
+    {
       "author": "poteshnik83",
       "last_update": "2016-08-11T14:38:39",
       "num_changes": 0,
@@ -3729,26 +3749,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
-    },
-    {
-      "author": "katecloud",
-      "last_update": "2016-08-11T06:49:21",
-      "num_changes": 0,
-      "permlink": "i-cashing-in-steem-hiking-the-appalachian-trail-and-body-painting-a-maxium-model",
-      "rshares": 2463869332,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 133228736032788
-    },
-    {
-      "author": "mrkuujo",
-      "last_update": "2016-08-11T06:48:21",
-      "num_changes": 0,
-      "permlink": "one-change-that-could-drastically-improve-the-streemit-experience-a-notification-centre",
-      "rshares": 2463869332,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6264973166234199
     },
     {
       "author": "williambanks",
@@ -3791,16 +3791,6 @@
       "weight": 75082929037129
     },
     {
-      "author": "dollarvigilante",
-      "last_update": "2016-08-11T08:39:57",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-7-reasons-the-dollar-vigilante-should-do-a-male-makeup-tutorial-to-redeem-himself-on-steemit-20160811t053556178z",
-      "rshares": 3079893985,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5577902125819714
-    },
-    {
       "author": "thedarkestplum",
       "last_update": "2016-08-11T06:09:30",
       "num_changes": 0,
@@ -3839,6 +3829,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 2080032721909037
+    },
+    {
+      "author": "dollarvigilante",
+      "last_update": "2016-08-11T08:39:57",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-7-reasons-the-dollar-vigilante-should-do-a-male-makeup-tutorial-to-redeem-himself-on-steemit-20160811t053556178z",
+      "rshares": 3079893985,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5577902125819714
     },
     {
       "author": "samupaha",
@@ -3971,16 +3971,6 @@
       "weight": 4525105749335828
     },
     {
-      "author": "smooth",
-      "last_update": "2016-08-11T10:13:30",
-      "num_changes": 0,
-      "permlink": "re-bendjmiller222-re-condra-re-dantheman-people-rank-using-page-rank-algorithm-for-better-curation-and-rewards-20160811t092310500z",
-      "rshares": 3079951273,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4621154364561543
-    },
-    {
       "author": "zjhzwgl",
       "last_update": "2016-08-11T12:32:45",
       "num_changes": 0,
@@ -3999,16 +3989,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 63138175885406
-    },
-    {
-      "author": "rittr",
-      "last_update": "2016-08-11T10:39:24",
-      "num_changes": 0,
-      "permlink": "re-summon-re-summon-re-martinwilson20-why-i-believe-steemit-numbers-could-drop-ff-in-the-future-20160811t094204022z",
-      "rshares": 3079999304,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 647718072438178
     },
     {
       "author": "crazymumzysa",
@@ -4059,6 +4039,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1826801045233969
+    },
+    {
+      "author": "smooth",
+      "last_update": "2016-08-11T10:13:30",
+      "num_changes": 0,
+      "permlink": "re-bendjmiller222-re-condra-re-dantheman-people-rank-using-page-rank-algorithm-for-better-curation-and-rewards-20160811t092310500z",
+      "rshares": 3079951273,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4621154364561543
+    },
+    {
+      "author": "rittr",
+      "last_update": "2016-08-11T10:39:24",
+      "num_changes": 0,
+      "permlink": "re-summon-re-summon-re-martinwilson20-why-i-believe-steemit-numbers-could-drop-ff-in-the-future-20160811t094204022z",
+      "rshares": 3079999304,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 647718072438178
     },
     {
       "author": "prufarchy",
@@ -4121,6 +4121,16 @@
       "weight": 2503985495660134
     },
     {
+      "author": "jholdsworthy",
+      "last_update": "2016-08-11T12:32:24",
+      "num_changes": 0,
+      "permlink": "steem-vs-btc-why-we-could-see-steem-overtake-btc-as-the-1-cryptocurrency-soon",
+      "rshares": 3080023312,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 140718525569410
+    },
+    {
       "author": "summon",
       "last_update": "2016-08-11T10:38:33",
       "num_changes": 0,
@@ -4159,16 +4169,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 668014064271341
-    },
-    {
-      "author": "jholdsworthy",
-      "last_update": "2016-08-11T12:32:24",
-      "num_changes": 0,
-      "permlink": "steem-vs-btc-why-we-could-see-steem-overtake-btc-as-the-1-cryptocurrency-soon",
-      "rshares": 3080023312,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 140718525569410
     },
     {
       "author": "mashkovpro",
@@ -4331,16 +4331,6 @@
       "weight": 770766687399726
     },
     {
-      "author": "smooth",
-      "last_update": "2016-08-11T12:28:27",
-      "num_changes": 0,
-      "permlink": "re-titusfrost-re-summon-re-titusfrost-titus-frost-youtube-channel-now-on-steemit-introduceyourself-20160811t115827400z",
-      "rshares": 3080023312,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 668462030238322
-    },
-    {
       "author": "bravenewcoin",
       "last_update": "2016-08-11T12:35:48",
       "num_changes": 0,
@@ -4421,6 +4411,16 @@
       "weight": 347642330379769
     },
     {
+      "author": "smooth",
+      "last_update": "2016-08-11T12:28:27",
+      "num_changes": 0,
+      "permlink": "re-titusfrost-re-summon-re-titusfrost-titus-frost-youtube-channel-now-on-steemit-introduceyourself-20160811t115827400z",
+      "rshares": 3080023312,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 668462030238322
+    },
+    {
       "author": "robrigo",
       "last_update": "2016-08-11T12:58:33",
       "num_changes": 0,
@@ -4451,16 +4451,6 @@
       "weight": 2354716324290300
     },
     {
-      "author": "summon",
-      "last_update": "2016-08-11T12:46:09",
-      "num_changes": 0,
-      "permlink": "re-webdesign-make-your-site-blazing-fast-with-http2-results-are-amazing-20160811t124445499z",
-      "rshares": 3080082391,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 32210500348638
-    },
-    {
       "author": "gavvet",
       "last_update": "2016-08-11T12:57:54",
       "num_changes": 0,
@@ -4489,6 +4479,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 12136216127559
+    },
+    {
+      "author": "summon",
+      "last_update": "2016-08-11T12:46:09",
+      "num_changes": 0,
+      "permlink": "re-webdesign-make-your-site-blazing-fast-with-http2-results-are-amazing-20160811t124445499z",
+      "rshares": 3080082391,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 32210500348638
     },
     {
       "author": "hanshotfirst",
@@ -4951,16 +4951,6 @@
       "weight": 2028631244599309
     },
     {
-      "author": "joseph",
-      "last_update": "2016-08-11T16:05:36",
-      "num_changes": 0,
-      "permlink": "re-busser-re-joseph-salem-is-a-social-media-platform-that-burns-20160811t160355685z",
-      "rshares": 3080130385,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 393595443148269
-    },
-    {
       "author": "hilarski",
       "last_update": "2016-08-11T16:37:27",
       "num_changes": 0,
@@ -5071,6 +5061,16 @@
       "weight": 2009003012016703
     },
     {
+      "author": "joseph",
+      "last_update": "2016-08-11T16:05:36",
+      "num_changes": 0,
+      "permlink": "re-busser-re-joseph-salem-is-a-social-media-platform-that-burns-20160811t160355685z",
+      "rshares": 3080130385,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 393595443148269
+    },
+    {
       "author": "mrgrey",
       "last_update": "2016-08-12T02:55:24",
       "num_changes": 0,
@@ -5141,16 +5141,6 @@
       "weight": 2402578192442391
     },
     {
-      "author": "andrewdemeter",
-      "last_update": "2016-08-11T20:47:09",
-      "num_changes": 0,
-      "permlink": "re-laconicflow-re-andrewdemeter-re-laconicflow-re-dollarvigilante-re-andrewdemeter-i-called-john-mcafee-and-he-won-t-join-steemit-because-of-this-flaw-20160811t170259887z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5323119177195683
-    },
-    {
       "author": "kencode",
       "last_update": "2016-08-11T18:11:00",
       "num_changes": 0,
@@ -5211,6 +5201,16 @@
       "weight": 5323227249621129
     },
     {
+      "author": "andrewdemeter",
+      "last_update": "2016-08-11T20:47:09",
+      "num_changes": 0,
+      "permlink": "re-laconicflow-re-andrewdemeter-re-laconicflow-re-dollarvigilante-re-andrewdemeter-i-called-john-mcafee-and-he-won-t-join-steemit-because-of-this-flaw-20160811t170259887z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5323119177195683
+    },
+    {
       "author": "blakemiles84",
       "last_update": "2016-08-12T10:32:24",
       "num_changes": 0,
@@ -5229,16 +5229,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 6281686213731671
-    },
-    {
-      "author": "valtr",
-      "last_update": "2016-08-11T20:32:09",
-      "num_changes": 0,
-      "permlink": "re-kencode-re-valtr-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t174406660z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10905943909085757"
     },
     {
       "author": "discombobulated",
@@ -5289,26 +5279,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 4689949421662486
-    },
-    {
-      "author": "gikitiki",
-      "last_update": "2016-08-11T18:27:51",
-      "num_changes": 0,
-      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t175122462z",
-      "rshares": 3080276043,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10756344226752512"
-    },
-    {
-      "author": "imyao",
-      "last_update": "2016-08-11T18:55:33",
-      "num_changes": 0,
-      "permlink": "re-kencode-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t180117458z",
-      "rshares": 3080277886,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10855683797364092"
     },
     {
       "author": "sirwinchester",
@@ -5389,6 +5359,36 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1658382815806503
+    },
+    {
+      "author": "valtr",
+      "last_update": "2016-08-11T20:32:09",
+      "num_changes": 0,
+      "permlink": "re-kencode-re-valtr-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t174406660z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10905943909085757"
+    },
+    {
+      "author": "gikitiki",
+      "last_update": "2016-08-11T18:27:51",
+      "num_changes": 0,
+      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t175122462z",
+      "rshares": 3080276043,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10756344226752512"
+    },
+    {
+      "author": "imyao",
+      "last_update": "2016-08-11T18:55:33",
+      "num_changes": 0,
+      "permlink": "re-kencode-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t180117458z",
+      "rshares": 3080277886,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10855683797364092"
     },
     {
       "author": "alechahn",
@@ -5501,16 +5501,6 @@
       "weight": 116532843761360
     },
     {
-      "author": "smooth",
-      "last_update": "2016-08-11T22:28:48",
-      "num_changes": 0,
-      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t185355800z",
-      "rshares": 3080320265,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4653451670370141
-    },
-    {
       "author": "brendandekora",
       "last_update": "2016-08-12T06:44:36",
       "num_changes": 0,
@@ -5559,46 +5549,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 4688141149796903
-    },
-    {
-      "author": "yulia98",
-      "last_update": "2016-08-11T20:29:09",
-      "num_changes": 0,
-      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t185834066z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10855764427748709"
-    },
-    {
-      "author": "blueorgy",
-      "last_update": "2016-08-11T22:29:12",
-      "num_changes": 0,
-      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t190100681z",
-      "rshares": 3080320265,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5145259137073988
-    },
-    {
-      "author": "vato",
-      "last_update": "2016-08-11T20:29:57",
-      "num_changes": 0,
-      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t190134498z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10855764427748709"
-    },
-    {
-      "author": "gekko",
-      "last_update": "2016-08-11T20:31:24",
-      "num_changes": 0,
-      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t190802322z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10898627609468856"
     },
     {
       "author": "benjiberigan",
@@ -5651,6 +5601,56 @@
       "weight": 1759126638546841
     },
     {
+      "author": "smooth",
+      "last_update": "2016-08-11T22:28:48",
+      "num_changes": 0,
+      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t185355800z",
+      "rshares": 3080320265,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4653451670370141
+    },
+    {
+      "author": "yulia98",
+      "last_update": "2016-08-11T20:29:09",
+      "num_changes": 0,
+      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t185834066z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10855764427748709"
+    },
+    {
+      "author": "blueorgy",
+      "last_update": "2016-08-11T22:29:12",
+      "num_changes": 0,
+      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t190100681z",
+      "rshares": 3080320265,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5145259137073988
+    },
+    {
+      "author": "vato",
+      "last_update": "2016-08-11T20:29:57",
+      "num_changes": 0,
+      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t190134498z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10855764427748709"
+    },
+    {
+      "author": "gekko",
+      "last_update": "2016-08-11T20:31:24",
+      "num_changes": 0,
+      "permlink": "re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t190802322z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10898627609468856"
+    },
+    {
       "author": "johnsmith",
       "last_update": "2016-08-11T20:22:36",
       "num_changes": 0,
@@ -5671,26 +5671,6 @@
       "weight": 2479042336549442
     },
     {
-      "author": "liondani",
-      "last_update": "2016-08-11T20:21:15",
-      "num_changes": 0,
-      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t192905148z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 190675934139018
-    },
-    {
-      "author": "thecryptofiend",
-      "last_update": "2016-08-11T20:24:33",
-      "num_changes": 0,
-      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t192922585z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 207949870668703
-    },
-    {
       "author": "jwest40",
       "last_update": "2016-08-11T20:39:42",
       "num_changes": 0,
@@ -5699,16 +5679,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 214251932917332
-    },
-    {
-      "author": "slimjim",
-      "last_update": "2016-08-11T20:31:00",
-      "num_changes": 0,
-      "permlink": "re-kencode-re-slimjim-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t193253842z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10855764427748709"
     },
     {
       "author": "valtr",
@@ -5759,46 +5729,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 1224996860770714
-    },
-    {
-      "author": "mikemacintire",
-      "last_update": "2016-08-12T06:50:51",
-      "num_changes": 0,
-      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t193557086z",
-      "rshares": 3080436179,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1636525680295528
-    },
-    {
-      "author": "johnsmith",
-      "last_update": "2016-08-11T20:55:48",
-      "num_changes": 0,
-      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t193732523z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 222999672902644
-    },
-    {
-      "author": "ervin-lemark",
-      "last_update": "2016-08-12T02:57:24",
-      "num_changes": 0,
-      "permlink": "re-rok-sivante-a-tale-of-transformation-why-i-legally-changed-my-name-a-decade-ago-20160811t193740529z",
-      "rshares": 2464329828,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 7207748894809862
-    },
-    {
-      "author": "ervin-lemark",
-      "last_update": "2016-08-11T20:26:06",
-      "num_changes": 0,
-      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t194546141z",
-      "rshares": 3080309214,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 207949870668703
     },
     {
       "author": "unrulyhuman",
@@ -5891,6 +5821,86 @@
       "weight": 4680631913394802
     },
     {
+      "author": "elewarne",
+      "last_update": "2016-08-12T00:33:09",
+      "num_changes": 0,
+      "permlink": "a-woman-toronto-artist",
+      "rshares": 2464290083,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 74773629009528
+    },
+    {
+      "author": "liondani",
+      "last_update": "2016-08-11T20:21:15",
+      "num_changes": 0,
+      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t192905148z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 190675934139018
+    },
+    {
+      "author": "thecryptofiend",
+      "last_update": "2016-08-11T20:24:33",
+      "num_changes": 0,
+      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t192922585z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 207949870668703
+    },
+    {
+      "author": "slimjim",
+      "last_update": "2016-08-11T20:31:00",
+      "num_changes": 0,
+      "permlink": "re-kencode-re-slimjim-re-kencode-ann-smartcoins-wallet-v1-0-5-released-multiple-currencies-loyalty-points-3sec-transactions-44-languages-overdraft-protection-20160811t193253842z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10855764427748709"
+    },
+    {
+      "author": "mikemacintire",
+      "last_update": "2016-08-12T06:50:51",
+      "num_changes": 0,
+      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t193557086z",
+      "rshares": 3080436179,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1636525680295528
+    },
+    {
+      "author": "johnsmith",
+      "last_update": "2016-08-11T20:55:48",
+      "num_changes": 0,
+      "permlink": "re-barrycooper-steem-has-a-severe-glitch-that-likens-it-to-reddit-facebook-and-fox-news-20160811t193732523z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 222999672902644
+    },
+    {
+      "author": "ervin-lemark",
+      "last_update": "2016-08-12T02:57:24",
+      "num_changes": 0,
+      "permlink": "re-rok-sivante-a-tale-of-transformation-why-i-legally-changed-my-name-a-decade-ago-20160811t193740529z",
+      "rshares": 2464329828,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 7207748894809862
+    },
+    {
+      "author": "ervin-lemark",
+      "last_update": "2016-08-11T20:26:06",
+      "num_changes": 0,
+      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160811t194546141z",
+      "rshares": 3080309214,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 207949870668703
+    },
+    {
       "author": "imyao",
       "last_update": "2016-08-11T20:28:00",
       "num_changes": 0,
@@ -5969,16 +5979,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 8535262488805877
-    },
-    {
-      "author": "elewarne",
-      "last_update": "2016-08-12T00:33:09",
-      "num_changes": 0,
-      "permlink": "a-woman-toronto-artist",
-      "rshares": 2464290083,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 74773629009528
     },
     {
       "author": "knozaki2015",
@@ -6111,16 +6111,6 @@
       "weight": 77496064406065
     },
     {
-      "author": "steemrollin",
-      "last_update": "2016-08-15T02:34:39",
-      "num_changes": 0,
-      "permlink": "re-anwenbaumeister-the-creation-of-a-new-food-regime-can-we-find-sovereignty-and-spirituality-in-our-food-system-once-more-plus-photos-from-my-20160811t211228820z",
-      "rshares": 2466895002,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 0
-    },
-    {
       "author": "federicopistono",
       "last_update": "2016-08-12T08:12:30",
       "num_changes": 0,
@@ -6129,16 +6119,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 79295255184784
-    },
-    {
-      "author": "anarchony",
-      "last_update": "2016-08-11T22:35:18",
-      "num_changes": 0,
-      "permlink": "re-tmendieta-how-i-went-from-being-a-hardcore-meat-eater-to-a-passionate-vegan-part-two-20160811t211723285z",
-      "rshares": 3080320265,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10609308485812882"
     },
     {
       "author": "donkeypong",
@@ -6241,6 +6221,26 @@
       "weight": "10617221494978725"
     },
     {
+      "author": "steemrollin",
+      "last_update": "2016-08-15T02:34:39",
+      "num_changes": 0,
+      "permlink": "re-anwenbaumeister-the-creation-of-a-new-food-regime-can-we-find-sovereignty-and-spirituality-in-our-food-system-once-more-plus-photos-from-my-20160811t211228820z",
+      "rshares": 2466895002,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 0
+    },
+    {
+      "author": "anarchony",
+      "last_update": "2016-08-11T22:35:18",
+      "num_changes": 0,
+      "permlink": "re-tmendieta-how-i-went-from-being-a-hardcore-meat-eater-to-a-passionate-vegan-part-two-20160811t211723285z",
+      "rshares": 3080320265,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10609308485812882"
+    },
+    {
       "author": "bendjmiller222",
       "last_update": "2016-08-12T06:12:09",
       "num_changes": 0,
@@ -6271,16 +6271,6 @@
       "weight": 5747480909716340
     },
     {
-      "author": "tmendieta",
-      "last_update": "2016-08-11T22:35:42",
-      "num_changes": 0,
-      "permlink": "re-anarchony-re-tmendieta-how-i-went-from-being-a-hardcore-meat-eater-to-a-passionate-vegan-part-two-20160811t215311284z",
-      "rshares": 3080320265,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10730898796212210"
-    },
-    {
       "author": "kyriacos",
       "last_update": "2016-08-12T02:56:51",
       "num_changes": 0,
@@ -6289,6 +6279,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 7195499616893533
+    },
+    {
+      "author": "tmendieta",
+      "last_update": "2016-08-11T22:35:42",
+      "num_changes": 0,
+      "permlink": "re-anarchony-re-tmendieta-how-i-went-from-being-a-hardcore-meat-eater-to-a-passionate-vegan-part-two-20160811t215311284z",
+      "rshares": 3080320265,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10730898796212210"
     },
     {
       "author": "opheliafu",
@@ -6371,6 +6371,26 @@
       "weight": 4467674781395175
     },
     {
+      "author": "venuspcs",
+      "last_update": "2016-08-12T12:53:33",
+      "num_changes": 0,
+      "permlink": "my-life-story-surviving-against-the-greatest-of-odds-now-all-in-1-really-long-post-author-is-venuspcs",
+      "rshares": 3696783382,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2043429939727324
+    },
+    {
+      "author": "sauravrungta",
+      "last_update": "2016-08-11T22:54:24",
+      "num_changes": 0,
+      "permlink": "change-makers-2-the-story-of-martin-luther-king-jr",
+      "rshares": 3080325788,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 734713339153728
+    },
+    {
       "author": "ervin-lemark",
       "last_update": "2016-08-11T22:22:39",
       "num_changes": 0,
@@ -6401,16 +6421,6 @@
       "weight": 1228208037687682
     },
     {
-      "author": "venuspcs",
-      "last_update": "2016-08-12T12:53:33",
-      "num_changes": 0,
-      "permlink": "my-life-story-surviving-against-the-greatest-of-odds-now-all-in-1-really-long-post-author-is-venuspcs",
-      "rshares": 3696783382,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 2043429939727324
-    },
-    {
       "author": "steemuwe",
       "last_update": "2016-08-11T22:59:21",
       "num_changes": 0,
@@ -6429,16 +6439,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 529306536956658
-    },
-    {
-      "author": "sauravrungta",
-      "last_update": "2016-08-11T22:54:24",
-      "num_changes": 0,
-      "permlink": "change-makers-2-the-story-of-martin-luther-king-jr",
-      "rshares": 3080325788,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 734713339153728
     },
     {
       "author": "lasvegasgirl",
@@ -6501,36 +6501,6 @@
       "weight": 34298297869507
     },
     {
-      "author": "sweetsssj",
-      "last_update": "2016-08-12T00:42:54",
-      "num_changes": 0,
-      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t230659902z",
-      "rshares": 2464294500,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8195442965232923
-    },
-    {
-      "author": "hermes7",
-      "last_update": "2016-08-12T00:42:33",
-      "num_changes": 0,
-      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t230904641z",
-      "rshares": 2464294500,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 7660510280970058
-    },
-    {
-      "author": "freddy008",
-      "last_update": "2016-08-12T00:13:33",
-      "num_changes": 0,
-      "permlink": "re-lasvegasgirl-my-amazing-experience-with-steemit-less-than-3-and-why-it-s-so-important-to-keep-posting-no-matter-what-20160811t231338200z",
-      "rshares": 3080342359,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 5552138107503339
-    },
-    {
       "author": "din",
       "last_update": "2016-08-12T00:59:06",
       "num_changes": 0,
@@ -6561,16 +6531,6 @@
       "weight": 0
     },
     {
-      "author": "logic",
-      "last_update": "2016-08-12T00:30:06",
-      "num_changes": 0,
-      "permlink": "re-sharingeverybite-re-logic-vegan-revolutionary-meatless-burger-by-impossible-foods-meat-eaters-can-t-taste-the-difference-startup-raised-over-usd180-20160811t232448731z",
-      "rshares": 3080360763,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10662876259336536"
-    },
-    {
       "author": "saphira",
       "last_update": "2016-08-21T14:36:45",
       "num_changes": 0,
@@ -6579,6 +6539,46 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
+    },
+    {
+      "author": "sweetsssj",
+      "last_update": "2016-08-12T00:42:54",
+      "num_changes": 0,
+      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t230659902z",
+      "rshares": 2464294500,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8195442965232923
+    },
+    {
+      "author": "hermes7",
+      "last_update": "2016-08-12T00:42:33",
+      "num_changes": 0,
+      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t230904641z",
+      "rshares": 2464294500,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 7660510280970058
+    },
+    {
+      "author": "freddy008",
+      "last_update": "2016-08-12T00:13:33",
+      "num_changes": 0,
+      "permlink": "re-lasvegasgirl-my-amazing-experience-with-steemit-less-than-3-and-why-it-s-so-important-to-keep-posting-no-matter-what-20160811t231338200z",
+      "rshares": 3080342359,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 5552138107503339
+    },
+    {
+      "author": "logic",
+      "last_update": "2016-08-12T00:30:06",
+      "num_changes": 0,
+      "permlink": "re-sharingeverybite-re-logic-vegan-revolutionary-meatless-burger-by-impossible-foods-meat-eaters-can-t-taste-the-difference-startup-raised-over-usd180-20160811t232448731z",
+      "rshares": 3080360763,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10662876259336536"
     },
     {
       "author": "artist1989",
@@ -6671,16 +6671,6 @@
       "weight": 1770902664091250
     },
     {
-      "author": "tcstix",
-      "last_update": "2016-08-12T00:41:39",
-      "num_changes": 0,
-      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t235524208z",
-      "rshares": 2464294500,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8250818324886006
-    },
-    {
       "author": "anarcho-andrei",
       "last_update": "2016-08-12T00:39:45",
       "num_changes": 0,
@@ -6751,6 +6741,16 @@
       "weight": 0
     },
     {
+      "author": "tcstix",
+      "last_update": "2016-08-12T00:41:39",
+      "num_changes": 0,
+      "permlink": "re-clains-where-does-the-money-in-steem-come-from-20160811t235524208z",
+      "rshares": 2464294500,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8250818324886006
+    },
+    {
       "author": "mrs.steemit",
       "last_update": "2016-08-12T00:42:00",
       "num_changes": 0,
@@ -6779,16 +6779,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 91540305067360
-    },
-    {
-      "author": "missjessica",
-      "last_update": "2016-08-12T04:06:33",
-      "num_changes": 0,
-      "permlink": "re-givemeyoursteem-how-to-run-a-half-marathon-and-how-you-can-too-20160812t003129810z",
-      "rshares": 3080419640,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1977366844567412
     },
     {
       "author": "stellabelle",
@@ -6831,16 +6821,6 @@
       "weight": 114419373596793
     },
     {
-      "author": "laconicflow",
-      "last_update": "2016-08-12T02:57:57",
-      "num_changes": 0,
-      "permlink": "re-brinkerbd-sorry-trump-if-anyone-is-the-mvp-of-isis-it-s-george-w-bush-20160812t004709064z",
-      "rshares": 2464329828,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 95085653766644
-    },
-    {
       "author": "nonlinearone",
       "last_update": "2016-08-12T04:24:18",
       "num_changes": 0,
@@ -6859,6 +6839,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 109172541437298
+    },
+    {
+      "author": "missjessica",
+      "last_update": "2016-08-12T04:06:33",
+      "num_changes": 0,
+      "permlink": "re-givemeyoursteem-how-to-run-a-half-marathon-and-how-you-can-too-20160812t003129810z",
+      "rshares": 3080419640,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1977366844567412
+    },
+    {
+      "author": "laconicflow",
+      "last_update": "2016-08-12T02:57:57",
+      "num_changes": 0,
+      "permlink": "re-brinkerbd-sorry-trump-if-anyone-is-the-mvp-of-isis-it-s-george-w-bush-20160812t004709064z",
+      "rshares": 2464329828,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 95085653766644
     },
     {
       "author": "fotoflares",
@@ -6951,16 +6951,6 @@
       "weight": 91238663590465
     },
     {
-      "author": "thecryptofiend",
-      "last_update": "2016-08-12T03:00:00",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-secret-writer-what-if-my-greatest-fear-is-my-own-success-20160812t014236684z",
-      "rshares": 2464329828,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4792300861035290
-    },
-    {
       "author": "xbananax",
       "last_update": "2016-08-12T02:16:21",
       "num_changes": 0,
@@ -7009,6 +6999,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 91533170422302
+    },
+    {
+      "author": "thecryptofiend",
+      "last_update": "2016-08-12T03:00:00",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-secret-writer-what-if-my-greatest-fear-is-my-own-success-20160812t014236684z",
+      "rshares": 2464329828,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4792300861035290
     },
     {
       "author": "stellabelle",
@@ -7101,16 +7101,6 @@
       "weight": 1387028459392980
     },
     {
-      "author": "steemrollin",
-      "last_update": "2016-08-12T02:54:24",
-      "num_changes": 0,
-      "permlink": "re-stellabelle-secret-writer-what-if-my-greatest-fear-is-my-own-success-20160812t021942982z",
-      "rshares": 2464328356,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 4792298088916239
-    },
-    {
       "author": "joshbreslauer",
       "last_update": "2016-08-12T02:52:51",
       "num_changes": 0,
@@ -7119,6 +7109,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 3070363232369582
+    },
+    {
+      "author": "steemrollin",
+      "last_update": "2016-08-12T02:54:24",
+      "num_changes": 0,
+      "permlink": "re-stellabelle-secret-writer-what-if-my-greatest-fear-is-my-own-success-20160812t021942982z",
+      "rshares": 2464328356,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4792298088916239
     },
     {
       "author": "lifestyle",
@@ -7211,16 +7211,6 @@
       "weight": 0
     },
     {
-      "author": "thecurator",
-      "last_update": "2016-08-17T00:07:48",
-      "num_changes": 0,
-      "permlink": "re-jedau-descriptions-on-the-spot-esoteric-20160812t044733274z",
-      "rshares": 1851561965,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6075946611095246
-    },
-    {
       "author": "pairmike",
       "last_update": "2016-08-12T06:06:00",
       "num_changes": 0,
@@ -7229,6 +7219,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 8735191064415903
+    },
+    {
+      "author": "thecurator",
+      "last_update": "2016-08-17T00:07:48",
+      "num_changes": 0,
+      "permlink": "re-jedau-descriptions-on-the-spot-esoteric-20160812t044733274z",
+      "rshares": 1851561965,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6075946611095246
     },
     {
       "author": "heretickitten",
@@ -7391,6 +7391,16 @@
       "weight": 2502478002784478
     },
     {
+      "author": "dana-edwards",
+      "last_update": "2016-08-12T10:36:51",
+      "num_changes": 0,
+      "permlink": "mutual-aid-societies-a-short-review-of-history",
+      "rshares": 3696695292,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 150280508422036
+    },
+    {
       "author": "nadira",
       "last_update": "2016-08-12T14:14:33",
       "num_changes": 0,
@@ -7409,16 +7419,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 8230560289975166
-    },
-    {
-      "author": "dana-edwards",
-      "last_update": "2016-08-12T10:36:51",
-      "num_changes": 0,
-      "permlink": "mutual-aid-societies-a-short-review-of-history",
-      "rshares": 3696695292,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 150280508422036
     },
     {
       "author": "sisterholics",
@@ -7601,16 +7601,6 @@
       "weight": 1643871102437655
     },
     {
-      "author": "fishborne",
-      "last_update": "2016-08-12T10:20:21",
-      "num_changes": 0,
-      "permlink": "re-samupaha-steem-really-needs-a-wiki-20160812t095207534z",
-      "rshares": 3696668861,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6598368314942333
-    },
-    {
       "author": "mashkovpro",
       "last_update": "2016-08-12T16:33:15",
       "num_changes": 0,
@@ -7651,16 +7641,6 @@
       "weight": 2103783770638432
     },
     {
-      "author": "piedpiper",
-      "last_update": "2016-08-12T10:13:12",
-      "num_changes": 0,
-      "permlink": "re-medge-picture-of-bill-clinton-putting-his-penis-in-kelly-ayote-s-ear-20160812t101132314z",
-      "rshares": 3696668861,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 379503809101103
-    },
-    {
       "author": "oaldamster",
       "last_update": "2016-08-12T10:43:51",
       "num_changes": 0,
@@ -7669,6 +7649,26 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 2206679031211290
+    },
+    {
+      "author": "fishborne",
+      "last_update": "2016-08-12T10:20:21",
+      "num_changes": 0,
+      "permlink": "re-samupaha-steem-really-needs-a-wiki-20160812t095207534z",
+      "rshares": 3696668861,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6598368314942333
+    },
+    {
+      "author": "piedpiper",
+      "last_update": "2016-08-12T10:13:12",
+      "num_changes": 0,
+      "permlink": "re-medge-picture-of-bill-clinton-putting-his-penis-in-kelly-ayote-s-ear-20160812t101132314z",
+      "rshares": 3696668861,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 379503809101103
     },
     {
       "author": "fishborne",
@@ -8531,26 +8531,6 @@
       "weight": 4073035438416558
     },
     {
-      "author": "neoxian",
-      "last_update": "2016-08-12T20:59:03",
-      "num_changes": 0,
-      "permlink": "re-dantheman-re-chitty-whale-s-dilemma-20160812t162752511z",
-      "rshares": 3081008380,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 192271366087497
-    },
-    {
-      "author": "summon",
-      "last_update": "2016-08-12T16:32:12",
-      "num_changes": 0,
-      "permlink": "re-rittr-re-summon-please-stop-posting-comments-at-the-wallet-wall-i-won-t-vote-for-any-of-these-comments-20160812t163037265z",
-      "rshares": 3697124359,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 38810897315837
-    },
-    {
       "author": "lukestokes",
       "last_update": "2016-08-12T18:25:54",
       "num_changes": 0,
@@ -8571,16 +8551,6 @@
       "weight": 6173969465393513
     },
     {
-      "author": "rimann",
-      "last_update": "2016-08-12T18:10:51",
-      "num_changes": 0,
-      "permlink": "re-cheetah-re-permaculture-principle-2-catch-and-store-energy-20160812t163924-20160812t164120419z",
-      "rshares": 3697146347,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6216076989283720
-    },
-    {
       "author": "quinneaker",
       "last_update": "2016-08-13T02:08:33",
       "num_changes": 0,
@@ -8589,16 +8559,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": "12763682066983433"
-    },
-    {
-      "author": "recursive",
-      "last_update": "2016-08-12T16:52:24",
-      "num_changes": 0,
-      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160812t165221470z",
-      "rshares": 3697137552,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 245372754142766
     },
     {
       "author": "steemitforum",
@@ -8631,6 +8591,36 @@
       "weight": 0
     },
     {
+      "author": "neoxian",
+      "last_update": "2016-08-12T20:59:03",
+      "num_changes": 0,
+      "permlink": "re-dantheman-re-chitty-whale-s-dilemma-20160812t162752511z",
+      "rshares": 3081008380,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 192271366087497
+    },
+    {
+      "author": "summon",
+      "last_update": "2016-08-12T16:32:12",
+      "num_changes": 0,
+      "permlink": "re-rittr-re-summon-please-stop-posting-comments-at-the-wallet-wall-i-won-t-vote-for-any-of-these-comments-20160812t163037265z",
+      "rshares": 3697124359,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 38810897315837
+    },
+    {
+      "author": "recursive",
+      "last_update": "2016-08-12T16:52:24",
+      "num_changes": 0,
+      "permlink": "re-dantheman-follow-up-to-people-rank-algorithm-for-better-curation-rewards-20160812t165221470z",
+      "rshares": 3697137552,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 245372754142766
+    },
+    {
       "author": "kencode",
       "last_update": "2016-08-12T16:59:33",
       "num_changes": 0,
@@ -8659,6 +8649,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
+    },
+    {
+      "author": "rimann",
+      "last_update": "2016-08-12T18:10:51",
+      "num_changes": 0,
+      "permlink": "re-cheetah-re-permaculture-principle-2-catch-and-store-energy-20160812t163924-20160812t164120419z",
+      "rshares": 3697146347,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6216076989283720
     },
     {
       "author": "kimal73",
@@ -8901,16 +8901,6 @@
       "weight": 1903379245163953
     },
     {
-      "author": "berniesanders",
-      "last_update": "2016-08-12T18:12:39",
-      "num_changes": 0,
-      "permlink": "re-chitty-whale-s-dilemma-20160812t181029638z",
-      "rshares": 3697146347,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 287122566443140
-    },
-    {
       "author": "nonlinearone",
       "last_update": "2016-08-13T00:24:24",
       "num_changes": 0,
@@ -8939,16 +8929,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
-    },
-    {
-      "author": "fkinglag",
-      "last_update": "2016-08-13T04:54:27",
-      "num_changes": 0,
-      "permlink": "re-officialfuzzy-how-luke-rudkowsky-earned-2-of-5-trending-steemit-topics-on-the-same-day-secrets-of-an-attempted-bromance-20160812t181719386z",
-      "rshares": 3081150938,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 7049266550981738
     },
     {
       "author": "cryptogee",
@@ -9031,36 +9011,6 @@
       "weight": 3772349984692
     },
     {
-      "author": "sc-steemit",
-      "last_update": "2016-08-13T04:54:51",
-      "num_changes": 0,
-      "permlink": "re-officialfuzzy-how-luke-rudkowsky-earned-2-of-5-trending-steemit-topics-on-the-same-day-secrets-of-an-attempted-bromance-20160812t181907294z",
-      "rshares": 3081150938,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 6724057241564131
-    },
-    {
-      "author": "bleepcoin",
-      "last_update": "2016-08-12T18:43:57",
-      "num_changes": 0,
-      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t183934267z",
-      "rshares": 3080960783,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1426757603224244
-    },
-    {
-      "author": "skypanther",
-      "last_update": "2016-08-13T06:55:24",
-      "num_changes": 0,
-      "permlink": "re-kencode-ann-blockpay-point-of-sale-system-for-all-digital-currencies-20160812t184006191z",
-      "rshares": 3081339010,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10718370791927898"
-    },
-    {
       "author": "blakemiles84",
       "last_update": "2016-08-12T18:57:03",
       "num_changes": 0,
@@ -9099,6 +9049,56 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 258083408267532
+    },
+    {
+      "author": "berniesanders",
+      "last_update": "2016-08-12T18:12:39",
+      "num_changes": 0,
+      "permlink": "re-chitty-whale-s-dilemma-20160812t181029638z",
+      "rshares": 3697146347,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 287122566443140
+    },
+    {
+      "author": "fkinglag",
+      "last_update": "2016-08-13T04:54:27",
+      "num_changes": 0,
+      "permlink": "re-officialfuzzy-how-luke-rudkowsky-earned-2-of-5-trending-steemit-topics-on-the-same-day-secrets-of-an-attempted-bromance-20160812t181719386z",
+      "rshares": 3081150938,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 7049266550981738
+    },
+    {
+      "author": "sc-steemit",
+      "last_update": "2016-08-13T04:54:51",
+      "num_changes": 0,
+      "permlink": "re-officialfuzzy-how-luke-rudkowsky-earned-2-of-5-trending-steemit-topics-on-the-same-day-secrets-of-an-attempted-bromance-20160812t181907294z",
+      "rshares": 3081150938,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 6724057241564131
+    },
+    {
+      "author": "bleepcoin",
+      "last_update": "2016-08-12T18:43:57",
+      "num_changes": 0,
+      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t183934267z",
+      "rshares": 3080960783,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1426757603224244
+    },
+    {
+      "author": "skypanther",
+      "last_update": "2016-08-13T06:55:24",
+      "num_changes": 0,
+      "permlink": "re-kencode-ann-blockpay-point-of-sale-system-for-all-digital-currencies-20160812t184006191z",
+      "rshares": 3081339010,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10718370791927898"
     },
     {
       "author": "miacats",
@@ -9181,16 +9181,6 @@
       "weight": 4010979975289723
     },
     {
-      "author": "bendjmiller222",
-      "last_update": "2016-08-13T04:39:42",
-      "num_changes": 0,
-      "permlink": "re-rok-sivante-blockchain-literacy-101-and-the-battle-of-the-blockchains-steemit-vs-ethereum-lisk-etc-20160812t190714268z",
-      "rshares": 3081127193,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 0
-    },
-    {
       "author": "someguy123",
       "last_update": "2016-08-13T14:45:39",
       "num_changes": 0,
@@ -9209,6 +9199,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 765857754712981
+    },
+    {
+      "author": "bendjmiller222",
+      "last_update": "2016-08-13T04:39:42",
+      "num_changes": 0,
+      "permlink": "re-rok-sivante-blockchain-literacy-101-and-the-battle-of-the-blockchains-steemit-vs-ethereum-lisk-etc-20160812t190714268z",
+      "rshares": 3081127193,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 0
     },
     {
       "author": "ned",
@@ -9271,16 +9271,6 @@
       "weight": 2957632048199011
     },
     {
-      "author": "ned",
-      "last_update": "2016-08-12T20:37:36",
-      "num_changes": 0,
-      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t194857723z",
-      "rshares": 3080999228,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "10350916989871175"
-    },
-    {
       "author": "gargon",
       "last_update": "2016-08-12T20:06:51",
       "num_changes": 0,
@@ -9331,26 +9321,6 @@
       "weight": 6747980141006664
     },
     {
-      "author": "kaylinart",
-      "last_update": "2016-08-12T20:07:15",
-      "num_changes": 0,
-      "permlink": "re-gargon-the-value-of-music-why-your-kid-should-learn-music-20160812t195745258z",
-      "rshares": 3697163926,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 1929107895443371
-    },
-    {
-      "author": "truthtaco",
-      "last_update": "2016-08-13T00:10:54",
-      "num_changes": 0,
-      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t200553191z",
-      "rshares": 3081030339,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 2519373734805226
-    },
-    {
       "author": "thedashguy",
       "last_update": "2016-08-12T20:24:30",
       "num_changes": 0,
@@ -9391,6 +9361,36 @@
       "weight": 344784238274802
     },
     {
+      "author": "ned",
+      "last_update": "2016-08-12T20:37:36",
+      "num_changes": 0,
+      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t194857723z",
+      "rshares": 3080999228,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "10350916989871175"
+    },
+    {
+      "author": "kaylinart",
+      "last_update": "2016-08-12T20:07:15",
+      "num_changes": 0,
+      "permlink": "re-gargon-the-value-of-music-why-your-kid-should-learn-music-20160812t195745258z",
+      "rshares": 3697163926,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 1929107895443371
+    },
+    {
+      "author": "truthtaco",
+      "last_update": "2016-08-13T00:10:54",
+      "num_changes": 0,
+      "permlink": "re-cryptogee-introducing-steem-the-first-anarchy-mined-coin-20160812t200553191z",
+      "rshares": 3081030339,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2519373734805226
+    },
+    {
       "author": "papa-pepper",
       "last_update": "2016-08-12T22:54:33",
       "num_changes": 0,
@@ -9419,16 +9419,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 100681074520199
-    },
-    {
-      "author": "steemed",
-      "last_update": "2016-08-12T20:48:06",
-      "num_changes": 0,
-      "permlink": "re-chitty-whale-s-dilemma-20160812t153333754z",
-      "rshares": 3080999228,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 23235240287612
     },
     {
       "author": "elewarne",
@@ -9481,6 +9471,16 @@
       "weight": 2447036143346798
     },
     {
+      "author": "steemed",
+      "last_update": "2016-08-12T20:48:06",
+      "num_changes": 0,
+      "permlink": "re-chitty-whale-s-dilemma-20160812t153333754z",
+      "rshares": 3080999228,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 23235240287612
+    },
+    {
       "author": "acidyo",
       "last_update": "2016-08-13T02:53:30",
       "num_changes": 0,
@@ -9489,16 +9489,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 4549313860319242
-    },
-    {
-      "author": "how2steemit",
-      "last_update": "2016-08-12T22:39:03",
-      "num_changes": 0,
-      "permlink": "re-steemsmart-interview-with-andrew-levine-andrarchy-steem-smart-podcast-ep-2-20160812t212308922z",
-      "rshares": 3081028510,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "13697089262989730"
     },
     {
       "author": "dantheman",
@@ -9519,16 +9509,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 5705115036999719
-    },
-    {
-      "author": "georgedonnelly",
-      "last_update": "2016-08-12T22:24:27",
-      "num_changes": 0,
-      "permlink": "re-andrarchy-my-interview-with-georgedonnelly-and-piedpiper-20160812t212632422z",
-      "rshares": 3081026681,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8714612238570135
     },
     {
       "author": "venuspcs",
@@ -9559,16 +9539,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 724437587292825
-    },
-    {
-      "author": "georgedonnelly",
-      "last_update": "2016-08-12T22:39:30",
-      "num_changes": 0,
-      "permlink": "re-thylbom-re-steemsmart-interview-with-andrew-levine-andrarchy-steem-smart-podcast-ep-2-20160812t213905022z",
-      "rshares": 3081028510,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "13697089262989730"
     },
     {
       "author": "escapehatch",
@@ -9621,14 +9591,64 @@
       "weight": 1537247989831146
     },
     {
-      "author": "dwinblood",
-      "last_update": "2016-08-12T22:19:21",
+      "author": "crypt0",
+      "last_update": "2016-08-12T22:32:03",
       "num_changes": 0,
-      "permlink": "re-chaospoet-re-dantheman-what-would-smart-ballots-and-kamikaze-voters-mean-to-democracy-20160812t214925312z",
+      "permlink": "why-i-stopped-powering-down-my-steem-power",
+      "rshares": 3081028510,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8489546750550821
+    },
+    {
+      "author": "crowe",
+      "last_update": "2016-08-12T22:30:06",
+      "num_changes": 0,
+      "permlink": "best-drum-line-ever-awesome",
+      "rshares": 3081028510,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 8314179189218880
+    },
+    {
+      "author": "vongohren",
+      "last_update": "2016-08-12T22:53:09",
+      "num_changes": 0,
+      "permlink": "reports-from-the-norways-first-meetup",
+      "rshares": 3081028510,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "9446879580891888"
+    },
+    {
+      "author": "how2steemit",
+      "last_update": "2016-08-12T22:39:03",
+      "num_changes": 0,
+      "permlink": "re-steemsmart-interview-with-andrew-levine-andrarchy-steem-smart-podcast-ep-2-20160812t212308922z",
+      "rshares": 3081028510,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "13697089262989730"
+    },
+    {
+      "author": "georgedonnelly",
+      "last_update": "2016-08-12T22:24:27",
+      "num_changes": 0,
+      "permlink": "re-andrarchy-my-interview-with-georgedonnelly-and-piedpiper-20160812t212632422z",
       "rshares": 3081026681,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 2289685173274445
+      "weight": 8714612238570135
+    },
+    {
+      "author": "georgedonnelly",
+      "last_update": "2016-08-12T22:39:30",
+      "num_changes": 0,
+      "permlink": "re-thylbom-re-steemsmart-interview-with-andrew-levine-andrarchy-steem-smart-podcast-ep-2-20160812t213905022z",
+      "rshares": 3081028510,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "13697089262989730"
     },
     {
       "author": "veralynn",
@@ -9671,16 +9691,6 @@
       "weight": 3132059132084917
     },
     {
-      "author": "moonjelly",
-      "last_update": "2016-08-12T22:14:48",
-      "num_changes": 0,
-      "permlink": "re-piedpiper-re-moonjelly-re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t215838741z",
-      "rshares": 3081026681,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 7373605959286277
-    },
-    {
       "author": "monopoly-man",
       "last_update": "2016-08-12T22:08:12",
       "num_changes": 0,
@@ -9689,36 +9699,6 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 2581655777325170
-    },
-    {
-      "author": "crypt0",
-      "last_update": "2016-08-12T22:32:03",
-      "num_changes": 0,
-      "permlink": "why-i-stopped-powering-down-my-steem-power",
-      "rshares": 3081028510,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8489546750550821
-    },
-    {
-      "author": "crowe",
-      "last_update": "2016-08-12T22:30:06",
-      "num_changes": 0,
-      "permlink": "best-drum-line-ever-awesome",
-      "rshares": 3081028510,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": 8314179189218880
-    },
-    {
-      "author": "vongohren",
-      "last_update": "2016-08-12T22:53:09",
-      "num_changes": 0,
-      "permlink": "reports-from-the-norways-first-meetup",
-      "rshares": 3081028510,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "9446879580891888"
     },
     {
       "author": "harand",
@@ -9731,6 +9711,26 @@
       "weight": 5775610859750551
     },
     {
+      "author": "yogi.artist",
+      "last_update": "2016-08-12T22:18:45",
+      "num_changes": 0,
+      "permlink": "re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t220908884z",
+      "rshares": 3081026681,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 4383072273012276
+    },
+    {
+      "author": "dwinblood",
+      "last_update": "2016-08-12T22:19:21",
+      "num_changes": 0,
+      "permlink": "re-chaospoet-re-dantheman-what-would-smart-ballots-and-kamikaze-voters-mean-to-democracy-20160812t214925312z",
+      "rshares": 3081026681,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": 2289685173274445
+    },
+    {
       "author": "chitty",
       "last_update": "2016-08-13T10:20:06",
       "num_changes": 0,
@@ -9741,14 +9741,14 @@
       "weight": 7355991575420053
     },
     {
-      "author": "yogi.artist",
-      "last_update": "2016-08-12T22:18:45",
+      "author": "moonjelly",
+      "last_update": "2016-08-12T22:14:48",
       "num_changes": 0,
-      "permlink": "re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t220908884z",
+      "permlink": "re-piedpiper-re-moonjelly-re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t215838741z",
       "rshares": 3081026681,
       "vote_percent": 10000,
       "voter": "boy",
-      "weight": 4383072273012276
+      "weight": 7373605959286277
     },
     {
       "author": "rayphu",
@@ -9911,16 +9911,6 @@
       "weight": 7881080377671876
     },
     {
-      "author": "kevbonneau",
-      "last_update": "2016-08-13T00:14:45",
-      "num_changes": 0,
-      "permlink": "re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t231129447z",
-      "rshares": 3081030339,
-      "vote_percent": 10000,
-      "voter": "boy",
-      "weight": "13697058665778870"
-    },
-    {
       "author": "biophil",
       "last_update": "2016-08-13T04:57:45",
       "num_changes": 0,
@@ -9999,6 +9989,16 @@
       "vote_percent": 10000,
       "voter": "boy",
       "weight": 0
+    },
+    {
+      "author": "kevbonneau",
+      "last_update": "2016-08-13T00:14:45",
+      "num_changes": 0,
+      "permlink": "re-piedpiper-my-birthday-present-from-the-steemit-developers-and-my-big-plans-for-the-year-ahead-20160812t231129447z",
+      "rshares": 3081030339,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "13697058665778870"
     }
   ]
 }
