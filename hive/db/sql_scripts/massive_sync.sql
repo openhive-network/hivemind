@@ -930,7 +930,8 @@ DECLARE
     _wave INT;
     _processed_count INT;
     _remaining INT;
-    -- Step 7b: delete-create cycle handling
+    -- Step 7: delete handling
+    _delete_count INT;
     _delete_create_pairs TEXT[];
     _after_delete BOOLEAN;
     _current_pair TEXT;
@@ -1214,22 +1215,57 @@ BEGIN
           )
     ), '{}');
 
-    -- (a) Simple deletes: no create follows any delete for this pair
-    FOR _rec IN
+    -- (a) Simple deletes: set-based bulk operation instead of per-row loop.
+    -- Resolves all author/permlink pairs to post IDs in one join, then does
+    -- bulk UPDATE + 3 bulk DELETEs in a single data-modifying CTE.
+    -- At full chain scale (783K delete ops), this replaces ~4.7M individual
+    -- queries with 4 set-based operations.
+    WITH simple_delete_posts AS (
         SELECT
-            s.val->>'author' AS author,
-            s.val->>'permlink' AS permlink,
+            hp.id AS post_id,
+            hp.author_id,
+            hp.permlink_id,
             s.block_num,
             s.block_date
         FROM hivemind_app._ops_staging s
+        JOIN hivemind_app.hive_accounts ha ON ha.name = s.val->>'author'
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = s.val->>'permlink'
+        JOIN hivemind_app.hive_posts hp
+            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
         WHERE s.op_type_id = 17
           AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
           AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
-    LOOP
-        PERFORM hivemind_app.delete_hive_post(
-            _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
-        );
-    END LOOP;
+    ),
+    updated_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET counter_deleted = (
+                SELECT MAX(hps.counter_deleted) + 1
+                FROM hivemind_app.hive_posts hps
+                WHERE hps.author_id = hp.author_id AND hps.permlink_id = hp.permlink_id
+            ),
+            block_num = sd.block_num,
+            active = sd.block_date
+        FROM simple_delete_posts sd
+        WHERE hp.id = sd.post_id
+        RETURNING sd.post_id, sd.author_id
+    ),
+    del_reblogs AS (
+        DELETE FROM hivemind_app.hive_reblogs
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    ),
+    del_feed_cache AS (
+        DELETE FROM hivemind_app.hive_feed_cache hfc
+        USING updated_posts u
+        WHERE hfc.post_id = u.post_id AND hfc.account_id = u.author_id
+        RETURNING hfc.post_id
+    ),
+    del_tags AS (
+        DELETE FROM hivemind_app.hive_post_tags
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    )
+    SELECT count(*) INTO _delete_count FROM updated_posts;
 
     -- (b) Delete-create cycles: iterate ALL ops for affected pairs in chronological order.
     -- Skip creates before any delete (already handled in Steps 3-5).
