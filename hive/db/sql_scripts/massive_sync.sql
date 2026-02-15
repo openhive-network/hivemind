@@ -460,12 +460,11 @@ BEGIN
     INTO _count, _affected_post_ids
     FROM upserted;
 
-    -- Update rshares aggregates (sc_hot, sc_trend, etc.) for affected posts.
-    -- This MUST run before payouts set is_paidout=TRUE, because update_posts_rshares
-    -- zeroes sc_hot/sc_trend for paidout posts.
-    IF _affected_post_ids IS NOT NULL THEN
-        PERFORM hivemind_app.update_posts_rshares(_affected_post_ids);
-    END IF;
+    -- Rshares aggregates (sc_hot, sc_trend, etc.) are NOT updated per-batch during
+    -- massive sync. The key index (hive_votes_post_id_block_num_rshares_vote_is_effective_idx)
+    -- is dropped for write performance, making per-batch update_posts_rshares() extremely
+    -- expensive. Instead, recalculate_all_posts_rshares() runs once at finalization after
+    -- indexes are recreated (see DbState._finish_posts_rshares).
 
     -- Table is truncated at start of next call, no drop needed
     RETURN _count;
