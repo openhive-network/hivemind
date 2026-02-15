@@ -37,6 +37,7 @@ class DbState:
     _original_synchronous_commit_mode = None
     _original_fsync = None
     _original_full_page_writes = None
+    _rshares_recalculated = False
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
 
     @classmethod
@@ -638,6 +639,17 @@ class DbState:
 
         log.info("#############################################################################")
 
+        if not cls._rshares_recalculated:
+            # Run rshares recalculation first (creates ~54M dead tuples on hive_posts).
+            # Must complete before Part 0 so update_all_hive_posts_children_count doesn't
+            # scan a bloated table 256 times in a loop. Only needs to run once — subsequent
+            # finalization cycles during catch-up have negligible new votes.
+            cls._finish_posts_rshares(cls.db())
+
+            # Vacuum hive_posts to clean dead tuples before Part 0 scans it
+            cls.vacuum_tables_in_threads([f"{SCHEMA_NAME}.hive_posts"])
+            cls._rshares_recalculated = True
+
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
@@ -652,7 +664,6 @@ class DbState:
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
             ),
-            ('posts_rshares', cls._finish_posts_rshares, [cls.db()]),
         ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
