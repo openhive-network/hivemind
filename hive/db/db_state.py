@@ -627,6 +627,14 @@ class DbState:
 
         log.info("#############################################################################")
 
+        # Run rshares recalculation first (creates ~54M dead tuples on hive_posts).
+        # Must complete before Part 0 so update_all_hive_posts_children_count doesn't
+        # scan a bloated table 256 times in a loop.
+        cls._finish_posts_rshares(cls.db())
+
+        # Vacuum hive_posts to clean dead tuples before Part 0 scans it
+        cls.vacuum_tables_in_threads([f"{SCHEMA_NAME}.hive_posts"])
+
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
@@ -641,7 +649,6 @@ class DbState:
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
             ),
-            ('posts_rshares', cls._finish_posts_rshares, [cls.db()]),
         ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
