@@ -39,6 +39,7 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
+    _notification_min_block = None  # cached 90-day notification threshold
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -145,11 +146,11 @@ class Blocks:
           1.    Load staging table (single scan of operations_view)
           2.    Account registration + community state changes (single transaction)
           3.    Post/comment processing (must commit before votes/reblogs)
-          3a.   Community post-targeting ops + mute propagation
-          3.5.  Votes + rshares update (must complete before payouts)
+          3a.   Community post-targeting ops + mute propagation (skipped before community start)
+          3.5.  Votes (rshares deferred to finalization)
           4+3b. Parallel: SQL entity processing + Python body merging (overlapped)
           5.    PostDataCache flush
-          6.    Parallel notification flush
+          6.    Parallel notification flush (skipped for blocks before 90-day window)
         """
         time_start = OPSM.start()
         phase_times = {}
@@ -178,14 +179,17 @@ class Blocks:
         phase_times['posts'] = perf_counter() - t0
 
         # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
+        # Skip entirely when batch is before community support start block — no community
+        # ops or muted parents to propagate.
         t0 = perf_counter()
-        db.query_no_return("START TRANSACTION")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.propagate_muted_parent_for_batch({first_block}, {last_block})")
-        db.query_no_return("COMMIT")
+        if last_block >= Community.start_block:
+            db.query_no_return("START TRANSACTION")
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.propagate_muted_parent_for_batch({first_block}, {last_block})")
+            db.query_no_return("COMMIT")
         phase_times['community_post'] = perf_counter() - t0
 
-        # Phase 3.5: Votes + rshares update (must run BEFORE payouts which set is_paidout).
+        # Phase 3.5: Votes (rshares deferred to finalization; must run BEFORE payouts).
         t0 = perf_counter()
         Votes.db.query_no_return("START TRANSACTION")
         Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
@@ -241,24 +245,28 @@ class Blocks:
 
         # Phase 6: Parallel notification flush
         # Vote notifications are deferred to finalization (_finish_vote_notifications)
-        # because scoring uses payout data that isn't available during massive sync
-        # (payouts arrive ~7 days after the vote).
+        # because scoring uses payout data that isn't available during massive sync.
+        # Post/follow/reblog notifications are skipped for blocks older than the 90-day
+        # notification window (they would never appear in user notification feeds).
         t0 = perf_counter()
-        phase6_tasks = [
-            (
-                PostNotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.flush_post_notifications_for_blocks({first_block}, {last_block})",
-            ),
-            (
-                FollowNotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.flush_follow_notifications_for_blocks({first_block}, {last_block})",
-            ),
-            (
-                ReblogNotificationCache.db,
-                f"SELECT {SCHEMA_NAME}.flush_reblog_notifications_for_blocks({first_block}, {last_block})",
-            ),
-        ]
-        cls._run_parallel_sql(phase6_tasks)
+        if cls._notification_min_block is None:
+            cls._notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
+        if last_block > cls._notification_min_block:
+            phase6_tasks = [
+                (
+                    PostNotificationCache.db,
+                    f"SELECT {SCHEMA_NAME}.flush_post_notifications_for_blocks({first_block}, {last_block})",
+                ),
+                (
+                    FollowNotificationCache.db,
+                    f"SELECT {SCHEMA_NAME}.flush_follow_notifications_for_blocks({first_block}, {last_block})",
+                ),
+                (
+                    ReblogNotificationCache.db,
+                    f"SELECT {SCHEMA_NAME}.flush_reblog_notifications_for_blocks({first_block}, {last_block})",
+                ),
+            ]
+            cls._run_parallel_sql(phase6_tasks)
         phase_times['notify'] = perf_counter() - t0
 
         total = sum(phase_times.values())
