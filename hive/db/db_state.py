@@ -500,7 +500,9 @@ class DbState:
                 # Initial massive sync: update ALL root posts without block range restriction
                 sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id(NULL, NULL);"
             else:
-                sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
+                sql = (
+                    f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
+                )
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
@@ -533,6 +535,17 @@ class DbState:
             time_start = perf_counter()
             update_communities_posts_and_rank(db_mgr.db)
             log.info("[MASSIVE] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
+    def _finish_muted_parents(cls, db):
+        with AutoDbDisposer(db, "finish_muted_parents") as db_mgr:
+            time_start = perf_counter()
+            count = db_mgr.db.query_one(f"SELECT {SCHEMA_NAME}.propagate_all_muted_parents();")
+            log.info(
+                "[MASSIVE] propagate_all_muted_parents executed in %.4fs (%d posts updated)",
+                perf_counter() - time_start,
+                count or 0,
+            )
 
     @classmethod
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
@@ -570,12 +583,12 @@ class DbState:
         """
         with AutoDbDisposer(db, "finish_vote_notifications") as db_mgr:
             time_start = perf_counter()
-            last_block = db_mgr.db.query_one(
-                "SELECT hive.app_get_current_block_num('hivemind_app')"
-            )
+            last_block = db_mgr.db.query_one("SELECT hive.app_get_current_block_num('hivemind_app')")
             sql = f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks(1, {last_block})"
             result = db_mgr.db.query_one(sql)
-            log.info("[MASSIVE] flush_vote_notifications: %s notifications in %.4fs", result, perf_counter() - time_start)
+            log.info(
+                "[MASSIVE] flush_vote_notifications: %s notifications in %.4fs", result, perf_counter() - time_start
+            )
 
     @classmethod
     def _finish_reputation_notification_scores(cls, db):
@@ -666,6 +679,7 @@ class DbState:
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
+            ('muted_parents', cls._finish_muted_parents, [cls.db()]),
             (
                 'hive_posts',
                 cls._finish_hive_posts,

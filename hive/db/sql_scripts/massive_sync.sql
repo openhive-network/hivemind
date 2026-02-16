@@ -1968,6 +1968,48 @@ END
 $function$ LANGUAGE plpgsql VOLATILE;
 
 
+-- 10c. propagate_all_muted_parents (finalization)
+-- Full propagation pass for ALL community-muted posts. Used at finalization
+-- after indexes are recreated, replacing per-batch propagation which is too
+-- expensive during MASSIVE_WITHOUT_INDEXES (no parent_id index → full seq scan).
+-- With the parent_id index available this runs in seconds.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION hivemind_app.propagate_all_muted_parents()
+RETURNS INT AS $function$
+DECLARE
+    _count INT;
+BEGIN
+    WITH RECURSIVE muted_descendants AS (
+        -- Seed: ALL posts muted by community moderation
+        SELECT hp.id
+        FROM hivemind_app.hive_posts hp
+        WHERE hp.is_muted = true
+          AND hp.muted_reasons & 1 = 1  -- MUTED_COMMUNITY_MODERATION
+          AND hp.counter_deleted = 0
+
+        UNION ALL
+
+        -- Recurse: direct children of any muted post
+        SELECT child.id
+        FROM hivemind_app.hive_posts child
+        JOIN muted_descendants parent ON child.parent_id = parent.id
+        WHERE child.counter_deleted = 0
+    )
+    UPDATE hivemind_app.hive_posts hp
+    SET is_muted = true,
+        muted_reasons = hp.muted_reasons | 4  -- add MUTED_PARENT bit
+    FROM muted_descendants md
+    WHERE hp.id = md.id
+      AND hp.muted_reasons & 1 = 0  -- Don't modify the root muted posts themselves
+      AND (hp.is_muted = false OR hp.muted_reasons & 4 = 0);
+
+    GET DIAGNOSTICS _count = ROW_COUNT;
+    RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
 -- ============================================================================
 -- 11. Notification Flush Functions (Phase 6)
 -- ============================================================================
