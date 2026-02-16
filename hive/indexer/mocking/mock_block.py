@@ -289,10 +289,10 @@ class BlockMockAfterDb:
         initminer_account_id = 3
 
         sql = f"""
-INSERT INTO hafd.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
+INSERT INTO hafd.blocks (block_id, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
                          witness_signature, signing_key, hbd_interest_rate, total_vesting_fund_hive, total_vesting_shares,
                          total_reward_fund_hive, virtual_supply, current_supply, current_hbd_supply, dhf_interval_ledger)
-VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
+VALUES (hafd.make_block_id(:num, 1), :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
                          1000000, 1000, 1000, 1000, 2000, 2000);
 """
 
