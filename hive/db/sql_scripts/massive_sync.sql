@@ -1923,6 +1923,19 @@ CREATE OR REPLACE FUNCTION hivemind_app.propagate_muted_parent_for_batch(
 DECLARE
     _count INT;
 BEGIN
+    -- Early exit: skip expensive recursive scan if no mutePost ops exist in the
+    -- current batch. The staging table is small (~1000 blocks of ops) so this
+    -- check is instant, while the recursive CTE below requires a full sequential
+    -- scan of hive_posts during MASSIVE_WITHOUT_INDEXES mode (~15s per call).
+    IF NOT EXISTS (
+        SELECT 1 FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 18
+          AND (s.val->>'id') = 'community'
+          AND s.val->>'json' LIKE '%mutePost%'
+    ) THEN
+        RETURN 0;
+    END IF;
+
     -- Recursively find all descendants of posts that were muted by community
     -- moderation (mutePost) in the current batch and propagate MUTED_PARENT.
     WITH RECURSIVE muted_descendants AS (
