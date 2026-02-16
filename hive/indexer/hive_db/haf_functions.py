@@ -63,6 +63,12 @@ def ensure_op_type_partial_index(db: Db) -> None:
     ids_array = "ARRAY[" + ",".join(str(i) for i in sorted(HIVEMIND_OP_TYPE_IDS)) + "]::SMALLINT[]"
     log.info(f"Creating op_type partial index for {len(HIVEMIND_OP_TYPE_IDS)} operation types ...")
     t0 = perf_counter()
-    db.query_no_return(f"SELECT hive.create_op_type_partial_index({ids_array});")
+    try:
+        db.query_no_return(f"SELECT hive.create_op_type_partial_index({ids_array});")
+    except Exception as e:
+        if 'already exists' in str(e):
+            log.info("op_type partial index already exists, skipping creation")
+        else:
+            raise
     elapsed = perf_counter() - t0
     log.info(f"op_type partial index ready in {elapsed:.1f}s")
