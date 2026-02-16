@@ -199,12 +199,17 @@ class Blocks:
         # Phase 4+3b: Overlap Python body merging with parallel SQL entity processing.
         # PostDataCache._data is only accessed by the main thread; Phase 4 tasks use
         # separate DB connections and don't touch hive_post_data, so no conflict.
+        #
+        # IMPORTANT: process_follows_for_blocks, process_account_updates_from_staging,
+        # and process_lastread_from_staging all UPDATE hive_accounts. Running them on
+        # separate connections causes deadlocks when two transactions lock overlapping
+        # account rows in different orders. We run account_updates and lastread on the
+        # main thread (after parallel completes) to serialize hive_accounts access.
+        # Both are trivially fast (<1ms).
         t0 = perf_counter()
         phase4_tasks = [
             (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()"),
             (Follow.db, f"SELECT * FROM {SCHEMA_NAME}.process_follows_for_blocks({first_block}, {last_block})"),
-            (Accounts.db, f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()"),
-            (Notify.db, f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()"),
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
         ]
 
@@ -236,6 +241,13 @@ class Blocks:
         for f in futures:
             f.result()
         pool.shutdown(wait=False)
+
+        # Phase 4b: Account metadata + lastread (must run AFTER follows to avoid
+        # deadlocks on hive_accounts — all three UPDATE the same table).
+        db.query_no_return("START TRANSACTION")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()")
+        db.query_no_return("COMMIT")
         phase_times['parallel'] = perf_counter() - t0
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
