@@ -494,11 +494,23 @@ class DbState:
             log.info("[MASSIVE] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
             # UPDATE: `root_id`
-            # Update root_id all root posts
+            # Update root_id for all root posts (depth=0 posts have root_id temporarily set to 0 on INSERT)
             time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
+            if massive_sync_preconditions:
+                # Initial massive sync: update ALL root posts without block range restriction
+                sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id(NULL, NULL);"
+            else:
+                sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+
+            # Sanity check: no root posts should have root_id = 0 after finalization
+            broken = db_mgr.db.query_one(
+                f"SELECT COUNT(*) FROM {SCHEMA_NAME}.hive_posts WHERE root_id = 0 AND depth = 0 AND id != 0"
+            )
+            if broken:
+                log.error("[MASSIVE] CRITICAL: %d root posts still have root_id = 0 after finalization!", broken)
+                raise RuntimeError(f"Finalization failed: {broken} root posts have root_id = 0")
 
     @classmethod
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
