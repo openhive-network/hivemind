@@ -181,11 +181,14 @@ class Blocks:
         # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
         # Skip entirely when batch is before community support start block — no community
         # ops or muted parents to propagate.
+        # NOTE: propagate_muted_parent_for_batch is DEFERRED to finalization. During
+        # MASSIVE_WITHOUT_INDEXES the parent_id index is dropped, making the recursive
+        # CTE do a full sequential scan (~15s per call at 40M+ rows). A single pass at
+        # finalization (with indexes) handles all accumulated mutes instantly.
         t0 = perf_counter()
         if last_block >= Community.start_block:
             db.query_no_return("START TRANSACTION")
             db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
-            db.query_no_return(f"SELECT {SCHEMA_NAME}.propagate_muted_parent_for_batch({first_block}, {last_block})")
             db.query_no_return("COMMIT")
         phase_times['community_post'] = perf_counter() - t0
 
