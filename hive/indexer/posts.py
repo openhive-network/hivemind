@@ -259,14 +259,17 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def _process_comments_batch_waves(cls, comment_ops, db):
-        """Process comments using wave-based resolution."""
+        """Process comments using wave-based resolution.
+
+        Each wave resolves one level of parent-child dependency. Loop until all
+        comments are resolved or no progress is made (which means remaining ops
+        have parents that truly don't exist, e.g. from ineffective deletes).
+        """
         remaining = list(comment_ops)
-        max_waves = 20
+        _wave = 0
 
-        for _wave in range(max_waves):
-            if not remaining:
-                break
-
+        while remaining:
+            _wave += 1
             processed_seq_ids = set()
 
             for chunk in chunks(list(remaining), 1000):
@@ -325,8 +328,10 @@ class Posts(DbAdapterHolder):
 
             remaining = [item for item in remaining if item[0] not in processed_seq_ids]
 
-        if remaining:
-            log.warning(f"[POSTS] {len(remaining)} comment ops could not be resolved after {max_waves} waves")
+            if remaining and not processed_seq_ids:
+                log.warning(f"[POSTS] {len(remaining)} comment ops could not be resolved "
+                            f"(no progress in wave {_wave}, parents missing)")
+                break
 
     @classmethod
     def _process_post_result(cls, row, op, block_date, is_new_post):
