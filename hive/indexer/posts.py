@@ -423,9 +423,12 @@ class Posts(DbAdapterHolder):
 
         t0 = perf_counter()
 
-        # Phase 1: Parse ops and collect permlink cache misses
+        # Phase 1: Parse ops and collect permlink cache misses.
+        # Deduplicate by (author, permlink) — later ops overwrite earlier ones.
+        # This is required because PostgreSQL UPDATE FROM is non-deterministic
+        # when multiple VALUES rows match the same target row.
         needed = set()
-        items = []
+        deduped = {}
         for op in cls._pending_comment_option_ops:
             author_id = Accounts.get_id(op['author'])
             permlink = op['permlink']
@@ -441,17 +444,16 @@ class Posts(DbAdapterHolder):
             for ex in op.get('extensions') or []:
                 if ex.get('type') == 'comment_payout_beneficiaries' and 'beneficiaries' in ex.get('value', {}):
                     beneficiaries = ex['value']['beneficiaries']
-            items.append(
-                (
-                    author_id,
-                    permlink,
-                    max_accepted_payout,
-                    percent_hbd,
-                    allow_votes,
-                    allow_curation_rewards,
-                    dumps(beneficiaries),
-                )
+            deduped[(author_id, permlink)] = (
+                author_id,
+                permlink,
+                max_accepted_payout,
+                percent_hbd,
+                allow_votes,
+                allow_curation_rewards,
+                dumps(beneficiaries),
             )
+        items = list(deduped.values())
 
         db = DbAdapterHolder.common_block_processing_db()
 
