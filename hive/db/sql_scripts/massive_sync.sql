@@ -2079,6 +2079,16 @@ END
 $function$ LANGUAGE plpgsql VOLATILE;
 
 
+-- Helper: compute hivemind reputation score for a single account (index lookup).
+CREATE OR REPLACE FUNCTION hivemind_app.reputation_score(_haf_account_id INT)
+RETURNS INT AS $$
+    SELECT (GREATEST(LOG(10, ABS(nullif(ar.reputation, 0))) - 9, 0)
+            * CASE WHEN ar.reputation < 0 THEN -1 ELSE 1 END * 7.5 + 25)::INT
+    FROM reptracker_app.account_reputations ar
+    WHERE ar.account_id = _haf_account_id;
+$$ LANGUAGE sql STABLE;
+
+
 -- 11b. flush_post_notifications_for_blocks
 CREATE OR REPLACE FUNCTION hivemind_app.flush_post_notifications_for_blocks(
     _first_block INT, _last_block INT
@@ -2093,40 +2103,23 @@ BEGIN
         RETURN 0;
     END IF;
 
-    WITH log_account_rep AS (
+    -- Find new comments in this batch from _post_results (populated by Phase 3).
+    -- Uses the staging table instead of scanning hive_posts by block_num_created
+    -- (which has no index during MASSIVE_WITHOUT_INDEXES).
+    WITH new_comments AS (
         SELECT
-            account_id,
-            LOG(10, ABS(nullif(reputation, 0))) AS rep,
-            (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-        FROM reptracker_app.account_reputations
-    ),
-    calculate_rep AS (
-        SELECT account_id, GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-        FROM log_account_rep lar
-    ),
-    final_rep AS (
-        SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep cr
-    ),
-    -- Find new comments in this block range with depth > 0
-    -- Use blocks_view with block_num - 1 for timestamp (matching old Python behavior
-    -- where notifications used _head_block_date = previous block's timestamp).
-    -- hp.block_num may differ from block_num_created if the post was edited.
-    new_comments AS (
-        SELECT
-            hp.id AS post_id,
-            hp.author_id AS src,
-            hp_parent.author_id AS dst,
-            hp.parent_id AS dst_post_id,
-            hp.depth,
-            hp.block_num,
+            pr.post_id,
+            pr.author_id AS src,
+            pr.parent_author_id AS dst,
+            pr.parent_id AS dst_post_id,
+            pr.depth,
+            pr.block_num,
             hb.created_at,
-            ROW_NUMBER() OVER (PARTITION BY hp.block_num ORDER BY hp.id) AS counter
-        FROM hivemind_app.hive_posts hp
-        JOIN hivemind_app.hive_posts hp_parent ON hp.parent_id = hp_parent.id
-        JOIN hivemind_app.blocks_view hb ON hb.num = hp.block_num - 1
-        WHERE hp.block_num_created BETWEEN _first_block AND _last_block
-          AND hp.depth > 0
-          AND hp.counter_deleted = 0
+            ROW_NUMBER() OVER (PARTITION BY pr.block_num ORDER BY pr.post_id) AS counter
+        FROM hivemind_app._post_results pr
+        JOIN hivemind_app.blocks_view hb ON hb.num = pr.block_num - 1
+        WHERE pr.is_new_post = true
+          AND pr.depth > 0
     )
     INSERT INTO hivemind_app.hive_notification_cache
     (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -2139,16 +2132,15 @@ BEGIN
         nc.dst,
         nc.dst_post_id,
         nc.post_id,
-        COALESCE(r.rep, 25),
+        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
         '', '', ''
     FROM new_comments nc
     JOIN hivemind_app.hive_accounts ha ON nc.src = ha.id
     LEFT JOIN hivemind_app.muted m ON m.follower = nc.dst AND m.following = nc.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nc.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nc.src
-    LEFT JOIN final_rep r ON ha.haf_id = r.account_id
     WHERE nc.block_num > _min_block
-      AND COALESCE(r.rep, 25) > 0
+      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
       AND nc.src IS DISTINCT FROM nc.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nc.block_num, nc.created_at, nc.src, nc.dst, nc.dst_post_id, nc.post_id
@@ -2178,23 +2170,10 @@ BEGIN
     -- This tracks every follow event (including re-follows after unfollows) rather than just
     -- the final state from the follows table.
 
-    WITH log_account_rep AS (
-        SELECT
-            account_id,
-            LOG(10, ABS(nullif(reputation, 0))) AS rep,
-            (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-        FROM reptracker_app.account_reputations
-    ),
-    calculate_rep AS (
-        SELECT account_id, GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-        FROM log_account_rep lar
-    ),
-    final_rep AS (
-        SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep cr
-    ),
-    new_follows AS (
+    WITH new_follows AS (
         SELECT
             ha_f.id AS follower,
+            ha_f.haf_id AS follower_haf_id,
             ha_g.id AS following,
             fe.block_num,
             hb.created_at,
@@ -2212,16 +2191,14 @@ BEGIN
         nf.block_num, 15, nf.created_at,
         nf.follower, nf.following,
         NULL::INTEGER, NULL::INTEGER,
-        COALESCE(rep.rep, 25),
+        COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25),
         '', '', ''
     FROM new_follows nf
     LEFT JOIN hivemind_app.muted m ON m.follower = nf.following AND m.following = nf.follower
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nf.following
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nf.follower
-    LEFT JOIN hivemind_app.hive_accounts ha ON ha.id = nf.follower
-    LEFT JOIN final_rep rep ON ha.haf_id = rep.account_id
     WHERE nf.block_num > _min_block
-      AND COALESCE(rep.rep, 25) > 0
+      AND COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0
       AND nf.follower IS DISTINCT FROM nf.following
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nf.block_num, nf.created_at, nf.follower, nf.following
@@ -2247,21 +2224,7 @@ BEGIN
         RETURN 0;
     END IF;
 
-    WITH log_account_rep AS (
-        SELECT
-            account_id,
-            LOG(10, ABS(nullif(reputation, 0))) AS rep,
-            (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-        FROM reptracker_app.account_reputations
-    ),
-    calculate_rep AS (
-        SELECT account_id, GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-        FROM log_account_rep lar
-    ),
-    final_rep AS (
-        SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep cr
-    ),
-    new_reblogs AS (
+    WITH new_reblogs AS (
         SELECT
             hr.blogger_id AS src,
             hp.author_id AS dst,
@@ -2280,16 +2243,15 @@ BEGIN
         hivemind_app.notification_id(nr.created_at, 14, nr.counter::INT),
         nr.block_num, 14, nr.created_at,
         nr.src, nr.dst, nr.dst_post_id, nr.post_id,
-        COALESCE(rep.rep, 25),
+        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
         '', '', ''
     FROM new_reblogs nr
     JOIN hivemind_app.hive_accounts ha ON nr.src = ha.id
     LEFT JOIN hivemind_app.muted m ON m.follower = nr.dst AND m.following = nr.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nr.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nr.src
-    LEFT JOIN final_rep rep ON ha.haf_id = rep.account_id
     WHERE nr.block_num > _min_block
-      AND COALESCE(rep.rep, 25) > 0
+      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
       AND nr.src IS DISTINCT FROM nr.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nr.block_num, nr.created_at, nr.src, nr.dst, nr.dst_post_id, nr.post_id
