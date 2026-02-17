@@ -664,11 +664,12 @@ class DbState:
 
         log.info("#############################################################################")
 
-        if not cls._rshares_recalculated:
+        if massive_sync_preconditions and not cls._rshares_recalculated:
             # Run rshares recalculation first (creates ~54M dead tuples on hive_posts).
             # Must complete before Part 0 so update_all_hive_posts_children_count doesn't
-            # scan a bloated table 256 times in a loop. Only needs to run once — subsequent
-            # finalization cycles during catch-up have negligible new votes.
+            # scan a bloated table 256 times in a loop. Only needs to run once per initial
+            # massive sync — small gaps on restart don't need full recalculation since live
+            # sync updates rshares incrementally per block.
             cls._finish_posts_rshares(cls.db())
 
             # Vacuum hive_posts to clean dead tuples before Part 0 scans it
@@ -677,9 +678,6 @@ class DbState:
 
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
-            ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
-            ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
-            ('muted_parents', cls._finish_muted_parents, [cls.db()]),
             (
                 'hive_posts',
                 cls._finish_hive_posts,
@@ -691,19 +689,26 @@ class DbState:
                 [cls.db(), last_imported_block, current_imported_block],
             ),
         ]
+        if massive_sync_preconditions:
+            methods += [
+                ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
+                ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
+                ('muted_parents', cls._finish_muted_parents, [cls.db()]),
+            ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
-        methods = [
-            ('notification_cache', cls._finish_notification_cache, [cls.db()]),
-            ('vote_notifications', cls._finish_vote_notifications, [cls.db()]),
-        ]
-        # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
-        cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
+        if massive_sync_preconditions:
+            methods = [
+                ('notification_cache', cls._finish_notification_cache, [cls.db()]),
+                ('vote_notifications', cls._finish_vote_notifications, [cls.db()]),
+            ]
+            # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
+            cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
-        # Recalculate reputation-based notification scores after all notifications are
-        # flushed and muted ones cleared. Runs sequentially to avoid concurrent access
-        # to hive_notification_cache with the tasks above.
-        cls._finish_reputation_notification_scores(cls.db())
+            # Recalculate reputation-based notification scores after all notifications are
+            # flushed and muted ones cleared. Runs sequentially to avoid concurrent access
+            # to hive_notification_cache with the tasks above.
+            cls._finish_reputation_notification_scores(cls.db())
 
         real_time = FOSM.stop(start_time)
 
