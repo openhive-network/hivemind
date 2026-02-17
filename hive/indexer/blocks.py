@@ -51,12 +51,12 @@ class Blocks:
     _concurrent_flush_1 = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
-        ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
         ('Notify', Notify.flush, Notify),
     ]
     _concurrent_flush_2 = [
+        ('Votes', Votes.flush, Votes),  # Must run after Posts.flush (#327)
         ('Accounts', Accounts.flush, Accounts),
         ("VoteNotifications", VoteNotificationCache.flush_vote_notifications, VoteNotificationCache),
         ("PostNotifications", PostNotificationCache.flush_post_notifications, PostNotificationCache),
