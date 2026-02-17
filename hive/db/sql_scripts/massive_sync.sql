@@ -680,11 +680,12 @@ BEGIN
                      AND jsonb_array_length(no.inner_json) = 2
                      AND no.inner_json->>0 = 'setLastRead'
                      AND jsonb_typeof(no.inner_json->1) = 'object'
-                THEN COALESCE(
-                    -- Use explicit date if provided, otherwise use block_date
-                    LEAST((no.inner_json->1->>'date')::TIMESTAMP, no.block_date),
-                    no.block_date
-                )
+                THEN CASE
+                    -- Validate date matches YYYY-MM-DDTHH:MM:SS before casting
+                    WHEN (no.inner_json->1->>'date') ~ '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$'
+                    THEN LEAST((no.inner_json->1->>'date')::TIMESTAMP, no.block_date)
+                    ELSE no.block_date
+                END
                 ELSE NULL
             END AS read_date
         FROM notify_ops no
