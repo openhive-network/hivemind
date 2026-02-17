@@ -1160,9 +1160,13 @@ BEGIN
         )
     );
 
-    -- Step 6: Process comment_options (type 19) - update hive_posts columns
+    -- Step 6: Process comment_options (type 19) - update hive_posts columns.
+    -- DISTINCT ON keeps only the last op per (author, permlink) when the same
+    -- post has multiple comment_options in one batch (e.g. post created with
+    -- beneficiaries then edited clearing them). Without this, PostgreSQL's
+    -- UPDATE FROM would non-deterministically pick any matching row.
     WITH co_ops AS (
-        SELECT
+        SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
             s.id,
             s.val->>'author' AS author,
             s.val->>'permlink' AS permlink,
@@ -1179,6 +1183,7 @@ BEGIN
             ) AS beneficiaries
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 19
+        ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
     )
     UPDATE hivemind_app.hive_posts hp
     SET
