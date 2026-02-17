@@ -26,22 +26,6 @@ BEGIN
     -- In case of reputation being 0, the score is set to 25 rather than 0.
     SELECT hivemind_app.block_before_irreversible('90 days') INTO _notification_first_block;
     IF _block_num > _notification_first_block THEN
-        WITH log_account_rep AS (
-            SELECT
-                account_id,
-                LOG(10, ABS(NULLIF(reputation, 0))) AS rep,
-                (CASE WHEN reputation < 0 THEN -1 ELSE 1 END) AS is_neg
-            FROM reptracker_app.account_reputations
-        ),
-        calculate_rep AS (
-            SELECT
-                account_id,
-                GREATEST(lar.rep - 9, 0) * lar.is_neg AS rep
-            FROM log_account_rep lar
-        ),
-        final_rep AS (
-            SELECT account_id, (cr.rep * 7.5 + 25)::INT AS rep FROM calculate_rep AS cr
-        )
         INSERT INTO hivemind_app.hive_notification_cache
         (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
         SELECT
@@ -53,15 +37,14 @@ BEGIN
             hc.id,
             NULL,
             NULL,
-            COALESCE(rep.rep, 25),
+            COALESCE(hivemind_app.reputation_score(r.haf_id), 25),
             '',
             hc.name,
             hc.title
         FROM hivemind_app.hive_accounts AS r
         JOIN hivemind_app.hive_communities AS hc ON hc.id = _community_id
-        LEFT JOIN final_rep AS rep ON r.haf_id = rep.account_id
         WHERE r.id = _actor_id
-            AND COALESCE(rep.rep, 25) > 0
+            AND COALESCE(hivemind_app.reputation_score(r.haf_id), 25) > 0
             AND r.id IS DISTINCT FROM hc.id
         ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING;
     END IF;
