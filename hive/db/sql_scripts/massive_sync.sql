@@ -928,7 +928,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_posts_from_staging(
 DECLARE
     _rec RECORD;
     _ineffective_keys TEXT[];
-    _wave INT;
     _processed_count INT;
     _remaining INT;
     -- Step 7: delete handling
@@ -1019,7 +1018,9 @@ BEGIN
     JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id;
 
     -- Step 5: Process comments with wave-based resolution (first-occurrence only)
-    FOR _wave IN 1..20 LOOP
+    -- Each wave resolves one level of parent-child dependency. Loop until all
+    -- comments are resolved or no progress is made (truly missing parents).
+    LOOP
         -- Count unprocessed first-occurrence comments (not yet in results)
         SELECT count(*) INTO _remaining
         FROM hivemind_app._comment_staging cs
