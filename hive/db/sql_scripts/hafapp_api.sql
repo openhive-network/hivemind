@@ -265,6 +265,11 @@ BEGIN
         END IF;
 
         _what_action := COALESCE(_data->'what'->>0, '');
+        -- PostgreSQL ->> converts boolean false/true to text 'false'/'true';
+        -- normalize to '' (= unfollow/unmute) to match Python's `False or '' → ''`.
+        IF _what_action IN ('false', 'true') THEN
+            _what_action := '';
+        END IF;
         _follower_name := _data->>'follower';
 
         -- Follower must match auth account
