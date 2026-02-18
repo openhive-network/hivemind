@@ -83,7 +83,7 @@ variables:
   # CI base image from common-ci-configuration (Python 3.14)
   BUILDER_IMAGE_TAG: ":pypa_2_28-2"
   HIVE_CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image${BUILDER_IMAGE_TAG}"
-  PYTHON_COMPAT_IMAGE: "${HIVE_CI_BASE_IMAGE}"
+  PYTHON_IMAGE: "${HIVE_CI_BASE_IMAGE}"
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
@@ -1142,23 +1142,19 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
-  image: "${PYTHON_COMPAT_IMAGE}"
   needs:
   - job: generate_python_api_client
     artifacts: true
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+    PYTHON_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image:ubuntu24.04-py${PYTHON_VERSION}-2"
     GIT_SUBMODULE_STRATEGY: none
   parallel:
     matrix:
     - PYTHON_VERSION: ["3.12", "3.14"]
   before_script:
-  - |
-    if [[ "${TEST_WITH_LATEST_DEPENDENCIES}" == "true" ]]; then
-      echo "Updating dependencies to latest versions..."
-      poetry -C "${PYPROJECT_DIR}" update --lock
-    fi
-  - poetry -C "${PYPROJECT_DIR}" install
+  - !reference [.project_develop_configuration_template, before_script]
+  - !reference [.update_deps_for_tests, script]
   script:
   - poetry run -C "${PYPROJECT_DIR}" pytest "${PYPROJECT_DIR}/tests/test_generated_api_client.py"
   tags:
@@ -1173,13 +1169,13 @@ test_python_api_wheel:
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
     DIST_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package/dist"
+    PYTHON_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image:ubuntu24.04-py${PYTHON_VERSION}-2"
     GIT_SUBMODULE_STRATEGY: none
   parallel:
     matrix:
     - PYTHON_VERSION: ["3.12", "3.14"]
   before_script:
   - !reference [.configuration_template, before_script]
-  - !reference [.update_deps_for_tests, script]
   - poetry -C "${PYPROJECT_DIR}" install --no-root
   script:
   - pip install --no-deps "${DIST_DIR}"/*.whl
