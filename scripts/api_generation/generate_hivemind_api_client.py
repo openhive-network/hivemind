@@ -14,7 +14,7 @@ if __name__ == "__main__":
     build_directory = Path(sys.argv[2])
 
     swagger_hivemind_api_definition = build_directory / "swagger-doc.json"
-    hivemind_api_client_output_package = base_directory / "hivemind_api" / "hivemind_api_client"
+    hivemind_api_client_output_package = base_directory / "hiveio_hivemind_api" / "hivemind_api_client"
 
     generate_api_client_from_swagger(
         swagger_hivemind_api_definition,
