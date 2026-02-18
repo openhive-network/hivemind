@@ -163,7 +163,6 @@ class DbState:
             'blacklisted_block_num_idx',
             'follow_muted_block_num_idx',
             'follow_blacklisted_block_num_idx',
-            'hive_post_data_bm25_idx',
             'hive_accounts_haf_id_idx',
         ]
 
@@ -202,6 +201,30 @@ class DbState:
         _indexes[rep].append(idx_reputation_on_account_reputations)
 
         return _indexes
+
+    _BM25_INDEX_NAME = 'hive_post_data_bm25_idx'
+
+    @classmethod
+    def _bm25_index(cls):
+        """Return (table, index) for the BM25 full-text search index on hive_post_data.
+
+        This index is handled separately from disableable_indexes: it's dropped
+        at massive sync start but created during the fills phase (Part 0) instead
+        of the index creation phase, since it takes ~31 minutes and would otherwise
+        be the sole bottleneck. Creating it during fills hides the cost entirely.
+        """
+        md = build_metadata()
+        for table in md.tables.values():
+            for index in table.indexes:
+                if index.name == cls._BM25_INDEX_NAME:
+                    return table, index
+        raise AssertionError(f"BM25 index {cls._BM25_INDEX_NAME} not found in schema")
+
+    @classmethod
+    def _create_bm25_index(cls, db):
+        """Create the BM25 index (deferred from index creation to overlap with fills)."""
+        table, index = cls._bm25_index()
+        cls.processing_indexes_per_table(db, table.name, [index], False, False, True)
 
     @classmethod
     def has_index(cls, db, idx_name):
@@ -304,7 +327,7 @@ class DbState:
         log.info(f"=== {action} INDEXES ===")
         threads_time = FOSM.log_current(f"Total {action} indexes time")
         log.info(
-            f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s"
+            f"Elapsed time: {real_time:.4f}s. Calculated elapsed time: {threads_time:.4f}s. Difference: {real_time - threads_time:.4f}s"
         )
         FOSM.clear()
         log.info(f"=== {action} INDEXES ===")
@@ -400,6 +423,10 @@ class DbState:
 
         # is_pre_process, drop, create
         cls.processing_indexes(True, True, False)
+
+        # Drop BM25 index separately (deferred creation happens during fills phase)
+        table, index = cls._bm25_index()
+        cls.processing_indexes_per_table(cls.db(), table.name, [index], True, True, False)
 
         # Set tables to UNLOGGED for faster inserts (no WAL writes)
         from hive.db.schema import set_logged_table_attribute
@@ -695,6 +722,10 @@ class DbState:
                 ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
                 ('muted_parents', cls._finish_muted_parents, [cls.db()]),
             ]
+        # BM25 index creation is deferred from the index phase to here, running in
+        # parallel with the fills above. Takes ~31min but is hidden inside Part 0
+        # which takes ~48min, eliminating it from the critical path.
+        methods.append(('bm25_index', cls._create_bm25_index, [cls.db()]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
         if massive_sync_preconditions:
@@ -715,7 +746,7 @@ class DbState:
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
         threads_time = FOSM.log_current("Total final operations time")
         log.info(
-            f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s"
+            f"Elapsed time: {real_time:.4f}s. Calculated elapsed time: {threads_time:.4f}s. Difference: {real_time - threads_time:.4f}s"
         )
         FOSM.clear()
         log.info("=== FILLING FINAL DATA INTO TABLES ===")

@@ -92,11 +92,10 @@ class SyncHiveDb:
         log.info("Attempting to build Hivemind database schema if needed")
 
     def run(self) -> None:
-        from hive.indexer.hive_db.haf_functions import ensure_custom_json_type_index, ensure_op_type_partial_index
+        from hive.indexer.hive_db.haf_functions import ensure_custom_json_type_index
 
         start_time = perf()
         ensure_custom_json_type_index(self._db)
-        ensure_op_type_partial_index(self._db)
         Blocks.set_head_date()
 
         def report_enter_to_stage(current_stage) -> bool:
@@ -213,6 +212,7 @@ class SyncHiveDb:
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            DbState.ensure_indexes_are_enabled()
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
@@ -284,7 +284,9 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            assert is_superuser, (
+                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            )
 
     @staticmethod
     def _show_info(database: Db) -> None:
