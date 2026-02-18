@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry-core>=1.7.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+source = [
+    { name = "PyPI", priority = "primary" },
+    { name = "gitlab-hive", url = "https://gitlab.syncad.com/api/v4/groups/136/-/packages/pypi/simple", priority = "primary" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.14,<4"
+hiveio-api-client-generator = ">=1.7.1"
+hiveio-beekeepy = ">=1.28.6"
