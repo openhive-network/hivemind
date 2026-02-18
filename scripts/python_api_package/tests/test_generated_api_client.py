@@ -5,7 +5,7 @@ from typing import Final
 import aiohttp
 from beekeepy.interfaces import HttpUrl
 
-from api_client_tests.api_caller import HivemindApiCaller
+from tests.api_caller import HivemindApiCaller
 
 FALLBACK_ENDPOINTS: Final[list[HttpUrl]] = [
     HttpUrl("https://api.syncad.com"),

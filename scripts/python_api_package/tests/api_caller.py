@@ -4,7 +4,7 @@ from beekeepy.handle.remote import AbstractAsyncHandle, AsyncBatchHandle, Remote
 from beekeepy.handle.runnable import RunnableHandleSettings
 from beekeepy.interfaces import HttpUrl
 
-from api_client_tests.api_collection import HivemindApiCollection
+from tests.api_collection import HivemindApiCollection
 
 
 class HivemindApiCaller(AbstractAsyncHandle[RemoteHandleSettings, HivemindApiCollection]):
