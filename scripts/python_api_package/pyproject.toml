@@ -5,20 +5,15 @@ requires = [
 ]
 build-backend = "poetry_dynamic_versioning.backend"
 
-
 [tool.poetry]
-name = "hivemind_api"
+name = "hiveio-hivemind-api"
 version = "0.0.0"
-description = ""
-authors = []
-package-mode=true
-
 packages = [
-    { include = "hivemind_api" },
+    { include = "hiveio_hivemind_api" },
 ]
 include = [
-    { path =  "hivemind_api/*", format = ["wheel", "sdist"] },
-    { path =  "hivemind_api/hivemind_api_client/*", format = ["wheel", "sdist"] },
+    { path =  "hiveio_hivemind_api/*", format = ["wheel", "sdist"] },
+    { path =  "hiveio_hivemind_api/hivemind_api_client/*", format = ["wheel", "sdist"] },
 ]
 source = [
     { name = "PyPI", priority = "primary" },
@@ -26,10 +21,8 @@ source = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.14,<4"
+python = ">=3.12,<4"
 hiveio-beekeepy = ">=1.28.6"
-api_client_generator = ">=1.7.1"
-pydantic = ">=2.12.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.5"
@@ -59,5 +52,5 @@ format-jinja = """
 
 [tool.poetry-dynamic-versioning.substitution]
 files = [
-    "hivemind_api/__init__.py",
+    "hiveio_hivemind_api/__init__.py",
 ]
