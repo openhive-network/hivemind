@@ -1511,7 +1511,84 @@ $function$ LANGUAGE plpgsql VOLATILE;
 
 
 -- ============================================================================
--- 9b. process_community_op — dispatch a single community custom_json action
+-- 9b. Validation helpers for community ops (match Python CommunityOp validation)
+-- ============================================================================
+
+-- Validate that a JSONB object contains exactly the expected keys (no extra, no missing).
+-- Mirrors Python: assert_keys_match(self.op.keys(), schema, allow_missing=False)
+DROP FUNCTION IF EXISTS hivemind_app._validate_json_keys(JSONB, TEXT[]);
+CREATE OR REPLACE FUNCTION hivemind_app._validate_json_keys(
+    _data JSONB,
+    _required_keys TEXT[]
+) RETURNS BOOLEAN AS $$
+BEGIN
+    -- All required keys must be present
+    IF NOT (SELECT bool_and(_data ? k) FROM unnest(_required_keys) AS k) THEN
+        RETURN FALSE;
+    END IF;
+    -- No extraneous keys
+    IF EXISTS (
+        SELECT 1 FROM jsonb_object_keys(_data) AS k
+        WHERE k != ALL(_required_keys)
+    ) THEN
+        RETURN FALSE;
+    END IF;
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Validate a string field in a JSONB object.
+-- Mirrors Python: read_key_str(op, key, maxlen, allow_blank)
+-- Checks: key exists, value is JSON string type, non-blank (unless allow_blank),
+-- no whitespace padding (Python: assert op[key] == op[key].strip()), length limit.
+DROP FUNCTION IF EXISTS hivemind_app._validate_str(JSONB, TEXT, INT, BOOLEAN);
+CREATE OR REPLACE FUNCTION hivemind_app._validate_str(
+    _data JSONB,
+    _key TEXT,
+    _maxlen INT DEFAULT NULL,
+    _allow_blank BOOLEAN DEFAULT FALSE
+) RETURNS BOOLEAN AS $$
+DECLARE
+    _val TEXT;
+BEGIN
+    -- Key must exist
+    IF NOT _data ? _key THEN RETURN FALSE; END IF;
+    -- Must be JSON string type (not number, null, bool, etc.)
+    IF jsonb_typeof(_data->_key) != 'string' THEN RETURN FALSE; END IF;
+    _val := _data->>_key;
+    -- Non-blank check
+    IF NOT _allow_blank AND (_val = '') THEN RETURN FALSE; END IF;
+    -- Whitespace padding check
+    IF _val != TRIM(both FROM _val) THEN RETURN FALSE; END IF;
+    -- Length check
+    IF _maxlen IS NOT NULL AND length(_val) > _maxlen THEN RETURN FALSE; END IF;
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Validate a language code against ISO 639-1.
+-- Mirrors Python: LANGS tuple in community.py
+DROP FUNCTION IF EXISTS hivemind_app._is_valid_lang(TEXT);
+CREATE OR REPLACE FUNCTION hivemind_app._is_valid_lang(_lang TEXT) RETURNS BOOLEAN AS $$
+SELECT _lang = ANY(ARRAY[
+    'ab','aa','af','ak','sq','am','ar','an','hy','as','av','ae','ay','az',
+    'bm','ba','eu','be','bn','bh','bi','bs','br','bg','my','ca','ch','ce',
+    'ny','zh','cv','kw','co','cr','hr','cs','da','dv','nl','dz','en','eo',
+    'et','ee','fo','fj','fi','fr','ff','gl','ka','de','el','gn','gu','ht',
+    'ha','he','hz','hi','ho','hu','ia','id','ie','ga','ig','ik','io','is',
+    'it','iu','ja','jv','kl','kn','kr','ks','kk','km','ki','rw','ky','kv',
+    'kg','ko','ku','kj','la','lb','lg','li','ln','lo','lt','lu','lv','gv',
+    'mk','mg','ms','ml','mt','mi','mr','mh','mn','na','nv','nd','ne','ng',
+    'nb','nn','no','ii','nr','oc','oj','cu','om','or','os','pa','pi','fa',
+    'pl','ps','pt','qu','rm','rn','ro','ru','sa','sc','sd','se','sm','sg',
+    'sr','gd','sn','si','sk','sl','so','st','es','su','sw','ss','sv','ta',
+    'te','tg','th','ti','bo','tk','tl','tn','to','tr','ts','tt','tw','ty',
+    'ug','uk','ur','uz','ve','vi','vo','wa','cy','wo','fy','xh','yi','yo','za'
+]);
+$$ LANGUAGE sql IMMUTABLE;
+
+-- ============================================================================
+-- 9c. process_community_op — dispatch a single community custom_json action
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_op(
@@ -1540,14 +1617,46 @@ DECLARE
     _score INT := 35;
     _type_id INT;
     _post_id INT;
+    _props_title TEXT;
+    _valid_props_keys TEXT[] := ARRAY['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id'];
 BEGIN
+    -- ========= KEY VALIDATION (matches Python CommunityOp.SCHEMA + assert_keys_match) =========
+    -- Python rejects ops with extraneous or missing keys; replicate that here.
+    CASE _action
+        WHEN 'subscribe' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community']) THEN RETURN _counter_in; END IF;
+        WHEN 'unsubscribe' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community']) THEN RETURN _counter_in; END IF;
+        WHEN 'updateProps' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'props']) THEN RETURN _counter_in; END IF;
+        WHEN 'setRole' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'role']) THEN RETURN _counter_in; END IF;
+        WHEN 'setUserTitle' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'title']) THEN RETURN _counter_in; END IF;
+        WHEN 'mutePost' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'permlink', 'notes']) THEN RETURN _counter_in; END IF;
+        WHEN 'unmutePost' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'permlink', 'notes']) THEN RETURN _counter_in; END IF;
+        WHEN 'pinPost' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'permlink']) THEN RETURN _counter_in; END IF;
+        WHEN 'unpinPost' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'permlink']) THEN RETURN _counter_in; END IF;
+        WHEN 'flagPost' THEN
+            IF NOT hivemind_app._validate_json_keys(_data, ARRAY['community', 'account', 'permlink', 'notes']) THEN RETURN _counter_in; END IF;
+        ELSE
+            RETURN _counter_in;  -- unknown action
+    END CASE;
+
+    -- ========= FIELD VALIDATION (matches Python read_key_str assertions) =========
+    -- community: maxlen=16, non-blank, no whitespace padding
+    IF NOT hivemind_app._validate_str(_data, 'community', 16) THEN RETURN _counter_in; END IF;
+
     -- Resolve actor
     SELECT id INTO _actor_id FROM hivemind_app.hive_accounts WHERE name = _auth_account;
     IF _actor_id IS NULL THEN RETURN _counter_in; END IF;
 
     -- Read community name (required for all actions)
     _community_name := _data->>'community';
-    IF _community_name IS NULL OR _community_name = '' THEN RETURN _counter_in; END IF;
 
     -- Validate community exists
     SELECT id INTO _community_id FROM hivemind_app.hive_communities WHERE name = _community_name;
@@ -1569,18 +1678,22 @@ BEGIN
 
     -- Read action-specific fields
     IF _action IN ('setRole', 'setUserTitle', 'mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost') THEN
+        -- account: maxlen=16, non-blank, no padding
+        IF NOT hivemind_app._validate_str(_data, 'account', 16) THEN RETURN _counter_in; END IF;
         _account_name := _data->>'account';
-        IF _account_name IS NULL OR _account_name = '' THEN RETURN _counter_in; END IF;
         SELECT id INTO _account_id FROM hivemind_app.hive_accounts WHERE name = _account_name;
         IF _account_id IS NULL THEN RETURN _counter_in; END IF;
     END IF;
 
     IF _action IN ('mutePost', 'unmutePost', 'pinPost', 'unpinPost', 'flagPost') THEN
+        -- permlink: maxlen=256, non-blank, no padding
+        IF NOT hivemind_app._validate_str(_data, 'permlink', 256) THEN RETURN _counter_in; END IF;
         _permlink := _data->>'permlink';
-        IF _permlink IS NULL OR _permlink = '' THEN RETURN _counter_in; END IF;
     END IF;
 
     IF _action IN ('mutePost', 'unmutePost', 'flagPost') THEN
+        -- notes: maxlen=120, non-blank, no padding
+        IF NOT hivemind_app._validate_str(_data, 'notes', 120) THEN RETURN _counter_in; END IF;
         _notes := _data->>'notes';
     END IF;
 
@@ -1592,6 +1705,74 @@ BEGIN
         WHEN 'updateProps' THEN
             _props := _data->'props';
             IF _props IS NULL OR jsonb_typeof(_props) != 'object' THEN RETURN _counter_in; END IF;
+            -- Python: assert_keys_match(props.keys(), valid, allow_missing=True)
+            -- No extraneous keys in props (missing allowed)
+            IF EXISTS (
+                SELECT 1 FROM jsonb_object_keys(_props) AS k
+                WHERE k != ALL(_valid_props_keys)
+            ) THEN RETURN _counter_in; END IF;
+            -- Validate individual props fields (match Python _read_props)
+            IF _props ? 'title' THEN
+                -- read_key_str(props, 'title', 20): string, non-blank, no padding, maxlen=20
+                IF NOT hivemind_app._validate_str(_props, 'title', 20) THEN RETURN _counter_in; END IF;
+                _props_title := _props->>'title';
+                -- assert len(out['title']) >= 3
+                IF length(_props_title) < 3 THEN RETURN _counter_in; END IF;
+                -- assert out['title'][0] not in ('@', '#')
+                IF left(_props_title, 1) IN ('@', '#') THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'about' THEN
+                -- read_key_str(props, 'about', 120, allow_blank=True)
+                IF NOT hivemind_app._validate_str(_props, 'about', 120, TRUE) THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'lang' THEN
+                -- read_key_str(props, 'lang', 2, 'lang')
+                IF NOT hivemind_app._validate_str(_props, 'lang', 2) THEN RETURN _counter_in; END IF;
+                IF NOT hivemind_app._is_valid_lang(_props->>'lang') THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'is_nsfw' THEN
+                -- read_key_bool(props, 'is_nsfw'): must be JSON boolean
+                IF jsonb_typeof(_props->'is_nsfw') != 'boolean' THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'description' THEN
+                -- read_key_str(props, 'description', 1000, allow_blank=True)
+                IF NOT hivemind_app._validate_str(_props, 'description', 1000, TRUE) THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'flag_text' THEN
+                -- read_key_str(props, 'flag_text', 1000, allow_blank=True)
+                IF NOT hivemind_app._validate_str(_props, 'flag_text', 1000, TRUE) THEN RETURN _counter_in; END IF;
+            END IF;
+            IF _props ? 'settings' THEN
+                -- read_key_dict(props, 'settings'): must be non-empty object
+                IF jsonb_typeof(_props->'settings') != 'object' THEN RETURN _counter_in; END IF;
+                -- URL validation for avatar_url and cover_url
+                IF _props->'settings' ? 'avatar_url' THEN
+                    IF COALESCE(_props->'settings'->>'avatar_url', '') != '' THEN
+                        IF left(_props->'settings'->>'avatar_url', 7) != 'http://'
+                           AND left(_props->'settings'->>'avatar_url', 8) != 'https://' THEN
+                            RETURN _counter_in;
+                        END IF;
+                        IF length(_props->'settings'->>'avatar_url') >= 1024 THEN RETURN _counter_in; END IF;
+                    END IF;
+                END IF;
+                IF _props->'settings' ? 'cover_url' THEN
+                    IF COALESCE(_props->'settings'->>'cover_url', '') != '' THEN
+                        IF left(_props->'settings'->>'cover_url', 7) != 'http://'
+                           AND left(_props->'settings'->>'cover_url', 8) != 'https://' THEN
+                            RETURN _counter_in;
+                        END IF;
+                        IF length(_props->'settings'->>'cover_url') >= 1024 THEN RETURN _counter_in; END IF;
+                    END IF;
+                END IF;
+            END IF;
+            IF _props ? 'type_id' THEN
+                -- read_key_integer(props, 'type_id'): must be int, in [1,2,3]
+                IF jsonb_typeof(_props->'type_id') != 'number' THEN RETURN _counter_in; END IF;
+                IF (_props->>'type_id')::INT NOT IN (1, 2, 3) THEN RETURN _counter_in; END IF;
+            END IF;
+            -- Python: assert out, 'props were blank' — at least one valid prop must exist
+            -- (If all the above checks passed but no recognized field was present, props is empty)
+
             SELECT * INTO _result FROM hivemind_app.update_community_props(_actor_id, _community_id, _props);
             IF NOT _result.success THEN
                 RAISE WARNING 'updateProps failed: community=% actor=% actor_id=% community_id=% error=%',
@@ -1614,8 +1795,9 @@ BEGIN
             SELECT * INTO _result FROM hivemind_app.community_unsubscribe(_actor_id, _community_id);
 
         WHEN 'setRole' THEN
+            -- role: maxlen=16, non-blank, no padding (Python: read_key_str(self.op, 'role', 16))
+            IF NOT hivemind_app._validate_str(_data, 'role', 16) THEN RETURN _counter_in; END IF;
             _role := _data->>'role';
-            IF _role IS NULL OR _role = '' THEN RETURN _counter_in; END IF;
             _role_id := CASE _role
                 WHEN 'muted' THEN -2
                 WHEN 'guest' THEN 0
@@ -1641,6 +1823,8 @@ BEGIN
             END IF;
 
         WHEN 'setUserTitle' THEN
+            -- title: maxlen=32, allow_blank, no padding (Python: read_key_str(self.op, 'title', 32, allow_blank=True))
+            IF NOT hivemind_app._validate_str(_data, 'title', 32, TRUE) THEN RETURN _counter_in; END IF;
             _title := COALESCE(TRIM(_data->>'title'), '');
             SELECT * INTO _result FROM hivemind_app.community_set_title(
                 _actor_id, _account_id, _community_id, _title, _date
@@ -1891,17 +2075,15 @@ BEGIN
             _last_counter_block := _rec.block_num;
         END IF;
 
-        -- Dispatch to existing community SQL functions via the Python-equivalent process
-        -- This delegates to the existing community.sql functions
-        BEGIN
-            SELECT hivemind_app.process_community_op(
-                _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter
-            ) INTO _community_counter;
-            _count := _count + 1;
-        EXCEPTION WHEN OTHERS THEN
-            RAISE WARNING 'Community op failed: action=% account=% block=% error=%',
-                _action, _auth_account, _rec.block_num, SQLERRM;
-        END;
+        -- Dispatch to existing community SQL functions.
+        -- No EXCEPTION WHEN OTHERS wrapper: with proper validation in process_community_op,
+        -- the underlying SQL functions should not throw. If they do, it's a bug that should
+        -- propagate rather than be silently swallowed. The old wrapper also created an
+        -- implicit savepoint per iteration (PL/pgSQL subtransaction), adding overhead.
+        SELECT hivemind_app.process_community_op(
+            _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter
+        ) INTO _community_counter;
+        _count := _count + 1;
     END LOOP;
 
     RETURN _count;
