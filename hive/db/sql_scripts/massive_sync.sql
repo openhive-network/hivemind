@@ -605,34 +605,27 @@ DECLARE
     _count INT := 0;
 BEGIN
     -- Collect types 10 (ACCOUNT_UPDATE) and 43 (ACCOUNT_UPDATE_2) from staging
-    -- Deduplicate: per account, last update wins (highest op id)
-    -- Type 10: json_metadata always updated, posting_json_metadata only if present
-    -- Type 43: both json_metadata and posting_json_metadata always updated
+    -- Deduplicate per field: json_metadata from the last op of either type,
+    -- posting_json_metadata from the last type 43 op (type 10 doesn't carry it).
+    --
+    -- Previous DISTINCT ON approach picked one row per account (highest op id).
+    -- When the last op was type 10, it discarded the type 43's posting_json_metadata.
 
     WITH deduped AS (
-        -- For each account, keep the last update op
-        SELECT DISTINCT ON (val->>'account')
-            s.id,
-            s.op_type_id,
+        SELECT
             s.val->>'account' AS account_name,
-            -- posting_json_metadata: only type 43 (ACCOUNT_UPDATE_2) allows changing it
-            CASE
-                WHEN s.op_type_id = 43 THEN COALESCE(s.val->>'posting_json_metadata', '')
-                ELSE NULL  -- type 10 doesn't change posting_json_metadata
-            END AS posting_json_metadata,
-            COALESCE(s.val->>'json_metadata', '') AS json_metadata,
-            -- Track if this is type 43 (allows posting_json_metadata change)
-            (s.op_type_id = 43) AS allow_change_posting
+            -- json_metadata: last value from either op type
+            (array_agg(COALESCE(s.val->>'json_metadata', '') ORDER BY s.id DESC))[1] AS json_metadata,
+            -- posting_json_metadata: last value from type 43 only (type 10 doesn't carry it)
+            (array_agg(COALESCE(s.val->>'posting_json_metadata', '') ORDER BY s.id DESC)
+                FILTER (WHERE s.op_type_id = 43))[1] AS posting_json_metadata
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (10, 43)
-        ORDER BY val->>'account', s.id DESC
+        GROUP BY s.val->>'account'
     )
     UPDATE hivemind_app.hive_accounts ha
     SET
-        posting_json_metadata = CASE
-            WHEN d.allow_change_posting THEN d.posting_json_metadata
-            ELSE ha.posting_json_metadata
-        END,
+        posting_json_metadata = COALESCE(d.posting_json_metadata, ha.posting_json_metadata),
         json_metadata = d.json_metadata
     FROM deduped d
     WHERE ha.name = d.account_name;
