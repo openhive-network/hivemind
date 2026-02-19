@@ -1,5 +1,6 @@
 stages:
 - detect
+- lint
 - build
 - sync
 - benchmark
@@ -459,6 +460,20 @@ prepare_hivemind_image:
       dotenv: hivemind_image.env
     paths:
     - hivemind_image.env
+  tags: *shared_tags
+
+verify_poetry_lock_stability_api_package:
+  stage: lint
+  extends: .verify_poetry_lock_stability_template
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
+  tags: *shared_tags
+
+verify_poetry_lock_stability_api_generation:
+  stage: lint
+  extends: .verify_poetry_lock_stability_template
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/api_generation"
   tags: *shared_tags
 
 extract-swagger-json:
