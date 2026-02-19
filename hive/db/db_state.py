@@ -553,21 +553,25 @@ class DbState:
     def _finish_payout_stats_view(cls, db):
         with AutoDbDisposer(db, "finish_payout_stats_view") as db_mgr:
             time_start = perf_counter()
-            PayoutStats.generate(db=db_mgr.db)
+            PayoutStats.generate(db=db_mgr.db, separate_transaction=True)
             log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_communities_posts_and_rank(cls, db):
         with AutoDbDisposer(db, "finish_communities_posts_and_rank") as db_mgr:
             time_start = perf_counter()
+            db_mgr.db.query("START TRANSACTION")
             update_communities_posts_and_rank(db_mgr.db)
+            db_mgr.db.query("COMMIT")
             log.info("[MASSIVE] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_muted_parents(cls, db):
         with AutoDbDisposer(db, "finish_muted_parents") as db_mgr:
             time_start = perf_counter()
+            db_mgr.db.query("START TRANSACTION")
             count = db_mgr.db.query_one(f"SELECT {SCHEMA_NAME}.propagate_all_muted_parents();")
+            db_mgr.db.query("COMMIT")
             log.info(
                 "[MASSIVE] propagate_all_muted_parents executed in %.4fs (%d posts updated)",
                 perf_counter() - time_start,
@@ -578,8 +582,8 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            # cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});")
+            sql = f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -587,7 +591,7 @@ class DbState:
         with AutoDbDisposer(db, "finish_posts_rshares") as db_mgr:
             time_start = perf_counter()
             sql = f"SELECT {SCHEMA_NAME}.recalculate_all_posts_rshares();"
-            db_mgr.db.query_no_return(sql)
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -610,9 +614,11 @@ class DbState:
         """
         with AutoDbDisposer(db, "finish_vote_notifications") as db_mgr:
             time_start = perf_counter()
+            db_mgr.db.query("START TRANSACTION")
             last_block = db_mgr.db.query_one("SELECT hive.app_get_current_block_num('hivemind_app')")
             sql = f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks(1, {last_block})"
             result = db_mgr.db.query_one(sql)
+            db_mgr.db.query("COMMIT")
             log.info(
                 "[MASSIVE] flush_vote_notifications: %s notifications in %.4fs", result, perf_counter() - time_start
             )
@@ -650,7 +656,7 @@ class DbState:
                     AND hnc.type_id IN (12, 13, 14, 15)
                     AND hnc.score != COALESCE(fr.rep, 25)
             """
-            db_mgr.db.query_no_return(sql)
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info(
                 "[MASSIVE] finish_reputation_notification_scores executed in %.4fs",
                 perf_counter() - time_start,
