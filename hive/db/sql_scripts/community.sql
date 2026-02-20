@@ -187,7 +187,7 @@ BEGIN
             '',
             _name,
             ''
-        );
+        ) ON CONFLICT DO NOTHING;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
