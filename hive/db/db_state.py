@@ -477,8 +477,10 @@ class DbState:
         cls._fk_were_enabled = True
 
     @classmethod
-    def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
-        with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
+    def _finish_hive_posts_children_count(
+        cls, db, massive_sync_preconditions, last_imported_block, current_imported_block
+    ):
+        with AutoDbDisposer(db, "finish_hive_posts_children_count") as db_mgr:
             time_start = perf_counter()
 
             # UPDATE: `children`
@@ -493,8 +495,9 @@ class DbState:
                 cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
-            # UPDATE: `root_id`
-            # Update root_id all root posts
+    @classmethod
+    def _finish_hive_posts_root_id(cls, db, last_imported_block, current_imported_block):
+        with AutoDbDisposer(db, "finish_hive_posts_root_id") as db_mgr:
             time_start = perf_counter()
             sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
@@ -644,9 +647,14 @@ class DbState:
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
             (
-                'hive_posts',
-                cls._finish_hive_posts,
+                'hive_posts_children_count',
+                cls._finish_hive_posts_children_count,
                 [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block],
+            ),
+            (
+                'hive_posts_root_id',
+                cls._finish_hive_posts_root_id,
+                [cls.db(), last_imported_block, current_imported_block],
             ),
             (
                 'blocks_consistency_flag',
