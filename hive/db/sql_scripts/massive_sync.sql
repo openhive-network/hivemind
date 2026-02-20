@@ -1671,7 +1671,7 @@ BEGIN
                 hivemind_app.notification_id(_date, 10, _counter_in),
                 _block_num, 10, _date, _community_id, _actor_id, NULL, NULL, 35,
                 'Community ''' || _community_name || ''' does not exist', '', ''
-            );
+            ) ON CONFLICT DO NOTHING;
         END IF;
         RETURN _counter_in;
     END IF;
@@ -1819,7 +1819,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 2, _counter_in),
                     _block_num, 2, _date, _actor_id, _account_id, NULL, NULL, _score, _role, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'setUserTitle' THEN
@@ -1837,7 +1837,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 4, _counter_in),
                     _block_num, 4, _date, _actor_id, _account_id, NULL, NULL, _score, _title, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'mutePost' THEN
@@ -1852,7 +1852,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 5, _counter_in),
                     _block_num, 5, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'unmutePost' THEN
@@ -1867,7 +1867,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 6, _counter_in),
                     _block_num, 6, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'pinPost' THEN
@@ -1882,7 +1882,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 7, _counter_in),
                     _block_num, 7, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'unpinPost' THEN
@@ -1897,7 +1897,7 @@ BEGIN
                 VALUES (
                     hivemind_app.notification_id(_date, 8, _counter_in),
                     _block_num, 8, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                );
+                ) ON CONFLICT DO NOTHING;
             END IF;
 
         WHEN 'flagPost' THEN
