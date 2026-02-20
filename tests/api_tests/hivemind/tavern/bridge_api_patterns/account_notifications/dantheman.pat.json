@@ -96,8 +96,8 @@
     "url": "@dantheman/re-beanz-petition-to-take-down-earnest-fao-dan-and-ned-20160915t135233694z"
   },
   {
-    "date": "2016-09-15T15:38:30",
-    "id": "4058397867507713",
+    "date": "2016-09-15T15:32:48",
+    "id": "4058306062581761",
     "msg": "@stellabelle replied to your comment",
     "score": 65,
     "type": "reply_comment",
@@ -584,8 +584,8 @@
     "url": "@smooth/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t224701100z"
   },
   {
-    "date": "2016-09-13T22:56:12",
-    "id": "4019061872656385",
+    "date": "2016-09-13T22:47:00",
+    "id": "4018913696284673",
     "msg": "@smooth replied to your comment",
     "score": 59,
     "type": "reply_comment",
@@ -680,8 +680,8 @@
     "url": "@masteryoda/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t165008420z"
   },
   {
-    "date": "2016-09-13T16:40:27",
-    "id": "4013009995300865",
+    "date": "2016-09-13T16:38:42",
+    "id": "4012981809577985",
     "msg": "@shenanigator replied to your comment",
     "score": 53,
     "type": "reply_comment",
@@ -696,20 +696,20 @@
     "url": "@rusteemitblog/anons-proekta-rusteemitblog-rusteemitblog-project-announcement"
   },
   {
-    "date": "2016-09-13T16:25:27",
-    "id": "4012768403390465",
-    "msg": "@candy49 replied to your comment",
-    "score": 47,
-    "type": "reply_comment",
-    "url": "@candy49/re-dantheman-re-cryptomental-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t162427103z"
-  },
-  {
     "date": "2016-09-13T16:24:36",
     "id": "4012754721570818",
     "msg": "@james1987 followed you",
     "score": 44,
     "type": "follow",
     "url": "@james1987"
+  },
+  {
+    "date": "2016-09-13T16:24:27",
+    "id": "4012752297263105",
+    "msg": "@candy49 replied to your comment",
+    "score": 47,
+    "type": "reply_comment",
+    "url": "@candy49/re-dantheman-re-cryptomental-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t162427103z"
   },
   {
     "date": "2016-09-13T16:10:30",
@@ -720,14 +720,6 @@
     "url": "@clevecross/re-dantheman-re-masteryoda-steem-blocksize-report-2-20160913t161030568z"
   },
   {
-    "date": "2016-09-13T15:55:12",
-    "id": "4012281193037825",
-    "msg": "@sigmajin replied to your comment",
-    "score": 55,
-    "type": "reply_comment",
-    "url": "@sigmajin/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t155248698z"
-  },
-  {
     "date": "2016-09-13T15:52:45",
     "id": "4012241749803014",
     "msg": "@will-zewe voted on your post ($0.04)",
@@ -736,8 +728,16 @@
     "url": "@dantheman/re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t154250511z"
   },
   {
+    "date": "2016-09-13T15:52:45",
+    "id": "4012241733025793",
+    "msg": "@sigmajin replied to your comment",
+    "score": 55,
+    "type": "reply_comment",
+    "url": "@sigmajin/re-dantheman-re-sigmajin-re-james-show-re-steemitblog-steem-0-14-1-released-hardfork-postponed-until-9-20-2016-20160913t155248698z"
+  },
+  {
     "date": "2016-09-13T15:52:27",
-    "id": "4012236901187586",
+    "id": "4012236901187585",
     "msg": "@cryptomental replied to your comment",
     "score": 50,
     "type": "reply_comment",
