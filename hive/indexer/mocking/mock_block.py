@@ -13,6 +13,28 @@ from hive.indexer.block import OperationType, VirtualOperationType
 log = logging.getLogger(__name__)
 
 
+def get_current_fork_id() -> int:
+    """Get the current fork_id from the database (matches what hive.push_block uses)."""
+    fork_id = Db.instance().query_one(sql='SELECT id FROM hafd.fork ORDER BY id DESC LIMIT 1;')
+    return fork_id
+
+
+def get_block_id_for_block(block_num: int) -> int:
+    """Get the actual block_id for an existing block in the database.
+
+    During massive sync, blocks are written with fork_id=0 (C++ default).
+    Mock blocks created by BlockMockAfterDb use the current fork_id.
+    This function returns the correct block_id regardless of how the block was created.
+    """
+    block_id = Db.instance().query_one(
+        sql='SELECT block_id FROM hafd.blocks WHERE hafd.block_id_to_num(block_id) = :block_num ORDER BY block_id DESC LIMIT 1;',
+        block_num=block_num,
+    )
+    if block_id is None:
+        raise RuntimeError(f'Block {block_num} not found in hafd.blocks. Ensure the block exists before inserting operations.')
+    return block_id
+
+
 class AccountMock:
     account_id: Optional[int] = None
 
@@ -34,11 +56,12 @@ class AccountMock:
         return self._name
 
     def push(self) -> None:
+        block_id = get_block_id_for_block(self.block_number)
         sql = """
 INSERT INTO
-    hafd.accounts (id, name, block_num)
+    hafd.accounts (id, name, block_id)
 VALUES
-    (:id, :name, :block_num);
+    (:id, :name, :block_id);
 """
 
         self.__class__.account_id += 1
@@ -49,7 +72,7 @@ VALUES
             sql=sql,
             id=self.__class__.account_id,
             name=self.name,
-            block_num=self.block_number,
+            block_id=block_id,
         )
 
         log.info('ACCOUNT pushed successfully!')
@@ -118,8 +141,9 @@ class OperationBase:
     def push(self) -> None:
         OperationBase.pos_in_block += 1
 
+        # Generate operation_id using HAF function: hafd.operation_id(block_num, pos_in_block)
         OperationBase.operation_id = Db.instance().query_one(
-            sql='SELECT operation_id FROM hafd.operation_id(:block_num, :pos_in_block);',
+            sql='SELECT hafd.operation_id(:block_num, :pos_in_block);',
             block_num=self.block_number,
             pos_in_block=OperationBase.pos_in_block,
         )
@@ -128,19 +152,21 @@ class OperationBase:
             f'Attempting to push mocked {self.__class__.__name__} - type: {self.type} id: {OperationBase.operation_id}'
         )
 
+        block_id = get_block_id_for_block(self.block_number)
         custom_json_type_id = self._resolve_custom_json_type_id()
 
         sql = """
 INSERT INTO
-    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_binary, custom_json_type_id)
+    hafd.operations (block_id, trx_in_block, op_pos, op_type_id, body_binary, id, custom_json_type_id)
 VALUES
-    (:id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation, :cj_type_id);
+    (:block_id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation, :id, :cj_type_id);
 """
         Db.instance().query(
             sql=sql,
-            id=OperationBase.operation_id,
+            block_id=block_id,
             op_type_id=self.type.value,
             body=json.dumps(self.body),
+            id=OperationBase.operation_id,
             cj_type_id=custom_json_type_id,
         )
 
@@ -219,18 +245,19 @@ class TransactionMock:
             yield operation
 
     def push(self) -> None:
+        block_id = get_block_id_for_block(self.block_number)
         sql = """
 INSERT INTO
-    hafd.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
+    hafd.transactions (block_id, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
 VALUES
-    (:block_num, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
+    (:block_id, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
 """
 
         log.info(f'Attempting to push mocked TRANSACTION with hash: {self.hash}')
 
         Db.instance().query(
             sql=sql,
-            block_num=self.block_number,
+            block_id=block_id,
             trx_hash=self.hash,
             ref_block_num=self.ref_block_num,
             ref_block_prefix=self.ref_block_prefix,
@@ -288,11 +315,12 @@ class BlockMockAfterDb:
     def push(self) -> None:
         initminer_account_id = 3
 
+        fork_id = get_current_fork_id()
         sql = f"""
-INSERT INTO hafd.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
+INSERT INTO hafd.blocks (block_id, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
                          witness_signature, signing_key, hbd_interest_rate, total_vesting_fund_hive, total_vesting_shares,
                          total_reward_fund_hive, virtual_supply, current_supply, current_hbd_supply, dhf_interval_ledger)
-VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
+VALUES (hafd.make_block_id(:num, :fork_id), :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
                          1000000, 1000, 1000, 1000, 2000, 2000);
 """
 
@@ -301,6 +329,7 @@ VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea
         Db.instance().query(
             sql=sql,
             num=self.block_number,
+            fork_id=fork_id,
             hash=self.hash,
             prev=self.previous_hash,
             created_at=self.created_at,
