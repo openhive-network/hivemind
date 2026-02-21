@@ -1418,6 +1418,57 @@ BEGIN
         );
     END IF;
 
+    -- Step 7f: Re-apply comment_options for recreated posts.
+    -- Step 6 ran before delete-create handling, so comment_options (beneficiaries,
+    -- max_accepted_payout, etc.) were applied to the original post which Step 7
+    -- then deleted. The recreated post has fresh defaults. Re-apply comment_options
+    -- ops that came AFTER the last delete for each affected pair.
+    IF array_length(_delete_create_pairs, 1) > 0 THEN
+        WITH last_delete AS (
+            SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+                s.val->>'author' AS author, s.val->>'permlink' AS permlink,
+                s.id AS last_delete_id
+            FROM hivemind_app._ops_staging s
+            WHERE s.op_type_id = 17
+              AND ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
+              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+        ),
+        co_for_recreated AS (
+            SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+                s.val->>'author' AS author,
+                s.val->>'permlink' AS permlink,
+                COALESCE(hivemind_app.legacy_amount(s.val->'max_accepted_payout'), '1000000.000 HBD') AS max_accepted_payout,
+                COALESCE((s.val->>'percent_hbd')::INT, 10000) AS percent_hbd,
+                COALESCE((s.val->>'allow_votes')::BOOLEAN, TRUE) AS allow_votes,
+                COALESCE((s.val->>'allow_curation_rewards')::BOOLEAN, TRUE) AS allow_curation_rewards,
+                COALESCE(
+                    (SELECT elem->'value'->'beneficiaries'
+                     FROM jsonb_array_elements(s.val->'extensions') elem
+                     WHERE elem->>'type' = 'comment_payout_beneficiaries'
+                     LIMIT 1),
+                    '[]'::jsonb
+                ) AS beneficiaries
+            FROM hivemind_app._ops_staging s
+            JOIN last_delete ld
+                ON ld.author = s.val->>'author' AND ld.permlink = s.val->>'permlink'
+            WHERE s.op_type_id = 19
+              AND s.id > ld.last_delete_id
+            ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+        )
+        UPDATE hivemind_app.hive_posts hp
+        SET
+            max_accepted_payout = co.max_accepted_payout,
+            percent_hbd = co.percent_hbd,
+            allow_votes = co.allow_votes,
+            allow_curation_rewards = co.allow_curation_rewards,
+            beneficiaries = co.beneficiaries
+        FROM co_for_recreated co
+        JOIN hivemind_app.hive_accounts ha ON ha.name = co.author
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = co.permlink
+        WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0;
+    END IF;
+
     -- Step 7e: Correct community type muting for posts created BEFORE updateProps.
     -- When updateProps runs in Phase 2.5 (before posts), ALL posts in blocks with
     -- a type-changing updateProps see the new type and get muted. But posts created
