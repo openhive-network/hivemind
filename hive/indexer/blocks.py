@@ -192,12 +192,32 @@ class Blocks:
             db.query_no_return("COMMIT")
         phase_times['community_post'] = perf_counter() - t0
 
-        # Phase 3.5: Votes (rshares deferred to finalization; must run BEFORE payouts).
+        # Phase 3.5: Votes (rshares deferred to finalization during initial massive sync;
+        # must run BEFORE payouts).
         t0 = perf_counter()
         Votes.db.query_no_return("START TRANSACTION")
         Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
         Votes.db.query_no_return("COMMIT")
         phase_times['votes'] = perf_counter() - t0
+
+        # Phase 3.6: Incremental rshares update for MASSIVE_WITH_INDEXES mode.
+        # After the initial full recalculation (recalculate_all_posts_rshares) has run,
+        # any further massive batches must update rshares incrementally — the full
+        # recalculation won't run again (_rshares_recalculated flag prevents it).
+        # This covers the post-finalization catch-up window and any future
+        # MASSIVE_WITH_INDEXES episodes (e.g. node down for hours).
+        if DbState._rshares_recalculated:
+            t0 = perf_counter()
+            affected_posts = db.query_col(
+                f"SELECT DISTINCT post_id FROM {SCHEMA_NAME}.hive_votes "
+                f"WHERE block_num BETWEEN {first_block} AND {last_block}"
+            )
+            if affected_posts:
+                db.query_no_return(
+                    f"SELECT * FROM {SCHEMA_NAME}.update_posts_rshares(:post_ids)",
+                    post_ids=affected_posts,
+                )
+            phase_times['rshares_incr'] = perf_counter() - t0
 
         # Phase 4+3b: Overlap Python body merging with parallel SQL entity processing.
         # PostDataCache._data is only accessed by the main thread; Phase 4 tasks use
