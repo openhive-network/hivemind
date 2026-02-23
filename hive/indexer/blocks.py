@@ -201,12 +201,13 @@ class Blocks:
         phase_times['votes'] = perf_counter() - t0
 
         # Phase 3.6: Incremental rshares update for MASSIVE_WITH_INDEXES mode.
-        # After the initial full recalculation (recalculate_all_posts_rshares) has run,
-        # any further massive batches must update rshares incrementally — the full
-        # recalculation won't run again (_rshares_recalculated flag prevents it).
-        # This covers the post-finalization catch-up window and any future
-        # MASSIVE_WITH_INDEXES episodes (e.g. node down for hours).
-        if DbState._rshares_recalculated:
+        # When indexes are enabled, we must update rshares incrementally for votes
+        # processed in this batch. During MASSIVE_WITHOUT_INDEXES (initial sync),
+        # indexes don't exist so this is skipped — the full recalculate_all_posts_rshares
+        # runs at finalization. During MASSIVE_WITH_INDEXES (catch-up after restart
+        # or post-finalization gap), indexes exist and the full recalculation won't
+        # re-run, so incremental updates are essential.
+        if DbState.are_indexes_enabled():
             t0 = perf_counter()
             affected_posts = db.query_col(
                 f"SELECT DISTINCT post_id FROM {SCHEMA_NAME}.hive_votes "
