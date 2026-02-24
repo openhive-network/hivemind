@@ -1723,7 +1723,8 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_community_op(
     _data JSONB,
     _date TIMESTAMP,
     _block_num INT,
-    _counter_in INT DEFAULT 0
+    _counter_in INT DEFAULT 0,
+    _staging_op_id BIGINT DEFAULT NULL
 ) RETURNS INT AS $function$
 DECLARE
     _actor_id INT;
@@ -1745,6 +1746,10 @@ DECLARE
     _post_id INT;
     _props_title TEXT;
     _valid_props_keys TEXT[] := ARRAY['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id'];
+    _fallback_action_id SMALLINT := NULL;
+    _fallback_old_value TEXT := NULL;
+    _fallback_new_value TEXT := NULL;
+    _fallback_notes TEXT := NULL;
 BEGIN
     -- ========= KEY VALIDATION (matches Python CommunityOp.SCHEMA + assert_keys_match) =========
     -- Python rejects ops with extraneous or missing keys; replicate that here.
@@ -2011,6 +2016,11 @@ BEGIN
                         _block_num, 5, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
                     ) ON CONFLICT DO NOTHING;
                 END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 3;
+                _fallback_old_value := 'unmuted';
+                _fallback_new_value := 'muted';
+                _fallback_notes := _notes;
             END IF;
 
         WHEN 'unmutePost' THEN
@@ -2035,6 +2045,11 @@ BEGIN
                         _block_num, 6, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
                     ) ON CONFLICT DO NOTHING;
                 END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 4;
+                _fallback_old_value := 'muted';
+                _fallback_new_value := 'unmuted';
+                _fallback_notes := _notes;
             END IF;
 
         WHEN 'pinPost' THEN
@@ -2059,6 +2074,11 @@ BEGIN
                         _block_num, 7, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
                     ) ON CONFLICT DO NOTHING;
                 END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 5;
+                _fallback_old_value := 'unpinned';
+                _fallback_new_value := 'pinned';
+                _fallback_notes := NULL;
             END IF;
 
         WHEN 'unpinPost' THEN
@@ -2083,6 +2103,11 @@ BEGIN
                         _block_num, 8, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
                     ) ON CONFLICT DO NOTHING;
                 END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 6;
+                _fallback_old_value := 'pinned';
+                _fallback_new_value := 'unpinned';
+                _fallback_notes := NULL;
             END IF;
 
         WHEN 'flagPost' THEN
@@ -2102,11 +2127,45 @@ BEGIN
                         _block_num, 9, _actor_id, _community_id, _date, _result.post_id, _result.team_members, _notes, _counter_in
                     ) INTO _counter_in;
                 END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 7;
+                _fallback_old_value := NULL;
+                _fallback_new_value := 'flagged';
+                _fallback_notes := _notes;
             END IF;
 
         ELSE
             RETURN _counter_in;  -- Unknown action
     END CASE;
+
+    -- For post-targeting ops on posts deleted in the same batch: log the moderation
+    -- action using the post id from hive_posts (including deleted rows).
+    IF _fallback_action_id IS NOT NULL AND _staging_op_id IS NOT NULL THEN
+        IF EXISTS (
+            SELECT 1 FROM hivemind_app._ops_staging d
+            WHERE d.op_type_id = 17  -- delete_comment
+              AND d.val->>'author' = _account_name
+              AND d.val->>'permlink' = _permlink
+              AND d.id > _staging_op_id
+        ) THEN
+            SELECT hp.id INTO _post_id
+            FROM hivemind_app.hive_posts hp
+            JOIN hivemind_app.hive_permlink_data hpd ON hp.permlink_id = hpd.id
+            WHERE hp.author_id = _account_id
+              AND hpd.permlink = _permlink
+              AND hp.community_id = _community_id
+            ORDER BY hp.id DESC LIMIT 1;
+            IF _post_id IS NOT NULL THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
+                VALUES (
+                    _community_id, _fallback_action_id, _actor_id, _account_id, _post_id,
+                    _fallback_old_value, _fallback_new_value, _fallback_notes, _block_num, _date
+                );
+            END IF;
+        END IF;
+    END IF;
 
     -- Generate error notification on failure
     IF _result IS NOT NULL AND NOT _result.success AND _result.error_message IS NOT NULL AND _result.error_message != '' THEN
@@ -2247,10 +2306,10 @@ BEGIN
             IF _is_state_action THEN CONTINUE; END IF;
         END IF;
 
-        -- For mutePost/unmutePost in Phase 2: skip if a delete_comment for the same
-        -- (author, permlink) exists AFTER this op in the batch. The mute was targeting
-        -- a post that gets deleted; the recreated post shouldn't inherit the mute.
-        -- Without this, Phase 3a applies mutePost to the recreated post (only active row).
+        -- For mutePost/unmutePost in Phase 2: skip only if a delete_comment for the same
+        -- (author, permlink) exists AFTER this op in the batch AND the post is also
+        -- recreated after the deletion. If the post is only deleted (not recreated),
+        -- fall through so process_community_op can log the action via the staging fallback.
         IF _phase = 2 AND _action IN ('mutePost', 'unmutePost') THEN
             IF EXISTS (
                 SELECT 1 FROM hivemind_app._ops_staging d
@@ -2259,7 +2318,24 @@ BEGIN
                   AND d.val->>'permlink' = _data->>'permlink'
                   AND d.id > _rec.id
             ) THEN
-                CONTINUE;
+                -- Only skip if the post is also recreated after the deletion
+                IF EXISTS (
+                    SELECT 1 FROM hivemind_app._ops_staging c
+                    WHERE c.op_type_id = 1  -- comment_operation (post creation)
+                      AND c.val->>'parent_author' = ''
+                      AND c.val->>'author' = _data->>'account'
+                      AND c.val->>'permlink' = _data->>'permlink'
+                      AND c.id > (
+                          SELECT MAX(d2.id) FROM hivemind_app._ops_staging d2
+                          WHERE d2.op_type_id = 17
+                            AND d2.val->>'author' = _data->>'account'
+                            AND d2.val->>'permlink' = _data->>'permlink'
+                            AND d2.id > _rec.id
+                      )
+                ) THEN
+                    CONTINUE;  -- Post recreated: skip to avoid muting the new post
+                END IF;
+                -- Post only deleted: fall through so process_community_op logs via staging fallback
             END IF;
         END IF;
 
@@ -2275,7 +2351,7 @@ BEGIN
         -- propagate rather than be silently swallowed. The old wrapper also created an
         -- implicit savepoint per iteration (PL/pgSQL subtransaction), adding overhead.
         SELECT hivemind_app.process_community_op(
-            _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter
+            _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter, _rec.id
         ) INTO _community_counter;
         _count := _count + 1;
     END LOOP;
