@@ -60,7 +60,7 @@ BEGIN
       WHERE ml.community_id = _community_id
         AND (_action_id IS NULL OR ml.action = _action_id)
         AND (_last_date IS NULL OR ml.created_at < _last_date)
-      ORDER BY ml.created_at DESC
+      ORDER BY ml.created_at DESC, ml.id DESC
       LIMIT _limit
     ) sub
   );
