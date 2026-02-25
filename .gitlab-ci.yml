@@ -380,6 +380,8 @@ prepare_hivemind_image:
 extract-swagger-json:
   extends: .filter_out_swagger_json
   stage: build
+  rules:
+  - when: never
   variables:
     INPUT_SQL_SWAGGER_FILE: "${CI_PROJECT_DIR}/hive/db/sql_scripts/endpoints/endpoint_schema.sql"
   tags:
@@ -388,6 +390,8 @@ extract-swagger-json:
 generate_python_api_client:
   extends: .project_develop_configuration_template
   stage: build
+  rules:
+  - when: never
   variables:
     PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   needs:
@@ -406,6 +410,8 @@ generate_python_api_client:
 build_python_api_client_wheel:
   extends: .build_wheel_template
   stage: build
+  rules:
+  - when: never
   needs:
   - job: generate_python_api_client
     artifacts: true
@@ -689,6 +695,8 @@ e2e_benchmark_on_postgrest:
 python_api_client_test:
   extends: .project_develop_configuration_template
   stage: tests
+  rules:
+  - when: never
   needs:
   - job: generate_python_api_client
     artifacts: true
@@ -701,6 +709,8 @@ python_api_client_test:
 
 build_and_publish_image:
   stage: publish
+  rules:
+  - when: never
   extends: .publish_docker_image_template
   before_script:
   - !reference [.publish_docker_image_template, before_script]
@@ -714,6 +724,8 @@ build_and_publish_image:
 
 deploy_python_api_package_to_gitlab:
   stage: publish
+  rules:
+  - when: never
   needs:
   - job: build_python_api_client_wheel
     artifacts: true
@@ -729,18 +741,13 @@ deploy_python_api_package_to_gitlab:
 
 Trigger benchmark-results-collector:
   stage: collector
+  rules:
+  - when: never
   needs:
   - job: e2e_benchmark_on_postgrest
     artifacts: true   # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
-  rules:
-  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    when: on_success
-  - if: '$CI_COMMIT_BRANCH == "develop"'
-    when: on_success
-  - when: manual
-    allow_failure: true
   variables:
-    ARTIFACTS_URL: 
+    ARTIFACTS_URL:
       https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
     #description:
