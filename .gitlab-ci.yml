@@ -411,6 +411,8 @@ detect_changes:
 find_haf_image:
   extends: .find_haf_image
   stage: detect
+  variables:
+    UPSTREAM_BRANCH: "fix/319-buffer-over-read-push-string-to-jsonb"
 
 # Build base images if they're missing from registry
 prepare_base_images:
