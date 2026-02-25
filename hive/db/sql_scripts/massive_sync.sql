@@ -169,7 +169,7 @@ BEGIN
                THEN bd.created_at
                ELSE bd.prev_date
            END AS block_date,
-           ho.op_type_id, ho.body->'value'
+           ho.op_type_id, REPLACE(ho.body::text, '\u0000', '')::jsonb->'value'
     FROM hivemind_app.operations_view ho
     JOIN block_dates bd ON bd.num = ho.block_num
     WHERE ho.block_num BETWEEN _first_block AND _last_block
