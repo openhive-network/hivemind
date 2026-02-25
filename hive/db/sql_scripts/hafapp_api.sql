@@ -38,7 +38,7 @@ BEGIN
                   , ho.block_num
                   , ho.op_type_id as operation_type_id
                   , ho.op_type_id >= 50 AS is_virtual
-                  , ho.body::VARCHAR
+                  , REPLACE(ho.body::VARCHAR, '\u0000', '')
              FROM hivemind_app.operations_view ho
              WHERE ho.block_num BETWEEN _first_block AND _last_block
                AND (ho.op_type_id < 50
@@ -85,7 +85,7 @@ BEGIN
                       , ho.block_num
                       , ho.op_type_id as operation_type_id
                       , ho.op_type_id >= 50 AS is_virtual
-                      , ho.body::VARCHAR
+                      , REPLACE(ho.body::VARCHAR, '\u0000', '')
                  FROM hivemind_app.operations_view ho
                  WHERE ho.block_num BETWEEN _first_block AND _last_block
                    AND (ho.op_type_id < 50

@@ -1,0 +1,18 @@
+***block 4984623***
+account_create_operation( `nulltester` )
+account_update2_operation( `nulltester` ) -- sets json_metadata and posting_json_metadata with profile data
+comment_operation( `test`, `nulltester`, `null-byte-post` ) -- creates a test post
+
+Note: The mock JSON data is inserted WITHOUT \u0000 because PostgreSQL JSONB
+rejects null byte escape sequences at the HAF ingestion level.
+
+After mock insertion, scripts/ci/inject_null_bytes_for_tests.sql updates the
+HAF operations binary data to include \u0000 escape sequences (using direct
+text-to-hafd.operation cast which bypasses JSONB). This simulates real blockchain
+data like block 104130768 (guest4test) where json_metadata contains \u0000.
+
+The REPLACE() in massive_sync.sql load_ops_staging() strips \u0000 from the
+text representation before JSONB parsing, preventing the sync crash.
+
+***block 4984624***
+No transactions in this block. Placeholder to finalize processing.
