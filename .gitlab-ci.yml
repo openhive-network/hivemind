@@ -46,7 +46,6 @@ variables:
 .shared_tags:
   tags: &shared_tags
   - public-runner-docker
-  - hived-for-tests
 
 .start-timer:
 - ./scripts/ci/timer.sh start
@@ -326,7 +325,9 @@ prepare_haf_data:
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
+  - public-runner-docker
   - data-cache-storage
+  - fastest
 
 # Creates a temporary copy of replay data for the exclusive use of current pipeline
 replay_data_copy:
@@ -357,6 +358,7 @@ replay_data_copy:
     paths:
     - hived_uid.env
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 prepare_hivemind_image:
@@ -426,6 +428,7 @@ cleanup_hivemind_haf_cache_manual:
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
@@ -436,6 +439,7 @@ cleanup_haf_cache_manual:
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_* /cache/replay_data_haf_*"
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 # Cleans up cahce after tests. Must depend on all jobs that use
@@ -453,6 +457,7 @@ cleanup_pipeline_cache:
     CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
   when: always
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 download_await:
@@ -478,6 +483,7 @@ download_await:
       chmod +x ${DATA_CACHE_HIVEMIND}/await
     fi
   tags:
+  - public-runner-docker
   - data-cache-storage
 
 sync:
@@ -558,7 +564,9 @@ sync:
     - version.log
     - haf-$CI_JOB_NAME.log
   tags:
+  - public-runner-docker
   - data-cache-storage
+  - fastest
 
 e2e_benchmark_on_postgrest:
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.12-slim-1
@@ -690,7 +698,9 @@ e2e_benchmark_on_postgrest:
     - hivemind-server-await.log
     - hivemind-benchmark-server-await.log
   tags:
+  - public-runner-docker
   - data-cache-storage
+  - fastest
 
 python_api_client_test:
   extends: .project_develop_configuration_template
