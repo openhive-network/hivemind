@@ -18,10 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "database_api.find_comments"
-          params:
-            start: [["nulltester", "null-byte-post"]]
-            limit: 10
-            order: "by_account"
+          params: {"comments":[["nulltester","null-byte-post"]]}
       response:
         status_code: 200
         verify_response_with:
