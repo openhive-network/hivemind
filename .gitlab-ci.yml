@@ -1155,6 +1155,7 @@ test_python_api_wheel:
     - PYTHON_VERSION: ["3.12", "3.14"]
   before_script:
   - !reference [.configuration_template, before_script]
+  - !reference [.update_deps_for_tests, script]
   - poetry -C "${PYPROJECT_DIR}" install --no-root
   script:
   - pip install --no-deps "${DIST_DIR}"/*.whl
