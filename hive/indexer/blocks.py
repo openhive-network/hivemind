@@ -40,7 +40,6 @@ class Blocks:
     _current_block_date = None
     _last_safe_cashout_block = 0
     _notification_min_block = None  # cached 90-day notification threshold
-    _reputation_snapshot_populated = False  # True after _reputation_snapshot is filled
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -289,9 +288,7 @@ class Blocks:
         if cls._notification_min_block is None:
             cls._notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
         if last_block > cls._notification_min_block:
-            if not cls._reputation_snapshot_populated:
-                db.query_no_return(f"SELECT {SCHEMA_NAME}.refresh_reputation_snapshot()")
-                cls._reputation_snapshot_populated = True
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.refresh_reputation_snapshot()")
             phase6_tasks = [
                 (
                     PostNotificationCache.db,

@@ -2335,7 +2335,10 @@ $$ LANGUAGE sql STABLE;
 CREATE OR REPLACE FUNCTION hivemind_app.refresh_reputation_snapshot()
 RETURNS VOID AS $function$
 BEGIN
-    TRUNCATE hivemind_app._reputation_snapshot;
+    IF EXISTS (SELECT 1 FROM hivemind_app._reputation_snapshot) THEN
+        RETURN;
+    END IF;
+
     INSERT INTO hivemind_app._reputation_snapshot (account_id, score)
     SELECT ha.id,
            COALESCE(
