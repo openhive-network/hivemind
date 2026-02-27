@@ -125,11 +125,17 @@ BEGIN
     -- The ->> operator resolves JSON escapes (\n → literal newline, \t → literal tab, etc.)
     -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
     -- Re-escape them so the text is valid JSON again.
+    --
+    -- strip_json_null_escapes removes \u0000 (JSON null-byte escapes) that ->>
+    -- decodes into real 0x00 bytes, which TEXT/jsonb cannot store. It respects
+    -- backslash escaping so \\u0000 (escaped backslash) is preserved.
     RETURN REPLACE(
         REPLACE(
             REPLACE(
                 REPLACE(
-                    REPLACE(_text, E'\b', '\b'),
+                    REPLACE(
+                        hive.strip_json_null_escapes(_text),
+                    E'\b', '\b'),
                 E'\f', '\f'),
             E'\n', '\n'),
         E'\r', '\r'),
@@ -169,7 +175,7 @@ BEGIN
                THEN bd.created_at
                ELSE bd.prev_date
            END AS block_date,
-           ho.op_type_id, REPLACE(ho.body::text, '\u0000', '')::jsonb->'value'
+           ho.op_type_id, ho.body->'value'
     FROM hivemind_app.operations_view ho
     JOIN block_dates bd ON bd.num = ho.block_num
     WHERE ho.block_num BETWEEN _first_block AND _last_block
