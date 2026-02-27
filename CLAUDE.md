@@ -148,25 +148,18 @@ docker run --rm --network=haf --name=hivemind \
   setup --database-admin-url=postgresql://haf_admin@haf:5432/haf_block_log \
   --with-apps --add-mocks="true"
 
-# 3. Sync reputation_tracker to 4,999,979
-docker run --rm --network=haf --name=hivemind \
+# 3. Sync reputation_tracker (background) and Hivemind (foreground) concurrently
+docker run -d --network=haf --name=reptracker \
   --entrypoint=./app/reputation_tracker/scripts/process_blocks.sh \
   registry.gitlab.syncad.com/hive/hivemind/instance:local \
-  --stop-at-block=4999979 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
-
-# 4. Sync Hivemind to 5,000,024 (with community-start-block for testing)
+  --stop-at-block=5000024 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
 docker run --rm --network=haf --name=hivemind \
   registry.gitlab.syncad.com/hive/hivemind/instance:local \
   sync --test-max-block=5000024 --community-start-block=4998000 \
   --database-url=postgresql://hivemind@haf/haf_block_log
+docker wait reptracker && docker rm reptracker
 
-# 5. Finish syncing reputation_tracker
-docker run --rm --network=haf --name=hivemind \
-  --entrypoint=./app/reputation_tracker/scripts/process_blocks.sh \
-  registry.gitlab.syncad.com/hive/hivemind/instance:local \
-  --stop-at-block=5000024 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
-
-# 6. Start server and run tests (see API Tests section above)
+# 4. Start server and run tests (see API Tests section above)
 ```
 
 ### Code Formatting
@@ -299,8 +292,6 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 **Community Start Block:** In production, communities start at a specific block well after 5M. Use `--community-start-block` for testing with 5M block_log.
 
 **Mock Data Required:** API tests need mock operations injected (see test setup above) because 5M blocks lack recent operations.
-
-**Reputation Tracker Sync Order:** Must sync reputation_tracker to 4,999,979 BEFORE Hivemind completes massive sync, as Hivemind builds notification cache after massive sync.
 
 **Nginx Rewriter Required:** The server requires nginx/openresty to rewrite JSON-RPC to REST calls. Without it, API calls fail.
 

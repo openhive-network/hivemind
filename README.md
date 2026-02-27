@@ -615,39 +615,34 @@ using docker containers and second run on host with using hivemind virtual envir
      psql -d haf_block_log -f scripts/ci/wrapper_for_app_next_block.sql # to correctly stop on a 5M+24 block
      mocker --database-url=postgresql://haf_admin@localhost:5432/haf_block_log
      ```
-3. Start syncing reputation_tracker to block 4,999,979. It must be synced to this block because
-   Hivemind will complete its massive sync at this point and then begin collecting cache for notifications,
-   which impacts the tests.
+3. Sync reputation_tracker and Hivemind concurrently up to block 5,000,024.
+   Communities normally start much later, well beyond 5 million blocks, so we pass
+   `--community-start-block` to pretend they started earlier for testing.
+   Reputation_tracker runs in the background while Hivemind syncs in the foreground.
+   During massive sync, Hivemind computes notification scores using whatever reputation
+   data is available; a finalization pass corrects them once both processes complete.
    - dockerized setup:
      ```bash
-     docker run --rm --network=haf --name=hivemind --entrypoint=./app/reputation_tracker/scripts/process_blocks.sh registry.gitlab.syncad.com/hive/hivemind/instance:local --stop-at-block=4999979 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
+     # Start reputation_tracker in the background
+     docker run -d --network=haf --name=reptracker --entrypoint=./app/reputation_tracker/scripts/process_blocks.sh registry.gitlab.syncad.com/hive/hivemind/instance:local --stop-at-block=5000024 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
+     # Sync Hivemind in the foreground
+     docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:local sync --test-max-block=5000024 --community-start-block=4998000 --database-url=postgresql://hivemind@haf/haf_block_log
+     # Wait for reputation_tracker to finish
+     docker wait reptracker
+     docker rm reptracker
      ```
    - working in hivemind virtual environment on host:
      ```bash
      ./reputation_tracker/scripts/install_app.sh --postgres-url=postgresql://haf_admin@localhost:5432/haf_block_log --schema=reptracker_app --is_forking="false"
-     ./reputation_tracker/scripts/process_blocks.sh --stop-at-block=4999979
-     ```
-4. Syncing Hivemind up to block 5,000,024 while testing which block the communities feature starts at.
-   Communities normally start much later, well beyond 5 million blocks, so we need to pretend that they started earlier
-   to enable support for them.
-   - dockerized setup:
-     ```bash
-     docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:local sync --test-max-block=5000024 --community-start-block=4998000 --database-url=postgresql://hivemind@haf/haf_block_log
-     ```
-   - working in hivemind virtual environment on host:
-     ```bash
+     # Start reputation_tracker in the background
+     ./reputation_tracker/scripts/process_blocks.sh --stop-at-block=5000024 &
+     REP_TRACKER_PID=$!
+     # Sync Hivemind in the foreground
      hive sync --reptracker-schema-name=reptracker_app --test-max-block=5000024 --community-start-block=4998000 --database-url=postgresql://hivemind@localhost:5432/haf_block_log
+     # Wait for reputation_tracker to finish
+     wait $REP_TRACKER_PID
      ```
-5. When hivemind in synced now reputation tracker must by synced up to 5,000,024:
-   - dockerized setup:
-     ```bash
-     docker run --rm --network=haf --name=hivemind --entrypoint=./app/reputation_tracker/scripts/process_blocks.sh registry.gitlab.syncad.com/hive/hivemind/instance:local --stop-at-block=5000024 --postgres-url="postgresql://haf_admin@haf/haf_block_log"
-     ```
-   - working in hivemind virtual environment on host:
-     ```bash
-     ./reputation_tracker/scripts/process_blocks.sh --stop-at-block=5000024
-     ```
-6. Now we have all the data required by the tests, time to start hivemind server
+4. Now we have all the data required by the tests, time to start hivemind server
    - dockerized setup
      ```bash
      docker run -d --network=haf --name=hivemind-postgrest-server registry.gitlab.syncad.com/hive/hivemind:local server --database-url=postgresql://hivemind@haf:5432/haf_block_log
@@ -661,7 +656,7 @@ using docker containers and second run on host with using hivemind virtual envir
      ```bash
      sudo /etc/init.d/openresty start
      ```
-7. Start the tests
+5. Start the tests
   The test definitions are located in the [tests/api_tests/hivemind/tavern](tests/api_tests/hivemind/tavern) directory.
   They are written using the Tavern framework, which allows tests to be written in YAML and executed with pytest.
   You can start tests for any subfolder within `tests/api_tests/hivemind/tavern`
