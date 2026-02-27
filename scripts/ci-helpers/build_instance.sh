@@ -120,13 +120,7 @@ fi
 
 # Resolve API version from git tags for OpenAPI spec injection
 git fetch --tags --quiet 2>/dev/null || true
-API_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"
-
-REWRITER_TARGET=without_tag
-if [[ -n "$BUILD_IMAGE_TAG" ]]; then
-  REWRITER_TARGET=with_tag
-  TAG_BUILD_ARGS+=("--build-arg" "GIT_COMMIT_TAG=$BUILD_IMAGE_TAG")
-fi
+API_VERSION="$(git describe --tags 2>/dev/null || echo 0.0.0-dev)"
 
 # Build main image tags (always short SHA, 'latest' on develop, version on tags)
 MAIN_TAGS=("--tag" "$TAG")
@@ -156,13 +150,13 @@ echo "Done!"
 
 echo "Building Hivemind rewriter image..."
 docker buildx build "${TAG_BUILD_ARGS[@]}" \
+  --build-arg API_VERSION="$API_VERSION" \
   --build-arg BUILD_TIME="$BUILD_TIME" \
   --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
   --build-arg GIT_CURRENT_BRANCH="$GIT_CURRENT_BRANCH" \
   --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
-  --target=$REWRITER_TARGET \
   "${REWRITER_TAGS[@]}" \
   --file Dockerfile.rewriter .
 echo "Done!"

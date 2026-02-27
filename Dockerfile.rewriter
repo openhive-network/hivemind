@@ -1,4 +1,4 @@
-FROM registry.gitlab.syncad.com/hive/hivemind/openresty:1.27.1.1-1-alpine AS without_tag
+FROM registry.gitlab.syncad.com/hive/hivemind/openresty:1.27.1.1-1-alpine
 
 COPY docker/hivemind_nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf.template
 COPY rewrite_rules.conf /usr/local/openresty/nginx/conf/rewrite_rules.conf
@@ -12,11 +12,12 @@ ARG GIT_CURRENT_BRANCH
 ARG GIT_LAST_LOG_MESSAGE
 ARG GIT_LAST_COMMITTER
 ARG GIT_LAST_COMMIT_DATE
+ARG API_VERSION="0.0.0-dev"
 LABEL org.opencontainers.image.created="$BUILD_TIME"
 LABEL org.opencontainers.image.url="https://hive.io/"
 LABEL org.opencontainers.image.documentation="https://gitlab.syncad.com/hive/hivemind"
 LABEL org.opencontainers.image.source="https://gitlab.syncad.com/hive/hivemind"
-#LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.version="$API_VERSION"
 LABEL org.opencontainers.image.revision="$GIT_COMMIT_SHA"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.ref.name="hivemind"
@@ -26,8 +27,3 @@ LABEL io.hive.image.branch="$GIT_CURRENT_BRANCH"
 LABEL io.hive.image.commit.log_message="$GIT_LAST_LOG_MESSAGE"
 LABEL io.hive.image.commit.author="$GIT_LAST_COMMITTER"
 LABEL io.hive.image.commit.date="$GIT_LAST_COMMIT_DATE"
-
-FROM without_tag AS with_tag
-
-ARG GIT_COMMIT_TAG
-LABEL org.opencontainers.image.version="${GIT_COMMIT_TAG}"
