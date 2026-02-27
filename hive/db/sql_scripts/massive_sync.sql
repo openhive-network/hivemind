@@ -113,6 +113,15 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._follow_notification_events (
     op_seq        BIGINT NOT NULL
 );
 
+-- Staging table for reputation scores during massive sync. Populated once before
+-- the first notification-eligible batch so all three parallel flush functions see
+-- consistent scores. Truncated after finalization so live sync falls through to
+-- the live reputation_score() function via COALESCE.
+CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._reputation_snapshot (
+    account_id INT PRIMARY KEY,
+    score      INT NOT NULL
+);
+
 
 -- ============================================================================
 -- Helper: safe_parse_jsonb — parse text as jsonb, return NULL on failure
@@ -2320,6 +2329,25 @@ RETURNS INT AS $$
     WHERE ar.account_id = _haf_account_id;
 $$ LANGUAGE sql STABLE;
 
+-- Populate _reputation_snapshot with a point-in-time copy of reputation scores.
+-- Called once on the main connection before the first notification-eligible batch
+-- so that all three parallel flush functions see identical, consistent scores.
+CREATE OR REPLACE FUNCTION hivemind_app.refresh_reputation_snapshot()
+RETURNS VOID AS $function$
+BEGIN
+    TRUNCATE hivemind_app._reputation_snapshot;
+    INSERT INTO hivemind_app._reputation_snapshot (account_id, score)
+    SELECT ha.id,
+           COALESCE(
+               (GREATEST(LOG(10, ABS(NULLIF(ar.reputation, 0))) - 9, 0)
+                * CASE WHEN ar.reputation < 0 THEN -1 ELSE 1 END * 7.5 + 25)::INT,
+               25
+           )
+    FROM hivemind_app.hive_accounts ha
+    LEFT JOIN reptracker_app.account_reputations ar ON ar.account_id = ha.haf_id;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
 
 -- 11b. flush_post_notifications_for_blocks
 CREATE OR REPLACE FUNCTION hivemind_app.flush_post_notifications_for_blocks(
@@ -2364,15 +2392,16 @@ BEGIN
         nc.dst,
         nc.dst_post_id,
         nc.post_id,
-        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
+        COALESCE(rs.score, hivemind_app.reputation_score(ha.haf_id), 25),
         '', '', ''
     FROM new_comments nc
     JOIN hivemind_app.hive_accounts ha ON nc.src = ha.id
+    LEFT JOIN hivemind_app._reputation_snapshot rs ON rs.account_id = nc.src
     LEFT JOIN hivemind_app.muted m ON m.follower = nc.dst AND m.following = nc.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nc.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nc.src
     WHERE nc.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
+      AND COALESCE(rs.score, hivemind_app.reputation_score(ha.haf_id), 25) > 0
       AND nc.src IS DISTINCT FROM nc.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nc.block_num, nc.created_at, nc.src, nc.dst, nc.dst_post_id, nc.post_id
@@ -2423,14 +2452,15 @@ BEGIN
         nf.block_num, 15, nf.created_at,
         nf.follower, nf.following,
         NULL::INTEGER, NULL::INTEGER,
-        COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25),
+        COALESCE(rs.score, hivemind_app.reputation_score(nf.follower_haf_id), 25),
         '', '', ''
     FROM new_follows nf
+    LEFT JOIN hivemind_app._reputation_snapshot rs ON rs.account_id = nf.follower
     LEFT JOIN hivemind_app.muted m ON m.follower = nf.following AND m.following = nf.follower
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nf.following
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nf.follower
     WHERE nf.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0
+      AND COALESCE(rs.score, hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0
       AND nf.follower IS DISTINCT FROM nf.following
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nf.block_num, nf.created_at, nf.follower, nf.following
@@ -2475,15 +2505,16 @@ BEGIN
         hivemind_app.notification_id(nr.created_at, 14, nr.counter::INT),
         nr.block_num, 14, nr.created_at,
         nr.src, nr.dst, nr.dst_post_id, nr.post_id,
-        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
+        COALESCE(rs.score, hivemind_app.reputation_score(ha.haf_id), 25),
         '', '', ''
     FROM new_reblogs nr
     JOIN hivemind_app.hive_accounts ha ON nr.src = ha.id
+    LEFT JOIN hivemind_app._reputation_snapshot rs ON rs.account_id = nr.src
     LEFT JOIN hivemind_app.muted m ON m.follower = nr.dst AND m.following = nr.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nr.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nr.src
     WHERE nr.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
+      AND COALESCE(rs.score, hivemind_app.reputation_score(ha.haf_id), 25) > 0
       AND nr.src IS DISTINCT FROM nr.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nr.block_num, nr.created_at, nr.src, nr.dst, nr.dst_post_id, nr.post_id

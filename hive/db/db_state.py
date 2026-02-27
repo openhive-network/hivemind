@@ -747,6 +747,10 @@ class DbState:
             # to hive_notification_cache with the tasks above.
             cls._finish_reputation_notification_scores(cls.db())
 
+            # Clear snapshot so live sync uses live reputation_score()
+            with AutoDbDisposer(cls.db(), "truncate_reputation_snapshot") as db_mgr:
+                db_mgr.db.query_no_return(f"TRUNCATE {SCHEMA_NAME}._reputation_snapshot")
+
         real_time = FOSM.stop(start_time)
 
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
