@@ -1908,7 +1908,6 @@ BEGIN
             IF NOT _result.success THEN
                 RAISE WARNING 'updateProps failed: community=% actor=% actor_id=% community_id=% error=%',
                     _community_name, _auth_account, _actor_id, _community_id, _result.error_message;
-                RETURN _counter_in;  -- No error notification for updateProps; just log the warning
             END IF;
             -- Notify team on success
             IF _result.success AND _block_num > _notification_first_block THEN
@@ -2189,11 +2188,7 @@ BEGIN
     END IF;
 
     -- Generate error notification on failure
-    -- Note: avoid using "_result IS NOT NULL" — PostgreSQL composite NULL semantics require ALL fields
-    -- to be non-null for the row to be "not null". Since community_set_role failure cases return
-    -- NULL::INTEGER for old_role_id, "_result IS NOT NULL" evaluates to FALSE, silently skipping this block.
-    -- Checking _result.error_message directly works correctly for both unassigned (NULL) and assigned cases.
-    IF _result.error_message IS NOT NULL AND _result.error_message != '' THEN
+    IF _result IS NOT NULL AND NOT _result.success AND _result.error_message IS NOT NULL AND _result.error_message != '' THEN
         IF _block_num > _notification_first_block THEN
             _counter_in := _counter_in + 1;
             INSERT INTO hivemind_app.hive_notification_cache
