@@ -1,21 +1,47 @@
-"""Wrapper for sqlalchemy, providing a simple interface."""
+"""Database adapter using psycopg2 for direct PostgreSQL access."""
 
 import logging
-from collections import OrderedDict
+import re
 from time import perf_counter as perf
 
-import sqlalchemy
+import psycopg2
+import psycopg2.extensions
 import ujson
-from funcy.seqs import first
 from psycopg2.extras import register_default_jsonb
-from sqlalchemy import event
 
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
-
 log = logging.getLogger(__name__)
+
+# Convert SA-style :param bindings to psycopg2 %(param)s syntax.
+# Negative lookbehind avoids matching :: (PostgreSQL type casts) and :word_boundary.
+_PARAM_RE = re.compile(r'(?<![:\w]):([a-zA-Z_]\w*)')
+
+
+def _convert_named_params(sql):
+    """Convert :param style bindings to %(param)s for psycopg2."""
+    return _PARAM_RE.sub(r'%(\1)s', sql)
+
+
+class Row:
+    """Thin wrapper around a result row providing ._mapping for compatibility."""
+
+    __slots__ = ('_data', '_columns')
+
+    def __init__(self, data, columns):
+        self._data = data
+        self._columns = columns
+
+    @property
+    def _mapping(self):
+        return dict(zip(self._columns, self._data))
+
+    def __getitem__(self, index):
+        return self._data[index]
+
+    def __iter__(self):
+        return iter(self._data)
 
 
 class Db:
@@ -61,87 +87,38 @@ class Db:
         assert url, (
             '--database-url (or DATABASE_URL env) not specified; ' 'e.g. postgresql://user:pass@localhost:5432/hive'
         )
-        self._url = url
-        self._conn = []
-        self._engine = None
+        self._url = str(url)
         self._trx_active = False
-        self._prep_sql = {}
-
         self.name = name
 
-        self._conn.append({"connection": self.engine().connect(), "name": name})
-        # Since we need to manage transactions ourselves, yet the
-        # core behavior of DBAPI (per PEP-0249) is that a transaction
-        # is always in progress, this COMMIT is a workaround to get
-        # back control (and used with autocommit=False query exec).
-        self._basic_connection = self.get_connection(0)
-        self._basic_connection.execute(sqlalchemy.text("COMMIT"))
+        self._conn = psycopg2.connect(self._url, application_name=f'hivemind_{self.name}')
+        self._conn.autocommit = True
+        register_default_jsonb(self._conn, loads=ujson.loads)
 
         self.__autoexplain = None
         if enable_autoexplain:
             self.__autoexplain = AutoExplainWrapper(self)
 
     def clone(self, name):
-        cloned = Db(self._url, name, self.__autoexplain)
-
-        return cloned
+        return Db(self._url, name, self.__autoexplain is not None)
 
     def impersonated_clone(self, name, role):
-        role_url = self._engine.url.set(username=role)
-
-        cloned = Db(role_url, name, self.__autoexplain)
-
-        return cloned
+        role_url = psycopg2.extensions.make_dsn(self._url, user=role)
+        return Db(role_url, name, self.__autoexplain is not None)
 
     def close(self):
         """Close connection."""
         try:
-            for item in self._conn:
-                log.info(f"Closing database connection: '{item['name']}'")
-                item['connection'].close()
-            self._conn = []
+            if self._conn is not None and not self._conn.closed:
+                log.info(f"Closing database connection: '{self.name}'")
+                self._conn.close()
         except Exception as ex:
-            log.exception(f"Error during connections closing: {ex}")
+            log.exception(f"Error during connection closing: {ex}")
             raise ex
 
     def close_engine(self):
-        """Dispose db instance."""
-        try:
-            if self._engine is not None:
-                log.info("Disposing SQL engine")
-                self._engine.dispose()
-                self._engine = None
-            else:
-                log.info("SQL engine was already disposed")
-        except Exception as ex:
-            log.exception(f"Error during database closing: {ex}")
-            raise ex
-
-    def get_connection(self, number):
-        assert len(self._conn) > number, f"Incorrect number of connection. total: {len(self._conn)} number: {number}"
-        assert 'connection' in self._conn[number], 'Incorrect construction of db connection'
-        return self._conn[number]['connection']
-
-    def engine(self):
-        """Lazy-loaded SQLAlchemy engine."""
-        if self._engine is None:
-            from sqlalchemy.pool import NullPool
-
-            self._engine = sqlalchemy.create_engine(
-                self._url,
-                poolclass=NullPool,
-                echo=False,
-                connect_args={'application_name': f'hivemind_{self.name}'},
-            )
-
-            @event.listens_for(self._engine, "connect")
-            def _register_ujson_adapter(dbapi_conn, connection_record):
-                register_default_jsonb(dbapi_conn, loads=ujson.loads)
-
-        return self._engine
-
-    def get_dialect(self):
-        return self.get_connection(0).dialect
+        """No-op, kept for backward compatibility."""
+        pass
 
     def is_trx_active(self):
         """Check if a transaction is in progress."""
@@ -150,7 +127,6 @@ class Db:
     def explain(self):
         if self.__autoexplain:
             return self.__autoexplain
-
         return self
 
     def query(self, sql, **kwargs):
@@ -164,15 +140,8 @@ class Db:
             sql, kwargs = sql
 
         # this method is reserved for anything but SELECT
-        assert self._is_write_query(sql), sql
+        assert sql.strip()[0:6].strip() != 'SELECT', sql
         return self._query(sql, **kwargs)
-
-    def query_prepared(self, sql, **kwargs):
-        self._query(sql, True, **kwargs)
-
-    def query_prepared_all(self, sql, **kwargs):
-        res = self._query(sql, True, **kwargs)
-        return res.fetchall()
 
     def query_no_return(self, sql, **kwargs):
         self._query(sql, **kwargs)
@@ -181,49 +150,55 @@ class Db:
         """Execute a query with autocommit enabled (outside any transaction).
 
         Required for commands like ALTER SYSTEM that cannot run inside a transaction block.
-        """
-        query = sqlalchemy.text(sql)
-        # SQLAlchemy 2.0: use isolation_level="AUTOCOMMIT" instead of autocommit=True
-        self._basic_connection.execution_options(isolation_level="AUTOCOMMIT").execute(query)
-
-    def query_all(self, sql, **kwargs):
-        """Perform a `SELECT n*m`"""
-        res = self._query(sql, **kwargs)
-        return res.fetchall()
-
-    def query_all_raw(self, sql, params=None):
-        """Execute raw SQL without SQLAlchemy text() bind parameter parsing.
-
-        Use for queries with string-interpolated content that may contain
-        colon-prefixed words (e.g., ':kingdom') which text() would misinterpret
-        as bind parameters. When params is None, escapes '%' to '%%' so
-        psycopg2 doesn't misinterpret percent signs in content as parameter
-        placeholders. When params is provided, '%s' placeholders are left
-        intact for psycopg2 parameterized query execution.
+        Since we default to autocommit=True, this is a direct execute.
         """
         try:
             start = perf()
-            if params is not None:
-                result = self._basic_connection.exec_driver_sql(sql, params)
-            else:
-                result = self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
+            with self._conn.cursor() as cur:
+                cur.execute(sql)
             Stats.log_db(sql, perf() - start)
-            return result.fetchall()
+        except Exception as e:
+            log.warning("[SQL-ERR] %s in autocommit query %s", e.__class__.__name__, sql)
+            raise e
+
+    def query_all(self, sql, **kwargs):
+        """Perform a `SELECT n*m`"""
+        return self._query(sql, **kwargs)
+
+    def query_all_raw(self, sql, params=None):
+        """Execute raw SQL with psycopg2 %s-style parameter binding.
+
+        Use for queries with string-interpolated content that may contain
+        colon-prefixed words (e.g., ':kingdom') which _convert_named_params
+        would misinterpret as bind parameters.
+        """
+        try:
+            start = perf()
+            with self._conn.cursor() as cur:
+                if params is not None:
+                    cur.execute(sql, params)
+                else:
+                    cur.execute(sql)
+                columns = [desc[0] for desc in cur.description] if cur.description else []
+                rows = cur.fetchall()
+            Stats.log_db(sql, perf() - start)
+            return [Row(r, columns) for r in rows]
         except Exception as e:
             log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
             raise e
 
     def query_no_return_raw(self, sql, params=None):
-        """Execute raw SQL without text() bind parameter parsing, no result expected.
+        """Execute raw SQL with no result expected.
 
         Like query_all_raw but for statements that don't return rows (UPDATE, DELETE, etc.).
         """
         try:
             start = perf()
-            if params is not None:
-                self._basic_connection.exec_driver_sql(sql, params)
-            else:
-                self._basic_connection.exec_driver_sql(sql.replace('%', '%%'))
+            with self._conn.cursor() as cur:
+                if params is not None:
+                    cur.execute(sql, params)
+                else:
+                    cur.execute(sql)
             Stats.log_db(sql, perf() - start)
         except Exception as e:
             log.warning(f"[SQL-ERR] {e.__class__.__name__} in raw query")
@@ -231,25 +206,24 @@ class Db:
 
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
-        res = self._query(sql, **kwargs)
-        return first(res)
+        rows = self._query(sql, **kwargs)
+        return rows[0] if rows else None
 
     def query_col(self, sql, **kwargs):
         """Perform a `SELECT n*1`"""
-        res = self._query(sql, **kwargs).fetchall()
-        return [r[0] for r in res]
+        rows = self._query(sql, **kwargs)
+        return [r[0] for r in rows]
 
     def query_one(self, sql, **kwargs):
         """Perform a `SELECT 1*1`"""
-        row = first(self._query(sql, **kwargs))
-        return first(row) if row else None
+        rows = self._query(sql, **kwargs)
+        if rows:
+            return rows[0][0]
+        return None
 
     def engine_name(self):
-        """Get the name of the engine (e.g. `postgresql`, `mysql`)."""
-        _engine_name = self.get_dialect().name
-        if _engine_name != 'postgresql':
-            raise Exception(f"db engine {_engine_name} not supported")
-        return _engine_name
+        """Get the name of the engine. Only postgresql is supported."""
+        return 'postgresql'
 
     def batch_queries(self, queries, trx):
         """Process batches of prepared SQL tuples.
@@ -264,57 +238,8 @@ class Db:
         if trx:
             self.query("COMMIT")
 
-    @staticmethod
-    def build_insert(table, values, pk=None):
-        """Generates an INSERT statement w/ bindings."""
-        values = OrderedDict(values)
-
-        # Delete PK field if blank
-        if pk:
-            pks = [pk] if isinstance(pk, str) else pk
-            for key in pks:
-                if not values[key]:
-                    del values[key]
-
-        fields = list(values.keys())
-        cols = ', '.join([k for k in fields])
-        params = ', '.join([':' + k for k in fields])
-        sql = "INSERT INTO %s (%s) VALUES (%s)"
-        sql = sql % (table, cols, params)
-
-        return (sql, values)
-
-    @staticmethod
-    def build_update(table, values, pk):
-        """Generates an UPDATE statement w/ bindings."""
-        assert pk and isinstance(pk, (str, list))
-        pks = [pk] if isinstance(pk, str) else pk
-        values = OrderedDict(values)
-        fields = list(values.keys())
-
-        update = ', '.join([k + " = :" + k for k in fields if k not in pks])
-        where = ' AND '.join([k + " = :" + k for k in fields if k in pks])
-        sql = "UPDATE %s SET %s WHERE %s"
-        sql = sql % (table, update, where)
-
-        return (sql, values)
-
-    def _sql_text(self, sql, is_prepared):
-        #        if sql in self._prep_sql:
-        #            query = self._prep_sql[sql]
-        #        else:
-        #            query = sqlalchemy.text(sql).execution_options(autocommit=False)
-        #            self._prep_sql[sql] = query
-        # Python 3.14 compatibility: Always wrap strings with text()
-        # SQLAlchemy requires proper text objects, not plain strings
-        if isinstance(sql, str):
-            query = sqlalchemy.text(sql)
-        else:
-            query = sql
-        return query
-
-    def _query(self, sql, is_prepared: bool = False, **kwargs):
-        """Send a query off to SQLAlchemy."""
+    def _query(self, sql, **kwargs):
+        """Execute a query using psycopg2."""
         if sql == 'START TRANSACTION':
             assert not self._trx_active
             self._trx_active = True
@@ -324,36 +249,13 @@ class Db:
 
         try:
             start = perf()
-            query = self._sql_text(sql, is_prepared)
-            if 'log_query' in kwargs and kwargs['log_query']:
-                log.info(f"QUERY: {query}")
-            result = self._basic_connection.execute(query, kwargs)
-            if 'log_result' in kwargs and kwargs['log_result']:
-                log.info(f"RESULT: {result}")
+            converted = _convert_named_params(sql)
+            with self._conn.cursor() as cur:
+                cur.execute(converted, kwargs or None)
+                columns = [desc[0] for desc in cur.description] if cur.description else []
+                rows = cur.fetchall() if cur.description else []
             Stats.log_db(sql, perf() - start)
-            return result
+            return [Row(r, columns) for r in rows]
         except Exception as e:
             log.warning("[SQL-ERR] %s in query %s (%s)", e.__class__.__name__, sql, kwargs)
             raise e
-
-    @staticmethod
-    def _is_write_query(sql):
-        """Check if `sql` is a DELETE, UPDATE, COMMIT, ALTER, etc."""
-        action = sql.strip()[0:6].strip()
-        if action == 'SELECT':
-            return False
-        if action in [
-            'DELETE',
-            'UPDATE',
-            'INSERT',
-            'COMMIT',
-            'START',
-            'ALTER',
-            'TRUNCA',
-            'CREATE',
-            'DROP I',
-            'DROP T',
-            'ROLLBACK',
-        ]:
-            return True
-        raise Exception(f"unknown action: {sql}")

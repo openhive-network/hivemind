@@ -35,10 +35,6 @@ class AutoExplainController:
         if PostgresClientLogSeverity[self.__previous_psql_client_log_level].value > PostgresClientLogSeverity.log.value:
             self.__wrapped_db.query_no_return("SET client_min_messages=log")
 
-        self.__previous_log_level = logging.getLogger('sqlalchemy.dialects').getEffectiveLevel()
-        if self.__previous_log_level > logging.INFO:
-            logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
-
     def __exit__(self, exc_type, exc_value, traceback):
         self.__wrapped_db.query_no_return("SET auto_explain.log_nested_statements=off")
         self.__wrapped_db.query_no_return("SET auto_explain.log_min_duration=-1")
@@ -48,9 +44,6 @@ class AutoExplainController:
 
         if PostgresClientLogSeverity[self.__previous_psql_client_log_level].value > PostgresClientLogSeverity.log.value:
             self.__wrapped_db.query_no_return(f"SET client_min_messages={self.__previous_psql_client_log_level}")
-
-        if self.__previous_log_level > logging.INFO:
-            logging.getLogger('sqlalchemy.dialects').setLevel(self.__previous_log_level)
 
 
 class AutoExplainWrapper:
