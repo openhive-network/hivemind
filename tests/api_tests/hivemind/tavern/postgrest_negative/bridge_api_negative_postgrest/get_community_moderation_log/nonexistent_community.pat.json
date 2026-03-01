@@ -4,7 +4,7 @@
     "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
     "extension": {
-      "assertion_expression": "Community hive-999999 does not exist"
+      "assertion_expression": "Community hive-100000 does not exist"
     },
     "message": "Assert Exception",
     "name": "assert_exception",
@@ -26,5 +26,5 @@
       }
     ]
   },
-  "message": "Assert Exception:Community hive-999999 does not exist"
+  "message": "Assert Exception:Community hive-100000 does not exist"
 }
