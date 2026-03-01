@@ -8,11 +8,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Optional
 
-import sqlalchemy
-
 from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME, SCHEMA_OWNER_NAME, SWAGGER_URL
 from hive.db.adapter import Db
-from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
+from hive.db.schema import perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
@@ -39,6 +37,32 @@ class DbState:
     _original_full_page_writes = None
     _rshares_recalculated = False
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
+
+    # Tables that have registered indexes (via register_indexes.sql)
+    _TABLES_WITH_REGISTERED_INDEXES = [
+        'hive_feed_cache',
+        'hive_posts',
+        'hive_post_data',
+        'hive_votes',
+        'hive_subscriptions',
+        'hive_communities',
+        'hive_notification_cache',
+        'follows',
+        'muted',
+        'blacklisted',
+        'follow_muted',
+        'follow_blacklisted',
+        'hive_accounts',
+    ]
+
+    # Tables with foreign key constraints
+    _TABLES_WITH_FKS = [
+        'hive_posts',
+        'hive_votes',
+        'hive_post_tags',
+        'hive_reblogs',
+        'hive_mentions',
+    ]
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -113,129 +137,6 @@ class DbState:
         return cls._is_massive_sync
 
     @classmethod
-    def _all_foreign_keys(cls):
-        md = build_metadata()
-        out = []
-        for table in md.tables.values():
-            out.extend(table.foreign_keys)
-        return out
-
-    @classmethod
-    def disableable_indexes(cls):
-        to_locate = [
-            'hive_feed_cache_block_num_idx',
-            'hive_feed_cache_created_at_idx',
-            'hive_feed_cache_post_id_idx',
-            'hive_feed_cache_account_id_created_at_post_id_idx',
-            'hive_posts_parent_id_id_idx',
-            'hive_posts_depth_idx',
-            'hive_posts_root_id_id_idx',
-            'hive_posts_community_id_id_idx',
-            'hive_posts_community_id_is_pinned_idx',
-            'hive_posts_community_id_not_is_pinned_idx',
-            'hive_posts_community_id_not_is_paidout_idx',
-            'hive_posts_payout_at_idx',
-            'hive_posts_sc_trend_id_idx',
-            'hive_posts_sc_hot_id_idx',
-            'hive_posts_block_num_created_idx',
-            'hive_posts_payout_plus_pending_payout_id_idx',
-            'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
-            'hive_posts_author_id_created_at_id_idx',
-            'hive_posts_author_id_id_idx',
-            'hive_posts_block_num_idx',
-            'hive_posts_author_id_id_depth0_idx',
-            'hive_votes_voter_id_last_update_idx',
-            'hive_votes_block_num_idx',
-            'hive_subscriptions_block_num_idx',
-            'hive_subscriptions_community_idx',
-            'hive_communities_block_num_idx',
-            'hive_votes_post_id_voter_id_idx',
-            'hive_votes_post_id_block_num_rshares_vote_is_effective_idx',
-            'hive_notification_cache_block_num_idx',
-            'hive_notification_cache_dst_score_idx',
-            'follows_following_idx',
-            'muted_following_idx',
-            'blacklisted_following_idx',
-            'follow_muted_following_idx',
-            'follow_blacklisted_following_idx',
-            'follows_block_num_idx',
-            'muted_block_num_idx',
-            'blacklisted_block_num_idx',
-            'follow_muted_block_num_idx',
-            'follow_blacklisted_block_num_idx',
-            'hive_accounts_haf_id_idx',
-        ]
-
-        to_return = {}
-        md = build_metadata()
-        for table in md.tables.values():
-            for index in table.indexes:
-                if index.name not in to_locate:
-                    continue
-                to_locate.remove(index.name)
-                if table not in to_return:
-                    to_return[table] = []
-                to_return[table].append(index)
-
-        # ensure we found all the items we expected
-        assert not to_locate, f"indexes not located: {to_locate}"
-        return to_return
-
-    @classmethod
-    def _disableable_indexes(cls):
-        _indexes = cls.disableable_indexes()
-
-        metadata = sqlalchemy.MetaData(schema=REPTRACKER_SCHEMA_NAME)
-        rep = sqlalchemy.Table(
-            'account_reputations',
-            metadata,
-            sqlalchemy.Column('reputation', sqlalchemy.BigInteger, nullable=False, server_default='0'),
-        )
-
-        idx_reputation_on_account_reputations = sqlalchemy.Index(
-            'idx_reputation_on_account_reputations', rep.c.reputation
-        )
-
-        if rep not in _indexes:
-            _indexes[rep] = []
-        _indexes[rep].append(idx_reputation_on_account_reputations)
-
-        return _indexes
-
-    _BM25_INDEX_NAME = 'hive_post_data_bm25_idx'
-
-    @classmethod
-    def _bm25_index(cls):
-        """Return (table, index) for the BM25 full-text search index on hive_post_data.
-
-        This index is handled separately from disableable_indexes: it's dropped
-        at massive sync start but created during the fills phase (Part 0) instead
-        of the index creation phase, since it takes ~31 minutes and would otherwise
-        be the sole bottleneck. Creating it during fills hides the cost entirely.
-        """
-        md = build_metadata()
-        for table in md.tables.values():
-            for index in table.indexes:
-                if index.name == cls._BM25_INDEX_NAME:
-                    return table, index
-        raise AssertionError(f"BM25 index {cls._BM25_INDEX_NAME} not found in schema")
-
-    @classmethod
-    def _create_bm25_index(cls, db):
-        """Create the BM25 index (deferred from index creation to overlap with fills)."""
-        table, index = cls._bm25_index()
-        cls.processing_indexes_per_table(db, table.name, [index], False, False, True)
-
-    @classmethod
-    def has_index(cls, db, idx_name):
-        sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
-        count = db.query_one(sql, relname=idx_name)
-        if count == 1:
-            return True
-        else:
-            return False
-
-    @classmethod
     def _execute_query(cls, db: Db, sql: str, explain: bool = False) -> None:
         time_start = perf_counter()
 
@@ -274,63 +175,118 @@ class DbState:
             assert work_mem_after == work_mem_before, f'work_mem was changed: {work_mem_before} -> {work_mem_after}'
 
     @classmethod
-    def processing_indexes_per_table(cls, db, table_name, indexes, is_pre_process, drop, create):
-        log.info("[MASSIVE] Begin %s-massive sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
-        with AutoDbDisposer(db, table_name) as db_mgr:
-            engine = db_mgr.db.engine()
-
-            for index in indexes:
-                log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
-                try:
-                    if drop:
-                        if cls.has_index(db_mgr.db, index.name):
-                            time_start = perf_counter()
-                            index.drop(engine)
-                            end_time = perf_counter()
-                            elapsed_time = end_time - time_start
-                            log.info("Index %s dropped in time %.4f s", index.name, elapsed_time)
-                except sqlalchemy.exc.ProgrammingError as ex:
-                    log.warning(f"Ignoring ex: {ex}")
-
-                if create:
-                    if cls.has_index(db_mgr.db, index.name):
-                        log.info("Index %s already exists... Creation skipped.", index.name)
-                    else:
-                        time_start = perf_counter()
-                        index.create(engine)
-                        end_time = perf_counter()
-                        elapsed_time = end_time - time_start
-                        log.info("Index %s created in time %.4f s", index.name, elapsed_time)
-
-        log.info("[MASSIVE] End %s-massive sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
+    def _drop_registered_indexes(cls, db, table_name):
+        """Drop all HAF-registered indexes for a table and set their status to 'missing'."""
+        full_table = f'{SCHEMA_NAME}.{table_name}'
+        log.info("[MASSIVE] Dropping registered indexes for %s", full_table)
+        time_start = perf_counter()
+        db.query_no_return(f"""
+            DO $$
+            DECLARE
+                r RECORD;
+            BEGIN
+                FOR r IN
+                    SELECT index_constraint_name
+                    FROM hafd.indexes_constraints
+                    WHERE table_name = '{full_table}'
+                      AND is_foreign_key = FALSE
+                      AND status != 'missing'
+                LOOP
+                    EXECUTE format('DROP INDEX IF EXISTS %s', r.index_constraint_name);
+                    RAISE NOTICE 'Dropped index %', r.index_constraint_name;
+                END LOOP;
+                UPDATE hafd.indexes_constraints SET status = 'missing'
+                WHERE table_name = '{full_table}' AND is_foreign_key = FALSE;
+            END $$;
+        """)
+        log.info("[MASSIVE] Dropped registered indexes for %s in %.4fs", full_table, perf_counter() - time_start)
 
     @classmethod
-    def processing_indexes(cls, is_pre_process, drop, create):
+    def _drop_reptracker_index(cls, db):
+        """Drop the reputation tracker index registered alongside hivemind's indexes."""
+        full_table = f'{REPTRACKER_SCHEMA_NAME}.account_reputations'
+        log.info("[MASSIVE] Dropping registered indexes for %s", full_table)
+        time_start = perf_counter()
+        db.query_no_return(f"""
+            DO $$
+            DECLARE
+                r RECORD;
+            BEGIN
+                FOR r IN
+                    SELECT index_constraint_name
+                    FROM hafd.indexes_constraints
+                    WHERE table_name = '{full_table}'
+                      AND is_foreign_key = FALSE
+                      AND status != 'missing'
+                LOOP
+                    EXECUTE format('DROP INDEX IF EXISTS %s', r.index_constraint_name);
+                    RAISE NOTICE 'Dropped index %', r.index_constraint_name;
+                END LOOP;
+                UPDATE hafd.indexes_constraints SET status = 'missing'
+                WHERE table_name = '{full_table}' AND is_foreign_key = FALSE;
+            END $$;
+        """)
+        log.info("[MASSIVE] Dropped registered indexes for %s in %.4fs", full_table, perf_counter() - time_start)
+
+    @classmethod
+    def _restore_indexes_per_table(cls, db, full_table_name):
+        """Restore indexes for a single table using HAF API. Runs in a thread."""
+        with AutoDbDisposer(db, f'restore_idx_{full_table_name}') as db_mgr:
+            log.info("[MASSIVE] Restoring indexes for %s", full_table_name)
+            time_start = perf_counter()
+            db_mgr.db.query_no_return(f"SELECT hive.restore_indexes('{full_table_name}')")
+            log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
+
+    @classmethod
+    def _drop_indexes_in_threads(cls):
+        """Drop all registered indexes in parallel across tables."""
         start_time = FOSM.start()
-        action = 'CREATING' if create else 'DROPPING'
-        _indexes = cls._disableable_indexes()
 
         methods = []
-        for _key_table, indexes in _indexes.items():
-            methods.append(
-                (
-                    _key_table.name,
-                    cls.processing_indexes_per_table,
-                    [cls.db(), _key_table.name, indexes, is_pre_process, drop, create],
-                )
-            )
+        for table in cls._TABLES_WITH_REGISTERED_INDEXES:
+            methods.append((table, cls._drop_registered_indexes, [cls.db(), table]))
+        # Include reptracker index
+        methods.append(('account_reputations', cls._drop_reptracker_index, [cls.db()]))
 
-        cls.process_tasks_in_threads("[MASSIVE] %i threads finished creating indexes.", methods)
+        cls.process_tasks_in_threads("[MASSIVE] %i threads finished dropping indexes.", methods)
 
         real_time = FOSM.stop(start_time)
-
-        log.info(f"=== {action} INDEXES ===")
-        threads_time = FOSM.log_current(f"Total {action} indexes time")
+        log.info("=== DROPPING INDEXES ===")
+        threads_time = FOSM.log_current("Total DROPPING indexes time")
         log.info(
             f"Elapsed time: {real_time:.4f}s. Calculated elapsed time: {threads_time:.4f}s. Difference: {real_time - threads_time:.4f}s"
         )
         FOSM.clear()
-        log.info(f"=== {action} INDEXES ===")
+        log.info("=== DROPPING INDEXES ===")
+
+    @classmethod
+    def _restore_indexes_in_threads(cls):
+        """Restore all registered indexes in parallel across tables."""
+        start_time = FOSM.start()
+
+        methods = []
+        for table in cls._TABLES_WITH_REGISTERED_INDEXES:
+            full_name = f'{SCHEMA_NAME}.{table}'
+            methods.append((table, cls._restore_indexes_per_table, [cls.db(), full_name]))
+        # Include reptracker index
+        methods.append(
+            (
+                'account_reputations',
+                cls._restore_indexes_per_table,
+                [cls.db(), f'{REPTRACKER_SCHEMA_NAME}.account_reputations'],
+            )
+        )
+
+        cls.process_tasks_in_threads("[MASSIVE] %i threads finished creating indexes.", methods)
+
+        real_time = FOSM.stop(start_time)
+        log.info("=== CREATING INDEXES ===")
+        threads_time = FOSM.log_current("Total CREATING indexes time")
+        log.info(
+            f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s"
+        )
+        FOSM.clear()
+        log.info("=== CREATING INDEXES ===")
 
     @classmethod
     def ensure_off_synchronous_commit(cls):
@@ -421,8 +377,7 @@ class DbState:
         if cls._indexes_were_disabled:
             return
 
-        # is_pre_process, drop, create
-        cls.processing_indexes(True, True, False)
+        cls._drop_indexes_in_threads()
 
         # Drop BM25 index separately (deferred creation happens during fills phase)
         table, index = cls._bm25_index()
@@ -443,15 +398,12 @@ class DbState:
             return
 
         log.info("Dropping foreign keys")
-        from hive.db.schema import drop_fk
-
         time_start = perf_counter()
-        drop_fk(cls.db())
+        for table in cls._TABLES_WITH_FKS:
+            cls.db().query_no_return(f"SELECT hive.save_and_drop_foreign_keys('{SCHEMA_NAME}', '{table}')")
         end_time = perf_counter()
         elapsed_time = end_time - time_start
         log.info("Dropped foreign keys: %.4f s", elapsed_time)
-        if cls.db().is_trx_active():
-            cls.db().query_no_return("COMMIT")
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled = False
@@ -475,7 +427,7 @@ class DbState:
         set_logged_table_attribute(cls.db(), True)
 
         log.info("Creating indexes: started")
-        cls.processing_indexes(False, False, True)
+        cls._restore_indexes_in_threads()
         log.info("Creating indexes: finished")
 
         cls._indexes_were_disabled = False
@@ -489,16 +441,12 @@ class DbState:
         if cls._fk_were_enabled:
             return
 
-        # Note: set_logged_table_attribute(True) is now called in ensure_indexes_are_enabled()
-        # because some indexes (e.g., BM25/pg_search) don't support UNLOGGED tables
-        from hive.db.schema import create_fk
-
         start_time_foreign_keys = perf_counter()
         log.info("Recreating foreign keys")
-        create_fk(cls.db())
+        for table in cls._TABLES_WITH_FKS:
+            full_name = f'{SCHEMA_NAME}.{table}'
+            cls.db().query_no_return(f"SELECT hive.restore_foreign_keys('{full_name}')")
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
-        if cls.db().is_trx_active():
-            cls.db().query_no_return("COMMIT")
 
         cls._fk_were_disabled = False
         cls._fk_were_enabled = True
@@ -763,10 +711,10 @@ class DbState:
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
                 if table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data":
-                    db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (FULL, VERBOSE,ANALYZE) " + table))
+                    db_mgr.db.query_no_return_autocommit("VACUUM (FULL, VERBOSE,ANALYZE) " + table)
                 else:
-                    db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (VERBOSE,ANALYZE) " + table))
-                db_mgr.db.get_connection(0).execute(sqlalchemy.text("VACUUM (VERBOSE,ANALYZE) " + table))
+                    db_mgr.db.query_no_return_autocommit("VACUUM (VERBOSE,ANALYZE) " + table)
+                db_mgr.db.query_no_return_autocommit("VACUUM (VERBOSE,ANALYZE) " + table)
 
         methods = []
         for table in tables:
@@ -831,11 +779,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
     @classmethod
     def _is_schema_loaded(cls):
         """Check if the schema has been loaded into db yet."""
-        # check if database has been initialized (i.e. schema loaded)
-        _engine_name = cls.db().engine_name()
-        if _engine_name == 'postgresql':
-            return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
-        raise Exception(f"unknown db engine {_engine_name}")
+        return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
 
     @classmethod
     def _is_feed_cache_empty(cls):

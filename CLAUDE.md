@@ -196,7 +196,7 @@ hive/                      # Main Python package
 ├── cli.py                 # Entry point - routes commands (sync, build_schema, status)
 ├── conf.py                # CLI argument parsing and configuration
 ├── db/
-│   ├── schema.py          # Table definitions (Python SQLAlchemy)
+│   ├── schema.py          # Schema setup routines and SQL script loader
 │   ├── adapter.py         # Database connection management
 │   ├── sql_scripts/       # Pure SQL code
 │   │   └── postgrest/     # Server-side SQL functions (PL/pgSQL)
@@ -270,8 +270,7 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 - `mocker`: Inject mock data into HAF for testing
 
 **Dependencies (Python):**
-- SQLAlchemy 1.4.49 for HAF database access
-- aiopg, aiohttp for async operations
+- psycopg2 for direct PostgreSQL access
 - configargparse for configuration
 - psycopg2-binary for PostgreSQL
 
