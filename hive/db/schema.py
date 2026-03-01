@@ -15,25 +15,6 @@ def teardown(db):
     db.query_no_return(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE")
 
 
-def drop_fk(db):
-    """Drop all foreign key constraints."""
-    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
-    execute_sql_script(db.query_no_return, sql_scripts_dir_path / 'schema' / 'drop_foreign_keys.sql')
-
-
-def create_fk(db):
-    """Create foreign key constraints if they don't exist."""
-    existing = db.query_one(
-        "SELECT count(*) FROM information_schema.table_constraints "
-        "WHERE constraint_type = 'FOREIGN KEY' AND table_schema = :schema",
-        schema=SCHEMA_NAME,
-    )
-    if existing and existing > 0:
-        return  # foreign keys already exist
-    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
-    execute_sql_script(db.query_no_return, sql_scripts_dir_path / 'schema' / 'create_foreign_keys.sql')
-
-
 def create_statistics(db):
     """Create extended statistics dependencies for various tables."""
     sql = f"CREATE STATISTICS IF NOT EXISTS {SCHEMA_NAME}.hive_accounts_stats (dependencies) ON id, haf_id, name, created_at FROM {SCHEMA_NAME}.hive_accounts;"
@@ -101,6 +82,7 @@ def setup(db, admin_db):
     db.query_no_return(sql)
 
     # Register indexes with HAF for managed lifecycle (drop/restore during massive sync)
+    # Uses hive.app_register_index_dependency() which is SECURITY DEFINER — app role is sufficient
     execute_sql_script(db.query_no_return, sql_scripts_dir_path / 'schema' / 'register_indexes.sql')
 
     # Create foreign key constraints

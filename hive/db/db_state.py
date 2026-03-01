@@ -42,7 +42,6 @@ class DbState:
     _TABLES_WITH_REGISTERED_INDEXES = [
         'hive_feed_cache',
         'hive_posts',
-        'hive_post_data',
         'hive_votes',
         'hive_subscriptions',
         'hive_communities',
@@ -175,58 +174,12 @@ class DbState:
             assert work_mem_after == work_mem_before, f'work_mem was changed: {work_mem_before} -> {work_mem_after}'
 
     @classmethod
-    def _drop_registered_indexes(cls, db, table_name):
-        """Drop all HAF-registered indexes for a table and set their status to 'missing'."""
-        full_table = f'{SCHEMA_NAME}.{table_name}'
-        log.info("[MASSIVE] Dropping registered indexes for %s", full_table)
+    def _drop_all_registered_indexes(cls):
+        """Drop all HAF-registered indexes for the hivemind_app context."""
+        log.info("[MASSIVE] Dropping all registered indexes")
         time_start = perf_counter()
-        db.query_no_return(f"""
-            DO $$
-            DECLARE
-                r RECORD;
-            BEGIN
-                FOR r IN
-                    SELECT index_constraint_name
-                    FROM hafd.indexes_constraints
-                    WHERE table_name = '{full_table}'
-                      AND is_foreign_key = FALSE
-                      AND status != 'missing'
-                LOOP
-                    EXECUTE format('DROP INDEX IF EXISTS %s', r.index_constraint_name);
-                    RAISE NOTICE 'Dropped index %', r.index_constraint_name;
-                END LOOP;
-                UPDATE hafd.indexes_constraints SET status = 'missing'
-                WHERE table_name = '{full_table}' AND is_foreign_key = FALSE;
-            END $$;
-        """)
-        log.info("[MASSIVE] Dropped registered indexes for %s in %.4fs", full_table, perf_counter() - time_start)
-
-    @classmethod
-    def _drop_reptracker_index(cls, db):
-        """Drop the reputation tracker index registered alongside hivemind's indexes."""
-        full_table = f'{REPTRACKER_SCHEMA_NAME}.account_reputations'
-        log.info("[MASSIVE] Dropping registered indexes for %s", full_table)
-        time_start = perf_counter()
-        db.query_no_return(f"""
-            DO $$
-            DECLARE
-                r RECORD;
-            BEGIN
-                FOR r IN
-                    SELECT index_constraint_name
-                    FROM hafd.indexes_constraints
-                    WHERE table_name = '{full_table}'
-                      AND is_foreign_key = FALSE
-                      AND status != 'missing'
-                LOOP
-                    EXECUTE format('DROP INDEX IF EXISTS %s', r.index_constraint_name);
-                    RAISE NOTICE 'Dropped index %', r.index_constraint_name;
-                END LOOP;
-                UPDATE hafd.indexes_constraints SET status = 'missing'
-                WHERE table_name = '{full_table}' AND is_foreign_key = FALSE;
-            END $$;
-        """)
-        log.info("[MASSIVE] Dropped registered indexes for %s in %.4fs", full_table, perf_counter() - time_start)
+        cls.db().query_no_return("SELECT hive.app_save_and_drop_indexes('hivemind_app')")
+        log.info("[MASSIVE] Dropped all registered indexes in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _restore_indexes_per_table(cls, db, full_table_name):
@@ -234,34 +187,45 @@ class DbState:
         with AutoDbDisposer(db, f'restore_idx_{full_table_name}') as db_mgr:
             log.info("[MASSIVE] Restoring indexes for %s", full_table_name)
             time_start = perf_counter()
-            db_mgr.db.query_no_return(f"SELECT hive.restore_indexes('{full_table_name}')")
+            db_mgr.db.query_no_return(f"SELECT hive.app_restore_indexes('hivemind_app', '{full_table_name}')")
             log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
 
     @classmethod
+    def _restore_bm25_index(cls, db):
+        """Create the BM25 index on hive_post_data directly.
+
+        Not registered with HAF because pg_search leaves internal metadata
+        (MetaPage) that prevents UNLOGGED conversion even after the index is
+        dropped. Instead we manage this index manually: created here during
+        the fills phase, dropped explicitly in ensure_indexes_are_disabled.
+        """
+        with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
+            log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
+            time_start = perf_counter()
+            db_mgr.db.query_no_return(
+                f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data "
+                "USING bm25 (id, title, body) WITH (key_field = 'id', "
+                "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
+                f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
+            )
+            log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def _drop_indexes_in_threads(cls):
-        """Drop all registered indexes in parallel across tables."""
+        """Drop all registered indexes for the hivemind_app context in one call."""
         start_time = FOSM.start()
-
-        methods = []
-        for table in cls._TABLES_WITH_REGISTERED_INDEXES:
-            methods.append((table, cls._drop_registered_indexes, [cls.db(), table]))
-        # Include reptracker index
-        methods.append(('account_reputations', cls._drop_reptracker_index, [cls.db()]))
-
-        cls.process_tasks_in_threads("[MASSIVE] %i threads finished dropping indexes.", methods)
-
+        cls._drop_all_registered_indexes()
         real_time = FOSM.stop(start_time)
-        log.info("=== DROPPING INDEXES ===")
-        threads_time = FOSM.log_current("Total DROPPING indexes time")
-        log.info(
-            f"Elapsed time: {real_time:.4f}s. Calculated elapsed time: {threads_time:.4f}s. Difference: {real_time - threads_time:.4f}s"
-        )
+        log.info("=== DROPPING INDEXES === (%.4fs)", real_time)
         FOSM.clear()
-        log.info("=== DROPPING INDEXES ===")
 
     @classmethod
     def _restore_indexes_in_threads(cls):
-        """Restore all registered indexes in parallel across tables."""
+        """Restore all registered indexes in parallel across tables.
+
+        Excludes hive_post_data — the BM25 index is deferred to the fills phase
+        where it runs in parallel with other finalization work.
+        """
         start_time = FOSM.start()
 
         methods = []
@@ -379,9 +343,9 @@ class DbState:
 
         cls._drop_indexes_in_threads()
 
-        # Drop BM25 index separately (deferred creation happens during fills phase)
-        table, index = cls._bm25_index()
-        cls.processing_indexes_per_table(cls.db(), table.name, [index], True, True, False)
+        # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
+        # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
+        cls.db().query_no_return("DROP INDEX IF EXISTS hivemind_app.hive_post_data_bm25_idx")
 
         # Set tables to UNLOGGED for faster inserts (no WAL writes)
         from hive.db.schema import set_logged_table_attribute
@@ -400,10 +364,10 @@ class DbState:
         log.info("Dropping foreign keys")
         time_start = perf_counter()
         for table in cls._TABLES_WITH_FKS:
-            cls.db().query_no_return(f"SELECT hive.save_and_drop_foreign_keys('{SCHEMA_NAME}', '{table}')")
-        end_time = perf_counter()
-        elapsed_time = end_time - time_start
-        log.info("Dropped foreign keys: %.4f s", elapsed_time)
+            cls.db().query_no_return(
+                f"SELECT hive.app_save_and_drop_foreign_keys('hivemind_app', '{SCHEMA_NAME}', '{table}')"
+            )
+        log.info("Dropped foreign keys: %.4f s", perf_counter() - time_start)
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled = False
@@ -445,7 +409,7 @@ class DbState:
         log.info("Recreating foreign keys")
         for table in cls._TABLES_WITH_FKS:
             full_name = f'{SCHEMA_NAME}.{table}'
-            cls.db().query_no_return(f"SELECT hive.restore_foreign_keys('{full_name}')")
+            cls.db().query_no_return(f"SELECT hive.app_restore_foreign_keys('hivemind_app', '{full_name}')")
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
 
         cls._fk_were_disabled = False
@@ -679,7 +643,7 @@ class DbState:
         # BM25 index creation is deferred from the index phase to here, running in
         # parallel with the fills above. Takes ~31min but is hidden inside Part 0
         # which takes ~48min, eliminating it from the critical path.
-        methods.append(('bm25_index', cls._create_bm25_index, [cls.db()]))
+        methods.append(('bm25_index', cls._restore_bm25_index, [cls.db()]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
         if massive_sync_preconditions:
