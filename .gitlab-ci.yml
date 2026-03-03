@@ -80,6 +80,10 @@ variables:
   DOCKER_BUILDER_TAG: "47dab930d3676b007782723c45ae7080fa611705"
   DOCKER_DIND_TAG: "3dd346380da7f28cdaf3ef3955559c905d94bd1c"
   IMAGE_REMOVER_TAG: "latest"
+  # CI base image from common-ci-configuration (multi-Python pypa image)
+  BUILDER_IMAGE_TAG: ":pypa_2_28-4"
+  HIVE_CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/common-ci-configuration/ci-base-image${BUILDER_IMAGE_TAG}"
+  PYTHON_IMAGE: "${HIVE_CI_BASE_IMAGE}"
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
@@ -1228,3 +1232,4 @@ Trigger benchmark-results-collector:
     strategy: depend
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| JOBS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+

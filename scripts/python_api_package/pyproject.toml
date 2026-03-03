@@ -8,6 +8,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 [tool.poetry]
 name = "hiveio-hivemind-api"
 version = "0.0.0"
+requires-plugins = { poetry-dynamic-versioning = ">=1.0.0,<2.0.0" }
 packages = [
     { include = "hiveio_hivemind_api" },
 ]
