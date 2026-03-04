@@ -167,7 +167,8 @@ class Votes(DbAdapterHolder):
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
                     num_changes = {SCHEMA_NAME}.hive_votes.num_changes + EXCLUDED.num_changes + 1,
-                    block_num = EXCLUDED.block_num
+                    block_num = EXCLUDED.block_num,
+                    post_id = EXCLUDED.post_id
                   WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id and {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id and {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id
                 RETURNING post_id
                 """
