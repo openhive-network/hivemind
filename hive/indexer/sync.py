@@ -275,10 +275,17 @@ class SyncHiveDb:
         )
 
     def _on_stop_synchronization(self, active_connections_before):
+        # Restore WAL safety settings (fsync, full_page_writes) that were disabled
+        # via ALTER SYSTEM during massive sync. These persist in postgresql.auto.conf
+        # and survive PostgreSQL restarts, so they must always be restored on shutdown.
+        DbState.restore_wal_safety_after_massive_sync()
+        DbState.ensure_on_synchronous_commit()
         # Ensure tables are converted back to LOGGED before shutdown.
         # UNLOGGED tables are truncated during crash recovery, which can happen
         # if PostgreSQL is killed (e.g., docker timeout) instead of graceful shutdown.
         DbState.ensure_indexes_are_enabled()
+        DbState.ensure_fk_are_enabled()
+        DbState.close_admin_db()
         self.print_summary()
 
     def _check_log_explain_queries(self) -> None:

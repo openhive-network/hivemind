@@ -330,8 +330,9 @@ class Blocks:
         # Phase 1: Load staging table
         db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
 
-        # Phase 2: Account registration
+        # Phase 2: Account registration + community state ops (before posts)
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1)")
 
         # Phase 3: Post/comment processing
         post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})")
@@ -358,7 +359,7 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block})")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
 
         # Phase 5: PostDataCache flush
         PostDataCache.flush()
