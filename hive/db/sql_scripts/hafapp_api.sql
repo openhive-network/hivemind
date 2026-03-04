@@ -45,10 +45,8 @@ BEGIN
                  OR ho.op_type_id in (51, 53, 61, 72, 73)
                  )
                AND (ho.op_type_id != 18
-                 OR ho.custom_json_type_id IN (
-                     SELECT id FROM hafd.custom_json_types
-                     WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
-                 ))
+                 OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
+                 )
             ) as op
         GROUP BY op.block_num
     ;
@@ -97,10 +95,8 @@ BEGIN
                      OR ho.op_type_id in (51, 53, 61, 72, 73)
                      )
                    AND (ho.op_type_id != 18
-                     OR ho.custom_json_type_id IN (
-                         SELECT id FROM hafd.custom_json_types
-                         WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
-                     ))
+                     OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
+                     )
                 ) as op
             GROUP BY op.block_num
         ) as oper ON oper.block_num = hb.num
@@ -117,7 +113,7 @@ $function$
 DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op AS (
     block_num INT,
-    op_type_id SMALLINT,
+    op_type_id INT,
     body JSONB
 );
 
@@ -605,7 +601,7 @@ $function$
 DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op_extended AS (
     block_num INT,
-    op_type_id SMALLINT,
+    op_type_id INT,
     body JSONB,
     -- Extracted fields for vote (0) and effective_comment_vote (72) ops.
     -- NULL for all other op types.
@@ -667,7 +663,7 @@ DROP TYPE IF EXISTS hivemind_app.hivemind_flat_op_extended_with_date CASCADE;
 CREATE TYPE hivemind_app.hivemind_flat_op_extended_with_date AS (
     block_num INT,
     date TEXT,
-    op_type_id SMALLINT,
+    op_type_id INT,
     body JSONB,
     f_voter TEXT,
     f_author TEXT,
