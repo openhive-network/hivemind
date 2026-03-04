@@ -45,8 +45,10 @@ BEGIN
                  OR ho.op_type_id in (51, 53, 61, 72, 73)
                  )
                AND (ho.op_type_id != 18
-                 OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
-                 )
+                 OR ho.custom_json_type_id IN (
+                     SELECT id FROM hafd.custom_json_types
+                     WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+                 ))
             ) as op
         GROUP BY op.block_num
     ;
@@ -95,8 +97,10 @@ BEGIN
                      OR ho.op_type_id in (51, 53, 61, 72, 73)
                      )
                    AND (ho.op_type_id != 18
-                     OR ho.body->'value'->>'id' IN ('follow', 'reblog', 'community', 'notify')
-                     )
+                     OR ho.custom_json_type_id IN (
+                         SELECT id FROM hafd.custom_json_types
+                         WHERE custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+                     ))
                 ) as op
             GROUP BY op.block_num
         ) as oper ON oper.block_num = hb.num
