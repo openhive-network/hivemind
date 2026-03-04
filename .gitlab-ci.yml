@@ -411,8 +411,6 @@ detect_changes:
 find_haf_image:
   extends: .find_haf_image
   stage: detect
-  variables:
-    UPSTREAM_BRANCH: "strip-json-null-escapes"
 
 # Build base images if they're missing from registry
 prepare_base_images:
