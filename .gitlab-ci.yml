@@ -298,9 +298,26 @@ default:
     "mock_tests:api_smoketest_mock_tests.xml"
   )
 
+  # Detect pg_search availability via API probe (search-api requires paradedb extension)
+  PG_SEARCH_AVAILABLE=true
+  SEARCH_PROBE=$(curl -sf -X POST "http://$HOST:$PORT/" \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","id":1,"method":"search-api.find_text","params":{"pattern":"test","sort":"relevance","limit":1}}' 2>/dev/null || true)
+  if echo "$SEARCH_PROBE" | grep -q "pg_search extension not installed\|paradedb"; then
+    PG_SEARCH_AVAILABLE=false
+    echo "NOTE: pg_search extension not available — skipping search-api tests"
+  fi
+
   FAILED=0
   for test_spec in "${SMOKETESTS[@]}"; do
     IFS=':' read -r test_dir output_xml <<< "$test_spec"
+
+    # Skip search-api tests when pg_search is not available
+    if [[ "$test_dir" == "search-api_patterns" ]] && [[ "$PG_SEARCH_AVAILABLE" == "false" ]]; then
+      echo "Skipping ${test_dir} (pg_search not available)"
+      continue
+    fi
+
     section_name="${test_dir//\//_}"
     echo -e "\e[0Ksection_start:$(date +%s):${section_name}[collapsed=true]\r\e[0KRunning ${test_dir} smoketest..."
     if ! ./scripts/ci/start-api-smoketest.sh "$HOST" "$PORT" "${test_dir}/" "$output_xml" "$WORKERS"; then
