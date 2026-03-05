@@ -162,21 +162,17 @@ DECLARE
     _clean TEXT;
 BEGIN
     IF _val IS NULL THEN RETURN NULL; END IF;
-    -- Round-trip through TEXT to strip \u0000 sequences that corrupt psycopg2
-    -- wire protocol. For most operations this is a fast no-op path.
+    -- Validate JSONB can survive wire serialization by round-tripping through TEXT.
+    -- JSONB containing null bytes (from HAF C-level bypass of PostgreSQL validation)
+    -- may corrupt the psycopg2 wire protocol in PG18+. Strip \u0000 escapes when
+    -- found. Return original JSONB when clean (fast path, no overhead).
     _text := _val::text;
-    -- Strip \u0000 JSON escape sequences (6-char literal from JSONB text output).
-    -- Most operations don't contain null bytes so this replace is a no-op.
     _clean := replace(_text, '\u0000', '');
     IF _clean != _text THEN
-        -- Null bytes were found and stripped — rebuild JSONB from cleaned text
         RETURN _clean::jsonb;
     END IF;
-    -- No null bytes found — return original value unchanged
     RETURN _val;
 EXCEPTION WHEN OTHERS THEN
-    -- JSONB contains bytes that cannot be safely serialized (e.g., raw null bytes
-    -- that PG18 rejects in TEXT conversion). Skip this operation.
     RETURN NULL;
 END
 $function$ LANGUAGE plpgsql IMMUTABLE;
