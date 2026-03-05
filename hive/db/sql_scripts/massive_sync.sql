@@ -167,7 +167,10 @@ BEGIN
     -- output that corrupts the psycopg2 wire protocol. The round-trip also
     -- strips \u0000 escape sequences via text substitution.
     _text := _val::text;
+    -- Strip \u0000 JSON escape sequences
     _text := replace(_text, '\u0000', '');
+    -- Also strip raw null bytes using chr(0) — PG18 JSONB may produce these
+    _text := replace(_text, chr(0), '');
     RETURN _text::jsonb;
 EXCEPTION WHEN OTHERS THEN
     -- JSONB contains bytes that cannot be safely serialized.
