@@ -126,15 +126,16 @@ BEGIN
     -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
     -- Re-escape them so the text is valid JSON again.
     --
-    -- strip_json_null_escapes removes \u0000 (JSON null-byte escapes) that ->>
-    -- decodes into real 0x00 bytes, which TEXT/jsonb cannot store. It respects
-    -- backslash escaping so \\u0000 (escaped backslash) is preserved.
+    -- Remove null byte escapes that ->> decodes into real 0x00 bytes.
+    -- Use simple REPLACE as fallback until hive.strip_json_null_escapes()
+    -- is available in HAF (the C function handles \\u0000 edge cases better).
+    _text := REPLACE(_text, E'\u0000', '');
     RETURN REPLACE(
         REPLACE(
             REPLACE(
                 REPLACE(
                     REPLACE(
-                        hive.strip_json_null_escapes(_text),
+                        _text,
                     E'\b', '\b'),
                 E'\f', '\f'),
             E'\n', '\n'),
