@@ -53,6 +53,12 @@ BEGIN
         ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported sort, valid sorts: relevance, created');
         END CASE;
 
+    -- Check if pg_search extension is available (required for BM25 full-text search)
+    IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_search') THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+            'Full-text search is not available (pg_search extension not installed)');
+    END IF;
+
     -- Build search query for ParadeDB using the preprocessor
     -- Handles: quoted phrases, +/- terms, field specifications, and escaping
     _search_query = hivemind_postgrest_utilities.preprocess_search_query(_pattern);

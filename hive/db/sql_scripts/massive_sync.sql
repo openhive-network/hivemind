@@ -120,22 +120,25 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._follow_notification_events (
 
 CREATE OR REPLACE FUNCTION hivemind_app.safe_parse_jsonb(_text TEXT)
 RETURNS JSONB AS $function$
+DECLARE
+    _clean TEXT;
 BEGIN
     IF _text IS NULL THEN RETURN NULL; END IF;
     -- The ->> operator resolves JSON escapes (\n → literal newline, \t → literal tab, etc.)
     -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
     -- Re-escape them so the text is valid JSON again.
     --
-    -- strip_json_null_escapes removes literal \u0000 sequences that ->> produces
-    -- from \\u0000 in JSONB. Without this, ::jsonb rejects the text as containing
-    -- an invalid null byte escape. The C function uses backslash-parity counting
-    -- so \\u0000 (escaped backslash) is preserved.
+    -- Strip literal \u0000 sequences that ->> produces from null bytes in JSONB.
+    -- On PG17, HAF's C-level _operation_to_jsonb may preserve null bytes;
+    -- on PG18, it truncates at first null byte (pstrdup), so no \u0000 sequences
+    -- will appear. The replace() is a no-op in that case.
+    _clean := replace(_text, '\u0000', '');
     RETURN REPLACE(
         REPLACE(
             REPLACE(
                 REPLACE(
                     REPLACE(
-                        hive.strip_json_null_escapes(_text),
+                        _clean,
                     E'\b', '\b'),
                 E'\f', '\f'),
             E'\n', '\n'),
@@ -199,28 +202,24 @@ BEGIN
         FROM hivemind_app.blocks_view
         WHERE num BETWEEN (_first_block - 1) AND _last_block
     )
-    SELECT q.id, q.block_num, q.block_date, q.op_type_id, q.val
-    FROM (
-        SELECT ho.id, ho.block_num,
-               CASE WHEN ho.op_type_id >= 50
-                   THEN bd.created_at
-                   ELSE bd.prev_date
-               END AS block_date,
-               ho.op_type_id,
-               -- Validate JSONB is wire-safe (strips operations with null bytes that
-               -- PG18 rejects in TEXT serialization, preventing psycopg2 UnicodeDecodeError)
-               hivemind_app.safe_strip_null_jsonb(ho.body->'value') AS val
-        FROM hivemind_app.operations_view ho
-        JOIN block_dates bd ON bd.num = ho.block_num
-        WHERE ho.block_num BETWEEN _first_block AND _last_block
-          AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43,51,53,61,72,73)
-          AND (ho.op_type_id != 18
-            OR ho.custom_json_type_id IN (
-                SELECT cjt.id FROM hafd.custom_json_types cjt
-                WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
-            ))
-    ) q
-    WHERE q.val IS NOT NULL;
+    SELECT ho.id, ho.block_num,
+           -- Old Python used _head_block_date (previous block's date) for regular ops,
+           -- but the current block's date for virtual ops (payouts processed in _process_vops_flat
+           -- received date=block_dates[block_num]). Match that behavior.
+           CASE WHEN ho.op_type_id >= 50
+               THEN bd.created_at
+               ELSE bd.prev_date
+           END AS block_date,
+           ho.op_type_id, ho.body->'value'
+    FROM hivemind_app.operations_view ho
+    JOIN block_dates bd ON bd.num = ho.block_num
+    WHERE ho.block_num BETWEEN _first_block AND _last_block
+      AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43,51,53,61,72,73)
+      AND (ho.op_type_id != 18
+        OR ho.custom_json_type_id IN (
+            SELECT cjt.id FROM hafd.custom_json_types cjt
+            WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+        ));
 
     -- Partial ANALYZE: skip the expensive val JSONB column
     ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
