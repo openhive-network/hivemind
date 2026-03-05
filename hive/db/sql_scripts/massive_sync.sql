@@ -147,6 +147,32 @@ END
 $function$ LANGUAGE plpgsql IMMUTABLE;
 
 -- ============================================================================
+-- Helper: safe_strip_null_jsonb — remove \u0000 from JSONB values
+-- ============================================================================
+-- Real blockchain data may contain null bytes in operation binaries that HAF's
+-- C-level _operation_to_jsonb preserves inside JSONB. PostgreSQL 18+ may emit
+-- raw 0x00 bytes when serializing such JSONB to the text wire protocol, which
+-- corrupts the message and causes UnicodeDecodeError in psycopg2.
+-- Sanitize by round-tripping through text with null byte stripping.
+
+CREATE OR REPLACE FUNCTION hivemind_app.safe_strip_null_jsonb(_val JSONB)
+RETURNS JSONB AS $function$
+DECLARE
+    _text TEXT;
+BEGIN
+    IF _val IS NULL THEN RETURN NULL; END IF;
+    _text := _val::text;
+    -- Strip both raw null bytes and \u0000 JSON escape sequences
+    _text := replace(_text, E'\x00', '');
+    _text := replace(_text, '\u0000', '');
+    RETURN _text::jsonb;
+EXCEPTION WHEN OTHERS THEN
+    -- If sanitization fails, return empty object rather than corrupted JSONB
+    RETURN '{}'::jsonb;
+END
+$function$ LANGUAGE plpgsql IMMUTABLE;
+
+-- ============================================================================
 -- 2. load_ops_staging(_first_block, _last_block)
 -- ============================================================================
 
@@ -176,7 +202,12 @@ BEGIN
                THEN bd.created_at
                ELSE bd.prev_date
            END AS block_date,
-           ho.op_type_id, ho.body->'value'
+           ho.op_type_id,
+           -- Strip \u0000 from JSONB values: real blockchain data may contain null bytes
+           -- in body_binary that HAF's C-level _operation_to_jsonb preserves in JSONB.
+           -- PG18 may emit raw 0x00 in JSONB text serialization, corrupting the wire
+           -- protocol to psycopg2. Sanitize here at ingestion time.
+           hivemind_app.safe_strip_null_jsonb(ho.body->'value')
     FROM hivemind_app.operations_view ho
     JOIN block_dates bd ON bd.num = ho.block_num
     WHERE ho.block_num BETWEEN _first_block AND _last_block
