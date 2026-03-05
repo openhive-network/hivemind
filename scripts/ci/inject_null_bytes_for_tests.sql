@@ -21,7 +21,14 @@ DECLARE
     _old_len_byte int;
     _result bytea;
     _verify_text text;
+    _pg_major int;
 BEGIN
+    -- Skip null byte injection on PostgreSQL 18+ where it corrupts JSONB wire serialization
+    _pg_major := current_setting('server_version_num')::int / 10000;
+    IF _pg_major >= 18 THEN
+        RAISE NOTICE 'Skipping null byte injection on PostgreSQL % (PG18+ incompatible)', current_setting('server_version');
+        RETURN;
+    END IF;
     -- Find the comment_operation for nulltester
     -- Note: body_binary::text outputs bytea hex, not JSON.
     -- Use operation_to_jsontext() to get the JSON representation.
