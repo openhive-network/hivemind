@@ -1,0 +1,77 @@
+{
+	"4984623": {
+		"transactions": [
+			{
+				"ref_block_num": 100000,
+				"ref_block_prefix": 1,
+				"expiration": "2020-03-23T12:17:06",
+				"operations": [
+					{
+						"type": "account_create_operation",
+						"value": {
+							"creator": "gtg",
+							"new_account_name": "nulltester",
+							"owner": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"active": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"posting": {
+								"weight_threshold": 1,
+								"account_auths": [],
+								"key_auths": [
+									[
+										"STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+										1
+									]
+								]
+							},
+							"memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+							"json_metadata": "",
+							"extensions": []
+						}
+					},
+					{
+						"type": "account_update2_operation",
+						"value": {
+							"account": "nulltester",
+							"json_metadata": "{\"profile\":{\"name\":\"nulltester\",\"about\":\"about nulltester\",\"website\":\"https://example.com\",\"profile_image\":\"\",\"cover_image\":\"\",\"location\":\"\"}}",
+							"posting_json_metadata": "{\"profile\":{\"name\":\"nulltester posting\",\"about\":\"posting about nulltester\",\"website\":\"https://example.com\",\"profile_image\":\"\",\"cover_image\":\"\",\"location\":\"\"}}",
+							"extensions": []
+						}
+					},
+					{
+						"type": "comment_operation",
+						"value": {
+							"parent_author": "",
+							"parent_permlink": "test",
+							"author": "nulltester",
+							"permlink": "null-byte-post",
+							"title": "Title for null byte test",
+							"body": "Body for null byte defense test post",
+							"json_metadata": "{\"tags\":[\"test\"],\"app\":\"testapp\"}"
+						}
+					}
+				]
+			}
+		]
+	},
+	"4984624": {
+		"transactions": []
+	}
+}

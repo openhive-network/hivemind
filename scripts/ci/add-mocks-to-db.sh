@@ -52,4 +52,10 @@ run_mocker() {
   mocker --database-url "${HAF_ADMIN_POSTGRES_URL}"
 }
 
+inject_null_bytes() {
+  echo "Injecting null byte escape sequences into mock HAF operations for testing"
+  psql "${HAF_ADMIN_POSTGRES_URL}" -f "${SCRIPTPATH}/inject_null_bytes_for_tests.sql"
+}
+
 run_mocker
+inject_null_bytes
