@@ -9,6 +9,9 @@ from hive.version import GIT_DATE, GIT_REVISION, VERSION
 
 log = logging.getLogger(__name__)
 
+# Set during setup() — indicates whether pg_search (ParadeDB) extension is available
+pg_search_available = False
+
 
 def teardown(db):
     """Drop all tables by dropping the schema."""
@@ -31,6 +34,16 @@ def create_statistics(db):
     db.query_no_return(sql)
 
 
+def _try_create_extension(db, ext_name):
+    """Try to create an extension, return True if successful."""
+    try:
+        db.query(f'CREATE EXTENSION IF NOT EXISTS {ext_name};')
+        return True
+    except Exception:
+        # With autocommit=True the failed statement is already rolled back
+        return False
+
+
 def setup(db, admin_db):
     """Creates all tables and seed data"""
 
@@ -40,46 +53,61 @@ def setup(db, admin_db):
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_postgrest_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
     # Create extensions before table creation (needed for BM25 index type)
-    # Create ParadeDB pg_search extension for BM25 search
-    admin_db.query('CREATE EXTENSION IF NOT EXISTS pg_search;')
+    # Create ParadeDB pg_search extension for BM25 search (optional)
+    global pg_search_available
+    pg_search_available = _try_create_extension(admin_db, 'pg_search')
+    if not pg_search_available:
+        log.warning("pg_search extension not available — BM25 full-text search will be disabled")
+
     # Create plpython3u extension (requires superuser privileges)
     # Note: plpython3u is an untrusted language, only superusers can use it
     admin_db.query('CREATE EXTENSION IF NOT EXISTS plpython3u;')
 
     prepare_app_context(db=db)
 
-    # Create a dummy is_top_level_post function BEFORE table creation so the
-    # BM25 index WHERE clause can refer to it
-    sql = f"""
-    CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
-    RETURNS BOOLEAN
-    LANGUAGE sql
-    IMMUTABLE PARALLEL SAFE
-    AS $$
-      SELECT TRUE;
-    $$;
-    """
-    db.query_no_return(sql)
+    if pg_search_available:
+        # Create a dummy is_top_level_post function BEFORE table creation so the
+        # BM25 index WHERE clause can refer to it
+        sql = f"""
+        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+        RETURNS BOOLEAN
+        LANGUAGE sql
+        IMMUTABLE PARALLEL SAFE
+        AS $$
+          SELECT TRUE;
+        $$;
+        """
+        db.query_no_return(sql)
 
     # Create tables and indexes from SQL script
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
     execute_sql_script(db.query_no_return, sql_scripts_dir_path / 'schema' / 'create_tables.sql')
 
-    # Now that tables exist, replace the function with its real implementation that
-    # references the hive_posts table
-    sql = f"""
-    CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
-    RETURNS BOOLEAN
-    LANGUAGE sql
-    IMMUTABLE PARALLEL SAFE
-    AS $$
-      SELECT EXISTS (
-        SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
-        WHERE hp.id = post_id AND hp.depth = 0
-      );
-    $$;
-    """
-    db.query_no_return(sql)
+    if pg_search_available:
+        # Create BM25 index (requires pg_search extension)
+        sql = f"""
+        CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data
+            USING bm25 (id, title, body)
+            WITH (key_field = 'id', text_fields = '{{"title": {{"record": "position"}}, "body": {{"record": "position"}}}}')
+            WHERE {SCHEMA_NAME}.is_top_level_post(id);
+        """
+        db.query_no_return(sql)
+
+        # Now that tables exist, replace the function with its real implementation that
+        # references the hive_posts table
+        sql = f"""
+        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+        RETURNS BOOLEAN
+        LANGUAGE sql
+        IMMUTABLE PARALLEL SAFE
+        AS $$
+          SELECT EXISTS (
+            SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
+            WHERE hp.id = post_id AND hp.depth = 0
+          );
+        $$;
+        """
+        db.query_no_return(sql)
 
     # Register indexes with HAF for managed lifecycle (drop/restore during massive sync)
     # Uses hive.app_register_index_dependency() which is SECURITY DEFINER — app role is sufficient

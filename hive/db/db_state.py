@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Optional
 
+import hive.db.schema as schema_module
 from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME, SCHEMA_OWNER_NAME, SWAGGER_URL
 from hive.db.adapter import Db
 from hive.db.schema import perform_db_upgrade, setup, setup_runtime_code, teardown
@@ -89,6 +90,13 @@ class DbState:
             perform_db_upgrade(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
             log.info("Database schema upgrade finished")
+
+        # Detect pg_search availability for existing DBs (setup() sets this for fresh installs)
+        if not schema_module.pg_search_available:
+            result = cls.db().query_all("SELECT COUNT(*) FROM pg_extension WHERE extname = 'pg_search'")
+            if result and result[0][0] > 0:
+                schema_module.pg_search_available = True
+                log.info("pg_search extension detected in existing database")
 
         db_setup_owner.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}")
         db_setup_owner.query_no_return(f"SET custom.swagger_url = '{SWAGGER_URL}'")
@@ -198,7 +206,15 @@ class DbState:
         (MetaPage) that prevents UNLOGGED conversion even after the index is
         dropped. Instead we manage this index manually: created here during
         the fills phase, dropped explicitly in ensure_indexes_are_disabled.
+
+        Skipped when pg_search extension is not available.
         """
+        from hive.db.schema import pg_search_available
+
+        if not pg_search_available:
+            log.info("[MASSIVE] Skipping BM25 index creation (pg_search not available)")
+            return
+
         with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
             log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
             time_start = perf_counter()

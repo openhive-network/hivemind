@@ -93,11 +93,7 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_data (
     body TEXT NOT NULL DEFAULT '',
     json TEXT NOT NULL DEFAULT ''
 );
--- BM25 index for full-text search (requires pg_search extension)
-CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON hivemind_app.hive_post_data
-    USING bm25 (id, title, body)
-    WITH (key_field = 'id', text_fields = '{"title": {"record": "position"}, "body": {"record": "position"}}')
-    WHERE hivemind_app.is_top_level_post(id);
+-- BM25 index for full-text search is created conditionally in Python (requires pg_search extension)
 
 -- hive_permlink_data
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_permlink_data (
