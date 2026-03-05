@@ -411,6 +411,9 @@ detect_changes:
 find_haf_image:
   extends: .find_haf_image
   stage: detect
+  variables:
+    UPSTREAM_BRANCH: "feature/pg18-port"
+    HAF_PATTERNS_REF: "feature/pg18-port"
 
 # Build base images if they're missing from registry
 prepare_base_images:
