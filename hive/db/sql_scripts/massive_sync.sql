@@ -159,22 +159,24 @@ CREATE OR REPLACE FUNCTION hivemind_app.safe_strip_null_jsonb(_val JSONB)
 RETURNS JSONB AS $function$
 DECLARE
     _text TEXT;
+    _clean TEXT;
 BEGIN
     IF _val IS NULL THEN RETURN NULL; END IF;
-    -- Round-trip through TEXT to validate the JSONB is wire-safe.
-    -- Normal JSONB values pass through unchanged. JSONB containing null bytes
-    -- (from HAF C-level bypass) will fail TEXT conversion or produce invalid
-    -- output that corrupts the psycopg2 wire protocol. The round-trip also
-    -- strips \u0000 escape sequences via text substitution.
+    -- Round-trip through TEXT to strip \u0000 sequences that corrupt psycopg2
+    -- wire protocol. For most operations this is a fast no-op path.
     _text := _val::text;
-    -- Strip \u0000 JSON escape sequences
-    _text := replace(_text, '\u0000', '');
-    -- Also strip raw null bytes using chr(0) — PG18 JSONB may produce these
-    _text := replace(_text, chr(0), '');
-    RETURN _text::jsonb;
+    -- Strip \u0000 JSON escape sequences (6-char literal from JSONB text output).
+    -- Most operations don't contain null bytes so this replace is a no-op.
+    _clean := replace(_text, '\u0000', '');
+    IF _clean != _text THEN
+        -- Null bytes were found and stripped — rebuild JSONB from cleaned text
+        RETURN _clean::jsonb;
+    END IF;
+    -- No null bytes found — return original value unchanged
+    RETURN _val;
 EXCEPTION WHEN OTHERS THEN
-    -- JSONB contains bytes that cannot be safely serialized.
-    -- Return NULL — the operation will be filtered out during staging.
+    -- JSONB contains bytes that cannot be safely serialized (e.g., raw null bytes
+    -- that PG18 rejects in TEXT conversion). Skip this operation.
     RETURN NULL;
 END
 $function$ LANGUAGE plpgsql IMMUTABLE;
