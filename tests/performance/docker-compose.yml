@@ -1,0 +1,89 @@
+# Docker Compose for running k6 performance tests against Hivemind.
+#
+# Requires pre-synced HAF data (from CI cache or local sync).
+# See README.md for usage instructions.
+
+name: 'hivemind-perf'
+
+services:
+  haf:
+    image: ${HAF_IMAGE:-registry.gitlab.syncad.com/hive/haf/minimal-instance:latest}
+    entrypoint: /home/haf_admin/docker_entrypoint.sh
+    command: ["--skip-hived"]
+    environment:
+      HIVED_UID: ${HIVED_UID:-}
+      DATADIR: /home/hived/datadir
+      SHM_DIR: /home/hived/datadir/blockchain
+      PGCTLTIMEOUT: 600
+      PG_ACCESS: |
+        host    haf_block_log    hivemind         all    trust
+        host    haf_block_log    haf_admin        all    trust
+        host    postgres         haf_admin        all    trust
+    volumes:
+      - ${HAF_DATA_DIRECTORY:?Set HAF_DATA_DIRECTORY to your synced datadir}:/home/hived/datadir
+    networks:
+      haf-network:
+        aliases:
+          - haf-instance
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U haf_admin -d haf_block_log"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+  hivemind-server:
+    image: ${HIVEMIND_IMAGE:-registry.gitlab.syncad.com/hive/hivemind/instance:latest}
+    working_dir: /home/hivemind
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "Waiting for hivemind_app schema..."
+        WAIT_TIMEOUT=300
+        WAIT_START=$$(date +%s)
+        until psql "$${HAF_POSTGRES_URL}" -c "SELECT 1 FROM information_schema.schemata WHERE schema_name='hivemind_app'" 2>/dev/null | grep -q 1; do
+          if [[ $$(($$(date +%s) - WAIT_START)) -gt $$WAIT_TIMEOUT ]]; then
+            echo "ERROR: Timeout waiting for hivemind_app schema after $${WAIT_TIMEOUT}s"
+            exit 1
+          fi
+          sleep 2
+        done
+        echo "Starting Hivemind server on port $${HIVEMIND_PORT:-8080}..."
+        /home/hivemind/docker_entrypoint.sh server \
+          --webserver-port=$${HIVEMIND_PORT:-8080} \
+          --log-level=$${LOG_LEVEL:-info}
+    environment:
+      HAF_POSTGRES_URL: postgresql://hivemind@haf:5432/haf_block_log
+      HIVEMIND_PORT: ${HIVEMIND_PORT:-8080}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "${HIVEMIND_PORT:-8080}:${HIVEMIND_PORT:-8080}"
+    networks:
+      - haf-network
+    depends_on:
+      haf:
+        condition: service_healthy
+
+  k6:
+    image: grafana/k6:latest
+    working_dir: /tests
+    volumes:
+      - ./k6:/tests:ro
+    environment:
+      HIVEMIND_URL: http://hivemind-server:${HIVEMIND_PORT:-8080}
+      VUS: ${K6_VUS:-10}
+      DURATION: ${K6_DURATION:-2m}
+      MAX_VUS: ${K6_MAX_VUS:-100}
+    networks:
+      - haf-network
+    depends_on:
+      - hivemind-server
+    # Default: smoke test. Override with docker compose run k6 run <script>
+    command: ["run", "${K6_SCRIPT:-smoke.js}"]
+    profiles:
+      - test
+
+networks:
+  haf-network:
+    name: haf-network-perf
