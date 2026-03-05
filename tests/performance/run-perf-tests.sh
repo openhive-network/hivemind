@@ -6,8 +6,8 @@
 #
 # Options:
 #   --data-dir PATH       Path to pre-synced HAF datadir (required)
-#   --haf-image IMAGE     HAF Docker image (default: registry.gitlab.syncad.com/hive/haf/minimal-instance:latest)
-#   --hivemind-image IMG  Hivemind Docker image (default: registry.gitlab.syncad.com/hive/hivemind/instance:latest)
+#   --haf-image IMAGE     HAF Docker image (default: registry.gitlab.syncad.com/hive/haf/instance:1.27.10)
+#   --hivemind-image IMG  Hivemind Docker image (default: registry.gitlab.syncad.com/hive/hivemind/instance:1.27.10)
 #   --script SCRIPT       k6 script to run (default: smoke.js)
 #   --vus N               Virtual users (default: 10)
 #   --duration DUR        Test duration (default: 2m)
@@ -24,8 +24,8 @@ cd "$SCRIPT_DIR"
 
 # Defaults
 HAF_DATA_DIRECTORY=""
-HAF_IMAGE="registry.gitlab.syncad.com/hive/haf/minimal-instance:latest"
-HIVEMIND_IMAGE="registry.gitlab.syncad.com/hive/hivemind/instance:latest"
+HAF_IMAGE="registry.gitlab.syncad.com/hive/haf/instance:1.27.10"
+HIVEMIND_IMAGE="registry.gitlab.syncad.com/hive/hivemind/instance:1.27.10"
 K6_SCRIPT="smoke.js"
 K6_VUS="10"
 K6_DURATION="2m"
