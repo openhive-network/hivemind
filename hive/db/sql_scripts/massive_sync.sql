@@ -126,9 +126,10 @@ BEGIN
     -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
     -- Re-escape them so the text is valid JSON again.
     --
-    -- strip_json_null_escapes removes \u0000 (JSON null-byte escapes) that ->>
-    -- decodes into real 0x00 bytes, which TEXT/jsonb cannot store. It respects
-    -- backslash escaping so \\u0000 (escaped backslash) is preserved.
+    -- strip_json_null_escapes removes literal \u0000 sequences that ->> produces
+    -- from \\u0000 in JSONB. Without this, ::jsonb rejects the text as containing
+    -- an invalid null byte escape. The C function uses backslash-parity counting
+    -- so \\u0000 (escaped backslash) is preserved.
     RETURN REPLACE(
         REPLACE(
             REPLACE(
