@@ -162,8 +162,9 @@ DECLARE
 BEGIN
     IF _val IS NULL THEN RETURN NULL; END IF;
     _text := _val::text;
-    -- Strip both raw null bytes and \u0000 JSON escape sequences
-    _text := replace(_text, E'\x00', '');
+    -- Strip raw null bytes (using chr(0)) and \u0000 JSON escape sequences.
+    -- PG18 rejects E'\x00' as invalid UTF-8, so use chr(0) instead.
+    _text := replace(_text, chr(0), '');
     _text := replace(_text, '\u0000', '');
     RETURN _text::jsonb;
 EXCEPTION WHEN OTHERS THEN
