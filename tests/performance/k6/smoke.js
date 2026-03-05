@@ -43,6 +43,13 @@ export default function () {
           return false;
         }
       },
+      [`${req.method} no error`]: (r) => {
+        try {
+          return !JSON.parse(r.body).error;
+        } catch (e) {
+          return false;
+        }
+      },
     });
     sleep(0.1);
   }
