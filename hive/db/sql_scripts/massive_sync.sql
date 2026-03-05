@@ -1475,6 +1475,39 @@ BEGIN
         WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0;
     END IF;
 
+    -- Step 7g: Re-link child comments whose parent_id points to a now-deleted row.
+    -- Steps 4/5 processed comments before Step 7 handled delete-create pairs.
+    -- Comments that arrived after a post was recreated (but within the same batch)
+    -- linked to the original row via counter_deleted=0 (which was still active at
+    -- Step 5 time). Step 7 then deleted that row and created a new one. These
+    -- children now point to a deleted parent, inheriting wrong category/community.
+    -- Fix: update parent_id, category_id, root_id, and community_id to match the
+    -- new active parent. EXISTS pre-check uses only PK lookups to skip the expensive
+    -- hive_posts author_id+permlink_id join when no children point to deleted parents.
+    IF array_length(_delete_create_pairs, 1) > 0
+       AND EXISTS (
+           SELECT 1 FROM hivemind_app._post_results pr
+           JOIN hivemind_app.hive_posts old_parent ON old_parent.id = pr.parent_id
+           WHERE old_parent.counter_deleted = 1 AND pr.depth > 0
+           LIMIT 1
+       )
+    THEN
+        UPDATE hivemind_app.hive_posts child
+        SET parent_id = new_parent.id,
+            category_id = new_parent.category_id,
+            root_id = CASE new_parent.root_id WHEN 0 THEN new_parent.id ELSE new_parent.root_id END,
+            community_id = new_parent.community_id
+        FROM hivemind_app._post_results pr
+        JOIN hivemind_app.hive_posts old_parent ON old_parent.id = pr.parent_id
+        JOIN hivemind_app.hive_posts new_parent
+            ON new_parent.author_id = old_parent.author_id
+            AND new_parent.permlink_id = old_parent.permlink_id
+            AND new_parent.counter_deleted = 0
+        WHERE child.id = pr.post_id
+          AND old_parent.counter_deleted = 1
+          AND pr.depth > 0;
+    END IF;
+
     -- Step 7e: Correct community type muting for posts created BEFORE updateProps.
     -- When updateProps runs in Phase 2.5 (before posts), ALL posts in blocks with
     -- a type-changing updateProps see the new type and get muted. But posts created
