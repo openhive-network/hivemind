@@ -240,8 +240,10 @@ class Blocks:
         # Launch Phase 4 SQL tasks in background threads
         pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
         futures = []
+        task_times = {}
 
-        def run_one_task(db_conn, sql):
+        def run_one_task(db_conn, sql, task_name):
+            t_start = perf_counter()
             db_conn.query_no_return("START TRANSACTION")
             try:
                 db_conn.query_all_raw(sql)
@@ -252,9 +254,11 @@ class Blocks:
                 except Exception:
                     pass
                 raise
+            task_times[task_name] = perf_counter() - t_start
 
-        for db_conn, sql in phase4_tasks:
-            futures.append(pool.submit(run_one_task, db_conn, sql))
+        task_names = ['reblogs', 'follows', 'payouts']
+        for (db_conn, sql), name in zip(phase4_tasks, task_names):
+            futures.append(pool.submit(run_one_task, db_conn, sql, name))
 
         # Phase 3b: Process post results on main thread while Phase 4 runs in parallel
         t0_cache = perf_counter()
@@ -268,11 +272,13 @@ class Blocks:
 
         # Phase 4b: Account metadata + lastread (must run AFTER follows to avoid
         # deadlocks on hive_accounts — all three UPDATE the same table).
+        t0_4b = perf_counter()
         db.query_no_return("START TRANSACTION")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()")
         db.query_no_return("COMMIT")
         phase_times['parallel'] = perf_counter() - t0
+        task_times['acct_lastread'] = perf_counter() - t0_4b
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
         t0 = perf_counter()
@@ -306,12 +312,14 @@ class Blocks:
         phase_times['notify'] = perf_counter() - t0
 
         total = sum(phase_times.values())
+        task_detail = ' '.join(f'p4_{k}={v:.3f}' for k, v in task_times.items())
         log.info(
-            "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s",
+            "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s | %s",
             first_block,
             last_block,
             total,
             ' '.join(f'{k}={v:.3f}' for k, v in phase_times.items()),
+            task_detail,
         )
 
         OPSM.stop(time_start)
