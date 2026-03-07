@@ -1110,7 +1110,7 @@ BEGIN
             )::hivemind_app.post_tag_input
             FROM (
                 SELECT pr.post_id, pr.is_new_post, cs.parent_permlink,
-                       hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS parsed_md
+                       hivemind_app.safe_parse_jsonb_tolerant(cs.op_body->>'json_metadata') AS parsed_md
                 FROM hivemind_app._comment_staging cs
                 JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
                 WHERE cs.is_first
@@ -1143,7 +1143,7 @@ BEGIN
             FROM (
                 SELECT pr.post_id,
                        cs_first.parent_permlink,
-                       hivemind_app.safe_parse_jsonb(cs_last.op_body->>'json_metadata') AS parsed_md
+                       hivemind_app.safe_parse_jsonb_tolerant(cs_last.op_body->>'json_metadata') AS parsed_md
                 FROM hivemind_app._comment_staging cs_first
                 JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
                 JOIN LATERAL (
@@ -1412,7 +1412,7 @@ BEGIN
                 CROSS JOIN LATERAL (
                     SELECT jsonb_array_elements_text(parsed.md->'tags') AS tag_val
                     FROM (
-                        SELECT hivemind_app.safe_parse_jsonb(cs.op_body->>'json_metadata') AS md
+                        SELECT hivemind_app.safe_parse_jsonb_tolerant(cs.op_body->>'json_metadata') AS md
                         FROM hivemind_app._comment_staging cs
                         WHERE cs.author = fa.author AND cs.permlink = fa.permlink
                           AND cs.staging_id > ld.last_delete_staging_id
