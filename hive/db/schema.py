@@ -273,6 +273,8 @@ def setup_runtime_code(db):
         "postgrest/utilities/get_ranked_posts.sql",
         "postgrest/utilities/get_reblogged_posts.sql",
         "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
+        "postgrest/utilities/get_for_you_feed.sql",
+        "postgrest/bridge_api/bridge_api_get_for_you_feed.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql",
         "postgrest/condenser_api/condenser_api_get_replies_by_last_update.sql",
