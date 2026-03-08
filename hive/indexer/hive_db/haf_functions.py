@@ -39,27 +39,10 @@ def prepare_app_context(db: Db) -> None:
 def ensure_custom_json_type_index(db: Db) -> None:
     """Register partial index on hafd.operations for Hivemind's custom_json types.
 
-    Uses hive.register_index_dependency so HAF's indexes_controler creates the
-    index with CREATE INDEX CONCURRENTLY, avoiding ShareLock contention with
-    other apps that are writing to hafd.operations concurrently.
+    Uses hive.register_custom_json_type_index which registers the index via
+    register_index_dependency. HAF's indexes_controler then creates it with
+    CREATE INDEX CONCURRENTLY, avoiding ShareLock contention with other apps.
     """
-    types_sql = ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES)
-
-    # Look up numeric IDs for our custom_json types
-    type_ids = db.query_all(
-        f"SELECT id FROM hafd.custom_json_types "
-        f"WHERE custom_json_id IN ({types_sql}) ORDER BY id"
-    )
-    if not type_ids:
-        log.warning(f"No custom_json_type_ids found for {HIVEMIND_CUSTOM_JSON_TYPES} — index skipped")
-        return
-
-    ids = [row[0] for row in type_ids]
-    index_name = 'hive_operations_custom_json_types_' + '_'.join(str(i) for i in ids) + '_idx'
-    where_clause = 'custom_json_type_id IN (' + ','.join(str(i) for i in ids) + ')'
-    create_cmd = f'CREATE INDEX IF NOT EXISTS {index_name} ON hafd.operations (custom_json_type_id) WHERE {where_clause}'
-
-    log.info(f"Registering custom_json_type index dependency: {index_name}")
-    db.query_no_return(
-        f"SELECT hive.register_index_dependency('{SCHEMA_NAME}', $cmd${create_cmd}$cmd$);"
-    )
+    types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]"
+    log.info(f"Registering custom_json_type index for types: {HIVEMIND_CUSTOM_JSON_TYPES}")
+    db.query_no_return(f"SELECT hive.register_custom_json_type_index('{SCHEMA_NAME}', {types_array});")
