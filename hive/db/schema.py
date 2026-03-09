@@ -404,12 +404,26 @@ def set_logged_table_attribute(db, logged):
 
     Tables are converted in parallel to minimize total conversion time.
     The largest table (hive_votes at ~319GB) is the bottleneck.
+
+    Tables with foreign key relationships must be converted together. PostgreSQL
+    requires that if a referenced table is UNLOGGED, all tables with FKs pointing
+    to it must also be UNLOGGED (and vice versa). We convert in two phases:
+      Phase 1: small dependent tables (hive_reblogs, hive_mentions) that have FKs
+               to hive_accounts and hive_posts
+      Phase 2: the main large tables (including hive_accounts, hive_posts)
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from time import perf_counter
 
-    # Ordered by size descending - largest tables start first for better parallelism
-    logged_config = [
+    # Phase 1: small tables with FKs referencing tables in phase 2.
+    # Must be converted first when going to UNLOGGED, last when going to LOGGED.
+    fk_dependent_tables = [
+        'hive_reblogs',   # FKs to hive_accounts, hive_posts
+        'hive_mentions',  # FKs to hive_posts, hive_accounts
+    ]
+
+    # Phase 2: large tables, ordered by size descending for better parallelism
+    main_tables = [
         'hive_votes',  # ~319 GB
         'hive_post_data',  # ~127 GB
         'hive_posts',  # ~83 GB
@@ -419,7 +433,16 @@ def set_logged_table_attribute(db, logged):
     ]
 
     mode = 'LOGGED' if logged else 'UNLOGGED'
-    log.info(f"Converting {len(logged_config)} tables to {mode} in parallel...")
+
+    # When setting UNLOGGED: dependents first, then referenced tables
+    # When setting LOGGED: referenced tables first, then dependents
+    if logged:
+        phases = [('main', main_tables), ('dependent', fk_dependent_tables)]
+    else:
+        phases = [('dependent', fk_dependent_tables), ('main', main_tables)]
+
+    all_tables = fk_dependent_tables + main_tables
+    log.info(f"Converting {len(all_tables)} tables to {mode} in two phases...")
     start_time = perf_counter()
 
     def convert_table(table):
@@ -437,19 +460,20 @@ def set_logged_table_attribute(db, logged):
         finally:
             thread_db.close()
 
-    with ThreadPoolExecutor(max_workers=len(logged_config)) as executor:
-        futures = {executor.submit(convert_table, table): table for table in logged_config}
+    for phase_name, tables in phases:
+        with ThreadPoolExecutor(max_workers=len(tables)) as executor:
+            futures = {executor.submit(convert_table, table): table for table in tables}
 
-        for future in as_completed(futures):
-            table, elapsed, error = future.result()
-            if error:
-                log.error(f"Failed to set {mode} on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
-                raise error
-            else:
-                log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
+            for future in as_completed(futures):
+                table, elapsed, error = future.result()
+                if error:
+                    log.error(f"Failed to set {mode} on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
+                    raise error
+                else:
+                    log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
 
     total_elapsed = perf_counter() - start_time
-    log.info(f"All {len(logged_config)} tables converted to {mode} in {total_elapsed:.1f}s")
+    log.info(f"All {len(all_tables)} tables converted to {mode} in {total_elapsed:.1f}s")
 
 
 def execute_sql_script(query_executor, path_to_script):
