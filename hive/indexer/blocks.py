@@ -119,6 +119,11 @@ class Blocks:
     @staticmethod
     def head_date() -> str:
         """Get hive's head block date."""
+        # Check current block first to avoid expensive query when at block 0
+        # (hafd.blocks has no usable index during REINDEX, causing full table scan)
+        current = Db.instance().query_one(f"SELECT hive.app_get_current_block_num('{SCHEMA_NAME}')")
+        if not current:
+            return ''
         sql = f"SELECT {SCHEMA_NAME}.head_block_time()"
         return str(Db.instance().query_one(sql) or '')
 
