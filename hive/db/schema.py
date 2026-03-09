@@ -460,7 +460,7 @@ def set_logged_table_attribute(db, logged):
         finally:
             thread_db.close()
 
-    for phase_name, tables in phases:
+    for _phase_name, tables in phases:
         with ThreadPoolExecutor(max_workers=len(tables)) as executor:
             futures = {executor.submit(convert_table, table): table for table in tables}
 
