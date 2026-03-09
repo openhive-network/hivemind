@@ -23,6 +23,7 @@ from hive.indexer.notification_cache import (
 )
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.post_subscription import PostSubscription
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
@@ -69,6 +70,7 @@ class Blocks:
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
+        PostSubscription.setup_own_db_access(shared_db_adapter, "PostSubscription")
         Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
         NotificationCache.setup_own_db_access(shared_db_adapter, "NotificationCache")
         VoteNotificationCache.setup_own_db_access(shared_db_adapter, "VoteNotificationCache")
@@ -87,6 +89,7 @@ class Blocks:
         Reblog.close_own_db_access()
         Notify.close_own_db_access()
         Accounts.close_own_db_access()
+        PostSubscription.close_own_db_access()
         Mentions.close_own_db_access()
         NotificationCache.close_own_db_access()
         VoteNotificationCache.close_own_db_access()
@@ -332,6 +335,10 @@ class Blocks:
                     ReblogNotificationCache.db,
                     f"SELECT {SCHEMA_NAME}.flush_reblog_notifications_for_blocks({first_block}, {last_block})",
                 ),
+                (
+                    PostSubscription.db,
+                    f"SELECT {SCHEMA_NAME}.process_subscriptions_from_staging({first_block}, {last_block})",
+                ),
             ]
             cls._run_parallel_sql(phase6_tasks)
         phase_times['notify'] = perf_counter() - t0
@@ -409,6 +416,7 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.flush_post_notifications_for_blocks({first_block}, {last_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.flush_follow_notifications_for_blocks({first_block}, {last_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.flush_reblog_notifications_for_blocks({first_block}, {last_block})")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_subscriptions_from_staging({first_block}, {last_block})")
 
         # Live sync post-processing (within transaction boundary)
         log.info("[PROCESS LIVE SQL] Tables updating in live synchronization")

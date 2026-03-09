@@ -141,6 +141,825 @@
 				}
 			]
 	},
+	"4984623": {
+    "transactions": [
+      {
+        "ref_block_num": 10,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T12:30:00",
+        "operations": [
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "initminer",
+              "new_account_name": "subscribeuser0",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "initminer",
+              "new_account_name": "subscribeuser1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "initminer",
+              "new_account_name": "subscribeuser2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "initminer",
+              "new_account_name": "subscribeuser3",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "initminer",
+              "new_account_name": "subscribeuser4",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{}",
+              "extensions": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984624": {
+    "transactions": [
+      {
+        "ref_block_num": 20,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T13:00:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "test",
+              "author": "subscribeuser0",
+              "permlink": "deep-tree-root-0",
+              "title": "Deep Comment Tree 0",
+              "body": "This is the root post for deep comment tree 0. It will have comments nested up to 10 levels deep.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984625": {
+    "transactions": [
+      {
+        "ref_block_num": 50,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T14:30:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser3"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"deep-tree-root-0\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser1"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"deep-tree-root-0\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser2"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"deep-tree-root-0\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser4"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"deep-tree-root-0\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser1"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"deep-tree-root-0\"}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984626": {
+    "transactions": [
+      {
+        "ref_block_num": 200,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:00:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "deep-tree-root-0",
+              "author": "subscribeuser1",
+              "permlink": "tree0-depth1",
+              "title": "",
+              "body": "Comment at depth 1 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984627": {
+    "transactions": [
+      {
+        "ref_block_num": 201,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:03:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser1",
+              "parent_permlink": "tree0-depth1",
+              "author": "subscribeuser2",
+              "permlink": "tree0-depth2",
+              "title": "",
+              "body": "Comment at depth 2 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984628": {
+    "transactions": [
+      {
+        "ref_block_num": 202,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:06:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser2",
+              "parent_permlink": "tree0-depth2",
+              "author": "subscribeuser3",
+              "permlink": "tree0-depth3",
+              "title": "",
+              "body": "Comment at depth 3 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984629": {
+    "transactions": [
+      {
+        "ref_block_num": 203,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:09:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser3",
+              "parent_permlink": "tree0-depth3",
+              "author": "subscribeuser4",
+              "permlink": "tree0-depth4",
+              "title": "",
+              "body": "Comment at depth 4 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984630": {
+    "transactions": [
+      {
+        "ref_block_num": 204,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:12:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser4",
+              "parent_permlink": "tree0-depth4",
+              "author": "subscribeuser0",
+              "permlink": "tree0-depth5",
+              "title": "",
+              "body": "Comment at depth 5 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984631": {
+    "transactions": [
+      {
+        "ref_block_num": 205,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:15:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "tree0-depth5",
+              "author": "subscribeuser1",
+              "permlink": "tree0-depth6",
+              "title": "",
+              "body": "Comment at depth 6 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984632": {
+    "transactions": [
+      {
+        "ref_block_num": 206,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:18:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser1",
+              "parent_permlink": "tree0-depth6",
+              "author": "subscribeuser2",
+              "permlink": "tree0-depth7",
+              "title": "",
+              "body": "Comment at depth 7 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984633": {
+    "transactions": [
+      {
+        "ref_block_num": 207,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:21:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser2",
+              "parent_permlink": "tree0-depth7",
+              "author": "subscribeuser3",
+              "permlink": "tree0-depth8",
+              "title": "",
+              "body": "Comment at depth 8 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser3",
+              "parent_permlink": "tree0-depth8",
+              "author": "subscribeuser4",
+              "permlink": "tree0-depth9",
+              "title": "",
+              "body": "Comment at depth 9 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser4",
+              "parent_permlink": "tree0-depth9",
+              "author": "subscribeuser0",
+              "permlink": "tree0-depth10",
+              "title": "",
+              "body": "Comment at depth 10 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "tree0-depth10",
+              "author": "subscribeuser0",
+              "permlink": "trigger-tree0-0",
+              "title": "",
+              "body": "Trigger comment at depth 11 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "tree0-depth10",
+              "author": "subscribeuser1",
+              "permlink": "trigger-tree0-1",
+              "title": "",
+              "body": "Trigger comment at depth 11 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+			{
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "tree0-depth10",
+              "author": "subscribeuser1",
+              "permlink": "trigger-tree0-1",
+              "title": "",
+              "body": "Trigger comment at depth 11 in tree 0. Testing recursive notification generation.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser1",
+              "parent_permlink": "trigger-tree0-1",
+              "author": "subscribeuser2",
+              "permlink": "tree0-depth12",
+              "title": "",
+              "body": "Comment at depth 12 in tree 0. Testing recursive notification generation with depth limit.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser2",
+              "parent_permlink": "tree0-depth12",
+              "author": "subscribeuser3",
+              "permlink": "tree0-depth13",
+              "title": "",
+              "body": "Comment at depth 13 in tree 0. Testing recursive notification generation with depth limit.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser3",
+              "parent_permlink": "tree0-depth13",
+              "author": "subscribeuser4",
+              "permlink": "tree0-depth14",
+              "title": "",
+              "body": "Comment at depth 14 in tree 0. Testing recursive notification generation with depth limit.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser4",
+              "parent_permlink": "tree0-depth14",
+              "author": "subscribeuser0",
+              "permlink": "tree0-depth15",
+              "title": "",
+              "body": "Comment at depth 15 in tree 0. Testing recursive notification generation with depth limit.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "tree0-depth15",
+              "author": "subscribeuser1",
+              "permlink": "tree0-depth16",
+              "title": "",
+              "body": "Comment at depth 16 in tree 0. This is the last depth before the 16 limit cutoff.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser1",
+              "parent_permlink": "tree0-depth16",
+              "author": "subscribeuser2",
+              "permlink": "tree0-depth17",
+              "title": "",
+              "body": "Comment at depth 17 in tree 0. This comment should NOT trigger notifications to root post subscribers due to depth limit.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984634": {
+    "transactions": [
+      {
+        "ref_block_num": 208,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:24:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "jouchelle"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"tree0-depth10\"}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984635": {
+    "transactions": [
+      {
+        "ref_block_num": 209,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:27:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser2",
+              "parent_permlink": "tree0-depth17",
+              "author": "subscribeuser3",
+              "permlink": "tree0-depth18-jouchelle-test",
+              "title": "",
+              "body": "Comment at depth 18. Jouchelle subscribed at depth 10 should receive this notification (only 8 levels up). Root subscribers should NOT receive it (18 levels up exceeds limit).",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984636": {
+    "transactions": [
+      {
+        "ref_block_num": 210,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:30:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "jouchelle"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"unsubscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"tree0-depth10\"}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984637": {
+    "transactions": [
+      {
+        "ref_block_num": 211,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:33:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser3",
+              "parent_permlink": "tree0-depth18-jouchelle-test",
+              "author": "subscribeuser4",
+              "permlink": "tree0-depth19-after-unsub",
+              "title": "",
+              "body": "Comment at depth 19 after jouchelle unsubscribed. Jouchelle should NOT receive this notification since they unsubscribed.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984638": {
+    "transactions": [
+      {
+        "ref_block_num": 212,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:36:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "test",
+              "author": "subscribeuser0",
+              "permlink": "collision-test-root",
+              "title": "Collision Test Root Post",
+              "body": "This is a second root post to test notification ID collision when multiple posts in the same block have subscribers.",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984639": {
+    "transactions": [
+      {
+        "ref_block_num": 213,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:39:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser1"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"collision-test-root\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser2"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"collision-test-root\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser3"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"collision-test-root\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "subscribeuser4"
+              ],
+              "id": "subscribe_post",
+              "json": "[\"subscribe\", {\"author\": \"subscribeuser0\", \"permlink\": \"collision-test-root\"}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4984640": {
+    "transactions": [
+      {
+        "ref_block_num": 214,
+        "ref_block_prefix": 99000,
+        "expiration": "2020-01-01T22:42:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "deep-tree-root-0",
+              "author": "subscribeuser3",
+              "permlink": "collision-test-tree0-comment",
+              "title": "",
+              "body": "Comment in tree 0 - collision test. This gets counter=1 with 3 subscribers (1,2,4 excluding self). Counters: 1,2,3",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "subscribeuser0",
+              "parent_permlink": "collision-test-root",
+              "author": "subscribeuser4",
+              "permlink": "collision-test-tree1-comment",
+              "title": "",
+              "body": "Comment in tree 1 - collision test. This gets counter=2 with 3 subscribers (1,2,3 excluding self). Counters: 2,3,4 - OVERLAP with tree 0!",
+              "json_metadata": "{}"
+            }
+          }
+        ]
+      }
+    ]
+  },
 	"5000000": {
 		"transactions": []
 	}

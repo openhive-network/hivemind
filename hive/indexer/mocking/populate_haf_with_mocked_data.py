@@ -93,15 +93,13 @@ def main():
     log.info('Sorting block data')
     blocks.sort(key=lambda b: b.block_number)
 
-    last_block_in_db = db.query_row("SELECT * FROM hafd.blocks ORDER BY num DESC LIMIT 1")
+    last_block_in_db = db.query_row("SELECT * FROM hive.blocks_view ORDER BY num DESC LIMIT 1")
 
     last_block_num_to_mock = blocks[-1].block_number
     log.info(f'Last block to mock: {last_block_num_to_mock}')
 
     if last_block_in_db is None:
-        log.error(
-            'No blocks found in hafd.blocks table. The mocker requires an existing database with replayed blocks.'
-        )
+        log.error('No blocks found in hive.blocks_view. The mocker requires an existing database with replayed blocks.')
         log.error('Please ensure HAF has finished replaying before running the mocker.')
         sys.exit(1)
     else:

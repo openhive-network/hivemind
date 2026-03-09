@@ -199,7 +199,7 @@ BEGIN
       AND (ho.op_type_id != 18
         OR ho.custom_json_type_id IN (
             SELECT cjt.id FROM hafd.custom_json_types cjt
-            WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+            WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify', 'subscribe_post')
         ));
 
     -- Partial ANALYZE: skip the expensive val JSONB column

@@ -25,6 +25,7 @@ BEGIN
         WHEN 15 THEN 'follow'
         WHEN 16 THEN 'mention'
         WHEN 17 THEN 'vote'
+        WHEN 18 THEN 'post_subscription_reply'
         ELSE NULL
     END;
 
@@ -67,6 +68,7 @@ BEGIN
         WHEN _notify_type = 'reply_comment' THEN '<src> replied to your comment'
         WHEN _notify_type = 'mention' THEN '<src> mentioned you and <other_mentions> others'
         WHEN _notify_type = 'vote' THEN '<src> voted on your post'
+        WHEN _notify_type = 'post_subscription_reply' THEN '<src> replied to a subscribed post'
     END;
 
     IF _row.type_id = 17 AND _row.payload IS NOT NULL AND _row.payload <> '' THEN
