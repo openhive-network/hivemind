@@ -20,7 +20,7 @@ def log_memory_usage(memtypes=None, broadcast=True) -> str:
 
     def format_bytes(val: int):
         assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
-        return f'{val / 1024.0 / 1024.0 :.2f} MB'
+        return f'{val / 1024.0 / 1024.0:.2f} MB'
 
     human_readable = {
         "rss": "physical_memory",
@@ -85,6 +85,15 @@ class UniqueCounter:
             self.counter = 1
             self.last_value = value
         return self.counter
+
+    def increment_by(self, value, amount) -> int:
+        """Increment counter by a specific amount. Returns the starting counter value."""
+        if value != self.last_value:
+            self.counter = 0
+            self.last_value = value
+        start = self.counter + 1
+        self.counter += amount
+        return start
 
 
 def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):

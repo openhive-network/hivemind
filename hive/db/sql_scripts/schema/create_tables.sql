@@ -305,3 +305,16 @@ CREATE TABLE IF NOT EXISTS hivemind_app.follow_blacklisted (
 );
 CREATE INDEX IF NOT EXISTS follow_blacklisted_following_idx ON hivemind_app.follow_blacklisted (following);
 CREATE INDEX IF NOT EXISTS follow_blacklisted_block_num_idx ON hivemind_app.follow_blacklisted (block_num);
+
+-- hive_post_subscriptions
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_subscriptions (
+    id SERIAL PRIMARY KEY,
+    account_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    block_num INTEGER NOT NULL,
+    CONSTRAINT hive_post_subscriptions_ux1 UNIQUE (account_id, post_id)
+);
+CREATE INDEX IF NOT EXISTS hive_post_subscriptions_post_id_idx ON hivemind_app.hive_post_subscriptions (post_id);
+CREATE INDEX IF NOT EXISTS hive_post_subscriptions_account_id_idx ON hivemind_app.hive_post_subscriptions (account_id);
+CREATE INDEX IF NOT EXISTS hive_post_subscriptions_block_num_idx ON hivemind_app.hive_post_subscriptions (block_num);

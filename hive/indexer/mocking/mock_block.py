@@ -82,6 +82,8 @@ class OperationBase:
     def body(self) -> dict:
         return self._body
 
+    _custom_json_seq_synced = False
+
     def _resolve_custom_json_type_id(self):
         """For custom_json operations, resolve or insert the custom_json_type_id."""
         if self.type != OperationType.CUSTOM_JSON:
@@ -117,6 +119,7 @@ class OperationBase:
     def push(self) -> None:
         OperationBase.pos_in_block += 1
 
+        # Generate operation_id using HAF function: hafd.operation_id(block_num, pos_in_block)
         OperationBase.operation_id = Db.instance().query_one(
             sql='SELECT operation_id FROM hafd.operation_id(:block_num, :pos_in_block);',
             block_num=self.block_number,

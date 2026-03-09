@@ -23,6 +23,7 @@ class NotifyType(IntEnum):
     follow = 15
     mention = 16
     vote = 17
+    post_subscription_reply = 18  # New comment in subscribed thread
 
     # inactive
     # vote_comment = 16
