@@ -237,6 +237,25 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_subscriptions (
 CREATE INDEX IF NOT EXISTS hive_subscriptions_community_idx ON hivemind_app.hive_subscriptions (community_id);
 CREATE INDEX IF NOT EXISTS hive_subscriptions_block_num_idx ON hivemind_app.hive_subscriptions (block_num);
 
+-- hive_moderation_log
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_moderation_log (
+    id BIGSERIAL PRIMARY KEY,
+    community_id INTEGER NOT NULL,
+    action SMALLINT NOT NULL,
+    actor_id INTEGER NOT NULL,
+    target_account_id INTEGER,
+    target_post_id INTEGER,
+    old_value VARCHAR(256),
+    new_value VARCHAR(256),
+    notes VARCHAR(256),
+    block_num INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_community_id_created_at_idx ON hivemind_app.hive_moderation_log (community_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_actor_id_created_at_idx ON hivemind_app.hive_moderation_log (actor_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num);
+
 -- hive_notification_cache
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_notification_cache (
     id BIGINT PRIMARY KEY,
