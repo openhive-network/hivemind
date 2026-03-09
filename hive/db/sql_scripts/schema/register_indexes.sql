@@ -37,6 +37,12 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_subscriptions_block_num_idx ON hivemind_app.hive_subscriptions (block_num)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_subscriptions_community_idx ON hivemind_app.hive_subscriptions (community_id)');
 
+-- hive_moderation_log indexes
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_community_id_created_at_idx ON hivemind_app.hive_moderation_log (community_id, created_at DESC, id DESC)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_actor_id_created_at_idx ON hivemind_app.hive_moderation_log (actor_id, created_at DESC, id DESC)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num)');
+
 -- hive_communities indexes
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_communities_block_num_idx ON hivemind_app.hive_communities (block_num)');
 
