@@ -520,7 +520,7 @@ BEGIN
             -- Get auth account
             ro.val->'required_posting_auths'->>0 AS auth_account,
             -- Parse inner JSON
-            hivemind_app.safe_parse_jsonb(ro.val->>'json') AS inner_json
+            hivemind_app.safe_parse_jsonb_tolerant(ro.val->>'json') AS inner_json
         FROM raw_ops ro
         WHERE jsonb_array_length(COALESCE(ro.val->'required_auths', '[]'::jsonb)) = 0
           AND jsonb_array_length(COALESCE(ro.val->'required_posting_auths', '[]'::jsonb)) = 1
@@ -669,7 +669,7 @@ BEGIN
             s.block_num,
             s.block_date,
             s.val->'required_posting_auths'->>0 AS account,
-            hivemind_app.safe_parse_jsonb(s.val->>'json') AS inner_json
+            hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json') AS inner_json
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 18
           AND (s.val->>'id') = 'notify'
@@ -1526,12 +1526,12 @@ BEGIN
     -- (bit 2) — mutePost (bit 0) hasn't run yet — so clearing all muting is safe.
     WITH updateprops_type_changes AS (
         SELECT s.block_num, s.id AS staging_id,
-               hivemind_app.safe_parse_jsonb(s.val->>'json')->1->>'community' AS community_name
+               hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->>'community' AS community_name
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 18
           AND s.val->>'id' = 'community'
-          AND hivemind_app.safe_parse_jsonb(s.val->>'json')->>0 = 'updateProps'
-          AND hivemind_app.safe_parse_jsonb(s.val->>'json')->1->'props'->>'type_id' IS NOT NULL
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->>0 = 'updateProps'
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->'props'->>'type_id' IS NOT NULL
     ),
     posts_before_updateprops AS (
         SELECT pr.post_id
