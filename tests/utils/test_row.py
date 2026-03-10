@@ -71,3 +71,12 @@ def test_set_inequality():
         Row(('hivemind',), ('application_name',)),
     ]
     assert set(before) != set(after)
+
+
+def test_list_input_from_psycopg2():
+    """psycopg2 fetchall() returns lists, not tuples. Row must handle both."""
+    r1 = Row(['alice', 1], ['name', 'id'])
+    r2 = Row(('alice', 1), ('name', 'id'))
+    assert r1 == r2
+    assert hash(r1) == hash(r2)
+    assert len({r1, r2}) == 1

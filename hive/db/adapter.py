@@ -30,8 +30,8 @@ class Row:
     __slots__ = ('_data', '_columns')
 
     def __init__(self, data, columns):
-        self._data = data
-        self._columns = columns
+        self._data = tuple(data)
+        self._columns = tuple(columns)
 
     def __eq__(self, other):
         if not isinstance(other, Row):
