@@ -33,6 +33,14 @@ class Row:
         self._data = data
         self._columns = columns
 
+    def __eq__(self, other):
+        if not isinstance(other, Row):
+            return NotImplemented
+        return self._data == other._data and self._columns == other._columns
+
+    def __hash__(self):
+        return hash((self._data, self._columns))
+
     @property
     def _mapping(self):
         return dict(zip(self._columns, self._data))
