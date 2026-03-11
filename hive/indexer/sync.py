@@ -217,6 +217,7 @@ class SyncHiveDb:
         Blocks.set_end_of_sync_lib()
         Blocks.process_multi_sql(first_block, last_block)
 
+        self._db.query_no_return("START TRANSACTION")
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
         log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
@@ -229,6 +230,7 @@ class SyncHiveDb:
         self._massive_consume_blocks_futures = None
 
         # Batch completed successfully — remove crash recovery marker
+        self._db.query_no_return("START TRANSACTION")
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
 
@@ -304,6 +306,7 @@ class SyncHiveDb:
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
         # Record batch for crash recovery (must be COMMITTED before processing starts)
+        self._db.query_no_return("START TRANSACTION")
         self._db.query_no_return(
             f"INSERT INTO {SCHEMA_NAME}._batch_queue (first_block, last_block) VALUES ({lbound}, {ubound})"
         )
