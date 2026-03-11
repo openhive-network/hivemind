@@ -8,6 +8,15 @@
 -- Sequence for community op notification counter (avoids collisions across ops)
 CREATE SEQUENCE IF NOT EXISTS hivemind_app.community_op_counter;
 
+-- Crash recovery: tracks the in-flight batch block range.
+-- Written atomically before batch processing starts, deleted after completion.
+-- If the process crashes, the entry persists and triggers replay on restart.
+-- MUST remain LOGGED (not UNLOGGED) to survive PostgreSQL crash recovery.
+CREATE TABLE IF NOT EXISTS hivemind_app._batch_queue (
+    first_block INT NOT NULL,
+    last_block  INT NOT NULL
+);
+
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
     id          BIGINT NOT NULL,       -- HAF operation ID (ordering)
     block_num   INT NOT NULL,
@@ -463,8 +472,12 @@ BEGIN
                 ELSE hivemind_app.hive_votes.rshares END,
             vote_percent = EXCLUDED.vote_percent,
             last_update = EXCLUDED.last_update,
-            num_changes = hivemind_app.hive_votes.num_changes + EXCLUDED.num_changes + 1,
-            block_num = EXCLUDED.block_num
+            num_changes = CASE
+                WHEN EXCLUDED.block_num <= hivemind_app.hive_votes.block_num
+                THEN hivemind_app.hive_votes.num_changes  -- replay: skip increment
+                ELSE hivemind_app.hive_votes.num_changes + EXCLUDED.num_changes + 1
+            END,
+            block_num = GREATEST(EXCLUDED.block_num, hivemind_app.hive_votes.block_num)
         WHERE hivemind_app.hive_votes.voter_id = EXCLUDED.voter_id
           AND hivemind_app.hive_votes.author_id = EXCLUDED.author_id
           AND hivemind_app.hive_votes.permlink_id = EXCLUDED.permlink_id
@@ -755,7 +768,9 @@ BEGIN
             (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json_raw,
             (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight_raw,
             -- Flag: has COMMENT_REWARD? (used to nullify ECV data)
-            bool_or(s.op_type_id = 53) AS has_cr
+            bool_or(s.op_type_id = 53) AS has_cr,
+            -- Max block_num across all payout ops for this post (for replay detection)
+            MAX(s.block_num) AS max_payout_block
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (51, 53, 61, 72)
         GROUP BY s.val->>'author', s.val->>'permlink'
@@ -775,7 +790,8 @@ BEGIN
             pa.cr_payout_date,
             -- Nullify ECV data when COMMENT_REWARD exists (it supersedes pending payout)
             CASE WHEN pa.has_cr THEN NULL ELSE pa.pending_payout_json_raw END AS pending_payout_json,
-            CASE WHEN pa.has_cr THEN NULL ELSE pa.total_vote_weight_raw END AS total_vote_weight
+            CASE WHEN pa.has_cr THEN NULL ELSE pa.total_vote_weight_raw END AS total_vote_weight,
+            pa.max_payout_block
         FROM payout_agg pa
         JOIN hivemind_app.hive_accounts ha ON ha.name = pa.author
     )
@@ -789,7 +805,12 @@ BEGIN
             hivemind_app.legacy_amount(m.curator_payout_value),
             hp.curator_payout_value
         ),
-        author_rewards = COALESCE(m.author_rewards, 0) + hp.author_rewards,
+        last_payout_block = GREATEST(hp.last_payout_block, COALESCE(m.max_payout_block, 0)),
+        author_rewards = CASE
+            WHEN m.author_rewards IS NOT NULL AND m.max_payout_block <= hp.last_payout_block
+            THEN hp.author_rewards  -- replay: skip accumulation
+            ELSE COALESCE(m.author_rewards, 0) + hp.author_rewards
+        END,
         author_rewards_hive = COALESCE(m.author_rewards_hive, hp.author_rewards_hive),
         author_rewards_hbd = COALESCE(m.author_rewards_hbd, hp.author_rewards_hbd),
         author_rewards_vests = COALESCE(m.author_rewards_vests, hp.author_rewards_vests),

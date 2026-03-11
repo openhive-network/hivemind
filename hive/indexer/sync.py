@@ -98,6 +98,9 @@ class SyncHiveDb:
         ensure_custom_json_type_index(self._db)
         Blocks.set_head_date()
 
+        # Check for unfinished batch from prior crash
+        self._replay_crashed_batch()
+
         def report_enter_to_stage(current_stage) -> bool:
             if (
                 report_enter_to_stage.prev_application_stage is None
@@ -194,6 +197,30 @@ class SyncHiveDb:
                 self._on_stop_synchronization(active_connections_before)
                 raise AssertionError(f'Unknown application stage {application_stage}')
 
+    def _replay_crashed_batch(self):
+        """Check for and replay any unfinished batch from a prior crash.
+
+        The _batch_queue table records the block range of an in-flight batch.
+        If an entry exists, the prior process crashed mid-batch and we must
+        replay it. The idempotent SQL (vote num_changes, author_rewards guards)
+        ensures replayed data does not double-count.
+        """
+        leftover = self._db.query_all(f"SELECT first_block, last_block FROM {SCHEMA_NAME}._batch_queue LIMIT 1")
+        if not leftover:
+            return
+
+        first_block, last_block = leftover[0][0], leftover[0][1]
+        log.info(f"Crash recovery: replaying unfinished batch {first_block}..{last_block}")
+
+        DbLiveContextHolder.set_live_context(False)
+        Blocks.setup_own_db_access(shared_db_adapter=self._db)
+        Blocks.set_end_of_sync_lib()
+        Blocks.process_multi_sql(first_block, last_block)
+
+        self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
+        self._db.query_no_return("COMMIT")
+        log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
+
     def _wait_for_massive_consume(self):
         if self._massive_consume_blocks_futures is None:
             return
@@ -201,12 +228,19 @@ class SyncHiveDb:
         self._massive_consume_blocks_futures.result()
         self._massive_consume_blocks_futures = None
 
+        # Batch completed successfully — remove crash recovery marker
+        self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
+        self._db.query_no_return("COMMIT")
+
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
             restore_default_signal_handlers()
-            self._on_stop_synchronization(active_connections_before)
+            self._on_stop_synchronization(
+                active_connections_before,
+                sigint_during_massive=DbState.is_massive_sync(),
+            )
             return True
 
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
@@ -269,22 +303,38 @@ class SyncHiveDb:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
+        # Record batch for crash recovery (must be COMMITTED before processing starts)
+        self._db.query_no_return(
+            f"INSERT INTO {SCHEMA_NAME}._batch_queue (first_block, last_block) VALUES ({lbound}, {ubound})"
+        )
+        self._db.query_no_return("COMMIT")
+
         # SQL path: no data fetching needed, SQL functions read directly from operations_view
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
             self._consume_massive_blocks_sql, lbound, ubound
         )
 
-    def _on_stop_synchronization(self, active_connections_before):
+    def _on_stop_synchronization(self, active_connections_before, sigint_during_massive=False):
         # Restore WAL safety settings (fsync, full_page_writes) that were disabled
         # via ALTER SYSTEM during massive sync. These persist in postgresql.auto.conf
         # and survive PostgreSQL restarts, so they must always be restored on shutdown.
         DbState.restore_wal_safety_after_massive_sync()
         DbState.ensure_on_synchronous_commit()
-        # Ensure tables are converted back to LOGGED before shutdown.
-        # UNLOGGED tables are truncated during crash recovery, which can happen
-        # if PostgreSQL is killed (e.g., docker timeout) instead of graceful shutdown.
-        DbState.ensure_indexes_are_enabled()
-        DbState.ensure_fk_are_enabled()
+
+        if sigint_during_massive:
+            # During massive sync, skip expensive index/FK rebuild — the _batch_queue
+            # table ensures crash recovery will replay the interrupted batch on restart,
+            # and massive sync will continue without indexes anyway.
+            log.info(
+                "SIGINT during massive sync — relying on batch queue for crash recovery, skipping index/FK rebuild"
+            )
+        else:
+            # Ensure tables are converted back to LOGGED before shutdown.
+            # UNLOGGED tables are truncated during crash recovery, which can happen
+            # if PostgreSQL is killed (e.g., docker timeout) instead of graceful shutdown.
+            DbState.ensure_indexes_are_enabled()
+            DbState.ensure_fk_are_enabled()
+
         DbState.close_admin_db()
         self.print_summary()
 
