@@ -63,5 +63,3 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 -- hive_accounts indexes
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_accounts_haf_id_idx ON hivemind_app.hive_accounts (haf_id)');
 
--- reputation tracker index (managed alongside hivemind's indexes)
-SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS idx_reputation_on_account_reputations ON reptracker_app.account_reputations (reputation)');
