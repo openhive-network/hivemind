@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_posts (
     beneficiaries JSON NOT NULL DEFAULT '[]',
     block_num INTEGER NOT NULL,
     block_num_created INTEGER NOT NULL,
+    last_payout_block INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink_id, counter_deleted)
 );
 CREATE INDEX IF NOT EXISTS hive_posts_depth_idx ON hivemind_app.hive_posts (depth);

@@ -48,4 +48,7 @@ ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_git_rev TE
 ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_git_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT  NOW();
 ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_version TEXT NOT NULL DEFAULT '';
 
+-- Crash recovery: high-water mark for payout idempotency
+ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS last_payout_block INTEGER NOT NULL DEFAULT 0;
+
 RESET ROLE;

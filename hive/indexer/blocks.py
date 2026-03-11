@@ -325,12 +325,20 @@ class Blocks:
     def process_live_block_sql(cls, first_block: int, last_block: int) -> None:
         """Process blocks in live sync using SQL functions (sequential, shared connection).
 
-        All phases run sequentially on the shared connection (no parallelism).
+        All phases run sequentially on the shared connection (no parallelism)
+        inside a single transaction. This makes live sync fully atomic: if the
+        process crashes, the entire block's work rolls back and app_next_iteration()
+        returns the same range on restart.
+
         After SQL processing, live-sync-specific post-processing is performed
-        (children count, root_id, feed cache, periodic actions).
+        (children count, root_id, feed cache, periodic actions) — all within the
+        same transaction boundary.
         """
         time_start = OPSM.start()
         db = DbAdapterHolder.common_block_processing_db()
+
+        # Wrap entire live block in a single transaction for atomicity
+        db.query_no_return("START TRANSACTION")
 
         # Phase 1: Load staging table
         db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
@@ -366,7 +374,8 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
 
-        # Phase 5: PostDataCache flush
+        # Phase 5: PostDataCache flush (uses beginTx/commitTx which are no-ops in live mode,
+        # so it executes within this wrapping transaction)
         PostDataCache.flush()
 
         # Phase 6: Notifications (sequential)
@@ -375,10 +384,13 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.flush_follow_notifications_for_blocks({first_block}, {last_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.flush_reblog_notifications_for_blocks({first_block}, {last_block})")
 
-        # Live sync post-processing
+        # Live sync post-processing (within transaction boundary)
         log.info("[PROCESS LIVE SQL] Tables updating in live synchronization")
         cls.on_live_blocks_processed(first_block, last_block)
         cls._periodic_actions_by_num(last_block)
+
+        # Commit the entire block atomically
+        db.query_no_return("COMMIT")
 
         log.info(
             "[PROCESS LIVE SQL] blocks %d-%d in %.4fs",
