@@ -126,7 +126,15 @@ class SyncHiveDb:
             # Wait for previous massive consumption BEFORE modifying context state.
             # This prevents race condition where flush threads access context while
             # app_next_iteration is modifying it.
-            self._wait_for_massive_consume()
+            try:
+                self._wait_for_massive_consume()
+            except Exception:
+                # Exception from massive sync thread (deadlock, FK violation, etc).
+                # Clear the future so _break_requested's _wait_for_massive_consume()
+                # won't re-raise, allowing _on_stop_synchronization() to run with
+                # sigint_during_massive=True (skipping FK/index restore).
+                log.warning("Exception from massive sync thread — deferring to shutdown handler")
+                self._massive_consume_blocks_futures = None
 
             last_imported_block = Blocks.last_imported()
 
@@ -344,9 +352,7 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, (
-                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
-            )
+            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
     @staticmethod
     def _show_info(database: Db) -> None:
