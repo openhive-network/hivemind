@@ -20,13 +20,13 @@ BEGIN
         Virtual ops:  51=author_reward, 53=comment_reward, 61=comment_payout_update,
                       72=effective_comment_vote, 73=ineffective_delete_comment
 
-        Body is returned as jsonb->'value' (the inner payload, no type wrapper).
+        Body is returned as body_value (the inner payload, no type wrapper).
     */
     RETURN QUERY
         SELECT
             ho.block_num,
             ho.op_type_id,
-            ho.body->'value'
+            ho.body_value
         FROM hivemind_app.operations_view ho
         WHERE ho.block_num BETWEEN _first_block AND _last_block
           AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
@@ -93,7 +93,7 @@ BEGIN
         SELECT
             ho.id AS op_id,
             ho.block_num,
-            ho.body->'value' AS val
+            ho.body_value AS val
         FROM hivemind_app.operations_view ho
         WHERE ho.block_num BETWEEN _first_block AND _last_block
           AND ho.op_type_id = 18
@@ -514,11 +514,11 @@ BEGIN
         individual fields are populated. For all other ops, body contains the
         inner 'value' payload and the field columns are NULL.
 
-        Uses a CTE so body_binary::jsonb->'value' is computed exactly once per row.
+        Uses a CTE so body_value is computed exactly once per row.
     */
     RETURN QUERY
         WITH op_values AS (
-            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body->'value' as val
+            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body_value as val
             FROM hivemind_app.operations_view ho
             WHERE ho.block_num BETWEEN _first_block AND _last_block
               AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
@@ -578,7 +578,7 @@ BEGIN
     */
     RETURN QUERY
         WITH op_values AS (
-            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body->'value' as val
+            SELECT ho.id, ho.block_num, ho.op_type_id, ho.body_value as val
             FROM hivemind_app.operations_view ho
             WHERE ho.block_num BETWEEN _first_block AND _last_block
               AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43, 51,53,61,72,73)
