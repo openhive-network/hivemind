@@ -131,15 +131,15 @@ class OperationBase:
 
         sql = """
 INSERT INTO
-    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_binary, custom_json_type_id)
+    hafd.operations (id, trx_in_block, op_pos, op_type_id, body_value, custom_json_type_id)
 VALUES
-    (:id, -2, -2, :op_type_id, :body :: jsonb :: hafd.operation, :cj_type_id);
+    (:id, -2, -2, :op_type_id, :body_value :: jsonb, :cj_type_id);
 """
         Db.instance().query(
             sql=sql,
             id=OperationBase.operation_id,
             op_type_id=self.type.value,
-            body=json.dumps(self.body),
+            body_value=json.dumps(self.body.get('value', {})),
             cj_type_id=custom_json_type_id,
         )
 

@@ -22,7 +22,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
     block_num   INT NOT NULL,
     block_date  TIMESTAMP NOT NULL,
     op_type_id  SMALLINT NOT NULL,
-    val         JSONB                  -- body->'value' (pre-extracted)
+    val         JSONB                  -- body_value (pre-extracted inner payload)
 );
 
 -- Drop indexes if they exist (idempotent)
@@ -193,7 +193,7 @@ BEGIN
                THEN bd.created_at
                ELSE bd.prev_date
            END AS block_date,
-           ho.op_type_id, ho.body->'value'
+           ho.op_type_id, ho.body_value
     FROM hivemind_app.operations_view ho
     JOIN block_dates bd ON bd.num = ho.block_num
     WHERE ho.block_num BETWEEN _first_block AND _last_block
