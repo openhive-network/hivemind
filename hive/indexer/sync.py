@@ -462,8 +462,7 @@ class SyncHiveDb:
 
     def _get_active_db_connections(self):
         sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
-        active_connections = self._db.query_all(sql)
-        return active_connections
+        return self._db.query_col(sql)
 
     def _terminate_stale_connections(self):
         """Terminate lingering hivemind connections from previous crashed instances.

@@ -80,3 +80,12 @@ def test_list_input_from_psycopg2():
     assert r1 == r2
     assert hash(r1) == hash(r2)
     assert len({r1, r2}) == 1
+
+
+def test_nested_list_in_data():
+    """PostgreSQL array columns arrive as Python lists inside the row data."""
+    r = Row(('alice', [1, 2, 3]), ('name', 'tags'))
+    assert hash(r)  # must not raise TypeError
+    r2 = Row(('alice', [1, 2, 3]), ('name', 'tags'))
+    assert r == r2
+    assert len({r, r2}) == 1
