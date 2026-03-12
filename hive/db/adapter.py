@@ -39,7 +39,10 @@ class Row:
         return self._data == other._data and self._columns == other._columns
 
     def __hash__(self):
-        return hash((self._data, self._columns))
+        def _hashable(v):
+            return tuple(_hashable(i) for i in v) if isinstance(v, (list, dict)) else v
+
+        return hash((tuple(_hashable(v) for v in self._data), self._columns))
 
     @property
     def _mapping(self):
