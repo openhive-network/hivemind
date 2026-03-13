@@ -130,10 +130,8 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._follow_notification_events (
 -- but PostgreSQL's ::jsonb parser rejects literal control characters in strings.
 -- Re-escape them so the text is valid JSON again.
 --
--- Strip literal \u0000 sequences that ->> produces from null bytes in JSONB.
--- Uses HAF's C function hive.strip_json_null_escapes() which correctly
--- distinguishes \u0000 (strip) from \\u0000 (preserve, escaped backslash).
--- A naive replace() would corrupt \\u0000 into \- (invalid JSON).
+-- Note: \u0000 stripping is no longer needed — HAF now strips null bytes
+-- at storage time via strip_json_null_escapes() in the C COPY serializer.
 --
 -- This is a pure SQL function (no PL/pgSQL EXCEPTION handler) for performance:
 -- avoids subtransaction overhead per call (~36% faster in benchmarks).
@@ -144,7 +142,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.safe_parse_jsonb(_text TEXT)
 RETURNS JSONB AS $function$
     SELECT CASE WHEN _text IS NULL THEN NULL ELSE
         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-            hive.strip_json_null_escapes(_text),
+            _text,
         E'\b', '\b'), E'\f', '\f'), E'\n', '\n'), E'\r', '\r'), E'\t', '\t')::jsonb
     END
 $function$ LANGUAGE sql IMMUTABLE;
@@ -156,7 +154,11 @@ RETURNS JSONB AS $function$
 BEGIN
     IF _text IS NULL THEN RETURN NULL; END IF;
     RETURN REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+<<<<<<< HEAD
         hive.strip_json_null_escapes(_text),
+=======
+        _text,
+>>>>>>> e80a32d7e (Remove dead live-sync code and redundant null-byte stripping)
     E'\b', '\b'), E'\f', '\f'), E'\n', '\n'), E'\r', '\r'), E'\t', '\t')::jsonb;
 EXCEPTION WHEN OTHERS THEN
     RETURN NULL;
