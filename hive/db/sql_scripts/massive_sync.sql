@@ -2563,38 +2563,3 @@ END
 $function$ LANGUAGE plpgsql VOLATILE;
 
 
--- ============================================================================
--- Server-side wrapper: process_batch_phases_1_to_3a
--- Runs Phases 1 through 3a in a single function call, eliminating ~8
--- Python→DB round-trips (START TRANSACTION/COMMIT pairs for each sub-phase).
--- Within a single function, all statements share the same snapshot and can
--- see each other's writes without explicit COMMIT.
--- Returns the post_staging_result set needed by Python for body merging.
--- ============================================================================
-
-CREATE OR REPLACE FUNCTION hivemind_app.process_batch_phases_1_to_3a(
-    _first_block INT,
-    _last_block INT,
-    _community_support_start_block INT
-) RETURNS SETOF hivemind_app.post_staging_result AS $function$
-BEGIN
-    -- Phase 1: Load staging table
-    PERFORM hivemind_app.load_ops_staging(_first_block, _last_block);
-
-    -- Phase 2: Account registration
-    PERFORM hivemind_app.process_accounts_from_staging(_community_support_start_block);
-
-    -- Phase 2.5: Community state changes (subscribe, setRole, updateProps)
-    PERFORM hivemind_app.process_community_from_staging(_community_support_start_block, 1);
-
-    -- Phase 3: Post/comment processing
-    -- Must return results for Python body merging (Phase 3b)
-    RETURN QUERY SELECT * FROM hivemind_app.process_posts_from_staging(_community_support_start_block);
-
-    -- Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost)
-    PERFORM hivemind_app.process_community_from_staging(_community_support_start_block, 2);
-
-    -- Phase 3a continued: Propagate MUTED_PARENT to children of newly-muted posts
-    PERFORM hivemind_app.propagate_muted_parent_for_batch(_first_block, _last_block);
-END
-$function$ LANGUAGE plpgsql VOLATILE;
