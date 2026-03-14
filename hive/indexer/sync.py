@@ -106,6 +106,9 @@ class SyncHiveDb:
         # Check for unfinished batch from prior crash
         self._replay_crashed_batch()
 
+        # Detect data loss from UNLOGGED tables after a PostgreSQL crash
+        self._check_unlogged_data_consistency()
+
         def report_enter_to_stage(current_stage) -> bool:
             if (
                 report_enter_to_stage.prev_application_stage is None
@@ -233,6 +236,102 @@ class SyncHiveDb:
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
         log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
+
+    def _check_unlogged_data_consistency(self):
+        """Detect and recover from UNLOGGED table data loss after a PostgreSQL crash.
+
+        During massive sync, hivemind converts several tables (hive_accounts,
+        hive_posts, hive_votes, etc.) to UNLOGGED for write performance. If
+        PostgreSQL crashes while these tables are UNLOGGED, crash recovery
+        truncates them — but the HAF context (in a LOGGED table) survives,
+        creating a mismatch: the context says "processed up to block N" while
+        the data tables are empty.
+
+        Detection: the seed account with id=0 is inserted during initial schema
+        setup and is never deleted during normal operation. If it's missing AND
+        the context is ahead of last_completed_block, data was lost.
+
+        Recovery: truncate all data tables, reset the HAF context to block 0,
+        re-insert seed data, and let the sync restart from the beginning.
+        """
+        context_block = Blocks.last_imported()
+        completed_block = Blocks.last_completed()
+
+        if context_block <= completed_block:
+            return
+
+        has_seed_account = self._db.query_one(f"SELECT EXISTS(SELECT 1 FROM {SCHEMA_NAME}.hive_accounts WHERE id = 0)")
+        if has_seed_account:
+            return
+
+        log.warning(
+            "UNLOGGED table data loss detected: HAF context at block %d but seed "
+            "account missing (last_completed_block=%d). This typically happens when "
+            "PostgreSQL crashes while hivemind tables are UNLOGGED during massive sync. "
+            "Resetting all data and restarting sync from block 0.",
+            context_block,
+            completed_block,
+        )
+
+        # All hivemind data tables — order matters for FK constraints:
+        # dependent tables first, then referenced tables.
+        data_tables = [
+            'hive_notification_cache',
+            'hive_feed_cache',
+            'hive_reblogs',
+            'hive_mentions',
+            'hive_post_tags',
+            'hive_votes',
+            'hive_post_data',
+            'hive_roles',
+            'hive_subscriptions',
+            'follows',
+            'muted',
+            'blacklisted',
+            'follow_muted',
+            'follow_blacklisted',
+            'hive_posts',
+            'hive_communities',
+            'hive_accounts',
+            'hive_permlink_data',
+            'hive_category_data',
+            'hive_tag_data',
+            # Staging/internal tables
+            '_batch_queue',
+            '_ops_staging',
+            '_comment_staging',
+            '_post_results',
+            '_vote_batch',
+            '_reblog_ops',
+            '_reblog_final',
+            '_follow_notification_events',
+        ]
+
+        self._db.query_no_return("START TRANSACTION")
+
+        for table in data_tables:
+            self._db.query_no_return(f"TRUNCATE {SCHEMA_NAME}.{table} CASCADE")
+
+        # Reset hive_state to initial values
+        self._db.query_no_return(f"TRUNCATE {SCHEMA_NAME}.hive_state")
+
+        self._db.query_no_return("COMMIT")
+
+        # Reset the HAF context to block 0
+        from hive.indexer.hive_db.haf_functions import prepare_app_context
+
+        self._db.query_no_return(f"SELECT hive.app_remove_context('{SCHEMA_NAME}')")
+        prepare_app_context(self._db)
+
+        # Re-insert seed data
+        from hive.db.schema import insert_seed_data
+
+        insert_seed_data(self._db)
+
+        log.info(
+            "Data recovery complete. All tables truncated, context reset to block 0, "
+            "seed data re-inserted. Sync will restart from the beginning."
+        )
 
     def _wait_for_massive_consume(self):
         if self._massive_consume_blocks_futures is None:

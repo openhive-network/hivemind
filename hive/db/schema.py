@@ -44,6 +44,41 @@ def _try_create_extension(db, ext_name):
         return False
 
 
+def insert_seed_data(db):
+    """Insert the minimal seed rows required for hivemind to operate.
+
+    These rows must exist before any block processing starts:
+    - hive_state: tracks sync progress (last_completed_block_num = 1)
+    - permlink/category/tag ID 0: sentinel empty-string rows
+    - accounts 0-4: system accounts (empty, miners, null, temp, initminer)
+    - post ID 0: sentinel root post
+    """
+    sqls = [
+        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_completed_block_num, db_version, hivemind_git_rev, hivemind_git_date, hivemind_version)"
+        f" VALUES (1, 0, '{GIT_REVISION}', '{GIT_DATE}', '{VERSION}')"
+        f" ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"""
+        INSERT INTO
+            {SCHEMA_NAME}.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
+                community_id, created_at, depth, block_num, block_num_created
+            )
+        VALUES
+            (0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0)
+        ON CONFLICT DO NOTHING;
+        """,
+    ]
+    for sql in sqls:
+        db.query(sql)
+
+
 def setup(db, admin_db):
     """Creates all tables and seed data"""
 
@@ -122,27 +157,8 @@ def setup(db, admin_db):
     set_fillfactor(db)
 
     # default rows
-    sqls = [
-        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_completed_block_num, db_version, hivemind_git_rev, hivemind_git_date, hivemind_version) VALUES (1, 0, '{GIT_REVISION}', '{GIT_DATE}', '{VERSION}')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
-        f"""
-        INSERT INTO
-            {SCHEMA_NAME}.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
-                community_id, created_at, depth, block_num, block_num_created
-            )
-        VALUES
-            (0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0);
-        """,
-    ]
-    for sql in sqls:
-        db.query(sql)
+    insert_seed_data(db)
+    db.query(f"UPDATE {SCHEMA_NAME}.hive_state SET db_version = 0")
 
     sql = f"CREATE INDEX hive_communities_ft1 ON {SCHEMA_NAME}.hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
@@ -418,7 +434,7 @@ def set_logged_table_attribute(db, logged):
     # Phase 1: small tables with FKs referencing tables in phase 2.
     # Must be converted first when going to UNLOGGED, last when going to LOGGED.
     fk_dependent_tables = [
-        'hive_reblogs',   # FKs to hive_accounts, hive_posts
+        'hive_reblogs',  # FKs to hive_accounts, hive_posts
         'hive_mentions',  # FKs to hive_posts, hive_accounts
     ]
 
