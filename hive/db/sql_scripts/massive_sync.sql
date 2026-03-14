@@ -154,11 +154,7 @@ RETURNS JSONB AS $function$
 BEGIN
     IF _text IS NULL THEN RETURN NULL; END IF;
     RETURN REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-<<<<<<< HEAD
-        hive.strip_json_null_escapes(_text),
-=======
         _text,
->>>>>>> e80a32d7e (Remove dead live-sync code and redundant null-byte stripping)
     E'\b', '\b'), E'\f', '\f'), E'\n', '\n'), E'\r', '\r'), E'\t', '\t')::jsonb;
 EXCEPTION WHEN OTHERS THEN
     RETURN NULL;
