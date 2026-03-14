@@ -98,6 +98,11 @@ class SyncHiveDb:
         ensure_custom_json_type_index(self._db)
         Blocks.set_head_date()
 
+        # Kill leftover connections from previous process before opening new ones.
+        # Must run before _replay_crashed_batch, which calls setup_own_db_access
+        # to open flush connections — otherwise we'd kill our own fresh connections.
+        self._terminate_stale_connections()
+
         # Check for unfinished batch from prior crash
         self._replay_crashed_batch()
 
@@ -118,7 +123,6 @@ class SyncHiveDb:
         report_enter_to_stage.prev_application_stage = None
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
-        self._terminate_stale_connections()
         active_connections_before = self._get_active_db_connections()
         SyncHiveDb.time_start = OPSM.start()
 
