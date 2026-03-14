@@ -8,7 +8,6 @@ services:
     entrypoint: /home/haf_admin/docker_entrypoint.sh
     command: ["--skip-hived"]
     environment:
-      HIVED_UID: ${HIVED_UID:-}
       DATADIR: /home/hived/datadir
       SHM_DIR: /home/hived/shm_dir
       PGCTLTIMEOUT: 600

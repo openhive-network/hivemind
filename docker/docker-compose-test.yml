@@ -9,7 +9,6 @@ services:
     entrypoint: /home/haf_admin/docker_entrypoint.sh
     command: ["--skip-hived"]
     environment:
-      HIVED_UID: ${HIVED_UID:-}
       DATADIR: /home/hived/datadir
       # For hivemind, SHM_DIR is inside datadir/blockchain (contains shared_memory.bin)
       SHM_DIR: /home/hived/datadir/blockchain
