@@ -39,7 +39,11 @@ if [[ -n "$HAFAH_COMMIT" ]]; then
     sudo rm -rf hafah 2>/dev/null || rm -rf hafah || true
     git clone --no-checkout "$HAFAH_URL" hafah
     cd hafah
-    git checkout "$HAFAH_COMMIT"
+    git checkout "$HAFAH_COMMIT" 2>/dev/null || {
+        echo "Commit not in default branch, fetching all refs..."
+        git fetch --all
+        git checkout "$HAFAH_COMMIT"
+    }
     cd ..
 else
     echo "Skipping hafah (not a submodule in this tree)"
