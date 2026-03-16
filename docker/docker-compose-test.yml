@@ -6,7 +6,7 @@ name: 'hivemind-test'
 services:
   haf:
     image: ${HAF_IMAGE_NAME:-registry.gitlab.syncad.com/hive/haf:latest}
-    entrypoint: /home/haf_admin/docker_entrypoint.sh
+    entrypoint: /home/hived/docker_entrypoint.sh
     command: ["--skip-hived"]
     environment:
       DATADIR: /home/hived/datadir
