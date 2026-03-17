@@ -422,8 +422,8 @@ find_haf_image:
   extends: .find_haf_image
   stage: detect
   variables:
-    UPSTREAM_BRANCH: "feature/body-value-migration"
-    HAF_PATTERNS_REF: "feature/body-value-migration"
+    UPSTREAM_BRANCH: "feature/timescaledb-compression-bodyval"
+    HAF_PATTERNS_REF: "feature/timescaledb-compression-bodyval"
 
 # Build base images if they're missing from registry
 prepare_base_images:
