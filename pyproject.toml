@@ -7,6 +7,14 @@ requires = [
 ]
 
 
+[tool.versioningit.vcs]
+method = "git"
+default-tag = "0.0.0"
+
+[tool.versioningit.tag2version]
+rmprefix = "v"
+regex = '(?:v)?(?P<version>\d+\.\d+\.\d+.*)$'
+
 [tool.versioningit.write]
 file = 'hive/_version.py'
 template = """
