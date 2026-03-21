@@ -146,6 +146,7 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/scripts /home/
 # Fetch HAF scripts from common-ci-configuration (no submodule needed)
 ADD --chown=hivemind:hivemind --chmod=755 https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}/haf-app-tools/scripts/create_haf_app_role.sh /home/hivemind/haf/scripts/create_haf_app_role.sh
 ADD --chown=hivemind:hivemind --chmod=755 https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}/haf-app-tools/scripts/common.sh /home/hivemind/haf/scripts/common.sh
+ADD --chmod=755 https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}/haf-app-tools/scripts/run_with_reconnect.sh /usr/local/bin/run_with_reconnect.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
 # No --exclude needed: reputation_tracker and hafah no longer have nested HAF submodules
