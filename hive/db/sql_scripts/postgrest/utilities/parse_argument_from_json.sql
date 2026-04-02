@@ -64,7 +64,7 @@ BEGIN
   END CASE;
 
   IF _value IS NULL OR _value != floor(_value) THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(FORMAT('Invalid input for integer: parameter %s must be an integer or a float with zero fractional part, but received value ''%s''.', _arg_number, _params->>_arg_number));
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(FORMAT('Invalid input for integer: parameter %s must be an integer or a float with zero fractional part, but received value ''%s''.', _arg_name, _params->>_arg_name));
   END IF;
 
   RETURN floor(_value)::INTEGER;
@@ -115,7 +115,7 @@ BEGIN
   END CASE;
 
   IF _value IS NULL OR _value != floor(_value) THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(FORMAT('Invalid input for bigint: parameter %s must be an integer or a float with zero fractional part, but received value ''%s''.', _arg_number, _params->>_arg_number));
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(FORMAT('Invalid input for bigint: parameter %s must be an integer or a float with zero fractional part, but received value ''%s''.', _arg_name, _params->>_arg_name));
   END IF;
 
   RETURN floor(_value)::BIGINT;
