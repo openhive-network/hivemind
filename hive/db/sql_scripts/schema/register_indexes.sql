@@ -19,6 +19,7 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx ON hivemind_app.hive_posts (payout_at)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_idx ON hivemind_app.hive_posts (sc_trend, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_idx ON hivemind_app.hive_posts (sc_hot, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_sc_rising_id_idx ON hivemind_app.hive_posts (sc_rising, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_block_num_created_idx ON hivemind_app.hive_posts (block_num_created)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts ((payout+pending_payout), id) WHERE NOT is_paidout AND counter_deleted = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_category_id_payout_plus_pending_payout_depth_idx ON hivemind_app.hive_posts (category_id, (payout+pending_payout), depth) WHERE NOT is_paidout AND counter_deleted = 0');

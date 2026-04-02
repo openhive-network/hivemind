@@ -574,6 +574,14 @@ class DbState:
             log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_rising_scores(cls, db):
+        with AutoDbDisposer(db, "finish_rising_scores") as db_mgr:
+            time_start = perf_counter()
+            sql = f"SELECT {SCHEMA_NAME}.initialize_rising_scores();"
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            log.info("[MASSIVE] initialize_rising_scores executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
@@ -706,6 +714,7 @@ class DbState:
                 ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
                 ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
                 ('muted_parents', cls._finish_muted_parents, [cls.db()]),
+                ('rising_scores', cls._finish_rising_scores, [cls.db()]),
             ]
         # BM25 index creation is deferred from the index phase to here, running in
         # parallel with the fills above. Takes ~31min but is hidden inside Part 0

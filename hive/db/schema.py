@@ -211,6 +211,7 @@ def setup_runtime_code(db):
         "hot_and_trends.sql",
         "update_hive_posts_children_count.sql",
         "update_posts_rshares.sql",
+        "update_rising_score.sql",
         "update_hive_post_root_id.sql",
         "delete_reblog_feed_cache.sql",
         "is_superuser.sql",

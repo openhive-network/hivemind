@@ -518,6 +518,10 @@ class Blocks:
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
             update_communities_posts_and_rank(db=DbAdapterHolder.common_block_processing_db())
+            log.info("[SINGLE] updating rising scores")
+            DbAdapterHolder.common_block_processing_db().query_no_return(
+                f"SELECT {SCHEMA_NAME}.update_rising_scores()"
+            )
 
     @staticmethod
     @time_it

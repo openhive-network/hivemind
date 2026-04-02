@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_posts (
     is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
     sc_trend REAL NOT NULL DEFAULT 0,
     sc_hot REAL NOT NULL DEFAULT 0,
+    sc_rising REAL NOT NULL DEFAULT 0,
+    rshares_snapshot NUMERIC NOT NULL DEFAULT 0,
+    snapshot_at TIMESTAMP NOT NULL DEFAULT '1970-01-01',
     total_payout_value VARCHAR(30) NOT NULL DEFAULT '0.000 HBD',
     author_rewards BIGINT NOT NULL DEFAULT 0,
     author_rewards_hive BIGINT NOT NULL DEFAULT 0,
@@ -79,6 +82,7 @@ CREATE INDEX IF NOT EXISTS hive_posts_community_id_not_is_paidout_idx ON hivemin
 CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx ON hivemind_app.hive_posts (payout_at);
 CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_idx ON hivemind_app.hive_posts (sc_trend, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0;
 CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_idx ON hivemind_app.hive_posts (sc_hot, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0;
+CREATE INDEX IF NOT EXISTS hive_posts_sc_rising_id_idx ON hivemind_app.hive_posts (sc_rising, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0;
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_id_idx ON hivemind_app.hive_posts (author_id DESC, created_at DESC, id);
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_idx ON hivemind_app.hive_posts (author_id, id DESC) WHERE counter_deleted = 0;
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_depth0_idx ON hivemind_app.hive_posts (author_id, id DESC) WHERE depth = 0 AND counter_deleted = 0;

@@ -51,4 +51,10 @@ ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_version TE
 -- Crash recovery: high-water mark for payout idempotency
 ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS last_payout_block INTEGER NOT NULL DEFAULT 0;
 
+-- Rising/velocity sort support
+ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS sc_rising REAL NOT NULL DEFAULT 0;
+ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS rshares_snapshot NUMERIC NOT NULL DEFAULT 0;
+ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS snapshot_at TIMESTAMP NOT NULL DEFAULT '1970-01-01';
+CREATE INDEX IF NOT EXISTS hive_posts_sc_rising_id_idx ON hivemind_app.hive_posts (sc_rising, id) WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0;
+
 RESET ROLE;

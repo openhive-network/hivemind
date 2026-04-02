@@ -1,5 +1,5 @@
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.ranked_post_sort_type CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'created', 'muted', 'payout', 'payout_comments');
+CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'created', 'muted', 'payout', 'payout_comments', 'rising');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_ranked_posts_for_communities;
 CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type, IN _muted_reasons_filter_mask INT DEFAULT NULL)
@@ -101,6 +101,7 @@ BEGIN
       WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
       WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
       WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask);
+      WHEN 'rising' THEN _result = _result || hivemind_postgrest_utilities.get_rising_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask);
     END CASE;
   END IF;
 
@@ -2373,6 +2374,265 @@ BEGIN
       LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, _observer_id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
+      LIMIT _limit
+    ) row
+  );
+
+  RETURN COALESCE(_result, '[]'::jsonb);
+END
+$$
+;
+
+-- =============================================
+-- Rising sort functions
+-- =============================================
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_rising_ranked_posts_for_communities;
+CREATE FUNCTION hivemind_postgrest_utilities.get_rising_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+_rising_limit FLOAT;
+_result JSONB;
+BEGIN
+  IF _post_id <> 0 AND (SELECT is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id LIMIT 1) THEN
+    _post_id = 0;
+  ELSE
+    SELECT sc_rising INTO _rising_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
+  END IF;
+
+  _result = (
+    SELECT jsonb_agg (
+    (
+      CASE
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+      END
+    )
+    ) FROM (
+      WITH -- get_rising_ranked_posts_for_communities
+      ranked_community_posts as
+      (
+        SELECT hp.id
+        FROM hivemind_app.live_posts_view hp
+        JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
+        WHERE
+          hc.name = _tag
+          AND NOT hp.is_paidout
+          AND NOT(_called_from_bridge_api AND hp.is_pinned)
+          AND (_post_id = 0 OR hp.sc_rising < _rising_limit OR ( hp.sc_rising = _rising_limit AND hp.id < _post_id ))
+          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
+        ORDER BY
+          hp.sc_rising DESC, hp.id DESC
+        LIMIT _limit
+      )
+      SELECT
+        hp.id, hp.author, hp.parent_author, hp.author_rep, hp.root_title, hp.beneficiaries,
+        hp.max_accepted_payout, hp.percent_hbd, hp.url, hp.permlink, hp.parent_permlink_or_category,
+        hp.title, hp.body, hp.category, hp.depth, hp.payout, hp.pending_payout, hp.payout_at,
+        hp.is_paidout, hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.abs_rshares,
+        hp.json, hp.is_hidden, hp.is_grayed, hp.total_votes, hp.sc_trend, hp.role_title,
+        hp.community_title, hp.role_id, hp.is_pinned, hp.curator_payout_value, hp.is_muted,
+        hp.source AS blacklists, hp.muted_reasons
+      FROM ranked_community_posts,
+      LATERAL hivemind_app.get_full_post_view_by_id(ranked_community_posts.id, _observer_id) hp
+      ORDER BY
+        hp.sc_rising DESC, hp.id DESC
+      LIMIT _limit
+    ) row
+  );
+
+  RETURN COALESCE(_result, '[]'::jsonb);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_rising_ranked_posts_for_tag;
+CREATE FUNCTION hivemind_postgrest_utilities.get_rising_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+set enable_sort=false
+AS
+$$
+DECLARE
+__rising_limit FLOAT;
+_tag_id INT;
+_result JSONB;
+BEGIN
+  _tag_id = hivemind_postgrest_utilities.find_tag_id( _tag, True );
+
+  IF _post_id <> 0 THEN
+    SELECT sc_rising INTO __rising_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+  END IF;
+
+  _result = (
+    WITH tag_posts AS MATERIALIZED -- get_rising_ranked_posts_for_tag
+    (
+    SELECT
+      hp.id
+    FROM hivemind_app.live_posts_view hp
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+    WHERE
+      hpt.tag_id = _tag_id AND NOT hp.is_paidout
+      AND (_post_id = 0 OR hp.sc_rising < __rising_limit OR (hp.sc_rising = __rising_limit AND hp.id < _post_id))
+      AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
+    ORDER BY
+      hp.sc_rising DESC, hp.id DESC
+    LIMIT _limit
+    )
+    ,supplemented_data AS MATERIALIZED
+    (
+    SELECT
+      hp.id, hp.author, hp.parent_author, hp.author_rep, hp.root_title, hp.beneficiaries,
+      hp.max_accepted_payout, hp.percent_hbd, hp.url, hp.permlink, hp.parent_permlink_or_category,
+      hp.title, hp.body, hp.category, hp.depth, hp.payout, hp.pending_payout, hp.payout_at,
+      hp.is_paidout, hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.abs_rshares,
+      hp.json, hp.is_hidden, hp.is_grayed, hp.total_votes, hp.sc_trend, hp.sc_rising, hp.role_title,
+      hp.community_title, hp.role_id, hp.is_pinned, hp.curator_payout_value, hp.is_muted,
+      hp.source AS blacklists, hp.muted_reasons
+    FROM tag_posts,
+    LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, _observer_id) hp
+    )
+    SELECT jsonb_agg (
+      CASE
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, sd, _truncate_body, NULL, sd.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, sd, _truncate_body, False)
+      END
+      ORDER BY sd.sc_rising DESC, sd.id DESC
+    )
+    FROM supplemented_data sd
+  );
+
+  RETURN COALESCE(_result, '[]'::jsonb);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_rising_ranked_posts_for_observer_communities;
+CREATE FUNCTION hivemind_postgrest_utilities.get_rising_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+_rising_limit FLOAT;
+_result JSONB;
+BEGIN
+  IF _post_id <> 0 THEN
+      SELECT sc_rising INTO _rising_limit FROM hivemind_app.hive_posts WHERE id = _post_id;
+  END IF;
+
+  _result = (
+    SELECT jsonb_agg (
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+    ) FROM (
+      WITH -- get_rising_ranked_posts_for_observer_communities
+      observer_posts as
+      (
+        SELECT
+          hp.id
+        FROM hivemind_app.live_posts_view hp
+        JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
+        WHERE hs.account_id = _observer_id
+          AND NOT hp.is_paidout
+          AND (_post_id = 0 OR hp.sc_rising < _rising_limit OR (hp.sc_rising = _rising_limit AND hp.id < _post_id))
+          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
+        ORDER BY
+          hp.sc_rising DESC, hp.id DESC
+        LIMIT _limit
+      )
+      SELECT
+        hp.id, hp.author, hp.parent_author, hp.author_rep, hp.root_title, hp.beneficiaries,
+        hp.max_accepted_payout, hp.percent_hbd, hp.url, hp.permlink, hp.parent_permlink_or_category,
+        hp.title, hp.body, hp.category, hp.depth, hp.payout, hp.pending_payout, hp.payout_at,
+        hp.is_paidout, hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.abs_rshares,
+        hp.json, hp.is_hidden, hp.is_grayed, hp.total_votes, hp.sc_trend, hp.role_title,
+        hp.community_title, hp.role_id, hp.is_pinned, hp.curator_payout_value, hp.is_muted,
+        hp.source AS blacklists, hp.muted_reasons
+      FROM observer_posts,
+      LATERAL hivemind_app.get_full_post_view_by_id(observer_posts.id, _observer_id) hp
+      ORDER BY
+        hp.sc_rising DESC, hp.id DESC
+      LIMIT _limit
+    ) row
+  );
+
+  RETURN COALESCE(_result, '[]'::jsonb);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_rising_ranked_posts;
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_rising_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+_rising_limit FLOAT;
+_result JSONB;
+BEGIN
+  IF _post_id <> 0 THEN
+    SELECT sc_rising INTO _rising_limit FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+  END IF;
+
+  _result = (
+    SELECT jsonb_agg (
+    (
+      CASE
+        WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
+        ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
+      END
+    )
+    ) FROM (
+      WITH -- get_all_rising_ranked_posts
+      all_posts as
+      (
+        SELECT
+          hp.id
+        FROM hivemind_app.live_posts_view hp
+        WHERE
+          NOT hp.is_paidout
+          AND (_post_id = 0 OR hp.sc_rising < _rising_limit OR (hp.sc_rising = _rising_limit AND hp.id < _post_id))
+          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+              OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
+                  AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
+                  AND NOT ((_muted_reasons_filter_mask & 16) != 0 AND EXISTS (SELECT 1 FROM hivemind_app.hive_roles WHERE account_id = hp.author_id AND community_id = hp.community_id AND role_id = -2))))
+        ORDER BY
+          hp.sc_rising DESC, hp.id DESC
+        LIMIT _limit
+      )
+      SELECT
+        hp.id, hp.author, hp.parent_author, hp.author_rep, hp.root_title, hp.beneficiaries,
+        hp.max_accepted_payout, hp.percent_hbd, hp.url, hp.permlink, hp.parent_permlink_or_category,
+        hp.title, hp.body, hp.category, hp.depth, hp.payout, hp.pending_payout, hp.payout_at,
+        hp.is_paidout, hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.abs_rshares,
+        hp.json, hp.is_hidden, hp.is_grayed, hp.total_votes, hp.sc_trend, hp.role_title,
+        hp.community_title, hp.role_id, hp.is_pinned, hp.curator_payout_value, hp.is_muted,
+        hp.source AS blacklists, hp.muted_reasons
+      FROM all_posts,
+      LATERAL hivemind_app.get_full_post_view_by_id(all_posts.id, _observer_id) hp
+      ORDER BY
+        hp.sc_rising DESC, hp.id DESC
       LIMIT _limit
     ) row
   );

@@ -48,7 +48,8 @@ BEGIN
     WHEN 'payout' THEN _sort_type = 'payout';
     WHEN 'payout_comments' THEN _sort_type = 'payout_comments';
     WHEN 'muted' THEN _sort_type = 'muted';
-    ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted');
+    WHEN 'rising' THEN _sort_type = 'rising';
+    ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted, rising');
   END CASE;
 
   IF _tag IS NULL OR _tag = '' OR _tag = 'all' THEN
@@ -59,6 +60,7 @@ BEGIN
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_all_muted_ranked_posts(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
+      WHEN 'rising' THEN RETURN hivemind_postgrest_utilities.get_all_rising_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
     END CASE;
   ELSIF _tag = 'my' THEN
     CASE _sort_type
@@ -68,6 +70,7 @@ BEGIN
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
+      WHEN 'rising' THEN RETURN hivemind_postgrest_utilities.get_rising_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
     END CASE;
   ELSIF hivemind_postgrest_utilities.check_community(_tag) THEN
     RETURN hivemind_postgrest_utilities.get_ranked_posts_for_communities(_post_id, _observer_id, _limit, 0, _tag, True, _sort_type, _muted_reasons_filter_mask);
@@ -79,6 +82,7 @@ BEGIN
       WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
       WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask);
+      WHEN 'rising' THEN RETURN hivemind_postgrest_utilities.get_rising_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
     END CASE;
   END IF;
 END
