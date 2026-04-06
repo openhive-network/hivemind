@@ -637,14 +637,22 @@ BEGIN
     -- Previous DISTINCT ON approach picked one row per account (highest op id).
     -- When the last op was type 10, it discarded the type 43's posting_json_metadata.
 
+    -- In Hive protocol, an empty string for json_metadata or
+    -- posting_json_metadata means "don't change this field"
+    -- (see metadata_plugin.cpp — the update is skipped when size() == 0).
+    -- Use FILTER + NULLIF to exclude empty values from aggregation so
+    -- that COALESCE in the UPDATE preserves the existing stored value.
+
     WITH deduped AS (
         SELECT
             s.val->>'account' AS account_name,
-            -- json_metadata: last value from either op type
-            (array_agg(COALESCE(s.val->>'json_metadata', '') ORDER BY s.id DESC))[1] AS json_metadata,
-            -- posting_json_metadata: last value from type 43 only (type 10 doesn't carry it)
-            (array_agg(COALESCE(s.val->>'posting_json_metadata', '') ORDER BY s.id DESC)
-                FILTER (WHERE s.op_type_id = 43))[1] AS posting_json_metadata
+            -- json_metadata: last non-empty value from either op type
+            (array_agg(s.val->>'json_metadata' ORDER BY s.id DESC)
+                FILTER (WHERE NULLIF(s.val->>'json_metadata', '') IS NOT NULL))[1] AS json_metadata,
+            -- posting_json_metadata: last non-empty value from type 43 only (type 10 doesn't carry it)
+            (array_agg(s.val->>'posting_json_metadata' ORDER BY s.id DESC)
+                FILTER (WHERE s.op_type_id = 43
+                    AND NULLIF(s.val->>'posting_json_metadata', '') IS NOT NULL))[1] AS posting_json_metadata
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (10, 43)
         GROUP BY s.val->>'account'
@@ -652,7 +660,7 @@ BEGIN
     UPDATE hivemind_app.hive_accounts ha
     SET
         posting_json_metadata = COALESCE(d.posting_json_metadata, ha.posting_json_metadata),
-        json_metadata = d.json_metadata
+        json_metadata = COALESCE(d.json_metadata, ha.json_metadata)
     FROM deduped d
     WHERE ha.name = d.account_name;
 
