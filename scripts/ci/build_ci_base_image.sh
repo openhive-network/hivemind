@@ -45,8 +45,10 @@ while [ $# -gt 0 ]; do
 done
 
 BUILD_OPTIONS=(
-  "--platform=linux/amd64" 
+  "--platform=linux/amd64"
   "--progress=plain"
+  "--build-arg" "PIP_INDEX_URL"
+  "--build-arg" "PIP_TRUSTED_HOST"
   )
 
 if [[ -n "${REGISTRY}" ]]; then

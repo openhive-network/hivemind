@@ -11,8 +11,12 @@ FROM --platform=$BUILDPLATFORM python:3.14-slim-bookworm as runtime
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG COMMON_CI_REF=develop
+ARG PIP_INDEX_URL
+ARG PIP_TRUSTED_HOST
 
 ENV LANG=en_US.UTF-8
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+ENV PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
 ENV TARGETPLATFORM=${TARGETPLATFORM}
 ENV BUILDPLATFORM=${BUILDPLATFORM}
 
@@ -22,6 +26,9 @@ ADD https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF
 RUN <<EOF
   set -e
   chmod +x /root/setup_os.sh
+
+  # Install auto-apt-proxy for automatic apt caching proxy detection (safe no-op when no proxy available)
+  apt update && apt install -y --no-install-recommends auto-apt-proxy && rm -rf /var/lib/apt/lists/*
 
   apt update && DEBIAN_FRONTEND=noniteractive apt install -y  \
     bash \
@@ -51,8 +58,12 @@ SHELL ["/bin/bash", "-c"]
 
 FROM runtime AS ci-base-image
 
+ARG PIP_INDEX_URL
+ARG PIP_TRUSTED_HOST
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+ENV PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}
 ENV LANG=en_US.UTF-8
-SHELL ["/bin/bash", "-c"] 
+SHELL ["/bin/bash", "-c"]
 
 RUN <<EOF
   set -e
