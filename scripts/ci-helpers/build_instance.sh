@@ -144,6 +144,7 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
+  --build-arg PIP_INDEX_URL --build-arg PIP_TRUSTED_HOST \
   "${MAIN_TAGS[@]}" \
   --file Dockerfile .
 echo "Done!"
@@ -157,6 +158,7 @@ docker buildx build "${TAG_BUILD_ARGS[@]}" \
   --build-arg GIT_LAST_LOG_MESSAGE="$GIT_LAST_LOG_MESSAGE" \
   --build-arg GIT_LAST_COMMITTER="$GIT_LAST_COMMITTER" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
+  --build-arg PIP_INDEX_URL --build-arg PIP_TRUSTED_HOST \
   "${REWRITER_TAGS[@]}" \
   --file Dockerfile.rewriter .
 echo "Done!"
