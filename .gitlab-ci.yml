@@ -15,15 +15,15 @@ include:
 - project: 'hive/common-ci-configuration'
   ref: develop
   file:
-    - '/templates/base.gitlab-ci.yml'
-    - '/templates/docker_image_jobs.gitlab-ci.yml'
-    - '/templates/haf_data_preparation.gitlab-ci.yml'
-    - '/templates/cache_cleanup.gitlab-ci.yml'
-    - '/templates/python_projects.gitlab-ci.yml'
-    - '/templates/npm_projects.gitlab-ci.yml'
-    - '/templates/test_jobs.gitlab-ci.yml'
-    - '/templates/haf_app_testing.gitlab-ci.yml'
-    - '/templates/source_change_detection.gitlab-ci.yml'
+  - '/templates/base.gitlab-ci.yml'
+  - '/templates/docker_image_jobs.gitlab-ci.yml'
+  - '/templates/haf_data_preparation.gitlab-ci.yml'
+  - '/templates/cache_cleanup.gitlab-ci.yml'
+  - '/templates/python_projects.gitlab-ci.yml'
+  - '/templates/npm_projects.gitlab-ci.yml'
+  - '/templates/test_jobs.gitlab-ci.yml'
+  - '/templates/haf_app_testing.gitlab-ci.yml'
+  - '/templates/source_change_detection.gitlab-ci.yml'
 
 variables:
   # Common CI configuration reference
@@ -138,50 +138,50 @@ default:
     pre_get_sources_script:
       # Clean corrupt git state left by cancelled pipelines (see GitLab #296638, #4600)
       # Wrapped in subshell to avoid changing working directory for subsequent git operations
-      - |
-        (
-        cd "${CI_PROJECT_DIR:-/builds}" 2>/dev/null || exit 0
-        echo "pre_get_sources: checking $(pwd) for corrupt git state"
-        if [ -d ".git" ]; then
-          # Remove stale lock files that block git operations
-          find .git -name "*.lock" -delete 2>/dev/null || true
+    - |
+      (
+      cd "${CI_PROJECT_DIR:-/builds}" 2>/dev/null || exit 0
+      echo "pre_get_sources: checking $(pwd) for corrupt git state"
+      if [ -d ".git" ]; then
+        # Remove stale lock files that block git operations
+        find .git -name "*.lock" -delete 2>/dev/null || true
 
-          # Check if main repo is corrupt - if so, remove .git to force fresh clone
-          if ! git rev-parse HEAD >/dev/null 2>&1; then
-            echo "pre_get_sources: main repository corrupt, forcing fresh clone"
-            rm -rf .git
-          else
-            # Main repo OK - check and clean corrupt submodules
-            # Check both the working dir and .git/modules/ since either can be corrupt
-            if [ -f ".gitmodules" ]; then
-              git config --file .gitmodules --get-regexp path 2>/dev/null | awk '{print $2}' | while read submod; do
-                needs_clean=false
-                [ -z "$submod" ] && continue
-                # Check if submodule working directory exists but is corrupt
-                if [ -d "$submod" ] && [ -f "$submod/.git" ]; then
-                  if ! git -C "$submod" rev-parse HEAD >/dev/null 2>&1; then
-                    needs_clean=true
-                  fi
-                fi
-                # Check if .git/modules exists but is corrupt (even if working dir is gone)
-                if [ -d ".git/modules/$submod" ]; then
-                  if ! git --git-dir=".git/modules/$submod" rev-parse HEAD >/dev/null 2>&1; then
-                    echo "pre_get_sources: $submod corrupt (rev-parse failed)"
-                    needs_clean=true
-                  fi
-                fi
-                if [ "$needs_clean" = true ]; then
-                  echo "pre_get_sources: cleaning corrupt submodule: $submod"
-                  rm -rf "$submod" ".git/modules/$submod"
-                fi
-              done
-            fi
-            echo "pre_get_sources: existing repo OK"
-          fi
+        # Check if main repo is corrupt - if so, remove .git to force fresh clone
+        if ! git rev-parse HEAD >/dev/null 2>&1; then
+          echo "pre_get_sources: main repository corrupt, forcing fresh clone"
+          rm -rf .git
         else
-          echo "pre_get_sources: no .git directory (fresh workspace)"
+          # Main repo OK - check and clean corrupt submodules
+          # Check both the working dir and .git/modules/ since either can be corrupt
+          if [ -f ".gitmodules" ]; then
+            git config --file .gitmodules --get-regexp path 2>/dev/null | awk '{print $2}' | while read submod; do
+              needs_clean=false
+              [ -z "$submod" ] && continue
+              # Check if submodule working directory exists but is corrupt
+              if [ -d "$submod" ] && [ -f "$submod/.git" ]; then
+                if ! git -C "$submod" rev-parse HEAD >/dev/null 2>&1; then
+                  needs_clean=true
+                fi
+              fi
+              # Check if .git/modules exists but is corrupt (even if working dir is gone)
+              if [ -d ".git/modules/$submod" ]; then
+                if ! git --git-dir=".git/modules/$submod" rev-parse HEAD >/dev/null 2>&1; then
+                  echo "pre_get_sources: $submod corrupt (rev-parse failed)"
+                  needs_clean=true
+                fi
+              fi
+              if [ "$needs_clean" = true ]; then
+                echo "pre_get_sources: cleaning corrupt submodule: $submod"
+                rm -rf "$submod" ".git/modules/$submod"
+              fi
+            done
+          fi
+          echo "pre_get_sources: existing repo OK"
         fi
-        )
+      else
+        echo "pre_get_sources: no .git directory (fresh workspace)"
+      fi
+      )
 
 # =============================================================================
 # Early exit for doc-only changes
@@ -191,22 +191,22 @@ default:
 # Note: QUICK_TEST=true overrides AUTO_SKIP - user explicitly wants tests to run.
 .early_exit_for_docs_only:
   script: &early_exit_check
-    - |
-      if [[ "${QUICK_TEST:-false}" == "true" ]]; then
-        echo "=== QUICK_TEST mode: running tests with cached data ==="
-      elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
-        echo "=== Skipping (docs/tests only change) ==="
-        echo "Only documentation, tests, or CI config files changed."
-        echo "No work needed - exiting with success."
-        exit 0
-      fi
+  - |
+    if [[ "${QUICK_TEST:-false}" == "true" ]]; then
+      echo "=== QUICK_TEST mode: running tests with cached data ==="
+    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+      echo "=== Skipping (docs/tests only change) ==="
+      echo "Only documentation, tests, or CI config files changed."
+      echo "No work needed - exiting with success."
+      exit 0
+    fi
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Manual submodule initialization (reputation_tracker, hafah, tests_api)
 .init_submodules:
-  before_script: &init_submodules
-    - ./scripts/ci/init-submodules.sh
+  before_script:
+  - ./scripts/ci/init-submodules.sh
 
 .shared_tags:
   tags: &shared_tags
@@ -220,23 +220,23 @@ default:
 
 # Use shared extract-test-cache.sh from common-ci-configuration
 # Maps FORCE_NFS_CACHE to FORCE_EXTRACT for debugging cache issues
-.extract-nfs-cache-before-script: &extract-nfs-cache-before-script
-  - |
-    LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
-    echo "Extracting hivemind sync cache to: ${LOCAL_CACHE}"
+.extract-nfs-cache-before-script:
+- |
+  LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+  echo "Extracting hivemind sync cache to: ${LOCAL_CACHE}"
 
-    # Fetch shared extract script from common-ci-configuration
-    EXTRACT_SCRIPT="/tmp/extract-test-cache.sh"
-    curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${CACHE_MANAGER_REF:-develop}/scripts/extract-test-cache.sh" -o "$EXTRACT_SCRIPT"
-    chmod +x "$EXTRACT_SCRIPT"
+  # Fetch shared extract script from common-ci-configuration
+  EXTRACT_SCRIPT="/tmp/extract-test-cache.sh"
+  curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${CACHE_MANAGER_REF:-develop}/scripts/extract-test-cache.sh" -o "$EXTRACT_SCRIPT"
+  chmod +x "$EXTRACT_SCRIPT"
 
-    # Map FORCE_NFS_CACHE to FORCE_EXTRACT for the shared script
-    export FORCE_EXTRACT="${FORCE_NFS_CACHE:-0}"
-    # Tell script to check if PostgreSQL is already running (prevents deleting data in use)
-    export POSTGRES_HOST="haf-instance"
+  # Map FORCE_NFS_CACHE to FORCE_EXTRACT for the shared script
+  export FORCE_EXTRACT="${FORCE_NFS_CACHE:-0}"
+  # Tell script to check if PostgreSQL is already running (prevents deleting data in use)
+  export POSTGRES_HOST="haf-instance"
 
-    # Run shared extraction script (handles marker files, cleanup, exact key match)
-    "$EXTRACT_SCRIPT" "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}"
+  # Run shared extraction script (handles marker files, cleanup, exact key match)
+  "$EXTRACT_SCRIPT" "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}"
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -359,70 +359,72 @@ detect_changes:
   after_script:
     # Additional detection for PostgREST-only changes
     # If all non-skip changes are in PostgREST directories, we can skip sync and reload SQL
-    - |
-      # Ensure git is available (after_script runs in fresh shell)
-      if ! command -v git &> /dev/null; then
-        apk add --no-cache git 2>/dev/null || apt-get update && apt-get install -y git 2>/dev/null || true
+  - |
+    # Ensure git is available (after_script runs in fresh shell)
+    if ! command -v git &> /dev/null; then
+      apk add --no-cache git 2>/dev/null || apt-get update && apt-get install -y git 2>/dev/null || true
+    fi
+
+    if [[ -f detect_changes.env ]]; then
+      # Source the existing detection results
+      source detect_changes.env
+
+      # If already marked as full skip (docs/tests only), don't override
+      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+        echo "Already marked for skip (docs/tests only) - no PostgREST detection needed"
+        exit 0
       fi
 
-      if [[ -f detect_changes.env ]]; then
-        # Source the existing detection results
-        source detect_changes.env
+      # Get changed files that aren't in the standard skip patterns
+      if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
+        BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+      elif [ "$CI_COMMIT_REF_NAME" = "develop" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
+        BASE_SHA="HEAD~1"
+      else
+        BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "HEAD~1")
+      fi
 
-        # If already marked as full skip (docs/tests only), don't override
-        if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
-          echo "Already marked for skip (docs/tests only) - no PostgREST detection needed"
-          exit 0
-        fi
+      CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
 
-        # Get changed files that aren't in the standard skip patterns
-        if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
-          BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
-        elif [ "$CI_COMMIT_REF_NAME" = "develop" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
-          BASE_SHA="HEAD~1"
+      # Filter out standard skip patterns
+      HAF_APP_SKIP_PATTERNS='^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+      NEEDS_WORK=$(echo "$CHANGED_FILES" | grep -vE "${HAF_APP_SKIP_PATTERNS}" || true)
+
+      if [ -n "$NEEDS_WORK" ]; then
+        # Check if ALL remaining changes are in PostgREST directories
+        POSTGREST_PATTERNS='^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
+        NON_POSTGREST_CHANGES=$(echo "$NEEDS_WORK" | grep -vE "$POSTGREST_PATTERNS" || true)
+
+        if [ -z "$NON_POSTGREST_CHANGES" ]; then
+          echo ""
+          echo "=== PostgREST-Only Change Detected ==="
+          echo "All code changes are in PostgREST/endpoint SQL files."
+          echo "Sync can be skipped - SQL functions will be reloaded on cached data."
+          echo ""
+          echo "Changed PostgREST files:"
+          echo "$NEEDS_WORK" | head -20
+
+          # Append to the dotenv file
+          echo "POSTGREST_ONLY_CHANGE=true" >> detect_changes.env
         else
-          BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "HEAD~1")
-        fi
-
-        CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
-
-        # Filter out standard skip patterns
-        HAF_APP_SKIP_PATTERNS='^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
-        NEEDS_WORK=$(echo "$CHANGED_FILES" | grep -vE "${HAF_APP_SKIP_PATTERNS}" || true)
-
-        if [ -n "$NEEDS_WORK" ]; then
-          # Check if ALL remaining changes are in PostgREST directories
-          POSTGREST_PATTERNS='^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
-          NON_POSTGREST_CHANGES=$(echo "$NEEDS_WORK" | grep -vE "$POSTGREST_PATTERNS" || true)
-
-          if [ -z "$NON_POSTGREST_CHANGES" ]; then
-            echo ""
-            echo "=== PostgREST-Only Change Detected ==="
-            echo "All code changes are in PostgREST/endpoint SQL files."
-            echo "Sync can be skipped - SQL functions will be reloaded on cached data."
-            echo ""
-            echo "Changed PostgREST files:"
-            echo "$NEEDS_WORK" | head -20
-
-            # Append to the dotenv file
-            echo "POSTGREST_ONLY_CHANGE=true" >> detect_changes.env
-          else
-            echo ""
-            echo "=== Non-PostgREST changes detected ==="
-            echo "Files requiring full sync:"
-            echo "$NON_POSTGREST_CHANGES" | head -20
-            echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
-          fi
-        else
+          echo ""
+          echo "=== Non-PostgREST changes detected ==="
+          echo "Files requiring full sync:"
+          echo "$NON_POSTGREST_CHANGES" | head -20
           echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
         fi
+      else
+        echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
       fi
+    fi
 
 find_haf_image:
   extends: .find_haf_image
   stage: detect
 
 # Build base images if they're missing from registry
+  variables:
+    UPSTREAM_BRANCH: test5
 prepare_base_images:
   stage: build
   extends: .docker_image_builder_job_template
@@ -441,9 +443,9 @@ prepare_haf_data:
     # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
   before_script:
     # Fetch config_5M.ini from common-ci-configuration (no submodule needed)
-    - curl -fsSL "${COMMON_CI_URL}/haf-app-tools/config/config_5M.ini" -o /tmp/config_5M.ini
+  - curl -fsSL "${COMMON_CI_URL}/haf-app-tools/config/config_5M.ini" -o /tmp/config_5M.ini
     # Log the mapped variables
-    - echo "Using HAF image:${HAF_IMAGE_NAME} (commit:${HAF_COMMIT})"
+  - echo "Using HAF image:${HAF_IMAGE_NAME} (commit:${HAF_COMMIT})"
   tags:
   - public-runner-docker
   - data-cache-storage
@@ -456,7 +458,7 @@ prepare_hivemind_image:
   - prepare_base_images
   before_script:
     # Initialize submodules (reputation_tracker, hafah, tests_api - no HAF needed)
-    - ./scripts/ci/init-submodules.sh
+  - ./scripts/ci/init-submodules.sh
   script:
   - *instance-build-script
   artifacts:
@@ -957,7 +959,8 @@ e2e_benchmark_on_postgrest:
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-test.yml"
-    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml --ansi never"
+    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml\
+      \ --ansi never"
     # Hivemind server config
     HIVEMIND_PORT: "8080"
     # Test config
