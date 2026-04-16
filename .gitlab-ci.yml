@@ -424,7 +424,7 @@ find_haf_image:
 
 # Build base images if they're missing from registry
   variables:
-    UPSTREAM_BRANCH: test5
+    UPSTREAM_BRANCH: 1.28.8-rc13
 prepare_base_images:
   stage: build
   extends: .docker_image_builder_job_template
@@ -959,8 +959,8 @@ e2e_benchmark_on_postgrest:
     DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
     COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-test.yml"
-    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml\
-      \ --ansi never"
+    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml
+      --ansi never"
     # Hivemind server config
     HIVEMIND_PORT: "8080"
     # Test config
@@ -1226,7 +1226,8 @@ Trigger benchmark-results-collector:
   - when: manual
     allow_failure: true
   variables:
-    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
+    ARTIFACTS_URL: 
+      https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
     #description:
     SOURCE: hivemind
