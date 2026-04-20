@@ -136,6 +136,11 @@ BEGIN
     ) AS x
     GROUP BY id
   ),
+  -- Pre-lock hive_accounts rows in id order to prevent deadlocks
+  locked AS (
+    SELECT ha.id FROM hivemind_app.hive_accounts ha
+    JOIN counts c ON ha.id = c.id ORDER BY ha.id FOR UPDATE
+  ),
   accounts_updates AS (
     UPDATE hivemind_app.hive_accounts AS ha
     SET following = following + fc.following_inserted,
@@ -189,6 +194,11 @@ BEGIN
     ) AS x
     GROUP BY id
   ),
+  -- Pre-lock hive_accounts rows in id order to prevent deadlocks
+  locked AS (
+    SELECT ha.id FROM hivemind_app.hive_accounts ha
+    JOIN counts c ON ha.id = c.id ORDER BY ha.id FOR UPDATE
+  ),
   accounts_updates AS (
     UPDATE hivemind_app.hive_accounts AS ha
     SET following = following - fc.following_deleted,
@@ -236,6 +246,11 @@ BEGIN
       FROM following_counts
     ) AS x
     GROUP BY id
+  ),
+  -- Pre-lock hive_accounts rows in id order to prevent deadlocks
+  locked AS (
+    SELECT ha.id FROM hivemind_app.hive_accounts ha
+    JOIN counts c ON ha.id = c.id ORDER BY ha.id FOR UPDATE
   ),
   accounts_updates AS (
     UPDATE hivemind_app.hive_accounts AS ha

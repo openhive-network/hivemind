@@ -643,6 +643,8 @@ BEGIN
     -- Use FILTER + NULLIF to exclude empty values from aggregation so
     -- that COALESCE in the UPDATE preserves the existing stored value.
 
+    -- Deterministic lock order (by id) prevents deadlocks with concurrent
+    -- transactions that also update hive_accounts (e.g. process_follows_for_blocks).
     WITH deduped AS (
         SELECT
             s.val->>'account' AS account_name,
@@ -656,6 +658,10 @@ BEGIN
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (10, 43)
         GROUP BY s.val->>'account'
+    ),
+    locked AS (
+        SELECT ha.id FROM hivemind_app.hive_accounts ha
+        JOIN deduped d ON ha.name = d.account_name ORDER BY ha.id FOR UPDATE
     )
     UPDATE hivemind_app.hive_accounts ha
     SET
@@ -724,6 +730,12 @@ BEGIN
         FROM parsed
         WHERE read_date IS NOT NULL
         ORDER BY account, id DESC
+    ),
+    -- Deterministic lock order (by id) prevents deadlocks with concurrent
+    -- transactions that also update hive_accounts.
+    locked AS (
+        SELECT ha.id FROM hivemind_app.hive_accounts ha
+        JOIN deduped d ON ha.name = d.account ORDER BY ha.id FOR UPDATE
     )
     UPDATE hivemind_app.hive_accounts ha
     SET lastread_at = d.read_date
