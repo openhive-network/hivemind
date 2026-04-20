@@ -2,7 +2,9 @@
 
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from time import perf_counter
+from time import perf_counter, sleep
+
+import psycopg2.extensions
 
 from hive.conf import ONE_WEEK_IN_BLOCKS, SCHEMA_NAME, Conf
 from hive.db.adapter import Db
@@ -242,34 +244,58 @@ class Blocks:
             (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
         ]
 
-        # Launch Phase 4 SQL tasks in background threads
-        pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
-        futures = []
+        # Launch Phase 4 SQL tasks in background threads with deadlock retry.
+        # PostgreSQL detects deadlocks and aborts one transaction with error 40P01
+        # (psycopg2.extensions.TransactionRollbackError). We retry the entire
+        # parallel set because the rolled-back transaction's temp tables / state
+        # are gone and other transactions may have committed partial results that
+        # the retried batch will skip via idempotency guards.
+        MAX_DEADLOCK_RETRIES = 3
 
-        def run_one_task(db_conn, sql):
-            db_conn.query_no_return("START TRANSACTION")
-            try:
-                db_conn.query_all_raw(sql)
-                db_conn.query_no_return("COMMIT")
-            except Exception:
+        # Phase 3b: Process post results on main thread (overlapped with first attempt)
+        cache_merged = False
+
+        for attempt in range(1, MAX_DEADLOCK_RETRIES + 1):
+            pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
+            futures = []
+
+            def run_one_task(db_conn, sql):
+                db_conn.query_no_return("START TRANSACTION")
                 try:
-                    db_conn.query_no_return("ROLLBACK")
+                    db_conn.query_all_raw(sql)
+                    db_conn.query_no_return("COMMIT")
                 except Exception:
-                    pass
-                raise
+                    try:
+                        db_conn.query_no_return("ROLLBACK")
+                    except Exception:
+                        pass
+                    raise
 
-        for db_conn, sql in phase4_tasks:
-            futures.append(pool.submit(run_one_task, db_conn, sql))
+            for db_conn, sql in phase4_tasks:
+                futures.append(pool.submit(run_one_task, db_conn, sql))
 
-        # Phase 3b: Process post results on main thread while Phase 4 runs in parallel
-        t0_cache = perf_counter()
-        cls._process_post_results_for_cache(post_results)
-        phase_times['cache_merge'] = perf_counter() - t0_cache
+            if not cache_merged:
+                t0_cache = perf_counter()
+                cls._process_post_results_for_cache(post_results)
+                phase_times['cache_merge'] = perf_counter() - t0_cache
+                cache_merged = True
 
-        # Wait for all Phase 4 tasks to complete
-        for f in futures:
-            f.result()
-        pool.shutdown(wait=False)
+            try:
+                for f in futures:
+                    f.result()
+                pool.shutdown(wait=False)
+                break
+            except psycopg2.extensions.TransactionRollbackError:
+                pool.shutdown(wait=False)
+                if attempt == MAX_DEADLOCK_RETRIES:
+                    log.error("Phase 4 deadlock persisted after %d attempts", MAX_DEADLOCK_RETRIES)
+                    raise
+                log.warning(
+                    "Phase 4 deadlock detected (attempt %d/%d), retrying after brief pause",
+                    attempt,
+                    MAX_DEADLOCK_RETRIES,
+                )
+                sleep(0.1 * attempt)
 
         # Phase 4b: Account metadata + lastread (must run AFTER follows to avoid
         # deadlocks on hive_accounts — all three UPDATE the same table).
@@ -436,11 +462,12 @@ class Blocks:
             PostDataCache.add_data(post_id, post_data, is_new)
 
     @staticmethod
-    def _run_parallel_sql(tasks):
+    def _run_parallel_sql(tasks, max_retries=3):
         """Run multiple SQL functions in parallel on separate DB connections.
 
         Each task is a (db_connection, sql_string) tuple. Each function runs
-        in its own transaction on its own connection.
+        in its own transaction on its own connection. Retries the whole set on
+        deadlock (PostgreSQL error 40P01).
         """
 
         def run_one(db_conn, sql):
@@ -460,10 +487,23 @@ class Blocks:
                 run_one(db_conn, sql)
             return
 
-        with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
-            futures = [pool.submit(run_one, db_conn, sql) for db_conn, sql in tasks]
-            for f in futures:
-                f.result()  # Raises any exceptions from threads
+        for attempt in range(1, max_retries + 1):
+            try:
+                with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
+                    futures = [pool.submit(run_one, db_conn, sql) for db_conn, sql in tasks]
+                    for f in futures:
+                        f.result()
+                return
+            except psycopg2.extensions.TransactionRollbackError:
+                if attempt == max_retries:
+                    log.error("Parallel SQL deadlock persisted after %d attempts", max_retries)
+                    raise
+                log.warning(
+                    "Parallel SQL deadlock detected (attempt %d/%d), retrying",
+                    attempt,
+                    max_retries,
+                )
+                sleep(0.1 * attempt)
 
     @classmethod
     def _periodic_actions_by_num(cls, block_num: int) -> None:
