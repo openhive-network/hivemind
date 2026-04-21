@@ -5,8 +5,10 @@
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import Optional
+
+import psycopg2.extensions
 
 import hive.db.schema as schema_module
 from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME, SCHEMA_OWNER_NAME, SWAGGER_URL
@@ -63,6 +65,39 @@ class DbState:
         'hive_reblogs',
         'hive_mentions',
     ]
+
+    # Max retries for DDL operations that can deadlock with other HAF apps
+    # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
+    _DDL_MAX_RETRIES = 5
+
+    @staticmethod
+    def _retry_ddl(fn, description, max_retries=None):
+        """Retry a DDL operation that may deadlock with other HAF apps.
+
+        Other apps (proxy-whitelist, block explorer, etc.) may hold read locks
+        on hivemind tables while hivemind needs AccessExclusiveLock for DDL
+        (FK drop/restore, index drop/restore). These cross-app deadlocks are
+        expected and transient — the other app's transaction will finish
+        shortly.  The DDL operations are idempotent (already-dropped FKs are
+        no-ops), so retrying is safe.
+        """
+        if max_retries is None:
+            max_retries = DbState._DDL_MAX_RETRIES
+        for attempt in range(1, max_retries + 1):
+            try:
+                fn()
+                return
+            except psycopg2.extensions.TransactionRollbackError:
+                if attempt == max_retries:
+                    log.error("DDL deadlock persisted after %d attempts: %s", max_retries, description)
+                    raise
+                log.warning(
+                    "DDL deadlock on %s (attempt %d/%d), retrying after backoff",
+                    description,
+                    attempt,
+                    max_retries,
+                )
+                sleep(1.0 * attempt)
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -186,7 +221,10 @@ class DbState:
         """Drop all HAF-registered indexes for the hivemind_app context."""
         log.info("[MASSIVE] Dropping all registered indexes")
         time_start = perf_counter()
-        cls.db().query_no_return("SELECT hive.app_save_and_drop_indexes('hivemind_app')")
+        cls._retry_ddl(
+            lambda: cls.db().query_no_return("SELECT hive.app_save_and_drop_indexes('hivemind_app')"),
+            "drop all registered indexes",
+        )
         log.info("[MASSIVE] Dropped all registered indexes in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -195,7 +233,12 @@ class DbState:
         with AutoDbDisposer(db, f'restore_idx_{full_table_name}') as db_mgr:
             log.info("[MASSIVE] Restoring indexes for %s", full_table_name)
             time_start = perf_counter()
-            db_mgr.db.query_no_return(f"SELECT hive.app_restore_indexes('hivemind_app', '{full_table_name}')")
+            cls._retry_ddl(
+                lambda: db_mgr.db.query_no_return(
+                    f"SELECT hive.app_restore_indexes('hivemind_app', '{full_table_name}')"
+                ),
+                f"restore indexes on {full_table_name}",
+            )
             log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
 
     @classmethod
@@ -263,7 +306,7 @@ class DbState:
         log.info("=== CREATING INDEXES ===")
         threads_time = FOSM.log_current("Total CREATING indexes time")
         log.info(
-            f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s"
+            f"Elapsed time: {real_time:.4f}s. Calculated elapsed time: {threads_time:.4f}s. Difference: {real_time - threads_time:.4f}s"
         )
         FOSM.clear()
         log.info("=== CREATING INDEXES ===")
@@ -380,8 +423,11 @@ class DbState:
         log.info("Dropping foreign keys")
         time_start = perf_counter()
         for table in cls._TABLES_WITH_FKS:
-            cls.db().query_no_return(
-                f"SELECT hive.app_save_and_drop_foreign_keys('hivemind_app', '{SCHEMA_NAME}', '{table}')"
+            cls._retry_ddl(
+                lambda t=table: cls.db().query_no_return(
+                    f"SELECT hive.app_save_and_drop_foreign_keys('hivemind_app', '{SCHEMA_NAME}', '{t}')"
+                ),
+                f"drop FK on {table}",
             )
         log.info("Dropped foreign keys: %.4f s", perf_counter() - time_start)
 
@@ -425,7 +471,12 @@ class DbState:
         log.info("Recreating foreign keys")
         for table in cls._TABLES_WITH_FKS:
             full_name = f'{SCHEMA_NAME}.{table}'
-            cls.db().query_no_return(f"SELECT hive.app_restore_foreign_keys('hivemind_app', '{full_name}')")
+            cls._retry_ddl(
+                lambda fn=full_name: cls.db().query_no_return(
+                    f"SELECT hive.app_restore_foreign_keys('hivemind_app', '{fn}')"
+                ),
+                f"restore FK on {table}",
+            )
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
 
         cls._fk_were_disabled = False
