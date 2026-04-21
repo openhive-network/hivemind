@@ -163,9 +163,25 @@ class SyncHiveDb:
                     report_enter_to_stage(application_stage)
                 continue
 
-            # this  commit is added here only to prevent error idle-in-transaction timeout
-            # it should be removed, but it requires to check any possible long-lasting actions
-            # so as quic workaround this COMMIT stays
+            # app_next_iteration updated the HAF context and recreated the
+            # operations_view / blocks_view, but all of that is still inside an
+            # uncommitted transaction on self._db.  We MUST commit here because
+            # massive sync runs load_ops_staging on a *separate* DB connection
+            # (the cloned massive_instance) which cannot see uncommitted DDL
+            # changes from this session — without this commit the operations_view
+            # would show the old block range and the batch would find no ops.
+            #
+            # For massive sync stages, insert the block range into _batch_queue
+            # BEFORE committing so the context advancement and the crash-recovery
+            # marker are committed atomically.  Without this, a crash between the
+            # commit and _process_massive_blocks leaves the context advanced past
+            # blocks that were never processed and no batch_queue entry to trigger
+            # replay on restart.
+            if application_stage in ("MASSIVE_WITHOUT_INDEXES", "MASSIVE_WITH_INDEXES"):
+                self._db.query_no_return(
+                    f"INSERT INTO {SCHEMA_NAME}._batch_queue (first_block, last_block) "
+                    f"VALUES ({self._lbound}, {self._ubound})"
+                )
             self._db.query_no_return("COMMIT")
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync(True)
@@ -416,12 +432,8 @@ class SyncHiveDb:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
-        # Record batch for crash recovery (must be COMMITTED before processing starts)
-        self._db.query_no_return("START TRANSACTION")
-        self._db.query_no_return(
-            f"INSERT INTO {SCHEMA_NAME}._batch_queue (first_block, last_block) VALUES ({lbound}, {ubound})"
-        )
-        self._db.query_no_return("COMMIT")
+        # _batch_queue is already populated (committed atomically with the
+        # context advancement in the main loop, before we reach here).
 
         # SQL path: no data fetching needed, SQL functions read directly from operations_view
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
@@ -455,7 +467,9 @@ class SyncHiveDb:
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
             is_superuser = self._db.query_one("SELECT is_superuser()")
-            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            assert is_superuser, (
+                'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            )
 
     @staticmethod
     def _show_info(database: Db) -> None:
