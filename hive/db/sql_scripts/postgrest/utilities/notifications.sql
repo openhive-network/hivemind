@@ -37,6 +37,45 @@ END;
 $$
 ;
 
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_id_from_type;
+CREATE FUNCTION hivemind_postgrest_utilities.get_notify_id_from_type(_type TEXT)
+RETURNS INT
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+    _notify_id INT;
+BEGIN
+    _notify_id := CASE _type
+        WHEN 'new_community' THEN 1
+        WHEN 'set_role' THEN 2
+        WHEN 'set_props' THEN 3
+        WHEN 'set_title' THEN 4
+        WHEN 'mute_post' THEN 5
+        WHEN 'unmute_post' THEN 6
+        WHEN 'pin_post' THEN 7
+        WHEN 'unpin_post' THEN 8
+        WHEN 'flag_post' THEN 9
+        WHEN 'error' THEN 10
+        WHEN 'subscribe' THEN 11
+        WHEN 'reply' THEN 12
+        WHEN 'reply_comment' THEN 13
+        WHEN 'reblog' THEN 14
+        WHEN 'follow' THEN 15
+        WHEN 'mention' THEN 16
+        WHEN 'vote' THEN 17
+        ELSE NULL
+    END;
+
+    IF _notify_id IS NULL THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_notify_type_id_exception(FORMAT('The provided notification type ''%s'' does not correspond to any known notification type.', _type));
+    END IF;
+
+    RETURN _notify_id;
+END;
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_message;
 CREATE FUNCTION hivemind_postgrest_utilities.get_notify_message(_row RECORD)
 RETURNS TEXT

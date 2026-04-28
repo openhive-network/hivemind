@@ -2356,7 +2356,7 @@ BEGIN
         hn.block_num, 17, hn.last_update, hn.src, hn.dst, hn.post_id, hn.post_id,
         hn.score,
         hivemind_app.format_vote_value_payload(hn.vote_value),
-        '', ''
+        COALESCE(hn.community, ''), COALESCE(hn.community_title, '')
     FROM (
         SELECT
             hv.last_update,
@@ -2368,6 +2368,8 @@ BEGIN
             hp.author_id AS dst,
             hp.id AS post_id,
             hv.rshares,
+            hc.name AS community,
+            hc.title AS community_title,
             hivemind_app.calculate_value_of_vote_on_post(
                 hp.payout + hp.pending_payout, hp.vote_rshares, hv.rshares
             ) AS vote_value,
@@ -2376,6 +2378,7 @@ BEGIN
             ) AS score
         FROM hivemind_app.hive_votes hv
         JOIN hivemind_app.hive_posts hp ON hv.post_id = hp.id
+        LEFT JOIN hivemind_app.hive_communities hc ON hc.id = hp.community_id
         LEFT JOIN hivemind_app.muted m ON m.follower = hp.author_id AND m.following = hv.voter_id
         LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = hp.author_id
         LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = hv.voter_id
@@ -2433,6 +2436,7 @@ BEGIN
             pr.parent_id AS dst_post_id,
             pr.depth,
             pr.block_num,
+            pr.community_id,
             hb.created_at,
             ROW_NUMBER() OVER (PARTITION BY pr.block_num ORDER BY pr.post_id) AS counter
         FROM hivemind_app._post_results pr
@@ -2452,9 +2456,10 @@ BEGIN
         nc.dst_post_id,
         nc.post_id,
         COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
-        '', '', ''
+        '', COALESCE(hc.name, ''), COALESCE(hc.title, '')
     FROM new_comments nc
     JOIN hivemind_app.hive_accounts ha ON nc.src = ha.id
+    LEFT JOIN hivemind_app.hive_communities hc ON hc.id = nc.community_id
     LEFT JOIN hivemind_app.muted m ON m.follower = nc.dst AND m.following = nc.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nc.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nc.src
@@ -2549,6 +2554,7 @@ BEGIN
             hp.author_id AS dst,
             hp.parent_id AS dst_post_id,
             hp.id AS post_id,
+            hp.community_id,
             hr.block_num,
             hr.created_at,
             ROW_NUMBER() OVER (PARTITION BY hr.block_num ORDER BY hr.id) AS counter
@@ -2563,9 +2569,10 @@ BEGIN
         nr.block_num, 14, nr.created_at,
         nr.src, nr.dst, nr.dst_post_id, nr.post_id,
         COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
-        '', '', ''
+        '', COALESCE(hc.name, ''), COALESCE(hc.title, '')
     FROM new_reblogs nr
     JOIN hivemind_app.hive_accounts ha ON nr.src = ha.id
+    LEFT JOIN hivemind_app.hive_communities hc ON hc.id = nr.community_id
     LEFT JOIN hivemind_app.muted m ON m.follower = nr.dst AND m.following = nr.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nr.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nr.src

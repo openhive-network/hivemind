@@ -868,11 +868,13 @@ BEGIN
                   hm.post_id,
                   hm.post_id,
                   COALESCE(rep.rep, 25),
-                  '', '', ''
+                  '', COALESCE(hc.name, ''), COALESCE(hc.title, '')
               FROM mentions_data AS hm
               LEFT JOIN author_rep AS rep ON rep.author_id = hm.author_id
               LEFT JOIN insert_mentions AS im ON im.id = 0 -- force evaluation
               LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- force evaluation
+              LEFT JOIN hivemind_app.hive_posts AS hp ON hp.id = hm.post_id
+              LEFT JOIN hivemind_app.hive_communities AS hc ON hc.id = hp.community_id
               LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
               LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
               LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id

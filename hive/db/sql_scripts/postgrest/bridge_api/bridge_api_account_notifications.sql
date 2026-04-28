@@ -11,10 +11,13 @@ DECLARE
   _last_id BIGINT;
   _limit INTEGER;
   _oldest_block INTEGER;
+  _types TEXT[];
+  _type_ids INT[];
+  _community TEXT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number", "last_id": "number", "limit":"number"}', 1, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number", "last_id": "number", "limit":"number", "type": "array", "community": "string"}', 1, NULL);
 
-  _account_id = 
+  _account_id =
     hivemind_postgrest_utilities.find_account_id(
       hivemind_postgrest_utilities.valid_account(
         hivemind_postgrest_utilities.parse_argument_from_json(_params,'account', True),
@@ -31,6 +34,20 @@ BEGIN
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
   _oldest_block = hivemind_app.block_before_head( '90 days' );
 
+  _types = hivemind_postgrest_utilities.parse_string_array_argument_from_json(_params, 'type', False);
+  IF _types IS NOT NULL AND array_length(_types, 1) IS NOT NULL THEN
+    SELECT array_agg(hivemind_postgrest_utilities.get_notify_id_from_type(t))
+    INTO _type_ids
+    FROM unnest(_types) AS t;
+  END IF;
+
+  _community = hivemind_postgrest_utilities.valid_community(
+                 hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False),
+                 True);
+  IF _community = '' THEN
+    _community = NULL;
+  END IF;
+
   RETURN(
     SELECT jsonb_agg( -- bridge_api_account_notifications
       jsonb_build_object(
@@ -44,7 +61,17 @@ BEGIN
                   WHEN hive_notification_cache.community <> '' THEN 'c/' || hive_notification_cache.community
                   WHEN hive_notification_cache.src <> '' THEN '@' || hive_notification_cache.src
                   WHEN hive_notification_cache.dst <> '' THEN '@' || hive_notification_cache.dst
-                END
+                END,
+        'community', CASE
+                       WHEN hive_notification_cache.type_id = 15 THEN NULL
+                       WHEN hive_notification_cache.community IS NULL OR hive_notification_cache.community = '' THEN NULL
+                       ELSE hive_notification_cache.community
+                     END,
+        'community_title', CASE
+                             WHEN hive_notification_cache.type_id = 15 THEN NULL
+                             WHEN hive_notification_cache.community_title IS NULL OR hive_notification_cache.community_title = '' THEN NULL
+                             ELSE hive_notification_cache.community_title
+                           END
       ) ORDER BY hive_notification_cache.id DESC
     ) FROM (
       SELECT
@@ -79,6 +106,8 @@ BEGIN
             AND nv.block_num > _oldest_block
             AND nv.score >= _min_score
             AND NOT( _last_id <> 0 AND nv.id >= _last_id )
+            AND (_type_ids IS NULL OR nv.type_id = ANY(_type_ids))
+            AND (_community IS NULL OR nv.type_id = 15 OR nv.community = _community)
           ORDER BY nv.id DESC
           LIMIT _limit
         ) hnv
