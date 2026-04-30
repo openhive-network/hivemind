@@ -1,5 +1,7 @@
 [
   {
+    "community": "hive-135485",
+    "community_title": "World News",
     "date": "2016-09-15T18:01:51",
     "id": "4060706672476163",
     "msg": "@good-karma subscribed to World News",
@@ -8,6 +10,8 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
+    "community_title": "World News",
     "date": "2016-09-15T18:01:48",
     "id": "4060705867169808",
     "msg": "@roadscape subscribed to World News",
@@ -16,6 +20,8 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
+    "community_title": "World News",
     "date": "2016-09-15T18:01:48",
     "id": "4060705867169803",
     "msg": "@gtg subscribed to World News",
@@ -24,6 +30,8 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
+    "community_title": "World News",
     "date": "2016-09-15T18:01:48",
     "id": "4060705867169798",
     "msg": "@test-safari subscribed to World News",
@@ -32,6 +40,8 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
+    "community_title": "World News",
     "date": "2016-09-15T18:01:33",
     "id": "4060701840637959",
     "msg": "@test-safari subscribed to World News",
@@ -40,6 +50,7 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
     "date": "2016-09-15T18:01:33",
     "id": "4060701832249350",
     "msg": "@test-safari flagged a post - This is not a kitten..",
@@ -48,6 +59,7 @@
     "url": "@test-safari/secrets1"
   },
   {
+    "community": "hive-135485",
     "date": "2016-09-15T18:01:33",
     "id": "4060701807083521",
     "msg": "@test-safari set properties {\"about\": \"A place for major news from around the world.\", \"title\": \"World News\", \"is_nsfw\": true, \"settings\": {\"emotes\": {}, \"streams\": [[\"Say It Here\", \"0\", [\"member\"], [\"member\"]], [\"About\", \"/about\", null, null], [\"Visit Community\", \"/created\", null, null]], \"cover_url\": \"http://exa.com\", \"avatar_url\": \"http://example.com\"}, \"flag_text\": \"\", \"description\": \"\"}",
@@ -56,6 +68,7 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
     "date": "2016-09-15T18:01:30",
     "id": "4060701031137282",
     "msg": "error: cant modify owner role",
@@ -64,6 +77,7 @@
     "url": "c/hive-135485"
   },
   {
+    "community": "hive-135485",
     "date": "2016-09-15T18:01:30",
     "id": "4060700993388547",
     "msg": "@hive-135485 was created",

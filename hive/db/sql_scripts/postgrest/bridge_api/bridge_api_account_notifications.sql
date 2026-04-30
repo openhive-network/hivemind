@@ -50,7 +50,7 @@ BEGIN
   END IF;
 
   RETURN(
-    SELECT jsonb_agg( -- bridge_api_account_notifications
+    SELECT COALESCE(jsonb_agg( -- bridge_api_account_notifications
       jsonb_build_object(
         'id', hive_notification_cache.id::TEXT,
         'type', hivemind_postgrest_utilities.get_notify_type_from_id(hive_notification_cache.type_id),
@@ -130,7 +130,7 @@ BEGIN
         ) as hm
         ORDER BY hnv.id DESC
         LIMIT _limit
-      ) hive_notification_cache
+      ) hive_notification_cache), '[]'::jsonb)
   );
 END
 $$
