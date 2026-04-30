@@ -127,7 +127,8 @@ DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_string_array_argument
 CREATE FUNCTION hivemind_postgrest_utilities.parse_string_array_argument_from_json(
   _params JSONB,
   _arg_name TEXT,
-  _exception_on_unset_field BOOLEAN
+  _exception_on_unset_field BOOLEAN,
+  _max_elements INT DEFAULT 100
 )
 RETURNS TEXT[]
 LANGUAGE 'plpgsql'
@@ -156,9 +157,9 @@ BEGIN
     RETURN _result;
   END IF;
 
-  IF jsonb_array_length(_params->_arg_name) > 17 THEN
+  IF jsonb_array_length(_params->_arg_name) > _max_elements THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
-      FORMAT('Array %s has too many elements (max 17)', _arg_name)
+      FORMAT('Array %s has too many elements (max %s)', _arg_name, _max_elements)
     );
   END IF;
 

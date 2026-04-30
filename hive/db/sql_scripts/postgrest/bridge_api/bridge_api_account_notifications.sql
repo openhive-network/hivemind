@@ -34,7 +34,7 @@ BEGIN
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
   _oldest_block = hivemind_app.block_before_head( '90 days' );
 
-  _types = hivemind_postgrest_utilities.parse_string_array_argument_from_json(_params, 'type', False);
+  _types = hivemind_postgrest_utilities.parse_string_array_argument_from_json(_params, 'type', False, 17);
   IF _types IS NOT NULL AND array_length(_types, 1) IS NOT NULL THEN
     SELECT array_agg(hivemind_postgrest_utilities.get_notify_id_from_type(t))
     INTO _type_ids

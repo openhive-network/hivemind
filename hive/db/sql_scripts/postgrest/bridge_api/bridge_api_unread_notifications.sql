@@ -27,7 +27,7 @@ BEGIN
   _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'min_score', False);
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
-  _types = hivemind_postgrest_utilities.parse_string_array_argument_from_json(_params, 'type', False);
+  _types = hivemind_postgrest_utilities.parse_string_array_argument_from_json(_params, 'type', False, 17);
   IF _types IS NOT NULL AND array_length(_types, 1) IS NOT NULL THEN
     SELECT array_agg(hivemind_postgrest_utilities.get_notify_id_from_type(t))
     INTO _type_ids
