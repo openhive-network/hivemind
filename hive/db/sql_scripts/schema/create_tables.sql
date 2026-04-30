@@ -255,6 +255,7 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_notification_cache (
 CREATE INDEX IF NOT EXISTS hive_notification_cache_block_num_idx ON hivemind_app.hive_notification_cache (block_num);
 CREATE UNIQUE INDEX IF NOT EXISTS hive_notification_cache_src_dst_post_id ON hivemind_app.hive_notification_cache (src, dst, type_id, post_id, block_num);
 CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_score_idx ON hivemind_app.hive_notification_cache (dst, score) WHERE dst IS NOT NULL;
+CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_community_idx ON hivemind_app.hive_notification_cache (dst, community, id DESC) WHERE community <> '' AND dst IS NOT NULL;
 
 -- follows
 CREATE TABLE IF NOT EXISTS hivemind_app.follows (
