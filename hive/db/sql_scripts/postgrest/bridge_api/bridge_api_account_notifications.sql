@@ -41,11 +41,12 @@ BEGIN
     FROM unnest(_types) AS t;
   END IF;
 
-  _community = hivemind_postgrest_utilities.valid_community(
-                 hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False),
-                 True);
+  _community = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False);
   IF _community = '' THEN
     _community = NULL;
+  END IF;
+  IF _community IS NOT NULL THEN
+    _community = hivemind_postgrest_utilities.valid_community(_community, False);
   END IF;
 
   RETURN(

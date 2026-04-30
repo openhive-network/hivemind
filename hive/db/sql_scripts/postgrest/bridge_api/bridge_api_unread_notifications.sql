@@ -34,11 +34,12 @@ BEGIN
     FROM unnest(_types) AS t;
   END IF;
 
-  _community = hivemind_postgrest_utilities.valid_community(
-                 hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False),
-                 True);
+  _community = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False);
   IF _community = '' THEN
     _community = NULL;
+  END IF;
+  IF _community IS NOT NULL THEN
+    _community = hivemind_postgrest_utilities.valid_community(_community, False);
   END IF;
 
   SELECT ha.lastread_at INTO _last_read_at FROM hivemind_app.hive_accounts ha WHERE ha.id = _account_id;
