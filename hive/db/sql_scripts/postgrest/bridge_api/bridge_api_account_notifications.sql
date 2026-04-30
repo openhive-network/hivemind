@@ -62,7 +62,9 @@ BEGIN
                   WHEN hive_notification_cache.community <> '' THEN 'c/' || hive_notification_cache.community
                   WHEN hive_notification_cache.src <> '' THEN '@' || hive_notification_cache.src
                   WHEN hive_notification_cache.dst <> '' THEN '@' || hive_notification_cache.dst
-                END,
+                END
+      )
+      || jsonb_strip_nulls(jsonb_build_object(
         'community', CASE
                        WHEN hive_notification_cache.type_id = 15 THEN NULL
                        WHEN hive_notification_cache.community IS NULL OR hive_notification_cache.community = '' THEN NULL
@@ -73,7 +75,8 @@ BEGIN
                              WHEN hive_notification_cache.community_title IS NULL OR hive_notification_cache.community_title = '' THEN NULL
                              ELSE hive_notification_cache.community_title
                            END
-      ) ORDER BY hive_notification_cache.id DESC
+      ))
+      ORDER BY hive_notification_cache.id DESC
     ) FROM (
       SELECT
         hnv.id,
