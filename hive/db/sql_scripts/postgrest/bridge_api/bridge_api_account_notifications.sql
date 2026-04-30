@@ -77,7 +77,7 @@ BEGIN
                            END
       ))
       ORDER BY hive_notification_cache.id DESC
-    ) FROM (
+    ), '[]'::jsonb) FROM (
       SELECT
         hnv.id,
         hnv.type_id,
@@ -130,7 +130,7 @@ BEGIN
         ) as hm
         ORDER BY hnv.id DESC
         LIMIT _limit
-      ) hive_notification_cache), '[]'::jsonb)
+      ) hive_notification_cache
   );
 END
 $$
