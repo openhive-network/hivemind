@@ -92,7 +92,12 @@ BEGIN
                                            END as score
                                        FROM hivemind_app.hive_post_data hpd
                                        INNER JOIN author_posts ap ON ap.id = hpd.id
+                                       -- is_top_level_post(hpd.id) must match the partial bm25 index predicate
+                                       -- (hive_post_data_bm25_idx WHERE is_top_level_post(id)). pg_search <=0.19.5
+                                       -- rejected an explicit predicate and inferred it; 0.21.13 reversed that and
+                                       -- raises "Unsupported query shape" without it.
                                        WHERE hpd @@@ paradedb.parse(_search_query)
+                                         AND hivemind_app.is_top_level_post(hpd.id)
                                        ORDER BY 
                                            CASE _sort_type
                                                WHEN 'relevance' THEN paradedb.score(hpd.id)
@@ -189,7 +194,10 @@ BEGIN
                                                ELSE 0
                                            END as score
                                        FROM hivemind_app.hive_post_data hpd
+                                       -- See note in author-search branch above: the is_top_level_post predicate is
+                                       -- required by pg_search 0.21.13 to match the partial bm25 index.
                                        WHERE hpd @@@ paradedb.parse(_search_query)
+                                         AND hivemind_app.is_top_level_post(hpd.id)
                                        ORDER BY 
                                            CASE _sort_type
                                                WHEN 'relevance' THEN paradedb.score(hpd.id)
