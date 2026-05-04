@@ -19,7 +19,10 @@ BEGIN
       result := hivemind_postgrest_utilities.get_tags_api_method(__method_type, __params);
     WHEN __api_type = 'database_api' THEN
       result := hivemind_postgrest_utilities.get_database_api_method(__method_type, __params);
-    WHEN __api_type = 'search-api' THEN
+    -- search_api is accepted alongside search-api; in normal operation drone's
+    -- equivalent_methods folds the underscore form onto the hyphen before reaching
+    -- here, so the search_api branch is documentation of intent more than a live path.
+    WHEN __api_type IN ('search-api', 'search_api') THEN
         result := hivemind_postgrest_utilities.get_search_api_method(__method_type, __params);
     WHEN __api_type = 'hive' THEN
       result := hivemind_postgrest_utilities.get_hive_api_method(__method_type, __params);
