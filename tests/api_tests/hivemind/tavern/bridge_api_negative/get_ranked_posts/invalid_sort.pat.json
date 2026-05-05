@@ -4,7 +4,7 @@
     "assert_hash": "3c4d5e6f7a8b9c0d1e2f",
     "code": 10,
     "extension": {
-      "assertion_expression": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted"
+      "assertion_expression": "Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted, rising"
     },
     "message": "Assert Exception",
     "name": "assert_exception",
@@ -26,5 +26,5 @@
       }
     ]
   },
-  "message": "Assert Exception:Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted"
+  "message": "Assert Exception:Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted, rising"
 }
