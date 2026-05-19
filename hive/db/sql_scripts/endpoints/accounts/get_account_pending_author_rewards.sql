@@ -66,7 +66,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_account_pending_author_rewards;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_account_pending_author_rewards(
     "account-name" TEXT
 )
-RETURNS hivemind_endpoints.pending_author_rewards
+RETURNS hivemind_endpoints.pending_author_rewards 
 -- openapi-generated-code-end
 LANGUAGE 'plpgsql' STABLE
 AS
