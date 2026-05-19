@@ -1,0 +1,26 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+    - negative
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_account_pending_author_rewards"
+        method: POST
+        headers:
+          content-type: application/json
+          accept: application/json
+        json:
+          account-name: "this_account_does_not_exist_xyz"
+      response:
+        status_code: 400
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            error_response: true

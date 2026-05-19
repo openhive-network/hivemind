@@ -1,0 +1,19 @@
+{
+  "account": "guest4test1",
+  "pending_post_count": 1,
+  "gross_pending_payout": {
+    "amount": "2",
+    "nai": "@@000000013",
+    "precision": 3
+  },
+  "estimated_author_payout": {
+    "amount": "1",
+    "nai": "@@000000013",
+    "precision": 3
+  },
+  "estimated_beneficiaries_payout": {
+    "amount": "0",
+    "nai": "@@000000013",
+    "precision": 3
+  }
+}
