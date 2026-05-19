@@ -65,6 +65,9 @@ DECLARE
 BEGIN
   PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=2"}]', true);
 
+  -- Consensus payout split (HF21+): curators receive 50% of the effective payout,
+  -- distributed proportionally by hive_votes.weight / hive_posts.total_vote_weight.
+  -- Pre-HF21 posts (75/25 split) are all paid out, so they're filtered by `NOT is_paidout`.
   SELECT
     COUNT(*)::INT,
     COALESCE(SUM(

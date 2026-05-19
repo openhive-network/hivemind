@@ -82,6 +82,9 @@ DECLARE
 BEGIN
   PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=2"}]', true);
 
+  -- Consensus payout split (HF21+): 50% curators, 50% (author + beneficiaries).
+  -- Older posts use a 75/25 split, but those are filtered out by `NOT is_paidout`
+  -- (all pre-HF21 posts are paid out long ago).
   WITH per_post AS (
     SELECT
       CASE

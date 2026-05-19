@@ -136,7 +136,7 @@ hivemind_endpoints.hbd_asset:
     nai:
       type: string
       description: Numeric Asset Identifier (''@@000000013'' for HBD)
-*/
+ */
 
 /** openapi:components:schemas
 hivemind_endpoints.pending_author_rewards:
