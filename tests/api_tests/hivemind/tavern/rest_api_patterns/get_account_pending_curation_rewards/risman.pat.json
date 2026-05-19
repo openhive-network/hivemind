@@ -1,8 +1,8 @@
 {
   "account": "risman",
-  "pending_vote_count": 0,
+  "pending_vote_count": 1,
   "estimated_curation_payout": {
-    "amount": "0",
+    "amount": "1",
     "nai": "@@000000013",
     "precision": 3
   }
