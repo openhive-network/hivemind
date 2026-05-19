@@ -189,6 +189,75 @@ declare
         "items": {
           "$ref": "#/components/schemas/hivemind_endpoints.reblog_status"
         }
+      },
+      "hivemind_endpoints.hbd_asset": {
+        "type": "object",
+        "x-sql-datatype": "JSON",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "HBD amount in raw integer units (multiply by 10^-precision to get HBD)"
+          },
+          "precision": {
+            "type": "integer",
+            "description": "Decimal precision of the amount (always 3 for HBD)"
+          },
+          "nai": {
+            "type": "string",
+            "description": "Numeric Asset Identifier (''@@000000013'' for HBD)"
+          }
+        }
+      },
+      "hivemind_endpoints.pending_author_rewards": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "Account name"
+          },
+          "pending_post_count": {
+            "type": "integer",
+            "description": "Number of posts awaiting payout"
+          },
+          "gross_pending_payout": {
+            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+            "x-sql-datatype": "JSON",
+            "description": "Sum of pending payouts across all unpaid posts (capped by max_accepted_payout); equals author + beneficiaries + curators"
+          },
+          "estimated_author_payout": {
+            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+            "x-sql-datatype": "JSON",
+            "description": "Estimated portion of gross payout going to the author"
+          },
+          "estimated_beneficiaries_payout": {
+            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+            "x-sql-datatype": "JSON",
+            "description": "Estimated portion of gross payout going to beneficiaries"
+          },
+          "estimated_curators_payout": {
+            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+            "x-sql-datatype": "JSON",
+            "description": "Estimated portion of gross payout going to curators (0 if allow_curation_rewards is false)"
+          }
+        }
+      },
+      "hivemind_endpoints.pending_curation_rewards": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "Account name"
+          },
+          "pending_vote_count": {
+            "type": "integer",
+            "description": "Number of recent votes awaiting payout (within the last 8 chain-days)"
+          },
+          "estimated_curation_payout": {
+            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+            "x-sql-datatype": "JSON",
+            "description": "Estimated curation reward across the account''s pending votes"
+          }
+        }
       }
     }
   },
@@ -322,6 +391,111 @@ declare
                       "trx_in_block": 3
                     }
                   ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such account in the database"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/pending-author-rewards": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get pending (pre-payout) author rewards for an account.",
+        "description": "Returns the aggregated pending author and beneficiary rewards across all\nof the account''s posts that have not yet reached payout (i.e. `is_paidout = false`\nand not deleted). For each unpaid post the gross pending payout is capped by\n`max_accepted_payout` and is split between the author and the beneficiaries.\nPosts that declined payout (`is_declined = true`) contribute zero.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_author_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-author-rewards''`\n",
+        "operationId": "hivemind_endpoints.get_account_pending_author_rewards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account to get pending author rewards for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aggregated pending author rewards.\n\n* Returns `hivemind_endpoints.pending_author_rewards`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.pending_author_rewards"
+                },
+                "example": {
+                  "account": "blocktrades",
+                  "pending_post_count": 1,
+                  "gross_pending_payout": {
+                    "amount": "2",
+                    "precision": 3,
+                    "nai": "@@000000013"
+                  },
+                  "estimated_author_payout": {
+                    "amount": "1",
+                    "precision": 3,
+                    "nai": "@@000000013"
+                  },
+                  "estimated_beneficiaries_payout": {
+                    "amount": "0",
+                    "precision": 3,
+                    "nai": "@@000000013"
+                  },
+                  "estimated_curators_payout": {
+                    "amount": "1",
+                    "precision": 3,
+                    "nai": "@@000000013"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such account in the database"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/pending-curation-rewards": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get pending (pre-payout) curation rewards for an account.",
+        "description": "Returns the aggregated estimated curation reward for the account, summed\nacross all of the account''s votes on posts that have not yet reached payout.\nOnly votes cast within the last eight chain-days (relative to the head block)\nare considered, matching the chain''s curation reward window. Posts that\ndeclined payout or disabled curation rewards contribute zero.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_curation_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-curation-rewards''`\n",
+        "operationId": "hivemind_endpoints.get_account_pending_curation_rewards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account to get pending curation rewards for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aggregated pending curation rewards.\n\n* Returns `hivemind_endpoints.pending_curation_rewards`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.pending_curation_rewards"
+                },
+                "example": {
+                  "account": "blocktrades",
+                  "pending_vote_count": 1,
+                  "estimated_curation_payout": {
+                    "amount": "1",
+                    "precision": 3,
+                    "nai": "@@000000013"
+                  }
                 }
               }
             }
