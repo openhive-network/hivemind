@@ -121,3 +121,77 @@ CREATE TYPE hivemind_endpoints.operation_history AS (
 -- CASCADE DROP destroying the utility functions that depend on it.
 -- The OpenAPI schema for reblog_status and array_of_reblog_status
 -- is defined in endpoint_schema.sql.
+
+/** openapi:components:schemas
+hivemind_endpoints.hbd_asset:
+  type: object
+  x-sql-datatype: JSON
+  properties:
+    amount:
+      type: string
+      description: HBD amount in raw integer units (multiply by 10^-precision to get HBD)
+    precision:
+      type: integer
+      description: Decimal precision of the amount (always 3 for HBD)
+    nai:
+      type: string
+      description: Numeric Asset Identifier (''@@000000013'' for HBD)
+*/
+
+/** openapi:components:schemas
+hivemind_endpoints.pending_author_rewards:
+  type: object
+  properties:
+    account:
+      type: string
+      description: Account name
+    pending_post_count:
+      type: integer
+      description: Number of posts awaiting payout
+    gross_pending_payout:
+      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      x-sql-datatype: JSON
+      description: Sum of pending payouts across all unpaid posts (capped by max_accepted_payout)
+    estimated_author_payout:
+      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      x-sql-datatype: JSON
+      description: Estimated portion of gross payout going to the author
+    estimated_beneficiaries_payout:
+      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      x-sql-datatype: JSON
+      description: Estimated portion of gross payout going to beneficiaries
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.pending_author_rewards CASCADE;
+CREATE TYPE hivemind_endpoints.pending_author_rewards AS (
+    "account" TEXT,
+    "pending_post_count" INT,
+    "gross_pending_payout" JSON,
+    "estimated_author_payout" JSON,
+    "estimated_beneficiaries_payout" JSON
+);
+-- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.pending_curation_rewards:
+  type: object
+  properties:
+    account:
+      type: string
+      description: Account name
+    pending_vote_count:
+      type: integer
+      description: Number of recent votes awaiting payout (within the last 8 chain-days)
+    estimated_curation_payout:
+      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      x-sql-datatype: JSON
+      description: Estimated curation reward across the account''s pending votes
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.pending_curation_rewards CASCADE;
+CREATE TYPE hivemind_endpoints.pending_curation_rewards AS (
+    "account" TEXT,
+    "pending_vote_count" INT,
+    "estimated_curation_payout" JSON
+);
+-- openapi-generated-code-end
