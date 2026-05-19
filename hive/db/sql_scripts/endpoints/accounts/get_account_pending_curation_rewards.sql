@@ -73,11 +73,11 @@ BEGIN
              AND hp.allow_curation_rewards
              AND NOT hp.is_declined
         THEN (hv.weight / hp.total_vote_weight)
-             * LEAST(hp.pending_payout, mp.amount)
+             * LEAST(hp.payout + hp.pending_payout, mp.amount)
              / 2
         ELSE 0
       END
-    ), 0)::DECIMAL(10,3)
+    ), 0)
   INTO _pending_vote_count, _estimated
   FROM hivemind_app.hive_votes hv
   JOIN hivemind_app.hive_posts hp ON hp.id = hv.post_id

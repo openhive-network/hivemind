@@ -80,7 +80,7 @@ BEGIN
     SELECT
       CASE
         WHEN hp.is_declined THEN 0::NUMERIC
-        ELSE LEAST(hp.pending_payout, mp.amount)
+        ELSE LEAST(hp.payout + hp.pending_payout, mp.amount)
       END AS effective_payout,
       hp.allow_curation_rewards AS allow_curation_rewards,
       COALESCE((
@@ -96,17 +96,17 @@ BEGIN
   )
   SELECT
     COUNT(*)::INT,
-    COALESCE(SUM(effective_payout), 0)::DECIMAL(10,3),
+    COALESCE(SUM(effective_payout), 0),
     COALESCE(SUM(
       effective_payout
         * CASE WHEN allow_curation_rewards THEN 0.5 ELSE 1.0 END
         * (1 - beneficiary_weight_sum / 10000)
-    ), 0)::DECIMAL(10,3),
+    ), 0),
     COALESCE(SUM(
       effective_payout
         * CASE WHEN allow_curation_rewards THEN 0.5 ELSE 1.0 END
         * (beneficiary_weight_sum / 10000)
-    ), 0)::DECIMAL(10,3)
+    ), 0)
   INTO _pending_post_count, _gross, _author_payout, _beneficiaries_payout
   FROM per_post;
 
