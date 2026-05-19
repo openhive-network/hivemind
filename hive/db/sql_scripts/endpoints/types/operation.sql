@@ -116,11 +116,37 @@ CREATE TYPE hivemind_endpoints.operation_history AS (
 );
 -- openapi-generated-code-end
 
--- Note: hivemind_endpoints.reblog_status type is defined in
--- postgrest/utilities/get_reblogged_posts.sql (not here) to avoid
--- CASCADE DROP destroying the utility functions that depend on it.
--- The OpenAPI schema for reblog_status and array_of_reblog_status
--- is defined in endpoint_schema.sql.
+-- Note: the SQL composite type `hivemind_endpoints.reblog_status` is
+-- defined in postgrest/utilities/get_reblogged_posts.sql (not here) to
+-- avoid CASCADE DROP destroying the utility functions that depend on it.
+-- The OpenAPI schema fragments below are required so $ref lookups in
+-- the regenerator resolve, but `process_openapi.py` would otherwise
+-- emit a duplicate `DROP TYPE ... CASCADE; CREATE TYPE reblog_status`
+-- block right after the YAML. That block MUST be hand-removed after
+-- every run of `scripts/openapi_rewrite.sh` until the regenerator
+-- gains an `x-skip-create-type`-style override.
+
+/** openapi:components:schemas
+hivemind_endpoints.reblog_status:
+  type: object
+  properties:
+    author:
+      type: string
+      description: Post author account name
+    permlink:
+      type: string
+      description: Post permlink
+    reblogged:
+      type: boolean
+      description: True if the observer has reblogged this post
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_reblog_status:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.reblog_status'
+ */
 
 /** openapi:components:schemas
 hivemind_endpoints.hbd_asset:
