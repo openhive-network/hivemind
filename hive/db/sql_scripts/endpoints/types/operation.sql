@@ -151,7 +151,7 @@ hivemind_endpoints.pending_author_rewards:
     gross_pending_payout:
       $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
       x-sql-datatype: JSON
-      description: Sum of pending payouts across all unpaid posts (capped by max_accepted_payout)
+      description: Sum of pending payouts across all unpaid posts (capped by max_accepted_payout); equals author + beneficiaries + curators
     estimated_author_payout:
       $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
       x-sql-datatype: JSON
@@ -160,6 +160,10 @@ hivemind_endpoints.pending_author_rewards:
       $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
       x-sql-datatype: JSON
       description: Estimated portion of gross payout going to beneficiaries
+    estimated_curators_payout:
+      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      x-sql-datatype: JSON
+      description: Estimated portion of gross payout going to curators (0 if allow_curation_rewards is false)
  */
 -- openapi-generated-code-begin
 DROP TYPE IF EXISTS hivemind_endpoints.pending_author_rewards CASCADE;
@@ -168,7 +172,8 @@ CREATE TYPE hivemind_endpoints.pending_author_rewards AS (
     "pending_post_count" INT,
     "gross_pending_payout" JSON,
     "estimated_author_payout" JSON,
-    "estimated_beneficiaries_payout" JSON
+    "estimated_beneficiaries_payout" JSON,
+    "estimated_curators_payout" JSON
 );
 -- openapi-generated-code-end
 

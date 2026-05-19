@@ -15,5 +15,10 @@
     "amount": "0",
     "nai": "@@000000013",
     "precision": 3
+  },
+  "estimated_curators_payout": {
+    "amount": "1",
+    "nai": "@@000000013",
+    "precision": 3
   }
 }

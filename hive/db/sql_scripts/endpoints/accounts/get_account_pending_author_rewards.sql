@@ -51,6 +51,11 @@
                     "amount": "0",
                     "precision": 3,
                     "nai": "@@000000013"
+                  },
+                  "estimated_curators_payout": {
+                    "amount": "1",
+                    "precision": 3,
+                    "nai": "@@000000013"
                   }
                 }
       '404':
@@ -73,6 +78,7 @@ DECLARE
   _gross NUMERIC;
   _author_payout NUMERIC;
   _beneficiaries_payout NUMERIC;
+  _curators_payout NUMERIC;
 BEGIN
   PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=2"}]', true);
 
@@ -106,8 +112,12 @@ BEGIN
       effective_payout
         * CASE WHEN allow_curation_rewards THEN 0.5 ELSE 1.0 END
         * (beneficiary_weight_sum / 10000)
+    ), 0),
+    COALESCE(SUM(
+      effective_payout
+        * CASE WHEN allow_curation_rewards THEN 0.5 ELSE 0 END
     ), 0)
-  INTO _pending_post_count, _gross, _author_payout, _beneficiaries_payout
+  INTO _pending_post_count, _gross, _author_payout, _beneficiaries_payout, _curators_payout
   FROM per_post;
 
   _result.account := "account-name";
@@ -115,6 +125,7 @@ BEGIN
   _result.gross_pending_payout := hivemind_postgrest_utilities.to_nai(_gross, 'HBD'::hivemind_postgrest_utilities.currency)::JSON;
   _result.estimated_author_payout := hivemind_postgrest_utilities.to_nai(_author_payout, 'HBD'::hivemind_postgrest_utilities.currency)::JSON;
   _result.estimated_beneficiaries_payout := hivemind_postgrest_utilities.to_nai(_beneficiaries_payout, 'HBD'::hivemind_postgrest_utilities.currency)::JSON;
+  _result.estimated_curators_payout := hivemind_postgrest_utilities.to_nai(_curators_payout, 'HBD'::hivemind_postgrest_utilities.currency)::JSON;
 
   RETURN _result;
 END
