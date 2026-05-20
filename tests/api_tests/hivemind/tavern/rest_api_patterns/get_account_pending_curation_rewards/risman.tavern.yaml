@@ -1,4 +1,13 @@
 ---
+# Regression test: empirically `risman` returns count=0 in this 5M-block
+# mocked sync, even though the mock contains both a vote_operation (block
+# 5,000,021) and an effective_comment_vote_operation (block 5,000,021) for
+# the same post. The hive_votes row ends up with last_update=1970-01-01
+# (default), so the 8-day chain-time window filters it out. The exact
+# indexer reason is left undiagnosed (likely a batch boundary between
+# massive and live sync when --test-max-block=5,000,024 cuts at block
+# 5,000,021); this test pins down the *observed* behaviour so any future
+# indexer change that flips it shows up here.
   test_name: Hivemind
 
   marks:
