@@ -2,6 +2,7 @@
 
 import ast
 import logging
+import sys
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -57,6 +58,27 @@ class SyncHiveDb:
             log.info("Entering HAF mode synchronization")
 
         set_custom_signal_handlers()
+
+        # Coordinate with other hivemind processes via Postgres advisory locks.
+        # The lock is held on self._db's persistent connection for the lifetime
+        # of this process; on shutdown / crash the connection drops and Postgres
+        # releases the lock automatically.
+        if self._enter_sync:
+            # Block-processor: take a SHARED lock. Blocks (with NOTICE logging
+            # every minute) until any active installer releases its EXCLUSIVE
+            # lock.
+            self._db.query_no_return_autocommit(
+                "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind'])"
+            )
+        else:
+            # Installer (build_schema / upgrade_schema): try EXCLUSIVE lock.
+            # If a block-processor is holding the shared lock the function
+            # NOTICEs the holder and returns false; skip rather than racing.
+            if not self._db.query_one(
+                "SELECT hive.try_acquire_app_install_lock('hivemind')"
+            ):
+                log.info("Skipping hivemind schema install (see NOTICE above).")
+                sys.exit(0)
 
         Community.start_block = self._conf.get("community_start_block")
         DbState.initialize(self._enter_sync, self._upgrade_schema)
