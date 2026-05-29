@@ -64,11 +64,15 @@ class SyncHiveDb:
         # of this process; on shutdown / crash the connection drops and Postgres
         # releases the lock automatically.
         if self._enter_sync:
-            # Block-processor: take a SHARED lock. Blocks (with NOTICE logging
-            # every minute) until any active installer releases its EXCLUSIVE
-            # lock.
+            # Block-processor: take a SHARED lock on hivemind itself and on
+            # every upstream app whose schema this sync reads at runtime --
+            # currently reputation_tracker (reptracker_app referenced from
+            # massive_sync.sql and hive_post_operations.sql). Blocks (with
+            # NOTICE logging every minute) until any active installer of
+            # those apps releases its EXCLUSIVE lock.
             self._db.query_no_return_autocommit(
-                "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind'])"
+                "SELECT hive.acquire_app_block_processor_locks("
+                "ARRAY['hivemind', 'reputation_tracker'])"
             )
         else:
             # Installer (build_schema / upgrade_schema): try EXCLUSIVE lock.
