@@ -149,19 +149,38 @@ hivemind_endpoints.array_of_reblog_status:
  */
 
 /** openapi:components:schemas
-hivemind_endpoints.hbd_asset:
+hivemind_endpoints.asset:
   type: object
   x-sql-datatype: JSON
   properties:
     amount:
       type: string
-      description: HBD amount in raw integer units (multiply by 10^-precision to get HBD)
+      description: Asset amount in raw integer units (multiply by 10^-precision to get the decimal amount)
     precision:
       type: integer
-      description: Decimal precision of the amount (always 3 for HBD)
+      description: Decimal precision for the NAI asset
     nai:
       type: string
-      description: Numeric Asset Identifier (''@@000000013'' for HBD)
+      description: Numeric Asset Identifier
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.pending_reward_basis:
+  type: object
+  x-sql-datatype: JSON
+  properties:
+    liquid:
+      $ref: '#/components/schemas/hivemind_endpoints.asset'
+      description: HBD-denominated reward basis routed to liquid payout; final HBD/HIVE split requires exact hbd_print_rate outside Hivemind
+    vesting:
+      $ref: '#/components/schemas/hivemind_endpoints.asset'
+      description: HBD-denominated reward basis routed to HP/VESTS; final VESTS amount requires exact reward vesting state outside Hivemind
+    direct:
+      $ref: '#/components/schemas/hivemind_endpoints.asset'
+      description: HBD-denominated reward basis for direct-HBD paths such as treasury beneficiaries
+    total:
+      $ref: '#/components/schemas/hivemind_endpoints.asset'
+      description: Sum of the visible liquid, vesting, and direct HBD-denominated reward-basis buckets
  */
 
 /** openapi:components:schemas
@@ -174,32 +193,32 @@ hivemind_endpoints.pending_author_rewards:
     pending_post_count:
       type: integer
       description: Number of posts awaiting payout
-    gross_pending_payout:
-      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+    gross_reward_basis:
+      $ref: '#/components/schemas/hivemind_endpoints.asset'
       x-sql-datatype: JSON
-      description: Sum of pending payouts across all unpaid posts (capped by max_accepted_payout); equals author + beneficiaries + curators
-    estimated_author_payout:
-      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      description: Sum of pending reward basis across all unpaid posts, capped by max_accepted_payout
+    author_reward_basis:
+      $ref: '#/components/schemas/hivemind_endpoints.pending_reward_basis'
       x-sql-datatype: JSON
-      description: Estimated portion of gross payout going to the author
-    estimated_beneficiaries_payout:
-      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      description: Author reward basis after beneficiary split; not final HBD/HIVE/VESTS payout
+    beneficiaries_reward_basis:
+      $ref: '#/components/schemas/hivemind_endpoints.pending_reward_basis'
       x-sql-datatype: JSON
-      description: Estimated portion of gross payout going to beneficiaries
-    estimated_curators_payout:
-      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+      description: Beneficiary reward basis, including direct-HBD treasury beneficiary basis when present; not final HBD/HIVE/VESTS payout
+    curators_reward_basis:
+      $ref: '#/components/schemas/hivemind_endpoints.pending_reward_basis'
       x-sql-datatype: JSON
-      description: Estimated portion of gross payout going to curators (0 if allow_curation_rewards is false)
+      description: Curator reward basis for the account''s posts; curation resolves to HP/VESTS outside Hivemind
  */
 -- openapi-generated-code-begin
 DROP TYPE IF EXISTS hivemind_endpoints.pending_author_rewards CASCADE;
 CREATE TYPE hivemind_endpoints.pending_author_rewards AS (
     "account" TEXT,
     "pending_post_count" INT,
-    "gross_pending_payout" JSON,
-    "estimated_author_payout" JSON,
-    "estimated_beneficiaries_payout" JSON,
-    "estimated_curators_payout" JSON
+    "gross_reward_basis" JSON,
+    "author_reward_basis" JSON,
+    "beneficiaries_reward_basis" JSON,
+    "curators_reward_basis" JSON
 );
 -- openapi-generated-code-end
 
@@ -213,16 +232,16 @@ hivemind_endpoints.pending_curation_rewards:
     pending_vote_count:
       type: integer
       description: Number of recent votes awaiting payout (within the last 8 chain-days)
-    estimated_curation_payout:
-      $ref: '#/components/schemas/hivemind_endpoints.hbd_asset'
+    curation_reward_basis:
+      $ref: '#/components/schemas/hivemind_endpoints.pending_reward_basis'
       x-sql-datatype: JSON
-      description: Estimated curation reward across the account''s pending votes
+      description: Curation reward basis across the account''s pending votes; resolves to HP/VESTS outside Hivemind
  */
 -- openapi-generated-code-begin
 DROP TYPE IF EXISTS hivemind_endpoints.pending_curation_rewards CASCADE;
 CREATE TYPE hivemind_endpoints.pending_curation_rewards AS (
     "account" TEXT,
     "pending_vote_count" INT,
-    "estimated_curation_payout" JSON
+    "curation_reward_basis" JSON
 );
 -- openapi-generated-code-end

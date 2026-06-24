@@ -190,21 +190,43 @@ declare
           "$ref": "#/components/schemas/hivemind_endpoints.reblog_status"
         }
       },
-      "hivemind_endpoints.hbd_asset": {
+      "hivemind_endpoints.asset": {
         "type": "object",
         "x-sql-datatype": "JSON",
         "properties": {
           "amount": {
             "type": "string",
-            "description": "HBD amount in raw integer units (multiply by 10^-precision to get HBD)"
+            "description": "Asset amount in raw integer units (multiply by 10^-precision to get the decimal amount)"
           },
           "precision": {
             "type": "integer",
-            "description": "Decimal precision of the amount (always 3 for HBD)"
+            "description": "Decimal precision for the NAI asset"
           },
           "nai": {
             "type": "string",
-            "description": "Numeric Asset Identifier (''@@000000013'' for HBD)"
+            "description": "Numeric Asset Identifier"
+          }
+        }
+      },
+      "hivemind_endpoints.pending_reward_basis": {
+        "type": "object",
+        "x-sql-datatype": "JSON",
+        "properties": {
+          "liquid": {
+            "$ref": "#/components/schemas/hivemind_endpoints.asset",
+            "description": "HBD-denominated reward basis routed to liquid payout; final HBD/HIVE split requires exact hbd_print_rate outside Hivemind"
+          },
+          "vesting": {
+            "$ref": "#/components/schemas/hivemind_endpoints.asset",
+            "description": "HBD-denominated reward basis routed to HP/VESTS; final VESTS amount requires exact reward vesting state outside Hivemind"
+          },
+          "direct": {
+            "$ref": "#/components/schemas/hivemind_endpoints.asset",
+            "description": "HBD-denominated reward basis for direct-HBD paths such as treasury beneficiaries"
+          },
+          "total": {
+            "$ref": "#/components/schemas/hivemind_endpoints.asset",
+            "description": "Sum of the visible liquid, vesting, and direct HBD-denominated reward-basis buckets"
           }
         }
       },
@@ -219,25 +241,25 @@ declare
             "type": "integer",
             "description": "Number of posts awaiting payout"
           },
-          "gross_pending_payout": {
-            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+          "gross_reward_basis": {
+            "$ref": "#/components/schemas/hivemind_endpoints.asset",
             "x-sql-datatype": "JSON",
-            "description": "Sum of pending payouts across all unpaid posts (capped by max_accepted_payout); equals author + beneficiaries + curators"
+            "description": "Sum of pending reward basis across all unpaid posts, capped by max_accepted_payout"
           },
-          "estimated_author_payout": {
-            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+          "author_reward_basis": {
+            "$ref": "#/components/schemas/hivemind_endpoints.pending_reward_basis",
             "x-sql-datatype": "JSON",
-            "description": "Estimated portion of gross payout going to the author"
+            "description": "Author reward basis after beneficiary split; not final HBD/HIVE/VESTS payout"
           },
-          "estimated_beneficiaries_payout": {
-            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+          "beneficiaries_reward_basis": {
+            "$ref": "#/components/schemas/hivemind_endpoints.pending_reward_basis",
             "x-sql-datatype": "JSON",
-            "description": "Estimated portion of gross payout going to beneficiaries"
+            "description": "Beneficiary reward basis, including direct-HBD treasury beneficiary basis when present; not final HBD/HIVE/VESTS payout"
           },
-          "estimated_curators_payout": {
-            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+          "curators_reward_basis": {
+            "$ref": "#/components/schemas/hivemind_endpoints.pending_reward_basis",
             "x-sql-datatype": "JSON",
-            "description": "Estimated portion of gross payout going to curators (0 if allow_curation_rewards is false)"
+            "description": "Curator reward basis for the account''s posts; curation resolves to HP/VESTS outside Hivemind"
           }
         }
       },
@@ -252,10 +274,10 @@ declare
             "type": "integer",
             "description": "Number of recent votes awaiting payout (within the last 8 chain-days)"
           },
-          "estimated_curation_payout": {
-            "$ref": "#/components/schemas/hivemind_endpoints.hbd_asset",
+          "curation_reward_basis": {
+            "$ref": "#/components/schemas/hivemind_endpoints.pending_reward_basis",
             "x-sql-datatype": "JSON",
-            "description": "Estimated curation reward across the account''s pending votes"
+            "description": "Curation reward basis across the account''s pending votes; resolves to HP/VESTS outside Hivemind"
           }
         }
       }
@@ -407,7 +429,7 @@ declare
           "blog_api"
         ],
         "summary": "Get pending (pre-payout) author rewards for an account.",
-        "description": "Returns the aggregated pending author and beneficiary rewards across all\nof the account''s posts that have not yet reached payout (i.e. `is_paidout = false`\nand not deleted). For each unpaid post the gross pending payout is capped by\n`max_accepted_payout` and is split between the author and the beneficiaries.\nPosts that declined payout (`is_declined = true`) contribute zero.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_author_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-author-rewards''`\n",
+        "description": "Returns the aggregated pending author and beneficiary rewards across all\nof the account''s posts that have not yet reached payout (i.e. `is_paidout = false`\nand not deleted). For each unpaid post the gross pending payout is capped by\n`max_accepted_payout` and is split between the author and the beneficiaries.\nPosts that declined payout (`is_declined = true`) contribute zero.\nThe response intentionally does not expose final HBD/HIVE/VESTS payout\nassets. Hivemind does not have exact HBD print-rate and reward-vesting\nstate, so the endpoint returns only HBD-denominated reward basis values\nsplit into liquid, vesting, and direct buckets.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_author_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-author-rewards''`\n",
         "operationId": "hivemind_endpoints.get_account_pending_author_rewards",
         "parameters": [
           {
@@ -431,25 +453,76 @@ declare
                 "example": {
                   "account": "blocktrades",
                   "pending_post_count": 1,
-                  "gross_pending_payout": {
-                    "amount": "2",
+                  "gross_reward_basis": {
+                    "amount": "2000",
                     "precision": 3,
                     "nai": "@@000000013"
                   },
-                  "estimated_author_payout": {
-                    "amount": "1",
-                    "precision": 3,
-                    "nai": "@@000000013"
+                  "author_reward_basis": {
+                    "liquid": {
+                      "amount": "500",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "vesting": {
+                      "amount": "500",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "direct": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "total": {
+                      "amount": "1000",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    }
                   },
-                  "estimated_beneficiaries_payout": {
-                    "amount": "0",
-                    "precision": 3,
-                    "nai": "@@000000013"
+                  "beneficiaries_reward_basis": {
+                    "liquid": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "vesting": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "direct": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "total": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    }
                   },
-                  "estimated_curators_payout": {
-                    "amount": "1",
-                    "precision": 3,
-                    "nai": "@@000000013"
+                  "curators_reward_basis": {
+                    "liquid": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "vesting": {
+                      "amount": "1000",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "direct": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "total": {
+                      "amount": "1000",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    }
                   }
                 }
               }
@@ -467,7 +540,7 @@ declare
           "blog_api"
         ],
         "summary": "Get pending (pre-payout) curation rewards for an account.",
-        "description": "Returns the aggregated estimated curation reward for the account, summed\nacross all of the account''s votes on posts that have not yet reached payout.\nOnly votes cast within the last eight chain-days (relative to the head block)\nare considered, matching the chain''s curation reward window. Posts that\ndeclined payout or disabled curation rewards contribute zero.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_curation_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-curation-rewards''`\n",
+        "description": "Returns the aggregated curation reward basis for the account, summed\nacross all of the account''s votes on posts that have not yet reached payout.\nOnly votes cast within the last eight chain-days (relative to the head block)\nare considered, matching the chain''s curation reward window. Posts that\ndeclined payout or disabled curation rewards contribute zero.\nCuration rewards resolve to HP/VESTS outside Hivemind. This endpoint returns\nonly the HBD-denominated reward basis, not final VESTS/HBD/HIVE payout assets.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_pending_curation_rewards(''blocktrades'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/pending-curation-rewards''`\n",
         "operationId": "hivemind_endpoints.get_account_pending_curation_rewards",
         "parameters": [
           {
@@ -491,10 +564,27 @@ declare
                 "example": {
                   "account": "blocktrades",
                   "pending_vote_count": 1,
-                  "estimated_curation_payout": {
-                    "amount": "1",
-                    "precision": 3,
-                    "nai": "@@000000013"
+                  "curation_reward_basis": {
+                    "liquid": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "vesting": {
+                      "amount": "1000",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "direct": {
+                      "amount": "0",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    },
+                    "total": {
+                      "amount": "1000",
+                      "precision": 3,
+                      "nai": "@@000000013"
+                    }
                   }
                 }
               }

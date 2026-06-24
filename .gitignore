@@ -156,3 +156,6 @@ pghero.yml
 
 # report file
 tavern_benchmarks_report.html
+
+# local agent notes
+notes/

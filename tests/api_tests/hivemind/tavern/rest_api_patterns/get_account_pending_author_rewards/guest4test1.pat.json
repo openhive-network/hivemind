@@ -1,24 +1,75 @@
 {
   "account": "guest4test1",
   "pending_post_count": 1,
-  "gross_pending_payout": {
+  "gross_reward_basis": {
     "amount": "2",
     "nai": "@@000000013",
     "precision": 3
   },
-  "estimated_author_payout": {
-    "amount": "1",
-    "nai": "@@000000013",
-    "precision": 3
+  "author_reward_basis": {
+    "liquid": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "vesting": {
+      "amount": "1",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "direct": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "total": {
+      "amount": "1",
+      "nai": "@@000000013",
+      "precision": 3
+    }
   },
-  "estimated_beneficiaries_payout": {
-    "amount": "0",
-    "nai": "@@000000013",
-    "precision": 3
+  "beneficiaries_reward_basis": {
+    "liquid": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "vesting": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "direct": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "total": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    }
   },
-  "estimated_curators_payout": {
-    "amount": "1",
-    "nai": "@@000000013",
-    "precision": 3
+  "curators_reward_basis": {
+    "liquid": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "vesting": {
+      "amount": "1",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "direct": {
+      "amount": "0",
+      "nai": "@@000000013",
+      "precision": 3
+    },
+    "total": {
+      "amount": "1",
+      "nai": "@@000000013",
+      "precision": 3
+    }
   }
 }
