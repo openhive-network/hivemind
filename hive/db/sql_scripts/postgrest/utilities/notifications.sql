@@ -65,7 +65,7 @@ BEGIN
         WHEN _notify_type = 'follow' THEN '<src> followed you'
         WHEN _notify_type = 'reply' THEN '<src> replied to your post'
         WHEN _notify_type = 'reply_comment' THEN '<src> replied to your comment'
-        WHEN _notify_type = 'mention' THEN '<src> mentioned you and <other_mentions> others'
+        WHEN _notify_type = 'mention' THEN '<src> mentioned you<other_mentions>'
         WHEN _notify_type = 'vote' THEN '<src> voted on your post'
     END;
 
@@ -94,8 +94,16 @@ BEGIN
         _msg := replace(_msg, '<comm>', coalesce(_row.community_title, ''));
     END IF;
 
+    -- Build the "others" clause from the mention count (number_of_mentions includes the
+    -- notified account itself): 1 -> "" (just "mentioned you"), 2 -> " and 1 other",
+    -- 3+ -> " and N others". Avoids the "mentioned you and 0 others" / "and 1 others" wording.
     IF position('<other_mentions>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<other_mentions>', (coalesce(_row.number_of_mentions, 1) - 1)::TEXT);
+        _msg := replace(_msg, '<other_mentions>',
+            CASE
+                WHEN coalesce(_row.number_of_mentions, 1) <= 1 THEN ''
+                WHEN coalesce(_row.number_of_mentions, 1) = 2 THEN ' and 1 other'
+                ELSE ' and ' || (coalesce(_row.number_of_mentions, 1) - 1)::TEXT || ' others'
+            END);
     END IF;
 
     RETURN _msg;
