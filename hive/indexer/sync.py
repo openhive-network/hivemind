@@ -8,6 +8,8 @@ from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter as perf
 
+import psycopg2
+
 from hive.conf import SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
@@ -102,7 +104,15 @@ class SyncHiveDb:
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
 
-            PayoutStats.generate(self._db, separate_transaction=True)
+            try:
+                PayoutStats.generate(self._db, separate_transaction=True)
+            except Exception:
+                # A failed cleanup (typically a dead DB connection — often the
+                # very thing that brought us here) must not mask the original
+                # exception with an unrelated traceback.
+                if exc_type is None:
+                    raise
+                log.warning("Skipping payout_stats_view refresh during abnormal shutdown", exc_info=True)
 
             last_imported_block = Blocks.last_imported()
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
@@ -155,6 +165,19 @@ class SyncHiveDb:
         active_connections_before = self._get_active_db_connections()
         SyncHiveDb.time_start = OPSM.start()
 
+        while True:
+            try:
+                self._main_loop(report_enter_to_stage, active_connections_before)
+                return
+            except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                # Massive sync flushes batches from separate threads and
+                # connections; resuming it in-process is not safe. A process
+                # restart replays the unfinished batch via _batch_queue instead.
+                if DbState.is_massive_sync():
+                    raise
+                self._recover_from_disconnect(e)
+
+    def _main_loop(self, report_enter_to_stage, active_connections_before) -> None:
         while True:
             # Wait for previous massive consumption BEFORE modifying context state.
             # This prevents race condition where flush threads access context while
@@ -253,6 +276,38 @@ class SyncHiveDb:
             else:
                 self._on_stop_synchronization(active_connections_before)
                 raise AssertionError(f'Unknown application stage {application_stage}')
+
+    RECONNECT_DELAY_SECONDS = 5
+
+    def _recover_from_disconnect(self, cause: Exception) -> None:
+        """Re-establish the shared DB connection after the server dropped it.
+
+        Losing the session rolls back the in-flight transaction INCLUDING the
+        HAF context advancement done by hive.app_next_iteration, so after
+        reconnecting the loop resumes exactly after the last committed block —
+        the same guarantee the run_with_reconnect.sh wrapper relies on for the
+        SQL-loop HAF apps (see haf#321). Postgres drops sessions on a restart
+        and via idle_in_transaction_session_timeout when this process stalls
+        (e.g. the swap-thrash freezes observed on API nodes); both land here.
+        """
+        log.warning("Database connection lost; reconnecting...", exc_info=True)
+        attempt = 0
+        while can_continue_thread():
+            attempt += 1
+            try:
+                self._db.reconnect()
+                # The advisory locks acquired in __enter__ died with the old
+                # session; re-acquire them before touching hivemind state again.
+                self._db.query_no_return_autocommit(
+                    "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind', 'reputation_tracker'])"
+                )
+                log.warning(f"Reconnected to the database after {attempt} attempt(s); resuming synchronization")
+                return
+            except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                log.warning(f"Reconnect attempt {attempt} failed: {e}; retrying in {self.RECONNECT_DELAY_SECONDS}s")
+                time.sleep(self.RECONNECT_DELAY_SECONDS)
+        # Interrupted while reconnecting — surface the original disconnection.
+        raise cause
 
     def _replay_crashed_batch(self):
         """Check for and replay any unfinished batch from a prior crash.
