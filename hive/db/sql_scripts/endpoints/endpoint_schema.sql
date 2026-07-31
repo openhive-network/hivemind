@@ -702,6 +702,44 @@ declare
           }
         }
       }
+    },
+    "/sync-status": {
+      "get": {
+        "tags": [
+          "Other"
+        ],
+        "summary": "Get hivemind''s sync status",
+        "description": "Get the last block processed by hivemind as an object containing both\nthe block number and its timestamp (UTC). This is the uniform HAF-app\nsync/health endpoint: the timestamp lets a consumer compute staleness\nwith a single call (`age = now() - last_block_time`) without needing a\nseparate head-block reference.\n`last_block_time` is null if no block has been processed yet.\nWhile the HAF instance is still in massive sync (indexes not yet\nbuilt) the call fails fast with an error rather than executing an\nunindexed lookup.\n\nSQL example\n* `SELECT hivemind_endpoints.get_sync_status();`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/sync-status''`\n",
+        "operationId": "hivemind_endpoints.get_sync_status",
+        "responses": {
+          "200": {
+            "description": "Last block processed by hivemind and its timestamp.\n\n* Returns `JSON`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "x-sql-datatype": "JSON",
+                  "properties": {
+                    "last_block_num": {
+                      "type": "integer",
+                      "description": "highest block number processed by hivemind"
+                    },
+                    "last_block_time": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "UTC timestamp of that block"
+                    }
+                  }
+                },
+                "example": {
+                  "last_block_num": 5000000,
+                  "last_block_time": "2016-09-15T19:47:21"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -313,6 +313,7 @@ def setup_runtime_code(db):
         "endpoints/accounts/get_account_pending_author_rewards.sql",
         "endpoints/accounts/get_account_pending_curation_rewards.sql",
         "endpoints/blog/get_reblogs.sql",
+        "endpoints/other/get_sync_status.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
