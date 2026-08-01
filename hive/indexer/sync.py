@@ -50,6 +50,7 @@ class SyncHiveDb:
         self._ubound = None
         self._databases = None
         self.time_start = None
+        self._live_prepared = False
 
         self._massive_consume_blocks_futures = None
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
@@ -73,16 +74,13 @@ class SyncHiveDb:
             # NOTICE logging every minute) until any active installer of
             # those apps releases its EXCLUSIVE lock.
             self._db.query_no_return_autocommit(
-                "SELECT hive.acquire_app_block_processor_locks("
-                "ARRAY['hivemind', 'reputation_tracker'])"
+                "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind', 'reputation_tracker'])"
             )
         else:
             # Installer (build_schema / upgrade_schema): try EXCLUSIVE lock.
             # If a block-processor is holding the shared lock the function
             # NOTICEs the holder and returns false; skip rather than racing.
-            if not self._db.query_one(
-                "SELECT hive.try_acquire_app_install_lock('hivemind')"
-            ):
+            if not self._db.query_one("SELECT hive.try_acquire_app_install_lock('hivemind')"):
                 log.info("Skipping hivemind schema install (see NOTICE above).")
                 sys.exit(0)
 
@@ -139,11 +137,20 @@ class SyncHiveDb:
         # to open flush connections — otherwise we'd kill our own fresh connections.
         self._terminate_stale_connections()
 
+        # Detect data loss from UNLOGGED tables after a PostgreSQL crash.
+        # Must run before _replay_crashed_batch: if PostgreSQL truncated the
+        # UNLOGGED tables while a batch was in flight, replaying that batch
+        # against empty tables fails before the reset logic would ever run,
+        # crash-looping the process.
+        self._check_unlogged_data_consistency()
+
         # Check for unfinished batch from prior crash
         self._replay_crashed_batch()
 
-        # Detect data loss from UNLOGGED tables after a PostgreSQL crash
-        self._check_unlogged_data_consistency()
+        # Detect (and when safe, heal) a live block skipped by a pre-#336-fix
+        # process. Must run before ensure_finalize_massive_sync, which erases
+        # the last_imported/last_completed mismatch that is the only evidence.
+        self._recover_skipped_live_blocks()
 
         def report_enter_to_stage(current_stage) -> bool:
             if (
@@ -214,24 +221,29 @@ class SyncHiveDb:
 
             # app_next_iteration updated the HAF context and recreated the
             # operations_view / blocks_view, but all of that is still inside an
-            # uncommitted transaction on self._db.  We MUST commit here because
-            # massive sync runs load_ops_staging on a *separate* DB connection
-            # (the cloned massive_instance) which cannot see uncommitted DDL
-            # changes from this session — without this commit the operations_view
-            # would show the old block range and the batch would find no ops.
+            # uncommitted transaction on self._db.
             #
-            # For massive sync stages, insert the block range into _batch_queue
+            # Massive sync MUST commit here because it runs load_ops_staging on a
+            # *separate* DB connection (the cloned massive_instance) which cannot
+            # see uncommitted DDL changes from this session — without this commit
+            # the operations_view would show the old block range and the batch
+            # would find no ops.  The block range is inserted into _batch_queue
             # BEFORE committing so the context advancement and the crash-recovery
-            # marker are committed atomically.  Without this, a crash between the
-            # commit and _process_massive_blocks leaves the context advanced past
-            # blocks that were never processed and no batch_queue entry to trigger
-            # replay on restart.
+            # marker are committed atomically; a crash mid-batch is then replayed
+            # from _batch_queue on restart.
+            #
+            # Live sync must NOT commit here: the block's entire work runs on
+            # this same connection, and process_live_block_sql's final COMMIT
+            # makes the context advancement, the block's work, and
+            # last_completed_block durable atomically.  Committing the pointer
+            # early opened a window where a mid-block connection loss skipped
+            # the block forever (#336).
             if application_stage in ("MASSIVE_WITHOUT_INDEXES", "MASSIVE_WITH_INDEXES"):
                 self._db.query_no_return(
                     f"INSERT INTO {SCHEMA_NAME}._batch_queue (first_block, last_block) "
                     f"VALUES ({self._lbound}, {self._ubound})"
                 )
-            self._db.query_no_return("COMMIT")
+                self._db.query_no_return("COMMIT")
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync(True)
                 report_enter_to_stage(application_stage)
@@ -260,15 +272,26 @@ class SyncHiveDb:
                 DbState.set_massive_sync(False)
                 report_enter_to_stage(application_stage)
 
-                DbState.ensure_on_synchronous_commit()
-                DbState.ensure_indexes_are_enabled()
-                DbState.restore_wal_safety_after_massive_sync()
-                DbState.close_admin_db()  # No longer needed after massive sync
+                if not self._live_prepared or last_imported_block > Blocks.last_completed():
+                    # First live iteration (fresh start or massive→live
+                    # transition): the ensure_*/finalization steps below run DDL
+                    # and COMMIT on the shared connection.  Roll back the open
+                    # pointer advance first so it can never become durable ahead
+                    # of the block's work (#336); the same range is re-taken on
+                    # the next iteration and processed atomically.
+                    self._db.query_no_return("ROLLBACK")
 
-                if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
-                    self.print_summary()
+                    DbState.ensure_on_synchronous_commit()
+                    DbState.ensure_indexes_are_enabled()
+                    DbState.restore_wal_safety_after_massive_sync()
+                    DbState.close_admin_db()  # No longer needed after massive sync
 
-                DbState.ensure_fk_are_enabled()
+                    if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
+                        self.print_summary()
+
+                    DbState.ensure_fk_are_enabled()
+                    self._live_prepared = True
+                    continue
 
                 log.info("[SINGLE] *** SINGLE block processing***")
 
@@ -283,12 +306,14 @@ class SyncHiveDb:
         """Re-establish the shared DB connection after the server dropped it.
 
         Losing the session rolls back the in-flight transaction INCLUDING the
-        HAF context advancement done by hive.app_next_iteration, so after
-        reconnecting the loop resumes exactly after the last committed block —
-        the same guarantee the run_with_reconnect.sh wrapper relies on for the
-        SQL-loop HAF apps (see haf#321). Postgres drops sessions on a restart
-        and via idle_in_transaction_session_timeout when this process stalls
-        (e.g. the swap-thrash freezes observed on API nodes); both land here.
+        HAF context advancement done by hive.app_next_iteration (in live mode
+        the pointer is only committed together with the block's work — see the
+        massive-only COMMIT in _main_loop, #336), so after reconnecting the
+        loop resumes exactly after the last committed block — the same
+        guarantee the run_with_reconnect.sh wrapper relies on for the SQL-loop
+        HAF apps (see haf#321). Postgres drops sessions on a restart and via
+        idle_in_transaction_session_timeout when this process stalls (e.g. the
+        swap-thrash freezes observed on API nodes); both land here.
         """
         log.warning("Database connection lost; reconnecting...", exc_info=True)
         attempt = 0
@@ -333,6 +358,76 @@ class SyncHiveDb:
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
         log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
+
+    def _recover_skipped_live_blocks(self):
+        """Detect a live block whose work was lost while the context advanced past it.
+
+        Before the pointer commit was made massive-only (#336), a mid-block
+        connection loss in live sync committed the HAF context advancement
+        while the block's work rolled back; on restart the block was silently
+        skipped forever. The mismatch (last_imported > last_completed with no
+        pending batch) is that failure's only durable signal — and the first
+        live iteration erases it via ensure_finalize_massive_sync — so this
+        must run before the main loop.
+
+        When the gap is unambiguously the live-skip signature, rewind the
+        context to last_completed so the lost blocks are re-processed; the
+        lost work rolled back atomically, so re-processing collides with
+        nothing. Rewind failures are logged and ignored — the WARNING is
+        always emitted and startup is never blocked.
+        """
+        last_imported = Blocks.last_imported()
+        last_completed = Blocks.last_completed()
+        gap = last_imported - last_completed
+        if gap <= 0:
+            return
+
+        if self._db.query_one(f"SELECT EXISTS(SELECT 1 FROM {SCHEMA_NAME}._batch_queue)"):
+            return  # in-flight massive batch: _replay_crashed_batch owns this gap
+
+        # During massive sync last_completed legitimately lags by huge amounts
+        # (it only advances at finalization); only a small gap while the app is
+        # in the live stage is the skipped-block signature.
+        stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
+        if stage != 'live' or gap > (self._max_batch or 1000):
+            return
+
+        log.warning(
+            "Detected %d live block(s) whose work was never committed: the HAF "
+            "context is at block %d but the last completed block is %d. Blocks "
+            "%d..%d were skipped by a previous process (see hivemind#336).",
+            gap,
+            last_imported,
+            last_completed,
+            last_completed + 1,
+            last_imported,
+        )
+
+        try:
+            was_attached = self._db.query_one(
+                "SELECT hca.is_attached FROM hafd.contexts_attachment hca "
+                f"JOIN hafd.contexts hc ON hc.id = hca.context_id WHERE hc.name = '{SCHEMA_NAME}'"
+            )
+            if was_attached:
+                self._db.query_no_return(f"SELECT hive.app_context_detach('{SCHEMA_NAME}')")
+            self._db.query_no_return(f"SELECT hive.app_set_current_block_num('{SCHEMA_NAME}', {last_completed})")
+            if was_attached:
+                self._db.query_no_return(f"SELECT hive.app_context_attach('{SCHEMA_NAME}')")
+            log.warning(
+                "Rewound the HAF context to block %d; blocks %d..%d will be re-processed.",
+                last_completed,
+                last_completed + 1,
+                last_imported,
+            )
+        except Exception:
+            log.warning(
+                "Could not rewind the HAF context to block %d; blocks %d..%d remain "
+                "missing from hivemind data and need a manual backfill.",
+                last_completed,
+                last_completed + 1,
+                last_imported,
+                exc_info=True,
+            )
 
     def _check_unlogged_data_consistency(self):
         """Detect and recover from UNLOGGED table data loss after a PostgreSQL crash.

@@ -26,7 +26,13 @@ class Posts(DbAdapterHolder):
             patch = dmp.patch_fromText(new_body_def)
             if patch is not None and len(patch):
                 old_body = PostDataCache.get_post_body(id)
-                new_body, _ = dmp.patch_apply(patch, old_body)
+                new_body, results = dmp.patch_apply(patch, old_body)
+                if results and not any(results):
+                    # No hunk matched — the patch was already applied (e.g. a
+                    # crashed batch replayed after its PostDataCache flush had
+                    # committed) or the stored body diverged; keep the stored
+                    # body instead of stacking the patch again.
+                    return old_body
             else:
                 new_body = new_body_def
         except ValueError:
