@@ -1,6 +1,6 @@
 import logging
 
-from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME
+from hive.conf import MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
@@ -14,8 +14,10 @@ def prepare_app_context(db: Db) -> None:
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
         LIMIT_FOR_PROCESSED_BLOCKS = 1000
+        # Existing contexts get the same stages via the UPDATE in
+        # upgrade/upgrade_runtime_migration.sql — keep the two in sync.
         synchronization_stages = f"""ARRAY[
-              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
+              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
             , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
             , hive.live_stage()
         ]::hive.application_stages"""

@@ -17,6 +17,20 @@ SWAGGER_URL = '{hivemind-host}'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
 ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 
+# Distance behind head at which sync enters MASSIVE_WITHOUT_INDEXES (drop
+# indexes for the catch-up; also gates the full-recompute finalization path).
+# Empirical basis (hbt5, 2026-08, measurements in hivemind#339): the machinery's
+# fixed overhead is ~12,100s (index rebuild 3,692s; UNLOGGED round-trip 6,566s
+# and BM25 rebuild ~1,860s, both since gated to initial sync only), while the
+# per-block saving is ~4.5ms (sustained 137 bps with indexes vs ~355 bps
+# without), putting break-even at ~2.3-2.7M blocks (~3 months behind). Real
+# whole-stack outages are bound by hived's p2p delivery (~47 bps) anyway, so
+# the threshold errs low only for hivemind-only resyncs. If this number looks
+# wrong in the future, re-measure those rates before retuning.
+# Keep in sync with the context-stages update in
+# hive/db/sql_scripts/upgrade/upgrade_runtime_migration.sql.
+MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS = 2_000_000
+
 
 def _sanitized_conf(parser):
     """Formats parser config, redacting database url password."""
@@ -269,7 +283,7 @@ class Conf:
                     "# if you want to have completion everywhere, execute theese commands\n",
                     "# ln $PWD/hive-completion.bash $HOME/.local/\n",
                     '# echo "source $HOME/.local/hive-completion.bash" >> $HOME/.bashrc\n',
-                    "# source $HOME/.bashrc\n\n" f'complete -f -W "{arguments}" hive\n',
+                    f"# source $HOME/.bashrc\n\ncomplete -f -W \"{arguments}\" hive\n",
                     "\n",
                 ]
             )
