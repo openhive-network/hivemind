@@ -35,7 +35,7 @@ distance-dirty = "{base_version}-{distance}+{vcs}{rev}-dirty.{author_date:%Y%m%d
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py314"
 
 [tool.ruff.format]
 quote-style = "preserve"  # Preserves existing quote style
