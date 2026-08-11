@@ -38,6 +38,25 @@ END
 $$
 ;
 
+--- #339: raise the MASSIVE_WITHOUT_INDEXES stage distance from one week (201600)
+--- to 2M blocks on existing contexts. Stage definitions are baked into the
+--- context at app_create_context time, so upgrades must rewrite them here.
+--- Keep in sync with MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS in hive/conf.py
+--- and the stage array in hive/indexer/hive_db/haf_functions.py.
+--- Idempotent: only rewrites when the stored stages differ.
+UPDATE hafd.contexts
+SET stages = ARRAY[
+      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 1000, '20 seconds'),
+      hive.stage('MASSIVE_WITH_INDEXES', 101, 1000, '20 seconds'),
+      hive.live_stage()
+    ]::hive.application_stages
+WHERE name = 'hivemind_app'
+  AND stages IS DISTINCT FROM ARRAY[
+      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 1000, '20 seconds'),
+      hive.stage('MASSIVE_WITH_INDEXES', 101, 1000, '20 seconds'),
+      hive.live_stage()
+    ]::hive.application_stages;
+
 --- Must be at the end
 TRUNCATE TABLE hivemind_app.hive_db_data_migration;
 
