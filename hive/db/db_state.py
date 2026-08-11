@@ -11,7 +11,13 @@ from typing import Optional
 import psycopg2.extensions
 
 import hive.db.schema as schema_module
-from hive.conf import ONE_WEEK_IN_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME, SCHEMA_OWNER_NAME, SWAGGER_URL
+from hive.conf import (
+    MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS,
+    REPTRACKER_SCHEMA_NAME,
+    SCHEMA_NAME,
+    SCHEMA_OWNER_NAME,
+    SWAGGER_URL,
+)
 from hive.db.adapter import Db
 from hive.db.schema import perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
@@ -40,6 +46,7 @@ class DbState:
     _original_full_page_writes = None
     _rshares_recalculated = False
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
+    _initial_sync = None  # Cached: True until the first finalization commits last_completed_block
 
     # Tables that have registered indexes (via register_indexes.sql)
     _TABLES_WITH_REGISTERED_INDEXES = [
@@ -345,6 +352,13 @@ class DbState:
         if cls._original_fsync is not None or cls._wal_safety_disable_attempted:
             return  # Already disabled or already attempted
 
+        if not cls.is_initial_sync():
+            # fsync=off is only tolerable when a crash means rebuilding from
+            # scratch anyway; on a database with committed state it risks real
+            # corruption for a marginal gain (WAL waits are <=2% of processing
+            # time per the #339 measurements).
+            return
+
         cls._wal_safety_disable_attempted = True
         admin = cls.admin_db()
         if admin is None:
@@ -396,20 +410,43 @@ class DbState:
         log.info("[MASSIVE] WAL safety features restored")
 
     @classmethod
+    def is_initial_sync(cls):
+        """True until the first massive finalization commits last_completed_block_num.
+
+        Gates the machinery that is only justified (and only safe) when the
+        database holds no irreplaceable state yet: UNLOGGED conversion, BM25
+        drop/rebuild, and WAL-safety disabling. Cached per process — a crash
+        during initial sync restarts with last_completed still 0, so the gate
+        re-engages correctly.
+        """
+        if cls._initial_sync is None:
+            last_completed = cls.db().query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state")
+            cls._initial_sync = (last_completed or 0) == 0
+        return cls._initial_sync
+
+    @classmethod
     def ensure_indexes_are_disabled(cls):
         if cls._indexes_were_disabled:
             return
 
         cls._drop_indexes_in_threads()
 
-        # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
-        # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
-        cls.db().query_no_return("DROP INDEX IF EXISTS hivemind_app.hive_post_data_bm25_idx")
+        if cls.is_initial_sync():
+            # UNLOGGED conversion (and the BM25 drop it requires) only pays for
+            # itself on initial sync: the round-trip costs ~6,600s + ~1,860s BM25
+            # rebuild on production-class hardware, while WAL waits are <=2% of
+            # with-indexes processing time (measurements in #339). It is also
+            # only *safe* here — a PostgreSQL crash truncates UNLOGGED tables,
+            # acceptable solely when the data can be rebuilt from scratch.
 
-        # Set tables to UNLOGGED for faster inserts (no WAL writes)
-        from hive.db.schema import set_logged_table_attribute
+            # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
+            # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
+            cls.db().query_no_return("DROP INDEX IF EXISTS hivemind_app.hive_post_data_bm25_idx")
 
-        set_logged_table_attribute(cls.db(), False)
+            # Set tables to UNLOGGED for faster inserts (no WAL writes)
+            from hive.db.schema import set_logged_table_attribute
+
+            set_logged_table_attribute(cls.db(), False)
 
         cls._indexes_were_disabled = True
         cls._indexes_were_enabled = False
@@ -885,7 +922,9 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
 
-            is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
+            is_initial_massive = (
+                last_imported_blocks - last_completed_blocks
+            ) > MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS
 
             if is_initial_massive:
                 cls.vacuum_all_hivemind_tables_in_threads()
