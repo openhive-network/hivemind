@@ -636,6 +636,33 @@ class DbState:
             )
 
     @classmethod
+    def _finish_vote_notifications_ranged(cls, db, last_imported_block, current_imported_block):
+        """Backfill vote notifications for the range a short massive catch-up covered.
+
+        Massive batches skip vote notifications (scoring needs payout data), and
+        only the initial-massive finalization ran the full backfill — so every
+        catch-up below the initial threshold silently lost its range's vote
+        notifications (#338). The flush is idempotent (ON CONFLICT DO NOTHING)
+        and windowed to the 90-day notification horizon inside the SQL.
+        """
+        with AutoDbDisposer(db, "finish_vote_notifications_ranged") as db_mgr:
+            time_start = perf_counter()
+            db_mgr.db.query("START TRANSACTION")
+            sql = (
+                f"SELECT {SCHEMA_NAME}.flush_vote_notifications_for_blocks("
+                f"{last_imported_block + 1}, {current_imported_block})"
+            )
+            result = db_mgr.db.query_one(sql)
+            db_mgr.db.query("COMMIT")
+            log.info(
+                "[MASSIVE] flush_vote_notifications (%d..%d): %s notifications in %.4fs",
+                last_imported_block + 1,
+                current_imported_block,
+                result,
+                perf_counter() - time_start,
+            )
+
+    @classmethod
     def _finish_reputation_notification_scores(cls, db):
         """Recalculate reputation-based notification scores using final reputation data.
 
@@ -768,6 +795,16 @@ class DbState:
                 ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
                 ('muted_parents', cls._finish_muted_parents, [cls.db()]),
             ]
+        else:
+            # The initial path backfills vote notifications in Part 1; short
+            # catch-ups must backfill their own range or lose it forever (#338).
+            methods.append(
+                (
+                    'vote_notifications',
+                    cls._finish_vote_notifications_ranged,
+                    [cls.db(), last_imported_block, current_imported_block],
+                )
+            )
         # BM25 index creation is deferred from the index phase to here, running in
         # parallel with the fills above. Takes ~31min but is hidden inside Part 0
         # which takes ~48min, eliminating it from the critical path.
