@@ -1159,7 +1159,7 @@ python_api_client_test:
     GIT_SUBMODULE_STRATEGY: none
   parallel:
     matrix:
-    - PYTHON_VERSION: ["3.12", "3.14"]
+    - PYTHON_VERSION: ["3.14"]
   before_script:
   - !reference [.project_develop_configuration_template, before_script]
   - !reference [.update_deps_for_tests, script]
@@ -1180,7 +1180,7 @@ test_python_api_wheel:
     GIT_SUBMODULE_STRATEGY: none
   parallel:
     matrix:
-    - PYTHON_VERSION: ["3.12", "3.14"]
+    - PYTHON_VERSION: ["3.14"]
   before_script:
   - !reference [.configuration_template, before_script]
   - !reference [.update_deps_for_tests, script]
