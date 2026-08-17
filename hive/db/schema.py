@@ -37,7 +37,8 @@ def create_statistics(db):
 def _try_create_extension(db, ext_name):
     """Try to create an extension, return True if successful."""
     try:
-        db.query(f'CREATE EXTENSION IF NOT EXISTS {ext_name};')
+        # CASCADE: pg_search >= 0.25 depends on the vector extension
+        db.query(f'CREATE EXTENSION IF NOT EXISTS {ext_name} CASCADE;')
         return True
     except Exception:
         # With autocommit=True the failed statement is already rolled back
