@@ -306,8 +306,15 @@ class Blocks:
         phase_times['parallel'] = perf_counter() - t0
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
+        # Mentions parsing is skipped for blocks older than the 90-day notification
+        # window, like the phase-6 flushes below: hive_mentions is pruned to that
+        # window (live sync only) and its sole consumer is notification rendering,
+        # so massive-era mentions would be built only to be bulk-deleted — and the
+        # body re-reads they force are the flush statement's main detoast traffic.
         t0 = perf_counter()
-        PostDataCache.flush()
+        if cls._notification_min_block is None:
+            cls._notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
+        PostDataCache.flush(process_mentions=last_block > cls._notification_min_block)
         phase_times['flush'] = perf_counter() - t0
 
         # Phase 6: Parallel notification flush
@@ -316,8 +323,6 @@ class Blocks:
         # Post/follow/reblog notifications are skipped for blocks older than the 90-day
         # notification window (they would never appear in user notification feeds).
         t0 = perf_counter()
-        if cls._notification_min_block is None:
-            cls._notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
         if last_block > cls._notification_min_block:
             phase6_tasks = [
                 (
