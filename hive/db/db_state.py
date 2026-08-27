@@ -77,6 +77,19 @@ class DbState:
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
     _DDL_MAX_RETRIES = 5
 
+    # During massive sync, autovacuum on the hot tables races the in-flight flush
+    # statements' toast reads (missing/unexpected-chunk failures, #342), so it is
+    # disabled on them and replaced by vacuums issued at chunk boundaries, when no
+    # flush statement is running. Dead tuples on these tables come only from our
+    # own batches, so a boundary check is at least as well-informed as autovacuum.
+    # Values are dead-tuple counts that trigger a vacuum at the next boundary.
+    MASSIVE_VACUUM_THRESHOLDS = {
+        'hive_accounts': 50000,
+        'hive_posts': 25000,
+        'hive_post_tags': 50000,
+        'hive_post_data': 50000,
+    }
+
     @staticmethod
     def _retry_ddl(fn, description, max_retries=None):
         """Retry a DDL operation that may deadlock with other HAF apps.
@@ -447,6 +460,8 @@ class DbState:
             from hive.db.schema import set_logged_table_attribute
 
             set_logged_table_attribute(cls.db(), False)
+
+        cls.disable_autovacuum_for_massive_sync()
 
         cls._indexes_were_disabled = True
         cls._indexes_were_enabled = False
@@ -885,6 +900,51 @@ class DbState:
         return True
 
     @classmethod
+    def disable_autovacuum_for_massive_sync(cls):
+        """Hand vacuum scheduling of the hot tables over to boundary vacuums."""
+        for table in cls.MASSIVE_VACUUM_THRESHOLDS:
+            cls.db().query_no_return(
+                f"ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_enabled = off, toast.autovacuum_enabled = off)"
+            )
+        log.info("[MASSIVE] Autovacuum disabled on %s; boundary vacuums take over", list(cls.MASSIVE_VACUUM_THRESHOLDS))
+
+    @classmethod
+    def restore_autovacuum_after_massive_sync(cls):
+        for table in cls.MASSIVE_VACUUM_THRESHOLDS:
+            cls.db().query_no_return(
+                f"ALTER TABLE {SCHEMA_NAME}.{table} RESET (autovacuum_enabled, toast.autovacuum_enabled)"
+            )
+        log.info("[MASSIVE] Autovacuum reloptions restored on %s", list(cls.MASSIVE_VACUUM_THRESHOLDS))
+
+    @classmethod
+    def run_boundary_vacuums(cls):
+        """Vacuum any watched table whose dead tuples exceed its threshold.
+
+        Called between chunks with no flush statement in flight; plain VACUUM
+        (visibility map limits it to recently-churned pages, and the heavy
+        indexes are dropped during massive sync anyway).
+        """
+        names = ','.join(f"'{t}'" for t in cls.MASSIVE_VACUUM_THRESHOLDS)
+        rows = cls.db().query_all(
+            f"SELECT relname, n_dead_tup FROM pg_stat_user_tables WHERE schemaname = '{SCHEMA_NAME}' AND relname IN ({names})"
+        )
+        due = [
+            row._mapping['relname']
+            for row in rows
+            if row._mapping['n_dead_tup'] >= cls.MASSIVE_VACUUM_THRESHOLDS[row._mapping['relname']]
+        ]
+        if not due:
+            return []
+
+        def vacuum_table(table, db):
+            with AutoDbDisposer(db, "boundary_vacuum") as db_mgr:
+                db_mgr.db.query_no_return_autocommit(f"VACUUM {SCHEMA_NAME}.{table}")
+
+        methods = [('VACUUM ' + table, vacuum_table, [table, cls.db()]) for table in due]
+        cls.process_tasks_in_threads("Boundary vacuum on hivemind tables", methods)
+        return due
+
+    @classmethod
     def vacuum_tables_in_threads(cls, tables):
         def vacuum_table(table, db):
             with AutoDbDisposer(db, "vacuum") as db_mgr:
@@ -921,6 +981,10 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
+
+            # Idempotent on purpose: after a crash the process-local state is gone
+            # but the reloptions persist, so always RESET them at finalization.
+            cls.restore_autovacuum_after_massive_sync()
 
             is_initial_massive = (
                 last_imported_blocks - last_completed_blocks
