@@ -49,7 +49,7 @@ class PostDataCache(DbAdapterHolder):
         return post_data['body']
 
     @classmethod
-    def flush(cls, print_query=False):
+    def flush(cls, print_query=False, process_mentions=True):
         """Flush data from cache to db"""
         if not cls._data:
             return 0
@@ -82,6 +82,16 @@ class PostDataCache(DbAdapterHolder):
             else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'
         )
 
+        # Mentions parsing re-reads the just-written bodies; callers disable it for
+        # blocks outside the 90-day notification window (hive_mentions is windowed
+        # data whose only consumer is notification rendering). The count() form
+        # keeps the data-modifying CTEs referenced and the statement shape intact.
+        final_select = (
+            f"SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM combined"
+            if process_mentions
+            else "SELECT count(id) FROM combined"
+        )
+
         sql = f"""
             WITH insert_values(id, is_root, title, body, json) AS (
                 SELECT * FROM (VALUES {insert_ph}) AS v(id, is_root, title, body, json)
@@ -109,8 +119,7 @@ class PostDataCache(DbAdapterHolder):
                 UNION ALL
                 SELECT id FROM update_post_data
             )
-            SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id))
-            FROM combined
+            {final_select}
         """
 
         params = []
