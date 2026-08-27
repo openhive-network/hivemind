@@ -341,6 +341,14 @@ class Blocks:
             cls._run_parallel_sql(phase6_tasks)
         phase_times['notify'] = perf_counter() - t0
 
+        # Phase 7: Boundary vacuum. Autovacuum is disabled on the hot tables for
+        # the duration of massive sync (its toast vacuums race the in-flight flush
+        # statements' detoast reads); vacuums run here instead, when no statement
+        # is in flight, triggered by per-table dead-tuple thresholds.
+        t0 = perf_counter()
+        DbState.run_boundary_vacuums()
+        phase_times['vacuum'] = perf_counter() - t0
+
         total = sum(phase_times.values())
         log.info(
             "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s",
