@@ -217,6 +217,7 @@ class SyncHiveDb:
             if self._lbound is None:
                 if application_stage == 'wait_for_haf':
                     report_enter_to_stage(application_stage)
+                self._idle_until_new_block(application_stage)
                 continue
 
             # app_next_iteration updated the HAF context and recreated the
@@ -568,8 +569,11 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
+        # _wait => FALSE: an empty iteration returns at once instead of waiting
+        # inside the database for the next block; _idle_until_new_block waits on
+        # this side, with the backend idle and no transaction open (haf#341).
         result = self._db.query_one(
-            f"CALL hive.app_next_iteration( _contexts => ARRAY['{SCHEMA_NAME}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {limit}, _override_max_batch => {batch} )"
+            f"CALL hive.app_next_iteration( _contexts => ARRAY['{SCHEMA_NAME}' ]::hive.contexts_group, _blocks_range => (0,0), _limit => {limit}, _override_max_batch => {batch}, _wait => FALSE )"
         )
 
         self._db._trx_active = True
@@ -586,6 +590,27 @@ class SyncHiveDb:
         log.info(f"Next block range from hive.app_next_iteration is: <{lbound}:{ubound}>")
 
         return lbound, ubound
+
+    IDLE_POLL_SECONDS = 0.5      # while HAF is not ready / massive sync starves
+    LIVE_SAFETY_WAIT_SECONDS = 15.0  # live: NOTIFY wakes us; this is the fallback
+
+    def _idle_until_new_block(self, application_stage) -> None:
+        """Wait for the next block after an empty iteration (haf#341).
+
+        Nothing is done in the database while waiting: the empty iteration's
+        transaction is rolled back (it only carried the heartbeat and no
+        position change), and in live sync the connection idles on the socket
+        until HAF's NOTIFY for a new block. Outside live sync (waiting for HAF,
+        or massive sync momentarily ahead of the irreversible head) a short
+        sleep is used instead - those states do not notify.
+        """
+        if self._db.is_trx_active():
+            self._db.query_no_return("ROLLBACK")
+        if application_stage == 'live':
+            self._db.listen_for_blocks()
+            self._db.wait_for_block_notification(self.LIVE_SAFETY_WAIT_SECONDS)
+        else:
+            time.sleep(self.IDLE_POLL_SECONDS)
 
     def _process_live_blocks(self, lbound, ubound, active_connections_before):
         log.info(f"[SINGLE] Attempting to process blocks in range: <{lbound}:{ubound}>")

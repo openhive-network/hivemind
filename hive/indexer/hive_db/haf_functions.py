@@ -34,8 +34,49 @@ def prepare_app_context(db: Db) -> None:
         is_forking = db.query_one(f"SELECT hive.app_is_forking('{SCHEMA_NAME}') as is_forking;")
         log.info(f"is_forking={is_forking}")
 
+    # Registration in the HAF application registry (register_application) is
+    # done by setup_runtime_code, after the runtime SQL it depends on exists.
+
     # Note: custom_json_type index creation is deferred to sync startup
     # (SyncHiveDb.run) so that the install container finishes quickly.
+
+
+def register_application(db: Db) -> None:
+    """Register hivemind in the HAF application registry (haf#341).
+
+    Hivemind drives its own loop (no process procedure), so the registration
+    exists for other applications: hivesense and proxy-whitelist declare a
+    dependency on 'hivemind_app', and HAF then withholds from them every block
+    hivemind has not committed yet.
+
+    That gating normally reads a dependency's hafd.contexts.current_block_num,
+    which is right for loops that commit the position together with the block's
+    work - hivemind's live sync does (#336). Massive sync however commits the
+    position (and the _batch_queue crash-recovery marker) BEFORE the batch is
+    flushed on the massive connection, so the committed data trails the position
+    by the in-flight batch: completed_block_num() reports the position minus
+    that batch, and is registered as the completed-block function.
+    """
+    db.query_no_return(
+        f"""CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.completed_block_num()
+            RETURNS INTEGER
+            LANGUAGE sql
+            STABLE
+            AS $$
+                SELECT LEAST(
+                    hive.app_get_current_block_num('{SCHEMA_NAME}'),
+                    COALESCE((SELECT MIN(first_block) - 1 FROM {SCHEMA_NAME}._batch_queue), 2147483647)
+                )
+            $$;"""
+    )
+    registry_available = db.query_one("SELECT to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') IS NOT NULL")
+    if not registry_available:
+        log.warning("HAF application registry not available (hive.app_register); skipping hivemind registration")
+        return
+    db.query_no_return(
+        f"SELECT hive.app_register('{SCHEMA_NAME}', ARRAY['{SCHEMA_NAME}']::hive.contexts_group, NULL, '{SCHEMA_NAME}.completed_block_num');"
+    )
+    log.info(f"Registered '{SCHEMA_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)")
 
 
 def ensure_custom_json_type_index(db: Db) -> None:
