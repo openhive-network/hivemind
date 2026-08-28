@@ -359,6 +359,11 @@ def setup_runtime_code(db):
     db.query_no_return(sql.format(GIT_REVISION))
     db.query_no_return(sql_hive_state_update)
 
+    # register in the HAF application registry; needs hivemind_app._batch_queue
+    # (massive_sync.sql above) for the completed-block function (haf#341)
+    from hive.indexer.hive_db.haf_functions import register_application
+    register_application(db)
+
 
 def perform_db_upgrade(db, admin_db):
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
