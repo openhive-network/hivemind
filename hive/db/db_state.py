@@ -77,16 +77,17 @@ class DbState:
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
     _DDL_MAX_RETRIES = 5
 
-    # During massive sync, autovacuum on the hot tables races the in-flight flush
-    # statements' toast reads (missing/unexpected-chunk failures, #342), so it is
-    # disabled on them and replaced by vacuums issued at chunk boundaries, when no
-    # flush statement is running. Dead tuples on these tables come only from our
-    # own batches, so a boundary check is at least as well-informed as autovacuum.
+    # During massive sync, autovacuum on hive_post_data races the flush
+    # statement's toast reads of post bodies (missing/unexpected-chunk failures,
+    # #342 — every observed hit was this table), so it is disabled there and
+    # replaced by vacuums issued at chunk boundaries, when no flush statement is
+    # running. Scope is deliberately this one table: the other hot tables have no
+    # toast read path, and the 60-70M bed A/B measured their concurrent
+    # autovacuums as free in wall time while boundary vacuums of them cost 9.5%
+    # (563s of synchronous stalls). hive_post_data itself needed ~1 vacuum per
+    # 10M blocks, so serializing it costs nothing.
     # Values are dead-tuple counts that trigger a vacuum at the next boundary.
     MASSIVE_VACUUM_THRESHOLDS = {
-        'hive_accounts': 50000,
-        'hive_posts': 25000,
-        'hive_post_tags': 50000,
         'hive_post_data': 50000,
     }
 
@@ -901,7 +902,7 @@ class DbState:
 
     @classmethod
     def disable_autovacuum_for_massive_sync(cls):
-        """Hand vacuum scheduling of the hot tables over to boundary vacuums."""
+        """Hand vacuum scheduling of the race-prone table(s) over to boundary vacuums."""
         for table in cls.MASSIVE_VACUUM_THRESHOLDS:
             cls.db().query_no_return(
                 f"ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_enabled = off, toast.autovacuum_enabled = off)"
