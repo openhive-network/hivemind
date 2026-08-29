@@ -341,10 +341,11 @@ class Blocks:
             cls._run_parallel_sql(phase6_tasks)
         phase_times['notify'] = perf_counter() - t0
 
-        # Phase 7: Boundary vacuum. Autovacuum is disabled on the hot tables for
-        # the duration of massive sync (its toast vacuums race the in-flight flush
-        # statements' detoast reads); vacuums run here instead, when no statement
-        # is in flight, triggered by per-table dead-tuple thresholds.
+        # Phase 7: Boundary vacuum. Autovacuum is disabled on hive_post_data for
+        # the duration of massive sync (its toast vacuums race the flush
+        # statement's body reads); vacuums run here instead, when no statement
+        # is in flight, triggered by a dead-tuple threshold. Rarely fires -- the
+        # table accrues dead toast slowly -- so the phase is ~free.
         t0 = perf_counter()
         DbState.run_boundary_vacuums()
         phase_times['vacuum'] = perf_counter() - t0
