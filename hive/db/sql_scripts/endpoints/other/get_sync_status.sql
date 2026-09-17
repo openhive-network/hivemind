@@ -52,27 +52,41 @@ RETURNS JSON
 LANGUAGE 'plpgsql' STABLE
 AS
 $$
+DECLARE
+  __block_num INT;
 BEGIN
   -- No cache - sync status needs real-time accuracy
   PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=0"}]', true);
 
   -- Fail fast during HAF massive sync: hafd.blocks' indexes are dropped for
-  -- the duration (hive.disable_indexes_of_irreversible), so the blocks_view
-  -- lookup below would seq-scan. Health-check agents gate on
-  -- is_instance_ready() before calling APIs; this guard protects any caller
-  -- that does not (e.g. a raw haproxy httpchk) by erroring in milliseconds.
+  -- the duration (hive.disable_indexes_of_irreversible), so the block lookup
+  -- below would seq-scan. Health-check agents gate on is_instance_ready()
+  -- before calling APIs; this guard protects any caller that does not (e.g. a
+  -- raw haproxy httpchk) by erroring in milliseconds.
   IF NOT hive.is_instance_ready() THEN
     RAISE EXCEPTION 'HAF instance is not ready (massive sync in progress)'
       USING ERRCODE = '55000';
   END IF;
 
-  RETURN (
-    SELECT json_build_object(
-      'last_block_num', c.current_block_num,
-      'last_block_time', to_char(b.created_at, 'YYYY-MM-DD"T"HH24:MI:SS')
-    )
-    FROM hivemind_app.context_data_view c
-    LEFT JOIN hivemind_app.blocks_view b ON b.num = c.current_block_num
+  __block_num := (SELECT current_block_num FROM hafd.contexts WHERE name = 'hivemind_app');
+
+  -- Block timestamp via HAF's public API rather than hivemind_app.blocks_view:
+  -- HAF recreates a context's views under an ACCESS EXCLUSIVE lock on every
+  -- context attach/detach (which the app loop does when switching stages to
+  -- catch up), so a lookup through the view queues behind the whole iteration
+  -- transaction (seen on haf_block_explorer: 17 s -> statement timeouts and
+  -- haproxy check failures). hive.get_app_current_block_age() reads
+  -- hafd.contexts + hafd.blocks + hafd.blocks_reversible and touches no view.
+  -- now() is the transaction timestamp on both sides of the subtraction, so
+  -- now() - age is the block's created_at exactly (HAF runs with a UTC session
+  -- time zone). Block 0 (pre-sync) has no row and HAF reports its age from
+  -- the epoch, hence the explicit null.
+  RETURN json_build_object(
+    'last_block_num', __block_num,
+    'last_block_time', CASE WHEN __block_num > 0 THEN
+      to_char(now() - hive.get_app_current_block_age(ARRAY['hivemind_app']::hive.contexts_group),
+              'YYYY-MM-DD"T"HH24:MI:SS')
+    END
   );
 END
 $$;
