@@ -620,7 +620,7 @@ class SyncHiveDb:
             Blocks.close_own_db_access()
             self._terminate_stale_connections()
             # Wait for pg_stat_activity to reflect closed connections before
-            # establishing baseline (see hivemind issue #207)
+            # establishing baseline (see hivemind issues #207 and #343)
             active_connections_before = self._wait_for_stable_connections()
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
@@ -778,9 +778,27 @@ class SyncHiveDb:
 
         return 1
 
-    def _get_active_db_connections(self):
-        sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
+    def _query_hivemind_connections(self, exclude_pid=None) -> list:
+        """Return the application_name of every hivemind_* backend, from a fresh read.
+
+        pg_stat_activity is served from a per-transaction cache: the first read
+        inside a transaction is frozen until COMMIT/ROLLBACK.  Live mode keeps
+        the app_next_iteration transaction open across the massive->live
+        handoff (#336), so without clearing the snapshot every poll in the
+        stale-connection sweep and the baseline capture would return the same
+        stale rows -- a worker backend still tearing down a millisecond after
+        close() would be frozen into the baseline and then "vanish" (#343).
+        A separate statement on purpose: bundling pg_stat_clear_snapshot()
+        into the SELECT gives no evaluation-order guarantee.
+        """
+        self._db.query_no_return("SELECT pg_stat_clear_snapshot()")
+        sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%'"
+        if exclude_pid is not None:
+            sql += f" AND pid != {exclude_pid}"
         return self._db.query_col(sql)
+
+    def _get_active_db_connections(self):
+        return self._query_hivemind_connections()
 
     def _terminate_stale_connections(self):
         """Terminate lingering hivemind connections from previous crashed instances.
@@ -790,6 +808,9 @@ class SyncHiveDb:
         assertion to fail when compared against the post-processing snapshot.
         """
         our_pid = self._db.query_one("SELECT pg_backend_pid();")
+        # Fresh read, so backends that already disconnected are not "terminated"
+        # (see _query_hivemind_connections).
+        self._db.query_no_return("SELECT pg_stat_clear_snapshot()")
         terminated = self._db.query_all(
             f"SELECT pg_terminate_backend(pid), application_name "
             f"FROM pg_stat_activity "
@@ -801,11 +822,7 @@ class SyncHiveDb:
             # Wait for terminated backends to fully disappear from pg_stat_activity
             for _ in range(50):
                 time.sleep(0.1)
-                remaining = self._db.query_all(
-                    f"SELECT application_name FROM pg_stat_activity "
-                    f"WHERE application_name LIKE 'hivemind_%%' "
-                    f"AND pid != {our_pid};"
-                )
+                remaining = self._query_hivemind_connections(exclude_pid=our_pid)
                 if not remaining:
                     break
             if remaining:
@@ -813,14 +830,21 @@ class SyncHiveDb:
 
     @staticmethod
     def _assert_connections_closed(connections_before: Iterable, connections_after: Iterable) -> None:
-        assert_message = (
-            f'Some db connections used in '
+        """Fail if block processing left behind a connection that was not in the baseline.
+
+        Only *new* names are a leak.  A name that was in the baseline and is
+        gone afterwards is not: a backend that finished tearing down during the
+        block, or an orderly full disconnect at shutdown, must not abort the
+        process (#343).
+        """
+        leaked = set(connections_after) - set(connections_before)
+        assert not leaked, (
+            f'Db connections opened during '
             f'{"LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE"} sync were not closed!\n'
+            f'leaked: {sorted(leaked)}\n'
             f'before: {connections_before}\n'
             f'after: {connections_after}'
         )
-
-        assert set(connections_before) == set(connections_after), assert_message
 
     def _wait_for_stable_connections(self, timeout_seconds: float = 1.0) -> list:
         """Poll pg_stat_activity until connection state stabilizes.
