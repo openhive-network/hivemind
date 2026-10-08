@@ -1,0 +1,30 @@
+# The service stack AIDEV starts for the slots that install hivemind (every suite in
+# .aidev/project.yaml without `stack: false`): one HAF testnet database, empty — no
+# hived, no block_log, the sleep_infinity maintenance script keeping PostgreSQL up,
+# as HAfAH's AIDEV stack and its CI `.haf-instance-testnet` service run it.
+#
+# The checks run in the runtime image (.aidev/runtime/), which joins this stack's
+# network and reaches the database as `haf`. They install the candidate's own SQL
+# and schema into it (.aidev/run-checks.sh), so no hivemind image is built.
+#
+# HAF image: find_haf_image in .gitlab-ci.yml resolves UPSTREAM_BRANCH 1.28.8-rc3 to
+# HAF commit 8de693b2; this is that commit's testnet image. Bump the digest here
+# when that variable moves.
+services:
+  haf:
+    image: registry.gitlab.syncad.com/hive/haf/testnet@sha256:2b8b29a88da7d5bcbac37c5031f41f66846ca510e825a40519696244864604ea
+    command: ["--execute-maintenance-script=/home/hived/source/./scripts/maintenance-scripts/sleep_infinity.sh"]
+    environment:
+      PGCTLTIMEOUT: "600"
+      # Every role the checks connect as (haf_admin, hivemind, hivemind_user), from
+      # anywhere on the stack network. Test-grade: the database is throwaway.
+      PG_ACCESS: |
+        "host    all              all              0.0.0.0/0    trust"
+    healthcheck:
+      # Healthy once hive_fork_manager is installed and the server accepts TCP
+      # connections the way the checks make them.
+      test: ["CMD-SHELL", "psql -h 127.0.0.1 -U haf_admin -d haf_block_log -Atc \"select 1 from pg_extension where extname = 'hive_fork_manager'\" | grep -qx 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s

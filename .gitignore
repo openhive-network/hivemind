@@ -159,3 +159,6 @@ tavern_benchmarks_report.html
 
 # local agent notes
 notes/
+
+# AIDEV check reports (.aidev/run-checks.sh)
+test-results/

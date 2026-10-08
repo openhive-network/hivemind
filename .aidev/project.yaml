@@ -1,0 +1,94 @@
+# Profile for hive/hivemind, written by `aidev project scaffold` (#13561).
+#
+# Schema reference: docs/architecture/project-profile.md
+# Onboarding procedure: the `onboard-external-project` skill.
+# Guide: docs/operations/onboarding-an-external-project.md
+#
+# The generator writes a starting point, not a governed answer: every
+# binding below is the command a maintainer said this project runs, and it
+# is reviewed and edited like any other declaration.
+version: 2
+project: hivemind
+
+gitlab:
+  host: "gitlab.syncad.com"
+  path: "hive/hivemind"
+  id: 213
+
+# AIDEV integrates into its own branch; people merge it into develop through
+# merge requests (as in hive/HAfAH and hive/haf), so `stable` is omitted and
+# `aidev release` never moves develop or master.
+branches:
+  integration: "aidev/integration"
+
+# How this project's suites execute (#13892): one kind, stated once.
+environment:
+  kind: "container"
+  # Built by .aidev/runtime/build.sh from .aidev/runtime/Dockerfile and setup.cfg
+  # (its install_requires are baked in).
+  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:0dd572113f71bb5da37b0fb177786c8148965f2dcd569cb471f6eeb8f374010e"
+  inputs: [".aidev/runtime/Dockerfile", "setup.cfg"]
+
+issues:
+  intake_label: todo
+  taxonomy: ".aidev/labels.yaml"
+  decompose:
+    # `never` is where an external project starts: nothing marks work
+    # approved on this project's behalf until there is a track record.
+    auto_todo: never
+  # Reports about this project's work are filed against this project.
+  watcher_reports: self
+
+# The service stack the slots that install hivemind start (aidev#9890): one empty
+# HAF testnet database. The runtime container joins its network and reaches it as
+# `haf`; the candidate's own SQL and schema (with the reputation_tracker and HAfAH
+# submodules it installs on) go into it through .aidev/run-checks.sh, so no
+# hivemind image is built. Slots that only run unit tests say `stack: false`.
+# See .aidev/README.md.
+sandbox:
+  compose: .aidev/test-stack.compose.yml
+  # One idle PostgreSQL 18 (about 0.9 GB resident, nothing replayed).
+  resource_class: light
+  services: [haf]
+  readiness_timeout: 300
+  env:
+    HIVEMIND_TEST_DB_HOST: haf
+
+# Verification slots. Each binding is what this project genuinely runs for
+# that slot — never one selection repeated under seven names, which makes
+# seven gates report on the same evidence while claiming to check seven
+# different things.
+#
+# Lightweight first: the Python unit tests, then install / reinstall of the
+# candidate into an empty HAF testnet database and a PostgREST JSON-RPC smoke
+# test. CI's tavern pattern suites (a HAF replayed to 5M blocks, mocks, a
+# hivemind sync) aren't bound yet; see .aidev/README.md.
+verification:
+  quick:
+    adapter: command
+    args: [".aidev/run-checks.sh", "quick", "unit"]
+    stack: false
+    artifacts: ["test-results/quick/"]
+  full:
+    adapter: command
+    args: [".aidev/run-checks.sh", "full", "unit", "install", "reinstall", "api-smoke"]
+    artifacts: ["test-results/full/"]
+  baseline:
+    adapter: command
+    args: [".aidev/run-checks.sh", "baseline", "install", "reinstall", "api-smoke"]
+    artifacts: ["test-results/baseline/"]
+  canary:
+    adapter: command
+    args: [".aidev/run-checks.sh", "canary", "unit", "install", "reinstall", "api-smoke"]
+    artifacts: ["test-results/canary/"]
+  # There is no coverage tooling in the image yet; `coverage` runs the unit tests
+  # (AIDEV runs it in the post-implementation scan only). `static` and `system`
+  # are left unbound: AIDEV runs neither for a project.
+  coverage:
+    adapter: command
+    args: [".aidev/run-checks.sh", "coverage", "unit"]
+    stack: false
+    artifacts: ["test-results/coverage/"]
+
+# Capability grants for target-side code. Empty until this project needs one.
+capabilities: []
