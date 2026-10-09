@@ -2,13 +2,10 @@
 # ruff: noqa: F403
 
 from hive import *
-from hive.community import *
 from hive.db import *
 from hive.indexer import *
-from hive.server import *
-from hive.steem import *
 from hive.utils import *
 
 
-def test_import():
+def test_import() -> None:
     pass

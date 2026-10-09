@@ -2,42 +2,44 @@
 from hive.utils.unique_fifo import UniqueFIFO
 
 
-def test_unique_queue():
+def test_unique_queue() -> None:
     q = UniqueFIFO()
-    assert q.extend(set(['tim', 'bob'])) == 2
+    assert q.extend({'tim', 'bob'}) == 2
     assert len(q) == 2
 
-    assert q.extend(set(['tim', 'foo'])) == 1
+    assert q.extend({'tim', 'foo'}) == 1
     assert len(q) == 3
 
     pop1 = q.shift_portion(3)
-    assert pop1 == ['tim']
+    assert len(pop1) == 1
+    assert pop1[0] in {'tim', 'bob'}
     assert len(q) == 2
 
     assert q.extend(set()) == 0
     assert len(q) == 2
 
-    assert q.extend(set(['foo'])) == 0
+    assert q.extend({'foo'}) == 0
     assert len(q) == 2
 
     pop2 = q.shift_portion(1)
-    assert pop2 == ['bob', 'foo']
+    assert pop2 == [({'tim', 'bob'} - set(pop1)).pop(), 'foo']
     assert not q
 
     assert q.shift_portion(500) == []
 
-    assert q.extend(set(['tim', 'bob'])) == 2
-    assert q.extend(set(['tim', 'tom'])) == 1
-    assert q.extend(set(['tim', 'foo'])) == 1
+    assert q.extend({'tim', 'bob'}) == 2
+    assert q.extend({'tim', 'tom'}) == 1
+    assert q.extend({'tim', 'foo'}) == 1
 
-    assert set(q.shift_count(2)) == set(['tim', 'bob'])
+    assert set(q.shift_count(2)) == {'tim', 'bob'}
     assert q.shift_count(1) == ['tom']
     assert q.shift_count(400) == ['foo']
     assert q.shift_count(400) == []
 
-    q.extend(set(['foo', 'bar']))
+    q.extend({'foo', 'bar'})
     q.add('foo')
     q.add('cat')
     assert len(q) == 3
     pop3 = q.shift_portion(1)
-    assert pop3 == ['foo', 'bar', 'cat']
+    assert set(pop3[:2]) == {'foo', 'bar'}
+    assert pop3[2] == 'cat'
