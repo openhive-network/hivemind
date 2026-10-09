@@ -103,5 +103,14 @@ quality:
       adapter: command
       args: ["python3", ".aidev/mypy_sarif.py", "hive"]
 
+# Commit trailers AIDEV asks the implementing agent to declare (aidev#15385).
+# `Hivemind-Sync` tells CI's detect_changes whether the commit needs a full sync;
+# scripts/ci/sync_decision.sh applies it behind path guards.
+commit_trailers:
+  - key: Hivemind-Sync
+    values: [required, not-required]
+    reason: required
+    guidance: "CLAUDE.md#ci-sync-decision"
+
 # Capability grants for target-side code. Empty until this project needs one.
 capabilities: []
