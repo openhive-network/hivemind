@@ -116,9 +116,12 @@ wait_for_db() {
         echo "waiting for $ADMIN_URL ($i)"
         sleep 5
     done
-    # hived seeds hafd.hive_state when it first connects; this database has never
-    # seen hived, and without that row hive.app_register_table skips adding
-    # hive_rowid, so reputation_tracker's install fails. Seed it the way hived does.
+    # This database has never seen hived. hived calls hive.initialize_extension_data()
+    # when it first connects; it fills hafd.events_queue and hafd.hive_state. Without
+    # events_queue, hive.is_instance_ready() is false and hivemind's API refuses
+    # ("HAF instance is not ready", e.g. get_sync_status). Without hive_state, a HAF
+    # older than hive/haf#354 skips hive_rowid in app_register_table, so
+    # reputation_tracker's install fails. Stand in for hived connecting.
     psql "$ADMIN_URL" -v ON_ERROR_STOP=on -Atc "select hive.initialize_extension_data()"
 }
 
