@@ -8,7 +8,6 @@ from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter as perf
 from types import TracebackType
-from typing import Optional, Type
 
 import psycopg2
 
