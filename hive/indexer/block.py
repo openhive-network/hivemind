@@ -74,5 +74,3 @@ class OperationType(Enum):
             return OperationType.CUSTOM_JSON
         # for operations not supported by hivemind
         return None
-
-

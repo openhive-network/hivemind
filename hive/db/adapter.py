@@ -46,7 +46,7 @@ class Row:
 
     @property
     def _mapping(self):
-        return dict(zip(self._columns, self._data))
+        return dict(zip(self._columns, self._data, strict=True))
 
     def __getitem__(self, index):
         return self._data[index]
@@ -96,7 +96,7 @@ class Db:
         instance before config is loaded.
         """
         assert url, (
-            '--database-url (or DATABASE_URL env) not specified; ' 'e.g. postgresql://user:pass@localhost:5432/hive'
+            '--database-url (or DATABASE_URL env) not specified; e.g. postgresql://user:pass@localhost:5432/hive'
         )
         self._url = str(url)
         self._trx_active = False
@@ -131,6 +131,7 @@ class Db:
         notification arrives or timeout seconds pass. Returns True on a
         notification. Requires listen_for_blocks() and no open transaction."""
         import select
+
         ready, _, _ = select.select([self._conn], [], [], timeout)
         if not ready:
             return False

@@ -59,19 +59,19 @@ sandbox:
 # seven gates report on the same evidence while claiming to check seven
 # different things.
 #
-# Lightweight first: the Python unit tests, then install / reinstall of the
-# candidate into an empty HAF testnet database and a PostgREST JSON-RPC smoke
-# test. CI's tavern pattern suites (a HAF replayed to 5M blocks, mocks, a
+# Lightweight first: the Python unit tests and ruff, then install / reinstall of
+# the candidate into an empty HAF testnet database and a PostgREST JSON-RPC
+# smoke test. CI's tavern pattern suites (a HAF replayed to 5M blocks, mocks, a
 # hivemind sync) aren't bound yet; see .aidev/README.md.
 verification:
   quick:
     adapter: command
-    args: [".aidev/run-checks.sh", "quick", "unit"]
+    args: [".aidev/run-checks.sh", "quick", "unit", "ruff"]
     stack: false
     artifacts: ["test-results/quick/"]
   full:
     adapter: command
-    args: [".aidev/run-checks.sh", "full", "unit", "install", "reinstall", "api-smoke"]
+    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "api-smoke"]
     artifacts: ["test-results/full/"]
   baseline:
     adapter: command
@@ -79,7 +79,7 @@ verification:
     artifacts: ["test-results/baseline/"]
   canary:
     adapter: command
-    args: [".aidev/run-checks.sh", "canary", "unit", "install", "reinstall", "api-smoke"]
+    args: [".aidev/run-checks.sh", "canary", "unit", "ruff", "install", "reinstall", "api-smoke"]
     artifacts: ["test-results/canary/"]
   # There is no coverage tooling in the image yet; `coverage` runs the unit tests
   # (AIDEV runs it in the post-implementation scan only). `static` and `system`

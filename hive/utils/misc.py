@@ -20,7 +20,7 @@ def log_memory_usage(memtypes=None, broadcast=True) -> str:
 
     def format_bytes(val: int):
         assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
-        return f'{val / 1024.0 / 1024.0 :.2f} MB'
+        return f'{val / 1024.0 / 1024.0:.2f} MB'
 
     human_readable = {
         "rss": "physical_memory",
