@@ -45,6 +45,15 @@ Not covered yet: CI's tavern API pattern suites (`condenser_api_patterns`,
 and a hivemind sync), the python API client tests and the benchmarks. They stay in
 GitLab CI until AIDEV can reach a persistent, replayed HAF (hive/haf#353).
 
+## Quality evaluation
+
+AIDEV's quality evaluation runs its own collectors except where `project.yaml`'s
+`quality:` section declares the project's command for a stage. `typecheck` is declared:
+`.aidev/mypy_sarif.py hive` runs mypy at its default strictness (unannotated functions
+aren't checked, imports without stubs are ignored) and prints SARIF, because AIDEV's own
+collector runs `mypy --strict` on every changed file, which no change to untyped code here
+could pass. Findings on lines a change doesn't touch are advisory.
+
 ## The HAF test stack (`test-stack.compose.yml`)
 
 One service, `haf`: the HAF testnet image for the HAF commit CI's `find_haf_image`
@@ -70,7 +79,7 @@ this project's own `Dockerfile`) with `postgresql-client` and `git`, the `postgr
 binary of `common-ci-configuration/postgrest` (the `POSTGREST_VERSION` of
 `Dockerfile`), `create_haf_app_role.sh` / `common.sh` from common-ci-configuration at a
 pinned commit (where `scripts/setup_postgres.sh` looks before it downloads them), and
-`setup.cfg`'s `install_requires` plus pytest and ruff. Every base and download is pinned.
+`setup.cfg`'s `install_requires` plus pytest, ruff and mypy. Every base and download is pinned.
 
 When `runtime/Dockerfile` or `setup.cfg` changes, rebuild and re-pin **in the same
 commit**:

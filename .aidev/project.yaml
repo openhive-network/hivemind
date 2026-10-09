@@ -26,7 +26,7 @@ environment:
   kind: "container"
   # Built by .aidev/runtime/build.sh from .aidev/runtime/Dockerfile and setup.cfg
   # (its install_requires are baked in).
-  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:6bcfafada39d98d12103f913f64dff6f17e5fd2be99ba72445b0a258958e14ad"
+  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:359a674c67855ef2f359c0860aaf56cb12cbe019d2c9a696dca2cc490bc3561b"
   inputs: [".aidev/runtime/Dockerfile", "setup.cfg"]
 
 issues:
@@ -89,6 +89,19 @@ verification:
     args: [".aidev/run-checks.sh", "coverage", "unit"]
     stack: false
     artifacts: ["test-results/coverage/"]
+
+# Quality evaluation (#14454): hivemind is largely unannotated, so AIDEV's own
+# typecheck collector (mypy --strict on every changed file) would refuse any change
+# to untyped code. The project's typecheck is mypy at its default strictness
+# instead — unannotated functions aren't checked — through .aidev/mypy_sarif.py,
+# which prints SARIF. Findings on lines a change doesn't touch are advisory.
+quality:
+  commands:
+    - name: mypy
+      replaces: [typecheck]
+      format: sarif
+      adapter: command
+      args: ["python3", ".aidev/mypy_sarif.py", "hive"]
 
 # Capability grants for target-side code. Empty until this project needs one.
 capabilities: []
