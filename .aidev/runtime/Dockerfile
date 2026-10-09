@@ -7,7 +7,8 @@
 #   + the postgrest binary of common-ci-configuration/postgrest (POSTGREST_VERSION there)
 #   + create_haf_app_role.sh / common.sh from common-ci-configuration, where
 #     scripts/setup_postgres.sh looks for them first (otherwise it curls them)
-#   + setup.cfg's install_requires and pytest, so `hive` runs from the checkout
+#   + setup.cfg's install_requires, pytest and ruff (pinned: the `ruff` step's verdict
+#     must not move with a new release), so `hive` runs from the checkout
 #     (PYTHONPATH) with no network at check time.
 #
 # Its inputs are this file and setup.cfg (the only file in the build context).
@@ -35,7 +36,7 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gcc libffi-dev libc6-dev \
     && python3 -c "import configparser; c = configparser.ConfigParser(); c.read('/tmp/setup.cfg'); \
 print('\n'.join(r for r in c['options']['install_requires'].split('\n') if r.strip()))" > /tmp/requirements.txt \
-    && pip install --no-cache-dir -r /tmp/requirements.txt pytest==8.4.2 \
+    && pip install --no-cache-dir -r /tmp/requirements.txt pytest==8.4.2 ruff==0.16.10 \
     && apt-get purge -y --auto-remove gcc libc6-dev \
     && rm -rf /var/lib/apt/lists/* /tmp/setup.cfg /tmp/requirements.txt
 

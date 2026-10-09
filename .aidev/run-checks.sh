@@ -8,6 +8,8 @@
 #
 #   - unit       pytest on tests/utils and tests/steem, those that exist (the
 #                Makefile's test-utils / test-steem); one junit case per test in unit.xml
+#   - ruff       `ruff check` and `ruff format --check` on hive/ and tests/, with the
+#                pyproject.toml configuration
 #   - install    into the stack's HAF database (HIVEMIND_TEST_DB_HOST, default `haf`),
 #                as the hivemind image's `setup --with-apps` does it:
 #                scripts/setup_postgres.sh, the reputation_tracker and HAfAH
@@ -82,6 +84,14 @@ unit() {
     return "$rc"
 }
 
+run_ruff() {
+    ruff --version
+    local rc=0
+    ruff check --no-cache hive tests || rc=1
+    ruff format --no-cache --check hive tests || rc=1
+    return "$rc"
+}
+
 # The install scripts write their logs next to themselves and the submodules'
 # version files come from git, which a workflow checkout may not have: stage them
 # in a scratch directory and write the version files there.
@@ -140,6 +150,7 @@ reinstall() {
 for s in "$@"; do
     case "$s" in
         unit) step unit unit ;;
+        ruff) step ruff run_ruff ;;
         install) step install install ;;
         reinstall) step reinstall reinstall ;;
         api-smoke) step api-smoke python3 .aidev/hivemind_smoke.py "$out" ;;
