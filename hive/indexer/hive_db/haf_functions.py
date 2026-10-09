@@ -69,14 +69,18 @@ def register_application(db: Db) -> None:
                 )
             $$;"""
     )
-    registry_available = db.query_one("SELECT to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') IS NOT NULL")
+    registry_available = db.query_one(
+        "SELECT to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') IS NOT NULL"
+    )
     if not registry_available:
         log.warning("HAF application registry not available (hive.app_register); skipping hivemind registration")
         return
     db.query_no_return(
         f"SELECT hive.app_register('{SCHEMA_NAME}', ARRAY['{SCHEMA_NAME}']::hive.contexts_group, NULL, '{SCHEMA_NAME}.completed_block_num');"
     )
-    log.info(f"Registered '{SCHEMA_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)")
+    log.info(
+        f"Registered '{SCHEMA_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)"
+    )
 
 
 def ensure_custom_json_type_index(db: Db) -> None:

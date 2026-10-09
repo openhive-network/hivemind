@@ -12,6 +12,6 @@ def mentions(body):
     # validMentionPrecedingChars = /(?:^|[^a-zA-Z0-9_!#$%&*@＠]|(?:^|[^a-zA-Z0-9_+~.-])(?:rt|RT|rT|Rt):?)/
     # endMentionMatch = regexSupplant(/^(?:#{atSigns}|[#{latinAccentChars}]|:\/\/)/);
     matches = re.findall(
-        '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])' '(?:@)' '([a-zA-Z0-9][a-zA-Z0-9\\-.]{1,14}[a-zA-Z0-9])' '(?![a-z])', body
+        '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9][a-zA-Z0-9\\-.]{1,14}[a-zA-Z0-9])(?![a-z])', body
     )
     return {grp.lower() for grp in matches}

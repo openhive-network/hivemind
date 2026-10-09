@@ -6,7 +6,6 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
-from typing import Optional
 
 import psycopg2.extensions
 
@@ -121,7 +120,7 @@ class DbState:
                 sleep(1.0 * attempt)
 
     @classmethod
-    def initialize(cls, enter_massive: bool, schema_upgrade: bool):
+    def initialize(cls, enter_massive: bool, schema_upgrade: bool) -> None:
         """Perform startup database checks.
 
         1) Load schema if needed
@@ -161,7 +160,7 @@ class DbState:
         db_setup_owner.close()
 
     @classmethod
-    def teardown(cls):
+    def teardown(cls) -> None:
         """Drop all tables in db."""
         teardown(cls.db())
 
@@ -184,14 +183,14 @@ class DbState:
         return cls._admin_db
 
     @classmethod
-    def close_admin_db(cls):
+    def close_admin_db(cls) -> None:
         """Close admin db connection after massive sync completes."""
         if cls._admin_db:
             cls._admin_db.close()
             cls._admin_db = None
 
     @classmethod
-    def set_massive_sync(cls, is_massive: bool):
+    def set_massive_sync(cls, is_massive: bool) -> None:
         cls._is_massive_sync = is_massive
 
     @classmethod
@@ -212,7 +211,7 @@ class DbState:
 
     @classmethod
     def _execute_query_with_modified_work_mem(
-        cls, db: Db, sql: str, explain: bool = False, value: Optional[str] = None, separate_transaction: bool = True
+        cls, db: Db, sql: str, explain: bool = False, value: str | None = None, separate_transaction: bool = True
     ) -> None:
         divide_factor = 64
         _value = value or f'{int(get_memory_amount() / divide_factor)}MB'
@@ -238,7 +237,7 @@ class DbState:
             assert work_mem_after == work_mem_before, f'work_mem was changed: {work_mem_before} -> {work_mem_after}'
 
     @classmethod
-    def _drop_all_registered_indexes(cls):
+    def _drop_all_registered_indexes(cls) -> None:
         """Drop all HAF-registered indexes for the hivemind_app context."""
         log.info("[MASSIVE] Dropping all registered indexes")
         time_start = perf_counter()
@@ -249,7 +248,7 @@ class DbState:
         log.info("[MASSIVE] Dropped all registered indexes in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _restore_indexes_per_table(cls, db, full_table_name):
+    def _restore_indexes_per_table(cls, db, full_table_name) -> None:
         """Restore indexes for a single table using HAF API. Runs in a thread."""
         with AutoDbDisposer(db, f'restore_idx_{full_table_name}') as db_mgr:
             log.info("[MASSIVE] Restoring indexes for %s", full_table_name)
@@ -263,7 +262,7 @@ class DbState:
             log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
 
     @classmethod
-    def _restore_bm25_index(cls, db):
+    def _restore_bm25_index(cls, db) -> None:
         """Create the BM25 index on hive_post_data directly.
 
         Not registered with HAF because pg_search leaves internal metadata
@@ -291,7 +290,7 @@ class DbState:
             log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _drop_indexes_in_threads(cls):
+    def _drop_indexes_in_threads(cls) -> None:
         """Drop all registered indexes for the hivemind_app context in one call."""
         start_time = FOSM.start()
         cls._drop_all_registered_indexes()
@@ -300,7 +299,7 @@ class DbState:
         FOSM.clear()
 
     @classmethod
-    def _restore_indexes_in_threads(cls):
+    def _restore_indexes_in_threads(cls) -> None:
         """Restore all registered indexes in parallel across tables.
 
         Excludes hive_post_data — the BM25 index is deferred to the fills phase
@@ -333,7 +332,7 @@ class DbState:
         log.info("=== CREATING INDEXES ===")
 
     @classmethod
-    def ensure_off_synchronous_commit(cls):
+    def ensure_off_synchronous_commit(cls) -> None:
         if cls._original_synchronous_commit_mode is not None:
             return
 
@@ -344,7 +343,7 @@ class DbState:
         log.info("[MASSIVE] SET synchronous_commit = OFF")
 
     @classmethod
-    def ensure_on_synchronous_commit(cls):
+    def ensure_on_synchronous_commit(cls) -> None:
         if cls._original_synchronous_commit_mode is None:
             return
 
@@ -354,7 +353,7 @@ class DbState:
         log.info("SET synchronous_commit = ON")
 
     @classmethod
-    def disable_wal_safety_for_massive_sync(cls):
+    def disable_wal_safety_for_massive_sync(cls) -> None:
         """Disable WAL safety features during massive sync for better performance.
 
         This is safe because if massive sync is interrupted, the database is in an
@@ -399,7 +398,7 @@ class DbState:
             cls._original_full_page_writes = None
 
     @classmethod
-    def restore_wal_safety_after_massive_sync(cls):
+    def restore_wal_safety_after_massive_sync(cls) -> None:
         """Restore WAL safety features to their original values after massive sync."""
         if cls._original_fsync is None:
             return  # Nothing to restore
@@ -439,7 +438,7 @@ class DbState:
         return cls._initial_sync
 
     @classmethod
-    def ensure_indexes_are_disabled(cls):
+    def ensure_indexes_are_disabled(cls) -> None:
         if cls._indexes_were_disabled:
             return
 
@@ -469,7 +468,7 @@ class DbState:
         log.info("[MASSIVE] Indexes are disabled")
 
     @classmethod
-    def ensure_fk_are_disabled(cls):
+    def ensure_fk_are_disabled(cls) -> None:
         if cls._fk_were_disabled:
             return
 
@@ -492,7 +491,7 @@ class DbState:
         return cls._indexes_were_enabled
 
     @classmethod
-    def ensure_indexes_are_enabled(cls):
+    def ensure_indexes_are_enabled(cls) -> None:
         if cls.are_indexes_enabled():
             return
 
@@ -516,7 +515,7 @@ class DbState:
         log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
 
     @classmethod
-    def ensure_fk_are_enabled(cls):
+    def ensure_fk_are_enabled(cls) -> None:
         if cls._fk_were_enabled:
             return
 
@@ -536,7 +535,7 @@ class DbState:
         cls._fk_were_enabled = True
 
     @classmethod
-    def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
+    def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block) -> None:
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             # UPDATE: `children`
             # Only the initial-massive full recompute runs here: it is idempotent,
@@ -565,7 +564,7 @@ class DbState:
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
+    def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block) -> None:
         with AutoDbDisposer(db, "finish_hive_feed_cache") as db_mgr:
             time_start = perf_counter()
             sql = f"SELECT {SCHEMA_NAME}.update_feed_cache({last_imported_block}, {current_imported_block});"
@@ -573,14 +572,14 @@ class DbState:
             log.info("[MASSIVE] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_payout_stats_view(cls, db):
+    def _finish_payout_stats_view(cls, db) -> None:
         with AutoDbDisposer(db, "finish_payout_stats_view") as db_mgr:
             time_start = perf_counter()
             PayoutStats.generate(db=db_mgr.db, separate_transaction=True)
             log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_communities_posts_and_rank(cls, db):
+    def _finish_communities_posts_and_rank(cls, db) -> None:
         with AutoDbDisposer(db, "finish_communities_posts_and_rank") as db_mgr:
             time_start = perf_counter()
             db_mgr.db.query("START TRANSACTION")
@@ -589,7 +588,7 @@ class DbState:
             log.info("[MASSIVE] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_muted_parents(cls, db):
+    def _finish_muted_parents(cls, db) -> None:
         with AutoDbDisposer(db, "finish_muted_parents") as db_mgr:
             time_start = perf_counter()
             db_mgr.db.query("START TRANSACTION")
@@ -652,7 +651,7 @@ class DbState:
             log.info("[MASSIVE] finalization completion marker committed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_posts_rshares(cls, db):
+    def _finish_posts_rshares(cls, db) -> None:
         with AutoDbDisposer(db, "finish_posts_rshares") as db_mgr:
             time_start = perf_counter()
             sql = f"SELECT {SCHEMA_NAME}.recalculate_all_posts_rshares();"
@@ -660,7 +659,7 @@ class DbState:
             log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_notification_cache(cls, db):
+    def _finish_notification_cache(cls, db) -> None:
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
             sql = f"CALL {SCHEMA_NAME}.clear_muted_notifications();"
@@ -668,7 +667,7 @@ class DbState:
             log.info("[MASSIVE] clear_muted_notifications executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_vote_notifications(cls, db):
+    def _finish_vote_notifications(cls, db) -> None:
         """Flush vote notifications for the entire sync range at finalization.
 
         Vote notification scoring uses payout + pending_payout from hive_posts,
@@ -689,7 +688,7 @@ class DbState:
             )
 
     @classmethod
-    def _finish_vote_notifications_ranged(cls, db, last_imported_block, current_imported_block):
+    def _finish_vote_notifications_ranged(cls, db, last_imported_block, current_imported_block) -> None:
         """Backfill vote notifications for the range a short massive catch-up covered.
 
         Massive batches skip vote notifications (scoring needs payout data), and
@@ -716,7 +715,7 @@ class DbState:
             )
 
     @classmethod
-    def _finish_reputation_notification_scores(cls, db):
+    def _finish_reputation_notification_scores(cls, db) -> None:
         """Recalculate reputation-based notification scores using final reputation data.
 
         During massive sync, post/follow/reblog notification scores are computed
@@ -784,7 +783,7 @@ class DbState:
         log.info(f'{info} Real elapsed time: {perf_counter() - start_time:.3f}, completed threads: {completedThreads}')
 
     @classmethod
-    def _interrupted(cls, phase):
+    def _interrupted(cls, phase) -> bool:
         """True when a shutdown was requested; finalization stops at task boundaries.
 
         Safe at any boundary: the completion marker only commits at the very end
@@ -804,7 +803,7 @@ class DbState:
         return True
 
     @classmethod
-    def _finish_all_tables(cls, massive_sync_preconditions, last_imported_block, current_imported_block):
+    def _finish_all_tables(cls, massive_sync_preconditions, last_imported_block, current_imported_block) -> bool:
         """Fill derived tables after massive sync. Returns True when finalization completed.
 
         Ordering contract: all fill tasks run (idempotently re-runnable) BEFORE
@@ -901,7 +900,7 @@ class DbState:
         return True
 
     @classmethod
-    def disable_autovacuum_for_massive_sync(cls):
+    def disable_autovacuum_for_massive_sync(cls) -> None:
         """Hand vacuum scheduling of the race-prone table(s) over to boundary vacuums."""
         for table in cls.MASSIVE_VACUUM_THRESHOLDS:
             cls.db().query_no_return(
@@ -910,7 +909,7 @@ class DbState:
         log.info("[MASSIVE] Autovacuum disabled on %s; boundary vacuums take over", list(cls.MASSIVE_VACUUM_THRESHOLDS))
 
     @classmethod
-    def restore_autovacuum_after_massive_sync(cls):
+    def restore_autovacuum_after_massive_sync(cls) -> None:
         for table in cls.MASSIVE_VACUUM_THRESHOLDS:
             cls.db().query_no_return(
                 f"ALTER TABLE {SCHEMA_NAME}.{table} RESET (autovacuum_enabled, toast.autovacuum_enabled)"
@@ -937,7 +936,7 @@ class DbState:
         if not due:
             return []
 
-        def vacuum_table(table, db):
+        def vacuum_table(table, db) -> None:
             with AutoDbDisposer(db, "boundary_vacuum") as db_mgr:
                 db_mgr.db.query_no_return_autocommit(f"VACUUM {SCHEMA_NAME}.{table}")
 
@@ -946,8 +945,8 @@ class DbState:
         return due
 
     @classmethod
-    def vacuum_tables_in_threads(cls, tables):
-        def vacuum_table(table, db):
+    def vacuum_tables_in_threads(cls, tables) -> None:
+        def vacuum_table(table, db) -> None:
             with AutoDbDisposer(db, "vacuum") as db_mgr:
                 log.info(f"Vacuuming table {table}")
                 if table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data":
@@ -963,7 +962,7 @@ class DbState:
         cls.process_tasks_in_threads("Requesting vacuum on hivemind tables", methods)
 
     @classmethod
-    def vacuum_all_hivemind_tables_in_threads(cls):
+    def vacuum_all_hivemind_tables_in_threads(cls) -> None:
         log.info("Requesting vacuum on hivemind tables")
         sql = f"""
 SELECT table_schema || '.' || table_name AS table_name
@@ -978,7 +977,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         cls.vacuum_tables_in_threads(tables)
 
     @classmethod
-    def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
+    def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks) -> bool:
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
@@ -1022,9 +1021,11 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         """Basic health status: head block/time, current age (secs)."""
         sql = f"SELECT * FROM {SCHEMA_NAME}.get_head_state()"
         row = DbState.db().query_row(sql)._mapping
-        return dict(
-            db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['age'])
-        )
+        return {
+            'db_head_block': row['num'],
+            'db_head_time': str(row['created_at']),
+            'db_head_age': int(time.time() - row['age']),
+        }
 
     @classmethod
     def _is_schema_loaded(cls):
@@ -1032,7 +1033,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
 
     @classmethod
-    def _is_feed_cache_empty(cls):
+    def _is_feed_cache_empty(cls) -> bool:
         """Check if the hive_feed_cache table is empty.
 
         If empty, it indicates that the massive sync has not finished.

@@ -3,7 +3,6 @@ import hashlib
 import logging
 from abc import abstractmethod
 from collections.abc import Iterator
-from typing import Optional, Union
 
 import ujson as json
 
@@ -14,9 +13,9 @@ log = logging.getLogger(__name__)
 
 
 class AccountMock:
-    account_id: Optional[int] = None
+    account_id: int | None = None
 
-    def __init__(self, block_number: int, name: str):
+    def __init__(self, block_number: int, name: str) -> None:
         self._block_number = block_number
         self._name = name
 
@@ -56,11 +55,11 @@ VALUES
 
 
 class OperationBase:
-    operation_id: Optional[int] = None
-    pos_in_block: Optional[int] = 1
+    operation_id: int | None = None
+    pos_in_block: int | None = 1
     _custom_json_seq_synced = False
 
-    def __init__(self, block_number: int, body: dict):
+    def __init__(self, block_number: int, body: dict) -> None:
         self._block_number = block_number
         self._body = body
 
@@ -71,7 +70,7 @@ class OperationBase:
 
     @property
     @abstractmethod
-    def type(self) -> Optional[Union[OperationType, VirtualOperationType]]:
+    def type(self) -> OperationType | VirtualOperationType | None:
         raise NotImplementedError
 
     @property
@@ -164,27 +163,27 @@ VALUES
 
 
 class VirtualOperationMock(OperationBase):
-    def __init__(self, block_number: int, body: dict):
+    def __init__(self, block_number: int, body: dict) -> None:
         super().__init__(block_number=block_number, body=body)
         self._type = VirtualOperationType.from_name(operation_name=body['type'])
 
     @property
-    def type(self) -> Optional[VirtualOperationType]:
+    def type(self) -> VirtualOperationType | None:
         return self._type
 
 
 class OperationMock(OperationBase):
-    def __init__(self, block_number: int, body: dict):
+    def __init__(self, block_number: int, body: dict) -> None:
         super().__init__(block_number=block_number, body=body)
         self._type = OperationType.from_name(operation_name=body['type'])
 
     @property
-    def type(self) -> Optional[OperationType]:
+    def type(self) -> OperationType | None:
         return self._type
 
 
 class TransactionMock:
-    def __init__(self, block_number: int, body: dict):
+    def __init__(self, block_number: int, body: dict) -> None:
         self._block_number = block_number
         self._body = body
 
@@ -240,7 +239,7 @@ VALUES
 
 
 class BlockMock:
-    def __init__(self, block_number: int, block_data: dict, virtual_ops: Optional[dict] = None):
+    def __init__(self, block_number: int, block_data: dict, virtual_ops: dict | None = None) -> None:
         self._block_number = block_number
         self._blocks_data = block_data
         self._virtual_ops = virtual_ops if virtual_ops is not None else {}
@@ -262,7 +261,7 @@ class BlockMock:
 
 
 class BlockMockAfterDb:
-    def __init__(self, block_number: int, hash: str, previous_hash: str, created_at: datetime.datetime):
+    def __init__(self, block_number: int, hash: str, previous_hash: str, created_at: datetime.datetime) -> None:
         self._block_number = block_number
         self._hash = hash
         self._previous_hash = previous_hash
