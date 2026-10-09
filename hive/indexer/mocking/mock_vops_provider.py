@@ -2,7 +2,6 @@
 
 import json
 import logging
-from typing import Optional
 
 from hive.indexer.mocking.mock_data_provider import MockDataProvider
 
@@ -32,11 +31,11 @@ class MockVopsProvider(MockDataProvider):
             cls.block_data[block_num] = block_content
 
     @classmethod
-    def get_mock_block_data(cls, block_number: int) -> Optional[dict]:
+    def get_mock_block_data(cls, block_number: int) -> dict | None:
         return cls.block_data.get(block_number, None)
 
     @classmethod
-    def get_mock_vops(cls, block_number: int) -> Optional[dict]:
+    def get_mock_vops(cls, block_number: int) -> dict | None:
         mock_block_data = cls.get_mock_block_data(block_number)
 
         return mock_block_data.get('virtual_operations', None) if mock_block_data else None

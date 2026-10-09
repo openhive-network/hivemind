@@ -154,8 +154,7 @@ def legacy_amount(value):
         return value  # already legacy
     amt, asset = parse_amount(value)
     prec = {'HBD': 3, 'HIVE': 3, 'VESTS': 6}[asset]
-    tmpl = "%%.%df %%s" % prec
-    return tmpl % (amt, asset)
+    return f"{float(amt):.{prec}f} {asset}"
 
 
 def block_num(block):
@@ -211,7 +210,7 @@ def secs_to_str(secs):
             break
     if rem:  # leftover = weeks
         out.append((rem, 'w'))
-    return ' '.join(["%02d%s" % tup for tup in out[::-1]])
+    return ' '.join([f"{int(value):02d}{unit}" for value, unit in out[::-1]])
 
 
 def rep_log10(rep):

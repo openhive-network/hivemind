@@ -75,12 +75,12 @@ class Timer:
             out = prefix
         else:
             # " -- post 1 of 10"
-            out = " -- %s %d of %d" % (self._entity, self._processed, self._full_total)
+            out = f" -- {self._entity} {int(self._processed)} of {int(self._full_total)}"
 
         # " (3/s, 4rps, 5wps) -- "
         rates = []
         for i, unit in enumerate(['/s', *self._lap_units]):
-            rates.append('%d%s' % (self._rate(i), unit))
+            rates.append(f'{int(self._rate(i))}{unit}')
         out += f" ({', '.join(rates)}) -- "
 
         if self._processed < self._total:

@@ -36,6 +36,8 @@ distance-dirty = "{base_version}-{distance}+{vcs}{rev}-dirty.{author_date:%Y%m%d
 [tool.ruff]
 line-length = 120
 target-version = "py314"
+# tests/tests_api is the tests_api submodule, linted in its own repository.
+extend-exclude = ["tests/tests_api"]
 
 [tool.ruff.format]
 quote-style = "preserve"  # Preserves existing quote style
