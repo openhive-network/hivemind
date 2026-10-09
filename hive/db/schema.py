@@ -1,6 +1,7 @@
 """Db schema definitions and setup routines."""
 
 import logging
+import os
 from pathlib import Path
 
 from hive.conf import SCHEMA_NAME, SCHEMA_OWNER_NAME
@@ -189,6 +190,13 @@ def setup(db, admin_db) -> None:
         execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
 
 
+def _postgrest_scripts() -> list[str]:
+    """Return the scripts included by postgrest/load_order.sql, in order, as paths relative to sql_scripts/."""
+    lines = (Path(__file__).parent / 'sql_scripts' / 'postgrest' / 'load_order.sql').read_text().splitlines()
+    includes = (line.strip().removeprefix('\\ir ') for line in lines if line.strip().startswith('\\ir '))
+    return [os.path.normpath(f'postgrest/{include.strip()}') for include in includes]
+
+
 def setup_runtime_code(db) -> None:
     sql_scripts = [
         "utility_functions.sql",
@@ -216,7 +224,6 @@ def setup_runtime_code(db) -> None:
         "delete_reblog_feed_cache.sql",
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
-        "postgrest/home.sql",
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",
         "hafapp_api.sql",
@@ -224,98 +231,7 @@ def setup_runtime_code(db) -> None:
         "grant_hivemind_user.sql",
         "community.sql",
         "community_utils.sql",
-        "postgrest/utilities/exceptions.sql",
-        "postgrest/utilities/validate_json_arguments.sql",
-        "postgrest/utilities/api_limits.sql",
-        "postgrest/utilities/parse_argument_from_json.sql",
-        "postgrest/utilities/valid_account.sql",
-        "postgrest/utilities/find_account_id.sql",
-        "postgrest/condenser_api/condenser_api_get_follow_count.sql",
-        "postgrest/utilities/find_comment_id.sql",
-        "postgrest/utilities/valid_permlink.sql",
-        "postgrest/condenser_api/condenser_api_get_reblogged_by.sql",
-        "postgrest/utilities/valid_number.sql",
-        "postgrest/utilities/valid_tag.sql",
-        "postgrest/utilities/find_category_id.sql",
-        "postgrest/condenser_api/condenser_api_get_trending_tags.sql",
-        "postgrest/condenser_api/condenser_api_get_account_reputations.sql",
-        "postgrest/utilities/check_community.sql",
-        "postgrest/utilities/valid_community.sql",
-        "postgrest/utilities/valid_limit.sql",
-        "postgrest/utilities/json_date.sql",
-        "postgrest/utilities/community.sql",
-        "postgrest/bridge_api/bridge_api_get_community.sql",
-        "postgrest/bridge_api/bridge_api_get_community_context.sql",
-        "postgrest/utilities/dispatch.sql",
-        "postgrest/utilities/get_api_method.sql",
-        "postgrest/utilities/valid_offset.sql",
-        "postgrest/utilities/list_votes.sql",
-        "postgrest/utilities/assets_operations.sql",
-        "postgrest/utilities/create_condenser_post_object.sql",
-        "postgrest/condenser_api/condenser_api_get_blog.sql",
-        "postgrest/condenser_api/condenser_api_get_content.sql",
-        "postgrest/database_api/database_api_find_votes.sql",
-        "postgrest/database_api/database_api_list_votes.sql",
-        "postgrest/condenser_api/condenser_api_get_active_votes.sql",
-        "postgrest/utilities/rep_log10.sql",
-        "postgrest/utilities/muted_reasons_operations.sql",
-        "postgrest/utilities/create_bridge_post_object.sql",
-        "postgrest/bridge_api/bridge_api_get_post.sql",
-        "postgrest/bridge_api/bridge_api_get_payout_stats.sql",
-        "postgrest/hive_api/hive_api_get_info.sql",
-        "postgrest/hive_api/hive_api_db_head_state.sql",
-        "postgrest/utilities/get_account_posts.sql",
-        "postgrest/utilities/get_account_posts_by_tag.sql",
-        "postgrest/bridge_api/bridge_api_get_account_posts.sql",
-        "postgrest/bridge_api/bridge_api_get_account_posts_by_tag.sql",
-        "postgrest/bridge_api/bridge_api_get_relationship_between_accounts.sql",
-        "postgrest/bridge_api/bridge_api_unread_notifications.sql",
-        "postgrest/utilities/find_tag_id.sql",
-        "postgrest/utilities/get_ranked_posts.sql",
-        "postgrest/utilities/get_reblogged_posts.sql",
-        "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
-        "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql",
-        "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql",
-        "postgrest/condenser_api/condenser_api_get_replies_by_last_update.sql",
-        "postgrest/condenser_api/condenser_api_get_discussion_by_author_before_date.sql",
-        "postgrest/condenser_api/condenser_api_get_discussion_by.sql",
-        "postgrest/utilities/notifications.sql",
-        "postgrest/bridge_api/bridge_api_account_notifications.sql",
-        "postgrest/bridge_api/bridge_api_post_notifications.sql",
-        "postgrest/utilities/create_database_post_object.sql",
-        "postgrest/database_api/database_api_find_comments.sql",
-        "postgrest/utilities/valid_date.sql",
-        "postgrest/bridge_api/bridge_api_list_subscribers.sql",
-        "postgrest/bridge_api/bridge_api_get_trending_topics.sql",
-        "postgrest/bridge_api/bridge_api_list_communities.sql",
-        "postgrest/bridge_api/bridge_api_get_discussion.sql",
-        "postgrest/bridge_api/bridge_api_list_votes.sql",
-        "postgrest/bridge_api/bridge_api_get_post_header.sql",
-        "postgrest/utilities/get_profiles.sql",
-        "postgrest/utilities/get_muted_accounts_list.sql",
-        "postgrest/bridge_api/bridge_api_get_profile.sql",
-        "postgrest/bridge_api/bridge_api_does_user_follow_any_lists.sql",
-        "postgrest/utilities/extract_profile_metadata.sql",
-        "postgrest/bridge_api/bridge_api_get_follow_list.sql",
-        "postgrest/utilities/get_role_name.sql",
-        "postgrest/utilities/find_community_id.sql",
-        "postgrest/bridge_api/bridge_api_list_community_roles.sql",
-        "postgrest/bridge_api/bridge_api_list_all_subscriptions.sql",
-        "postgrest/bridge_api/bridge_api_list_pop_communities.sql",
-        "postgrest/condenser_api/extract_parameters_for_get_following_and_followers.sql",
-        "postgrest/condenser_api/condenser_api_get_followers.sql",
-        "postgrest/condenser_api/condenser_api_get_following.sql",
-        "postgrest/utilities/find_subscription_id.sql",
-        "postgrest/bridge_api/bridge_api_get_profiles.sql",
-        "postgrest/utilities/valid_accounts.sql",
-        "postgrest/search-api/find_text.sql",
-        "endpoints/endpoint_schema.sql",
-        "endpoints/types/operation.sql",
-        "endpoints/accounts/get_ops_by_account.sql",
-        "endpoints/accounts/get_account_pending_author_rewards.sql",
-        "endpoints/accounts/get_account_pending_curation_rewards.sql",
-        "endpoints/blog/get_reblogs.sql",
-        "endpoints/other/get_sync_status.sql",
+        *_postgrest_scripts(),
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

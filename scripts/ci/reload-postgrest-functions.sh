@@ -8,8 +8,8 @@
 # This allows skipping the full sync and reusing cached data when only
 # API function code changed.
 #
-# IMPORTANT: The SQL file list is extracted from hive/db/schema.py to ensure
-# this script stays in sync with the main installation code.
+# IMPORTANT: The SQL file list is read from hive/db/sql_scripts/postgrest/load_order.sql,
+# the same manifest hive/db/schema.py installs from.
 #
 # Usage:
 #   ./scripts/ci/reload-postgrest-functions.sh --postgres-url=postgresql://hivemind@localhost:5432/haf_block_log
@@ -79,22 +79,17 @@ if [ -z "$ADMIN_URL" ]; then
 fi
 
 SQL_SCRIPTS_DIR="$REPO_ROOT/hive/db/sql_scripts"
-SCHEMA_PY="$REPO_ROOT/hive/db/schema.py"
+LOAD_ORDER="$SQL_SCRIPTS_DIR/postgrest/load_order.sql"
 
 echo "=== Reloading PostgREST SQL functions ==="
 echo "PostgreSQL URL: ${POSTGRES_URL%%@*}@..."
 echo "SQL scripts dir: $SQL_SCRIPTS_DIR"
 
-# Extract PostgREST/endpoint scripts from schema.py
-# This ensures we stay in sync with the main installation code
+# List the PostgREST/endpoint scripts the manifest includes (`\ir <path>`, relative
+# to postgrest/), as paths relative to $SQL_SCRIPTS_DIR
 extract_postgrest_scripts() {
-    # Extract the sql_scripts list from setup_runtime_code() in schema.py
-    # Filter to only postgrest/ and endpoints/ scripts
-    # Exclude preprocess_search_query.sql as it's handled separately (requires admin)
-    grep -E '^\s+"(postgrest/|endpoints/)' "$SCHEMA_PY" | \
-        sed 's/.*"\([^"]*\)".*/\1/' | \
-        grep -v '^#' | \
-        grep -v 'preprocess_search_query'
+    sed -n 's|^[[:space:]]*\\ir[[:space:]]\{1,\}\([^[:space:]]*\).*|postgrest/\1|p' "$LOAD_ORDER" | \
+        sed 's|^postgrest/\.\./||'
 }
 
 # Function to load a SQL script
@@ -119,10 +114,10 @@ echo ""
 echo "=== Installing admin-level scripts ==="
 load_sql "$ADMIN_URL" "postgrest/utilities/preprocess_search_query.sql"
 
-# Load PostgREST scripts in the order from schema.py::setup_runtime_code()
+# Load PostgREST scripts in manifest order
 # This ensures proper dependency resolution
 echo ""
-echo "=== Loading PostgREST scripts (extracted from schema.py) ==="
+echo "=== Loading PostgREST scripts (from postgrest/load_order.sql) ==="
 
 # Extract and load scripts
 SCRIPT_COUNT=0
