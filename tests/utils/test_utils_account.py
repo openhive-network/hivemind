@@ -17,8 +17,9 @@ def test_valid_account():
     account = {'name': 'foo', 'posting_json_metadata': json.dumps(dict(profile=raw_profile))}
 
     safe_profile = safe_profile_metadata(account)
-    for key, safe_value in safe_profile.items():
-        assert raw_profile[key] == safe_value
+    expected = {key: value for key, value in raw_profile.items() if key != 'version'}
+    expected.update(blacklist_description='', muted_list_description='')
+    assert safe_profile == expected
 
 
 def test_invalid_account():

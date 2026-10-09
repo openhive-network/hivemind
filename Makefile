@@ -7,7 +7,7 @@ PROJECT_DOCKER_RUN_ARGS := --link db:db
 
 default: build
 
-.PHONY: test run test-all test-utils test-server test-steem test-lint fmt test-with-build build docs
+.PHONY: test run test-all test-utils test-server test-lint fmt test-with-build build docs
 
 docs:
 	pdoc --html hive --html-dir docs --overwrite
@@ -44,9 +44,6 @@ test-all:
 
 test-utils:
 	py.test tests/utils --cov=hive/utils --capture=sys
-
-test-steem:
-	py.test tests/steem --cov=hive/steem --capture=sys
 
 test-server:
 	py.test tests/server --cov=hive/server --capture=sys

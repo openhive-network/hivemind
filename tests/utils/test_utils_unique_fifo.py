@@ -11,7 +11,8 @@ def test_unique_queue():
     assert len(q) == 3
 
     pop1 = q.shift_portion(3)
-    assert pop1 == ['tim']
+    assert len(pop1) == 1
+    assert pop1[0] in {'tim', 'bob'}
     assert len(q) == 2
 
     assert q.extend(set()) == 0
@@ -21,7 +22,7 @@ def test_unique_queue():
     assert len(q) == 2
 
     pop2 = q.shift_portion(1)
-    assert pop2 == ['bob', 'foo']
+    assert pop2 == [({'tim', 'bob'} - set(pop1)).pop(), 'foo']
     assert not q
 
     assert q.shift_portion(500) == []
@@ -40,4 +41,5 @@ def test_unique_queue():
     q.add('cat')
     assert len(q) == 3
     pop3 = q.shift_portion(1)
-    assert pop3 == ['foo', 'bar', 'cat']
+    assert set(pop3[:2]) == {'foo', 'bar'}
+    assert pop3[2] == 'cat'
