@@ -6,7 +6,7 @@
 #
 #   .aidev/run-checks.sh <suite> <step>...
 #
-#   - unit       pytest on tests/utils and tests/steem, those that exist (the
+#   - unit       pytest on tests/utils, tests/steem and tests/ci, those that exist (the
 #                Makefile's test-utils / test-steem); one junit case per test in unit.xml
 #   - ruff       `ruff check` and `ruff format --check` on hive/ and tests/, with the
 #                pyproject.toml configuration
@@ -68,7 +68,7 @@ ensure_version() {
 # The tests write scratch files (e.g. .tmp.test-prof) relative to the working
 # directory: run them from a scratch one so the checkout stays clean. A directory
 # of UNIT_DIRS that doesn't exist is skipped, so removing one doesn't break the step.
-UNIT_DIRS=(tests/utils tests/steem)
+UNIT_DIRS=(tests/utils tests/steem tests/ci)
 unit() {
     ensure_version
     local scratch dir rc=0

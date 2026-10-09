@@ -369,7 +369,8 @@ detect_changes:
     # - *.md, README, CHANGELOG, LICENSE, CLAUDE.md (docs)
     # - .gitlab-ci.yml (CI config)
     # Note: PostgREST SQL changes now have special handling - they skip sync but reload SQL
-    HAF_APP_SKIP_PATTERNS: '^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+    # The sync job reuses these to find an ancestor whose sync cache this commit can use.
+    HAF_APP_SKIP_PATTERNS: &haf_app_skip_patterns '^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
   after_script:
     # Additional detection for PostgREST-only changes
     # If all non-skip changes are in PostgREST directories, we can skip sync and reload SQL
@@ -597,6 +598,7 @@ sync:
     DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
     SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
     ADD_MOCKS: "true"
+    HAF_APP_SKIP_PATTERNS: *haf_app_skip_patterns
     # Docker compose variables
     HAF_DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
     HAF_SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
@@ -664,22 +666,43 @@ sync:
       touch "${CI_PROJECT_DIR}/.sync_skipped"
       SYNC_SKIPPED=true
 
-    # AUTO_SKIP_SYNC mode: try exact cache, fallback to full sync
-    # NOTE: No fallback to caches with different app commits - this ensures schema compatibility
+    # AUTO_SKIP_SYNC mode: try the exact cache, then the caches of first-parent ancestors
+    # this commit differs from by docs/tests/CI only (same schema and indexer), else full sync.
+    # Ancestors behind any other change are never considered - this ensures schema compatibility.
     elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
       echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
-      echo "Looking for hivemind sync cache (exact key match only)..."
+      echo "Looking for hivemind sync cache (this commit, or an ancestor differing by docs/tests/CI only)..."
 
-      # Check if exact cache exists
-      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
-      if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
-        echo "Exact cache found: ${SYNC_CACHE_KEY}"
-        echo "Sync skipped - using cached data"
-        touch "${CI_PROJECT_DIR}/.sync_skipped"
-        SYNC_SKIPPED=true
-      else
-        echo "Exact cache not found - will run full sync"
-        echo "This ensures schema compatibility with current app version"
+      git config --global --add safe.directory "$CI_PROJECT_DIR"
+      CANDIDATE_KEYS="${SYNC_CACHE_KEY}"
+      for ancestor in $("${CI_PROJECT_DIR}/scripts/ci/find_skip_cache_ancestor.sh" HEAD 25 || true); do
+        CANDIDATE_KEYS+=" ${HAF_COMMIT}_${ancestor}"
+      done
+
+      for CANDIDATE_KEY in $CANDIDATE_KEYS; do
+        LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${CANDIDATE_KEY}"
+        if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${CANDIDATE_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
+          echo "Cache found: ${CANDIDATE_KEY}"
+          if [[ "$CANDIDATE_KEY" != "$SYNC_CACHE_KEY" ]]; then
+            echo "SYNC_CACHE_KEY=${CANDIDATE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+            # Services use the default key evaluated at job start: point it at the found cache.
+            NFS_FOUND_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${CANDIDATE_KEY}.tar"
+            NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+            if [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+              echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename "$NFS_FOUND_TAR")"
+              ln -sf "$(basename "$NFS_FOUND_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+            fi
+          fi
+          echo "Sync skipped - using cached data"
+          touch "${CI_PROJECT_DIR}/.sync_skipped"
+          SYNC_SKIPPED=true
+          break
+        fi
+        echo "No cache for ${CANDIDATE_KEY}"
+      done
+
+      if [[ "$SYNC_SKIPPED" == "false" ]]; then
+        echo "No cache for this commit or a docs/tests/CI-only ancestor - will run full sync"
       fi
 
     # POSTGREST_ONLY_CHANGE mode: find any compatible cache with matching HAF commit and schema
