@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_discussion;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_discussion(IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_discussion(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -9,8 +9,9 @@ DECLARE
   _post_id  INT;
   _observer_id INT;
   _muted_reasons_filter_mask INT;
+  _top_votes INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array"}', 2, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array"}' ELSE '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array", "top_votes": "number"}' END)::JSON, 2, NULL);
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
@@ -31,10 +32,15 @@ BEGIN
     hivemind_postgrest_utilities.parse_integer_array_argument_from_json(_params, 'muted_reasons_filter', False)
   );
 
+  _top_votes = (CASE
+    WHEN _votes_mode = 0 THEN 0
+    ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+  END);
+
   RETURN COALESCE(
   (
     SELECT     -- bridge_api_get_discussion
-      jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, row.replies))
+      jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, row.replies, _votes_mode, _top_votes))
       FROM (
         SELECT
           hpv.id,

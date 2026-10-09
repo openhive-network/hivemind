@@ -113,10 +113,14 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_community_context(__params);
     WHEN __method_type = 'get_post' THEN
       result := hivemind_endpoints.bridge_api_get_post(__params);
+    WHEN __method_type = 'get_post_v2' THEN
+      result := hivemind_endpoints.bridge_api_get_post(__params, /* _votes_mode */ 1::SMALLINT);
     WHEN __method_type = 'get_payout_stats' THEN
       result := hivemind_endpoints.bridge_api_get_payout_stats(__params);
     WHEN __method_type = 'get_account_posts' THEN
       result := hivemind_endpoints.bridge_api_get_account_posts(__params);
+    WHEN __method_type = 'get_account_posts_v2' THEN
+      result := hivemind_endpoints.bridge_api_get_account_posts(__params, /* _votes_mode */ 1::SMALLINT);
     WHEN __method_type = 'get_account_posts_by_tag' THEN
       result := hivemind_endpoints.bridge_api_get_account_posts_by_tag(__params);
     WHEN __method_type = 'get_relationship_between_accounts' THEN
@@ -125,6 +129,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_unread_notifications(__params);
     WHEN __method_type = 'get_ranked_posts' THEN
       result := hivemind_endpoints.bridge_api_get_ranked_posts(__params);
+    WHEN __method_type = 'get_ranked_posts_v2' THEN
+      result := hivemind_endpoints.bridge_api_get_ranked_posts(__params, /* _votes_mode */ 1::SMALLINT);
     WHEN __method_type = 'account_notifications' THEN
       result := hivemind_endpoints.bridge_api_account_notifications(__params);
     WHEN __method_type = 'post_notifications' THEN
@@ -137,6 +143,10 @@ BEGIN
       result := hivemind_endpoints.bridge_api_list_communities(__params);
     WHEN __method_type = 'get_discussion' THEN
       result := hivemind_endpoints.bridge_api_get_discussion(__params);
+    WHEN __method_type = 'get_discussion_v2' THEN
+      result := hivemind_endpoints.bridge_api_get_discussion(__params, /* _votes_mode */ 1::SMALLINT);
+    WHEN __method_type = 'list_votes' THEN
+      result := hivemind_endpoints.bridge_api_list_votes(__params);
     WHEN __method_type = 'get_post_header' THEN
       result := hivemind_endpoints.bridge_api_get_posts_header(__params);
     WHEN __method_type = 'normalize_post' THEN

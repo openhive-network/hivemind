@@ -289,6 +289,7 @@ def setup_runtime_code(db) -> None:
         "postgrest/bridge_api/bridge_api_get_trending_topics.sql",
         "postgrest/bridge_api/bridge_api_list_communities.sql",
         "postgrest/bridge_api/bridge_api_get_discussion.sql",
+        "postgrest/bridge_api/bridge_api_list_votes.sql",
         "postgrest/bridge_api/bridge_api_get_post_header.sql",
         "postgrest/utilities/get_profiles.sql",
         "postgrest/utilities/get_muted_accounts_list.sql",

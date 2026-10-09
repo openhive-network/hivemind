@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_account_posts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts(IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -10,13 +10,15 @@ _account_id INT;
 _observer_id INT;
 _post_id INT;
 _limit INT;
+_top_votes INT;
 
 _account TEXT;
 _permlink TEXT;
 
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
-                                                                 '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string"}',
+                                                                 (CASE WHEN _votes_mode = 0 THEN '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string"}'
+                                                                  ELSE '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "top_votes": "number"}' END)::JSON,
                                                                  2,
                                                                  '{"start_permlink": "permlink must be string"}');
 
@@ -44,13 +46,18 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
+  _top_votes = (CASE
+    WHEN _votes_mode = 0 THEN 0
+    ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+  END);
+
   CASE hivemind_postgrest_utilities.parse_argument_from_json(_params, 'sort', True)
-    WHEN 'blog' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account, _account_id, _post_id, _observer_id, _limit, 0, True);
-    WHEN 'comments' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_comments(_account_id, _post_id, _observer_id, _limit, 0, True);
-    WHEN 'feed' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_feed(_account_id, _post_id, _observer_id, _limit, 0, True);
-    WHEN 'posts' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_posts(_account_id, _post_id, _observer_id, _limit);
-    WHEN 'replies' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_replies(_account_id, _post_id, _observer_id, _limit, 0, (_permlink IS NOT NULL AND _permlink <> '' ), True);
-    WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_payout(_account_id, _post_id, _observer_id, _limit);
+    WHEN 'blog' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account, _account_id, _post_id, _observer_id, _limit, 0, True, _votes_mode, _top_votes);
+    WHEN 'comments' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_comments(_account_id, _post_id, _observer_id, _limit, 0, True, _votes_mode, _top_votes);
+    WHEN 'feed' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_feed(_account_id, _post_id, _observer_id, _limit, 0, True, _votes_mode, _top_votes);
+    WHEN 'posts' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_posts(_account_id, _post_id, _observer_id, _limit, _votes_mode, _top_votes);
+    WHEN 'replies' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_replies(_account_id, _post_id, _observer_id, _limit, 0, (_permlink IS NOT NULL AND _permlink <> '' ), True, _votes_mode, _top_votes);
+    WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_payout(_account_id, _post_id, _observer_id, _limit, _votes_mode, _top_votes);
     ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported sort, valid sorts: blog, feed, posts, comments, replies, payout');
   END CASE;
 END

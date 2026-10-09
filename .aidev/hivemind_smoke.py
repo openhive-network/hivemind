@@ -11,8 +11,11 @@ database is an empty HAF testnet one, so every check asserts the shape an empty
 chain answers with (the testnet's genesis accounts exist, posts and communities
 don't), not chain data.
 
-Writes OUT_DIR/api-smoke.xml (one junit case per call) and exits non-zero when
-any call fails. To check another method or endpoint, add it to CHECKS.
+Then runs the psql scripts in SQL_TESTS against the same database: they seed the
+data they need in a transaction they roll back, and fail by raising.
+
+Writes OUT_DIR/api-smoke.xml (one junit case per call or script) and exits
+non-zero when any fails. To check another method or endpoint, add it to CHECKS.
 """
 import json
 import os
@@ -83,6 +86,15 @@ CHECKS = [
     ("jsonrpc/tags_api.get_discussion.unknown", rpc("tags_api.get_discussion", {"author": "initminer", "permlink": "nope"}), rpc_error(-32602)),
     ("jsonrpc/bridge.get_profile", rpc("bridge.get_profile", {"account": "initminer"}), result_has("id", "name", "stats", "metadata")),
     ("jsonrpc/bridge.get_ranked_posts", rpc("bridge.get_ranked_posts", {"sort": "trending", "limit": 5}), result_is([])),
+    ("jsonrpc/bridge.get_ranked_posts_v2", rpc("bridge.get_ranked_posts_v2", {"sort": "trending", "limit": 5, "top_votes": 3}), result_is([])),
+    ("jsonrpc/bridge.get_ranked_posts_v2.top_votes_11", rpc("bridge.get_ranked_posts_v2", {"sort": "trending", "top_votes": 11}), rpc_error(-32602)),
+    ("jsonrpc/bridge.get_ranked_posts_v2.top_votes_negative", rpc("bridge.get_ranked_posts_v2", {"sort": "trending", "top_votes": -1}), rpc_error(-32602)),
+    ("jsonrpc/bridge.get_ranked_posts_v2.extra_parameter", rpc("bridge.get_ranked_posts_v2", {"sort": "trending", "extra": 1}), rpc_error(-32602)),
+    ("jsonrpc/bridge.get_ranked_posts.top_votes", rpc("bridge.get_ranked_posts", {"sort": "trending", "top_votes": 3}), rpc_error(-32602)),
+    ("jsonrpc/bridge.get_account_posts_v2", rpc("bridge.get_account_posts_v2", {"sort": "posts", "account": "initminer"}), result_is([])),
+    ("jsonrpc/bridge.get_post_v2.unknown", rpc("bridge.get_post_v2", {"author": "initminer", "permlink": "nope"}), rpc_error(-32602)),
+    ("jsonrpc/bridge.get_discussion_v2.unknown", rpc("bridge.get_discussion_v2", {"author": "initminer", "permlink": "nope"}), rpc_error(-32602)),
+    ("jsonrpc/bridge.list_votes.unknown", rpc("bridge.list_votes", {"author": "initminer", "permlink": "nope"}), rpc_error(-32602)),
     ("jsonrpc/bridge.list_communities", rpc("bridge.list_communities", {"limit": 5}), result_is([])),
     ("jsonrpc/bridge.get_trending_topics", rpc("bridge.get_trending_topics", {}), result_list()),
     ("jsonrpc/bridge.unread_notifications", rpc("bridge.unread_notifications", {"account": "initminer"}), result_has("unread", "lastread")),
@@ -91,6 +103,17 @@ CHECKS = [
     ("jsonrpc/unknown_method", rpc("condenser_api.no_such_method", []), rpc_error(-32602)),
     ("rest/get_sync_status", ("GET", "/rpc/get_sync_status", None), http_json(dict)),
 ]
+
+SQL_TESTS = [
+    "tests/sql/bridge_vote_free_calls.sql",
+]
+
+
+def run_sql_test(path):
+    proc = subprocess.run(
+        ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-d", os.environ["HIVEMIND_TEST_USER_URL"], "-f", path],
+        capture_output=True, text=True)
+    return proc.returncode, proc.stdout + proc.stderr
 
 
 def free_port():
@@ -158,6 +181,17 @@ def main(out):
                     verdict, message = "fail", str(err).replace("\t", " ").replace("\n", " ")[:300]
                     print(f"FAIL {name}: {message}\n     response: {text[:500]}")
                 tsv.write(f"case\t{name}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
+            for script in SQL_TESTS:
+                t0 = time.monotonic()
+                rc, output = run_sql_test(os.path.join(HERE, "..", script))
+                if rc == 0:
+                    verdict, message = "pass", ""
+                    print(f"ok   sql/{script}\n{output}")
+                else:
+                    failed += 1
+                    verdict, message = "fail", output.replace("\t", " ").replace("\n", " ")[-300:]
+                    print(f"FAIL sql/{script}: exit {rc}\n{output[-2000:]}")
+                tsv.write(f"case\tsql/{script}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
         finally:
             proc.terminate()
             try:
@@ -165,7 +199,8 @@ def main(out):
             except subprocess.TimeoutExpired:
                 proc.kill()
     subprocess.run([sys.executable, os.path.join(HERE, "junit_cases.py"), os.path.join(out, "api-smoke.xml"), "api-smoke", cases], check=True)
-    print(f"{len(CHECKS) - failed}/{len(CHECKS)} calls answered as expected")
+    total = len(CHECKS) + len(SQL_TESTS)
+    print(f"{total - failed}/{total} calls and scripts answered as expected")
     return 1 if failed else 0
 
 

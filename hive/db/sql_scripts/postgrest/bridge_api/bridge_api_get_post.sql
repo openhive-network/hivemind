@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_post;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_post(IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_post(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,8 +11,9 @@ _permlink TEXT;
 _observer TEXT;
 _observer_id INTEGER;
 _post_id INT;
+_top_votes INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "observer": "string"}', 2, '{"permlink": "permlink must be string"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"author": "string", "permlink": "string", "observer": "string"}' ELSE '{"author": "string", "permlink": "string", "observer": "string", "top_votes": "number"}' END)::JSON, 2, '{"permlink": "permlink must be string"}');
   _author = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', True);
   _permlink = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'permlink', True);
 
@@ -24,10 +25,15 @@ BEGIN
     hivemind_postgrest_utilities.valid_account(_observer, True),
     True);
 
+  _top_votes = (CASE
+    WHEN _votes_mode = 0 THEN 0
+    ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+  END);
+
   _post_id =  hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True);
 
   RETURN (
-    SELECT hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, False, True) FROM ( -- bridge_api_get_post
+    SELECT hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, False, True, NULL, _votes_mode, _top_votes) FROM ( -- bridge_api_get_post
       SELECT
         hp.id,
         hp.author,

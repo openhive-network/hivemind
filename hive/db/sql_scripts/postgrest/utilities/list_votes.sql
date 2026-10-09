@@ -1,5 +1,5 @@
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.vote_presentation CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.vote_presentation AS ENUM( 'database_api', 'condenser_api', 'bridge_api', 'active_votes');
+CREATE TYPE hivemind_postgrest_utilities.vote_presentation AS ENUM( 'database_api', 'condenser_api', 'bridge_api', 'active_votes', 'bridge_list_votes');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.apply_vote_presentation;
 CREATE FUNCTION hivemind_postgrest_utilities.apply_vote_presentation(IN _vote RECORD, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation)
@@ -41,6 +41,15 @@ BEGIN
       'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
       'weight', hivemind_app.json_stringify_numeric(_vote.weight)
     )::jsonb;
+  ELSIF _presentation_mode = 'bridge_list_votes' THEN
+    RETURN jsonb_build_object(
+      'voter', _vote.voter,
+      'rshares', hivemind_app.json_stringify_numeric(_vote.rshares),
+      'percent', _vote.percent,
+      'weight', hivemind_app.json_stringify_numeric(_vote.weight),
+      'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
+      'reputation', hivemind_postgrest_utilities.rep_log10(_vote.reputation)
+    );
   ELSE
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array - unspecified vote presentation mode');
   END IF;
@@ -49,7 +58,7 @@ $function$
 ;
 
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.list_votes_case CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
+CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment', 'bridge_list_by_comment_voter_after');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_votes;
 CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER, IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL)
@@ -61,7 +70,7 @@ $function$
 DECLARE
 _result JSONB;
 BEGIN
-  IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case]) THEN
+  IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case,'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case]) THEN
     assert _voter_id IS NOT NULL;
   END IF;
 
@@ -86,6 +95,7 @@ BEGIN
           WHEN _case = 'get_votes_for_posts' THEN v.post_id = _post_id
           WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
           WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
+          WHEN _case = 'bridge_list_by_comment_voter_after' THEN (v.post_id = _post_id AND v.voter_id > _voter_id)
         END
       )
       AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
@@ -94,6 +104,7 @@ BEGIN
           WHEN _case = 'get_votes_for_posts' THEN v.voter_id
           WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
           WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
+          WHEN _case = 'bridge_list_by_comment_voter_after' THEN v.voter_id
         END
       )
       LIMIT _limit

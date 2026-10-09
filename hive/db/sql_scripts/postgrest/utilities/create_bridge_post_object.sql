@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_bridge_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _observer_id INTEGER, IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN, IN _replies JSONB DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _observer_id INTEGER, IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN, IN _replies JSONB DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -66,13 +66,39 @@ BEGIN
             ),
     'payout', (_row.payout + _row.pending_payout),
     'author_reputation', _tmp_amount,
-    'active_votes', hivemind_postgrest_utilities.list_votes(_observer_id, _row.id, /* in python code it was hardcoded */ 1000,
-                    'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
                     WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN to_jsonb(string_to_array(_row.blacklists, ',')) 
                     ELSE to_jsonb('{}'::INT[])
                   END)
   );
+  -- _votes_mode 0: embedded active_votes; 1: vote-free (observer_vote, optional top_votes)
+  IF _votes_mode = 0 THEN
+    _result = jsonb_set(_result, '{active_votes}', hivemind_postgrest_utilities.list_votes(_observer_id, _row.id, /* in python code it was hardcoded */ 1000,
+                        'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation));
+  ELSE
+    _result = jsonb_set(_result, '{observer_vote}', COALESCE(
+      (SELECT jsonb_build_object('rshares', hivemind_app.json_stringify_numeric(hv.rshares), 'percent', hv.vote_percent)
+       FROM hivemind_app.hive_votes hv
+       WHERE _observer_id <> 0 AND hv.post_id = _row.id AND hv.voter_id = _observer_id),
+      'null'::JSONB));
+
+    IF _top_votes > 0 THEN
+      _result = jsonb_set(_result, '{top_votes}', COALESCE(
+        (SELECT jsonb_agg(jsonb_build_object('voter', tv.voter, 'rshares', hivemind_app.json_stringify_numeric(tv.rshares), 'percent', tv.vote_percent)
+                          ORDER BY abs(tv.rshares) DESC, tv.voter_id)
+         FROM (
+           SELECT ha.name AS voter, hv.voter_id, hv.rshares, hv.vote_percent
+           FROM hivemind_app.hive_votes hv
+           JOIN hivemind_app.hive_accounts ha ON ha.id = hv.voter_id
+           WHERE hv.post_id = _row.id
+             AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hv.voter_id))
+           ORDER BY abs(hv.rshares) DESC, hv.voter_id
+           LIMIT _top_votes
+         ) tv),
+        '[]'::JSONB));
+    END IF;
+  END IF;
+
   -- reputation
   IF _tmp_amount < 1 THEN
     _result = jsonb_set(_result, '{blacklists}', _result->'blacklists' || jsonb_build_array('reputation-0'));

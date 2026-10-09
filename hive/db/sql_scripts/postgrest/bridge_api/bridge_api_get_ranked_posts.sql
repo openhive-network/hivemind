@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_ranked_posts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_ranked_posts(IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_ranked_posts(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,9 +12,10 @@ _post_id INT;
 _observer_id INT;
 _sort_type hivemind_postgrest_utilities.ranked_post_sort_type;
 _muted_reasons_filter_mask INT;
+_top_votes INT;
 
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "observer": "string", "muted_reasons_filter": "array"}', 1, '{"start_permlink": "permlink must be string"}');
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "observer": "string", "muted_reasons_filter": "array"}' ELSE '{"sort": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "tag": "string", "observer": "string", "muted_reasons_filter": "array", "top_votes": "number"}' END)::JSON, 1, '{"start_permlink": "permlink must be string"}');
 
   _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
                                                      least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
@@ -41,6 +42,11 @@ BEGIN
     hivemind_postgrest_utilities.parse_integer_array_argument_from_json(_params, 'muted_reasons_filter', False)
   );
 
+  _top_votes = (CASE
+    WHEN _votes_mode = 0 THEN 0
+    ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+  END);
+
   CASE hivemind_postgrest_utilities.parse_argument_from_json(_params, 'sort', True)
     WHEN 'trending' THEN _sort_type = 'trending';
     WHEN 'hot' THEN _sort_type = 'hot';
@@ -53,32 +59,32 @@ BEGIN
 
   IF _tag IS NULL OR _tag = '' OR _tag = 'all' THEN
     CASE _sort_type
-      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_all_trending_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
-      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_all_hot_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
-      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_all_created_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
-      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
-      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask);
-      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_all_muted_ranked_posts(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
+      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_all_trending_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_all_hot_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_all_created_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit, 0, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_all_muted_ranked_posts(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
     END CASE;
   ELSIF _tag = 'my' THEN
     CASE _sort_type
-      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
-      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
-      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
-      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
-      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
-      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask);
+      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit, _muted_reasons_filter_mask, _votes_mode, _top_votes);
     END CASE;
   ELSIF hivemind_postgrest_utilities.check_community(_tag) THEN
-    RETURN hivemind_postgrest_utilities.get_ranked_posts_for_communities(_post_id, _observer_id, _limit, 0, _tag, True, _sort_type, _muted_reasons_filter_mask);
+    RETURN hivemind_postgrest_utilities.get_ranked_posts_for_communities(_post_id, _observer_id, _limit, 0, _tag, True, _sort_type, _muted_reasons_filter_mask, _votes_mode, _top_votes);
   ELSE
     CASE _sort_type
-      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
-      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
-      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
-      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
-      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask);
-      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask);
+      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask, _votes_mode, _top_votes);
     END CASE;
   END IF;
 END

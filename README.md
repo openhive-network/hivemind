@@ -77,6 +77,8 @@ Hivemind is divided into two parts:
    data. Some API calls require Hive accounts reputation data. The server code
    relies on another HAF application, [**reputation-tracker**](https://gitlab.syncad.com/hive/reputation_tracker/), which must run
    alongside the Hivemind indexer to provide this functionality.
+   Post calls that leave out the embedded vote lists, and paginated votes, are
+   described in [docs/bridge-votes.md](docs/bridge-votes.md).
 
 ## Software architecture
 
