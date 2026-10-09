@@ -6,8 +6,8 @@
 #
 #   .aidev/run-checks.sh <suite> <step>...
 #
-#   - unit       pytest on tests/utils and tests/steem (the Makefile's test-utils /
-#                test-steem); one junit case per test in unit.xml
+#   - unit       pytest on tests/utils and tests/steem, those that exist (the
+#                Makefile's test-utils / test-steem); one junit case per test in unit.xml
 #   - install    into the stack's HAF database (HIVEMIND_TEST_DB_HOST, default `haf`),
 #                as the hivemind image's `setup --with-apps` does it:
 #                scripts/setup_postgres.sh, the reputation_tracker and HAfAH
@@ -64,14 +64,20 @@ ensure_version() {
 }
 
 # The tests write scratch files (e.g. .tmp.test-prof) relative to the working
-# directory: run them from a scratch one so the checkout stays clean.
+# directory: run them from a scratch one so the checkout stays clean. A directory
+# of UNIT_DIRS that doesn't exist is skipped, so removing one doesn't break the step.
+UNIT_DIRS=(tests/utils tests/steem)
 unit() {
     ensure_version
-    local scratch rc=0
+    local scratch dir rc=0
+    local -a dirs=()
+    for dir in "${UNIT_DIRS[@]}"; do
+        [ -d "$dir" ] && dirs+=("$root/$dir")
+    done
+    [ "${#dirs[@]}" -gt 0 ] || { echo "none of ${UNIT_DIRS[*]} exists"; return 1; }
     scratch="$(mktemp -d)"
     (cd "$scratch" && PYTHONPATH="$root" python3 -m pytest -p no:cacheprovider --rootdir="$root" \
-        --junitxml="$out/unit.xml" -o junit_suite_name=unit \
-        "$root/tests/utils" "$root/tests/steem") || rc=$?
+        --junitxml="$out/unit.xml" -o junit_suite_name=unit "${dirs[@]}") || rc=$?
     rm -rf "$scratch"
     return "$rc"
 }
