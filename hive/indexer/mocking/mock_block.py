@@ -3,7 +3,6 @@ import hashlib
 import logging
 from abc import abstractmethod
 from collections.abc import Iterator
-from typing import Optional, Union
 
 import ujson as json
 
@@ -14,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class AccountMock:
-    account_id: Optional[int] = None
+    account_id: int | None = None
 
     def __init__(self, block_number: int, name: str):
         self._block_number = block_number
@@ -56,8 +55,8 @@ VALUES
 
 
 class OperationBase:
-    operation_id: Optional[int] = None
-    pos_in_block: Optional[int] = 1
+    operation_id: int | None = None
+    pos_in_block: int | None = 1
     _custom_json_seq_synced = False
 
     def __init__(self, block_number: int, body: dict):
@@ -71,7 +70,7 @@ class OperationBase:
 
     @property
     @abstractmethod
-    def type(self) -> Optional[Union[OperationType, VirtualOperationType]]:
+    def type(self) -> OperationType | VirtualOperationType | None:
         raise NotImplementedError
 
     @property
@@ -169,7 +168,7 @@ class VirtualOperationMock(OperationBase):
         self._type = VirtualOperationType.from_name(operation_name=body['type'])
 
     @property
-    def type(self) -> Optional[VirtualOperationType]:
+    def type(self) -> VirtualOperationType | None:
         return self._type
 
 
@@ -179,7 +178,7 @@ class OperationMock(OperationBase):
         self._type = OperationType.from_name(operation_name=body['type'])
 
     @property
-    def type(self) -> Optional[OperationType]:
+    def type(self) -> OperationType | None:
         return self._type
 
 
@@ -240,7 +239,7 @@ VALUES
 
 
 class BlockMock:
-    def __init__(self, block_number: int, block_data: dict, virtual_ops: Optional[dict] = None):
+    def __init__(self, block_number: int, block_data: dict, virtual_ops: dict | None = None):
         self._block_number = block_number
         self._blocks_data = block_data
         self._virtual_ops = virtual_ops if virtual_ops is not None else {}

@@ -16,7 +16,7 @@ per call (`api-smoke.xml`).
 | Step | What |
 |---|---|
 | `unit` | pytest on `tests/utils` and `tests/steem`, those that exist (the Makefile's `test-utils` / `test-steem`), run from a scratch directory with `hive` imported from the checkout |
-| `ruff` | `ruff check` and `ruff format --check` on `hive/` and `tests/` with `pyproject.toml`'s configuration (ruff pinned in the image). Not bound to a slot yet: `develop` carries 20 findings and 8 unformatted files |
+| `ruff` | `ruff check` and `ruff format --check` on `hive/` and `tests/` with `pyproject.toml`'s configuration (ruff pinned in the image); `pyproject.toml` excludes the `tests_api` submodule, a separate project formatted with black |
 | `install` | into the stack's HAF database as `haf_admin`, the way the hivemind image's `setup --with-apps` does it: `scripts/setup_postgres.sh`, the `reputation_tracker` and `hafah` submodules' `install_app.sh`, `scripts/install_app.sh`, then `hive build_schema` from this checkout; passes when `hivemind_endpoints` has functions |
 | `reinstall` | `scripts/uninstall_app.sh`, then the hivemind half of `install` again |
 | `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with |
@@ -34,8 +34,9 @@ fails (`child table is missing column "hive_rowid"`). The install steps first ca
 
 | Slot | Steps | HAF stack |
 |---|---|---|
-| quick, coverage | unit | no |
-| full, canary | unit, install, reinstall, api-smoke | yes |
+| quick | unit, ruff | no |
+| coverage | unit | no |
+| full, canary | unit, ruff, install, reinstall, api-smoke | yes |
 | baseline | install, reinstall, api-smoke | yes |
 
 `static` and `system` are unbound: AIDEV runs neither for a project.

@@ -29,7 +29,7 @@ class BroadcastObject:
         return f"hivemind_{ret}"
 
     def debug(self):
-        log.debug(f"{self.name()}_{self.unit}: {self.value :.2f}")
+        log.debug(f"{self.name()}_{self.unit}: {self.value:.2f}")
 
     def __repr__(self):
         return self.__str__()
@@ -167,7 +167,7 @@ class OPStat(Stat):
         self.count = count
 
     def __str__(self):
-        return f"Processed {self.count :.0f} times in {self.time :.5f} seconds"
+        return f"Processed {self.count:.0f} times in {self.time:.5f} seconds"
 
     def broadcast(self, name: str):
         n = name.lower()
@@ -203,7 +203,7 @@ class OPStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(OPStatusManager.global_stats)
-        log.info(f"Total time for processing operations time: {tm :.4f}s.")
+        log.info(f"Total time for processing operations time: {tm:.4f}s.")
         return tm
 
     @staticmethod
@@ -211,7 +211,7 @@ class OPStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(OPStatusManager.cpbs)
-        log.info(f"Current time for processing operations time: {tm :.4f}s.")
+        log.info(f"Current time for processing operations time: {tm:.4f}s.")
         return tm
 
 
@@ -221,7 +221,7 @@ class FlushStat(Stat):
         self.pushed = pushed
 
     def __str__(self):
-        return f"Pushed {self.pushed :.0f} records in {self.time :.4f} seconds"
+        return f"Pushed {self.pushed:.0f} records in {self.time:.4f} seconds"
 
     def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
@@ -255,7 +255,7 @@ class FlushStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FlushStatusManager.global_stats)
-        log.info(f"Total flushing time: {tm :.4f}s.")
+        log.info(f"Total flushing time: {tm:.4f}s.")
         return tm
 
     @staticmethod
@@ -263,7 +263,7 @@ class FlushStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FlushStatusManager.current_flushes)
-        log.info(f"Current flushing time: {tm :.4f}s.")
+        log.info(f"Current flushing time: {tm:.4f}s.")
         return tm
 
 
@@ -272,7 +272,7 @@ class FinalStat(Stat):
         super().__init__(time)
 
     def __str__(self):
-        return f"Processed final operations in {self.time :.4f} seconds"
+        return f"Processed final operations in {self.time:.4f} seconds"
 
     def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
@@ -298,7 +298,7 @@ class FinalOperationStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FinalOperationStatusManager.current_finals)
-        log.info(f"Current final processing time: {tm :.4f}s.")
+        log.info(f"Current final processing time: {tm:.4f}s.")
         return tm
 
     @staticmethod
@@ -311,7 +311,7 @@ class WaitStat(Stat):
         super().__init__(time)
 
     def __str__(self):
-        return f"Waited {self.time :.4f} seconds"
+        return f"Waited {self.time:.4f} seconds"
 
 
 class WaitingStatusManager(StatusManager):
@@ -340,7 +340,7 @@ class WaitingStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(WaitingStatusManager.global_stats)
-        log.info(f"Total waiting time: {tm :.4f}s.")
+        log.info(f"Total waiting time: {tm:.4f}s.")
         return tm
 
     @staticmethod
@@ -348,7 +348,7 @@ class WaitingStatusManager(StatusManager):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(WaitingStatusManager.current_waits)
-        log.info(f"Current waiting time: {tm :.4f}s.")
+        log.info(f"Current waiting time: {tm:.4f}s.")
         return tm
 
 
@@ -482,7 +482,7 @@ class SteemStats(StatsAbstract):
         par = self.PAR_STEEMD[call]
         over = per / par
         if over >= self.PAR_THRESHOLD:
-            out = "[STEEM][%dms] %s[%d] -- %.1fx par (%d/%d)" % (ms, call, batch_size, over, per, par)
+            out = f"[STEEM][{int(ms)}ms] {call}[{int(batch_size)}] -- {over:.1f}x par ({int(per)}/{int(par)})"
             log.warning(colorize(out))
 
 
@@ -501,7 +501,7 @@ class DbStats(StatsAbstract):
         if ms > self.LOGGING_TRESHOLD:
             log.warning("[SQL][%dms] %s", ms, call)
             if ms > self.SLOW_QUERY_MS:
-                out = "[SQL][%dms] %s" % (ms, call[:250])
+                out = f"[SQL][{int(ms)}ms] {call[:250]}"
                 log.warning(colorize(out))
 
 

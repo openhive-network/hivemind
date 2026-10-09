@@ -591,7 +591,7 @@ class SyncHiveDb:
 
         return lbound, ubound
 
-    IDLE_POLL_SECONDS = 0.5      # while HAF is not ready / massive sync starves
+    IDLE_POLL_SECONDS = 0.5  # while HAF is not ready / massive sync starves
     LIVE_SAFETY_WAIT_SECONDS = 15.0  # live: NOTIFY wakes us; this is the fallback
 
     def _idle_until_new_block(self, application_stage) -> None:

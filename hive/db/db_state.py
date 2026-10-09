@@ -6,7 +6,6 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
-from typing import Optional
 
 import psycopg2.extensions
 
@@ -212,7 +211,7 @@ class DbState:
 
     @classmethod
     def _execute_query_with_modified_work_mem(
-        cls, db: Db, sql: str, explain: bool = False, value: Optional[str] = None, separate_transaction: bool = True
+        cls, db: Db, sql: str, explain: bool = False, value: str | None = None, separate_transaction: bool = True
     ) -> None:
         divide_factor = 64
         _value = value or f'{int(get_memory_amount() / divide_factor)}MB'

@@ -1,7 +1,6 @@
 import logging
 import sys
 from collections.abc import Sequence
-from typing import Optional
 
 import configargparse
 
@@ -44,7 +43,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     return parser.parse_args(args)
 
 
-def load_mock_data(mock_block_data_paths: Optional[list[str]] = None, mock_vops_data_paths: Optional[list[str]] = None):
+def load_mock_data(mock_block_data_paths: list[str] | None = None, mock_vops_data_paths: list[str] | None = None):
     log.info('Loading mock data')
     mock_block_data_paths = [] if not mock_block_data_paths else mock_block_data_paths
     mock_vops_data_paths = [] if not mock_vops_data_paths else mock_vops_data_paths
