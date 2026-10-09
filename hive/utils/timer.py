@@ -47,23 +47,23 @@ class Timer:
     _processed = 0
     _last_items = 0
 
-    def __init__(self, total=None, entity='', laps=None, full_total=None):
+    def __init__(self, total=None, entity='', laps=None, full_total=None) -> None:
         self._entity = entity
         self._lap_units = laps or []
         self._total = total
         self._full_total = full_total or total
         self._start_time = perf()
 
-    def batch_start(self):
+    def batch_start(self) -> None:
         """Signal new batch; call at top of loop."""
         self._laps = []
         self.batch_lap()
 
-    def batch_lap(self):
+    def batch_lap(self) -> None:
         """Signal movement to next task within batch."""
         self._laps.append(perf())
 
-    def batch_finish(self, ops=None):
+    def batch_finish(self, ops=None) -> None:
         """Signal end of batch."""
         self.batch_lap()
         self._last_items = ops

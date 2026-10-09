@@ -7,6 +7,8 @@ import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter as perf
+from types import TracebackType
+from typing import Optional, Type
 
 import psycopg2
 
@@ -36,7 +38,7 @@ log = logging.getLogger(__name__)
 
 
 class SyncHiveDb:
-    def __init__(self, conf: Conf, enter_sync: bool, upgrade_schema: bool):
+    def __init__(self, conf: Conf, enter_sync: bool, upgrade_schema: bool) -> None:
         self._conf = conf
         self._db = conf.db()
         self._enter_sync = enter_sync
@@ -98,7 +100,9 @@ class SyncHiveDb:
 
         return self
 
-    def __exit__(self, exc_type, value, traceback):
+    def __exit__(
+        self, exc_type: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None
+    ):
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
 
@@ -335,7 +339,7 @@ class SyncHiveDb:
         # Interrupted while reconnecting — surface the original disconnection.
         raise cause
 
-    def _replay_crashed_batch(self):
+    def _replay_crashed_batch(self) -> None:
         """Check for and replay any unfinished batch from a prior crash.
 
         The _batch_queue table records the block range of an in-flight batch.
@@ -360,7 +364,7 @@ class SyncHiveDb:
         self._db.query_no_return("COMMIT")
         log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
 
-    def _recover_skipped_live_blocks(self):
+    def _recover_skipped_live_blocks(self) -> None:
         """Detect a live block whose work was lost while the context advanced past it.
 
         Before the pointer commit was made massive-only (#336), a mid-block
@@ -430,7 +434,7 @@ class SyncHiveDb:
                 exc_info=True,
             )
 
-    def _check_unlogged_data_consistency(self):
+    def _check_unlogged_data_consistency(self) -> None:
         """Detect and recover from UNLOGGED table data loss after a PostgreSQL crash.
 
         During massive sync, hivemind converts several tables (hive_accounts,
@@ -526,7 +530,7 @@ class SyncHiveDb:
             "seed data re-inserted. Sync will restart from the beginning."
         )
 
-    def _wait_for_massive_consume(self):
+    def _wait_for_massive_consume(self) -> None:
         if self._massive_consume_blocks_futures is None:
             return
 
@@ -538,7 +542,7 @@ class SyncHiveDb:
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
 
-    def _break_requested(self, last_imported_block, active_connections_before):
+    def _break_requested(self, last_imported_block, active_connections_before) -> bool:
         if not can_continue_thread():
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
@@ -612,7 +616,7 @@ class SyncHiveDb:
         else:
             time.sleep(self.IDLE_POLL_SECONDS)
 
-    def _process_live_blocks(self, lbound, ubound, active_connections_before):
+    def _process_live_blocks(self, lbound, ubound, active_connections_before) -> None:
         log.info(f"[SINGLE] Attempting to process blocks in range: <{lbound}:{ubound}>")
 
         if not DbLiveContextHolder.is_live_context():
@@ -628,7 +632,7 @@ class SyncHiveDb:
         active_connections_after_live = self._get_active_db_connections()
         self._assert_connections_closed(active_connections_before, active_connections_after_live)
 
-    def _process_massive_blocks(self, lbound, ubound, active_connections_before):
+    def _process_massive_blocks(self, lbound, ubound, active_connections_before) -> None:
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
@@ -641,7 +645,7 @@ class SyncHiveDb:
             self._consume_massive_blocks_sql, lbound, ubound
         )
 
-    def _on_stop_synchronization(self, active_connections_before, sigint_during_massive=False):
+    def _on_stop_synchronization(self, active_connections_before, sigint_during_massive=False) -> None:
         # Restore WAL safety settings (fsync, full_page_writes) that were disabled
         # via ALTER SYSTEM during massive sync. These persist in postgresql.auto.conf
         # and survive PostgreSQL restarts, so they must always be restored on shutdown.
@@ -687,7 +691,7 @@ class SyncHiveDb:
 
         show_app_version(log, blocks_info, patch_level_info)
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         import json as json_module
 
         if SyncHiveDb.time_start is None:
@@ -800,7 +804,7 @@ class SyncHiveDb:
     def _get_active_db_connections(self):
         return self._query_hivemind_connections()
 
-    def _terminate_stale_connections(self):
+    def _terminate_stale_connections(self) -> None:
         """Terminate lingering hivemind connections from previous crashed instances.
 
         When hivemind crashes, its PostgreSQL connections remain in pg_stat_activity

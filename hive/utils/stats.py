@@ -14,12 +14,12 @@ log = logging.getLogger(__name__)
 
 
 class BroadcastObject:
-    def __init__(self, category: str, value, unit):
+    def __init__(self, category: str, value, unit) -> None:
         self.category = category
         self.value = value
         self.unit = unit
 
-    def name(self):
+    def name(self) -> str:
         ret = ""
         for c in self.category:
             if c.isalnum():
@@ -28,13 +28,13 @@ class BroadcastObject:
                 ret += "_"
         return f"hivemind_{ret}"
 
-    def debug(self):
+    def debug(self) -> None:
         log.debug(f"{self.name()}_{self.unit}: {self.value:.2f}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__dict__)
 
 
@@ -43,7 +43,7 @@ class PrometheusClient:
     logs_to_broadcast = Queue()
 
     @staticmethod
-    def work(port, pid):
+    def work(port, pid) -> None:
         try:
             import prometheus_client as prom
 
@@ -66,11 +66,10 @@ class PrometheusClient:
         except Exception as e:
             log.error(f"Prometheus logging failed. Exception\n {e}")
 
-    def __init__(self, port):
+    def __init__(self, port) -> None:
         if port is None:
             return
-        else:
-            port = int(port)
+        port = int(port)
         if PrometheusClient.deamon is None:
             try:
                 import prometheus_client  # noqa: F401
@@ -96,7 +95,7 @@ class PrometheusClient:
 
 
 class Stat:
-    def __init__(self, time):
+    def __init__(self, time) -> None:
         self.time = time
 
     def update(self, other):
@@ -107,7 +106,7 @@ class Stat:
             setattr(self, key, oatte[key] + val)
         return self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__dict__
 
     def __lt__(self, other):
@@ -119,7 +118,7 @@ class Stat:
 
 class StatusManager:
     # Fully abstract class
-    def __init__(self):
+    def __init__(self) -> None:
         raise AssertionError()
 
     @staticmethod
@@ -157,23 +156,23 @@ class StatusManager:
         return measured_time
 
     @staticmethod
-    def print_row():
+    def print_row() -> None:
         log.info("#" * 20)
 
 
 class OPStat(Stat):
-    def __init__(self, time, count):
+    def __init__(self, time, count) -> None:
         super().__init__(time)
         self.count = count
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Processed {self.count:.0f} times in {self.time:.5f} seconds"
 
     def broadcast(self, name: str):
         n = name.lower()
         if not n.endswith('operation'):
             n = f"{n}_operation"
-        return list([super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b')])
+        return [super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b')]
 
 
 class OPStatusManager(StatusManager):
@@ -184,7 +183,7 @@ class OPStatusManager(StatusManager):
     cpbs = {}
 
     @staticmethod
-    def op_stats(name, time, processed=1):
+    def op_stats(name, time, processed=1) -> None:
         if name in OPStatusManager.cpbs.keys():
             OPStatusManager.cpbs[name].time += time
             OPStatusManager.cpbs[name].count += processed
@@ -192,7 +191,7 @@ class OPStatusManager(StatusManager):
             OPStatusManager.cpbs[name] = OPStat(time, processed)
 
     @staticmethod
-    def next_blocks():
+    def next_blocks() -> None:
         OPStatusManager.global_stats = StatusManager.merge_dicts(
             OPStatusManager.global_stats, OPStatusManager.cpbs, True
         )
@@ -216,16 +215,16 @@ class OPStatusManager(StatusManager):
 
 
 class FlushStat(Stat):
-    def __init__(self, time, pushed):
+    def __init__(self, time, pushed) -> None:
         super().__init__(time)
         self.pushed = pushed
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Pushed {self.pushed:.0f} records in {self.time:.4f} seconds"
 
     def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
-        return list([super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b')])
+        return [super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b')]
 
 
 class FlushStatusManager(StatusManager):
@@ -236,7 +235,7 @@ class FlushStatusManager(StatusManager):
     current_flushes = {}
 
     @staticmethod
-    def flush_stat(name, time, pushed):
+    def flush_stat(name, time, pushed) -> None:
         if name in FlushStatusManager.current_flushes.keys():
             FlushStatusManager.current_flushes[name].time += time
             FlushStatusManager.current_flushes[name].pushed += pushed
@@ -244,7 +243,7 @@ class FlushStatusManager(StatusManager):
             FlushStatusManager.current_flushes[name] = FlushStat(time, pushed)
 
     @staticmethod
-    def next_blocks():
+    def next_blocks() -> None:
         FlushStatusManager.global_stats = StatusManager.merge_dicts(
             FlushStatusManager.global_stats, FlushStatusManager.current_flushes, True
         )
@@ -268,15 +267,15 @@ class FlushStatusManager(StatusManager):
 
 
 class FinalStat(Stat):
-    def __init__(self, time):
+    def __init__(self, time) -> None:
         super().__init__(time)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Processed final operations in {self.time:.4f} seconds"
 
     def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
-        return list([super().broadcast(n), BroadcastObject(n + "_items", '', 'b')])
+        return [super().broadcast(n), BroadcastObject(n + "_items", '', 'b')]
 
 
 class FinalOperationStatusManager(StatusManager):
@@ -287,7 +286,7 @@ class FinalOperationStatusManager(StatusManager):
     current_finals = {}
 
     @staticmethod
-    def final_stat(name, time):
+    def final_stat(name, time) -> None:
         if name in FinalOperationStatusManager.current_finals.keys():
             FinalOperationStatusManager.current_finals[name].time += time
         else:
@@ -302,15 +301,15 @@ class FinalOperationStatusManager(StatusManager):
         return tm
 
     @staticmethod
-    def clear():
+    def clear() -> None:
         FinalOperationStatusManager.current_finals.clear()
 
 
 class WaitStat(Stat):
-    def __init__(self, time):
+    def __init__(self, time) -> None:
         super().__init__(time)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Waited {self.time:.4f} seconds"
 
 
@@ -322,14 +321,14 @@ class WaitingStatusManager(StatusManager):
     current_waits = {}
 
     @staticmethod
-    def wait_stat(name, time):
+    def wait_stat(name, time) -> None:
         if name in WaitingStatusManager.current_waits.keys():
             WaitingStatusManager.current_waits[name].time += time
         else:
             WaitingStatusManager.current_waits[name] = WaitStat(time)
 
     @staticmethod
-    def next_blocks():
+    def next_blocks() -> None:
         WaitingStatusManager.global_stats = StatusManager.merge_dicts(
             WaitingStatusManager.global_stats, WaitingStatusManager.current_waits, True
         )
@@ -392,11 +391,11 @@ def _normalize_sql(sql, maxlen=180):
 class StatsAbstract:
     """Tracks service call timings"""
 
-    def __init__(self, service):
+    def __init__(self, service) -> None:
         self._service = service
         self.clear()
 
-    def add(self, call, ms, batch_size=1):
+    def add(self, call, ms, batch_size=1) -> None:
         """Record a call's duration."""
         try:
             key = self._calls[call]
@@ -407,14 +406,14 @@ class StatsAbstract:
         self.check_timing(call, ms, batch_size)
         self._ms += ms
 
-    def check_timing(self, call, ms, batch_size):
+    def check_timing(self, call, ms, batch_size) -> None:
         """Override for service-specific QA"""
 
     def ms(self):
         """Get total time spent in service"""
         return self._ms
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear accumulators"""
         self._calls = {}
         self._ms = 0.0
@@ -424,7 +423,7 @@ class StatsAbstract:
         top = sorted(self._calls.items(), key=lambda x: -x[1][0])
         return [(call, *vals) for (call, vals) in top[:count]]
 
-    def report(self, parent_secs):
+    def report(self, parent_secs) -> None:
         """Emit a table showing top calls by time spent."""
         if not self._calls:
             return
@@ -471,10 +470,10 @@ class SteemStats(StatsAbstract):
         'enum_virtual_ops': 1000,
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('steem')
 
-    def check_timing(self, call, ms, batch_size):
+    def check_timing(self, call, ms, batch_size) -> None:
         """Warn if a request (accounting for batch size) is too slow."""
         if call == 'get_block' and batch_size > 1:
             call = 'get_blocks_batch'
@@ -492,10 +491,10 @@ class DbStats(StatsAbstract):
     SLOW_QUERY_MS = 250
     LOGGING_TRESHOLD = 50
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('db')
 
-    def check_timing(self, call, ms, batch_size):
+    def check_timing(self, call, ms, batch_size) -> None:
         """Warn if any query is slower than defined threshold."""
 
         if ms > self.LOGGING_TRESHOLD:
@@ -520,26 +519,26 @@ class Stats:
     _start = perf()
 
     @classmethod
-    def log_db(cls, sql, secs):
+    def log_db(cls, sql, secs) -> None:
         """Log a database query. Incoming SQL is normalized."""
         if cls.COLLECT_DB_STATS:
             cls._db.add(_normalize_sql(sql), secs * 1000)
             cls.add_secs(secs)
 
     @classmethod
-    def log_steem(cls, method, secs, batch_size=1):
+    def log_steem(cls, method, secs, batch_size=1) -> None:
         """Log a steemd call."""
         if cls.COLLECT_NODE_STATS:
             cls._steemd.add(method, secs * 1000, batch_size)
             cls.add_secs(secs)
 
     @classmethod
-    def log_idle(cls, secs):
+    def log_idle(cls, secs) -> None:
         """Track idle time (e.g. sleeping until next block)"""
         cls._idle += secs
 
     @classmethod
-    def add_secs(cls, secs):
+    def add_secs(cls, secs) -> None:
         """Add to total ms elapsed; print if threshold reached."""
         cls._secs += secs
         if cls._secs > cls.PRINT_THRESH_MINS * 60:
@@ -549,7 +548,7 @@ class Stats:
             cls._start = perf()
 
     @classmethod
-    def report(cls):
+    def report(cls) -> None:
         """Emit a timing report for tracked services."""
         if not cls._secs:
             return  # nothing to report

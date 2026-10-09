@@ -43,7 +43,9 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     return parser.parse_args(args)
 
 
-def load_mock_data(mock_block_data_paths: list[str] | None = None, mock_vops_data_paths: list[str] | None = None):
+def load_mock_data(
+    mock_block_data_paths: list[str] | None = None, mock_vops_data_paths: list[str] | None = None
+) -> None:
     log.info('Loading mock data')
     mock_block_data_paths = [] if not mock_block_data_paths else mock_block_data_paths
     mock_vops_data_paths = [] if not mock_vops_data_paths else mock_vops_data_paths
@@ -55,7 +57,7 @@ def load_mock_data(mock_block_data_paths: list[str] | None = None, mock_vops_dat
         MockVopsProvider.load_block_data(path)
 
 
-def create_mocked_blocks_after_haf_db_blocks(lbound: int, ubound: int):
+def create_mocked_blocks_after_haf_db_blocks(lbound: int, ubound: int) -> None:
     log.info(f'Creating mocked blocks in db from {lbound} to {ubound}')
     for block_number in range(lbound, ubound + 1):
         block_data = MockBlockProvider.make_empty_block(block_num=block_number)
@@ -68,7 +70,7 @@ def create_mocked_blocks_after_haf_db_blocks(lbound: int, ubound: int):
         block.push()
 
 
-def main():
+def main() -> None:
     args = init_argparse(sys.argv[1:])
 
     log.info(f'Setting up the database connection using URL {args.database_url}')

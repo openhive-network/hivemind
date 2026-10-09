@@ -18,7 +18,7 @@ def log_memory_usage(memtypes=None, broadcast=True) -> str:
     if memtypes is None:
         memtypes = ["rss", "vms", "shared"]
 
-    def format_bytes(val: int):
+    def format_bytes(val: int) -> str:
         assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
         return f'{val / 1024.0 / 1024.0:.2f} MB'
 
@@ -74,7 +74,7 @@ class PatchLevelInfo:
 
 
 class UniqueCounter:
-    def __init__(self):
+    def __init__(self) -> None:
         self.counter = 0
         self.last_value = None
 
@@ -87,7 +87,7 @@ class UniqueCounter:
         return self.counter
 
 
-def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):
+def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo) -> None:
     from hive.version import GIT_DATE, GIT_REVISION, VERSION
 
     log.info(f"hivemind_version : {VERSION}")

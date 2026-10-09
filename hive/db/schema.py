@@ -13,12 +13,12 @@ log = logging.getLogger(__name__)
 pg_search_available = False
 
 
-def teardown(db):
+def teardown(db) -> None:
     """Drop all tables by dropping the schema."""
     db.query_no_return(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE")
 
 
-def create_statistics(db):
+def create_statistics(db) -> None:
     """Create extended statistics dependencies for various tables."""
     sql = f"CREATE STATISTICS IF NOT EXISTS {SCHEMA_NAME}.hive_accounts_stats (dependencies) ON id, haf_id, name, created_at FROM {SCHEMA_NAME}.hive_accounts;"
     db.query_no_return(sql)
@@ -34,7 +34,7 @@ def create_statistics(db):
     db.query_no_return(sql)
 
 
-def _try_create_extension(db, ext_name):
+def _try_create_extension(db, ext_name) -> bool:
     """Try to create an extension, return True if successful."""
     try:
         # CASCADE: pg_search >= 0.25 depends on the vector extension
@@ -45,7 +45,7 @@ def _try_create_extension(db, ext_name):
         return False
 
 
-def insert_seed_data(db):
+def insert_seed_data(db) -> None:
     """Insert the minimal seed rows required for hivemind to operate.
 
     These rows must exist before any block processing starts:
@@ -80,7 +80,7 @@ def insert_seed_data(db):
         db.query(sql)
 
 
-def setup(db, admin_db):
+def setup(db, admin_db) -> None:
     """Creates all tables and seed data"""
 
     # create schema and aux functions
@@ -189,7 +189,7 @@ def setup(db, admin_db):
         execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
 
 
-def setup_runtime_code(db):
+def setup_runtime_code(db) -> None:
     sql_scripts = [
         "utility_functions.sql",
         "follow_ops.sql",
@@ -366,7 +366,7 @@ def setup_runtime_code(db):
     register_application(db)
 
 
-def perform_db_upgrade(db, admin_db):
+def perform_db_upgrade(db, admin_db) -> None:
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
 
     sql_scripts = [
@@ -392,7 +392,7 @@ def perform_db_upgrade(db, admin_db):
         log.info("Skipping VACUUM FULL on upgraded database (no vacuum request)")
 
 
-def reset_autovac(db):
+def reset_autovac(db) -> None:
     """Initializes/resets per-table autovacuum/autoanalyze params.
 
     We use a scale factor of 0 and specify exact threshold tuple counts,
@@ -414,7 +414,7 @@ ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
         db.query(sql)
 
 
-def set_fillfactor(db):
+def set_fillfactor(db) -> None:
     """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
     # Lowered fillfactor for hive_votes table in attempt to speed up update_posts_rshares procedure
@@ -495,8 +495,7 @@ def set_logged_table_attribute(db, logged):
                 if error:
                     log.error(f"Failed to set {mode} on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
                     raise error
-                else:
-                    log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
+                log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
 
     total_elapsed = perf_counter() - start_time
     log.info(f"All {len(all_tables)} tables converted to {mode} in {total_elapsed:.1f}s")

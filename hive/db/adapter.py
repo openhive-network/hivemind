@@ -29,7 +29,7 @@ class Row:
 
     __slots__ = ('_data', '_columns')
 
-    def __init__(self, data, columns):
+    def __init__(self, data, columns) -> None:
         self._data = tuple(data)
         self._columns = tuple(columns)
 
@@ -71,12 +71,12 @@ class Db:
         return cls._instance
 
     @classmethod
-    def set_shared_instance(cls, db):
+    def set_shared_instance(cls, db) -> None:
         """Set the global/shared db instance. Do not use."""
         cls._instance = db
 
     @classmethod
-    def set_max_connections(cls, db):
+    def set_max_connections(cls, db) -> None:
         """Remember maximum connections offered by postgres database."""
         assert db is not None, "Database has to be initialized"
         cls.max_connections = db.query_one("SELECT setting::int FROM pg_settings WHERE  name = 'max_connections'")
@@ -89,7 +89,7 @@ class Db:
                 f"A database offers maximum connections: {cls.max_connections}. Required {cls.necessary_connections} connections."
             )
 
-    def __init__(self, url, name, enable_autoexplain=False):
+    def __init__(self, url, name, enable_autoexplain=False) -> None:
         """Initialize an instance.
 
         No work is performed here. Some modues might initialize an
@@ -110,13 +110,13 @@ class Db:
 
     BLOCK_NOTIFY_CHANNELS = ("haf_new_block", "haf_new_irreversible")
 
-    def _connect(self):
+    def _connect(self) -> None:
         self._conn = psycopg2.connect(self._url, application_name=f'hivemind_{self.name}')
         self._conn.autocommit = True
         register_default_jsonb(self._conn, loads=ujson.loads)
         self._listening = False
 
-    def listen_for_blocks(self):
+    def listen_for_blocks(self) -> None:
         """Subscribe this connection to HAF's new-block notifications (haf#341).
         Effective immediately (autocommit); redone after a reconnect."""
         if self._listening:
@@ -139,7 +139,7 @@ class Db:
         del self._conn.notifies[:]
         return True
 
-    def reconnect(self):
+    def reconnect(self) -> None:
         """Replace a broken connection with a fresh one.
 
         Only safe when no server-side state is expected to survive: the server
@@ -171,9 +171,8 @@ class Db:
             log.exception(f"Error during connection closing: {ex}")
             raise ex
 
-    def close_engine(self):
+    def close_engine(self) -> None:
         """No-op, kept for backward compatibility."""
-        pass
 
     def is_trx_active(self):
         """Check if a transaction is in progress."""
@@ -198,7 +197,7 @@ class Db:
         assert sql.strip()[0:6].strip() != 'SELECT', sql
         return self._query(sql, **kwargs)
 
-    def query_no_return(self, sql, **kwargs):
+    def query_no_return(self, sql, **kwargs) -> None:
         self._query(sql, **kwargs)
 
     def query_no_return_autocommit(self, sql):
@@ -276,11 +275,11 @@ class Db:
             return rows[0][0]
         return None
 
-    def engine_name(self):
+    def engine_name(self) -> str:
         """Get the name of the engine. Only postgresql is supported."""
         return 'postgresql'
 
-    def batch_queries(self, queries, trx):
+    def batch_queries(self, queries, trx) -> None:
         """Process batches of prepared SQL tuples.
 
         If `trx` is true, the queries will be wrapped in a transaction.
