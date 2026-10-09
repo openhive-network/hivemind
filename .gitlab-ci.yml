@@ -698,7 +698,9 @@ sync:
 
       # List available caches with matching HAF commit
       echo "Searching for caches with HAF commit: ${HAF_COMMIT}"
-      AVAILABLE_CACHES=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | grep "^${HAF_COMMIT}_" || true)
+      # cache-manager list prints "  <key> - <size> - <date>" under section headers:
+      # take the key column before matching, or no cache ever matches.
+      AVAILABLE_CACHES=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | awk '{print $1}' | grep "^${HAF_COMMIT}_" || true)
 
       if [[ -n "$AVAILABLE_CACHES" ]]; then
         echo "Found compatible cache candidates:"
