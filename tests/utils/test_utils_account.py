@@ -4,17 +4,17 @@ import json
 from hive.utils.account import safe_profile_metadata
 
 
-def test_valid_account():
-    raw_profile = dict(
-        name='Leonardo Da Vinci',
-        about='Renaissance man, vegetarian, inventor of the helicopter in 1512 and painter of the Mona Lisa.',
-        location='Florence',
-        website='http://www.davincilife.com/',
-        cover_image='https://steemitimages.com/0x0/https://pbs.twimg.com/profile_banners/816255358066946050/1483447009/1500x500',
-        profile_image='https://www.parhlo.com/wp-content/uploads/2016/01/tmp617041537745813506.jpg',
-        version=2,
-    )
-    account = {'name': 'foo', 'posting_json_metadata': json.dumps(dict(profile=raw_profile))}
+def test_valid_account() -> None:
+    raw_profile = {
+        'name': 'Leonardo Da Vinci',
+        'about': 'Renaissance man, vegetarian, inventor of the helicopter in 1512 and painter of the Mona Lisa.',
+        'location': 'Florence',
+        'website': 'http://www.davincilife.com/',
+        'cover_image': 'https://steemitimages.com/0x0/https://pbs.twimg.com/profile_banners/816255358066946050/1483447009/1500x500',
+        'profile_image': 'https://www.parhlo.com/wp-content/uploads/2016/01/tmp617041537745813506.jpg',
+        'version': 2,
+    }
+    account = {'name': 'foo', 'posting_json_metadata': json.dumps({'profile': raw_profile})}
 
     safe_profile = safe_profile_metadata(account)
     expected = {key: value for key, value in raw_profile.items() if key != 'version'}
@@ -22,21 +22,21 @@ def test_valid_account():
     assert safe_profile == expected
 
 
-def test_invalid_account():
-    raw_profile = dict(
-        name='NameIsTooBigByOneChar',
-        location='Florence\x00',
-        website='davincilife.com/',
-        cover_image='example.com/avatar.jpg',
-        profile_image='https://example.com/valid-url-but-longer-than-1024-chars' + 'x' * 1024,
-    )
-    ignore_prof = dict(
-        name='Ignore me -- missing version:2!',
-    )
+def test_invalid_account() -> None:
+    raw_profile = {
+        'name': 'NameIsTooBigByOneChar',
+        'location': 'Florence\x00',
+        'website': 'davincilife.com/',
+        'cover_image': 'example.com/avatar.jpg',
+        'profile_image': 'https://example.com/valid-url-but-longer-than-1024-chars' + 'x' * 1024,
+    }
+    ignore_prof = {
+        'name': 'Ignore me -- missing version:2!',
+    }
     account = {
         'name': 'foo',
-        'json_metadata': json.dumps(dict(profile=raw_profile)),
-        'posting_json_metadata': json.dumps(dict(profile=ignore_prof)),
+        'json_metadata': json.dumps({'profile': raw_profile}),
+        'posting_json_metadata': json.dumps({'profile': ignore_prof}),
     }
 
     safe_profile = safe_profile_metadata(account)

@@ -7,5 +7,5 @@ from hive.indexer import *
 from hive.utils import *
 
 
-def test_import():
+def test_import() -> None:
     pass
