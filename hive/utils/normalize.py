@@ -249,7 +249,7 @@ def rep_to_raw(rep):
     return int(sign * pow(10, rep))
 
 
-def strtobool(val):
+def strtobool(val) -> bool:
     """Convert a booleany str to a bool.
 
     True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
@@ -259,10 +259,9 @@ def strtobool(val):
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
         return True
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+    if val in ('n', 'no', 'f', 'false', 'off', '0'):
         return False
-    else:
-        raise ValueError(f"not booleany: {val!r}")
+    raise ValueError(f"not booleany: {val!r}")
 
 
 def int_log_level(str_log_level):
