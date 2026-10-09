@@ -369,7 +369,7 @@ detect_changes:
     # - *.md, README, CHANGELOG, LICENSE, CLAUDE.md (docs)
     # - .gitlab-ci.yml (CI config)
     # Note: PostgREST SQL changes now have special handling - they skip sync but reload SQL
-    HAF_APP_SKIP_PATTERNS: '^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+    HAF_APP_SKIP_PATTERNS: '^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
   after_script:
     # Additional detection for PostgREST-only changes
     # If all non-skip changes are in PostgREST directories, we can skip sync and reload SQL
@@ -401,7 +401,7 @@ detect_changes:
       CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
 
       # Filter out standard skip patterns
-      HAF_APP_SKIP_PATTERNS='^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+      HAF_APP_SKIP_PATTERNS='^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
       NEEDS_WORK=$(echo "$CHANGED_FILES" | grep -vE "${HAF_APP_SKIP_PATTERNS}" || true)
 
       if [ -n "$NEEDS_WORK" ]; then
