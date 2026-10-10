@@ -11,13 +11,14 @@ _observer_id INT;
 _post_id INT;
 _limit INT;
 _tag TEXT;
+_truncate_body INT;
 
 _account TEXT;
 _permlink TEXT;
 
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
-                                                                 '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string"}',
+                                                                 '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "truncate_body": "number"}',
                                                                  2,
                                                                  '{"start_permlink": "permlink must be string"}');
 
@@ -49,7 +50,11 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
-  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit);
+  _truncate_body = hivemind_postgrest_utilities.valid_number(
+    hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
+    0, 0, NULL, 'truncate_body');
+
+  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit, _truncate_body);
 END
 $$
 ;

@@ -21,10 +21,10 @@ BEGIN
   END IF;
 
   IF _lbound IS NOT NULL AND _num < _lbound THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || _lbound || ':' || _ubound ||']');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || COALESCE(_lbound::TEXT, '') || ':' || COALESCE(_ubound::TEXT, '') ||']');
   END IF;
   IF _ubound IS NOT NULL AND _num > _ubound THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || _lbound || ':' || _ubound ||']');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || COALESCE(_lbound::TEXT, '') || ':' || COALESCE(_ubound::TEXT, '') ||']');
   END IF;
 
   RETURN _num;
@@ -55,10 +55,10 @@ BEGIN
   END IF;
 
   IF _lbound IS NOT NULL AND _num < _lbound THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || _lbound || ':' || _ubound ||']');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || COALESCE(_lbound::TEXT, '') || ':' || COALESCE(_ubound::TEXT, '') ||']');
   END IF;
   IF _ubound IS NOT NULL AND _num > _ubound THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || _lbound || ':' || _ubound ||']');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_name || ' = ' || _num || ' outside valid range [' || COALESCE(_lbound::TEXT, '') || ':' || COALESCE(_ubound::TEXT, '') ||']');
   END IF;
 
   RETURN _num;

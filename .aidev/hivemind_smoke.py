@@ -190,6 +190,7 @@ CHECKS = [
 
 SQL_TESTS = [
     "tests/sql/bridge_vote_free_calls.sql",
+    "tests/sql/bridge_truncate_body.sql",
 ]
 
 
