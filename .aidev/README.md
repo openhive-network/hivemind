@@ -11,7 +11,9 @@ AIDEV branches (`ai/*`, `session/*`, pushes to `aidev/integration`); see
 `.aidev/run-checks.sh <suite> <step>...` runs the named steps and writes
 `test-results/<suite>/junit.xml`, one test case per step, with the step's log tail as
 the failure body. `unit` also writes one case per test (`unit.xml`), `api-smoke` one
-per call (`api-smoke.xml`).
+per call (`api-smoke.xml`), `tavern` one report per tavern group (`tavern-<group>.xml`).
+A step that exits 77 is recorded as skipped, with the last line it printed as the reason:
+its precondition belongs to the host environment, not to the change.
 
 | Step | What |
 |---|---|
@@ -20,6 +22,7 @@ per call (`api-smoke.xml`).
 | `install` | into the stack's HAF database as `haf_admin`, the way the hivemind image's `setup --with-apps` does it: `scripts/setup_postgres.sh`, the `reputation_tracker` and `hafah` submodules' `install_app.sh`, `scripts/install_app.sh`, then `hive build_schema` from this checkout; passes when `hivemind_endpoints` has functions |
 | `reinstall` | `scripts/uninstall_app.sh`, then the hivemind half of `install` again |
 | `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with |
+| `tavern` | `.aidev/hivemind_tavern.py`: CI's tavern API suite against a per-run clone of the shared synced hivemind, with this tree's PostgREST SQL reloaded into it; see [The `tavern` step](#the-tavern-step) |
 
 The install steps copy `scripts/`, `reputation_tracker/` and `hafah/` to a scratch
 directory and write the submodules' `scripts/set_version_in_sql.pgsql` there
@@ -40,15 +43,59 @@ so both apply. A newer HAF still needs the call for the first reason.
 |---|---|---|
 | quick | unit, ruff | no |
 | coverage | unit | no |
-| full, canary | unit, ruff, install, reinstall, api-smoke | yes |
+| full | unit, ruff, install, reinstall, api-smoke, tavern | yes, and the shared hivemind |
+| canary | unit, ruff, install, reinstall, api-smoke | yes |
 | baseline | install, reinstall, api-smoke | yes |
 
 `static` and `system` are unbound: AIDEV runs neither for a project.
 
-Not covered yet: CI's tavern API pattern suites (`condenser_api_patterns`,
-`bridge_api_patterns`, … against a HAF replayed to 5M blocks, with mocks injected
-and a hivemind sync), the python API client tests and the benchmarks. They stay in
-GitLab CI until AIDEV can reach a persistent, replayed HAF (hive/haf#353).
+Not covered yet: the python API client tests and the benchmarks. They stay in GitLab CI.
+
+## The `tavern` step
+
+`full` runs CI's tavern API suite (`tests/api_tests/hivemind/tavern/`) against the
+[shared synced hivemind](#the-shared-synced-hivemind-sandboxsharedhivemind), which
+`sandbox.external` names `hivemind` (`AIDEV_EXTERNAL_HIVEMIND_HOST` / `_PORT`).
+`.aidev/hivemind_tavern.py`:
+
+1. reads the tree's **schema revision**: the last quoted 40-hex hash in
+   `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`, the key CI's
+   POSTGREST_ONLY path greps (`shared-hivemind/shared_fixture.py`);
+2. lists the provider's templates (`hivemind_shared.health()`) and takes the one
+   seeded for that revision. **On a miss** (a schema or indexer change that bumped
+   the patch level) it calls `hivemind_shared.request_seed(<revision>, <HEAD commit>)`
+   and skips with `no hivemind fixture for schema revision <rev>; seeding requested`.
+   A missing fixture never fails the gate. The next run after the seed finishes
+   (about 15–20 minutes) has it. The seed fetches that commit from GitLab, so it
+   succeeds only for a pushed commit whose patch level yields the revision;
+   otherwise the request is marked `failed` in `hivemind_shared.seed_requests`;
+3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>)`) and
+   reloads the tree's PostgREST SQL into the clone as `hivemind` with
+   `scripts/ci/reload-postgrest-functions.sh` (what CI's POSTGREST_ONLY path does),
+   so query changes are tested without a re-sync. The admin-level
+   `preprocess_search_query.sql` (plpython3u) needs a superuser, which a run is
+   not: it logs a warning and the template's copy stays;
+4. serves the clone with PostgREST as `scripts/start_postgrest.sh` does, with
+   `PGRST_DB_ROOT_SPEC=home` standing in for the postgrest-rewriter's `/` → `/rpc/home`;
+5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
+   in its order) as `scripts/ci/start-api-smoketest.sh` does in
+   `e2e_benchmark_on_postgrest`: `-m "not postgrest_ignore" --dist loadfile`, with
+   `HIVEMIND_TAVERN_WORKERS` workers (default 4). Tox is not used, because the check
+   container has no network to build its venv; the runtime image carries
+   `[testenv:tavern]`'s pins instead. As in CI, a failing `search-api_patterns`
+   (pg_search) is a warning, not a failure;
+6. moves the `.out.json` files tavern writes next to the patterns to
+   `test-results/full/tavern-out/` and drops the clone, also when the run fails. A
+   clone a killed run leaves behind is reaped after 6 hours.
+
+**Adding or refreshing a pattern.** Write the `.tavern.yaml` and a first
+`.pat.json` (or change the SQL), run `aidev test run --slot full`, and read the
+actual response from `test-results/full/tavern-out/<group>/…/<test>.out.json`. When
+it is right, copy it over the `.pat.json`. Run the slot again: the group's
+`tavern-<group>.xml` must pass. The clone holds CI's data (5M blocks, the mocks,
+sync to 5000024), so patterns produced this way match CI's `e2e_benchmark_on_postgrest`.
+A change that alters synced data gets a fixture only once the commit bumping the
+patch level is pushed. Until then the step skips by name, and CI's sync job is the check.
 
 ### Positive tavern patterns
 
@@ -92,6 +139,102 @@ docker run --rm --user "$(id -u):$(id -g)" --network hivemind-checks_default -v 
 docker compose -p hivemind-checks -f .aidev/test-stack.compose.yml down -v
 ```
 
+## The shared synced hivemind (`sandbox.shared.hivemind`)
+
+A persistent PostgreSQL that holds HAF's 5M replay with hivemind installed, mocked
+and synced the way CI's `sync` job does it. It keeps one frozen template per hivemind
+schema revision and gives each test run, from any session, its own copy-on-write
+clone of one. It is declared under `sandbox.shared.hivemind` in `project.yaml`,
+defined in `shared-hivemind.compose.yml` and implemented in `shared-hivemind/`,
+modelled on hive/haf's `shared-haf` service. A dedicated session hosts it:
+
+```bash
+aidev session create hivemind-shared --host steem-13 --remote git@gitlab.syncad.com:hive/hivemind.git \
+    --target-branch aidev/integration --shared-service hivemind
+```
+
+**Create it as soon as this declaration lands.** While no session serves
+`hivemind/hivemind`, AIDEV refuses this project's slots that start a stack (`full`,
+`canary`, `baseline`) as `service_stack_unavailable`, naming the provider. That is
+never a failed test, but it is no verdict either. A remotely executed run reads the
+declaration for every slot, so it refuses there too.
+
+Consumers declare `sandbox.external: [{name: hivemind, provider: "hivemind/hivemind"}]`,
+connect to `$AIDEV_EXTERNAL_HIVEMIND_HOST:$AIDEV_EXTERNAL_HIVEMIND_PORT` as
+`hivemind_shared_consumer` (no password, no secret), and per run:
+
+```sql
+-- in database hivemind_shared
+select * from hivemind_shared.health();   -- revision, template, HAF and hivemind commits, head block, live clones
+select hivemind_shared.clone_run_database('<run id>', '<revision>');  -- returns run_<run id>; null revision = newest
+select hivemind_shared.drop_run_database('<run id>');                 -- when done
+select hivemind_shared.request_seed('<revision>', '<40-hex commit>'); -- seeded | pending | seeding | done | failed
+select * from hivemind_shared.seed_requests;                          -- what the seeder is doing, failures' log tails
+```
+
+A run id is 1-48 of `[a-z0-9_-]`. `clone_run_database` raises `no_data_found` when
+no template matches. Inside `run_<id>` a run connects as `hivemind`, the role that
+owns hivemind's schemas, to reload SQL and serve PostgREST.
+
+**Access.** Over TCP only from the fleet's LAN, without a password, as on the shared
+HAF: `hivemind_shared_consumer` reaches only `hivemind_shared` and `run_*` databases,
+and `hivemind` only `run_*` databases. The LAN is `192.168.3.0/24`, `192.168.5.0/24`,
+`192.168.6.0/24`, plus `172.16.0.0/12` for the provider host's own connections through
+docker's NAT. The data is public chain data plus CI's mocks. `127.0.0.1` (trusted for
+every role) is the `hivemind` container's own network namespace, shared only with
+`seeder`.
+
+**How it works.** Three services:
+
+- `cluster` (one-shot, the `hive/haf/fixture-5m:<commit>` image hive/haf's own
+  shared service pins) refuses a data root that is not ZFS. On the first start of a
+  HAF commit it copies the image's replayed cluster to
+  `$HIVEMIND_SHARED_DATA_ROOT/<commit>/haf_db_store`, as hive/haf's `seed.sh` does.
+- `hivemind` (same image) bind-mounts that directory at the image's own
+  `haf_db_store` path. `start.sh` sets `file_copy_method = clone`. `serve.sh` installs
+  the clone API (`admin.sql`) into `hivemind_shared` and, once per HAF commit, freezes
+  `haf_template` from `haf_block_log`. It then reaps run databases older than
+  `HIVEMIND_SHARED_RUN_TTL` (6 hours) every 5 minutes, along with `run_*` databases no
+  run is registered for.
+- `seeder` (this project's runtime image, which has hivemind's Python dependencies,
+  psql and git) shares `hivemind`'s network namespace. `seeder.sh` takes pending
+  `seed_requests` one at a time. Every 30 minutes it also requests a seed for the tips
+  of `HIVEMIND_SHARED_SEED_REFS` (`develop aidev/integration`), so they are seeded
+  before anyone asks. `seed.sh <revision> <commit>`:
+  1. fetches that commit, with the `reputation_tracker` and `hafah` submodules, from
+     `HIVEMIND_SHARED_REMOTE` (gitlab.syncad.com/hive/hivemind) and checks its patch
+     level yields the revision;
+  2. clones `haf_template` into `seed_<revision>`;
+  3. runs what CI's `sync` job runs (`docker/docker-compose-sync.yml`):
+     `setup_postgres.sh`, the submodules' `install_app.sh`, `scripts/install_app.sh`,
+     `scripts/ci/add-mocks-to-db.sh`, `hive build_schema`, then reputation_tracker's
+     `process_blocks.sh` alongside
+     `hive sync --test-max-block=5000024 --community-start-block 4998000 …`,
+     with the same flags, from the fetched source;
+  4. checks hivemind reached block 5000024, renames the database `hivemind_<revision>`,
+     freezes it (`is_template`, no connections) and records it.
+
+  CI's `ALTER SYSTEM` tuning (`fsync = off`, …) is left out: it would apply to a
+  cluster serving live clones, and it changes no synced data. A failed seed is marked
+  `failed` with its log tail and is retried only when a different commit is requested.
+
+As for the shared HAF, the `shared-hivemind/` bind reads the checkout through
+`${AIDEV_HOST_CHECKOUT}`, because compose runs in the session worker against the
+host's daemon.
+
+**Host setup (once, on steem-13).** The data root must be a dataset on a pool with
+`feature@block_cloning` (ZFS 2.4+). No credential is provisioned.
+
+```bash
+sudo zfs create haf-pool/aidev-shared-hivemind       # mounted at /haf-pool/aidev-shared-hivemind
+```
+
+**Changing the HAF version.** Set `HAF_FIXTURE_COMMIT` and `HAF_FIXTURE_DIGEST` in
+`sandbox.shared.hivemind.env` to what hive/haf's `sandbox.shared.haf` pins. The next
+start copies that commit's cluster, and the seeder re-seeds the refs' revisions in it.
+The old commit's directory under the data root can then be destroyed. **Changing the
+runtime image** (`environment.image`): re-pin `HIVEMIND_RUNTIME_IMAGE` to the same digest.
+
 ## The test runtime image (`runtime/`)
 
 The checks run in a container with your uid: `python:3.14-slim-bookworm` (the base of
@@ -99,7 +242,9 @@ this project's own `Dockerfile`) with `postgresql-client` and `git`, the `postgr
 binary of `common-ci-configuration/postgrest` (the `POSTGREST_VERSION` of
 `Dockerfile`), `create_haf_app_role.sh` / `common.sh` from common-ci-configuration at a
 pinned commit (where `scripts/setup_postgres.sh` looks before it downloads them), and
-`setup.cfg`'s `install_requires` plus pytest, ruff and mypy. Every base and download is pinned.
+`setup.cfg`'s `install_requires` plus pytest, ruff and mypy, and `tox.ini`
+`[testenv:tavern]`'s deps (tavern, pytest-xdist, deepdiff, jsondiff) for the `tavern`
+step and the shared hivemind's seeder. Every base and download is pinned.
 
 When `runtime/Dockerfile` or `setup.cfg` changes, rebuild and re-pin **in the same
 commit**:
@@ -107,6 +252,7 @@ commit**:
 ```bash
 .aidev/runtime/build.sh --push   # registry digest if aidev-<input hash> exists, else build + push
 # put the printed repo@sha256:<digest> into project.yaml environment.image
+# and sandbox.shared.hivemind.env.HIVEMIND_RUNTIME_IMAGE
 ```
 
 To build through a pull-through registry cache near the build host, set

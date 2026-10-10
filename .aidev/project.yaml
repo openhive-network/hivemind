@@ -25,8 +25,9 @@ branches:
 environment:
   kind: "container"
   # Built by .aidev/runtime/build.sh from .aidev/runtime/Dockerfile and setup.cfg
-  # (its install_requires are baked in).
-  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:359a674c67855ef2f359c0860aaf56cb12cbe019d2c9a696dca2cc490bc3561b"
+  # (its install_requires are baked in). sandbox.shared.hivemind's
+  # HIVEMIND_RUNTIME_IMAGE pins the same image: re-pin both together.
+  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
   inputs: [".aidev/runtime/Dockerfile", "setup.cfg"]
 
 issues:
@@ -44,6 +45,13 @@ issues:
 # `haf`; the candidate's own SQL and schema (with the reputation_tracker and HAfAH
 # submodules it installs on) go into it through .aidev/run-checks.sh, so no
 # hivemind image is built. Slots that only run unit tests say `stack: false`.
+#
+# The shared synced hivemind (`shared.hivemind`): HAF's 5M replay with hivemind
+# installed, mocked and synced as CI's `sync` job does, one frozen template per
+# schema revision, a copy-on-write clone per run. A dedicated session hosts it
+# (`aidev session create hivemind-shared … --shared-service hivemind`), and this
+# project's own `tavern` step consumes it (`external`). While no session serves
+# it, AIDEV refuses the slots that start the stack by name.
 # See .aidev/README.md.
 sandbox:
   compose: .aidev/test-stack.compose.yml
@@ -53,6 +61,24 @@ sandbox:
   readiness_timeout: 300
   env:
     HIVEMIND_TEST_DB_HOST: haf
+  shared:
+    hivemind:
+      compose: ".aidev/shared-hivemind.compose.yml"
+      services: [hivemind, seeder]
+      ports: [pg]
+      # The first start of a HAF commit copies its replayed cluster onto the dataset.
+      readiness_timeout: 1800
+      env:
+        # hive/haf's sandbox.shared.haf pins this fixture (hive/haf/fixture-5m:<commit>,
+        # CI's build_haf_fixture_image); move both together.
+        HAF_FIXTURE_COMMIT: "e2237bea170e6aea9fc327fb1b1e34b5237d219d"
+        HAF_FIXTURE_DIGEST: "sha256:6f0d0f435b829b47379b80dbba8f2602d8ce558cedd941d1cb1b427985c8c020"
+        HIVEMIND_SHARED_DATA_ROOT: "/haf-pool/aidev-shared-hivemind"
+        HIVEMIND_RUNTIME_IMAGE: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
+        HIVEMIND_SHARED_SEED_REFS: "develop aidev/integration"
+  external:
+    - name: hivemind             # AIDEV_EXTERNAL_HIVEMIND_HOST / _PORT
+      provider: "hivemind/hivemind"
 
 # Verification slots. Each binding is what this project genuinely runs for
 # that slot — never one selection repeated under seven names, which makes
@@ -61,8 +87,9 @@ sandbox:
 #
 # Lightweight first: the Python unit tests and ruff, then install / reinstall of the
 # candidate into an empty HAF testnet database and a PostgREST JSON-RPC smoke
-# test. CI's tavern pattern suites (a HAF replayed to 5M blocks, mocks, a
-# hivemind sync) aren't bound yet; see .aidev/README.md.
+# test. `full` adds CI's tavern pattern suites against a clone of the shared
+# synced hivemind (skipped, named, while no fixture matches the tree's schema
+# revision); see .aidev/README.md.
 verification:
   quick:
     adapter: command
@@ -71,7 +98,7 @@ verification:
     artifacts: ["test-results/quick/"]
   full:
     adapter: command
-    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "api-smoke"]
+    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "api-smoke", "tavern"]
     artifacts: ["test-results/full/"]
   baseline:
     adapter: command

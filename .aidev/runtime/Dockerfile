@@ -9,7 +9,9 @@
 #     scripts/setup_postgres.sh looks for them first (otherwise it curls them)
 #   + setup.cfg's install_requires, pytest, ruff and mypy (pinned: the `ruff` step's and
 #     the quality typecheck's verdicts must not move with a new release), so `hive` runs from the checkout
-#     (PYTHONPATH) with no network at check time.
+#     (PYTHONPATH) with no network at check time
+#   + tox.ini [testenv:tavern]'s deps (tavern, pytest-xdist, deepdiff, jsondiff) at its
+#     pins, for the `tavern` step, which runs the suite without tox (no network for a venv)
 #
 # Its inputs are this file and setup.cfg (the only file in the build context).
 # Build and pin it with .aidev/runtime/build.sh; see .aidev/README.md.
@@ -37,6 +39,7 @@ RUN apt-get update \
     && python3 -c "import configparser; c = configparser.ConfigParser(); c.read('/tmp/setup.cfg'); \
 print('\n'.join(r for r in c['options']['install_requires'].split('\n') if r.strip()))" > /tmp/requirements.txt \
     && pip install --no-cache-dir -r /tmp/requirements.txt pytest==8.4.2 ruff==0.16.10 mypy==2.4.0 \
+        tavern==3.0.2 pytest-xdist==3.8.0 'deepdiff[murmur]==8.1.1' jsondiff==2.2.1 \
     && apt-get purge -y --auto-remove gcc libc6-dev \
     && rm -rf /var/lib/apt/lists/* /tmp/setup.cfg /tmp/requirements.txt
 
