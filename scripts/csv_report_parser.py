@@ -33,7 +33,7 @@ def parse_csv_files(root_dir):
             test_benchmark_time_threshold = None
             try:
                 test_benchmark_time_threshold = float(row[3])
-            except (ValueError, IndexError):
+            except ValueError, IndexError:
                 pass
 
             if test_name in ret_times:

@@ -23,7 +23,7 @@ async def _get_healthy_endpoint(endpoints: list[HttpUrl], service_path: str) -> 
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
                     if response.status < 400:
                         return endpoint
-            except (aiohttp.ClientError, TimeoutError):
+            except aiohttp.ClientError, TimeoutError:
                 continue
     raise ValueError(f"No healthy endpoint found for service path: {service_path}")
 
