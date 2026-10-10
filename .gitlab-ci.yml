@@ -381,6 +381,10 @@ detect_changes:
     if ! command -v git &> /dev/null; then
       apk add --no-cache git 2>/dev/null || apt-get update && apt-get install -y git 2>/dev/null || true
     fi
+    # scripts/ci/sync_decision.sh needs bash; this job's image may only have sh.
+    if ! command -v bash &> /dev/null; then
+      apk add --no-cache bash 2>/dev/null || (apt-get update && apt-get install -y bash) 2>/dev/null || true
+    fi
 
     if [[ -f detect_changes.env ]]; then
       # Source the existing detection results
