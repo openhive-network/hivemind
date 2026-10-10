@@ -18,10 +18,16 @@
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - api-smoke  PostgREST over the installed schema, JSON-RPC calls checked by
 #                .aidev/hivemind_smoke.py; one junit case per call
+#   - tavern     CI's tavern API suite against a clone of the shared synced hivemind
+#                (sandbox.external hivemind), with this tree's PostgREST SQL reloaded
+#                into it: .aidev/hivemind_tavern.py; one junit report per group
 #
-# install, reinstall and api-smoke need the HAF stack (.aidev/test-stack.compose.yml).
+# install, reinstall and api-smoke need the HAF stack (.aidev/test-stack.compose.yml),
+# tavern the shared hivemind service. A step exiting 77 is skipped, not failed: its
+# precondition is the host environment's (tavern: no fixture for this tree's schema
+# revision yet); the last line it printed is the reason.
 # Reports go to test-results/<suite>/: junit.xml (one case per step) plus
-# unit.xml and api-smoke.xml.
+# unit.xml, api-smoke.xml and tavern-<group>.xml.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 root="$PWD"
@@ -37,10 +43,13 @@ export HIVEMIND_TEST_USER_URL="postgresql://hivemind@$DB_HOST/haf_block_log"
 REPTRACKER_SCHEMA=reptracker_app
 
 status=0
+SKIP_RC=77
 # record CASES_FILE NAME RC SECONDS LOG
 record() {
     if [ "$3" -eq 0 ]; then
         printf 'case\t%s\tpass\t%s\t\n' "$2" "$4" >> "$1"
+    elif [ "$3" -eq "$SKIP_RC" ]; then
+        printf 'case\t%s\tskip\t%s\t%s\n' "$2" "$4" "$(grep -v '^[[:space:]]*$' "$5" | tail -1 | tr '\t' ' ')" >> "$1"
     else
         printf 'case\t%s\tfail\t%s\texit %s\t%s\n' "$2" "$4" "$3" "$5" >> "$1"
     fi
@@ -51,7 +60,11 @@ step() {
     local log="$out/$name.log" t0=$SECONDS rc=0
     echo "== $name" >&2
     "$@" > "$log" 2>&1 < /dev/null || rc=$?
-    [ "$rc" -eq 0 ] || { status=1; tail -40 "$log" >&2; }
+    if [ "$rc" -eq "$SKIP_RC" ]; then
+        echo "skipped: $(grep -v '^[[:space:]]*$' "$log" | tail -1)" >&2
+    elif [ "$rc" -ne 0 ]; then
+        status=1; tail -40 "$log" >&2
+    fi
     record "$cases" "$name" "$rc" "$((SECONDS - t0))" "$log"
 }
 
@@ -157,6 +170,7 @@ for s in "$@"; do
         install) step install install ;;
         reinstall) step reinstall reinstall ;;
         api-smoke) step api-smoke python3 .aidev/hivemind_smoke.py "$out" ;;
+        tavern) step tavern python3 .aidev/hivemind_tavern.py "$out" ;;
         *) echo "unknown step: $s" >&2; exit 2 ;;
     esac
 done

@@ -26,6 +26,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from typing import Any
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STARTUP_TIMEOUT_S = 60
@@ -215,13 +216,14 @@ def run_sql_test(path):
     return proc.returncode, proc.stdout + proc.stderr
 
 
-def free_port():
+def free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
+        port: int = sock.getsockname()[1]
+        return port
 
 
-def call(base, request):
+def call(base: str, request: tuple[str, str, dict[str, Any] | None]) -> tuple[int, Any, str]:
     method, path, payload = request
     data = None if payload is None else json.dumps(payload).encode()
     req = urllib.request.Request(base + path, data=data, method=method, headers={"Content-Type": "application/json"})
@@ -237,7 +239,7 @@ def call(base, request):
         return status, None, text
 
 
-def wait_until_serving(base, proc, log_path):
+def wait_until_serving(base: str, proc: subprocess.Popen[bytes], log_path: str) -> None:
     deadline = time.monotonic() + STARTUP_TIMEOUT_S
     while time.monotonic() < deadline:
         if proc.poll() is not None:

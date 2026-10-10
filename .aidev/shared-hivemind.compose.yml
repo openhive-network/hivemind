@@ -1,0 +1,106 @@
+# The shared hivemind service (`sandbox.shared.hivemind` in project.yaml): one
+# PostgreSQL holding HAF's 5M replay with hivemind installed, mocked and synced as
+# CI's `sync` job does, as one frozen template per hivemind schema revision, and
+# handing every test run its own copy-on-write clone of one
+# (.aidev/shared-hivemind/, see .aidev/README.md). Modelled on hive/haf's
+# shared-haf service.
+#
+# Hosted by a dedicated AIDEV session on a host whose HIVEMIND_SHARED_DATA_ROOT
+# is a ZFS dataset with block cloning (steem-13); cluster.sh refuses anything
+# else. The port is published on every interface: consumers reach it through
+# relays on other hosts.
+
+x-haf-fixture: &haf-fixture
+  # The HAF fixture image and commit hive/haf's own shared service pins
+  # (HAF_FIXTURE_COMMIT / HAF_FIXTURE_DIGEST in project.yaml).
+  image: "registry.gitlab.syncad.com/hive/haf/fixture-5m:${HAF_FIXTURE_COMMIT:?}@${HAF_FIXTURE_DIGEST:?}"
+
+# Compose runs in the session worker, but the host's daemon resolves bind
+# sources on the host: a relative path would name a worker-side directory.
+x-data-root: &data-root
+  type: bind
+  source: "${HIVEMIND_SHARED_DATA_ROOT:?}"
+  target: /hivemind-shared
+x-scripts: &scripts
+  type: bind
+  source: "${AIDEV_HOST_CHECKOUT:?AIDEV_HOST_CHECKOUT must name the checkout as the docker daemon sees it}/.aidev/shared-hivemind"
+  target: /aidev/shared-hivemind
+  read_only: true
+
+services:
+  # Copies the image's replayed cluster onto the dataset on the first start of
+  # a HAF commit; a no-op afterwards.
+  cluster:
+    <<: *haf-fixture
+    environment:
+      HAF_FIXTURE_COMMIT: "${HAF_FIXTURE_COMMIT:?}"
+      HIVEMIND_SHARED_ROOT: /hivemind-shared
+    volumes: [*data-root, *scripts]
+    entrypoint: ["/aidev/shared-hivemind/cluster.sh"]
+    command: []
+    restart: "no"
+
+  hivemind:
+    <<: *haf-fixture
+    depends_on:
+      cluster:
+        condition: service_completed_successfully
+    environment:
+      HIVEMIND_SHARED_ROOT: /hivemind-shared
+      HIVEMIND_SHARED_RUN_TTL: "${HIVEMIND_SHARED_RUN_TTL:-6 hours}"
+      # Over TCP from the fleet's LAN, without a password (the data is public
+      # chain data and mocks): the consumer role only to the clone API and to run
+      # databases, and `hivemind` only to run databases, where a run reloads its
+      # SQL and serves PostgREST as the role owning hivemind's schemas.
+      # 172.16.0.0/12 admits the provider host itself, whose connections arrive
+      # through docker's NAT. 127.0.0.1 is this container's own network
+      # namespace, shared only with `seeder`. The image's trust rule is replaced.
+      PG_ACCESS: 'host all all 127.0.0.1/32 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.3.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.3.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.5.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.5.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.6.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.6.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 172.16.0.0/12 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 172.16.0.0/12 trust'
+    ports:
+      - "0.0.0.0:${AIDEV_PORT_PG:?}:5432"
+    volumes:
+      - *data-root
+      - *scripts
+      # The HAF commit's cluster, mounted at the very path the image's
+      # tablespace and postgresql.conf name (see hive/haf's shared-haf.compose.yml).
+      - type: bind
+        source: "${HIVEMIND_SHARED_DATA_ROOT:?}/${HAF_FIXTURE_COMMIT:?}/haf_db_store"
+        target: /home/hived/datadir/haf_db_store
+        bind:
+          create_host_path: true
+    entrypoint: ["/aidev/shared-hivemind/start.sh"]
+    command: []
+    stop_grace_period: 2m
+    healthcheck:
+      # Serving once the clone API answers; templates arrive from `seeder`.
+      test: ["CMD-SHELL", "sudo -nu postgres psql -X -d hivemind_shared -Atc \"select 'templates ' || count(*) from hivemind_shared.health()\" | grep -q templates"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      # The first start of a HAF commit freezes haf_template.
+      start_period: 30m
+
+  # Seeds a template per requested schema revision (seeder.sh, seed.sh) in
+  # hivemind's AIDEV runtime image, which carries hivemind's Python
+  # dependencies, psql and git. It joins `hivemind`'s network namespace, so it
+  # reaches PostgreSQL on 127.0.0.1 and no superuser is reachable over the network.
+  seeder:
+    image: "${HIVEMIND_RUNTIME_IMAGE:?}"
+    depends_on:
+      hivemind:
+        condition: service_healthy
+    network_mode: "service:hivemind"
+    environment:
+      HAF_FIXTURE_COMMIT: "${HAF_FIXTURE_COMMIT:?}"
+      HIVEMIND_SHARED_REMOTE: "${HIVEMIND_SHARED_REMOTE:-https://gitlab.syncad.com/hive/hivemind.git}"
+      HIVEMIND_SHARED_SEED_REFS: "${HIVEMIND_SHARED_SEED_REFS:-develop}"
+    volumes: [*scripts]
+    entrypoint: ["/aidev/shared-hivemind/seeder.sh"]
+    command: []
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "psql -X -h 127.0.0.1 -U postgres -d hivemind_shared -Atc 'select 1' | grep -qx 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
