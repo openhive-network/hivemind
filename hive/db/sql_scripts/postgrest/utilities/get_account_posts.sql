@@ -190,7 +190,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_feed;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0, IN _include_own BOOLEAN DEFAULT False)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -204,8 +204,12 @@ BEGIN
   IF _post_id <> 0 THEN
     SELECT MIN(hfc.created_at) INTO _min_date
     FROM hivemind_app.hive_feed_cache hfc
-    JOIN hivemind_app.follows f ON hfc.account_id = f.following
-    WHERE f.follower = _account_id AND hfc.post_id = _post_id;
+    JOIN (
+      SELECT f.following FROM hivemind_app.follows f WHERE f.follower = _account_id
+      UNION ALL
+      SELECT _account_id WHERE _include_own
+    ) f ON hfc.account_id = f.following
+    WHERE hfc.post_id = _post_id;
   END IF;
 
   _cutoff = hivemind_app.block_before_head( '1 month' );
@@ -227,9 +231,14 @@ BEGIN
             MIN(hfc.created_at) as min_created, 
             array_agg(DISTINCT(ha.name) ORDER BY ha.name) AS reblogged_by
           FROM hivemind_app.hive_feed_cache hfc
-          JOIN hivemind_app.follows f ON hfc.account_id = f.following
+          -- a self-follow plus _include_own yields duplicate rows; GROUP BY post_id and DISTINCT collapse them
+          JOIN (
+            SELECT f.following FROM hivemind_app.follows f WHERE f.follower = _account_id
+            UNION ALL
+            SELECT _account_id WHERE _include_own
+          ) f ON hfc.account_id = f.following
           JOIN hivemind_app.hive_accounts ha ON ha.id = f.following
-          WHERE hfc.block_num > _cutoff AND f.follower = _account_id
+          WHERE hfc.block_num > _cutoff
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
           GROUP BY hfc.post_id
           HAVING (_post_id = 0 OR MIN(hfc.created_at) < _min_date OR ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
