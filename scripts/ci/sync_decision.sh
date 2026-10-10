@@ -55,10 +55,11 @@ fi
 any_required=false
 declare -A trusted=() distrusted=()
 while IFS=$'\t' read -r sha parents trailers; do
-  value="$(tr '[:upper:]' '[:lower:]' <<< "$trailers" | tr -d '[:space:]')"
   claims_required=false claims_not_required=false
-  IFS=',' read -ra values <<< "$value"
+  # Each value is "<decision> — <reason>" (aidev#15385): the decision is its first word.
+  IFS=',' read -ra values <<< "$(tr '[:upper:]' '[:lower:]' <<< "$trailers")"
   for v in "${values[@]}"; do
+    read -r v _ <<< "$v"
     case "$v" in
       required) claims_required=true ;;
       not-required) claims_not_required=true ;;

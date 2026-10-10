@@ -84,6 +84,23 @@ CASES = {
         'false',
         FULL,
     ),
+    'not-required with a reason (as AIDEV writes it) -> postgrest-only': (
+        [
+            (
+                ['hive/db/schema.py', 'hive/db/sql_scripts/postgrest/a.sql'],
+                'not-required — only registers a PostgREST script',
+            )
+        ],
+        'feature',
+        'false',
+        POSTGREST_ONLY,
+    ),
+    'required with a reason -> full': (
+        [(['hive/db/sql_scripts/postgrest/a.sql'], 'required — changes a table')],
+        'feature',
+        'false',
+        FULL,
+    ),
     'required forces full even for docs-only': (
         [(['docs/a.md'], 'required')],
         'feature',
