@@ -3,7 +3,13 @@
 -- through the live path. hive.app_next_iteration calls the 3-argument
 -- hive.app_next_block, which is wrapped here.
 --
--- Idempotent: HAF's function is renamed to app_next_block_haf only the first time.
+-- Truncating the range only makes HAF re-analyze stages at 4999980; the stage
+-- is picked from the distance to hive.get_estimated_hive_head_block(), which
+-- extrapolates from the head block's timestamp to now(). The mock blocks date
+-- from 2016, so that estimate is ~100M blocks ahead and live is never reached.
+-- It is wrapped too, to return the irreversible head (5000024).
+--
+-- Idempotent: HAF's functions are renamed to *_haf only the first time.
 -- If neither name exists (HAF changed the signature), the ALTER fails.
 DO $$
 BEGIN
@@ -38,3 +44,39 @@ $BODY$;
 
 REVOKE EXECUTE ON FUNCTION hive.app_next_block( hive.contexts_group, BOOLEAN, INT ) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION hive.app_next_block( hive.contexts_group, BOOLEAN, INT ) TO hive_applications_group;
+
+DO $$
+BEGIN
+    IF to_regprocedure('hive.get_estimated_hive_head_block_haf()') IS NULL THEN
+        ALTER FUNCTION hive.get_estimated_hive_head_block() RENAME TO get_estimated_hive_head_block_haf;
+    END IF;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION hive.get_estimated_hive_head_block()
+    RETURNS INTEGER
+    LANGUAGE plpgsql
+    STABLE
+AS
+$BODY$
+BEGIN
+    RETURN hive.get_irreversible_head_block();
+END;
+$BODY$;
+
+-- Same EXECUTE grants as HAF's function (a NULL ACL means the defaults).
+DO $$
+DECLARE
+    __grantee TEXT;
+BEGIN
+    REVOKE ALL ON FUNCTION hive.get_estimated_hive_head_block() FROM PUBLIC;
+    FOR __grantee IN
+        SELECT CASE WHEN acl.grantee = 0 THEN 'PUBLIC' ELSE acl.grantee::regrole::TEXT END
+        FROM pg_proc p, aclexplode( COALESCE( p.proacl, acldefault( 'f', p.proowner ) ) ) acl
+        WHERE p.oid = 'hive.get_estimated_hive_head_block_haf()'::regprocedure
+          AND acl.privilege_type = 'EXECUTE'
+    LOOP
+        EXECUTE format( 'GRANT EXECUTE ON FUNCTION hive.get_estimated_hive_head_block() TO %s', __grantee );
+    END LOOP;
+END
+$$;

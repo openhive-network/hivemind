@@ -1,8 +1,14 @@
 -- Applies scripts/ci/wrapper_for_app_next_block.sql twice to the stack's HAF and
--- checks the wrapper, inside one transaction that is rolled back.
+-- checks the wrappers, inside one transaction that is rolled back.
 --   psql -X -v ON_ERROR_STOP=1 -f .aidev/app_next_block_wrapper_check.sql
 \set QUIET on
 BEGIN;
+
+CREATE TEMP TABLE haf_original AS
+SELECT prosrc AS head_estimate_src
+FROM pg_proc
+WHERE oid = COALESCE( to_regprocedure('hive.get_estimated_hive_head_block_haf()'),
+                      'hive.get_estimated_hive_head_block()'::regprocedure );
 
 \ir ../scripts/ci/wrapper_for_app_next_block.sql
 
@@ -15,13 +21,26 @@ BEGIN
         'the 3-argument hive.app_next_block does not delegate to app_next_block_haf';
     ASSERT has_function_privilege('hive_applications_group', 'hive.app_next_block(hive.contexts_group, boolean, integer)', 'EXECUTE'),
         'hive_applications_group cannot execute the wrapper';
+    ASSERT (SELECT prosrc FROM pg_proc WHERE oid = 'hive.get_estimated_hive_head_block_haf()'::regprocedure)
+           = (SELECT head_estimate_src FROM haf_original),
+        'HAF''s get_estimated_hive_head_block was not preserved as get_estimated_hive_head_block_haf';
+    ASSERT (SELECT prosrc FROM pg_proc WHERE oid = 'hive.get_estimated_hive_head_block()'::regprocedure)
+           LIKE '%hive.get_irreversible_head_block()%',
+        'hive.get_estimated_hive_head_block does not return the irreversible head';
+    ASSERT NOT EXISTS (
+            SELECT 1 FROM pg_roles r
+            WHERE has_function_privilege( r.oid, 'hive.get_estimated_hive_head_block()', 'EXECUTE' )
+               <> has_function_privilege( r.oid, 'hive.get_estimated_hive_head_block_haf()', 'EXECUTE' ) ),
+        'the get_estimated_hive_head_block wrapper''s EXECUTE grants differ from HAF''s function';
 END
 $$;
 
 CREATE TEMP TABLE applied_once AS
 SELECT 'hive.app_next_block(hive.contexts_group, boolean, integer)'::regprocedure::oid AS wrapper_oid,
        'hive.app_next_block_haf(hive.contexts_group, boolean, integer)'::regprocedure::oid AS haf_oid,
-       (SELECT prosrc FROM pg_proc WHERE oid = 'hive.app_next_block_haf(hive.contexts_group, boolean, integer)'::regprocedure) AS haf_src;
+       (SELECT prosrc FROM pg_proc WHERE oid = 'hive.app_next_block_haf(hive.contexts_group, boolean, integer)'::regprocedure) AS haf_src,
+       'hive.get_estimated_hive_head_block()'::regprocedure::oid AS head_wrapper_oid,
+       'hive.get_estimated_hive_head_block_haf()'::regprocedure::oid AS head_haf_oid;
 
 \ir ../scripts/ci/wrapper_for_app_next_block.sql
 
@@ -32,6 +51,24 @@ BEGIN
                 AND (SELECT prosrc FROM pg_proc WHERE oid = haf_oid) = haf_src
             FROM applied_once),
         're-applying the wrapper changed hive.app_next_block or app_next_block_haf';
+    ASSERT (SELECT 'hive.get_estimated_hive_head_block()'::regprocedure::oid = head_wrapper_oid
+                AND 'hive.get_estimated_hive_head_block_haf()'::regprocedure::oid = head_haf_oid
+                AND (SELECT prosrc FROM pg_proc WHERE oid = head_haf_oid) = (SELECT head_estimate_src FROM haf_original)
+            FROM applied_once),
+        're-applying the wrapper changed hive.get_estimated_hive_head_block or get_estimated_hive_head_block_haf';
+END
+$$;
+
+-- The head estimate, with HAF's irreversible head stubbed.
+CREATE OR REPLACE FUNCTION hive.get_irreversible_head_block()
+    RETURNS INTEGER LANGUAGE sql
+AS $$ SELECT 5000024 $$;
+
+DO $$
+BEGIN
+    ASSERT hive.get_estimated_hive_head_block() = 5000024,
+        format('get_estimated_hive_head_block gave %s, expected the irreversible head 5000024',
+               hive.get_estimated_hive_head_block());
 END
 $$;
 
@@ -70,3 +107,4 @@ $$;
 
 ROLLBACK;
 \echo app_next_block wrapper: applied twice, delegates, caps at 4999979
+\echo get_estimated_hive_head_block wrapper: applied twice, original preserved, grants match, returns the irreversible head
