@@ -316,3 +316,35 @@ The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
 - Benchmarking tests
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
+
+## CI sync decision
+
+A full hivemind sync costs CI 14–18 minutes. `detect_changes` decides by path whether a pipeline needs one, and paths can't tell a change that alters synced data from one that doesn't. So whoever writes a commit (the implementing agent or a human) can declare it with a commit trailer:
+
+```
+Hivemind-Sync: required
+Hivemind-Sync: not-required
+```
+
+**`required`** — the change alters what the indexer writes or how synced data is shaped:
+- `hive/indexer/**`;
+- `hive/utils/**` reached from the indexer;
+- table, index and constraint DDL (`hive/db/sql_scripts/schema/*`, `register_indexes.sql`);
+- `hive/db/sql_scripts/upgrade/*`;
+- SQL the sync runs (`massive_sync.sql`, `update_*` / `process_*`, `hafapp_api.sql`, …);
+- `scripts/install_app.sql`, `scripts/setup_postgres.sh`;
+- anything else that changes the contents of `hivemind_app` tables.
+
+**`not-required`** — read-side only:
+- PostgREST and endpoint SQL (`hive/db/sql_scripts/postgrest/`, `endpoints/`);
+- registering a script in the PostgREST load list;
+- Python used only by the API server;
+- tests, docs, `.aidev/`, CI.
+
+**When unsure, `required`.** A wrong `not-required` lets the API tests run against data synced by older code.
+
+How CI applies it (`scripts/ci/sync_decision.sh`, run in `detect_changes`'s `after_script`):
+- any commit in the pipeline's range saying `required` forces a full sync, even for a docs-only change;
+- a file changed only by commits saying `not-required` stops counting against the PostgREST-only mode (reload SQL on cached data), except files matching `^hive/indexer/|^hive/db/sql_scripts/(schema|upgrade)/|massive_sync\.sql$|^scripts/install_app\.sql$|^scripts/setup_postgres\.sh$`, which always need a sync;
+- commits without the trailer, and merge commits, are classified by path as before;
+- pipelines on `develop` and `master` ignore `not-required`, so a wrong skip shows up on the first pipeline after merge.

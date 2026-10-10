@@ -56,6 +56,8 @@ variables:
   # 1. AUTOMATIC: When only tests/docs change, detect_changes sets AUTO_SKIP_SYNC=true.
   #    The sync job will use cached data if an exact match exists for this app commit.
   #    If no exact cache is found, it runs full sync to ensure schema compatibility.
+  #    A commit's `Hivemind-Sync: required|not-required` trailer refines the path rules
+  #    (scripts/ci/sync_decision.sh; CLAUDE.md, "CI sync decision").
   #
   # 2. MANUAL: Set QUICK_TEST=true to force skip mode with a specific cache:
   #    - QUICK_TEST=true
@@ -372,8 +374,8 @@ detect_changes:
     # The sync job reuses these to find an ancestor whose sync cache this commit can use.
     HAF_APP_SKIP_PATTERNS: &haf_app_skip_patterns '^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
   after_script:
-    # Additional detection for PostgREST-only changes
-    # If all non-skip changes are in PostgREST directories, we can skip sync and reload SQL
+    # Additional detection for PostgREST-only changes and Hivemind-Sync commit trailers
+    # (scripts/ci/sync_decision.sh; CLAUDE.md, "CI sync decision")
   - |
     # Ensure git is available (after_script runs in fresh shell)
     if ! command -v git &> /dev/null; then
@@ -384,13 +386,6 @@ detect_changes:
       # Source the existing detection results
       source detect_changes.env
 
-      # If already marked as full skip (docs/tests only), don't override
-      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
-        echo "Already marked for skip (docs/tests only) - no PostgREST detection needed"
-        exit 0
-      fi
-
-      # Get changed files that aren't in the standard skip patterns
       if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
         BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
       elif [ "$CI_COMMIT_REF_NAME" = "develop" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
@@ -399,38 +394,15 @@ detect_changes:
         BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "HEAD~1")
       fi
 
-      CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || echo "")
-
-      # Filter out standard skip patterns
-      HAF_APP_SKIP_PATTERNS='^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
-      NEEDS_WORK=$(echo "$CHANGED_FILES" | grep -vE "${HAF_APP_SKIP_PATTERNS}" || true)
-
-      if [ -n "$NEEDS_WORK" ]; then
-        # Check if ALL remaining changes are in PostgREST directories
-        POSTGREST_PATTERNS='^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
-        NON_POSTGREST_CHANGES=$(echo "$NEEDS_WORK" | grep -vE "$POSTGREST_PATTERNS" || true)
-
-        if [ -z "$NON_POSTGREST_CHANGES" ]; then
-          echo ""
-          echo "=== PostgREST-Only Change Detected ==="
-          echo "All code changes are in PostgREST/endpoint SQL files."
-          echo "Sync can be skipped - SQL functions will be reloaded on cached data."
-          echo ""
-          echo "Changed PostgREST files:"
-          echo "$NEEDS_WORK" | head -20
-
-          # Append to the dotenv file
-          echo "POSTGREST_ONLY_CHANGE=true" >> detect_changes.env
-        else
-          echo ""
-          echo "=== Non-PostgREST changes detected ==="
-          echo "Files requiring full sync:"
-          echo "$NON_POSTGREST_CHANGES" | head -20
-          echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
-        fi
-      else
-        echo "POSTGREST_ONLY_CHANGE=false" >> detect_changes.env
+      if ! DECISION=$(AUTO_SKIP_SYNC="${AUTO_SKIP_SYNC:-false}" \
+          HAF_APP_SKIP_PATTERNS='^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$' \
+          bash scripts/ci/sync_decision.sh "$BASE_SHA" HEAD); then
+        echo "Sync decision failed - falling back to a full sync"
+        DECISION=$'AUTO_SKIP_SYNC=false\nPOSTGREST_ONLY_CHANGE=false'
       fi
+      grep -vE '^(AUTO_SKIP_SYNC|POSTGREST_ONLY_CHANGE)=' detect_changes.env > detect_changes.env.tmp || true
+      echo "$DECISION" >> detect_changes.env.tmp
+      mv detect_changes.env.tmp detect_changes.env
     fi
 
 find_haf_image:
