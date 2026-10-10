@@ -20,8 +20,10 @@ set -euo pipefail
 
 _REVISION_FILE=".hivemind_revision"
 
+# The last quoted 40-hex hash. POSIX sed, not grep -P: CI's job images ship
+# busybox grep, which has no -P ("grep: unrecognized option: P").
 _revision() {
-  grep -oP "'\K[a-f0-9]{40}(?=')" "$1" | tail -1 || true
+  sed -nE "s/.*'([a-f0-9]{40})'.*/\1/p" "$1" 2>/dev/null | tail -1 || true
 }
 
 _record() {

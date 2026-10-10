@@ -94,3 +94,23 @@ def test_returns_none_without_an_expected_revision(nfs: Path, tmp_path: Path) ->
     _cache(nfs, f'{HAF}_aaaaaaaa', '2026-10-01T08:00:00+00:00', CURRENT, tmp_path)
 
     assert _pick(nfs, _listing(f'{HAF}_aaaaaaaa'), revision='') == ''
+
+
+def test_revision_does_not_need_grep_p(tmp_path: Path) -> None:
+    """CI's job images ship busybox grep, which rejects -P; the revision must still be read."""
+    shim = tmp_path / 'bin'
+    shim.mkdir()
+    (shim / 'grep').write_text(
+        '#!/bin/sh\nfor a; do case "$a" in -*P*) echo "grep: unrecognized option: P" >&2; exit 2;; esac; done\n'
+        'exec /usr/bin/env -i PATH=/usr/bin:/bin grep "$@"\n'
+    )
+    (shim / 'grep').chmod(0o755)
+    env = {'PATH': f'{shim}:/usr/bin:/bin'}
+    out = subprocess.run(
+        ['bash', str(SCRIPT), 'revision', str(_patchlevel(tmp_path, CURRENT))],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert out.stdout.strip() == CURRENT
