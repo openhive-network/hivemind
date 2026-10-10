@@ -415,8 +415,6 @@ find_haf_image:
   stage: detect
 
 # Build base images if they're missing from registry
-  variables:
-    UPSTREAM_BRANCH: 1.28.8-rc3
 prepare_base_images:
   stage: build
   extends: .docker_image_builder_job_template

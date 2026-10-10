@@ -69,10 +69,12 @@ sandbox:
       # The first start of a HAF commit copies its replayed cluster onto the dataset.
       readiness_timeout: 1800
       env:
-        # hive/haf's sandbox.shared.haf pins this fixture (hive/haf/fixture-5m:<commit>,
-        # CI's build_haf_fixture_image); move both together.
-        HAF_FIXTURE_COMMIT: "e2237bea170e6aea9fc327fb1b1e34b5237d219d"
-        HAF_FIXTURE_DIGEST: "sha256:6f0d0f435b829b47379b80dbba8f2602d8ce558cedd941d1cb1b427985c8c020"
+        # hive/haf/fixture-5m:<commit> (hive/haf CI's build_haf_fixture_image) for the
+        # HAF commit hivemind tests against: the one test-stack.compose.yml's testnet
+        # image is pinned to. It follows hivemind's own HAF, not hive/haf's
+        # sandbox.shared.haf pin, so the two may differ. Move it with that image.
+        HAF_FIXTURE_COMMIT: "2ae98b8225165ce9eebb4f1858b81e50c5a705b3"
+        HAF_FIXTURE_DIGEST: "sha256:2f6683cb175a8a79005c81bfec9f712223eeaa036e00c67d1e31593c3e554691"
         HIVEMIND_SHARED_DATA_ROOT: "/haf-pool/aidev-shared-hivemind"
         HIVEMIND_RUNTIME_IMAGE: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
         HIVEMIND_SHARED_SEED_REFS: "develop aidev/integration"
