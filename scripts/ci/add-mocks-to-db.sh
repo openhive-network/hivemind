@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
 done
 
 run_mocker() {
-  echo "Creating hive.app_next_block() function wrapper"
+  echo "Creating hive.app_next_block() and hive.get_estimated_hive_head_block() function wrappers"
   psql "${HAF_ADMIN_POSTGRES_URL}" -v ON_ERROR_STOP=1 -f "${SCRIPTPATH}/wrapper_for_app_next_block.sql"
 
   echo "Running mocking script"
