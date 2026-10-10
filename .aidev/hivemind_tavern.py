@@ -7,10 +7,13 @@ The provider is the shared hivemind service (`sandbox.external` `hivemind`,
 reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
 .aidev/README.md). The step:
 
-1. reads this tree's schema revision (update_db_patchlevel.sql) and picks the
-   template seeded for it. With none, it asks the provider to seed one
-   (request_seed) and exits SKIP: a missing fixture is the host environment's,
-   not the change's;
+1. reads this tree's schema revision (update_db_patchlevel.sql) and sync recipe
+   (shared_fixture.py, on project.yaml's HAF_FIXTURE_COMMIT) and picks the
+   template seeded for both. Without one it asks the provider to seed it
+   (request_seed) and takes the newest template of the revision instead, with
+   an advisory: its data is schema-compatible but synced by another recipe.
+   With no template of the revision it exits SKIP: a missing fixture is the
+   host environment's, not the change's;
 2. clones the template into run_<id> and reloads this tree's PostgREST SQL into
    it (scripts/ci/reload-postgrest-functions.sh, what CI's POSTGREST_ONLY path
    does), so query changes are tested without a re-sync;
@@ -21,7 +24,8 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
 4. moves the .out.json files tavern writes next to the patterns to
    OUT_DIR/tavern-out/ and drops the clone.
 
-Exits 0 when every group passes, 1 when one fails, SKIP (77) on a revision miss;
+Exits 0 when every group passes, 1 when one fails, SKIP (77) on a revision miss
+or a provider whose clone API predates sync recipes;
 the last line printed is the reason.
 """
 
@@ -92,14 +96,29 @@ def _psql(url: str, sql: str, **variables: str) -> str:
 
 
 def _templates(api_url: str) -> list[Any]:
-    rows = _psql(api_url, "select revision || ' ' || template from hivemind_shared.health();")
-    return [shared_fixture.Template(*line.split(" ", 1)) for line in rows.splitlines() if line]
+    rows = _psql(api_url, "select revision || ' ' || recipe || ' ' || template from hivemind_shared.health();")
+    return [shared_fixture.Template(*line.split(" ", 2)) for line in rows.splitlines() if line]
 
 
 def _head_commit() -> str | None:
     proc = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], capture_output=True, text=True)
     commit = proc.stdout.strip()
     return commit if proc.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", commit) else None
+
+
+def _request_seed(api_url: str, revision: str, recipe: str) -> bool:
+    commit = _head_commit()
+    if commit is None:
+        return False
+    state = _psql(
+        api_url,
+        "select hivemind_shared.request_seed(:'rev', :'recipe', :'commit');",
+        rev=revision,
+        recipe=recipe,
+        commit=commit,
+    )
+    print(f"seed request for {commit}: {state}")
+    return True
 
 
 def _reload_sql(run_url: str, log_path: str) -> None:
@@ -200,6 +219,16 @@ def main(out: str) -> int:
     if revision is None:
         print(f"{shared_fixture.PATCHLEVEL_SQL} names no schema revision")
         return 1
+    with open(os.path.join(ROOT, shared_fixture.PROJECT_YAML), encoding="utf-8") as handle:
+        haf_commit = shared_fixture.haf_fixture_commit(handle.read())
+    if haf_commit is None:
+        print(f"{shared_fixture.PROJECT_YAML} names no HAF_FIXTURE_COMMIT")
+        return 1
+    try:
+        recipe = shared_fixture.recipe_of_tree(ROOT, haf_commit)
+    except shared_fixture.RecipeError as err:
+        print(f"no sync recipe: {err}")
+        return 1
     host = os.environ.get("AIDEV_EXTERNAL_HIVEMIND_HOST")
     port = os.environ.get("AIDEV_EXTERNAL_HIVEMIND_PORT")
     if not host or not port:
@@ -209,21 +238,29 @@ def main(out: str) -> int:
         groups = smoketest_groups(handle.read())
 
     api_url = f"postgresql://hivemind_shared_consumer@{host}:{port}/hivemind_shared"
-    templates = _templates(api_url)
-    print(f"schema revision {revision}; templates: {', '.join(t.revision for t in templates) or 'none'}")
-    template = shared_fixture.select_template(templates, revision)
-    if template is None:
-        commit = _head_commit()
-        if commit:
-            state = _psql(
-                api_url, "select hivemind_shared.request_seed(:'rev', :'commit');", rev=revision, commit=commit
-            )
-            print(f"seed request for {commit}: {state}")
-        print(shared_fixture.miss_message(revision, requested=commit is not None))
+    # serve.sh installs admin.sql only when the provider starts.
+    if _psql(api_url, "select to_regprocedure('hivemind_shared.request_seed(text, text, text)') is not null;") != "t":
+        print("the shared hivemind service's clone API predates sync recipes; it installs this one on its next start")
         return SKIP
+    templates = _templates(api_url)
+    listed = ", ".join(f"{t.revision}/{t.recipe[:12]}" for t in templates) or "none"
+    print(f"schema revision {revision}, sync recipe {recipe}; templates: {listed}")
+    template = shared_fixture.select_template(templates, revision, recipe)
+    if template is None or template.recipe != recipe:
+        requested = _request_seed(api_url, revision, recipe)
+        if template is None:
+            print(shared_fixture.miss_message(revision, requested=requested))
+            return SKIP
+        print(shared_fixture.fallback_message(template, recipe, requested=requested))
 
     run_id = shared_fixture.new_run_id("tavern")
-    database = _psql(api_url, "select hivemind_shared.clone_run_database(:'run', :'rev');", run=run_id, rev=revision)
+    database = _psql(
+        api_url,
+        "select hivemind_shared.clone_run_database(:'run', :'rev', :'recipe');",
+        run=run_id,
+        rev=revision,
+        recipe=template.recipe,
+    )
     print(f"cloned {template.database} into {database}")
     try:
         run_url = f"postgresql://hivemind@{host}:{port}/{database}"

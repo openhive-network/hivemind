@@ -59,18 +59,39 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
 `sandbox.external` names `hivemind` (`AIDEV_EXTERNAL_HIVEMIND_HOST` / `_PORT`).
 `.aidev/hivemind_tavern.py`:
 
-1. reads the tree's **schema revision**: the last quoted 40-hex hash in
-   `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`, the key CI's
-   POSTGREST_ONLY path greps (`shared-hivemind/shared_fixture.py`);
-2. lists the provider's templates (`hivemind_shared.health()`) and takes the one
-   seeded for that revision. **On a miss** (a schema or indexer change that bumped
-   the patch level) it calls `hivemind_shared.request_seed(<revision>, <HEAD commit>)`
-   and skips with `no hivemind fixture for schema revision <rev>; seeding requested`.
+1. reads the tree's key (`shared-hivemind/shared_fixture.py`):
+   - its **schema revision**: the last quoted 40-hex hash in
+     `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`, the key CI's
+     POSTGREST_ONLY path greps;
+   - its **sync recipe**: a SHA-256 over the git blob ids of the tracked files that
+     decide what a seed syncs besides the schema, as they are on disk
+     (`scripts/ci/add-mocks-to-db.sh`, `scripts/ci/wrapper_for_app_next_block.sql`,
+     `mock_data/`, `hive/indexer/`, `hive/utils/`, `hive/db/`,
+     `scripts/install_app.sh` / `.sql`, `scripts/setup_postgres.sh`,
+     `.aidev/shared-hivemind/seed.sh`), the `reputation_tracker` and `hafah`
+     commits the tree pins, and `HAF_FIXTURE_COMMIT` from `project.yaml`.
+     `hive/db/sql_scripts/postgrest/` and `endpoints/` (CI's
+     `POSTGREST_ONLY_PATTERNS`) are left out: step 3 reloads them;
+2. skips by name when the provider's clone API predates sync recipes (`serve.sh`
+   installs `admin.sql` only when the service starts), else lists the provider's
+   templates (`hivemind_shared.health()`, newest first) and
+   takes the one seeded for both. **On a recipe miss** (the mocks, the indexer or an
+   app moved without a patch-level bump) it calls
+   `hivemind_shared.request_seed(<revision>, <recipe>, <HEAD commit>)` and uses the
+   newest template of the revision instead, printing
+   `advisory: no hivemind fixture for sync recipe <recipe> of schema revision <rev>;
+   using <template>, synced by recipe <other>; seeding requested`. Its data is
+   schema-compatible, so the run goes on, but a pattern that depends on what the
+   recipe changed may disagree with CI's. **On a revision miss** (a schema or
+   indexer change that bumped the patch level) it requests the seed the same way and
+   skips with `no hivemind fixture for schema revision <rev>; seeding requested`.
    A missing fixture never fails the gate. The next run after the seed finishes
    (about 15–20 minutes) has it. The seed fetches that commit from GitLab, so it
-   succeeds only for a pushed commit whose patch level yields the revision;
-   otherwise the request is marked `failed` in `hivemind_shared.seed_requests`;
-3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>)`) and
+   succeeds only for a pushed commit whose patch level yields the revision and whose
+   recipe is the requested one (an uncommitted edit to a recipe file changes the
+   tree's recipe, not the commit's); otherwise the request is marked `failed` in
+   `hivemind_shared.seed_requests`;
+3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>, <its recipe>)`) and
    reloads the tree's PostgREST SQL into the clone as `hivemind` with
    `scripts/ci/reload-postgrest-functions.sh` (what CI's POSTGREST_ONLY path does),
    so query changes are tested without a re-sync. The admin-level
@@ -147,9 +168,9 @@ docker compose -p hivemind-checks -f .aidev/test-stack.compose.yml down -v
 ## The shared synced hivemind (`sandbox.shared.hivemind`)
 
 A persistent PostgreSQL that holds HAF's 5M replay with hivemind installed, mocked
-and synced the way CI's `sync` job does it. It keeps one frozen template per hivemind
-schema revision and gives each test run, from any session, its own copy-on-write
-clone of one. It is declared under `sandbox.shared.hivemind` in `project.yaml`,
+and synced the way CI's `sync` job does it. It keeps frozen templates keyed by
+(hivemind schema revision, sync recipe) (see [The `tavern` step](#the-tavern-step))
+and gives each test run, from any session, its own copy-on-write clone of one. It is declared under `sandbox.shared.hivemind` in `project.yaml`,
 defined in `shared-hivemind.compose.yml` and implemented in `shared-hivemind/`,
 modelled on hive/haf's `shared-haf` service. A dedicated session hosts it:
 
@@ -170,15 +191,19 @@ connect to `$AIDEV_EXTERNAL_HIVEMIND_HOST:$AIDEV_EXTERNAL_HIVEMIND_PORT` as
 
 ```sql
 -- in database hivemind_shared
-select * from hivemind_shared.health();   -- revision, template, HAF and hivemind commits, head block, live clones
-select hivemind_shared.clone_run_database('<run id>', '<revision>');  -- returns run_<run id>; null revision = newest
+select * from hivemind_shared.health();  -- revision, recipe, template, HAF and hivemind commits, head block, live clones
+select hivemind_shared.clone_run_database('<run id>', '<revision>', '<recipe>');
+    -- returns run_<run id>, cloned from the newest template matching both; null = any
 select hivemind_shared.drop_run_database('<run id>');                 -- when done
-select hivemind_shared.request_seed('<revision>', '<40-hex commit>'); -- seeded | pending | seeding | done | failed
+select hivemind_shared.request_seed('<revision>', '<recipe>', '<40-hex commit>');
+    -- seeded | pending | seeding | done | failed
 select * from hivemind_shared.seed_requests;                          -- what the seeder is doing, failures' log tails
 ```
 
-A run id is 1-48 of `[a-z0-9_-]`. `clone_run_database` raises `no_data_found` when
-no template matches. Inside `run_<id>` a run connects as `hivemind`, the role that
+A run id is 1-48 of `[a-z0-9_-]`, a recipe 64 hex digits
+(`shared_fixture.py recipe tree <checkout> <HAF commit>`). `clone_run_database`
+raises `no_data_found` when no template matches. A template seeded before the recipe
+joined the key is listed with recipe `unrecorded`, which no tree matches. Inside `run_<id>` a run connects as `hivemind`, the role that
 owns hivemind's schemas, to reload SQL and serve PostgREST.
 
 **Access.** Over TCP only from the fleet's LAN, without a password, as on the shared
@@ -204,24 +229,33 @@ every role) is the `hivemind` container's own network namespace, shared only wit
 - `seeder` (this project's runtime image, which has hivemind's Python dependencies,
   psql and git) shares `hivemind`'s network namespace. `seeder.sh` takes pending
   `seed_requests` one at a time. Every 30 minutes it also requests a seed for the tips
-  of `HIVEMIND_SHARED_SEED_REFS` (`develop aidev/integration`), so they are seeded
-  before anyone asks. `seed.sh <revision> <commit>`:
+  of `HIVEMIND_SHARED_SEED_REFS` (`develop aidev/integration`) by their revision and
+  recipe (`shared_fixture.py recipe commit`), so they are seeded before anyone asks,
+  also when only the recipe moved. `seed.sh <revision> <recipe> <commit>`:
   1. fetches that commit, with the `reputation_tracker` and `hafah` submodules, from
      `HIVEMIND_SHARED_REMOTE` (gitlab.syncad.com/hive/hivemind) and checks its patch
-     level yields the revision;
-  2. clones `haf_template` into `seed_<revision>`;
+     level yields the revision and its recipe on `HAF_FIXTURE_COMMIT` is the recipe;
+  2. clones `haf_template` into `seed_<revision>_<recipe, 12 hex>`;
   3. runs what CI's `sync` job runs (`docker/docker-compose-sync.yml`):
      `setup_postgres.sh`, the submodules' `install_app.sh`, `scripts/install_app.sh`,
      `scripts/ci/add-mocks-to-db.sh`, `hive build_schema`, then reputation_tracker's
      `process_blocks.sh` alongside
      `hive sync --test-max-block=5000024 --community-start-block 4998000 …`,
      with the same flags, from the fetched source;
-  4. checks hivemind reached block 5000024, renames the database `hivemind_<revision>`,
-     freezes it (`is_template`, no connections) and records it.
+  4. checks hivemind reached block 5000024, renames the database
+     `hivemind_<revision>_<recipe, 12 hex>`, freezes it (`is_template`, no
+     connections) and records it.
 
   CI's `ALTER SYSTEM` tuning (`fsync = off`, …) is left out: it would apply to a
   cluster serving live clones, and it changes no synced data. A failed seed is marked
   `failed` with its log tail and is retried only when a different commit is requested.
+
+  **Retention.** Whenever it is idle, the seeder keeps the newest
+  `HIVEMIND_SHARED_KEEP_TEMPLATES` (3) templates of each revision and drops the older
+  ones that no registered run was cloned from (`shared_fixture.py retire`,
+  `hivemind_shared.drop_template`); one still cloned from goes once its runs are
+  dropped or reaped. A request whose template was retired is queued again by the next
+  `request_seed` for it.
 
 As for the shared HAF, the `shared-hivemind/` bind reads the checkout through
 `${AIDEV_HOST_CHECKOUT}`, because compose runs in the session worker against the

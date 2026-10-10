@@ -308,9 +308,9 @@ In an AIDEV workflow, commit the placeholders and say in the summary which tests
 the script after the workflow (or in a follow-up issue the agent requests).
 
 **Tavern under AIDEV (the `tavern` step of the `full` slot):**
-- Runs the same groups as `e2e_benchmark_on_postgrest`, against a per-run clone of the shared synced hivemind. That fixture is HAF 5M + CI's mocks + a hivemind sync to 5000024, one template per schema revision, hosted by the `hivemind-shared` session (`sandbox.shared.hivemind`, `.aidev/shared-hivemind/`).
+- Runs the same groups as `e2e_benchmark_on_postgrest`, against a per-run clone of the shared synced hivemind. That fixture is HAF 5M + CI's mocks + a hivemind sync to 5000024, with templates keyed by (schema revision, sync recipe), hosted by the `hivemind-shared` session (`sandbox.shared.hivemind`, `.aidev/shared-hivemind/`).
 - The tree's PostgREST SQL is reloaded into the clone first, so endpoint/query changes are tested without a re-sync.
-- The schema revision is the last hash in `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`. When no template matches (a schema/indexer change), the step skips with `no hivemind fixture for schema revision <rev>; seeding requested`, and the provider seeds it from the pushed commit for a later run.
+- The schema revision is the last hash in `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`; the sync recipe hashes the mocks, the indexer, the non-PostgREST SQL, the app submodule commits, `seed.sh` and the HAF commit (`.aidev/shared-hivemind/shared_fixture.py`). When no template matches the revision (a schema/indexer change), the step skips with `no hivemind fixture for schema revision <rev>; seeding requested`. When only the recipe misses, it runs against the revision's newest template with an `advisory:` line naming both recipes. Either way the provider seeds the exact key from the pushed commit for a later run.
 - To add or refresh a pattern: run `aidev test run --slot full`, read the actual response from `test-results/full/tavern-out/<group>/…/<test>.out.json`, and copy it over the `.pat.json` once it is right. Then rerun until `test-results/full/tavern-<group>.xml` passes.
 - Details: `.aidev/README.md`, "The `tavern` step" and "The shared synced hivemind".
 
