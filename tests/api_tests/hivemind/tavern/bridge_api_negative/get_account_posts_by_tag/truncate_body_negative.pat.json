@@ -1,0 +1,30 @@
+{
+  "code": -32602,
+  "message": "Assert Exception:truncate_body = -1 outside valid range [0:]",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2026-10-09T19:31:15"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "truncate_body = -1 outside valid range [0:]"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
+}

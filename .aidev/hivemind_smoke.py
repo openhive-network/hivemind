@@ -202,6 +202,7 @@ SQL_TESTS = [
     "tests/sql/bridge_vote_free_calls.sql",
     "tests/sql/bridge_get_discussion_cap.sql",
     "tests/sql/bridge_get_posts.sql",
+    "tests/sql/bridge_truncate_body.sql",
 ]
 
 

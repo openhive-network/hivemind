@@ -100,7 +100,7 @@ BEGIN
       WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask, _votes_mode, _top_votes);
       WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask, _votes_mode, _top_votes);
       WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api, _muted_reasons_filter_mask, _votes_mode, _top_votes);
-      WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, _muted_reasons_filter_mask, _votes_mode, _top_votes);
+      WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _muted_reasons_filter_mask, _votes_mode, _top_votes);
     END CASE;
   END IF;
 
@@ -603,7 +603,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -619,7 +619,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_communities
       community_posts as
@@ -1178,7 +1178,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1197,7 +1197,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_tag
       tag_posts as
@@ -1272,7 +1272,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1288,7 +1288,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_trending_ranked_posts_for_observer_communities
       observer_posts as
@@ -1362,7 +1362,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1378,7 +1378,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_hot_ranked_posts_for_observer_communities
       observer_posts as
@@ -1452,7 +1452,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1463,7 +1463,7 @@ DECLARE
 BEGIN
   _result = (
     SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_created_ranked_posts_for_observer_communities
       observer_posts AS
@@ -1546,7 +1546,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1565,7 +1565,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_payout_ranked_posts_for_observer_communities
       observer_posts as
@@ -1641,7 +1641,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1657,7 +1657,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_payout_comments_ranked_posts_for_observer_communities
       observer_posts as
@@ -1732,7 +1732,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1748,7 +1748,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_muted_ranked_posts_for_observer_communities
       observer_posts as
@@ -2294,7 +2294,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_muted_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_muted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_muted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2310,7 +2310,7 @@ BEGIN
 
   _result = (
     SELECT jsonb_agg (
-      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
+      hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
     ) FROM (
       WITH -- get_all_muted_ranked_posts
       all_posts as

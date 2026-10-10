@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_tag(IN _account_id INT, IN _tag TEXT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_tag(IN _account_id INT, IN _tag TEXT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -37,7 +37,7 @@ BEGIN
     -- Query for community posts
     _result = (
       SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH posts AS MATERIALIZED -- get_account_posts_by_tag (community)
         (
@@ -105,7 +105,7 @@ BEGIN
     -- Query for tag posts
     _result = (
       SELECT jsonb_agg (
-        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True)
+        hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH posts AS MATERIALIZED -- get_account_posts_by_tag (tag)
         (
