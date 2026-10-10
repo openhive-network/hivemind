@@ -100,7 +100,7 @@ verification:
     artifacts: ["test-results/quick/"]
   full:
     adapter: command
-    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "api-smoke", "tavern"]
+    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke", "tavern"]
     artifacts: ["test-results/full/"]
   baseline:
     adapter: command
@@ -108,7 +108,7 @@ verification:
     artifacts: ["test-results/baseline/"]
   canary:
     adapter: command
-    args: [".aidev/run-checks.sh", "canary", "unit", "ruff", "install", "reinstall", "api-smoke"]
+    args: [".aidev/run-checks.sh", "canary", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke"]
     artifacts: ["test-results/canary/"]
   # There is no coverage tooling in the image yet; `coverage` runs the unit tests
   # (AIDEV runs it in the post-implementation scan only). `static` and `system`
