@@ -10,6 +10,9 @@ DECLARE
   _observer_id INT;
   _muted_reasons_filter_mask INT;
   _top_votes INT;
+  _max_posts INT := hivemind_postgrest_utilities.get_max_discussion_posts_limit();
+  _result JSONB;
+  _truncated BOOLEAN;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array"}' ELSE '{"author": "string", "permlink": "string", "observer":"string", "muted_reasons_filter": "array", "top_votes": "number"}' END)::JSON, 2, NULL);
 
@@ -37,10 +40,10 @@ BEGIN
     ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
   END);
 
-  RETURN COALESCE(
-  (
-    SELECT     -- bridge_api_get_discussion
-      jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, row.replies, _votes_mode, _top_votes))
+  SELECT     -- bridge_api_get_discussion
+    jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, 0, NULL, row.is_pinned, True, row.replies, _votes_mode, _top_votes)) FILTER (WHERE row.rn <= _max_posts),
+    COUNT(*) > _max_posts
+  INTO _result, _truncated
       FROM (
         SELECT
           hpv.id,
@@ -82,7 +85,8 @@ BEGIN
           hpv.parent_id,
           hpv.source AS blacklists,
           hpv.muted_reasons,
-          ds.replies
+          ds.replies,
+          ROW_NUMBER() OVER (ORDER BY ds.id) AS rn
         FROM
         (
           WITH RECURSIVE child_posts (id, parent_id) AS
@@ -130,9 +134,20 @@ BEGIN
             AND NOT (hpv.role_id = -2 AND (_muted_reasons_filter_mask & 16) != 0)
           ))
         ORDER BY ds.id
-        LIMIT 2000
-    ) row),
-  '{}') ;
+        LIMIT _max_posts + 1
+    ) row;
+
+  -- a cut thread leaves parents listing replies that are not in the result
+  IF _truncated THEN
+    _result = (
+      SELECT jsonb_object_agg(post.key, jsonb_set(post.value, '{replies}', COALESCE(
+        (SELECT jsonb_agg(reply.value ORDER BY reply.ord) FROM jsonb_array_elements_text(post.value->'replies') WITH ORDINALITY AS reply(value, ord) WHERE _result ? reply.value),
+        '[]'::JSONB)))
+      FROM jsonb_each(_result) post
+    );
+  END IF;
+
+  RETURN COALESCE(_result, '{}');
 END
 $$
 ;

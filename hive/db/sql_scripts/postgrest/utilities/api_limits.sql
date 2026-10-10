@@ -6,3 +6,11 @@ BEGIN
     RETURN COALESCE(NULLIF(current_setting('hivemind_app.max_posts_per_call', true), '')::INTEGER, 20);
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
+
+-- the maximum number of posts bridge.get_discussion returns for one thread
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_max_discussion_posts_limit;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_max_discussion_posts_limit() RETURNS INTEGER AS $$
+BEGIN
+    RETURN 4000;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
