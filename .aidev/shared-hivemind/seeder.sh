@@ -1,25 +1,33 @@
 #!/usr/bin/env bash
 # The `seeder` service of the shared hivemind (.aidev/shared-hivemind.compose.yml):
-# keeps one template per requested schema revision, seeding them one at a time
-# with seed.sh. Runs in hivemind's AIDEV runtime image, in the `hivemind`
+# keeps a template per requested (schema revision, sync recipe), seeding them one
+# at a time with seed.sh. Runs in hivemind's AIDEV runtime image, in the `hivemind`
 # container's network namespace (PostgreSQL on 127.0.0.1).
 #
 # Requests come from consumers (hivemind_shared.request_seed, called by the
-# `tavern` step on a revision miss) and, every HIVEMIND_SHARED_REFS_INTERVAL
-# seconds, from the tips of HIVEMIND_SHARED_SEED_REFS, so the branches tests run
-# against are seeded before anyone asks. A request whose seed fails is marked
-# failed with its log tail (visible in hivemind_shared.seed_requests) and is
-# retried only for another commit.
+# `tavern` step when no template has its tree's recipe) and, every
+# HIVEMIND_SHARED_REFS_INTERVAL seconds, from the tips of
+# HIVEMIND_SHARED_SEED_REFS, so the branches tests run against are seeded before
+# anyone asks, also when only their recipe moved. A request whose seed fails is
+# marked failed with its log tail (visible in hivemind_shared.seed_requests) and
+# is retried only for another commit.
 #
-# Environment: HIVEMIND_SHARED_REMOTE, HAF_FIXTURE_COMMIT (for seed.sh),
-# HIVEMIND_SHARED_SEED_REFS (default "develop"), HIVEMIND_SHARED_REFS_INTERVAL
-# (default 1800), HIVEMIND_SHARED_SEED_POLL (default 60).
+# Whenever it is idle it retires every template past the newest
+# HIVEMIND_SHARED_KEEP_TEMPLATES of its revision that no run was cloned from
+# (shared_fixture.py retire, hivemind_shared.drop_template).
+#
+# Environment: HIVEMIND_SHARED_REMOTE, HAF_FIXTURE_COMMIT (the recipe's, and
+# seed.sh's), HIVEMIND_SHARED_SEED_REFS (default "develop"),
+# HIVEMIND_SHARED_REFS_INTERVAL (default 1800), HIVEMIND_SHARED_SEED_POLL
+# (default 60), HIVEMIND_SHARED_KEEP_TEMPLATES (default 3).
 set -uo pipefail
 
 remote="${HIVEMIND_SHARED_REMOTE:?HIVEMIND_SHARED_REMOTE must name the hivemind repository to fetch}"
 refs="${HIVEMIND_SHARED_SEED_REFS:-develop}"
 refs_interval="${HIVEMIND_SHARED_REFS_INTERVAL:-1800}"
 poll="${HIVEMIND_SHARED_SEED_POLL:-60}"
+keep="${HIVEMIND_SHARED_KEEP_TEMPLATES:-3}"
+haf_commit="${HAF_FIXTURE_COMMIT:?HAF_FIXTURE_COMMIT must name the HAF commit templates are seeded on}"
 here="$(cd "$(dirname "$0")" && pwd -P)"
 patchlevel="hive/db/sql_scripts/upgrade/update_db_patchlevel.sql"
 refs_git="$(mktemp -d)"
@@ -38,7 +46,7 @@ git init -q --bare "$refs_git"
 q -c "update hivemind_shared.seed_requests set state = 'pending', updated_at = now() where state = 'seeding'"
 
 request_refs() {
-    local ref commit rev
+    local ref commit rev recipe
     for ref in $refs; do
         commit="$(git ls-remote "$remote" "refs/heads/$ref" | cut -f1)"
         if [ -z "$commit" ]; then
@@ -50,23 +58,37 @@ request_refs() {
             echo "$ref ($commit): no schema revision; not requesting a seed"
             continue
         fi
-        echo "$ref ($commit): revision $rev: $(q -v rev="$rev" -v commit="$commit" <<< "select hivemind_shared.request_seed(:'rev', :'commit')")"
+        if ! recipe="$(python3 "$here/shared_fixture.py" recipe commit "$refs_git" "$commit" "$haf_commit")"; then
+            echo "$ref ($commit): no sync recipe; not requesting a seed"
+            continue
+        fi
+        echo "$ref ($commit): revision $rev, recipe $recipe: $(q -v rev="$rev" -v recipe="$recipe" -v commit="$commit" \
+            <<< "select hivemind_shared.request_seed(:'rev', :'recipe', :'commit')")"
     done
+}
+
+retire_templates() {
+    local db
+    q -c "select revision || ' ' || recipe || ' ' || template || ' ' || run_databases from hivemind_shared.health()" \
+        | python3 "$here/shared_fixture.py" retire "$keep" \
+        | while read -r db; do
+            echo "retiring $db: $(q -v db="$db" <<< "select hivemind_shared.drop_template(:'db')")"
+        done
 }
 
 claim() {
     q <<'SQL'
 update hivemind_shared.seed_requests set state = 'seeding', updated_at = now()
-where revision = (select revision from hivemind_shared.seed_requests where state = 'pending'
-                  order by requested_at limit 1 for update skip locked)
-returning revision || ' ' || hivemind_commit;
+where (revision, recipe) = (select revision, recipe from hivemind_shared.seed_requests where state = 'pending'
+                            order by requested_at limit 1 for update skip locked)
+returning revision || ' ' || recipe || ' ' || hivemind_commit;
 SQL
 }
 
 finish() {
-    q -v rev="$1" -v state="$2" -v detail="$3" <<'SQL'
+    q -v rev="$1" -v recipe="$2" -v state="$3" -v detail="$4" <<'SQL'
 update hivemind_shared.seed_requests set state = :'state', detail = nullif(:'detail', ''), updated_at = now()
-where revision = :'rev';
+where revision = :'rev' and recipe = :'recipe';
 SQL
 }
 
@@ -78,17 +100,18 @@ while true; do
     fi
     claimed="$(claim)"
     if [ -z "$claimed" ]; then
+        retire_templates || echo "retiring templates failed; retrying in ${poll}s"
         sleep "$poll"
         continue
     fi
-    read -r rev commit <<< "$claimed"
+    read -r rev recipe commit <<< "$claimed"
     log="$(mktemp)"
-    echo "seeding revision $rev from $commit"
-    if "$here/seed.sh" "$rev" "$commit" 2>&1 | tee "$log"; then
-        finish "$rev" done ""
+    echo "seeding revision $rev, recipe $recipe from $commit"
+    if "$here/seed.sh" "$rev" "$recipe" "$commit" 2>&1 | tee "$log"; then
+        finish "$rev" "$recipe" done ""
     else
-        echo "seeding revision $rev from $commit failed"
-        finish "$rev" failed "$(tail -c 2000 "$log")"
+        echo "seeding revision $rev, recipe $recipe from $commit failed"
+        finish "$rev" "$recipe" failed "$(tail -c 2000 "$log")"
     fi
     rm -f "$log"
 done

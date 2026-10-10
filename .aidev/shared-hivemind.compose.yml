@@ -1,7 +1,7 @@
 # The shared hivemind service (`sandbox.shared.hivemind` in project.yaml): one
 # PostgreSQL holding HAF's 5M replay with hivemind installed, mocked and synced as
-# CI's `sync` job does, as one frozen template per hivemind schema revision, and
-# handing every test run its own copy-on-write clone of one
+# CI's `sync` job does, as frozen templates keyed by (hivemind schema revision,
+# sync recipe), and handing every test run its own copy-on-write clone of one
 # (.aidev/shared-hivemind/, see .aidev/README.md). Modelled on hive/haf's
 # shared-haf service.
 #
@@ -80,7 +80,7 @@ services:
       # The first start of a HAF commit freezes haf_template.
       start_period: 30m
 
-  # Seeds a template per requested schema revision (seeder.sh, seed.sh) in
+  # Seeds a template per requested (schema revision, sync recipe) (seeder.sh, seed.sh) in
   # hivemind's AIDEV runtime image, which carries hivemind's Python
   # dependencies, psql and git. It joins `hivemind`'s network namespace, so it
   # reaches PostgreSQL on 127.0.0.1 and no superuser is reachable over the network.
@@ -94,6 +94,7 @@ services:
       HAF_FIXTURE_COMMIT: "${HAF_FIXTURE_COMMIT:?}"
       HIVEMIND_SHARED_REMOTE: "${HIVEMIND_SHARED_REMOTE:-https://gitlab.syncad.com/hive/hivemind.git}"
       HIVEMIND_SHARED_SEED_REFS: "${HIVEMIND_SHARED_SEED_REFS:-develop}"
+      HIVEMIND_SHARED_KEEP_TEMPLATES: "${HIVEMIND_SHARED_KEEP_TEMPLATES:-3}"
     volumes: [*scripts]
     entrypoint: ["/aidev/shared-hivemind/seeder.sh"]
     command: []
