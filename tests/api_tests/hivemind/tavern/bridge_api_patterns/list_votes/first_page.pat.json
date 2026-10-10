@@ -1,0 +1,26 @@
+[
+  {
+    "percent": 10000,
+    "reputation": 71.46,
+    "rshares": 30137301806887,
+    "time": "2016-07-22T23:00:36",
+    "voter": "dantheman",
+    "weight": "17412903474494492"
+  },
+  {
+    "percent": 10000,
+    "reputation": 45.53,
+    "rshares": 785653864312,
+    "time": "2016-07-22T17:32:48",
+    "voter": "mr11acdee",
+    "weight": 1499241661750225
+  },
+  {
+    "percent": 10000,
+    "reputation": 25,
+    "rshares": 200133072703,
+    "time": "2016-07-22T17:32:57",
+    "voter": "mr11acdee1",
+    "weight": 379999622075636
+  }
+]

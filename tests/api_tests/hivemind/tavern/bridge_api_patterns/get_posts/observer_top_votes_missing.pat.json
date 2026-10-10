@@ -1,0 +1,121 @@
+[
+  {
+    "author": "xeroc",
+    "author_payout_value": "44529.188 HBD",
+    "author_reputation": 69.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "![](https://i.imgsafe.org/2411b61f27.png)\n\n# Piston.web - Standalone User Interface\n\nMany may already know `piston` as a tool that simplifies interaction with Steem/Steemit. You can read, post, comment, edit, transfer funds and much more, if you are willing to use the command line.\n\nThis changes **now**. With `piston.web`, the toolbox now comes with **graphical user interface** that you can access via your browser. It is **fully independent of steemit.com**, which means that you can do what you love doing on Steem, even if steemit.com goes down.\n\n# Available Features\n\n* browsing steem posts\n* reading full posts and comments\n* reply to topics and comments\n* upvote/downvote\n* read account details\n  * recommended posts\n  * blog posts\n  * funds\n  * transaction history\n* integrated wallet\n* full encrypted (AES + BIP32) for private keys\n* import keys from account name and password\n\n# Screenshots\n\n## Browse:\n![](https://i.imgsafe.org/219c17ace1.png)\n\n## Account\n![](https://i.imgsafe.org/219c1dbdc5.png)\n\n## Funds:\n![](https://i.imgsafe.org/219c2ae8a0.png)\n\n## Post:\n![](https://i.imgsafe.org/219c26f1d0.png)\n\n## Wallet:\n![](https://i.imgsafe.org/219c2e7b58.png)\n\n# Installation\n\nUntil we leave pre-alpha, piston.web is on a different branch.\n\n    git clone https://github.com/xeroc/piston\n    cd piston\n    git checkout feature/standalone-web\n    make install-user\n    # install extra requirements for piston.web\n    pip install -r requirements-web.txt\n\n# Usage\n    \n    piston web\n\nOn first run, you will be asked to provide a passphrase for your new wallet. Empty password are allowed but result in private keys being stored in plain text.\n\nAfter that, you will see\n\n     * Running on http://127.0.0.1:5054/ (Press CTRL+C to quit)\n     * Restarting with stat\n     * Debugger is active!\n     * Debugger pin code: 227-869-909\n\nIgnore the debugging output and start using piston.web in your browser\nby accessing\n\n    http://127.0.0.1:5054/\n\nNOTE: piston.web will only be reachable from the same machine (localhost).\n\n# Technologies\n\n## Backend\n\nThe backend is written in python using\n\n* Flask (with Jinja2)\n* python-steem.\n\nIt offers the HTML files and a Socket-IO for real-time communications.\n\n## Frontend\n\nThese technologies have been used so far in piston.web:\n\n* Bootstrap\n* Markdown\n* Font-Awesome\n* Plain Javascript\n\n## Wallet\n\nThe wallet is only accessible from the backend. All keys are encrypted with a random master password that is stored in an SQLite3 database in its AES encrypted form. Each private key is encrypted with the master password using BIP32 and stored in a SQLite3 database.  The wallet will make backups of the SQLite3 database every week and keep several weeks of backup.\n\n# Todos\n\n* Transfer of funds\n* PowerUp, PowerDown\n* Trading\n* Account Administration (changing keys etc)\n* Allow to attach JSON object to posts\n* Secure socket.io with a password\n* layout and style improvements\n\n# Contributions\n\nCurrently, we are looking for the bravest of the bravest to help us test what is already there and give \n\n* bug reports\n* improvement proposals\n* feature request\n\nPlease use the [github issue tracker](https://github.com/xeroc/piston/issues) to make it easier for us to remember all the feedback.\n\n# Important Note\n\npiston.web is alpha software. For that reason, you need to expect it to break at any time. Use at your own risk.\n\n# Update 1\n\nI'd like to clarify that this GUI is **not** meant to replace steemit.com or be used as a hosted, public site. It rather offers a *personal*, *localhost-only* page that you can use to access your wallet. Exposing the piston.web to a publicly accessible port is **not** recommended!\n\n# Update 2\n\nI fixed the `sqlite3.OperationalError: unable to open database file` error earlier today so that people can actually take a look.\n\n# Update 3\n\nMore short-term fixes for the weekend-testers:\n\n    * [2016-07-23][bf3dae5] | [setup] make sure the user uses python3\n    * [2016-07-23][c31eec7] | [web] highlight own posts\n    * [2016-07-23][03e0d2f] | [web] fix reply identifier not in the form",
+    "category": "piston",
+    "children": 369,
+    "created": "2016-07-22T16:14:09",
+    "curator_payout_value": "2444.671 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 390122583822342,
+    "observer_vote": null,
+    "payout": 46973.859,
+    "payout_at": "2016-08-24T14:49:30",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-web-first-open-source-steem-gui---searching-for-alpha-testers",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 1.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1565
+    },
+    "title": "[piston.web] First Open Source Steem GUI - Searching for alpha testers",
+    "top_votes": [
+      {
+        "percent": 10000,
+        "rshares": 65406341911263,
+        "voter": "ned"
+      },
+      {
+        "percent": 10000,
+        "rshares": 44623728822570,
+        "voter": "dan"
+      }
+    ],
+    "updated": "2016-07-23T12:19:12",
+    "url": "/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+  },
+  {
+    "author": "dollarvigilante",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.46,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<center>https://dollarvigilante.com/wp-content/uploads/2016/09/Jubilee-Jolt-Dow-Down-400-Stocks-Smashed-In-Biggest-Drop-Since-Brexit.jpg</center>\n\nIt was just two days ago that we wrote, \u201c<a href=\"https://dollarvigilante.com/blog/2016/09/07/gold-biggest-one-day-rally-since-brexit-elites-rush-gold.html\">Gold Has Biggest One Day Rally Since Brexit as Elites Rush Into Gold</a>\u201d.\n\nNow, to end the week, US stocks had their biggest drop since Brexit on Friday.\n\nThe Dow Jones Industrial Average fell 394.46 points, or 2.1%, to 18085.45, and the S&amp;P 500 declined 2.45%, while the Nasdaq Composite lost 2.5%.\n\nMost pegged the blame on concern over a 0.25% rate hike by the Federal Reserve at their upcoming September 20th-21st meeting.\n\nFederal funds futures, which are used by traders to place bets on central bank policy, on Friday showed a 24% chance of a US interest-rate rise in September, compared with an 18% chance as of Thursday.\n\nEric Rosengren, President of the Federal Reserve Bank of Boston said Friday that \u201ca reasonable case can be made\u201d for raising interest rates to avoid overheating the economy.\n\nOf course, no one asks, \u201chow does an economy overheat\u201d? An economy isn\u2019t a cake. If an economy is \u201coverheating\u201d it would mean that trade is going well, profits are being made and capital accumulated. Why would one want to avoid \u201coverheating\u201d the economy?\n\nWell, the US and all other Western monetary systems are run by a communist-style central planning agency who deem it their task to manipulate interest rates and counterfeit money in response to the perceived \u201coverheating\u201d or \u201ccooling\u201d.\n\nIt\u2019s nonsense, of course, and the only shocking thing is that no one has taken the central bankers out into the town square and hung them yet.\n\nBut, in this communist-style system, ALL eyes and ears are focused on the politburo to see what the wise leaders have deemed is best for the rest of us plebs. And this is the case, yet again, as the market has jitters that a rate hike of 0.25% could destroy the entire worldwide economy, monetary and financial system\u2026 a state of affairs that could never have happened without central planning.\n\nEven more hilarious, is the fact that anyone could deem a system with nearly 50 million people on food stamps and nearly \u2153 of the entire public jobless as \u201coverheating\u201d.\n\n<strong>ARE WE IN FOR A MASSIVE CRASH THIS JUBILEE YEAR?</strong>\n\nThe Jubilee Year ends on October 2nd. And, based on our analysis we said that 2016 would be highly volatile, there\u2019d be massive change and all the building blocks towards global government would be put into place.\n\nWe were right, straight off the bat when January was the worst opening month to a year for worldwide stock markets in history. Then, in June, with Brexit, we saw the continued fracturing of the EU (which we were the first to boldly predict on the end day of the Shemitah last year (\u201c<a href=\"https://dollarvigilante.com/blog/2015/09/13/eurozone-collapses-borders-erected-across-europe-on-shemitah-end-day.html\">Eurozone Collapses, Borders Erected on Shemitah End Day</a>\u201d).\n\nAnd the day after Brexit saw the worst one-day worldwide stock market drop in history. Exactly 7 years, 7 months, 7 weeks and 7 days since the Shemitah end-day crash in 2008.\n\nWe\u2019ve profited massively from our analysis, with the TDV newsletter\u2019s Premium portfolio up 200% from a year ago.\n\nOur positions in gold &amp; silver have done very well since the very first day of 2016.\n\n<center>https://dollarvigilante.com/wp-content/uploads/2016/09/Gold-One-Year-Chart.jpg</center>\nSince the beginning of the year, gold has risen\u00a024.9% and silver has skyrocketed 37.1%.\n\nAnd bitcoin has also risen nearly 9% since the start of September.\n\n<center>https://dollarvigilante.com/wp-content/uploads/2016/09/bitcoin-1-month-chart-The-Dollar-Vigilante.jpg</center>\n\nBut the question is, will we see another massive crash by October 2nd, or soon after?\n\nThere is no way to know for sure, of course.\n\nBut I\u2019ve said for months now that I expect September/October to be a very volatile and dangerous time in the markets.\n\nOnly time will tell if that is the case or not. \u00a0We'll find out early next week if this drop on Friday carries through.\n\nBut, as we warned, be prepared for massive volatility and, potentially, a massive crash during this time period.\n\nMany of our subscribers have been enjoying all this volatility, while most others are living in fear on days like today. \u00a0Here is just one subscriber's comments from our private subscriber's only Facebook group with his gains from just today alone.\n\n<center>https://dollarvigilante.com/wp-content/uploads/2016/09/Testimonials-18-The-Dollar-Vigilante.jpg</center>\n\nTo join our group of worldwide vigilantes, many of whom are happy to help you with any questions you may have, <a href=\"http://dollarvigilante.com/subscribe\">click here</a>.\n\nMost people are worried sick this weekend after Friday's market action. \u00a0But here at TDV we are all looking forward to Monday to see if the markets continue to drop in free fall.\n\nBut, even if it doesn't, we are positioned to profit from the volatility which we expect to continue throughout this fall. \u00a0This is not going to be a boring few months ahead!\n\nFollow along with us here at Steemit ( @dollarvigilante ) where Dollar Vigilante articles are posted first before anywhere else.\n\n<center>https://img1.steemit.com/0x0/https://www.dollarvigilante.com/wp-content/uploads/2016/08/Jeff-Berwick-The-Dollar-Vigilante-Steemit-Bio-1024x221.jpg</center>",
+    "category": "money",
+    "children": 35,
+    "created": "2016-09-10T04:33:42",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://dollarvigilante.com/wp-content/uploads/2016/09/Jubilee-Jolt-Dow-Down-400-Stocks-Smashed-In-Biggest-Drop-Since-Brexit.jpg",
+        "https://dollarvigilante.com/wp-content/uploads/2016/09/Gold-One-Year-Chart.jpg",
+        "https://dollarvigilante.com/wp-content/uploads/2016/09/bitcoin-1-month-chart-The-Dollar-Vigilante.jpg",
+        "https://dollarvigilante.com/wp-content/uploads/2016/09/Testimonials-18-The-Dollar-Vigilante.jpg",
+        "https://img1.steemit.com/0x0/https://www.dollarvigilante.com/wp-content/uploads/2016/08/Jeff-Berwick-The-Dollar-Vigilante-Steemit-Bio-1024x221.jpg"
+      ],
+      "links": [
+        "https://dollarvigilante.com/blog/2016/09/07/gold-biggest-one-day-rally-since-brexit-elites-rush-gold.html",
+        "https://dollarvigilante.com/blog/2015/09/13/eurozone-collapses-borders-erected-across-europe-on-shemitah-end-day.html",
+        "http://dollarvigilante.com/subscribe"
+      ],
+      "tags": [
+        "money",
+        "stocks",
+        "gold",
+        "silver",
+        "bitcoin"
+      ],
+      "users": [
+        "dollarvigilante"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 98702780120460,
+    "observer_vote": {
+      "percent": 10000,
+      "rshares": 31585416159994
+    },
+    "payout": 914.41,
+    "payout_at": "2016-09-17T04:33:42",
+    "pending_payout_value": "914.410 HBD",
+    "percent_hbd": 10000,
+    "permlink": "jubilee-jolt-dow-down-400-stocks-smashed-in-biggest-drop-since-brexit",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 525
+    },
+    "title": "JUBILEE JOLT: Dow Down 400, Stocks Smashed In Biggest Drop Since Brexit",
+    "top_votes": [
+      {
+        "percent": 10000,
+        "rshares": 31585416159994,
+        "voter": "smooth"
+      },
+      {
+        "percent": 10000,
+        "rshares": 7126422138279,
+        "voter": "xeldal"
+      }
+    ],
+    "updated": "2016-09-10T16:50:39",
+    "url": "/money/@dollarvigilante/jubilee-jolt-dow-down-400-stocks-smashed-in-biggest-drop-since-brexit"
+  },
+  null
+]

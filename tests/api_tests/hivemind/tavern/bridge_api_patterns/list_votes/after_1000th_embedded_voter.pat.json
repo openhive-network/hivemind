@@ -1,0 +1,42 @@
+[
+  {
+    "percent": 10000,
+    "reputation": 34.14,
+    "rshares": 119759891,
+    "time": "2016-07-23T11:04:15",
+    "voter": "xb0w",
+    "weight": 51562906619
+  },
+  {
+    "percent": 10000,
+    "reputation": 54.03,
+    "rshares": 8325168415,
+    "time": "2016-07-22T23:02:42",
+    "voter": "ungratefulchump",
+    "weight": 4419513486809
+  },
+  {
+    "percent": 10000,
+    "reputation": 41.4,
+    "rshares": 1667597253,
+    "time": "2016-07-23T04:03:24",
+    "voter": "flexcougar",
+    "weight": 802261392074
+  },
+  {
+    "percent": 10000,
+    "reputation": 41.07,
+    "rshares": 94781581,
+    "time": "2016-07-23T02:29:33",
+    "voter": "clonewarz",
+    "weight": 49640814998
+  },
+  {
+    "percent": 10000,
+    "reputation": 38.08,
+    "rshares": 121332474,
+    "time": "2016-07-23T21:04:30",
+    "voter": "inlighten",
+    "weight": 51573774892
+  }
+]
