@@ -206,7 +206,7 @@ def _git(*args: str) -> str:
 
 
 class _GitLab:
-    def __init__(self, url: str, project: str, token: str):
+    def __init__(self, url: str, project: str, token: str) -> None:
         self._api = f'{url.rstrip("/")}/api/v4/projects/{urllib.parse.quote(project, safe="")}'
         self._token = token
 
