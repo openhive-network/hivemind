@@ -202,6 +202,7 @@ class Blocks:
         # Phase 3.5: Votes (rshares deferred to finalization during initial massive sync;
         # must run BEFORE payouts).
         t0 = perf_counter()
+        assert Votes.db is not None, 'Votes has no db access; setup_own_db_access was not called'
         Votes.db.query_no_return("START TRANSACTION")
         Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
         Votes.db.query_no_return("COMMIT")
@@ -540,7 +541,7 @@ class Blocks:
 
     @staticmethod
     @time_it
-    def on_live_blocks_processed(first_block: int, last_block: int = None) -> None:
+    def on_live_blocks_processed(first_block: int, last_block: int | None = None) -> None:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """

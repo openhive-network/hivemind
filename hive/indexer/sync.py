@@ -5,9 +5,10 @@ import logging
 import sys
 import time
 from collections.abc import Iterable
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from time import perf_counter as perf
 from types import TracebackType
+from typing import Any
 
 import psycopg2
 
@@ -37,6 +38,8 @@ log = logging.getLogger(__name__)
 
 
 class SyncHiveDb:
+    time_start: float | None = None
+
     def __init__(self, conf: Conf, enter_sync: bool, upgrade_schema: bool) -> None:
         self._conf = conf
         self._db = conf.db()
@@ -47,15 +50,14 @@ class SyncHiveDb:
         self._last_block_to_process = self._conf.get('test_max_block')
         self._max_batch = conf.get('max_batch')
 
-        self._lbound = None
-        self._ubound = None
+        self._lbound: int | None = None
+        self._ubound: int | None = None
         self._databases = None
-        self.time_start = None
         self._live_prepared = False
 
-        self._massive_consume_blocks_futures = None
+        self._massive_consume_blocks_futures: Future[int] | None = None
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
-        self.rate = {}
+        self.rate: dict[str, Any] = {}
 
     def __enter__(self):
         if self._enter_sync:
@@ -155,21 +157,20 @@ class SyncHiveDb:
         # the last_imported/last_completed mismatch that is the only evidence.
         self._recover_skipped_live_blocks()
 
+        prev_application_stage = None
+
         def report_enter_to_stage(current_stage) -> bool:
-            if (
-                report_enter_to_stage.prev_application_stage is None
-                or report_enter_to_stage.prev_application_stage != current_stage
-            ):
+            nonlocal prev_application_stage
+            if prev_application_stage is None or prev_application_stage != current_stage:
                 last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
                 log.info(
                     f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}"
                 )
-                report_enter_to_stage.prev_application_stage = current_stage
+                prev_application_stage = current_stage
                 return True
-            report_enter_to_stage.prev_application_stage = current_stage
+            prev_application_stage = current_stage
             return False
 
-        report_enter_to_stage.prev_application_stage = None
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
         active_connections_before = self._get_active_db_connections()
@@ -563,7 +564,7 @@ class SyncHiveDb:
 
         return False
 
-    def _query_for_app_next_block(self) -> tuple[int, int]:
+    def _query_for_app_next_block(self) -> tuple[int | None, int | None]:
         limit = "NULL"
         batch = "NULL"
         if self._last_block_to_process:

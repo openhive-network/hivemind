@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 class MockVopsProvider(MockDataProvider):
     """Data provider for test vops"""
 
-    block_data = {}
+    block_data: dict[int, dict] = {}
 
     @classmethod
     def add_block_data_from_file(cls, filename) -> None:

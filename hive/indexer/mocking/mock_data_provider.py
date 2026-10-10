@@ -15,7 +15,7 @@ class MockDataProviderException(Exception):
 class MockDataProvider:
     """Data provider for test operations"""
 
-    block_data = {}
+    block_data: dict[int, dict] = {}
 
     @classmethod
     def print_data(cls):

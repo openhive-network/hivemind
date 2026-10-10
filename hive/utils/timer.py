@@ -36,14 +36,14 @@ class Timer:
     # pylint: disable=too-many-instance-attributes
 
     # Name of entity, lap units (e.g. rps, wps), total items in job
-    _entity = []
-    _lap_units = []
+    _entity: str = ''
+    _lap_units: list[str] = []
     _total = None
     _full_total = None
-    _start_time = None
+    _start_time: float | None = None
 
     # Lap checkpoints, # processed, last # processed
-    _laps = []
+    _laps: list[float] = []
     _processed = 0
     _last_items = 0
 
