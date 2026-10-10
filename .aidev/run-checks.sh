@@ -8,8 +8,8 @@
 #
 #   - unit       pytest on tests/utils, tests/steem and tests/ci, those that exist (the
 #                Makefile's test-utils / test-steem); one junit case per test in unit.xml
-#   - ruff       `ruff check` and `ruff format --check` on hive/ and tests/, with the
-#                pyproject.toml configuration
+#   - ruff       `ruff check` and `ruff format --check` on hive/, tests/ and
+#                scripts/, with the pyproject.toml configuration
 #   - install    into the stack's HAF database (HIVEMIND_TEST_DB_HOST, default `haf`),
 #                as the hivemind image's `setup --with-apps` does it:
 #                scripts/setup_postgres.sh, the reputation_tracker and HAfAH
@@ -87,8 +87,8 @@ unit() {
 run_ruff() {
     ruff --version
     local rc=0
-    ruff check --no-cache hive tests || rc=1
-    ruff format --no-cache --check hive tests || rc=1
+    ruff check --no-cache hive tests scripts || rc=1
+    ruff format --no-cache --check hive tests scripts || rc=1
     return "$rc"
 }
 

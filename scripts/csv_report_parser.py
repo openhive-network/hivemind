@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import contextlib
 import csv
 import json
 import os
@@ -31,10 +32,8 @@ def parse_csv_files(root_dir):
             ret_benchmark_request_params[test_name] = json.loads(row[4])
 
             test_benchmark_time_threshold = None
-            try:
+            with contextlib.suppress(ValueError, IndexError):
                 test_benchmark_time_threshold = float(row[3])
-            except (ValueError, IndexError):
-                pass
 
             if test_name in ret_times:
                 ret_times[test_name].append(test_time)
