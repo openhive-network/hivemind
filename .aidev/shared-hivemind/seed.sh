@@ -72,6 +72,10 @@ fi
 # hive runs from the source here.
 printf "__version__ = '0.0.0+aidev'\n__git_revision__ = '%s'\n__git_revision_date__ = '%s'\n" \
     "$commit" "$(git -C "$src" log -1 --format=%cI)" > "$src/hive/_version.py"
+# The apps' install_app.sh read a generated set_version_in_sql.pgsql, which the
+# hivemind image's build (scripts/ci/build.sh) writes from each submodule's git dir.
+(cd "$src/reputation_tracker" && ./scripts/generate_version_sql.sh "$src/reputation_tracker" "$src/.git/modules/reputation_tracker")
+(cd "$src/hafah" && ./scripts/generate_version_sql.bash "$src/hafah" "$src/.git/modules/hafah")
 # scripts/ci/add-mocks-to-db.sh runs the `mocker` console script.
 mkdir -p "$work/bin"
 cat > "$work/bin/mocker" <<'MOCKER'
