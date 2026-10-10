@@ -35,6 +35,26 @@ in exactly these ways:
  "params": {"author": "gtg", "permlink": "heavy-duty-witness-node-infrastructure", "observer": "alice", "top_votes": 3}}
 ```
 
+## `bridge.get_posts`
+
+Fetches many posts in one call, in the vote-free shape above.
+
+| Parameter | |
+|---|---|
+| `posts` | required; array of 1–100 `[author, permlink]` pairs |
+| `observer` | optional |
+| `top_votes` | integer 0–10, default 0 |
+
+The result is an array of the same length and order as `posts`. Each entry is what
+`bridge.get_post_v2` returns for that pair with the same `observer` and `top_votes`, or
+`null` where the post doesn't exist or is deleted. A pair may repeat; each occurrence
+gets its own entry.
+
+```json
+{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_posts",
+ "params": {"posts": [["steemit", "firstpost"], ["gtg", "heavy-duty-witness-node-infrastructure"]], "observer": "alice"}}
+```
+
 ## `bridge.list_votes`
 
 Pages through a post's votes.

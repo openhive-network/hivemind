@@ -1,0 +1,30 @@
+{
+  "code": -32602,
+  "message": "Assert Exception:posts[1] must be an [author, permlink] pair of strings",
+  "data": {
+    "code": 10,
+    "name": "assert_exception",
+    "message": "Assert Exception",
+    "stack": [
+      {
+        "context": {
+          "level": "error",
+          "file": "",
+          "line": 0,
+          "method": "",
+          "hostname": "",
+          "thread_name": "",
+          "timestamp": "2026-10-09T19:31:14"
+        },
+        "format": "",
+        "data": {
+          "category": "hivemind"
+        }
+      }
+    ],
+    "extension": {
+      "assertion_expression": "posts[1] must be an [author, permlink] pair of strings"
+    },
+    "assert_hash": "3c4d5e6f7a8b9c0d1e2f"
+  }
+}
