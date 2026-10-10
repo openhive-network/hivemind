@@ -83,7 +83,11 @@ export PATH="$work/bin:$PATH" PYTHONPATH="$src"
 
 echo "== cloning haf_template into $seed_db"
 psql_pg -d "$PG/postgres" -c "drop database if exists $seed_db with (force)" \
-    -c "create database $seed_db owner haf_admin template haf_template strategy file_copy"
+    -c "create database $seed_db owner haf_admin template haf_template strategy file_copy" \
+    -c "grant create on database $seed_db to hive_applications_owner_group"
+# A template copies data, not the database's ACL: grant the app owners CREATE as
+# HAF's own haf_block_log does (hive_applications_owner_group=C/haf_admin), or the
+# app installs' SET ROLE <owner>; CREATE SCHEMA is refused.
 
 echo "== installing (the hivemind image's setup --with-apps --add-mocks=true)"
 cd "$src"

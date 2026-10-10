@@ -130,6 +130,9 @@ begin
         perform hivemind_shared._loopback('postgres', format(
             'create database %I owner %I template %I strategy file_copy',
             _name, session_user, _template.database_name));
+        -- A template copies data, not the ACL (see seed.sh).
+        perform hivemind_shared._loopback('postgres', format(
+            'grant create on database %I to hive_applications_owner_group', _name));
     exception when others then
         perform hivemind_shared._loopback(current_database(), format(
             'delete from hivemind_shared.run_databases where run_id = %L', _run_id));
