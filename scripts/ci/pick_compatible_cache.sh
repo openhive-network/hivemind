@@ -59,7 +59,9 @@ _pick() {
   # cache-manager list prints "  <key> - <size> - <date>" under section headers.
   while read -r key _; do
     [[ "$key" == "${haf_commit}_"* ]] || continue
-    revision=$(tr -d '[:space:]' < "${dir}/${key}/${_REVISION_FILE}" 2>/dev/null || true)
+    revision=""
+    # Test first: a failed '<' redirect reports before a trailing 2>/dev/null applies.
+    [[ -r "${dir}/${key}/${_REVISION_FILE}" ]] && revision=$(tr -d '[:space:]' < "${dir}/${key}/${_REVISION_FILE}")
     if [[ "$revision" != "$expected" ]]; then
       echo "Skipping ${key}: schema revision ${revision:-unrecorded}, need ${expected}" >&2
       continue
