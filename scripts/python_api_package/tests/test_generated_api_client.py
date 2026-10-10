@@ -28,7 +28,7 @@ async def _get_healthy_endpoint(endpoints: list[HttpUrl], service_path: str) -> 
     raise ValueError(f"No healthy endpoint found for service path: {service_path}")
 
 
-async def test_generated_api_client():
+async def test_generated_api_client() -> None:
     # ARRANGE
     endpoint = await _get_healthy_endpoint(
         FALLBACK_ENDPOINTS, f"/hivemind-api/accounts/{SEARCHED_ACCOUNT_IN_TESTS}/operations"
