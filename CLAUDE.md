@@ -287,6 +287,26 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 - Download artifacts to `logs/tavern/<api_type>/<test_name>/<test>.out.json`
 - Use these `.out.json` files to see actual API responses and fix pattern mismatches
 
+**Tests that need real data:**
+
+A positive test's values come from CI's mock-data database (HAF replayed to 5M blocks + mocks + a
+hivemind sync), which an AIDEV session doesn't have. Don't invent them, and don't derive them from
+other patterns unless only the shape changes. Instead:
+
+1. Commit the new `*.tavern.yaml` with a `{}` placeholder `.pat.json`. CI fails such a test until it is filled.
+2. Run `scripts/ci/generate_patterns.py <test>.tavern.yaml ...` (or `--all-placeholders`; `--dry-run` first
+   shows the branch, pipeline variables and tests). It pushes HEAD to `patterns/<shortsha>` with `-o ci.skip`,
+   runs a pipeline there on a cached sync (`POSTGREST_ONLY_CHANGE=true AUTO_SKIP_SYNC=false`), copies each
+   test's `.out.json` from `e2e_benchmark_on_postgrest`'s artifacts to its `.pat.json`, prints a per-test summary
+   (keys, list lengths, nulls) and deletes the branch. It never overwrites a non-placeholder pattern without `--force`.
+   `--artifacts <dir|zip>` applies artifacts already downloaded.
+3. Check each value against independent data before committing the patterns. `MISSING` means no `.out.json`:
+   the test passed against `{}` (e.g. an empty discussion, a real `{}` answer) or did not run.
+
+The script needs `GITLAB_TOKEN` and push access to gitlab.syncad.com, which an implementing agent doesn't have.
+In an AIDEV workflow, commit the placeholders and say in the summary which tests need patterns; an operator runs
+the script after the workflow (or in a follow-up issue the agent requests).
+
 ## Common Gotchas
 
 **Submodules:** HAF, reputation_tracker, and hafah are git submodules. Always clone with `--recurse-submodules`.
