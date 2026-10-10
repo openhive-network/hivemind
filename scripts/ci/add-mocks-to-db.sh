@@ -46,7 +46,7 @@ done
 
 run_mocker() {
   echo "Creating hive.app_next_block() function wrapper"
-  psql "${HAF_ADMIN_POSTGRES_URL}" -f "${SCRIPTPATH}/wrapper_for_app_next_block.sql"
+  psql "${HAF_ADMIN_POSTGRES_URL}" -v ON_ERROR_STOP=1 -f "${SCRIPTPATH}/wrapper_for_app_next_block.sql"
 
   echo "Running mocking script"
   mocker --database-url "${HAF_ADMIN_POSTGRES_URL}"

@@ -567,7 +567,6 @@ sync:
   variables:
     # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
-    RUNNER_HIVEMIND_SYNC_IRREVERSIBLE_MAX_BLOCK: 4999979
     # Variables for copy_datadir.sh (like balance_tracker)
     DATA_SOURCE: "${DATA_CACHE_HAF_PREFIX}_${HAF_UPSTREAM_COMMIT}"
     DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"

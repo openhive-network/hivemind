@@ -21,6 +21,7 @@ its precondition belongs to the host environment, not to the change.
 | `ruff` | `ruff check` and `ruff format --check` on `hive/`, `tests/` and `scripts/` with `pyproject.toml`'s configuration (ruff pinned in the image), excluding the `tests/tests_api` submodule |
 | `install` | into the stack's HAF database as `haf_admin`, the way the hivemind image's `setup --with-apps` does it: `scripts/setup_postgres.sh`, the `reputation_tracker` and `hafah` submodules' `install_app.sh`, `scripts/install_app.sh`, then `hive build_schema` from this checkout; passes when `hivemind_endpoints` has functions |
 | `reinstall` | `scripts/uninstall_app.sh`, then the hivemind half of `install` again |
+| `mock-wrapper` | `.aidev/app_next_block_wrapper_check.sql`: applies `scripts/ci/wrapper_for_app_next_block.sql` (which `scripts/ci/add-mocks-to-db.sh` applies in CI's `sync` and the shared hivemind's seed) twice to the stack's HAF, in a transaction it rolls back, and checks that the 3-argument `hive.app_next_block` delegates to `app_next_block_haf`, that re-applying changes nothing, and the 4999979 cap with HAF's range stubbed |
 | `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with |
 | `tavern` | `.aidev/hivemind_tavern.py`: CI's tavern API suite against a per-run clone of the shared synced hivemind, with this tree's PostgREST SQL reloaded into it; see [The `tavern` step](#the-tavern-step) |
 
@@ -43,8 +44,8 @@ pinned `2ae98b82` includes #354, so only the `events_queue` reason remains.
 |---|---|---|
 | quick | unit, ruff | no |
 | coverage | unit | no |
-| full | unit, ruff, install, reinstall, api-smoke, tavern | yes, and the shared hivemind |
-| canary | unit, ruff, install, reinstall, api-smoke | yes |
+| full | unit, ruff, install, reinstall, mock-wrapper, api-smoke, tavern | yes, and the shared hivemind |
+| canary | unit, ruff, install, reinstall, mock-wrapper, api-smoke | yes |
 | baseline | install, reinstall, api-smoke | yes |
 
 `static` and `system` are unbound: AIDEV runs neither for a project.

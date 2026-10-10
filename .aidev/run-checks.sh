@@ -16,13 +16,16 @@
 #                submodules' install_app.sh, scripts/install_app.sh, then
 #                `hive build_schema` from this checkout
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
+#   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
+#                stack's HAF and checked, in a transaction rolled back:
+#                .aidev/app_next_block_wrapper_check.sql
 #   - api-smoke  PostgREST over the installed schema, JSON-RPC calls checked by
 #                .aidev/hivemind_smoke.py; one junit case per call
 #   - tavern     CI's tavern API suite against a clone of the shared synced hivemind
 #                (sandbox.external hivemind), with this tree's PostgREST SQL reloaded
 #                into it: .aidev/hivemind_tavern.py; one junit report per group
 #
-# install, reinstall and api-smoke need the HAF stack (.aidev/test-stack.compose.yml),
+# install, reinstall, mock-wrapper and api-smoke need the HAF stack (.aidev/test-stack.compose.yml),
 # tavern the shared hivemind service. A step exiting 77 is skipped, not failed: its
 # precondition is the host environment's (tavern: no fixture for this tree's schema
 # revision yet); the last line it printed is the reason.
@@ -163,12 +166,18 @@ reinstall() {
     install_hivemind
 }
 
+mock_wrapper() {
+    wait_for_db || return 1
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_next_block_wrapper_check.sql
+}
+
 for s in "$@"; do
     case "$s" in
         unit) step unit unit ;;
         ruff) step ruff run_ruff ;;
         install) step install install ;;
         reinstall) step reinstall reinstall ;;
+        mock-wrapper) step mock-wrapper mock_wrapper ;;
         api-smoke) step api-smoke python3 .aidev/hivemind_smoke.py "$out" ;;
         tavern) step tavern python3 .aidev/hivemind_tavern.py "$out" ;;
         *) echo "unknown step: $s" >&2; exit 2 ;;
