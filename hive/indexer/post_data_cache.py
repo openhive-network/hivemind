@@ -16,7 +16,7 @@ def _sanitize_nul(val):
 class PostDataCache(DbAdapterHolder):
     """Provides cache for DB operations on post data table in order to speed up massive sync"""
 
-    _data = {}
+    _data: dict[int, dict] = {}
 
     @classmethod
     def is_cached(cls, pid):

@@ -15,10 +15,10 @@ class Accounts(DbAdapterHolder):
     """Manages account id map and `hive_accounts` table."""
 
     # name->id map
-    _ids = {}
+    _ids: dict[str, int] = {}
 
     # in-mem id->rank map
-    _ranks = {}
+    _ranks: dict[int, int] = {}
 
     @classmethod
     def load_ids(cls):

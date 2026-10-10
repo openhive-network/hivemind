@@ -156,10 +156,10 @@ class Community:
     """Handles hive community registration and operations."""
 
     # name->id map
-    _ids = {}
+    _ids: dict[str, int] = {}
 
     # id -> name map
-    _names = {}
+    _names: dict[int, str] = {}
 
     _counter = UniqueCounter()
 

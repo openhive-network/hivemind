@@ -18,7 +18,7 @@ class DbLiveContextHolder:
 
 
 class DbAdapterHolder:
-    db = None
+    db: Db | None = None
     _block_processing_thread_sync_db = None
 
     _inside_sync_tx = False

@@ -40,6 +40,7 @@ VALUES
     (:id, :name, :block_num);
 """
 
+        assert self.__class__.account_id is not None, 'last account id is loaded in __init__'
         self.__class__.account_id += 1
 
         log.info(f'Attempting to push mocked ACCOUNT with name: {self.name}')
@@ -56,7 +57,7 @@ VALUES
 
 class OperationBase:
     operation_id: int | None = None
-    pos_in_block: int | None = 1
+    pos_in_block: int = 1
     _custom_json_seq_synced = False
 
     def __init__(self, block_number: int, body: dict) -> None:
@@ -127,6 +128,7 @@ class OperationBase:
         )
 
         custom_json_type_id = self._resolve_custom_json_type_id()
+        assert self.type is not None, 'operations of unknown type are skipped before push'
 
         sql = """
 INSERT INTO

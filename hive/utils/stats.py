@@ -4,6 +4,7 @@ import atexit
 import logging
 from os import getpid
 from queue import Queue
+from threading import Thread
 from time import perf_counter as perf
 
 from psutil import pid_exists
@@ -39,8 +40,8 @@ class BroadcastObject:
 
 
 class PrometheusClient:
-    deamon = None
-    logs_to_broadcast = Queue()
+    deamon: Thread | None = None
+    logs_to_broadcast: Queue[BroadcastObject] = Queue()
 
     @staticmethod
     def work(port, pid) -> None:
@@ -49,7 +50,7 @@ class PrometheusClient:
 
             prom.start_http_server(port)
 
-            gauges = {}
+            gauges: dict[str, prom.Gauge] = {}
 
             while pid_exists(pid):
                 value: BroadcastObject = PrometheusClient.logs_to_broadcast.get(True)
@@ -76,7 +77,6 @@ class PrometheusClient:
             except ImportError:
                 log.warn("Failed to import prometheus client. Online stats disabled")
                 return
-            from threading import Thread
 
             PrometheusClient.deamon = Thread(target=PrometheusClient.work, args=[port, getpid()], daemon=True)
             PrometheusClient.deamon.start()
@@ -107,7 +107,7 @@ class Stat:
         return self
 
     def __repr__(self) -> str:
-        return self.__dict__
+        return str(self.__dict__)
 
     def __lt__(self, other):
         return self.time < other.time
@@ -177,10 +177,10 @@ class OPStat(Stat):
 
 class OPStatusManager(StatusManager):
     # Summary for whole sync
-    global_stats = {}
+    global_stats: dict[str, OPStat] = {}
 
     # Currently processed blocks stats, merged to global stats, after `next_block`
-    cpbs = {}
+    cpbs: dict[str, OPStat] = {}
 
     @staticmethod
     def op_stats(name, time, processed=1) -> None:
@@ -229,10 +229,10 @@ class FlushStat(Stat):
 
 class FlushStatusManager(StatusManager):
     # Summary for whole sync
-    global_stats = {}
+    global_stats: dict[str, FlushStat] = {}
 
     # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_flushes = {}
+    current_flushes: dict[str, FlushStat] = {}
 
     @staticmethod
     def flush_stat(name, time, pushed) -> None:
@@ -280,10 +280,10 @@ class FinalStat(Stat):
 
 class FinalOperationStatusManager(StatusManager):
     # Summary for whole sync
-    global_stats = {}
+    global_stats: dict[str, FinalStat] = {}
 
     # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_finals = {}
+    current_finals: dict[str, FinalStat] = {}
 
     @staticmethod
     def final_stat(name, time) -> None:
@@ -315,10 +315,10 @@ class WaitStat(Stat):
 
 class WaitingStatusManager(StatusManager):
     # Summary for whole sync
-    global_stats = {}
+    global_stats: dict[str, WaitStat] = {}
 
     # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_waits = {}
+    current_waits: dict[str, WaitStat] = {}
 
     @staticmethod
     def wait_stat(name, time) -> None:
@@ -415,7 +415,7 @@ class StatsAbstract:
 
     def clear(self) -> None:
         """Clear accumulators"""
-        self._calls = {}
+        self._calls: dict[str, list[float]] = {}
         self._ms = 0.0
 
     def table(self, count=40):
