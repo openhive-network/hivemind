@@ -54,8 +54,9 @@ variables:
   # Two ways to skip builds/sync and use cached data:
   #
   # 1. AUTOMATIC: When only tests/docs change, detect_changes sets AUTO_SKIP_SYNC=true.
-  #    The sync job will use cached data if an exact match exists for this app commit.
-  #    If no exact cache is found, it runs full sync to ensure schema compatibility.
+  #    The sync job uses the cache of this commit or of an ancestor differing by
+  #    docs/tests/CI only; failing that, the newest cache with the same HAF commit and
+  #    schema revision, reloading the SQL functions into it; failing that, a full sync.
   #    A commit's `Hivemind-Sync: required|not-required` trailer refines the path rules
   #    (scripts/ci/sync_decision.sh; CLAUDE.md, "CI sync decision").
   #
@@ -643,87 +644,56 @@ sync:
       SYNC_SKIPPED=true
 
     # AUTO_SKIP_SYNC mode: try the exact cache, then the caches of first-parent ancestors
-    # this commit differs from by docs/tests/CI only (same schema and indexer), else full sync.
-    # Ancestors behind any other change are never considered - this ensures schema compatibility.
-    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
-      echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
-      echo "Looking for hivemind sync cache (this commit, or an ancestor differing by docs/tests/CI only)..."
-
-      git config --global --add safe.directory "$CI_PROJECT_DIR"
-      CANDIDATE_KEYS="${SYNC_CACHE_KEY}"
-      for ancestor in $("${CI_PROJECT_DIR}/scripts/ci/find_skip_cache_ancestor.sh" HEAD 25 || true); do
-        CANDIDATE_KEYS+=" ${HAF_COMMIT}_${ancestor}"
-      done
-
-      for CANDIDATE_KEY in $CANDIDATE_KEYS; do
-        LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${CANDIDATE_KEY}"
-        if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${CANDIDATE_KEY}" "${LOCAL_CACHE}" 2>/dev/null; then
-          echo "Cache found: ${CANDIDATE_KEY}"
-          if [[ "$CANDIDATE_KEY" != "$SYNC_CACHE_KEY" ]]; then
-            echo "SYNC_CACHE_KEY=${CANDIDATE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
-            # Services use the default key evaluated at job start: point it at the found cache.
-            NFS_FOUND_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${CANDIDATE_KEY}.tar"
-            NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
-            if [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
-              echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename "$NFS_FOUND_TAR")"
-              ln -sf "$(basename "$NFS_FOUND_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
-            fi
-          fi
-          echo "Sync skipped - using cached data"
-          touch "${CI_PROJECT_DIR}/.sync_skipped"
-          SYNC_SKIPPED=true
-          break
-        fi
-        echo "No cache for ${CANDIDATE_KEY}"
-      done
-
-      if [[ "$SYNC_SKIPPED" == "false" ]]; then
-        echo "No cache for this commit or a docs/tests/CI-only ancestor - will run full sync"
-      fi
-
-    # POSTGREST_ONLY_CHANGE mode: find any compatible cache with matching HAF commit and schema
-    elif [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]]; then
-      echo "=== POSTGREST_ONLY_CHANGE Mode (only PostgREST SQL changed) ==="
-      echo "Looking for compatible cache (same HAF commit, compatible schema)..."
-
+    # this commit differs from by docs/tests/CI only (same schema and indexer); else
+    # fall through to the POSTGREST_ONLY_CHANGE selection below, else full sync.
+    # Ancestors behind any other change are never reused as is - only with the SQL reloaded.
+    # POSTGREST_ONLY_CHANGE mode: the newest cache with matching HAF commit and schema
+    # revision; the e2e job reloads the SQL functions into it.
+    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]] || [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]]; then
       PICK_CACHE="${CI_PROJECT_DIR}/scripts/ci/pick_compatible_cache.sh"
       EXPECTED_REVISION=$("$PICK_CACHE" revision "${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql" 2>/dev/null || true)
       echo "Expected schema revision: ${EXPECTED_REVISION:-unknown}"
 
-      # Newest cache for this HAF commit synced with the same schema revision;
-      # the script logs the chosen key, its revision and age, or why none fits.
-      echo "Searching for caches with HAF commit: ${HAF_COMMIT}"
-      COMPATIBLE_KEY=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null \
-        | "$PICK_CACHE" pick "${HAF_COMMIT}" "${EXPECTED_REVISION}" "${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}" || true)
+      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+        echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
+        echo "Looking for hivemind sync cache (this commit, an ancestor differing by docs/tests/CI only, or a compatible one)..."
+        git config --global --add safe.directory "$CI_PROJECT_DIR"
+        CANDIDATE_KEYS=("${SYNC_CACHE_KEY}")
+        for ancestor in $("${CI_PROJECT_DIR}/scripts/ci/find_skip_cache_ancestor.sh" HEAD 25 || true); do
+          CANDIDATE_KEYS+=("${HAF_COMMIT}_${ancestor}")
+        done
+        SELECTED=$(CACHE_MANAGER="$CACHE_MANAGER" SYNC_CACHE_TYPE="$SYNC_CACHE_TYPE" HAF_COMMIT="$HAF_COMMIT" \
+          DATA_CACHE_NFS_PREFIX="$DATA_CACHE_NFS_PREFIX" \
+          "${CI_PROJECT_DIR}/scripts/ci/select_sync_cache.sh" auto-skip "${EXPECTED_REVISION}" "${CANDIDATE_KEYS[@]}" || true)
+      else
+        echo "=== POSTGREST_ONLY_CHANGE Mode (only PostgREST SQL changed) ==="
+        echo "Looking for compatible cache (same HAF commit, compatible schema)..."
+        SELECTED=$(CACHE_MANAGER="$CACHE_MANAGER" SYNC_CACHE_TYPE="$SYNC_CACHE_TYPE" HAF_COMMIT="$HAF_COMMIT" \
+          DATA_CACHE_NFS_PREFIX="$DATA_CACHE_NFS_PREFIX" \
+          "${CI_PROJECT_DIR}/scripts/ci/select_sync_cache.sh" compatible "${EXPECTED_REVISION}" || true)
+      fi
 
-      if [[ -n "$COMPATIBLE_KEY" ]]; then
-        LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${COMPATIBLE_KEY}"
-
-        echo ""
-        echo "Attempting to use cache: ${COMPATIBLE_KEY}"
-        if "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${COMPATIBLE_KEY}" "${LOCAL_CACHE}"; then
-          echo "Compatible cache extracted successfully"
-          echo "SYNC_CACHE_KEY=${COMPATIBLE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
-
-          # Create NFS symlink for services (same pattern as QUICK_TEST)
-          NFS_COMPAT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${COMPATIBLE_KEY}.tar"
-          NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
-          if [[ "$NFS_COMPAT_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
-            echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename $NFS_COMPAT_TAR)"
-            ln -sf "$(basename "$NFS_COMPAT_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
-          fi
-
-          touch "${CI_PROJECT_DIR}/.sync_skipped"
+      read -r SELECTED_MODE SELECTED_KEY <<< "${SELECTED:-}" || true
+      if [[ -n "${SELECTED_KEY:-}" ]]; then
+        echo "Using cache ${SELECTED_KEY} (${SELECTED_MODE})"
+        echo "SYNC_CACHE_KEY=${SELECTED_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+        # Services use the default key evaluated at job start: point it at the selected cache.
+        NFS_SELECTED_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SELECTED_KEY}.tar"
+        NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+        if [[ "$NFS_SELECTED_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+          echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename "$NFS_SELECTED_TAR")"
+          ln -sf "$(basename "$NFS_SELECTED_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+        fi
+        touch "${CI_PROJECT_DIR}/.sync_skipped"
+        SYNC_SKIPPED=true
+        if [[ "$SELECTED_MODE" == "reload" ]]; then
           touch "${CI_PROJECT_DIR}/.postgrest_only_mode"
-          SYNC_SKIPPED=true
-          echo ""
           echo "Sync skipped - SQL functions will be reloaded by e2e job"
         else
-          echo "Failed to extract cache - will run full sync"
+          echo "Sync skipped - using cached data"
         fi
       else
-        echo "No compatible cache for HAF commit ${HAF_COMMIT} and schema revision ${EXPECTED_REVISION:-unknown}"
-        echo "Will run full sync"
+        echo "No usable cache - will run full sync"
       fi
     fi
 
