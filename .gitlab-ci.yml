@@ -686,27 +686,17 @@ sync:
       echo "=== POSTGREST_ONLY_CHANGE Mode (only PostgREST SQL changed) ==="
       echo "Looking for compatible cache (same HAF commit, compatible schema)..."
 
-      # Get current patch level from update_db_patchlevel.sql (the expected revision)
-      EXPECTED_REVISION=""
-      PATCHLEVEL_FILE="${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql"
-      if [[ -f "$PATCHLEVEL_FILE" ]]; then
-        # Extract the revision hash from the SQL file
-        EXPECTED_REVISION=$(grep -oP "'\K[a-f0-9]{40}(?=')" "$PATCHLEVEL_FILE" | tail -1 || echo "")
-      fi
-      echo "Expected patch revision: ${EXPECTED_REVISION:-unknown}"
+      PICK_CACHE="${CI_PROJECT_DIR}/scripts/ci/pick_compatible_cache.sh"
+      EXPECTED_REVISION=$("$PICK_CACHE" revision "${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql" 2>/dev/null || true)
+      echo "Expected schema revision: ${EXPECTED_REVISION:-unknown}"
 
-      # List available caches with matching HAF commit
+      # Newest cache for this HAF commit synced with the same schema revision;
+      # the script logs the chosen key, its revision and age, or why none fits.
       echo "Searching for caches with HAF commit: ${HAF_COMMIT}"
-      # cache-manager list prints "  <key> - <size> - <date>" under section headers:
-      # take the key column before matching, or no cache ever matches.
-      AVAILABLE_CACHES=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | awk '{print $1}' | grep "^${HAF_COMMIT}_" || true)
+      COMPATIBLE_KEY=$("$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null \
+        | "$PICK_CACHE" pick "${HAF_COMMIT}" "${EXPECTED_REVISION}" "${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}" || true)
 
-      if [[ -n "$AVAILABLE_CACHES" ]]; then
-        echo "Found compatible cache candidates:"
-        echo "$AVAILABLE_CACHES" | head -5
-
-        # Use the most recent cache (first in list, which is sorted by mtime)
-        COMPATIBLE_KEY=$(echo "$AVAILABLE_CACHES" | head -1)
+      if [[ -n "$COMPATIBLE_KEY" ]]; then
         LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${COMPATIBLE_KEY}"
 
         echo ""
@@ -732,7 +722,7 @@ sync:
           echo "Failed to extract cache - will run full sync"
         fi
       else
-        echo "No compatible caches found for HAF commit ${HAF_COMMIT}"
+        echo "No compatible cache for HAF commit ${HAF_COMMIT} and schema revision ${EXPECTED_REVISION:-unknown}"
         echo "Will run full sync"
       fi
     fi
@@ -917,6 +907,12 @@ sync:
       echo "Re-running with bash -x for debugging:"
       bash -x "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" 2>&1 | head -50 || true
       echo "Warning: Failed to push to NFS cache - e2e job may fail if running on different builder"
+    else
+      # POSTGREST_ONLY_CHANGE pipelines reuse only caches recorded with their schema revision.
+      "${CI_PROJECT_DIR}/scripts/ci/pick_compatible_cache.sh" record \
+        "${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql" \
+        "${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" \
+        || echo "Warning: Could not record schema revision - POSTGREST_ONLY_CHANGE pipelines won't reuse this cache"
     fi
   after_script:
   - |
