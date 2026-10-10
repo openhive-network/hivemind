@@ -37,13 +37,24 @@ class _NoticeLogger:
 
     _LEVELS = {'WARNING': logging.WARNING, 'NOTICE': logging.INFO, 'INFO': logging.INFO, 'LOG': logging.INFO}
 
+    # PostgreSQL's routine DDL chatter during install and upgrade (thousands of lines
+    # per sync, none actionable) goes to DEBUG; everything else keeps its severity.
+    _ROUTINE = re.compile(
+        r'^NOTICE:\s+(?:.* does not exist, skipping'
+        r'|type reference \S+%TYPE converted to '
+        r'|drop cascades to \d+ other objects?)'
+    )
+
     def __init__(self, name) -> None:
         self._name = name
 
     def append(self, message) -> None:
         message = message.rstrip('\n')
         severity = message.split(':', 1)[0]
-        level = logging.DEBUG if severity.startswith('DEBUG') else self._LEVELS.get(severity, logging.INFO)
+        if severity.startswith('DEBUG') or self._ROUTINE.match(message):
+            level = logging.DEBUG
+        else:
+            level = self._LEVELS.get(severity, logging.INFO)
         log.log(level, f"[{self._name}] {message}")
 
 

@@ -89,3 +89,21 @@ def test_reconnect_and_clones_install_handler(db: Db, caplog: pytest.LogCaptureF
         '[worker] NOTICE:  on clone',
         '[owner] NOTICE:  on impersonated clone',
     ]
+
+
+def test_routine_ddl_notices_go_to_debug(db: Db, caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG, logger='hive.db.adapter')
+    db._conn.notices.append('NOTICE:  table "_final_actions" does not exist, skipping\n')
+    db._conn.notices.append('NOTICE:  type reference hivemind_app.hive_posts.id%TYPE converted to integer\n')
+    db._conn.notices.append('NOTICE:  drop cascades to 3 other objects\n')
+    db._conn.notices.append('NOTICE:  drop cascades to 1 other object\n')
+    db._conn.notices.append('NOTICE:  Index hive_posts_idx created in 1.234 seconds\n')
+    db._conn.notices.append('WARNING:  table "x" does not exist, skipping\n')
+    assert [level for level, _ in _adapter_records(caplog)] == [
+        logging.DEBUG,
+        logging.DEBUG,
+        logging.DEBUG,
+        logging.DEBUG,
+        logging.INFO,
+        logging.WARNING,
+    ]
