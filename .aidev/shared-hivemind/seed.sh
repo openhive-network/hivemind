@@ -83,6 +83,14 @@ cat > "$work/bin/mocker" <<'MOCKER'
 exec python3 -c 'import sys; from hive.indexer.mocking.populate_haf_with_mocked_data import main; sys.argv[0] = "mocker"; main()' "$@"
 MOCKER
 chmod +x "$work/bin/mocker"
+# reputation_tracker's process_blocks.sh execs run_with_reconnect.sh, which the
+# hivemind image installs from common-ci-configuration (Dockerfile: ADD …
+# haf-app-tools/scripts/run_with_reconnect.sh /usr/local/bin/). Without it the
+# reputation tracker never runs and the seed fails on its exit status.
+python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' \
+    "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF:-develop}/haf-app-tools/scripts/run_with_reconnect.sh" \
+    "$work/bin/run_with_reconnect.sh"
+chmod +x "$work/bin/run_with_reconnect.sh"
 export PATH="$work/bin:$PATH" PYTHONPATH="$src"
 
 echo "== cloning haf_template into $seed_db"
