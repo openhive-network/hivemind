@@ -95,6 +95,17 @@ CASES = {
         'false',
         POSTGREST_ONLY,
     ),
+    'not-required whose reason has commas and the word required -> postgrest-only': (
+        [
+            (
+                ['hive/db/schema.py'],
+                'not-required — registers a script, required by nothing at sync time, docs too',
+            )
+        ],
+        'feature',
+        'false',
+        POSTGREST_ONLY,
+    ),
     'required with a reason -> full': (
         [(['hive/db/sql_scripts/postgrest/a.sql'], 'required — changes a table')],
         'feature',

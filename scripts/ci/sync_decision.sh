@@ -57,7 +57,7 @@ declare -A trusted=() distrusted=()
 while IFS=$'\t' read -r sha parents trailers; do
   claims_required=false claims_not_required=false
   # Each value is "<decision> — <reason>" (aidev#15385): the decision is its first word.
-  IFS=',' read -ra values <<< "$(tr '[:upper:]' '[:lower:]' <<< "$trailers")"
+  IFS=$'\x1f' read -ra values <<< "$(tr '[:upper:]' '[:lower:]' <<< "$trailers")"
   for v in "${values[@]}"; do
     read -r v _ <<< "$v"
     case "$v" in
@@ -82,7 +82,7 @@ while IFS=$'\t' read -r sha parents trailers; do
     fi
     while IFS= read -r f; do [[ -n "$f" ]] && distrusted["$f"]=1; done < <(commit_files "$sha")
   fi
-done < <(git log --format='%H%x09%P%x09%(trailers:key=Hivemind-Sync,valueonly,separator=%x2C)' "$base..$head_rev")
+done < <(git log --format='%H%x09%P%x09%(trailers:key=Hivemind-Sync,valueonly,separator=%x1F)' "$base..$head_rev")
 
 if $any_required; then
   log "A commit requires a full sync"
