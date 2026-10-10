@@ -1,5 +1,6 @@
 """Blocks processor."""
 
+import contextlib
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter, sleep
@@ -44,11 +45,11 @@ class Blocks:
     _notification_min_block = None  # cached 90-day notification threshold
 
     @classmethod
-    def setup(cls, conf: Conf):
+    def setup(cls, conf: Conf) -> None:
         cls._conf = conf
 
     @classmethod
-    def set_head_date(cls):
+    def set_head_date(cls) -> None:
         head_date = cls.head_date()
         if head_date == '':
             cls._head_block_date = None
@@ -266,10 +267,8 @@ class Blocks:
                     db_conn.query_all_raw(sql)
                     db_conn.query_no_return("COMMIT")
                 except Exception:
-                    try:
+                    with contextlib.suppress(Exception):
                         db_conn.query_no_return("ROLLBACK")
-                    except Exception:
-                        pass
                     raise
 
             for db_conn, sql in phase4_tasks:
@@ -446,7 +445,7 @@ class Blocks:
         )
 
     @classmethod
-    def _process_post_results_for_cache(cls, post_results):
+    def _process_post_results_for_cache(cls, post_results) -> None:
         """Process SQL post results for PostDataCache body merging.
 
         Each result row from process_posts_from_staging() contains the post_id,
@@ -466,18 +465,18 @@ class Blocks:
             parent_author = op_body.get('parent_author', '')
 
             if is_new:
-                post_data = dict(
-                    title=op_body.get('title', '') or '',
-                    body=op_body.get('body', '') or '',
-                    json=op_body.get('json_metadata', '') or '',
-                    is_root='true' if not parent_author else 'false',
-                )
+                post_data = {
+                    'title': op_body.get('title', '') or '',
+                    'body': op_body.get('body', '') or '',
+                    'json': op_body.get('json_metadata', '') or '',
+                    'is_root': 'true' if not parent_author else 'false',
+                }
             else:
                 body = op_body.get('body')
                 new_body = Posts._merge_post_body(id=post_id, new_body_def=body) if body else None
                 new_title = op_body.get('title') if op_body.get('title') else None
                 new_json = op_body.get('json_metadata') if op_body.get('json_metadata') else None
-                post_data = dict(title=new_title, body=new_body, json=new_json, is_root='false')
+                post_data = {'title': new_title, 'body': new_body, 'json': new_json, 'is_root': 'false'}
 
             PostDataCache.add_data(post_id, post_data, is_new)
 
@@ -496,10 +495,8 @@ class Blocks:
                 db_conn.query_all_raw(sql)  # Consume any results
                 db_conn.query_no_return("COMMIT")
             except Exception:
-                try:
+                with contextlib.suppress(Exception):
                     db_conn.query_no_return("ROLLBACK")
-                except Exception:
-                    pass
                 raise
 
         if len(tasks) <= 1:

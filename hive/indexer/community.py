@@ -59,7 +59,7 @@ def _valid_url_proto(url):
     return url[0:7] == 'http://' or url[0:8] == 'https://'
 
 
-def assert_keys_match(keys, expected, allow_missing=True):
+def assert_keys_match(keys, expected, allow_missing=True) -> None:
     """Compare a set of input keys to expected keys."""
     if not allow_missing:
         missing = expected - keys
@@ -68,7 +68,7 @@ def assert_keys_match(keys, expected, allow_missing=True):
     assert not extra, f'extraneous keys: {extra}'
 
 
-def process_json_community_op(actor, op_json, date, block_num):
+def process_json_community_op(actor, op_json, date, block_num) -> None:
     """Validates community op and apply state changes to db."""
     CommunityOp.process_if_valid(actor, op_json, date, block_num)
 
@@ -166,7 +166,7 @@ class Community:
     start_block = 37500000
 
     @classmethod
-    def register(cls, name, block_date, block_num):
+    def register(cls, name, block_date, block_num) -> None:
         """Block processing: hooks into new account registration.
 
         `Accounts` calls this method with any newly registered names.
@@ -273,7 +273,7 @@ class CommunityOp:
         'unsubscribe': ['community'],
     }
 
-    def __init__(self, actor, date, block_num):
+    def __init__(self, actor, date, block_num) -> None:
         """Inits a community op for validation and processing."""
         self.date = date
         self.block_num = block_num
@@ -301,7 +301,7 @@ class CommunityOp:
         self.props = None
 
     @classmethod
-    def process_if_valid(cls, actor, op_json, date, block_num):
+    def process_if_valid(cls, actor, op_json, date, block_num) -> bool:
         """Helper to instantiate, validate, process an op."""
         op = CommunityOp(actor, date, block_num)
         if op.validate(op_json):
@@ -342,28 +342,28 @@ class CommunityOp:
 
         return self.valid
 
-    def process(self):
+    def process(self) -> bool:
         """Applies a validated operation."""
         assert self.valid, 'cannot apply invalid op'
 
         time_start = perf_counter()
 
         action = self.action
-        params = dict(
-            date=self.date,
-            community=self.community,
-            community_id=self.community_id,
-            actor=self.actor,
-            actor_id=self.actor_id,
-            account=self.account,
-            account_id=self.account_id,
-            post_id=self.post_id,
-            role_id=self.role_id,
-            notes=self.notes,
-            title=self.title,
-            block_num=self.block_num,
-            muted_reasons=encode_bitwise_mask([0]),  # 0 is MUTED_COMMUNITY_MODERATION, used in the mutePost action
-        )
+        params = {
+            "date": self.date,
+            "community": self.community,
+            "community_id": self.community_id,
+            "actor": self.actor,
+            "actor_id": self.actor_id,
+            "account": self.account,
+            "account_id": self.account_id,
+            "post_id": self.post_id,
+            "role_id": self.role_id,
+            "notes": self.notes,
+            "title": self.title,
+            "block_num": self.block_num,
+            "muted_reasons": encode_bitwise_mask([0]),  # 0 is MUTED_COMMUNITY_MODERATION, used in the mutePost action
+        }
 
         # Community-level commands
         if action == 'updateProps':
@@ -522,7 +522,7 @@ class CommunityOp:
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
         return True
 
-    def _handle_result(self, result, operation_name=None, payload=None):
+    def _handle_result(self, result, operation_name=None, payload=None) -> bool:
         """Handle result from SQL operations with success/error_messages as notifications"""
         if result and result['success']:
             if operation_name:
@@ -530,7 +530,7 @@ class CommunityOp:
                 is_subscribed = result['is_subscribed'] if 'is_subscribed' in result.keys() else False
                 self._notify(operation_name, post_id=post_id, is_subscribed=is_subscribed, payload=payload)
             return True
-        elif result:
+        if result:
             Notify(
                 block_num=self.block_num,
                 type_id='error',
@@ -543,7 +543,7 @@ class CommunityOp:
             return False
         return True
 
-    def _notify(self, op, post_id=None, is_subscribed=None, **kwargs):
+    def _notify(self, op, post_id=None, is_subscribed=None, **kwargs) -> None:
         dst_id = None
         score = 35
 
@@ -564,7 +564,7 @@ class CommunityOp:
             **kwargs,
         )
 
-    def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
+    def _notify_team(self, op, team_members=None, post_id=None, **kwargs) -> None:
         """Send notifications to all team members (mod, admin, owner) in a community."""
         for member_id in team_members:
             # Skip sending notification to the source user (the one triggering the notification)
@@ -591,7 +591,7 @@ class CommunityOp:
         assert raw_op[0] in self.SCHEMA.keys(), 'invalid action'
         return (raw_op[0], raw_op[1])
 
-    def _read_schema(self):
+    def _read_schema(self) -> None:
         """Validate structure; read and validate keys."""
         schema = self.SCHEMA[self.action]
         assert_keys_match(self.op.keys(), schema, allow_missing=False)
@@ -610,7 +610,7 @@ class CommunityOp:
         if 'props' in schema:
             self._read_props()
 
-    def _read_community(self):
+    def _read_community(self) -> None:
         _name = read_key_str(self.op, 'community', 16)
         assert _name, 'must name a community'
         _id = Community.validated_id(_name)
@@ -619,36 +619,36 @@ class CommunityOp:
         self.community = _name
         self.community_id = _id
 
-    def _read_account(self):
+    def _read_account(self) -> None:
         _name = read_key_str(self.op, 'account', 16)
         assert _name, 'must name an account'
         self.account_id = Accounts.get_id(_name)
         self.account = _name
 
-    def _read_permlink(self):
+    def _read_permlink(self) -> None:
         assert self.account, 'permlink requires named account'
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
         self.permlink = _permlink
 
-    def _read_role(self):
+    def _read_role(self) -> None:
         _role = read_key_str(self.op, 'role', 16)
         assert _role, 'must name a role'
         assert _role in Role.__members__, 'invalid role'
         self.role = _role
         self.role_id = Role[_role].value
 
-    def _read_notes(self):
+    def _read_notes(self) -> None:
         _notes = read_key_str(self.op, 'notes', 120)
         assert _notes, 'notes cannot be blank'
         self.notes = _notes
 
-    def _read_title(self):
+    def _read_title(self) -> None:
         _title = read_key_str(self.op, 'title', 32, allow_blank=True) or ''
         _title = _title.strip()
         self.title = _title
 
-    def _read_props(self):
+    def _read_props(self) -> None:
         # TODO: assert props changed?
         props = read_key_dict(self.op, 'props')
         valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id']

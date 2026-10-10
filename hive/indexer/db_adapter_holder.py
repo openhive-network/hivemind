@@ -9,7 +9,7 @@ class DbLiveContextHolder:
     _live_context = None
 
     @classmethod
-    def set_live_context(cls, live_context):
+    def set_live_context(cls, live_context) -> None:
         cls._live_context = live_context
 
     @classmethod
@@ -24,14 +24,14 @@ class DbAdapterHolder:
     _inside_sync_tx = False
 
     @classmethod
-    def setup_own_db_access(cls, sharedDb, name):
+    def setup_own_db_access(cls, sharedDb, name) -> None:
         if DbLiveContextHolder.is_live_context():
             cls.db = sharedDb
         else:
             cls.db = sharedDb.clone(name)
 
     @classmethod
-    def close_own_db_access(cls):
+    def close_own_db_access(cls) -> None:
         if cls.db is not None:
             cls.db.close()
             cls.db = None
@@ -41,13 +41,13 @@ class DbAdapterHolder:
         return cls._inside_sync_tx
 
     @classmethod
-    def beginTx(cls):
+    def beginTx(cls) -> None:
         if not DbLiveContextHolder.is_live_context():
             cls.db.query("START TRANSACTION")
             cls._inside_sync_tx = True
 
     @classmethod
-    def commitTx(cls):
+    def commitTx(cls) -> None:
         if not DbLiveContextHolder.is_live_context():
             cls.db.query("COMMIT")
             cls._inside_sync_tx = False
@@ -60,13 +60,13 @@ class DbAdapterHolder:
         return Db.instance()
 
     @staticmethod
-    def open_common_blocks_in_background_processing_db():
+    def open_common_blocks_in_background_processing_db() -> None:
         """Get the shared instance."""
         assert DbAdapterHolder._block_processing_thread_sync_db is None, 'massive instance already opened'
         DbAdapterHolder._block_processing_thread_sync_db = Db.instance().clone("massive_instance")
 
     @staticmethod
-    def close_common_blocks_in_background_processing_db():
+    def close_common_blocks_in_background_processing_db() -> None:
         """Get the shared instance."""
         if DbAdapterHolder._block_processing_thread_sync_db is not None:
             DbAdapterHolder._block_processing_thread_sync_db.close()

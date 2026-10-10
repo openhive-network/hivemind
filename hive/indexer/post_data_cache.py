@@ -19,12 +19,12 @@ class PostDataCache(DbAdapterHolder):
     _data: dict[int, dict] = {}
 
     @classmethod
-    def is_cached(cls, pid):
+    def is_cached(cls, pid) -> bool:
         """Check if data is cached"""
         return pid in cls._data
 
     @classmethod
-    def add_data(cls, pid, post_data, is_new_post):
+    def add_data(cls, pid, post_data, is_new_post) -> None:
         """Add data to cache"""
         if not cls.is_cached(pid):
             cls._data[pid] = post_data

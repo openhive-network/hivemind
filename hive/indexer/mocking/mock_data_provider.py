@@ -18,11 +18,11 @@ class MockDataProvider:
     block_data: dict[int, dict] = {}
 
     @classmethod
-    def print_data(cls):
+    def print_data(cls) -> None:
         print(dumps(cls.block_data, indent=4, sort_keys=True))
 
     @classmethod
-    def add_block_data_from_directory(cls, dir_name):
+    def add_block_data_from_directory(cls, dir_name) -> None:
         pattern = "*.json"
         for path in Path(dir_name).rglob(pattern):
             log.warning(f"Loading mock ops data from file: {path}")
@@ -33,7 +33,7 @@ class MockDataProvider:
         raise NotImplementedError("add_block_data_from_file is not implemented")
 
     @classmethod
-    def load_block_data(cls, data_path):
+    def load_block_data(cls, data_path) -> None:
         if os.path.isdir(data_path):
             log.warning(f"Loading mock ops data from directory: {data_path}")
             cls.add_block_data_from_directory(data_path)

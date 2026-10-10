@@ -21,7 +21,7 @@ class Accounts(DbAdapterHolder):
     _ranks: dict[int, int] = {}
 
     @classmethod
-    def load_ids(cls):
+    def load_ids(cls) -> None:
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
         cls._ids = dict(
@@ -29,7 +29,7 @@ class Accounts(DbAdapterHolder):
         )
 
     @classmethod
-    def clear_ids(cls):
+    def clear_ids(cls) -> None:
         """Wipe id map. Only used for db migration #5."""
         cls._ids = None
 
@@ -47,7 +47,7 @@ class Accounts(DbAdapterHolder):
         return cls._ids.get(name, None)
 
     @classmethod
-    def exists(cls, names):
+    def exists(cls, names) -> bool:
         """Check if an account name exists."""
         if isinstance(names, str):
             return names in cls._ids
