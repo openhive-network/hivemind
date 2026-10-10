@@ -34,10 +34,10 @@ An empty HAF has never seen hived, so the install steps first call
 `hive.initialize_extension_data()`, which is what hived does when it first connects. It
 fills `hafd.events_queue` and `hafd.hive_state`. Without `events_queue`,
 `hive.is_instance_ready()` is false and hivemind's API refuses with "HAF instance is not ready"
-(`get_sync_status`, which the smoke test waits on). Without `hive_state`, a HAF older than
-hive/haf#354 skips `hive_rowid` in `hive.app_register_table`, so reputation_tracker's install
-fails with `child table is missing column "hive_rowid"`. The pinned `8de693b2` predates #354,
-so both apply. A newer HAF still needs the call for the first reason.
+(`get_sync_status`, which the smoke test waits on). A HAF older than hive/haf#354 also
+needed `hive_state` filled, or `hive.app_register_table` skipped `hive_rowid` and
+reputation_tracker's install failed with `child table is missing column "hive_rowid"`; the
+pinned `2ae98b82` includes #354, so only the `events_queue` reason remains.
 
 | Slot | Steps | HAF stack |
 |---|---|---|
@@ -123,11 +123,15 @@ could pass. Findings on lines a change doesn't touch are advisory.
 
 ## The HAF test stack (`test-stack.compose.yml`)
 
-One service, `haf`: the HAF testnet image for the HAF commit CI's `find_haf_image`
-resolves (`8de693b2`, for `UPSTREAM_BRANCH` `1.28.8-rc3`), started empty with the
-`sleep_infinity` maintenance script. The checks reach it as `haf` on the stack's
-network. When `.gitlab-ci.yml`'s `UPSTREAM_BRANCH` moves, re-pin the image digest
-there to `registry.gitlab.syncad.com/hive/haf/testnet:<new HAF commit, 8 chars>`.
+One service, `haf`: the HAF testnet image for HAF develop commit `2ae98b82`, started
+empty with the `sleep_infinity` maintenance script. The checks reach it as `haf` on the
+stack's network. CI's `find_haf_image` tracks HAF `develop` (the common-ci-configuration
+template's default `UPSTREAM_BRANCH`; hivemind no longer overrides it), so the commit it
+resolves moves with HAF. When it does, re-pin both HAF pins together, to the same commit:
+the image digest here to `registry.gitlab.syncad.com/hive/haf/testnet:<commit, 8 chars>`,
+and `HAF_FIXTURE_COMMIT` / `HAF_FIXTURE_DIGEST` in `project.yaml` to
+`registry.gitlab.syncad.com/hive/haf/fixture-5m:<commit, 8 chars>` (see
+"Changing the HAF version" under the shared synced hivemind below).
 
 To run the stack checks by hand (with the submodules checked out):
 
@@ -186,8 +190,8 @@ every role) is the `hivemind` container's own network namespace, shared only wit
 
 **How it works.** Three services:
 
-- `cluster` (one-shot, the `hive/haf/fixture-5m:<commit>` image hive/haf's own
-  shared service pins) refuses a data root that is not ZFS. On the first start of a
+- `cluster` (one-shot, the `hive/haf/fixture-5m:<commit>` image for the HAF commit
+  the test stack pins) refuses a data root that is not ZFS. On the first start of a
   HAF commit it copies the image's replayed cluster to
   `$HIVEMIND_SHARED_DATA_ROOT/<commit>/haf_db_store`, as hive/haf's `seed.sh` does.
 - `hivemind` (same image) bind-mounts that directory at the image's own
@@ -230,7 +234,9 @@ sudo zfs create haf-pool/aidev-shared-hivemind       # mounted at /haf-pool/aide
 ```
 
 **Changing the HAF version.** Set `HAF_FIXTURE_COMMIT` and `HAF_FIXTURE_DIGEST` in
-`sandbox.shared.hivemind.env` to what hive/haf's `sandbox.shared.haf` pins. The next
+`sandbox.shared.hivemind.env` to the `hive/haf/fixture-5m` image of the commit
+`test-stack.compose.yml` pins (hivemind's own HAF, which may differ from what hive/haf's
+`sandbox.shared.haf` pins). The next
 start copies that commit's cluster, and the seeder re-seeds the refs' revisions in it.
 The old commit's directory under the data root can then be destroyed. **Changing the
 runtime image** (`environment.image`): re-pin `HIVEMIND_RUNTIME_IMAGE` to the same digest.

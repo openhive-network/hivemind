@@ -7,12 +7,13 @@
 # network and reaches the database as `haf`. They install the candidate's own SQL
 # and schema into it (.aidev/run-checks.sh), so no hivemind image is built.
 #
-# HAF image: find_haf_image in .gitlab-ci.yml resolves UPSTREAM_BRANCH 1.28.8-rc3 to
-# HAF commit 8de693b2; this is that commit's testnet image. Bump the digest here
-# when that variable moves.
+# HAF image: find_haf_image in .gitlab-ci.yml tracks HAF develop (the template's
+# default UPSTREAM_BRANCH); this is the testnet image of HAF develop commit 2ae98b82.
+# When CI's resolved HAF commit moves, bump this digest together with
+# HAF_FIXTURE_COMMIT/_DIGEST in project.yaml (see README.md).
 services:
   haf:
-    image: registry.gitlab.syncad.com/hive/haf/testnet@sha256:2b8b29a88da7d5bcbac37c5031f41f66846ca510e825a40519696244864604ea
+    image: registry.gitlab.syncad.com/hive/haf/testnet@sha256:7970789c09eaad6917bcb60bb191023679bfc0007cf0a5374bee74317842e674
     command: ["--execute-maintenance-script=/home/hived/source/./scripts/maintenance-scripts/sleep_infinity.sh"]
     environment:
       PGCTLTIMEOUT: "600"
