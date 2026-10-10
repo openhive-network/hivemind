@@ -66,6 +66,9 @@ done
 [[ -z "$SRCROOTDIR" ]] && printf "Missing argument #2 - source directory path\n\n" && print_help && exit 1
 [[ -z "$REGISTRY" ]] && printf "Missing argument #3 - target container registry URL\n\n" && print_help && exit 1
 
+# A relative path would no longer resolve once we pushd into it
+SRCROOTDIR="$(realpath "$SRCROOTDIR")"
+
 printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
 pushd "$SRCROOTDIR"

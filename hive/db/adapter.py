@@ -1,5 +1,7 @@
 """Database adapter using psycopg2 for direct PostgreSQL access."""
 
+from __future__ import annotations
+
 import logging
 import re
 from time import perf_counter as perf
@@ -22,6 +24,27 @@ _PARAM_RE = re.compile(r'(?<![:\w]):([a-zA-Z_]\w*)')
 def _convert_named_params(sql):
     """Convert :param style bindings to %(param)s for psycopg2."""
     return _PARAM_RE.sub(r'%(\1)s', sql)
+
+
+class _NoticeLogger:
+    """Stand-in for `connection.notices` that logs each server message as it arrives.
+
+    psycopg2 calls `append` on whatever object `notices` holds and trims only a real
+    list (to its last 50 entries), so logging here loses nothing.
+    """
+
+    __slots__ = ('_name',)
+
+    _LEVELS = {'WARNING': logging.WARNING, 'NOTICE': logging.INFO, 'INFO': logging.INFO, 'LOG': logging.INFO}
+
+    def __init__(self, name) -> None:
+        self._name = name
+
+    def append(self, message) -> None:
+        message = message.rstrip('\n')
+        severity = message.split(':', 1)[0]
+        level = logging.DEBUG if severity.startswith('DEBUG') else self._LEVELS.get(severity, logging.INFO)
+        log.log(level, f"[{self._name}] {message}")
 
 
 class Row:
@@ -112,6 +135,7 @@ class Db:
 
     def _connect(self) -> None:
         self._conn = psycopg2.connect(self._url, application_name=f'hivemind_{self.name}')
+        self._conn.notices = _NoticeLogger(self.name)
         self._conn.autocommit = True
         register_default_jsonb(self._conn, loads=ujson.loads)
         self._listening = False
@@ -154,10 +178,10 @@ class Db:
         self._trx_active = False
         self._connect()
 
-    def clone(self, name):
+    def clone(self, name: str) -> Db:
         return Db(self._url, name, self.__autoexplain is not None)
 
-    def impersonated_clone(self, name, role):
+    def impersonated_clone(self, name: str, role: str) -> Db:
         role_url = psycopg2.extensions.make_dsn(self._url, user=role)
         return Db(role_url, name, self.__autoexplain is not None)
 
