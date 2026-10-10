@@ -166,6 +166,16 @@ CHECKS = [
         rpc_error(-32602),
     ),
     (
+        "jsonrpc/bridge.get_posts.unknown",
+        rpc("bridge.get_posts", {"posts": [["initminer", "nope"]]}),
+        result_is([None]),
+    ),
+    (
+        "jsonrpc/bridge.get_posts.empty",
+        rpc("bridge.get_posts", {"posts": []}),
+        rpc_error(-32602),
+    ),
+    (
         "jsonrpc/bridge.get_discussion_v2.unknown",
         rpc("bridge.get_discussion_v2", {"author": "initminer", "permlink": "nope"}),
         rpc_error(-32602),
@@ -191,6 +201,7 @@ CHECKS = [
 SQL_TESTS = [
     "tests/sql/bridge_vote_free_calls.sql",
     "tests/sql/bridge_get_discussion_cap.sql",
+    "tests/sql/bridge_get_posts.sql",
 ]
 
 

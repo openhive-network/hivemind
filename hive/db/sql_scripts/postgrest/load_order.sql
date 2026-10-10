@@ -50,6 +50,7 @@
 \ir utilities/muted_reasons_operations.sql
 \ir utilities/create_bridge_post_object.sql
 \ir bridge_api/bridge_api_get_post.sql
+\ir bridge_api/bridge_api_get_posts.sql
 \ir bridge_api/bridge_api_get_payout_stats.sql
 \ir hive_api/hive_api_get_info.sql
 \ir hive_api/hive_api_db_head_state.sql

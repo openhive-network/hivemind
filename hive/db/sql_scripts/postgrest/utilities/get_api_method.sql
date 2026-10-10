@@ -115,6 +115,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_post(__params);
     WHEN __method_type = 'get_post_v2' THEN
       result := hivemind_endpoints.bridge_api_get_post(__params, /* _votes_mode */ 1::SMALLINT);
+    WHEN __method_type = 'get_posts' THEN
+      result := hivemind_endpoints.bridge_api_get_posts(__params);
     WHEN __method_type = 'get_payout_stats' THEN
       result := hivemind_endpoints.bridge_api_get_payout_stats(__params);
     WHEN __method_type = 'get_account_posts' THEN
