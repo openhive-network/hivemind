@@ -50,6 +50,21 @@ Not covered yet: CI's tavern API pattern suites (`condenser_api_patterns`,
 and a hivemind sync), the python API client tests and the benchmarks. They stay in
 GitLab CI until AIDEV can reach a persistent, replayed HAF (hive/haf#353).
 
+### Positive tavern patterns
+
+A worker can't produce the values of a new positive pattern: they come from CI's
+mock-data database. It commits the new `*.tavern.yaml` with a `{}` placeholder
+`.pat.json` and names those tests in its summary. After the workflow, an operator with
+`GITLAB_TOKEN` and push access runs `scripts/ci/generate_patterns.py` (see `CLAUDE.md`,
+"Tests that need real data"): it pushes the commit to a scratch branch
+`patterns/<shortsha>` with `-o ci.skip` (AIDEV's `ai/*` and `session/*` branches run no
+pipeline), runs a pipeline on a cached sync (`POSTGREST_ONLY_CHANGE=true`,
+`AUTO_SKIP_SYNC=false`), copies the `.out.json` files of `e2e_benchmark_on_postgrest`'s
+artifacts to the placeholders, prints a summary per test, and deletes the branch.
+`--dry-run` prints the branch, variables and tests without pushing. Check the values
+against independent data before committing them. If the operator step isn't available,
+the worker files a follow-up issue for the patterns.
+
 ## Quality evaluation
 
 AIDEV's quality evaluation runs its own collectors except where `project.yaml`'s
