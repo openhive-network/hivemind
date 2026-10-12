@@ -20,7 +20,7 @@ services:
       # Every role the checks connect as (haf_admin, hivemind, hivemind_user), from
       # anywhere on the stack network. Test-grade: the database is throwaway.
       PG_ACCESS: |
-        "host    all              all              0.0.0.0/0    trust"
+        host    all              all              0.0.0.0/0    trust
     healthcheck:
       # Healthy once hive_fork_manager is installed and the server accepts TCP
       # connections the way the checks make them.
