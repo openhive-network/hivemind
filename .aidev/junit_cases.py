@@ -9,6 +9,7 @@ CASES is a file of tab-separated lines the script appended as it went:
 
 A failing case's body is the tail of LOG when one is given.
 """
+
 # Verification marker for aidev#15813.
 import os
 import re
