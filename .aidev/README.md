@@ -301,3 +301,4 @@ To build through a pull-through registry cache near the build host, set
 `eu=cache.example.org:5001,*=cache2.example.org:5001`: a pair applies when its region is
 a label of the host's FQDN, and `*` applies to any other host. Unset, the image is built
 straight from `registry.gitlab.syncad.com`.
+Session hm-verify-15834 was used to verify aidev#15813 (tip-prewarm on a stale pull-host clone).
