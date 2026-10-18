@@ -65,10 +65,14 @@ CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER,
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
+-- a generic plan of the CASE-in-WHERE statement scans all of hive_votes
+SET plan_cache_mode = force_custom_plan
 AS
 $function$
 DECLARE
 _result JSONB;
+-- folded to a constant in the custom plan, so the planner drops the reputation join when it is not output
+_with_reputation BOOLEAN := _presentation_mode NOT IN ('bridge_api', 'database_api');
 BEGIN
   IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case,'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case]) THEN
     assert _voter_id IS NOT NULL;
@@ -87,7 +91,7 @@ BEGIN
         v.percent,
         v.last_update,
         v.num_changes,
-        v.reputation
+        (CASE WHEN _with_reputation THEN v.reputation END) AS reputation
       FROM
         hivemind_app.hive_votes_view AS v
       WHERE
