@@ -65,22 +65,23 @@ CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER,
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
--- a generic plan of the CASE-in-WHERE statement scans all of hive_votes
-SET plan_cache_mode = force_custom_plan
 AS
 $function$
 DECLARE
 _result JSONB;
--- folded to a constant in the custom plan, so the planner drops the reputation join when it is not output
+-- folded to a constant in the per-execution plan, so the planner drops the reputation join when it is not output
 _with_reputation BOOLEAN := _presentation_mode NOT IN ('bridge_api', 'database_api');
 BEGIN
   IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case,'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case]) THEN
     assert _voter_id IS NOT NULL;
   END IF;
 
-  _result = (
+  -- Dynamic SQL is planned with the parameter values on every execution: a generic plan of the
+  -- CASE-in-WHERE statement scans all of hive_votes. A function-level SET plan_cache_mode would also
+  -- apply to apply_vote_presentation and force it to replan its expressions for every vote.
+  EXECUTE $query$
     SELECT jsonb_agg( -- list_votes
-        hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode)
+        hivemind_postgrest_utilities.apply_vote_presentation(r, $5)
       ) FROM (
       SELECT
         v.voter,
@@ -91,29 +92,31 @@ BEGIN
         v.percent,
         v.last_update,
         v.num_changes,
-        (CASE WHEN _with_reputation THEN v.reputation END) AS reputation
+        (CASE WHEN $7 THEN v.reputation END) AS reputation
       FROM
         hivemind_app.hive_votes_view AS v
       WHERE
       ( CASE
-          WHEN _case = 'get_votes_for_posts' THEN v.post_id = _post_id
-          WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
-          WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
-          WHEN _case = 'bridge_list_by_comment_voter_after' THEN (v.post_id = _post_id AND v.voter_id > _voter_id)
+          WHEN $4 = 'get_votes_for_posts' THEN v.post_id = $2
+          WHEN $4 = 'database_list_by_comment_voter' THEN (v.post_id = $2 AND v.voter_id >= $6)
+          WHEN $4 = 'database_list_by_voter_comment' THEN (v.voter_id = $6 AND v.post_id >= $2)
+          WHEN $4 = 'bridge_list_by_comment_voter_after' THEN (v.post_id = $2 AND v.voter_id > $6)
         END
       )
-      AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
+      AND ($1 = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = $1 AND muted_id = v.voter_id))
       ORDER BY
       ( CASE
-          WHEN _case = 'get_votes_for_posts' THEN v.voter_id
-          WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
-          WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
-          WHEN _case = 'bridge_list_by_comment_voter_after' THEN v.voter_id
+          WHEN $4 = 'get_votes_for_posts' THEN v.voter_id
+          WHEN $4 = 'database_list_by_comment_voter' THEN v.voter_id
+          WHEN $4 = 'database_list_by_voter_comment' THEN v.post_id
+          WHEN $4 = 'bridge_list_by_comment_voter_after' THEN v.voter_id
         END
       )
-      LIMIT _limit
+      LIMIT $3
     ) r
-  );
+  $query$
+  INTO _result
+  USING _observer_id, _post_id, _limit, _case, _presentation_mode, _voter_id, _with_reputation;
 
   RETURN COALESCE(_result, '[]'::jsonb);
 END;
