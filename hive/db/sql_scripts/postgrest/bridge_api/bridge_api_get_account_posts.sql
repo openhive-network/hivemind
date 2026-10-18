@@ -13,15 +13,17 @@ _limit INT;
 _top_votes INT;
 _truncate_body INT;
 _include_own BOOLEAN;
+_community_id INT;
 _sort TEXT;
 
 _account TEXT;
 _permlink TEXT;
+_community TEXT;
 
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
-                                                                 (CASE WHEN _votes_mode = 0 THEN '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "truncate_body": "number", "include_own": "boolean"}'
-                                                                  ELSE '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "top_votes": "number", "truncate_body": "number", "include_own": "boolean"}' END)::JSON,
+                                                                 (CASE WHEN _votes_mode = 0 THEN '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "truncate_body": "number", "include_own": "boolean", "community": "string"}'
+                                                                  ELSE '{"sort": "string", "account": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "top_votes": "number", "truncate_body": "number", "include_own": "boolean", "community": "string"}' END)::JSON,
                                                                  2,
                                                                  '{"start_permlink": "permlink must be string"}');
 
@@ -66,11 +68,21 @@ BEGIN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_unexpected_keyword_exception('include_own');
   END IF;
 
+  _community = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False);
+
+  IF _community IS NOT NULL AND _sort NOT IN ('posts', 'comments') THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_unexpected_keyword_exception('community');
+  END IF;
+
+  _community_id = hivemind_postgrest_utilities.find_community_id(
+    hivemind_postgrest_utilities.valid_community(_community, True),
+    True);
+
   CASE _sort
     WHEN 'blog' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account, _account_id, _post_id, _observer_id, _limit, _truncate_body, True, _votes_mode, _top_votes);
-    WHEN 'comments' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_comments(_account_id, _post_id, _observer_id, _limit, _truncate_body, True, _votes_mode, _top_votes);
+    WHEN 'comments' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_comments(_account_id, _post_id, _observer_id, _limit, _truncate_body, True, _votes_mode, _top_votes, _community_id);
     WHEN 'feed' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_feed(_account_id, _post_id, _observer_id, _limit, _truncate_body, True, _votes_mode, _top_votes, COALESCE(_include_own, False));
-    WHEN 'posts' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_posts(_account_id, _post_id, _observer_id, _limit, _truncate_body, _votes_mode, _top_votes);
+    WHEN 'posts' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_posts(_account_id, _post_id, _observer_id, _limit, _truncate_body, _votes_mode, _top_votes, _community_id);
     WHEN 'replies' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_replies(_account_id, _post_id, _observer_id, _limit, _truncate_body, (_permlink IS NOT NULL AND _permlink <> '' ), True, _votes_mode, _top_votes);
     WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_account_posts_by_payout(_account_id, _post_id, _observer_id, _limit, _truncate_body, _votes_mode, _top_votes);
     ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unsupported sort, valid sorts: blog, feed, posts, comments, replies, payout');

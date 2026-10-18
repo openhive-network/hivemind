@@ -103,7 +103,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_comments;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_comments(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_comments(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0, IN _community_id INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -134,6 +134,7 @@ BEGIN
         FROM hivemind_app.live_comments_view hp1
         WHERE hp1.author_id = _account_id
           AND (_post_id = 0 OR hp1.id < _post_id)
+          AND (_community_id = 0 OR hp1.community_id = _community_id)
         ORDER BY hp1.id DESC
         LIMIT _limit
       )
@@ -298,7 +299,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_posts(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_posts(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0, IN _community_id INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -326,6 +327,7 @@ BEGIN
         WHERE  -- use new hive_posts_author_id_id_depth0_idx
           hp.author_id = _account_id
           AND ( _post_id = 0 OR hp.id < _post_id )
+          AND ( _community_id = 0 OR hp.community_id = _community_id )
         ORDER BY hp.id DESC
         LIMIT _limit
       )
