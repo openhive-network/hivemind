@@ -106,3 +106,4 @@
 \ir ../endpoints/accounts/get_account_pending_curation_rewards.sql
 \ir ../endpoints/blog/get_reblogs.sql
 \ir ../endpoints/other/get_sync_status.sql
+\ir ../endpoints/other/get_version.sql
