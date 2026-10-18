@@ -20,6 +20,8 @@ gitlab:
 # `aidev release` never moves develop or master.
 branches:
   integration: "aidev/integration"
+  # Integration reaches develop only by merge request gated by the project CI (aidev handoff).
+  handoff: develop
 
 # How this project's suites execute (#13892): one kind, stated once.
 environment:
