@@ -182,7 +182,12 @@ def setup(db, admin_db) -> None:
         """
     db.query_no_return(sql)
 
-    # Execute plpython3u scripts with admin privileges
+    _setup_admin_runtime_code(admin_db)
+
+
+def _setup_admin_runtime_code(admin_db) -> None:
+    """(Re)create the plpython3u runtime functions, which need admin privileges."""
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
     admin_sql_scripts = [
         "postgrest/utilities/preprocess_search_query.sql",
     ]
@@ -295,6 +300,9 @@ def perform_db_upgrade(db, admin_db) -> None:
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
     for script in sql_scripts:
         execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
+
+    # setup_runtime_code() runs as the schema owner and cannot reload these
+    _setup_admin_runtime_code(admin_db)
 
     log.info("Database schema upgrade completed.")
 

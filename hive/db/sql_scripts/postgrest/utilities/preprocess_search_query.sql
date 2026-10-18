@@ -8,7 +8,35 @@ LANGUAGE plpython3u
 IMMUTABLE
 SECURITY DEFINER
 AS $$
-import re
+import string
+import unicodedata
+
+# Every ASCII punctuation character is either query syntax for the ParadeDB (tantivy)
+# parser or harmless to escape: `don't`, `re:`, `[beta]` and `<b>` (read as a range over
+# every term below `b`) must reach the parser as plain text.
+_QUERY_SYNTAX_CHARS = frozenset(string.punctuation)
+
+def _is_searchable(text):
+    # The parser rejects a term without a letter, digit or emoji (`(`, `?`, `—`, `""`), and
+    # such a term would not match a token anyway. Symbols (category So) are kept for emoji;
+    # a lone non-emoji symbol such as `°` or `★` still fails to parse.
+    return any(c.isalnum() or unicodedata.category(c) == 'So' for c in text)
+
+def _escape_term(term):
+    """
+    Returns `term` as a literal for the query parser, or None when it cannot be searched.
+    Lowercasing matches the index tokenizer and keeps a typed AND/OR/NOT/IN from being
+    read as an operator.
+    """
+    if not _is_searchable(term):
+        return None
+    return ''.join('\\' + c if c in _QUERY_SYNTAX_CHARS else c for c in term.lower())
+
+def _quote_phrase(phrase):
+    """Returns `phrase` as a quoted phrase for the query parser, or None when it cannot be searched."""
+    if not _is_searchable(phrase):
+        return None
+    return '"' + phrase.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 def preprocess_search_query(pattern):
     """
@@ -45,15 +73,14 @@ def preprocess_search_query(pattern):
             while j < len(pattern):
                 if pattern[j] == '"':
                     # Found closing quote
-                    phrase = ''.join(phrase_parts)
-                    # Escape any quotes within the phrase
-                    phrase = phrase.replace('"', '\\"')
-                    tokens.append(('phrase', f'"{phrase}"'))
+                    phrase = _quote_phrase(''.join(phrase_parts))
+                    if phrase:
+                        tokens.append(('phrase', phrase))
                     i = j + 1
                     break
                 elif pattern[j] == '\\' and j + 1 < len(pattern):
-                    # Handle escaped characters
-                    phrase_parts.append(pattern[j:j+2])
+                    # An escaped character is taken literally
+                    phrase_parts.append(pattern[j+1])
                     j += 2
                 else:
                     phrase_parts.append(pattern[j])
@@ -104,14 +131,14 @@ def preprocess_search_query(pattern):
                                 break
                             k += 1
                     # Process the field:value
-                    if value.startswith('"') and value.endswith('"'):
-                        inner = value[1:-1]
-                        inner = inner.replace('"', '\\"')
-                        tokens.append(('field', f'{field}:"{inner}"'))
+                    if len(value) > 1 and value.startswith('"') and value.endswith('"'):
+                        value = _quote_phrase(value[1:-1])
                     else:
-                        tokens.append(('field', f'{field}:{value}'))
+                        value = _escape_term(value)
                 else:
-                    tokens.append(('field', word))
+                    value = _escape_term(value)
+                if value:
+                    tokens.append(('field', f'{field}:{value}'))
             else:
                 # Regular word
                 if word and word != '"':  # Skip standalone quotes
@@ -126,33 +153,26 @@ def preprocess_search_query(pattern):
     
     for token_type, value in tokens:
         if token_type == 'field':
-            # Field-specific search - use as-is
+            # Field-specific search - already escaped
             query_parts.append(value)
             
         elif token_type == 'phrase':
             # Quoted phrase - search in both fields
             query_parts.append(f'(title:{value} OR body:{value})')
             
-        elif token_type == 'must':
-            # Must have term - search in both fields with + prefix
-            # Escape quotes in the term if present
-            if '"' in value:
-                value = value.replace('"', '\\"')
-            query_parts.append(f'+(title:{value} OR body:{value})')
-            
-        elif token_type == 'mustnot':
-            # Must not have term - search in both fields with - prefix
-            # Escape quotes in the term if present
-            if '"' in value:
-                value = value.replace('"', '\\"')
-            query_parts.append(f'-(title:{value} OR body:{value})')
-            
-        elif token_type == 'word':
-            # Regular word - search in both fields
-            # Escape quotes if present
-            if '"' in value:
-                value = value.replace('"', '\\"')
-            query_parts.append(f'(title:{value} OR body:{value})')
+        else:
+            value = _escape_term(value)
+            if not value:
+                continue
+            if token_type == 'must':
+                # Must have term - search in both fields with + prefix
+                query_parts.append(f'+(title:{value} OR body:{value})')
+            elif token_type == 'mustnot':
+                # Must not have term - search in both fields with - prefix
+                query_parts.append(f'-(title:{value} OR body:{value})')
+            else:
+                # Regular word - search in both fields
+                query_parts.append(f'(title:{value} OR body:{value})')
     
     # Join with AND by default (like Google)
     # Must/mustnot terms are already prefixed, so they work correctly
