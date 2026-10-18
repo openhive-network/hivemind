@@ -1,0 +1,55 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - smoketest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: read version fields from hive.get_info
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "hive.get_info"
+          params: {}
+      response:
+        status_code: 200
+        json:
+          jsonrpc: "2.0"
+          id: !anything
+          result:
+            hivemind_version: !anystr
+            hivemind_git_rev: !anystr
+            hivemind_git_date: !anystr
+            database_schema_version: !anyint
+            database_head_block: !anything
+            database_patch_date: !anything
+            database_patched_to_revision: !anything
+        save:
+          json:
+            info_hivemind_version: result.hivemind_version
+            info_hivemind_git_rev: result.hivemind_git_rev
+            info_hivemind_git_date: result.hivemind_git_date
+            info_database_schema_version: result.database_schema_version
+
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_version"
+        method: POST
+        headers:
+          content-type: application/json
+          accept: application/json
+      response:
+        status_code: 200
+        json:
+          hivemind_version: "{info_hivemind_version}"
+          hivemind_git_rev: "{info_hivemind_git_rev}"
+          hivemind_git_date: "{info_hivemind_git_date}"
+          database_schema_version: !int "{info_database_schema_version}"

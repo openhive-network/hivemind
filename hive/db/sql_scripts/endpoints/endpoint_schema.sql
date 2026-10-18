@@ -740,6 +740,54 @@ declare
           }
         }
       }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "Other"
+        ],
+        "summary": "Get hivemind''s version",
+        "description": "Get the version and git revision of the running hivemind, together with\nthe database schema version (patch level). The fields match the ones\nreturned by the JSON-RPC `hive.get_info` call.\n\nSQL example\n* `SELECT hivemind_endpoints.get_version();`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/version''`\n",
+        "operationId": "hivemind_endpoints.get_version",
+        "responses": {
+          "200": {
+            "description": "Hivemind version information.\n\n* Returns `JSON`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "x-sql-datatype": "JSON",
+                  "properties": {
+                    "hivemind_version": {
+                      "type": "string",
+                      "description": "hivemind package version"
+                    },
+                    "hivemind_git_rev": {
+                      "type": "string",
+                      "description": "git commit hash hivemind was built from"
+                    },
+                    "hivemind_git_date": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "date of that git commit"
+                    },
+                    "database_schema_version": {
+                      "type": "integer",
+                      "description": "database schema patch level"
+                    }
+                  }
+                },
+                "example": {
+                  "hivemind_version": "1.28.8",
+                  "hivemind_git_rev": "455898cc3462d4e5ee2274756e5e3d44688fe204",
+                  "hivemind_git_date": "2026-10-01T12:00:00",
+                  "database_schema_version": 42
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
