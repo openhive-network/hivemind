@@ -259,8 +259,7 @@ def main(out: str) -> int:
         print("the shared hivemind service's clone API predates sync recipes; it installs this one on its next start")
         return SKIP
     can_install_admin = (
-        _psql(api_url, "select to_regprocedure('hivemind_shared.install_admin_script(text, text)') is not null;")
-        == "t"
+        _psql(api_url, "select to_regprocedure('hivemind_shared.install_admin_script(text, text)') is not null;") == "t"
     )
     templates = _templates(api_url)
     listed = ", ".join(f"{t.revision}/{t.recipe[:12]}" for t in templates) or "none"
