@@ -1,104 +1,104 @@
 {
   "votes": [
     {
-      "author": "wackou",
-      "last_update": "2016-05-04T05:20:06",
+      "author": "dantheman",
+      "last_update": "2016-06-01T19:28:00",
       "num_changes": 0,
-      "permlink": "wackou-witness-post",
-      "rshares": 3782373700,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 27
-    },
-    {
-      "author": "bue-witness",
-      "last_update": "2016-04-10T15:31:15",
-      "num_changes": 0,
-      "permlink": "bue-witness-post",
-      "rshares": 206000000,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 5
-    },
-    {
-      "author": "boy",
-      "last_update": "2016-04-13T18:12:15",
-      "num_changes": 0,
-      "permlink": "news",
-      "rshares": 3936000000,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 41823962
-    },
-    {
-      "author": "bue",
-      "last_update": "2016-04-13T12:09:39",
-      "num_changes": 0,
-      "permlink": "news",
-      "rshares": 3936000000,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 13204514
-    },
-    {
-      "author": "pop",
-      "last_update": "2016-05-04T05:16:42",
-      "num_changes": 0,
-      "permlink": "china",
-      "rshares": 3859565000,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 94422
-    },
-    {
-      "author": "pop",
-      "last_update": "2016-05-04T05:16:39",
-      "num_changes": 0,
-      "permlink": "taiwanese",
+      "permlink": "how-to-calculate-the-market-capitalization-of-steem",
       "rshares": 3936756300,
       "vote_percent": 10000,
       "voter": "bunny",
-      "weight": 79128
+      "weight": 6
     },
     {
-      "author": "ice",
-      "last_update": "2016-05-04T05:16:48",
+      "author": "dantheman",
+      "last_update": "2016-06-01T20:19:18",
       "num_changes": 0,
-      "permlink": "taiwan",
+      "permlink": "why-people-will-buy-steem",
+      "rshares": 3782373700,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 9
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-01T20:17:54",
+      "num_changes": 0,
+      "permlink": "how-to-interpret-steemits-post-valuations",
       "rshares": 3859565000,
       "vote_percent": 10000,
       "voter": "bunny",
-      "weight": 44360
+      "weight": 20
     },
     {
-      "author": "pharesim",
-      "last_update": "2016-08-27T00:39:00",
-      "num_changes": 1,
-      "permlink": "witness-post",
+      "author": "dantheman",
+      "last_update": "2016-06-01T20:08:51",
+      "num_changes": 0,
+      "permlink": "re-abit-re-dantheman-how-to-maximize-curation-rewards-20160429t145047016z-20160429t165039103z",
+      "rshares": 3936756300,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 7670
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-05-25T21:03:24",
+      "num_changes": 0,
+      "permlink": "re-linouxis9-liqbot-0-20160505t221523686z",
+      "rshares": 3936756300,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 79466
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-01T20:14:03",
+      "num_changes": 0,
+      "permlink": "get-your-private-key-from-your-steemit",
+      "rshares": 3859565000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 34
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-01T23:16:48",
+      "num_changes": 0,
+      "permlink": "proposal-to-remove-curation-rewards",
+      "rshares": 3859565000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 13
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-17T13:59:57",
+      "num_changes": 0,
+      "permlink": "daniel-larimer--co-founder-of-bitshares-steemit",
       "rshares": 3627991100,
       "vote_percent": 10000,
       "voter": "bunny",
-      "weight": 3
+      "weight": 0
     },
     {
-      "author": "silver",
-      "last_update": "2016-05-04T05:21:57",
+      "author": "dantheman",
+      "last_update": "2016-06-17T16:17:12",
       "num_changes": 0,
-      "permlink": "panama-papers",
-      "rshares": 3319225900,
+      "permlink": "re-innuendo-is-the-dac-concept-dead-20160617t133058506z",
+      "rshares": 3473608500,
       "vote_percent": 10000,
       "voter": "bunny",
-      "weight": 6663372
+      "weight": 4624
     },
     {
-      "author": "dele-puppy",
-      "last_update": "2016-05-04T05:20:54",
+      "author": "dantheman",
+      "last_update": "2016-06-18T13:17:24",
       "num_changes": 0,
-      "permlink": "dele-puppy-witness-thread",
-      "rshares": 3550799800,
+      "permlink": "changes-to-curation-reward-allocation",
+      "rshares": 3705182400,
       "vote_percent": 10000,
       "voter": "bunny",
-      "weight": 2464
+      "weight": 5
     }
   ]
 }
