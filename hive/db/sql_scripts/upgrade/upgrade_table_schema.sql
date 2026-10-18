@@ -51,4 +51,8 @@ ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_version TE
 -- Crash recovery: high-water mark for payout idempotency
 ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS last_payout_block INTEGER NOT NULL DEFAULT 0;
 
+-- database_api.list_votes by_voter_comment paging; created before registering so HAF records it as 'created'
+CREATE INDEX IF NOT EXISTS hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id);
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id)');
+
 RESET ROLE;
