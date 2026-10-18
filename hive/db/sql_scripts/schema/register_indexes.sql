@@ -31,6 +31,7 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hivemind_app.hive_votes (voter_id, last_update)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_block_num_idx ON hivemind_app.hive_votes (block_num)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_idx ON hivemind_app.hive_votes (post_id, voter_id)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_post_id_block_num_rshares_vote_is_effective_idx ON hivemind_app.hive_votes (post_id, block_num, rshares, is_effective)');
 
 -- hive_subscriptions indexes
