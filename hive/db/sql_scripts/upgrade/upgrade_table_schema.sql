@@ -51,8 +51,15 @@ ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_version TE
 -- Crash recovery: high-water mark for payout idempotency
 ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS last_payout_block INTEGER NOT NULL DEFAULT 0;
 
--- database_api.list_votes by_voter_comment paging; created before registering so HAF records it as 'created'
-CREATE INDEX IF NOT EXISTS hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id);
-SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id)');
+-- Superseded: database_api.list_votes by_voter_comment pages on hive_votes_voter_id_author_id_permlink_id_uk
+DROP INDEX IF EXISTS hivemind_app.hive_votes_voter_id_post_id_idx;
 
 RESET ROLE;
+
+-- HAF has no per-index deregistration and applications cannot write hafd.indexes_constraints, so this runs as
+-- the admin. Mirrors hive.remove_index_dependencies for one index; a left-over registration would recreate it.
+UPDATE hafd.indexes_constraints
+SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name = 'hivemind_app'))
+WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_voter_id_post_id_idx';
+DELETE FROM hafd.indexes_constraints
+WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_voter_id_post_id_idx' AND cardinality(contexts) = 0;

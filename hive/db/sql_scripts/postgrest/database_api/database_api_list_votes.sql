@@ -19,6 +19,8 @@ DECLARE
   _voter_id INT;
   _observer_id INT;
   _post_id INT;
+  _start_author_id INT := 0;
+  _start_permlink_id INT := 0;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"start": "array", "limit": "number", "order": "string", "observer": "string"}', 3, NULL);
   _start = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', True);
@@ -63,7 +65,10 @@ BEGIN
   IF _order_by_comment_voter THEN
     RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_observer_id, _post_id, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
   ELSE
-    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_observer_id, _post_id, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
+    IF _post_id <> 0 THEN
+      SELECT hp.author_id, hp.permlink_id INTO _start_author_id, _start_permlink_id FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
+    END IF;
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_observer_id, _post_id, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id, _start_author_id, _start_permlink_id)));
   END IF;
 END;
 $$

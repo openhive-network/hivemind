@@ -1,0 +1,104 @@
+{
+  "votes": [
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-18T13:17:24",
+      "num_changes": 0,
+      "permlink": "changes-to-curation-reward-allocation",
+      "rshares": 3705182400,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 5
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-06-19T21:53:30",
+      "num_changes": 0,
+      "permlink": "smart-contracts-in-a-free-society",
+      "rshares": 3936756300,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 6
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-07-10T16:09:54",
+      "num_changes": 0,
+      "permlink": "the-myth-that-proof-of-work-creates-irreversibility",
+      "rshares": 3724806399,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 14211239406537
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-07-14T01:32:03",
+      "num_changes": 0,
+      "permlink": "how-anyone-can-build-custom-apps-on-steem-right-now",
+      "rshares": 6870225330,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 36923680710651
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-07-14T04:05:42",
+      "num_changes": 0,
+      "permlink": "can-bitcoin-scale-to-keep-up-with-demand-created-by-steem",
+      "rshares": 5993175288,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 26667232740657
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-02T22:21:24",
+      "num_changes": 0,
+      "permlink": "brief-update-on-reputation-score",
+      "rshares": 2011695897,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 42381606894407
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-03T10:28:24",
+      "num_changes": 0,
+      "permlink": "re-dantheman-brief-update-on-reputation-score-20160802t223111474z",
+      "rshares": 1582192811,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 2914322696112376
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-03T18:28:15",
+      "num_changes": 0,
+      "permlink": "bitfinex-blockchain-hacks-and-replay-attacks-oh-my-all-things-that-steem-s-technology-is-designed-to-prevent",
+      "rshares": 1295586491,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 64278543065659
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-03T20:16:51",
+      "num_changes": 0,
+      "permlink": "re-dana-edwards-re-mrweed-re-dana-edwards-the-bitfinex-hack-and-why-steem-power-may-be-the-safest-place-to-put-your-money-for-the-foreseeable-future-20160803t185156482z",
+      "rshares": 1295869750,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 4707087298001899
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-03T20:25:30",
+      "num_changes": 0,
+      "permlink": "re-sean-king-sexual-click-bait-20160803t200523599z",
+      "rshares": 1151884222,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 1946822962914853
+    }
+  ]
+}
