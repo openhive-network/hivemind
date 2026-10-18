@@ -94,9 +94,14 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
 3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>, <its recipe>)`) and
    reloads the tree's PostgREST SQL into the clone as `hivemind` with
    `scripts/ci/reload-postgrest-functions.sh` (what CI's POSTGREST_ONLY path does),
-   so query changes are tested without a re-sync. The admin-level
-   `preprocess_search_query.sql` (plpython3u) needs a superuser, which a run is
-   not: it logs a warning and the template's copy stays;
+   so query changes are tested without a re-sync. The reload cannot install the
+   admin-level scripts (`schema.py`'s `_setup_admin_runtime_code`, plpython3u):
+   `hivemind` owns their schema, so it drops the template's copy, and the CREATE is
+   refused with a warning, since only a superuser may create them. The step then
+   installs the tree's copy through the provider,
+   `install_admin_script('<run id>', <script>)`, which runs it as `haf_admin` in that
+   run's database. On a provider whose clone API predates it, the step says so and
+   runs without them (search-api fails);
 4. serves the clone with PostgREST as `scripts/start_postgrest.sh` does, with
    `PGRST_DB_ROOT_SPEC=home` standing in for the postgrest-rewriter's `/` → `/rpc/home`;
 5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
@@ -194,6 +199,8 @@ connect to `$AIDEV_EXTERNAL_HIVEMIND_HOST:$AIDEV_EXTERNAL_HIVEMIND_PORT` as
 select * from hivemind_shared.health();  -- revision, recipe, template, HAF and hivemind commits, head block, live clones
 select hivemind_shared.clone_run_database('<run id>', '<revision>', '<recipe>');
     -- returns run_<run id>, cloned from the newest template matching both; null = any
+select hivemind_shared.install_admin_script('<run id>', '<script>');
+    -- runs an admin-level script (plpython3u) as haf_admin in run_<run id>; refuses any other database
 select hivemind_shared.drop_run_database('<run id>');                 -- when done
 select hivemind_shared.request_seed('<revision>', '<recipe>', '<40-hex commit>');
     -- seeded | pending | seeding | done | failed

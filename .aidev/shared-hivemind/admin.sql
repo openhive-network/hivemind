@@ -218,6 +218,35 @@ begin
 end
 $$;
 
+-- Runs _script, one of hivemind's admin-level scripts (schema.py's
+-- _setup_admin_runtime_code: plpython3u functions, which only a superuser may
+-- create), in the run's database as haf_admin, the role `hive setup` installs
+-- them as. A run works as `hivemind` and cannot. Raises no_data_found, changing
+-- nothing, unless _run_id is a run registered by clone_run_database() whose
+-- database exists: never a template, the seed database or any other.
+--
+-- The script is the caller's, so a consumer runs superuser SQL in its own run
+-- database; the service trusts its consumers on the fleet's LAN as it trusts
+-- them with request_seed().
+create or replace function hivemind_shared.install_admin_script(_run_id text, _script text)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog, hivemind_shared
+as $$
+declare
+    _name text := hivemind_shared._run_database_name(_run_id);
+begin
+    if not exists (select 1 from hivemind_shared.run_databases r
+                   join pg_database d on d.datname = r.database_name
+                   where r.run_id = _run_id and r.database_name = _name and not d.datistemplate) then
+        raise exception 'no run database is registered for run %', _run_id
+            using errcode = 'no_data_found';
+    end if;
+    perform hivemind_shared._loopback(_name, 'set role haf_admin; ' || _script);
+end
+$$;
+
 -- Asks the seeder for a template of _revision and _recipe, synced from _commit
 -- (a hivemind commit whose update_db_patchlevel.sql yields _revision and whose
 -- recipe on the provider's HAF is _recipe). Returns the state afterwards:
@@ -343,5 +372,6 @@ revoke all on all tables in schema hivemind_shared from public;
 grant usage on schema hivemind_shared to hivemind_shared_consumer;
 grant select on hivemind_shared.seed_requests to hivemind_shared_consumer;
 grant execute on function hivemind_shared.clone_run_database(text, text, text), hivemind_shared.drop_run_database(text),
-    hivemind_shared.request_seed(text, text, text), hivemind_shared.health()
+    hivemind_shared.install_admin_script(text, text), hivemind_shared.request_seed(text, text, text),
+    hivemind_shared.health()
     to hivemind_shared_consumer;
