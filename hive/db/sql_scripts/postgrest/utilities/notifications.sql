@@ -1,3 +1,18 @@
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_type_names;
+-- Position in the array is the notification type_id stored in hive_notification_cache.
+CREATE FUNCTION hivemind_postgrest_utilities.get_notify_type_names()
+RETURNS TEXT[]
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT ARRAY[
+        'new_community', 'set_role', 'set_props', 'set_title', 'mute_post', 'unmute_post',
+        'pin_post', 'unpin_post', 'flag_post', 'error', 'subscribe', 'reply',
+        'reply_comment', 'reblog', 'follow', 'mention', 'vote'
+    ]::TEXT[];
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_type_from_id;
 CREATE FUNCTION hivemind_postgrest_utilities.get_notify_type_from_id(notify_type_id INT)
 RETURNS TEXT
@@ -7,32 +22,48 @@ AS $$
 DECLARE
     notify_type TEXT;
 BEGIN
-    notify_type := CASE notify_type_id
-        WHEN 1 THEN 'new_community'
-        WHEN 2 THEN 'set_role'
-        WHEN 3 THEN 'set_props'
-        WHEN 4 THEN 'set_title'
-        WHEN 5 THEN 'mute_post'
-        WHEN 6 THEN 'unmute_post'
-        WHEN 7 THEN 'pin_post'
-        WHEN 8 THEN 'unpin_post'
-        WHEN 9 THEN 'flag_post'
-        WHEN 10 THEN 'error'
-        WHEN 11 THEN 'subscribe'
-        WHEN 12 THEN 'reply'
-        WHEN 13 THEN 'reply_comment'
-        WHEN 14 THEN 'reblog'
-        WHEN 15 THEN 'follow'
-        WHEN 16 THEN 'mention'
-        WHEN 17 THEN 'vote'
-        ELSE NULL
-    END;
+    notify_type := (hivemind_postgrest_utilities.get_notify_type_names())[notify_type_id];
 
 	IF notify_type IS NULL THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_notify_type_id_exception('The provided type_id does not correspond to any known notification type.');
     END IF;
 
     RETURN notify_type;
+END;
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_notify_type_ids_from_json;
+-- Returns NULL (no filtering) when the argument is absent, null or an empty array.
+CREATE FUNCTION hivemind_postgrest_utilities.parse_notify_type_ids_from_json(_params JSONB, _arg_name TEXT)
+RETURNS INT[]
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+    _elem JSONB;
+    _type_id INT;
+    _result INT[] := '{}';
+BEGIN
+    IF _params->_arg_name IS NULL OR jsonb_typeof(_params->_arg_name) = 'null' THEN
+        RETURN NULL;
+    END IF;
+
+    IF jsonb_typeof(_params->_arg_name) <> 'array' THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || _arg_name || ' type');
+    END IF;
+
+    FOR _elem IN SELECT jsonb_array_elements(_params->_arg_name) LOOP
+        _type_id := CASE WHEN jsonb_typeof(_elem) = 'string'
+                         THEN array_position(hivemind_postgrest_utilities.get_notify_type_names(), _elem#>>'{}')
+                    END;
+        IF _type_id IS NULL THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('unknown notification type: ' || _elem::TEXT);
+        END IF;
+        _result := array_append(_result, _type_id);
+    END LOOP;
+
+    RETURN NULLIF(_result, '{}');
 END;
 $$
 ;
