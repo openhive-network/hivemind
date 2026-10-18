@@ -18,4 +18,17 @@ params:
   "limit": {number}
 
      optional, 1..100, default = 100
+
+  "type": [{string}, ...]
+
+     optional, names of notification types to return (e.g. ["vote", "reply", "follow"]);
+     omitted, null or empty returns all types; unknown names are rejected
+
+  "community": "{community}"
+
+     optional, existing community name (e.g. "hive-123456"); returns only notifications
+     concerning that community (community operations and activity on posts in it) plus
+     notifications tied to no post or community at all (e.g. follow)
 }
+
+Notifications concerning a community carry an additional "community" field with its name.
