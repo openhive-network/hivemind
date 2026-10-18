@@ -11,8 +11,11 @@ DECLARE
   _last_id BIGINT;
   _limit INTEGER;
   _oldest_block INTEGER;
+  _type_ids INT[];
+  _community TEXT;
+  _community_id INT;
 BEGIN
-  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number", "last_id": "number", "limit":"number"}', 1, NULL);
+  _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"account": "string", "min_score": "number", "last_id": "number", "limit":"number", "type": "array", "community": "string"}', 1, NULL);
 
   _account_id = 
     hivemind_postgrest_utilities.find_account_id(
@@ -31,6 +34,15 @@ BEGIN
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
   _oldest_block = hivemind_app.block_before_head( '90 days' );
 
+  _type_ids = hivemind_postgrest_utilities.parse_notify_type_ids_from_json(_params, 'type');
+
+  _community = hivemind_postgrest_utilities.valid_community(
+    hivemind_postgrest_utilities.parse_argument_from_json(_params, 'community', False),
+  True);
+  IF _community <> '' THEN
+    _community_id = hivemind_postgrest_utilities.find_community_id(_community, True);
+  END IF;
+
   RETURN(
     SELECT jsonb_agg( -- bridge_api_account_notifications
       jsonb_build_object(
@@ -45,7 +57,11 @@ BEGIN
                   WHEN hive_notification_cache.src <> '' THEN '@' || hive_notification_cache.src
                   WHEN hive_notification_cache.dst <> '' THEN '@' || hive_notification_cache.dst
                 END
-      ) ORDER BY hive_notification_cache.id DESC
+      ) || CASE
+             WHEN hive_notification_cache.community <> '' THEN jsonb_build_object('community', hive_notification_cache.community)
+             ELSE '{}'::JSONB
+           END
+      ORDER BY hive_notification_cache.id DESC
     ) FROM (
       SELECT
         hnv.id,
@@ -55,7 +71,7 @@ BEGIN
         hd.name as dst,
         ha.name as author,
         hpd.permlink,
-        hnv.community,
+        COALESCE(NULLIF(hnv.community, ''), hc.name) AS community,
         hnv.community_title,
         hnv.score,
         hnv.payload,
@@ -79,6 +95,14 @@ BEGIN
             AND nv.block_num > _oldest_block
             AND nv.score >= _min_score
             AND NOT( _last_id <> 0 AND nv.id >= _last_id )
+            AND ( _type_ids IS NULL OR nv.type_id = ANY(_type_ids) )
+            AND (
+              _community_id IS NULL
+              -- notifications tied to neither a post nor a community (e.g. follow) are not community specific
+              OR ( COALESCE(nv.post_id, 0) = 0 AND COALESCE(nv.community, '') = '' )
+              OR nv.community = _community
+              OR EXISTS (SELECT 1 FROM hivemind_app.hive_posts p WHERE p.id = nv.post_id AND p.community_id = _community_id)
+            )
           ORDER BY nv.id DESC
           LIMIT _limit
         ) hnv
@@ -86,7 +110,8 @@ BEGIN
         JOIN hivemind_app.hive_accounts ha on hp.author_id = ha.id
         JOIN hivemind_app.hive_accounts hs on hs.id = hnv.src
         JOIN hivemind_app.hive_accounts hd on hd.id = hnv.dst
-        JOIN hivemind_app.hive_permlink_data hpd on hp.permlink_id = hpd.id,
+        JOIN hivemind_app.hive_permlink_data hpd on hp.permlink_id = hpd.id
+        LEFT JOIN hivemind_app.hive_communities hc on hc.id = hp.community_id,
         lateral
         (
           SELECT
