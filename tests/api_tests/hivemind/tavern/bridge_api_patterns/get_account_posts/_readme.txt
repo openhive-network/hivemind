@@ -32,4 +32,9 @@ params:
      If observer is specified, then in every sort case result will be supplemented with observer's blacklist.
      In case of sort by replies or feed, posts created by author muted by observer should not be visible,
      In case of sort by blog, posts, payout or comments, posts created by authors muted by observer should be marked as gray.     
+
+  "community": "{community}"
+
+     optional (can be skipped or passed empty), only allowed with sort "posts" or "comments"; when given has to point to
+     an existing community and only posts/comments of given account in that community are returned
 }
