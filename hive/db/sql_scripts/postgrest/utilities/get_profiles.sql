@@ -19,12 +19,16 @@ BEGIN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('accounts amount is greather than max allowed (1000)');
     END IF;
 
-    SELECT array_agg(value) INTO _account_names FROM jsonb_array_elements_text(_accounts);
-    _account_names = hivemind_postgrest_utilities.valid_accounts(_account_names, false);
-
     _observer_id = hivemind_postgrest_utilities.find_account_id(
             hivemind_postgrest_utilities.valid_account(_observer, True),
             True);
+
+    IF _accounts_amount = 0 THEN
+        RETURN '[]'::jsonb;
+    END IF;
+
+    SELECT array_agg(value) INTO _account_names FROM jsonb_array_elements_text(_accounts);
+    _account_names = hivemind_postgrest_utilities.valid_accounts(_account_names, false);
 
     SELECT jsonb_agg(jsonb_build_object(
             'id', row.id,
