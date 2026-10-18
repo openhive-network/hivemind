@@ -16,7 +16,8 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
    host environment's, not the change's;
 2. clones the template into run_<id> and reloads this tree's PostgREST SQL into
    it (scripts/ci/reload-postgrest-functions.sh, what CI's POSTGREST_ONLY path
-   does), so query changes are tested without a re-sync;
+   does), so query changes are tested without a re-sync, then has the provider
+   install the admin-level scripts, which need a superuser (install_admin_script);
 3. serves the clone with PostgREST as scripts/start_postgrest.sh does, and runs
    each tavern group of .gitlab-ci.yml's SMOKETESTS the way
    scripts/ci/start-api-smoketest.sh does (RUN_TESTS_WITH_MARKER as in
@@ -62,6 +63,9 @@ shared_fixture = _load_shared_fixture()
 SKIP = 77
 TAVERN_DIR = os.path.join(ROOT, "tests", "api_tests", "hivemind", "tavern")
 TESTS_API_DIR = os.path.join(ROOT, "tests", "tests_api")
+SQL_SCRIPTS_DIR = os.path.join(ROOT, "hive", "db", "sql_scripts")
+# hive/db/schema.py's _setup_admin_runtime_code: plpython3u, which only a superuser may create.
+ADMIN_SQL_SCRIPTS = ("postgrest/utilities/preprocess_search_query.sql",)
 MARKER = "not postgrest_ignore"
 # As .gitlab-ci.yml's run-all-smoketests: search-api needs pg_search, which a
 # HAF image may lack.
@@ -122,8 +126,6 @@ def _request_seed(api_url: str, revision: str, recipe: str) -> bool:
 
 
 def _reload_sql(run_url: str, log_path: str) -> None:
-    # The admin-level script (plpython3u) needs a superuser, which a run is not:
-    # it fails with a warning and the template's copy stays.
     with open(log_path, "w") as log:
         proc = subprocess.run(
             [
@@ -137,6 +139,20 @@ def _reload_sql(run_url: str, log_path: str) -> None:
         )
     if proc.returncode != 0:
         raise ProviderError(f"reloading the tree's SQL into the clone failed (exit {proc.returncode}); see {log_path}")
+
+
+def _install_admin_scripts(api_url: str, run_id: str) -> None:
+    # Only after the reload: it runs these scripts as `hivemind`, which owns their
+    # schema, so each DROP FUNCTION succeeds and the plpython3u CREATE is refused.
+    for script in ADMIN_SQL_SCRIPTS:
+        with open(os.path.join(SQL_SCRIPTS_DIR, script), encoding="utf-8") as handle:
+            _psql(
+                api_url,
+                "select hivemind_shared.install_admin_script(:'run', :'script');",
+                run=run_id,
+                script=handle.read(),
+            )
+        print(f"installed {script} into the clone")
 
 
 def _run_group(group: str, port: int, out: str, workers: str) -> int:
@@ -242,6 +258,10 @@ def main(out: str) -> int:
     if _psql(api_url, "select to_regprocedure('hivemind_shared.request_seed(text, text, text)') is not null;") != "t":
         print("the shared hivemind service's clone API predates sync recipes; it installs this one on its next start")
         return SKIP
+    can_install_admin = (
+        _psql(api_url, "select to_regprocedure('hivemind_shared.install_admin_script(text, text)') is not null;")
+        == "t"
+    )
     templates = _templates(api_url)
     listed = ", ".join(f"{t.revision}/{t.recipe[:12]}" for t in templates) or "none"
     print(f"schema revision {revision}, sync recipe {recipe}; templates: {listed}")
@@ -265,6 +285,13 @@ def main(out: str) -> int:
     try:
         run_url = f"postgresql://hivemind@{host}:{port}/{database}"
         _reload_sql(run_url, os.path.join(out, "tavern-reload.log"))
+        if can_install_admin:
+            _install_admin_scripts(api_url, run_id)
+        else:
+            print(
+                "the shared hivemind service's clone API predates install_admin_script; it installs it on its "
+                "next start. Until then the clone lacks the admin-level scripts and search-api fails"
+            )
         failed = _serve_and_test(run_url, out, groups)
     finally:
         print(f"moved {_collect_outputs(out)} .out.json files to {os.path.join(out, 'tavern-out')}")
