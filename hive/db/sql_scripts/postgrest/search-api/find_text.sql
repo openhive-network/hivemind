@@ -19,6 +19,10 @@ DECLARE
     _candidate_ids INT[];
     _candidate_scores REAL[];
     _candidate_limit INT;
+    _author_filter TEXT = '';
+    _start_score REAL;
+    _tie_ids INT[];
+    _tie_scores REAL[];
 BEGIN
     _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"pattern": "string", "sort": "string", "author": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}', 1, '{"start_permlink": "permlink must be string"}');
 
@@ -90,8 +94,105 @@ BEGIN
     -- explicit predicate and inferred it; 0.21.13 reversed that and raises "Unsupported
     -- query shape" without it.
     -- The candidate limit over-fetches to leave room for posts of muted authors.
+    -- Relevance candidates are ordered by (score, id), the same key as the final ranking, so
+    -- that the window is deterministic among equal scores and a page can resume after its
+    -- last post.
     _candidate_limit = _limit * 2;
-    IF _author_id > 0 THEN
+    IF _post_id > 0 THEN
+        -- Paging: candidates start right after the start post in the requested order, a
+        -- keyset on id (created) or on (score, id) (relevance).
+        -- These statements run through EXECUTE so that each gets a one-shot custom plan:
+        -- pg_search pushes `paradedb.score(id) < value` down as a score filter of the TopK
+        -- scan only when the value is a constant; with a generic plan's parameter it raises
+        -- "Unsupported query shape" or sorts every match.
+        -- Every clause pushed into the BM25 query adds to the score (a range or a term set
+        -- adds 1, an `id = x` term adds its own BM25 score), so the start post's score is
+        -- only comparable when the three relevance statements share the same scoring
+        -- clauses. The start post and the id bound are therefore matched through
+        -- const_score(0, ...), which adds exactly 0. An `OR` of the two keyset halves cannot
+        -- be used: pg_search 0.25.3 turns it into an empty boolean query.
+        -- Parameters: $1 search query, $2 author id, $3 start post id, $4 start post score,
+        -- $5 candidate limit.
+        IF _author_id > 0 THEN
+            _author_filter = 'AND hpd.id = ANY(ARRAY(
+                          SELECT hp.id FROM hivemind_app.hive_posts hp
+                          WHERE hp.author_id = $2 AND hp.depth = 0))';
+        END IF;
+
+        EXECUTE format($sql$
+            SELECT paradedb.score(hpd.id)
+            FROM hivemind_app.hive_post_data hpd
+            WHERE hpd @@@ paradedb.parse($1)
+              AND hivemind_app.is_top_level_post(hpd.id)
+              %s
+              AND hpd @@@ paradedb.const_score(0, paradedb.term('id', $3))
+            $sql$, _author_filter)
+            INTO _start_score
+            USING _search_query, _author_id, _post_id;
+
+        IF _start_score IS NULL THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(
+                'start post does not match the search pattern');
+        END IF;
+
+        IF _sort_type = 'relevance' THEN
+            -- Posts with the start post's score come first, newest first, then lower scores.
+            EXECUTE format($sql$
+                SELECT array_agg(c.id), array_agg(c.score)
+                FROM (
+                    SELECT hpd.id, paradedb.score(hpd.id) AS score
+                    FROM hivemind_app.hive_post_data hpd
+                    WHERE hpd @@@ paradedb.parse($1)
+                      AND hivemind_app.is_top_level_post(hpd.id)
+                      %s
+                      AND hpd @@@ paradedb.const_score(0, paradedb.range('id', int4range(NULL, $3)))
+                      AND paradedb.score(hpd.id) = $4
+                    ORDER BY hpd.id DESC
+                    LIMIT $5
+                ) c
+                $sql$, _author_filter)
+                INTO _tie_ids, _tie_scores
+                USING _search_query, _author_id, _post_id, _start_score, _candidate_limit;
+
+            IF COALESCE(cardinality(_tie_ids), 0) < _candidate_limit THEN
+                EXECUTE format($sql$
+                    SELECT array_agg(c.id), array_agg(c.score)
+                    FROM (
+                        SELECT hpd.id, paradedb.score(hpd.id) AS score
+                        FROM hivemind_app.hive_post_data hpd
+                        WHERE hpd @@@ paradedb.parse($1)
+                          AND hivemind_app.is_top_level_post(hpd.id)
+                          %s
+                          AND paradedb.score(hpd.id) < $4
+                        ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
+                        LIMIT $5
+                    ) c
+                    $sql$, _author_filter)
+                    INTO _candidate_ids, _candidate_scores
+                    USING _search_query, _author_id, _post_id, _start_score,
+                          _candidate_limit - COALESCE(cardinality(_tie_ids), 0);
+            END IF;
+
+            _candidate_ids = _tie_ids || _candidate_ids;
+            _candidate_scores = _tie_scores || _candidate_scores;
+        ELSE
+            EXECUTE format($sql$
+                SELECT array_agg(c.id)
+                FROM (
+                    SELECT hpd.id
+                    FROM hivemind_app.hive_post_data hpd
+                    WHERE hpd @@@ paradedb.parse($1)
+                      AND hivemind_app.is_top_level_post(hpd.id)
+                      %s
+                      AND hpd.id < $3
+                    ORDER BY hpd.id DESC
+                    LIMIT $5
+                ) c
+                $sql$, _author_filter)
+                INTO _candidate_ids
+                USING _search_query, _author_id, _post_id, _start_score, _candidate_limit;
+        END IF;
+    ELSIF _author_id > 0 THEN
         IF _sort_type = 'relevance' THEN
             SELECT array_agg(c.id), array_agg(c.score) INTO _candidate_ids, _candidate_scores
             FROM (
@@ -102,7 +203,7 @@ BEGIN
                   AND hpd.id = ANY(ARRAY(
                       SELECT hp.id FROM hivemind_app.hive_posts hp
                       WHERE hp.author_id = _author_id AND hp.depth = 0))
-                ORDER BY paradedb.score(hpd.id) DESC
+                ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
                 LIMIT _candidate_limit
             ) c;
         ELSE
@@ -127,7 +228,7 @@ BEGIN
                 FROM hivemind_app.hive_post_data hpd
                 WHERE hpd @@@ paradedb.parse(_search_query)
                   AND hivemind_app.is_top_level_post(hpd.id)
-                ORDER BY paradedb.score(hpd.id) DESC
+                ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
                 LIMIT _candidate_limit
             ) c;
         ELSE
@@ -171,11 +272,6 @@ BEGIN
                                           END::int AS rank_order,
                                       nmp.score
                                FROM not_muted_posts nmp
-                           ),
-                           upper_bound as ( -- find starting post (if passed) order
-                               SELECT op.rank_order AS from_order
-                               FROM   ordered_posts op
-                               WHERE  op.id = _post_id
                            )
                       SELECT
                           hp.id,
@@ -218,8 +314,6 @@ BEGIN
                           hp.muted_reasons
                       FROM ordered_posts op,
                            LATERAL hivemind_app.get_full_post_view_by_id(op.id, _observer_id) hp
-                      WHERE  op.rank_order >
-                             COALESCE((SELECT from_order FROM upper_bound),0)
                       ORDER BY op.rank_order ASC
                       LIMIT _limit
                   ) row
