@@ -14,7 +14,7 @@ params:
   "author": {optional hive account name}; if specified, search will be limited to posts by this author
   "start_author":"{start_author}", "start_permlink":"{start_permlink}",
 
-     start_author + start_permlink : optional (can be skipped or given empty), when given have to point to valid post; paging mechanism
+     start_author + start_permlink : optional (can be skipped or given empty), when given have to point to valid post that matches the pattern (and author); paging mechanism, results follow that post in the requested order
 
   "limit": {number}
 
