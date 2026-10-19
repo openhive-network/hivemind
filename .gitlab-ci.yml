@@ -315,28 +315,31 @@ default:
     "mock_tests:api_smoketest_mock_tests.xml"
   )
 
+  # search-api requires the pg_search (ParadeDB) extension, which a HAF image may lack:
+  # skip the group up front when the database under test has none, count it otherwise.
+  if ! PG_SEARCH_INSTALLED=$(docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
+      exec -T haf psql -X -At -v ON_ERROR_STOP=1 -U haf_admin -d haf_block_log \
+      -c "SELECT exists (SELECT 1 FROM pg_extension WHERE extname = 'pg_search')"); then
+    echo "ERROR: cannot check whether pg_search is installed in the database under test"
+    exit 1
+  fi
+
   FAILED=0
-  SEARCH_SKIPPED=false
   for test_spec in "${SMOKETESTS[@]}"; do
     IFS=':' read -r test_dir output_xml <<< "$test_spec"
+    if [[ "$test_dir" == "search-api_patterns" && "$PG_SEARCH_INSTALLED" != "t" ]]; then
+      echo "SKIPPED: ${test_dir} (the pg_search extension is not installed in the database under test)"
+      continue
+    fi
     section_name="${test_dir//\//_}"
     echo -e "\e[0Ksection_start:$(date +%s):${section_name}[collapsed=true]\r\e[0KRunning ${test_dir} smoketest..."
     if ! ./scripts/ci/start-api-smoketest.sh "$HOST" "$PORT" "${test_dir}/" "$output_xml" "$WORKERS"; then
-      # search-api requires pg_search/paradedb — treat as non-fatal when unavailable
-      if [[ "$test_dir" == "search-api_patterns" ]]; then
-        echo "WARNING: ${test_dir} smoketest failed (pg_search may not be available — non-fatal)"
-        SEARCH_SKIPPED=true
-      else
-        echo "WARNING: ${test_dir} smoketest failed"
-        FAILED=$((FAILED + 1))
-      fi
+      echo "WARNING: ${test_dir} smoketest failed"
+      FAILED=$((FAILED + 1))
     fi
     echo -e "\e[0Ksection_end:$(date +%s):${section_name}\r\e[0K"
   done
 
-  if [[ "$SEARCH_SKIPPED" == "true" ]]; then
-    echo "NOTE: search-api tests failed (pg_search extension not available — non-fatal)"
-  fi
   if [[ $FAILED -gt 0 ]]; then
     echo "ERROR: $FAILED smoketest group(s) failed"
     exit 1

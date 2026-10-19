@@ -25,7 +25,10 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
 4. moves the .out.json files tavern writes next to the patterns to
    OUT_DIR/tavern-out/ and drops the clone.
 
-Exits 0 when every group passes, 1 when one fails, SKIP (77) on a revision miss
+A group whose host precondition the clone lacks (search-api without pg_search)
+is not run and is reported `skip <group> (<reason>)`.
+
+Exits 0 when every group run passes, 1 when one fails, SKIP (77) on a revision miss
 or a provider whose clone API predates sync recipes;
 the last line printed is the reason.
 """
@@ -68,8 +71,8 @@ SQL_SCRIPTS_DIR = os.path.join(ROOT, "hive", "db", "sql_scripts")
 ADMIN_SQL_SCRIPTS = ("postgrest/utilities/preprocess_search_query.sql",)
 MARKER = "not postgrest_ignore"
 # As .gitlab-ci.yml's run-all-smoketests: search-api needs pg_search, which a
-# HAF image may lack.
-NON_FATAL_GROUPS = {"search-api_patterns"}
+# HAF image may lack, and the admin-level preprocess_search_query.
+SEARCH_GROUP = "search-api_patterns"
 _SMOKETESTS_RE = re.compile(r"SMOKETESTS=\((.*?)\)", re.DOTALL)
 _SMOKETEST_ENTRY_RE = re.compile(r'"([^":\s]+):[^"\s]+"')
 
@@ -155,6 +158,18 @@ def _install_admin_scripts(api_url: str, run_id: str) -> None:
         print(f"installed {script} into the clone")
 
 
+def precondition_skips(run_url: str, groups: list[str], can_install_admin: bool) -> dict[str, str]:
+    """The groups of `groups` whose host precondition the clone lacks, each with the reason."""
+    if SEARCH_GROUP not in groups:
+        return {}
+    installed = _psql(run_url, "select exists (select 1 from pg_extension where extname = 'pg_search');")
+    if installed != "t":
+        return {SEARCH_GROUP: "the pg_search extension is not installed in the clone"}
+    if not can_install_admin:
+        return {SEARCH_GROUP: "the clone lacks the admin-level scripts (provider predates install_admin_script)"}
+    return {}
+
+
 def _run_group(group: str, port: int, out: str, workers: str) -> int:
     env = dict(
         os.environ,
@@ -190,7 +205,7 @@ def _collect_outputs(out: str) -> int:
     return moved
 
 
-def _serve_and_test(run_url: str, out: str, groups: list[str]) -> list[str]:
+def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, str]) -> list[str]:
     port = free_port()
     base = f"http://127.0.0.1:{port}"
     log_path = os.path.join(out, "tavern-postgrest.log")
@@ -213,11 +228,13 @@ def _serve_and_test(run_url: str, out: str, groups: list[str]) -> list[str]:
         try:
             wait_until_serving(base, proc, log_path)
             for group in groups:
+                if group in skips:
+                    print(f"skip {group} ({skips[group]})", flush=True)
+                    continue
                 t0 = time.monotonic()
                 rc = _run_group(group, port, out, workers)
-                verdict = "ok  " if rc == 0 else ("WARN" if group in NON_FATAL_GROUPS else "FAIL")
-                print(f"{verdict} {group} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
-                if rc != 0 and group not in NON_FATAL_GROUPS:
+                print(f"{'ok  ' if rc == 0 else 'FAIL'} {group} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
+                if rc != 0:
                     failed.append(group)
         finally:
             proc.terminate()
@@ -289,9 +306,10 @@ def main(out: str) -> int:
         else:
             print(
                 "the shared hivemind service's clone API predates install_admin_script; it installs it on its "
-                "next start. Until then the clone lacks the admin-level scripts and search-api fails"
+                "next start. Until then the clone lacks the admin-level scripts and search-api is skipped"
             )
-        failed = _serve_and_test(run_url, out, groups)
+        skips = precondition_skips(run_url, groups, can_install_admin)
+        failed = _serve_and_test(run_url, out, groups, skips)
     finally:
         print(f"moved {_collect_outputs(out)} .out.json files to {os.path.join(out, 'tavern-out')}")
         try:
@@ -302,7 +320,8 @@ def main(out: str) -> int:
     if failed:
         print(f"tavern groups failed: {', '.join(failed)}")
         return 1
-    print(f"{len(groups)} tavern groups passed against {template.database}")
+    skipped = f", {len(skips)} skipped" if skips else ""
+    print(f"{len(groups) - len(skips)} tavern groups passed{skipped} against {template.database}")
     return 0
 
 

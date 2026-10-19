@@ -8,7 +8,7 @@ params:
 
      mandatory, determines order and filtering of returned posts
      values:
-       "relevant" - gives posts n order defined by postgres ts_rank algorithm https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-RANKING
+       "relevance" - gives posts n order defined by postgres ts_rank algorithm https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-RANKING
        "created" - newest top posts first (grayed out not considered); paging cuts out given and newer posts
 
   "author": {optional hive account name}; if specified, search will be limited to posts by this author

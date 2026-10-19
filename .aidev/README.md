@@ -101,7 +101,7 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
    installs the tree's copy through the provider,
    `install_admin_script('<run id>', <script>)`, which runs it as `haf_admin` in that
    run's database. On a provider whose clone API predates it, the step says so and
-   runs without them (search-api fails);
+   runs without them and skips search-api;
 4. serves the clone with PostgREST as `scripts/start_postgrest.sh` does, with
    `PGRST_DB_ROOT_SPEC=home` standing in for the postgrest-rewriter's `/` → `/rpc/home`;
 5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
@@ -109,8 +109,9 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
    `e2e_benchmark_on_postgrest`: `-m "not postgrest_ignore" --dist loadfile`, with
    `HIVEMIND_TAVERN_WORKERS` workers (default 4). Tox is not used, because the check
    container has no network to build its venv; the runtime image carries
-   `[testenv:tavern]`'s pins instead. As in CI, a failing `search-api_patterns`
-   (pg_search) is a warning, not a failure;
+   `[testenv:tavern]`'s pins instead. As in CI, `search-api_patterns` counts like
+   every other group when the clone has the `pg_search` extension, and is not run,
+   printing `skip search-api_patterns (<reason naming pg_search>)`, when it has none;
 6. moves the `.out.json` files tavern writes next to the patterns to
    `test-results/full/tavern-out/` and drops the clone, also when the run fails. A
    clone a killed run leaves behind is reaped after 6 hours.
