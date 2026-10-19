@@ -58,11 +58,12 @@
 \ir utilities/get_account_posts_by_tag.sql
 \ir bridge_api/bridge_api_get_account_posts.sql
 \ir bridge_api/bridge_api_get_account_posts_by_tag.sql
+\ir utilities/relationship_between_accounts.sql
 \ir bridge_api/bridge_api_get_relationship_between_accounts.sql
 \ir bridge_api/bridge_api_unread_notifications.sql
 \ir utilities/find_tag_id.sql
 \ir utilities/get_ranked_posts.sql
-\ir utilities/get_reblogged_posts.sql
+\ir utilities/ranked_posts_overlay.sql
 \ir bridge_api/bridge_api_get_ranked_posts.sql
 \ir condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql
 \ir condenser_api/condenser_api_get_discussions_by_comments.sql
@@ -104,6 +105,10 @@
 \ir ../endpoints/accounts/get_ops_by_account.sql
 \ir ../endpoints/accounts/get_account_pending_author_rewards.sql
 \ir ../endpoints/accounts/get_account_pending_curation_rewards.sql
+\ir ../endpoints/accounts/get_account_relationships.sql
+\ir ../endpoints/accounts/get_account_votes.sql
 \ir ../endpoints/blog/get_reblogs.sql
+\ir ../endpoints/blog/get_votes.sql
+\ir ../endpoints/posts/get_post_votes.sql
 \ir ../endpoints/other/get_sync_status.sql
 \ir ../endpoints/other/get_version.sql

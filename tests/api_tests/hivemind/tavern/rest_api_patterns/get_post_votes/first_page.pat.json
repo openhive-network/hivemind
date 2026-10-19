@@ -1,0 +1,32 @@
+[
+  {
+    "voter": "dantheman",
+    "author": "xeroc",
+    "permlink": "piston-web-first-open-source-steem-gui---searching-for-alpha-testers",
+    "weight": "17412903474494492",
+    "rshares": "30137301806887",
+    "vote_percent": 10000,
+    "last_update": "2016-07-22T23:00:36",
+    "num_changes": 0
+  },
+  {
+    "voter": "mr11acdee",
+    "author": "xeroc",
+    "permlink": "piston-web-first-open-source-steem-gui---searching-for-alpha-testers",
+    "weight": "1499241661750225",
+    "rshares": "785653864312",
+    "vote_percent": 10000,
+    "last_update": "2016-07-22T17:32:48",
+    "num_changes": 0
+  },
+  {
+    "voter": "mr11acdee1",
+    "author": "xeroc",
+    "permlink": "piston-web-first-open-source-steem-gui---searching-for-alpha-testers",
+    "weight": "379999622075636",
+    "rshares": "200133072703",
+    "vote_percent": 10000,
+    "last_update": "2016-07-22T17:32:57",
+    "num_changes": 0
+  }
+]

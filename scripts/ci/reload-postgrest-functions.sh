@@ -160,27 +160,20 @@ EOF
     echo "Function counts by schema:"
     psql "$POSTGRES_URL" -c "$COUNT_QUERY"
 
-    # Verify reblog functions specifically (critical for issue #326)
+    # Verify the ranked-posts overlay functions survived the CASCADE type drops in operation.sql (issue #326)
     echo ""
-    echo "=== Verifying reblog utility functions ==="
-    REBLOG_QUERY=$(cat <<'REBLOG_EOF'
-SELECT routine_schema, routine_name
-FROM information_schema.routines
-WHERE routine_name LIKE 'get_reblogged_posts%'
-   OR routine_name = 'get_reblogs'
-ORDER BY routine_schema, routine_name;
-REBLOG_EOF
-)
-    psql "$POSTGRES_URL" -c "$REBLOG_QUERY"
+    echo "=== Verifying ranked posts overlay functions ==="
+    OVERLAY_FUNCTIONS="'valid_ranked_posts_overlay_request', 'get_ranked_posts_overlay', 'get_ranked_posts_overlay_internal', 'get_reblogs', 'get_votes'"
+    psql "$POSTGRES_URL" -c "SELECT routine_schema, routine_name FROM information_schema.routines WHERE routine_name IN ($OVERLAY_FUNCTIONS) ORDER BY routine_schema, routine_name;"
 
-    REBLOG_COUNT=$(psql "$POSTGRES_URL" -t -c "SELECT COUNT(*) FROM information_schema.routines WHERE routine_name LIKE 'get_reblogged_posts%'")
-    REBLOG_COUNT=$(echo "$REBLOG_COUNT" | tr -d ' ')
-    if [ "$REBLOG_COUNT" -lt 5 ]; then
-        echo "ERROR: Expected at least 5 get_reblogged_posts functions, found $REBLOG_COUNT"
+    OVERLAY_COUNT=$(psql "$POSTGRES_URL" -t -c "SELECT COUNT(DISTINCT routine_name) FROM information_schema.routines WHERE routine_name IN ($OVERLAY_FUNCTIONS)")
+    OVERLAY_COUNT=$(echo "$OVERLAY_COUNT" | tr -d ' ')
+    if [ "$OVERLAY_COUNT" -lt 5 ]; then
+        echo "ERROR: Expected 5 ranked posts overlay functions, found $OVERLAY_COUNT"
         echo "The CASCADE DROP in operation.sql likely destroyed them"
         exit 1
     else
-        echo "OK: Found $REBLOG_COUNT get_reblogged_posts functions"
+        echo "OK: Found $OVERLAY_COUNT ranked posts overlay functions"
     fi
 fi
 

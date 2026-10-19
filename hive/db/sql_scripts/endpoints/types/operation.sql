@@ -116,16 +116,6 @@ CREATE TYPE hivemind_endpoints.operation_history AS (
 );
 -- openapi-generated-code-end
 
--- Note: the SQL composite type `hivemind_endpoints.reblog_status` is
--- defined in postgrest/utilities/get_reblogged_posts.sql (not here) to
--- avoid CASCADE DROP destroying the utility functions that depend on it.
--- The OpenAPI schema fragments below are required so $ref lookups in
--- the regenerator resolve, but `process_openapi.py` would otherwise
--- emit a duplicate `DROP TYPE ... CASCADE; CREATE TYPE reblog_status`
--- block right after the YAML. That block MUST be hand-removed after
--- every run of `scripts/openapi_rewrite.sh` until the regenerator
--- gains an `x-skip-create-type`-style override.
-
 /** openapi:components:schemas
 hivemind_endpoints.reblog_status:
   type: object
@@ -140,12 +130,194 @@ hivemind_endpoints.reblog_status:
       type: boolean
       description: True if the observer has reblogged this post
  */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.reblog_status CASCADE;
+CREATE TYPE hivemind_endpoints.reblog_status AS (
+    "author" TEXT,
+    "permlink" TEXT,
+    "reblogged" BOOLEAN
+);
+-- openapi-generated-code-end
 
 /** openapi:components:schemas
 hivemind_endpoints.array_of_reblog_status:
   type: array
   items:
     $ref: '#/components/schemas/hivemind_endpoints.reblog_status'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.vote_status:
+  type: object
+  properties:
+    author:
+      type: string
+      description: Post author account name
+    permlink:
+      type: string
+      description: Post permlink
+    voted:
+      type: boolean
+      description: True if the observer has voted on this post
+    vote_percent:
+      type: integer
+      description: Percent of the observer''s vote in basis points (10000 is a full upvote, negative for a downvote), 0 when the observer has not voted
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.vote_status CASCADE;
+CREATE TYPE hivemind_endpoints.vote_status AS (
+    "author" TEXT,
+    "permlink" TEXT,
+    "voted" BOOLEAN,
+    "vote_percent" INT
+);
+-- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_vote_status:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.vote_status'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.account_relationship:
+  type: object
+  properties:
+    account:
+      type: string
+      description: Listed account name
+    follows:
+      type: boolean
+      description: True if the account follows the listed account
+    ignores:
+      type: boolean
+      description: True if the account ignores (mutes) the listed account
+    blacklists:
+      type: boolean
+      description: True if the account blacklists the listed account
+    follows_blacklists:
+      type: boolean
+      description: True if the account follows the listed account''s blacklist
+    follows_muted:
+      type: boolean
+      description: True if the account follows the listed account''s mute list
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.account_relationship CASCADE;
+CREATE TYPE hivemind_endpoints.account_relationship AS (
+    "account" TEXT,
+    "follows" BOOLEAN,
+    "ignores" BOOLEAN,
+    "blacklists" BOOLEAN,
+    "follows_blacklists" BOOLEAN,
+    "follows_muted" BOOLEAN
+);
+-- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_account_relationship:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.account_relationship'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.account_vote:
+  type: object
+  properties:
+    author:
+      type: string
+      description: Author of the voted post
+    permlink:
+      type: string
+      description: Permlink of the voted post
+    weight:
+      type: string
+      description: Vote weight used for curation rewards, as a decimal integer string (can exceed 2^53)
+    rshares:
+      type: string
+      description: Reward shares of the vote, as a decimal integer string (can exceed 2^53)
+    vote_percent:
+      type: integer
+      description: Vote percent in basis points (10000 is a full upvote, negative for a downvote, 0 for a removed vote)
+    last_update:
+      type: string
+      format: date-time
+      description: Time the vote was cast or last changed
+    num_changes:
+      type: integer
+      description: Number of times the vote was changed
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.account_vote CASCADE;
+CREATE TYPE hivemind_endpoints.account_vote AS (
+    "author" TEXT,
+    "permlink" TEXT,
+    "weight" TEXT,
+    "rshares" TEXT,
+    "vote_percent" INT,
+    "last_update" TIMESTAMP,
+    "num_changes" INT
+);
+-- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_account_vote:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.account_vote'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.post_vote:
+  type: object
+  properties:
+    voter:
+      type: string
+      description: Voter account name
+    author:
+      type: string
+      description: Author of the voted post
+    permlink:
+      type: string
+      description: Permlink of the voted post
+    weight:
+      type: string
+      description: Vote weight used for curation rewards, as a decimal integer string (can exceed 2^53)
+    rshares:
+      type: string
+      description: Reward shares of the vote, as a decimal integer string (can exceed 2^53)
+    vote_percent:
+      type: integer
+      description: Vote percent in basis points (10000 is a full upvote, negative for a downvote, 0 for a removed vote)
+    last_update:
+      type: string
+      format: date-time
+      description: Time the vote was cast or last changed
+    num_changes:
+      type: integer
+      description: Number of times the vote was changed
+ */
+-- openapi-generated-code-begin
+DROP TYPE IF EXISTS hivemind_endpoints.post_vote CASCADE;
+CREATE TYPE hivemind_endpoints.post_vote AS (
+    "voter" TEXT,
+    "author" TEXT,
+    "permlink" TEXT,
+    "weight" TEXT,
+    "rshares" TEXT,
+    "vote_percent" INT,
+    "last_update" TIMESTAMP,
+    "num_changes" INT
+);
+-- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_post_vote:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.post_vote'
  */
 
 /** openapi:components:schemas

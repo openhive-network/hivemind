@@ -1,0 +1,6 @@
+{
+  "code": "P0001",
+  "details": null,
+  "hint": null,
+  "message": "start-author and start-permlink must be given together"
+}

@@ -1,0 +1,6 @@
+{
+  "code": "P0001",
+  "details": null,
+  "hint": null,
+  "message": "accounts may list at most 100 names, got 101"
+}
