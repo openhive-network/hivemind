@@ -290,12 +290,16 @@ def test_run_id_refuses_a_prefix_the_clone_api_would(prefix: str) -> None:
         fixture.new_run_id(prefix)
 
 
-def test_smoketest_groups_are_the_ci_list() -> None:
+def _load_tavern() -> ModuleType:
     sys.path.insert(0, str(AIDEV))
     try:
-        tavern = _load('hivemind_tavern', AIDEV / 'hivemind_tavern.py')
+        return _load('hivemind_tavern', AIDEV / 'hivemind_tavern.py')
     finally:
         sys.path.remove(str(AIDEV))
+
+
+def test_smoketest_groups_are_the_ci_list() -> None:
+    tavern = _load_tavern()
     groups = tavern.smoketest_groups((ROOT / '.gitlab-ci.yml').read_text())
 
     assert groups[:2] == ['condenser_api_patterns', 'condenser_api_negative']
@@ -326,6 +330,8 @@ elif 'request_seed' in sql:
     print('pending')
 elif 'clone_run_database' in sql:
     print('run_' + variables['run'])
+elif 'pg_extension' in sql:
+    print(os.environ.get('FAKE_PG_SEARCH', 'f'))
 '''
 
 
@@ -443,3 +449,34 @@ def test_an_exact_hit_clones_that_template_without_a_seed_request_and_drops_the_
         'reload refused: --postgres-url=postgresql://hivemind@hivemind:5432/run_tavern-'
         in (tmp_path / 'out' / 'tavern-reload.log').read_text()
     )
+
+
+@pytest.mark.parametrize(
+    ('pg_search', 'can_install_admin', 'reason'),
+    [
+        ('t', True, None),
+        ('f', True, 'pg_search'),
+        ('t', False, 'admin-level scripts'),
+    ],
+)
+def test_search_api_runs_only_where_its_precondition_holds(
+    tree: Path, monkeypatch: pytest.MonkeyPatch, pg_search: str, can_install_admin: bool, reason: str | None
+) -> None:
+    monkeypatch.setenv('FAKE_PG_SEARCH', pg_search)
+    tavern = _load_tavern()
+    groups = tavern.smoketest_groups((ROOT / '.gitlab-ci.yml').read_text())
+
+    skips = tavern.precondition_skips('postgresql://hivemind@hivemind:5432/run_x', groups, can_install_admin)
+
+    if reason is None:
+        assert skips == {}
+    else:
+        assert list(skips) == ['search-api_patterns']
+        assert reason in skips['search-api_patterns']
+
+
+def test_without_search_api_no_precondition_is_queried(tree: Path) -> None:
+    tavern = _load_tavern()
+
+    assert tavern.precondition_skips('postgresql://hivemind@hivemind:5432/run_x', ['bridge_api_patterns'], False) == {}
+    assert not Path(os.environ['FAKE_PSQL_LOG']).exists()
