@@ -8,6 +8,15 @@ $$
 DECLARE
   result JSONB;
 BEGIN
+  -- Optional serving seam for the lite_posts HAF app; see the PostgREST README.
+  -- The call is resolved at run time, so hivemind installs without lite_posts.
+  IF current_setting('hivemind.lite_intercept', true) = 'on' THEN
+    result := lite_posts.intercept(__api_type, __method_type, __params);
+    IF result IS NOT NULL THEN
+      RETURN result;
+    END IF;
+  END IF;
+
   CASE
     WHEN __api_type = 'condenser_api' THEN
       result := hivemind_postgrest_utilities.get_condenser_api_method(__method_type, __params);
