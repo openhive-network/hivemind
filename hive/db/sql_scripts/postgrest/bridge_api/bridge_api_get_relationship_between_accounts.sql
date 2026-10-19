@@ -35,13 +35,7 @@ BEGIN
 
   _debug = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'debug', False);
 
-  RETURN jsonb_build_object(
-      'follows', (SELECT EXISTS (SELECT 1 FROM hivemind_app.follows WHERE follower=_account1_id  AND FOLLOWING=_account2_id)),
-      'ignores', (SELECT EXISTS (SELECT 1 FROM hivemind_app.muted WHERE follower=_account1_id  AND FOLLOWING=_account2_id)),
-      'blacklists', (SELECT EXISTS (SELECT 1 FROM hivemind_app.blacklisted WHERE follower=_account1_id  AND FOLLOWING=_account2_id)),
-      'follows_blacklists', (SELECT EXISTS (SELECT 1 FROM hivemind_app.follow_blacklisted WHERE follower=_account1_id  AND FOLLOWING=_account2_id)),
-      'follows_muted', (SELECT EXISTS (SELECT 1 FROM hivemind_app.follow_muted WHERE follower=_account1_id  AND FOLLOWING=_account2_id))
-  );
+  RETURN to_jsonb(hivemind_postgrest_utilities.get_relationship_between_accounts(_account1_id, _account2_id));
 END
 $$
 ;

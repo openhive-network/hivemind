@@ -1,0 +1,50 @@
+[
+  {
+    "account": "flw3",
+    "follows": true,
+    "ignores": false,
+    "blacklists": false,
+    "follows_blacklists": false,
+    "follows_muted": false
+  },
+  {
+    "account": "flw6",
+    "follows": false,
+    "ignores": true,
+    "blacklists": false,
+    "follows_blacklists": false,
+    "follows_muted": false
+  },
+  {
+    "account": "flw7",
+    "follows": false,
+    "ignores": false,
+    "blacklists": true,
+    "follows_blacklists": false,
+    "follows_muted": false
+  },
+  {
+    "account": "flw8",
+    "follows": false,
+    "ignores": false,
+    "blacklists": false,
+    "follows_blacklists": true,
+    "follows_muted": false
+  },
+  {
+    "account": "flw9",
+    "follows": false,
+    "ignores": false,
+    "blacklists": false,
+    "follows_blacklists": false,
+    "follows_muted": true
+  },
+  {
+    "account": "flw2",
+    "follows": false,
+    "ignores": false,
+    "blacklists": false,
+    "follows_blacklists": false,
+    "follows_muted": false
+  }
+]

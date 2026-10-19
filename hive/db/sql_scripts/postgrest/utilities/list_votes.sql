@@ -58,10 +58,10 @@ $function$
 ;
 
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.list_votes_case CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment', 'bridge_list_by_comment_voter_after');
+CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment', 'bridge_list_by_comment_voter_after', 'list_by_voter_last_update_before');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_votes;
-CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER, IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL, IN _start_author_id INT DEFAULT NULL, IN _start_permlink_id INT DEFAULT NULL)
+CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _observer_id INTEGER, IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL, IN _start_author_id INT DEFAULT NULL, IN _start_permlink_id INT DEFAULT NULL, IN _before_last_update TIMESTAMP DEFAULT NULL, IN _before_vote_id BIGINT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
@@ -72,11 +72,14 @@ _result JSONB;
 -- folded to a constant in the per-execution plan, so the planner drops the reputation join when it is not output
 _with_reputation BOOLEAN := _presentation_mode NOT IN ('bridge_api', 'database_api');
 BEGIN
-  IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case,'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case]) THEN
+  IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case,'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case,'list_by_voter_last_update_before'::hivemind_postgrest_utilities.list_votes_case]) THEN
     assert _voter_id IS NOT NULL;
   END IF;
   IF _case = 'database_list_by_voter_comment' THEN
     assert _start_author_id IS NOT NULL AND _start_permlink_id IS NOT NULL;
+  END IF;
+  IF _case = 'list_by_voter_last_update_before' THEN
+    assert _before_last_update IS NOT NULL AND _before_vote_id IS NOT NULL;
   END IF;
 
   -- Dynamic SQL is planned with the parameter values on every execution: a generic plan of the
@@ -109,6 +112,8 @@ BEGIN
           -- (author_id, permlink_id) order lets hive_votes_voter_id_author_id_permlink_id_uk bound the scan
           WHEN $4 = 'database_list_by_voter_comment' THEN (v.voter_id = $6 AND (v.author_id, v.permlink_id) >= ($8, $9))
           WHEN $4 = 'bridge_list_by_comment_voter_after' THEN (v.post_id = $2 AND v.voter_id > $6)
+          -- newest first by (last_update, id); the last_update bound lets hive_votes_voter_id_last_update_idx bound the scan
+          WHEN $4 = 'list_by_voter_last_update_before' THEN (v.voter_id = $6 AND v.last_update <= $10 AND (v.last_update < $10 OR v.id < $11))
         END
       )
       AND ($1 = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = $1 AND muted_id = v.voter_id))
@@ -123,12 +128,20 @@ BEGIN
       ( CASE
           WHEN $4 = 'database_list_by_voter_comment' THEN v.permlink_id
         END
-      )
+      ),
+      ( CASE
+          WHEN $4 = 'list_by_voter_last_update_before' THEN v.last_update
+        END
+      ) DESC,
+      ( CASE
+          WHEN $4 = 'list_by_voter_last_update_before' THEN v.id
+        END
+      ) DESC
       LIMIT $3
     ) r
   $query$
   INTO _result
-  USING _observer_id, _post_id, _limit, _case, _presentation_mode, _voter_id, _with_reputation, _start_author_id, _start_permlink_id;
+  USING _observer_id, _post_id, _limit, _case, _presentation_mode, _voter_id, _with_reputation, _start_author_id, _start_permlink_id, _before_last_update, _before_vote_id;
 
   RETURN COALESCE(_result, '[]'::jsonb);
 END;

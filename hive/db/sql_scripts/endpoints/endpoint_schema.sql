@@ -190,6 +190,152 @@ declare
           "$ref": "#/components/schemas/hivemind_endpoints.reblog_status"
         }
       },
+      "hivemind_endpoints.vote_status": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "string",
+            "description": "Post author account name"
+          },
+          "permlink": {
+            "type": "string",
+            "description": "Post permlink"
+          },
+          "voted": {
+            "type": "boolean",
+            "description": "True if the observer has voted on this post"
+          },
+          "vote_percent": {
+            "type": "integer",
+            "description": "Percent of the observer''s vote in basis points (10000 is a full upvote, negative for a downvote), 0 when the observer has not voted"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_vote_status": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.vote_status"
+        }
+      },
+      "hivemind_endpoints.account_relationship": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "Listed account name"
+          },
+          "follows": {
+            "type": "boolean",
+            "description": "True if the account follows the listed account"
+          },
+          "ignores": {
+            "type": "boolean",
+            "description": "True if the account ignores (mutes) the listed account"
+          },
+          "blacklists": {
+            "type": "boolean",
+            "description": "True if the account blacklists the listed account"
+          },
+          "follows_blacklists": {
+            "type": "boolean",
+            "description": "True if the account follows the listed account''s blacklist"
+          },
+          "follows_muted": {
+            "type": "boolean",
+            "description": "True if the account follows the listed account''s mute list"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_account_relationship": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.account_relationship"
+        }
+      },
+      "hivemind_endpoints.account_vote": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "string",
+            "description": "Author of the voted post"
+          },
+          "permlink": {
+            "type": "string",
+            "description": "Permlink of the voted post"
+          },
+          "weight": {
+            "type": "string",
+            "description": "Vote weight used for curation rewards, as a decimal integer string (can exceed 2^53)"
+          },
+          "rshares": {
+            "type": "string",
+            "description": "Reward shares of the vote, as a decimal integer string (can exceed 2^53)"
+          },
+          "vote_percent": {
+            "type": "integer",
+            "description": "Vote percent in basis points (10000 is a full upvote, negative for a downvote, 0 for a removed vote)"
+          },
+          "last_update": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the vote was cast or last changed"
+          },
+          "num_changes": {
+            "type": "integer",
+            "description": "Number of times the vote was changed"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_account_vote": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.account_vote"
+        }
+      },
+      "hivemind_endpoints.post_vote": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "description": "Voter account name"
+          },
+          "author": {
+            "type": "string",
+            "description": "Author of the voted post"
+          },
+          "permlink": {
+            "type": "string",
+            "description": "Permlink of the voted post"
+          },
+          "weight": {
+            "type": "string",
+            "description": "Vote weight used for curation rewards, as a decimal integer string (can exceed 2^53)"
+          },
+          "rshares": {
+            "type": "string",
+            "description": "Reward shares of the vote, as a decimal integer string (can exceed 2^53)"
+          },
+          "vote_percent": {
+            "type": "integer",
+            "description": "Vote percent in basis points (10000 is a full upvote, negative for a downvote, 0 for a removed vote)"
+          },
+          "last_update": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the vote was cast or last changed"
+          },
+          "num_changes": {
+            "type": "integer",
+            "description": "Number of times the vote was changed"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_post_vote": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.post_vote"
+        }
+      },
       "hivemind_endpoints.asset": {
         "type": "object",
         "x-sql-datatype": "JSON",
@@ -596,6 +742,150 @@ declare
         }
       }
     },
+    "/accounts/{account-name}/relationships": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get the relationship of an account to each of a list of accounts",
+        "description": "Returns, for each listed account, whether the account follows, ignores (mutes) or blacklists it,\nand whether the account follows its blacklist or its mute list, the same fields as\n`bridge.get_relationship_between_accounts`. One row is returned per distinct listed account,\nin the order they are listed.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_relationships(''alice'', ''bob,carol'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/relationships?accounts=bob,carol''`\n",
+        "operationId": "hivemind_endpoints.get_account_relationships",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose relationships are returned"
+          },
+          {
+            "in": "query",
+            "name": "accounts",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of at most 100 account names"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relationship of the account to each listed account\n\n* Returns `SETOF hivemind_endpoints.account_relationship`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_account_relationship"
+                },
+                "example": [
+                  {
+                    "account": "bob",
+                    "follows": true,
+                    "ignores": false,
+                    "blacklists": false,
+                    "follows_blacklists": false,
+                    "follows_muted": false
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, missing or invalid account list, or more than 100 listed accounts"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/votes": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get votes cast by an account, newest first",
+        "description": "Returns the votes cast by the account ordered by the time each vote was last updated, newest first\n(ties are broken by the vote''s internal id, newest first).\n\nTo fetch the next page pass the `last_update`, `author` and `permlink` of the last vote of the\nprevious page as `before`, `start-author` and `start-permlink`; consecutive pages then neither\nrepeat nor skip a vote. `before` alone returns the votes last updated strictly before that time.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_votes(''blocktrades'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20''`\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20&before=2016-09-15T19:47:21&start-author=alice&start-permlink=my-awesome-post''`\n",
+        "operationId": "hivemind_endpoints.get_account_votes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose votes are listed"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            },
+            "description": "Maximum number of votes to return"
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": null
+            },
+            "description": "Return votes last updated before this time (`last_update` of the last vote of the previous page)"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of the post of the last vote of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of the post of the last vote of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Votes cast by the account, newest first\n\n* Returns `SETOF hivemind_endpoints.account_vote`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_account_vote"
+                },
+                "example": [
+                  {
+                    "author": "alice",
+                    "permlink": "my-awesome-post",
+                    "weight": "1146353766",
+                    "rshares": "1879215360",
+                    "vote_percent": 10000,
+                    "last_update": "2016-09-15T19:47:21",
+                    "num_changes": 0
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, unknown start post, or the account has not voted on the start post"
+          }
+        }
+      }
+    },
     "/blog/reblogs": {
       "get": {
         "tags": [
@@ -699,6 +989,193 @@ declare
           },
           "400": {
             "description": "Invalid parameters (missing observer or invalid sort)"
+          }
+        }
+      }
+    },
+    "/blog/votes": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get vote status for ranked posts",
+        "description": "Returns the observer''s vote on each post matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers, whether the observer has voted on each post\nand the percent of that vote, so a front end can cache the anonymous feed and fetch this overlay separately.\nA vote the observer later removed is still reported as `voted` with `vote_percent` 0, as it still appears\nin the post''s active votes.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_votes(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/votes?sort=trending&observer=alice&limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_votes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "trending",
+                "hot",
+                "created",
+                "payout",
+                "payout_comments",
+                "muted"
+              ]
+            },
+            "description": "Sorting method for posts"
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            },
+            "description": "Filter by tag, community name, ''my'' for observer''s subscribed communities, or empty/''all'' for all posts\n"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account name to check vote status for (required)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            },
+            "description": "Maximum number of posts to return"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of post to start pagination from"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of post to start pagination from"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of posts with the observer''s vote status\n\n* Returns `SETOF hivemind_endpoints.vote_status`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_vote_status"
+                },
+                "example": [
+                  {
+                    "author": "hiveio",
+                    "permlink": "hive-5-celebrating-our-5th-anniversary-as-hive",
+                    "voted": true,
+                    "vote_percent": 10000
+                  },
+                  {
+                    "author": "alice",
+                    "permlink": "my-awesome-post",
+                    "voted": false,
+                    "vote_percent": 0
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters (missing observer or invalid sort)"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}/votes": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get votes on a post",
+        "description": "Returns the votes on one post or comment, in the same order as `database_api.list_votes` with\n`by_comment_voter` (by the voter''s account id, i.e. account creation order).\n\nTo fetch the next page pass the `voter` of the last vote of the previous page as `start-voter`;\nthe page starts after that voter.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_post_votes(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/votes?limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_post_votes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            },
+            "description": "Maximum number of votes to return"
+          },
+          {
+            "in": "query",
+            "name": "start-voter",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Voter of the last vote of the previous page; the page starts after this voter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Votes on the post\n\n* Returns `SETOF hivemind_endpoints.post_vote`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_post_vote"
+                },
+                "example": [
+                  {
+                    "voter": "bob",
+                    "author": "alice",
+                    "permlink": "my-awesome-post",
+                    "weight": "1146353766",
+                    "rshares": "1879215360",
+                    "vote_percent": 10000,
+                    "last_update": "2016-09-15T19:47:21",
+                    "num_changes": 0
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown post or unknown start voter"
           }
         }
       }
