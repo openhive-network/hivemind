@@ -2,112 +2,1093 @@
   {
     "active_votes": [
       {
-        "rshares": 56815342,
-        "voter": "madodel"
+        "rshares": 640801360232,
+        "voter": "barrie"
+      },
+      {
+        "rshares": 2754029365198,
+        "voter": "proskynneo"
+      },
+      {
+        "rshares": 141389765592,
+        "voter": "highasfuck"
+      },
+      {
+        "rshares": 2288951832086,
+        "voter": "hr1"
+      },
+      {
+        "rshares": 7420156892577,
+        "voter": "tombstone"
+      },
+      {
+        "rshares": 3372913545514,
+        "voter": "wang"
+      },
+      {
+        "rshares": 2471431703,
+        "voter": "boy"
+      },
+      {
+        "rshares": 2999681908,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 562186630,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 42099094227,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1324776194,
+        "voter": "mini"
+      },
+      {
+        "rshares": 170731788,
+        "voter": "moon"
+      },
+      {
+        "rshares": 113896982652,
+        "voter": "alex90342fastn1"
+      },
+      {
+        "rshares": 410772782927,
+        "voter": "recursive2"
+      },
+      {
+        "rshares": 2727014063776,
+        "voter": "recursive"
+      },
+      {
+        "rshares": 889536184075,
+        "voter": "boombastic"
+      },
+      {
+        "rshares": 124551070886,
+        "voter": "mrs.agsexplorer"
+      },
+      {
+        "rshares": 9339107692,
+        "voter": "bingo-0"
+      },
+      {
+        "rshares": 2388248698,
+        "voter": "bingo-1"
+      },
+      {
+        "rshares": 1207243588756,
+        "voter": "steempower"
+      },
+      {
+        "rshares": 497044136,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 734326610,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 131666156835,
+        "voter": "team"
+      },
+      {
+        "rshares": 980597524,
+        "voter": "relativelyboston"
+      },
+      {
+        "rshares": 230193744,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 57633394586,
+        "voter": "noaommerrr"
+      },
+      {
+        "rshares": 464536603135,
+        "voter": "dana-edwards"
+      },
+      {
+        "rshares": 6087528729,
+        "voter": "full-measure"
+      },
+      {
+        "rshares": 15810330031,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 411899413,
+        "voter": "paco-steem"
+      },
+      {
+        "rshares": 4718442924,
+        "voter": "spaninv"
+      },
+      {
+        "rshares": 330793167340,
+        "voter": "teamsteem"
+      },
+      {
+        "rshares": 20759345572,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 735181413,
+        "voter": "wolf"
+      },
+      {
+        "rshares": 588940977,
+        "voter": "n25052016"
+      },
+      {
+        "rshares": 5031973733,
+        "voter": "cian.dafe"
+      },
+      {
+        "rshares": 2146447798,
+        "voter": "coar"
+      },
+      {
+        "rshares": 406127350289,
+        "voter": "kevinwong"
+      },
+      {
+        "rshares": 2159284677,
+        "voter": "murh"
+      },
+      {
+        "rshares": 18708488245,
+        "voter": "vippero"
+      },
+      {
+        "rshares": 431433572273,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 141944533,
+        "voter": "irit"
+      },
+      {
+        "rshares": 188222890396,
+        "voter": "billbutler"
+      },
+      {
+        "rshares": 44361054998,
+        "voter": "justtryme90"
+      },
+      {
+        "rshares": 4174428400,
+        "voter": "andre-ager"
+      },
+      {
+        "rshares": 322054367,
+        "voter": "stiletto"
+      },
+      {
+        "rshares": 109489279946,
+        "voter": "kenny-crane"
+      },
+      {
+        "rshares": 19541651162,
+        "voter": "samether"
+      },
+      {
+        "rshares": 68065212431,
+        "voter": "ratel"
+      },
+      {
+        "rshares": 129372747086,
+        "voter": "schro"
+      },
+      {
+        "rshares": 6203206625,
+        "voter": "mark-waser"
+      },
+      {
+        "rshares": 49829689749,
+        "voter": "geoffrey"
+      },
+      {
+        "rshares": 40207437553,
+        "voter": "honeythief"
+      },
+      {
+        "rshares": 2458834239,
+        "voter": "fuck.off"
+      },
+      {
+        "rshares": 3349447356,
+        "voter": "iloveporn"
+      },
+      {
+        "rshares": 4073325651,
+        "voter": "johnbradshaw"
+      },
+      {
+        "rshares": 9145245341,
+        "voter": "primus"
+      },
+      {
+        "rshares": 61099645784,
+        "voter": "norbu"
+      },
+      {
+        "rshares": 2840673122,
+        "voter": "the.whale"
+      },
+      {
+        "rshares": 8489838449,
+        "voter": "cannav"
+      },
+      {
+        "rshares": 245621205,
+        "voter": "russle"
+      },
+      {
+        "rshares": 8433966392,
+        "voter": "dasha"
+      },
+      {
+        "rshares": 2691550256,
+        "voter": "unicornfarts"
+      },
+      {
+        "rshares": 75707948920,
+        "voter": "rubybian"
+      },
+      {
+        "rshares": 2105090006,
+        "voter": "orly"
+      },
+      {
+        "rshares": 1048984163,
+        "voter": "bitcointop"
+      },
+      {
+        "rshares": 11075736394,
+        "voter": "konstantin"
+      },
+      {
+        "rshares": 111265427,
+        "voter": "soupernerd"
+      },
+      {
+        "rshares": 4899593083,
+        "voter": "cmtzco"
+      },
+      {
+        "rshares": 11082944191,
+        "voter": "stealthtrader"
+      },
+      {
+        "rshares": 2840901076,
+        "voter": "vote"
+      },
+      {
+        "rshares": 60687478640,
+        "voter": "jackkang"
+      },
+      {
+        "rshares": 2991126117,
+        "voter": "kissmybutt"
+      },
+      {
+        "rshares": 31785851320,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 512160635,
+        "voter": "endgame"
+      },
+      {
+        "rshares": 203116499499,
+        "voter": "slowwalker"
+      },
+      {
+        "rshares": 33445136629,
+        "voter": "furion"
+      },
+      {
+        "rshares": 537097998,
+        "voter": "busser"
+      },
+      {
+        "rshares": 1581202684,
+        "voter": "owdy"
+      },
+      {
+        "rshares": 376056431,
+        "voter": "barbara2"
+      },
+      {
+        "rshares": 416574219,
+        "voter": "ch0c0latechip"
+      },
+      {
+        "rshares": 385501453,
+        "voter": "doge4lyf"
+      },
+      {
+        "rshares": 1311952491,
+        "voter": "marcgodard"
+      },
+      {
+        "rshares": 18986910263,
+        "voter": "akareyon"
+      },
+      {
+        "rshares": 4368657675,
+        "voter": "gikitiki"
+      },
+      {
+        "rshares": 10090049062,
+        "voter": "asim"
+      },
+      {
+        "rshares": 3852695264,
+        "voter": "thegoodguy"
+      },
+      {
+        "rshares": 348268157951,
+        "voter": "bobbylee"
+      },
+      {
+        "rshares": 189619118,
+        "voter": "zoicneo"
+      },
+      {
+        "rshares": 329672708,
+        "voter": "dr2073"
+      },
+      {
+        "rshares": 570631386,
+        "voter": "pigatto"
+      },
+      {
+        "rshares": 1670036281,
+        "voter": "screasey"
+      },
+      {
+        "rshares": 52545625104,
+        "voter": "milestone"
+      },
+      {
+        "rshares": 2163609626,
+        "voter": "dimon14"
+      },
+      {
+        "rshares": 7127093424,
+        "voter": "cryptojoy.com"
+      },
+      {
+        "rshares": 2186090626,
+        "voter": "imp3"
+      },
+      {
+        "rshares": 413811506,
+        "voter": "natalyt"
+      },
+      {
+        "rshares": 163174319449,
+        "voter": "calaber24p"
+      },
+      {
+        "rshares": 13484617970,
+        "voter": "mustafaomar"
+      },
+      {
+        "rshares": 5891987414,
+        "voter": "tarindel"
+      },
+      {
+        "rshares": 39535512113,
+        "voter": "sauravrungta"
+      },
+      {
+        "rshares": 12733320861,
+        "voter": "positive"
+      },
+      {
+        "rshares": 1123625403,
+        "voter": "yarly"
+      },
+      {
+        "rshares": 248358280,
+        "voter": "yarly2"
+      },
+      {
+        "rshares": 248731455,
+        "voter": "yarly3"
+      },
+      {
+        "rshares": 144087185,
+        "voter": "yarly4"
+      },
+      {
+        "rshares": 144901897,
+        "voter": "yarly5"
+      },
+      {
+        "rshares": 82655604,
+        "voter": "yarly7"
+      },
+      {
+        "rshares": 7288499495,
+        "voter": "alsprinting"
+      },
+      {
+        "rshares": 771047095,
+        "voter": "politicasan2"
+      },
+      {
+        "rshares": 12127833213,
+        "voter": "lemooljiang"
+      },
+      {
+        "rshares": 447589203,
+        "voter": "kooshikoo"
+      },
+      {
+        "rshares": 614207849,
+        "voter": "curator"
+      },
+      {
+        "rshares": 288622071,
+        "voter": "yarly10"
+      },
+      {
+        "rshares": 226031185,
+        "voter": "alex.chien"
+      },
+      {
+        "rshares": 151532488,
+        "voter": "yarly11"
+      },
+      {
+        "rshares": 74716626,
+        "voter": "yarly12"
+      },
+      {
+        "rshares": 396551546,
+        "voter": "fnait"
+      },
+      {
+        "rshares": 389025700,
+        "voter": "keepcalmand"
+      },
+      {
+        "rshares": 3033229074,
+        "voter": "bkkshadow"
+      },
+      {
+        "rshares": 81930668,
+        "voter": "elliottgodard"
+      },
+      {
+        "rshares": 112996238,
+        "voter": "creatorgalaxy"
+      },
+      {
+        "rshares": 179979763,
+        "voter": "taz"
+      },
+      {
+        "rshares": 8235792162,
+        "voter": "youngkim"
+      },
+      {
+        "rshares": 101853977,
+        "voter": "steemster1"
+      },
+      {
+        "rshares": 104226163,
+        "voter": "jlwk0lb"
+      },
+      {
+        "rshares": 13303963198,
+        "voter": "williambanks"
+      },
+      {
+        "rshares": 109235699,
+        "voter": "weenis"
+      },
+      {
+        "rshares": 37360019593,
+        "voter": "shaka"
+      },
+      {
+        "rshares": 5417518397,
+        "voter": "mahekg"
+      },
+      {
+        "rshares": 2035308569,
+        "voter": "theprophet0"
+      },
+      {
+        "rshares": 51143991,
+        "voter": "sharon"
+      },
+      {
+        "rshares": 50234451,
+        "voter": "johnblow"
+      },
+      {
+        "rshares": 784525289,
+        "voter": "merej99"
+      },
+      {
+        "rshares": 50731326,
+        "voter": "lillianjones"
+      },
+      {
+        "rshares": 470586608,
+        "voter": "minnowsunited"
+      },
+      {
+        "rshares": 445770867255,
+        "voter": "glitterfart"
+      },
+      {
+        "rshares": 2138921260,
+        "voter": "darrenturetzky"
+      },
+      {
+        "rshares": 37421781450,
+        "voter": "joele"
+      },
+      {
+        "rshares": 61374242,
+        "voter": "makaveli"
+      },
+      {
+        "rshares": 51120963,
+        "voter": "msjennifer"
+      },
+      {
+        "rshares": 50828873,
+        "voter": "ciao"
+      },
+      {
+        "rshares": 5557329445,
+        "voter": "thebotkiller"
+      },
+      {
+        "rshares": 50521096,
+        "voter": "steemo"
+      },
+      {
+        "rshares": 50390768,
+        "voter": "steema"
+      },
+      {
+        "rshares": 1585842664,
+        "voter": "erikclark13"
+      },
+      {
+        "rshares": 145150689,
+        "voter": "gamerate"
+      },
+      {
+        "rshares": 225506459,
+        "voter": "vootka"
+      },
+      {
+        "rshares": 50183394,
+        "voter": "confucius"
+      },
+      {
+        "rshares": 61696026,
+        "voter": "immortality"
+      },
+      {
+        "rshares": 102038122954,
+        "voter": "miacats"
+      },
+      {
+        "rshares": 60886073,
+        "voter": "tomeraddady"
+      },
+      {
+        "rshares": 114975081,
+        "voter": "future-shock"
+      },
+      {
+        "rshares": 52952823,
+        "voter": "party1998"
+      },
+      {
+        "rshares": 61167862,
+        "voter": "immortal"
+      },
+      {
+        "rshares": 51153233,
+        "voter": "jarvis"
+      },
+      {
+        "rshares": 442742582,
+        "voter": "abc1621043211"
+      },
+      {
+        "rshares": 50692212,
+        "voter": "fortuner"
+      },
+      {
+        "rshares": 60661014,
+        "voter": "rashka"
+      },
+      {
+        "rshares": 139203837,
+        "voter": "jimmytwoshoes"
+      },
+      {
+        "rshares": 50684643,
+        "voter": "johnbyrd"
+      },
+      {
+        "rshares": 50682252,
+        "voter": "thomasaustin"
+      },
+      {
+        "rshares": 50680459,
+        "voter": "thermor"
+      },
+      {
+        "rshares": 50677748,
+        "voter": "ficholl"
+      },
+      {
+        "rshares": 1643997345,
+        "voter": "shneakysquirrel"
+      },
+      {
+        "rshares": 57640568,
+        "voter": "longtech"
+      },
+      {
+        "rshares": 1502682115,
+        "voter": "movievertigo"
+      },
+      {
+        "rshares": 50311250,
+        "voter": "revelbrooks"
+      },
+      {
+        "rshares": 890700319,
+        "voter": "levycore"
+      },
+      {
+        "rshares": 13792527351,
+        "voter": "yef99"
+      },
+      {
+        "rshares": 2860940315,
+        "voter": "netaterra"
+      },
+      {
+        "rshares": 59110838,
+        "voter": "metu2222"
+      },
+      {
+        "rshares": 26094708892,
+        "voter": "andrewawerdna"
+      },
+      {
+        "rshares": 58064982,
+        "voter": "zite"
+      },
+      {
+        "rshares": 68588220,
+        "voter": "joelbow"
+      },
+      {
+        "rshares": 17336813419,
+        "voter": "hilarski"
+      },
+      {
+        "rshares": 54826818,
+        "voter": "shadowspub"
+      },
+      {
+        "rshares": 50416427,
+        "voter": "curpose"
+      },
+      {
+        "rshares": 57998423,
+        "voter": "feminism"
+      },
+      {
+        "rshares": 59034939,
+        "voter": "rwgunderson"
+      },
+      {
+        "rshares": 92828372,
+        "voter": "runridefly"
+      },
+      {
+        "rshares": 4573219528,
+        "voter": "io-io-io"
+      },
+      {
+        "rshares": 995495327,
+        "voter": "jeffreyahann"
+      },
+      {
+        "rshares": 2230532056,
+        "voter": "einsteinpotsdam"
+      },
+      {
+        "rshares": 100188566,
+        "voter": "arnoldwish"
+      },
+      {
+        "rshares": 34104959084,
+        "voter": "onesunbeingnow"
+      },
+      {
+        "rshares": 778898361,
+        "voter": "xanoxt"
+      },
+      {
+        "rshares": 50593879,
+        "voter": "crion"
+      },
+      {
+        "rshares": 50262756,
+        "voter": "wiss"
+      },
+      {
+        "rshares": 58382726,
+        "voter": "vityass"
+      },
+      {
+        "rshares": 6792167711,
+        "voter": "sponge-bob"
+      },
+      {
+        "rshares": 3900499116,
+        "voter": "digital-wisdom"
+      },
+      {
+        "rshares": 51033798,
+        "voter": "stroully"
+      },
+      {
+        "rshares": 26833252891,
+        "voter": "zahnspange"
+      },
+      {
+        "rshares": 6159974057,
+        "voter": "jwaser"
+      },
+      {
+        "rshares": 10515019232,
+        "voter": "oldstone"
+      },
+      {
+        "rshares": 50712038,
+        "voter": "thadm"
+      },
+      {
+        "rshares": 50710305,
+        "voter": "prof"
+      },
+      {
+        "rshares": 50356354,
+        "voter": "yorsens"
+      },
+      {
+        "rshares": 54632424,
+        "voter": "budda"
+      },
+      {
+        "rshares": 50065875,
+        "voter": "bane"
+      },
+      {
+        "rshares": 50059754,
+        "voter": "vive"
+      },
+      {
+        "rshares": 50054445,
+        "voter": "coad"
+      },
+      {
+        "rshares": 139222205,
+        "voter": "mindhunter"
+      },
+      {
+        "rshares": 6566492665,
+        "voter": "goose"
+      },
+      {
+        "rshares": 52015504,
+        "voter": "analyzethis"
+      },
+      {
+        "rshares": 1373777742,
+        "voter": "bwaser"
+      },
+      {
+        "rshares": 51797295,
+        "voter": "roadhog"
+      },
+      {
+        "rshares": 51699969,
+        "voter": "doggnostic"
+      },
+      {
+        "rshares": 52671889,
+        "voter": "dr-who"
+      },
+      {
+        "rshares": 53930800,
+        "voter": "outchemy"
+      },
+      {
+        "rshares": 87523682,
+        "voter": "dr-house"
+      },
+      {
+        "rshares": 51449632,
+        "voter": "jenny-talls"
+      },
+      {
+        "rshares": 53478598,
+        "voter": "imc"
+      },
+      {
+        "rshares": 51247344,
+        "voter": "post-successful"
+      },
+      {
+        "rshares": 50162053,
+        "voter": "lynchiandream"
+      },
+      {
+        "rshares": 50918375,
+        "voter": "ailo"
+      },
+      {
+        "rshares": 51837159,
+        "voter": "thecentreofitall"
+      },
+      {
+        "rshares": 52865727,
+        "voter": "kinghabib786"
       }
     ],
-    "author": "madodel",
+    "author": "dana-edwards",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": 69.47,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Think Beek Urban Beekeeping in the Tropics\n\nTop Bar Hive V.S. Langstroth Hive Inspection\n\nMADE in the Philippines\n\nhttps://www.youtube.com/watch?v=LMu6WxqksdA",
-    "category": "food",
-    "children": 0,
-    "created": "2016-08-09T14:19:30",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "is_paidout": true,
-    "json_metadata": {
-      "links": [
-        "https://www.youtube.com/watch?v=LMu6WxqksdA"
-      ],
-      "tags": [
-        "food"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 56815342,
-    "payout": 0.0,
-    "payout_at": "2016-09-09T02:19:30",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "top-bar-hive-v-s-langstroth-hive-beekeeping",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "Top Bar Hive V.S. Langstroth Hive, Beekeeping",
-    "updated": "2016-08-09T14:19:30",
-    "url": "/food/@madodel/top-bar-hive-v-s-langstroth-hive-beekeeping"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 36264946146,
-        "voter": "redpalestino"
-      },
-      {
-        "rshares": 70910846,
-        "voter": "zakharsmirnoff"
-      },
-      {
-        "rshares": 502074408,
-        "voter": "lifeworship"
-      },
-      {
-        "rshares": 80880272,
-        "voter": "motsna"
-      }
-    ],
-    "author": "tanshin",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 43.7,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "This is the most well-designed hive I've seen to date, much easier to extract honey and less disturbance to the bees.  \n\nBees are the world\u2019s most important pollinator of food crops.  Let's stop the bee population decline!\n\nhttps://www.youtube.com/watch?v=WbMV9qYIXqM",
-    "category": "bee",
-    "children": 6,
-    "created": "2016-09-02T06:46:15",
+    "body": "Holonic systems\n===============\n\n![enter image description here](https://upload.wikimedia.org/wikipedia/commons/2/2f/Fractal_Art_Swirl.JPG)\n\nWhat is a holon?\n----------------\n\nA holon is both a whole and a part. An example would be that an individual human is composed of cells which are composed of atoms. The individual human is considered to be a whole human but that individual human is also a part of the human society making the individual part of a bigger whole. So the human being would be a good example of a holon but so would a node in a complex adaptive system.\n\nWhat are holonic systems?\n-------------------------\n\nIf we remember take bees as an example this time instead of humans then the holonic system would be the bee hive. The bee hive would be a representation of the societal governance structure of the bees that belong to the hive. The bees would be holons because they would be part of the hive due to the fact that they follow the rules of the hive. They cooperate between each other but are all subordinates to the rules of the hive which represents the whole. The bee hive represents a holonic system, as do ant colonies, swarms of birds, schools of fish.\n\n\nThe difference between pathological hierarchies and holonic hierarchies\n=======================================================================\n\nIn a pathological hierarchy perhaps one individual or one node in the network assumes the role of the \u201cwhole\u201d. This individual might consider him or herself to be the ruler, the number 1, the head authority, who must coerce and control everyone below them. This structure typically takes the shape of a rigid pyramid where the decision making and thinking typically comes from the head authority, with limited room for individuality below.\n\n>Holacracy embeds a generative mix of autonomy and cooperation in a flexible fabric of holonic design constitutional rules. It constitutes a new operating system for organizations that regulate the individual/group dynamics to eliminate on one side the possibility of capture via power games, and on the other side, the inherent chaos characteristic of \u201cleaderless,\u201d decentralized organizations.\n\n \nIn a holonic system of governance there is a system for generating rules to provide order. So for instance in the case of virtual governance the nodes on the network can all run the same software, the same configurations, and each changing of the configurations of each node in the network the rules for the network can change in collaborative fashion. Roles and rules are set collectively and collaboratively.\n\n>Every participant in a holacracy is a sensor for what is going on, and each plays a role in identifying the tensions in a timely way while taking active steps to resolve them. Effectiveness and resistance to capture are achieved by enhancing the power of collective decision locally via procedures such as: \u201cAfter taking Individual Action, a Part-ner should tell any affected Role about it, and, on their request, initi-ate actions to resolve any Tension created by the Individual Action or refrain from taking this Individual Action again in the future.\u201d\n\nReference\n\nUlieru, M. Organic Governance Through the Logic of Holonic Systems.",
+    "category": "politics",
+    "children": 14,
+    "created": "2016-08-19T10:06:57",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
     "is_paidout": false,
     "json_metadata": {
       "image": [
-        "https://img.youtube.com/vi/WbMV9qYIXqM/0.jpg"
-      ],
-      "links": [
-        "https://www.youtube.com/watch?v=WbMV9qYIXqM"
+        "https://upload.wikimedia.org/wikipedia/commons/2/2f/Fractal_Art_Swirl.JPG"
       ],
       "tags": [
-        "bee",
-        "food",
-        "life",
-        "gardening",
-        "nature"
+        "politics",
+        "philosophy",
+        "governance",
+        "holon"
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 36918811672,
-    "payout": 0.015,
-    "payout_at": "2016-09-09T06:46:15",
-    "pending_payout_value": "0.015 HBD",
+    "net_rshares": 26814585667646,
+    "payout": 113.266,
+    "payout_at": "2016-08-26T10:06:57",
+    "pending_payout_value": "113.266 HBD",
     "percent_hbd": 10000,
-    "permlink": "best-hive-for-beekeepers",
+    "permlink": "holonic-systems",
     "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "total_votes": 4
+      "total_votes": 219
     },
-    "title": "Best Hive for Beekeepers",
-    "updated": "2016-09-02T06:46:15",
-    "url": "/bee/@tanshin/best-hive-for-beekeepers"
+    "title": "Holonic systems",
+    "updated": "2016-08-19T10:08:21",
+    "url": "/politics/@dana-edwards/holonic-systems"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 21816618785,
+        "voter": "ossama-benjohn"
+      },
+      {
+        "rshares": 6191155663,
+        "voter": "mark-waser"
+      },
+      {
+        "rshares": 3632587828,
+        "voter": "svamiva"
+      },
+      {
+        "rshares": 30806602935,
+        "voter": "acassity"
+      },
+      {
+        "rshares": 6755232214,
+        "voter": "mtber"
+      },
+      {
+        "rshares": 458525808,
+        "voter": "edrivegom"
+      },
+      {
+        "rshares": 1279135617,
+        "voter": "doctorstrange"
+      },
+      {
+        "rshares": 5949351326,
+        "voter": "inti"
+      },
+      {
+        "rshares": 190058704038,
+        "voter": "blueorgy"
+      },
+      {
+        "rshares": 3644108334,
+        "voter": "bristolchris72"
+      },
+      {
+        "rshares": 1213221173,
+        "voter": "politicasan2"
+      },
+      {
+        "rshares": 8588256056,
+        "voter": "michaeldodridge"
+      },
+      {
+        "rshares": 2091538583,
+        "voter": "lukmarcus"
+      },
+      {
+        "rshares": 42155830202,
+        "voter": "anotherjoe"
+      },
+      {
+        "rshares": 74299708,
+        "voter": "august-newbie"
+      },
+      {
+        "rshares": 267622891,
+        "voter": "levycore"
+      },
+      {
+        "rshares": 8308915925,
+        "voter": "steemitpatina"
+      },
+      {
+        "rshares": 8353239954,
+        "voter": "etcmike"
+      },
+      {
+        "rshares": 198479777,
+        "voter": "kita"
+      },
+      {
+        "rshares": 1753773543,
+        "voter": "davidjkelley"
+      },
+      {
+        "rshares": 5992569234,
+        "voter": "digital-wisdom"
+      },
+      {
+        "rshares": 56760954,
+        "voter": "ethical-ai"
+      },
+      {
+        "rshares": 999749973,
+        "voter": "matthewtiii"
+      },
+      {
+        "rshares": 6048950061,
+        "voter": "jwaser"
+      },
+      {
+        "rshares": 2853258517,
+        "voter": "bwaser"
+      },
+      {
+        "rshares": 1611217127,
+        "voter": "ellepdub"
+      },
+      {
+        "rshares": 1157169630,
+        "voter": "herpetologyguy"
+      },
+      {
+        "rshares": 5114895425,
+        "voter": "morgan.waser"
+      }
+    ],
+    "author": "jwaser",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 51.05,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<p>Feeling stylish and always a little sexy in my beekeepers garb, I grab my smoker in one hand and my hive tool in the other and bounce like Tigger out into my beloved bee-yard. &nbsp;The apiary is no longer the two original hives -- expansion was inevitable. On this day, we are sitting pretty at 7 hives. &nbsp;&nbsp;Temperatures reaching into the 90's with some notable humidity, I feel simple pure joy as I remove the bricks from the top of the hive and pry off the first of the hive covers. &nbsp;I'm immediately met with a whiff of a gentle sweet smell and hear the simple quiet buzz of the girls at work -- as a couple of crabby ladies pop out and ping off my veil, informing me that I'm in their space. &nbsp;I tell myself \"it is ok, settle down, all is well\". &nbsp;After a few gentle puffs of cool smoke we all seem to calm down a bit.&nbsp;</p>\n<p>Today, I'm checking in on a brand new queen that I grafted (created) just six weeks ago. &nbsp;Four weeks later, I noted eggs and larva in this hive, so I know the queen emerged and mated. &nbsp;Today's work is simple... find this queen and mark her -- always assuming that she is still alive today!</p>\n<p><img src=\"https://www.steemimg.com/images/2016/08/25/beautyqueen07982.md.jpg\" width=\"500\" height=\"375\"/>&nbsp;<em><strong>That's the queen -- dead-center</strong></em></p>\n<p>Now, the bee \"authorities\" all claim that you should gently hold the queen between thumb and finger and then very carefully place a small spot of paint on her thorax. &nbsp;Let it dry and then release her back into the colony. The color is specific to the last 2 digits of the year. &nbsp;Pretty simple! &nbsp;What the experts don't seem to mention is that you must search among 50,000 bees buzzing about -- grumpy and stressed in the late summer heat during the dearth of late nectar. &nbsp;Now that I have had the hive open for a few minutes, everything feels frantic. &nbsp;Sweat is dripping from every pore in my body while I search frame by frame looking for that one special bug. &nbsp;I find my mind racing. &nbsp;Where the heck is that she? &nbsp;As time passes, the open hive is defenseless to the other bees in the bee-yard and for miles around -- causing the girls to become more and more feisty and defensive as I become more impatient with the task at hand.</p>\n<p>\"Oh yippy skippy, I found her!\" &nbsp;This is so much better than finding Waldo (although I rock at that too). &nbsp;I move the frame she's crawling on into a special box to protect her (mostly from myself) for the moment. &nbsp;Put the hive back together and toss on a cover. &nbsp;That should keep the other bees from robbing the hive for a few moments. &nbsp;With the paint pen readied, it is time to take on the task of placing a dot on her back. &nbsp;I, once again, try to locate the queen. &nbsp;Darn this lady has speed - moving all over the frame and ducking through holes in the comb arriving on the opposite side. &nbsp;</p>\n<p><img src=\"http://redbricktown.com/wp-content/uploads/2015/07/608.png\"/></p>\n<p>I spend some time trying to corner and catch her but fail as she flies off the frame and runs (breaking my 100M dash pace) under the hive. &nbsp;The \"experts\" don't mention that the fat plump mated queen can still fly! &nbsp;Oh no, what have I done?! Tears well up. But realize my friends, this is no ordinary queen, she's one that I grafted from a colony with a queen who I had over-wintered not once but twice! She's the only queen to emerge and mate from the 36 cells I thought I successfully grafted back in late June (The other grafts were a complete fail after taking an unplanned dive off the deck -- but that too is another story. &nbsp;My Bad!)</p>\n<p>Now, sadly, I must admit that this is not the first time I have had a queen who had a story to tell . . . but I digress... I carefully drop the frame, sputter a few less than positive words to myself and without a thought lean the entire hive to one side in hopes of finding my Queen. Now I know what you\u2019re thinking -- \"BAD IDEA!\", \"DON'T DO THAT!\". &nbsp;&nbsp;Trust me, I thought that too, but I needed find that queen, as without her the colony would dwindle and die. &nbsp;I had no replacement, no plan B.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/08/25/DSCF0117bd6dd.jpg\" width=\"195\" height=\"187\"/></p>\n<p>Awesome sauce! I found her - a REAL RESCUE. &nbsp;Scooping her up in my gloved hand and leaning the hive back down into its normal position, I commenced my attempt to mark her with a \"small\" white dot ... well it turned out she got herself a big fat splotch! (Serves her right!) Then acting like nothing unusual ever happened (which in some ways is was no different than any other bee-yard adventure), I released her into the hive, replaced the missing frame and put the inner &amp; outer cover back in place.&nbsp;</p>\n<p>Feeling fairly good with the overall final outcome (queen still alive, MARKED and in the hive), I collected my beekeeping stuff and snuffed the smoker. &nbsp;Just another fun day of awesome skillfulness in the bee-yard.</p>\n<p>=========================================================================</p>\n<p>I love the Doolittle Method for grafting (combined with the use of a Cloake board)! &nbsp;Don't get faked out, it is not \"do little\" but a name for the method of grafting/\u201ccreating\u201d queens. &nbsp;</p>\n<ol>\n  <li>Choose carefully from a frame of eggs and larva, selecting the tiniest larva in hopes it is &lt; 24 hours old AND floating it in a pool of delicious royal jelly. &nbsp;</li>\n  <li>Once the grafts are selected and delicately scooped up (careful not to flip the larva and block the sphericals/\"breathing tubes\" -- drowning them in the process), place them in plastic queen cells on a grafting bar fitted into a frame. &nbsp;</li>\n  <li>Inserted the frame into a queen-less hive that has been outfitted and manipulated for several days with the use of a Cloake Board. &nbsp;</li>\n  <li>With the proper planning and manipulation, tens of thousands of nurse bees fill the top hive box and will feed the grafts royal jelly while draw out the new queen cells, and care for the developing queens over the following 11 days.</li>\n</ol>\n<p>http://www.ohiostatebeekeepers.org/wp-content/pdf/books/Queen_Manual.pdf</p>\n<p>http://www.thebeeyard.org/rearing-queens-via-the-cloake-board-method/</p>\n<p><img src=\"https://www.steemimg.com/images/2016/08/25/May201205567d61.md.jpg\" width=\"500\" height=\"375\"/></p>\n<p><br></p>\n<p><img src=\"https://img1.steemit.com/0x0/https://static.wixstatic.com/media/5c9236_c609e6e3b70444fd8b756f5880dfcffb~mv2_d_2941_2046_s_2.jpg?dn=Minnow+Strength+2.jpg\" width=\"2941\" height=\"2046\"/></p>\n<h1>Minnows UNITE! (use the keyword <a href=\"https://steemit.com/created/minnowsunite\"><em>minnowsunite</em></a>)</h1>\n<p>Today, I'm trying to promote a starving herpetologist who joined Steemit just two days ago (his stuff really rocks!):</p>\n<h1><a href=\"https://steemit.com/minnowsunite/@herpetologyguy/here-with-little-to-no-clue\">Here with little to no clue!</a></h1>\n<p><a href=\"https://steemit.com/minnowsunite/@herpetologyguy/here-with-little-to-no-clue\">Hello everyone! My name is Thomas and like the title says, I have very little idea just what the heck I\u2019m doing here\u2026</a>&nbsp;</p>\n<p>&nbsp;=============================</p>\n<h1><a href=\"https://steemit.com/conservation/@herpetologyguy/frogwatchusa-citizen-science-as-the-future-of-environmental-research\">FrogWatchUSA: Citizen Science as the Future of Environmental Research</a></h1>\n<p><a href=\"https://steemit.com/conservation/@herpetologyguy/frogwatchusa-citizen-science-as-the-future-of-environmental-research\">Citizen Science is an form of research collaboration between scientists and volunteers, allowing for a wider array of\u2026</a>&nbsp;</p>\n<p>==============================</p>\n<h1><a href=\"https://steemit.com/photography/@herpetologyguy/copperhead-photos\">Copperhead Photos</a></h1>\n<p><a href=\"https://steemit.com/photography/@herpetologyguy/copperhead-photos\">I was fooling around at work taking a few photos of our Northern Copperheads. Not the crispest quality, but definitely\u2026</a>&nbsp;</p>\n<p>==============================</p>\n<h1><a href=\"https://steemit.com/science/@herpetologyguy/my-experience-training-alligators\">My Experience Training Alligators</a></h1>\n<p><a href=\"https://steemit.com/science/@herpetologyguy/my-experience-training-alligators\">If that title doesn\u2019t draw people in, then I don\u2019t know how to please you folks! &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;As I\u2019ve said in previous posts\u2026</a>&nbsp;</p>\n</html>",
+    "category": "bee",
+    "children": 5,
+    "created": "2016-08-26T11:36:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://www.steemimg.com/images/2016/08/25/beautyqueen07982.md.jpg",
+        "http://redbricktown.com/wp-content/uploads/2015/07/608.png",
+        "https://www.steemimg.com/images/2016/08/25/DSCF0117bd6dd.jpg",
+        "https://www.steemimg.com/images/2016/08/25/May201205567d61.md.jpg",
+        "https://img1.steemit.com/0x0/https://static.wixstatic.com/media/5c9236_c609e6e3b70444fd8b756f5880dfcffb~mv2_d_2941_2046_s_2.jpg?dn=Minnow+Strength+2.jpg"
+      ],
+      "links": [
+        "http://www.ohiostatebeekeepers.org/wp-content/pdf/books/Queen_Manual.pdf",
+        "http://www.thebeeyard.org/rearing-queens-via-the-cloake-board-method/",
+        "https://steemit.com/created/minnowsunite",
+        "https://steemit.com/minnowsunite/@herpetologyguy/here-with-little-to-no-clue",
+        "https://steemit.com/conservation/@herpetologyguy/frogwatchusa-citizen-science-as-the-future-of-environmental-research",
+        "https://steemit.com/photography/@herpetologyguy/copperhead-photos",
+        "https://steemit.com/science/@herpetologyguy/my-experience-training-alligators"
+      ],
+      "tags": [
+        "bee",
+        "bees",
+        "story",
+        "nature",
+        "science"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 367431771281,
+    "payout": 0.21,
+    "payout_at": "2016-09-02T11:36:09",
+    "pending_payout_value": "0.210 HBD",
+    "percent_hbd": 10000,
+    "permlink": "bee-happy-crowning-of-a-queen",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 28
+    },
+    "title": "BEE Happy:  Crowning of a QUEEN.",
+    "updated": "2016-08-26T11:36:09",
+    "url": "/bee/@jwaser/bee-happy-crowning-of-a-queen"
   }
 ]
