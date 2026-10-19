@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_account_votes"
+        method: POST
+        headers:
+          content-type: application/json
+          accept: application/json
+        json:
+          account-name: "gtg"
+          limit: 3
+          before: "2016-07-02T07:33:54"
+          start-author: "blocktrades"
+          start-permlink: "tax-issues-facing-us-based-cryptocurrency-holders-and-miners-intro-and-irs-guidelines"
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern

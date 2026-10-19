@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+    - negative
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_account_relationships"
+        method: POST
+        headers:
+          content-type: application/json
+          accept: application/json
+        json:
+          account-name: "flw1"
+          accounts: "flw1,flw2,flw3,flw4,flw5,flw6,flw7,flw8,flw9,flw10,flw11,flw12,flw13,flw14,flw15,flw16,flw17,flw18,flw19,flw20,flw21,flw22,flw23,flw24,flw25,flw26,flw27,flw28,flw29,flw30,flw31,flw32,flw33,flw34,flw35,flw36,flw37,flw38,flw39,flw40,flw41,flw42,flw43,flw44,flw45,flw46,flw47,flw48,flw49,flw50,flw51,flw52,flw53,flw54,flw55,flw56,flw57,flw58,flw59,flw60,flw61,flw62,flw63,flw64,flw65,flw66,flw67,flw68,flw69,flw70,flw71,flw72,flw73,flw74,flw75,flw76,flw77,flw78,flw79,flw80,flw81,flw82,flw83,flw84,flw85,flw86,flw87,flw88,flw89,flw90,flw91,flw92,flw93,flw94,flw95,flw96,flw97,flw98,flw99,flw100,flw101"
+      response:
+        status_code: 400
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            error_response: true

@@ -96,66 +96,22 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_reblogs(
 )
 RETURNS SETOF hivemind_endpoints.reblog_status 
 -- openapi-generated-code-end
-
--- Type hivemind_endpoints.reblog_status is defined in postgrest/utilities/get_reblogged_posts.sql
-
 LANGUAGE 'plpgsql' STABLE
 AS
 $$
 DECLARE
-  _limit INT;
-  _tag TEXT;
-  _post_id INT;
-  _observer_id INT;
-  _sort_type hivemind_postgrest_utilities.ranked_post_sort_type;
+  _request hivemind_postgrest_utilities.ranked_posts_overlay_request;
 BEGIN
-  -- Validate observer is provided
-  IF "observer" IS NULL OR "observer" = '' THEN
-    RAISE EXCEPTION 'observer is required for this endpoint';
-  END IF;
+  _request = hivemind_postgrest_utilities.valid_ranked_posts_overlay_request(
+    "sort", "tag", "observer", "limit", "start-author", "start-permlink");
 
-  -- Validate and set limit
-  _limit = LEAST(COALESCE("limit", 20), hivemind_postgrest_utilities.get_max_posts_per_call_limit());
-  IF _limit < 1 THEN
-    _limit = 1;
-  END IF;
-
-  -- Find start post for pagination
-  _post_id = hivemind_postgrest_utilities.find_comment_id(
-    hivemind_postgrest_utilities.valid_account("start-author", True),
-    hivemind_postgrest_utilities.valid_permlink("start-permlink", True),
-    True);
-
-  -- Validate tag
-  _tag = hivemind_postgrest_utilities.valid_tag(
-    hivemind_postgrest_utilities.valid_tag("tag", True),
-    True);
-
-  -- Find observer account id (throws exception if not found)
-  _observer_id = hivemind_postgrest_utilities.find_account_id(
-    hivemind_postgrest_utilities.valid_account("observer", False),
-    True);
-
-  -- Parse sort type
-  CASE "sort"
-    WHEN 'trending' THEN _sort_type = 'trending';
-    WHEN 'hot' THEN _sort_type = 'hot';
-    WHEN 'created' THEN _sort_type = 'created';
-    WHEN 'payout' THEN _sort_type = 'payout';
-    WHEN 'payout_comments' THEN _sort_type = 'payout_comments';
-    WHEN 'muted' THEN _sort_type = 'muted';
-    ELSE RAISE EXCEPTION 'Unsupported sort, valid sorts: trending, hot, created, payout, payout_comments, muted';
-  END CASE;
-
-  -- Return reblog status for posts matching the criteria
-  IF _tag IS NULL OR _tag = '' OR _tag = 'all' THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_all(_post_id, _observer_id, _limit, _sort_type);
-  ELSIF _tag = 'my' THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_observer_communities(_post_id, _observer_id, _limit, _sort_type);
-  ELSIF hivemind_postgrest_utilities.check_community(_tag) THEN
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_community(_post_id, _observer_id, _limit, _tag, _sort_type);
-  ELSE
-    RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.get_reblogged_posts_for_tag(_post_id, _observer_id, _limit, _tag, _sort_type);
-  END IF;
+  RETURN QUERY
+    SELECT
+      p.author,
+      p.permlink,
+      (hr.post_id IS NOT NULL)
+    FROM hivemind_postgrest_utilities.get_ranked_posts_overlay(_request) WITH ORDINALITY AS p(post_id, author, permlink, ord)
+    LEFT JOIN hivemind_app.hive_reblogs hr ON hr.blogger_id = _request.observer_id AND hr.post_id = p.post_id
+    ORDER BY p.ord;
 END
 $$;

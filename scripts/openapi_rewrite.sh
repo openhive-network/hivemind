@@ -30,7 +30,11 @@ ENDPOINTS_IN_ORDER="
 ../$endpoints/accounts/get_ops_by_account.sql
 ../$endpoints/accounts/get_account_pending_author_rewards.sql
 ../$endpoints/accounts/get_account_pending_curation_rewards.sql
+../$endpoints/accounts/get_account_relationships.sql
+../$endpoints/accounts/get_account_votes.sql
 ../$endpoints/blog/get_reblogs.sql
+../$endpoints/blog/get_votes.sql
+../$endpoints/posts/get_post_votes.sql
 ../$endpoints/other/get_sync_status.sql
 ../$endpoints/other/get_version.sql"
 
