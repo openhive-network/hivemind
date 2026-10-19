@@ -204,6 +204,7 @@ SQL_TESTS = [
     "tests/sql/bridge_get_discussion_cap.sql",
     "tests/sql/bridge_get_posts.sql",
     "tests/sql/bridge_truncate_body.sql",
+    "tests/sql/dispatch_lite_intercept.sql",
 ]
 
 
