@@ -1,0 +1,25 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_post_replies"
+        method: GET
+        headers:
+          accept: application/json
+        params:
+          author: "test-safari"
+          permlink: "please-comment-hive2-03"
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge posts>"

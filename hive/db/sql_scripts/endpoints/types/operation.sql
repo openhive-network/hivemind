@@ -417,3 +417,247 @@ CREATE TYPE hivemind_endpoints.pending_curation_rewards AS (
     "curation_reward_basis" JSON
 );
 -- openapi-generated-code-end
+
+/** openapi:components:schemas
+hivemind_endpoints.bridge_post:
+  type: object
+  x-sql-datatype: JSONB
+  description: A post or comment as returned by `bridge.get_post`
+  properties:
+    author:
+      type: string
+    permlink:
+      type: string
+    category:
+      type: string
+    title:
+      type: string
+    body:
+      type: string
+    json_metadata:
+      type: object
+    created:
+      type: string
+      format: date-time
+    updated:
+      type: string
+      format: date-time
+    depth:
+      type: integer
+    children:
+      type: integer
+    net_rshares:
+      type: integer
+    is_paidout:
+      type: boolean
+    payout_at:
+      type: string
+      format: date-time
+    payout:
+      type: number
+    pending_payout_value:
+      type: string
+    author_payout_value:
+      type: string
+    curator_payout_value:
+      type: string
+    promoted:
+      type: string
+    replies:
+      type: array
+      items:
+        type: string
+    active_votes:
+      type: array
+      items:
+        type: object
+    author_reputation:
+      type: number
+    stats:
+      type: object
+    url:
+      type: string
+    beneficiaries:
+      type: array
+      items:
+        type: object
+    max_accepted_payout:
+      type: string
+    percent_hbd:
+      type: integer
+    parent_author:
+      type: string
+    parent_permlink:
+      type: string
+    blacklists:
+      type: array
+      items:
+        type: string
+    community:
+      type: string
+    community_title:
+      type: string
+    author_role:
+      type: string
+    author_title:
+      type: string
+    reblogs:
+      type: integer
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_bridge_post:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.bridge_post'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.bridge_profile:
+  type: object
+  x-sql-datatype: JSONB
+  description: An account profile as returned by `bridge.get_profile`
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    created:
+      type: string
+      format: date-time
+    active:
+      type: string
+      format: date-time
+    post_count:
+      type: integer
+    reputation:
+      type: number
+    blacklists:
+      type: array
+      items:
+        type: string
+    stats:
+      type: object
+    metadata:
+      type: object
+    context:
+      type: object
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.follow:
+  type: object
+  x-sql-datatype: JSONB
+  description: A follow relation as returned by `condenser_api.get_followers` and `get_following`
+  properties:
+    follower:
+      type: string
+    following:
+      type: string
+    what:
+      type: array
+      items:
+        type: string
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_follow:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.follow'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.notification:
+  type: object
+  x-sql-datatype: JSONB
+  description: A notification as returned by `bridge.account_notifications`
+  properties:
+    id:
+      type: string
+    type:
+      type: string
+    score:
+      type: integer
+    date:
+      type: string
+      format: date-time
+    msg:
+      type: string
+    url:
+      type: string
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_notification:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.notification'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.bridge_community:
+  type: object
+  x-sql-datatype: JSONB
+  description: A community as returned by `bridge.get_community` and `bridge.list_communities`
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    title:
+      type: string
+    about:
+      type: string
+    description:
+      type: string
+    flag_text:
+      type: string
+    lang:
+      type: string
+    is_nsfw:
+      type: boolean
+    type_id:
+      type: integer
+    created_at:
+      type: string
+    subscribers:
+      type: integer
+    sum_pending:
+      type: number
+    num_pending:
+      type: integer
+    num_authors:
+      type: integer
+    admins:
+      type: array
+      items:
+        type: string
+    team:
+      type: array
+      items:
+        type: array
+        items:
+          type: string
+    settings:
+      type: object
+    context:
+      type: object
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_bridge_community:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.bridge_community'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_string_tuple:
+  type: array
+  description: Rows given as arrays of strings, as several bridge methods return them
+  items:
+    type: array
+    items:
+      type: ["string", "null"]
+ */

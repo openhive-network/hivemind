@@ -1,0 +1,26 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/search_posts"
+        method: GET
+        headers:
+          accept: application/json
+        params:
+          q: "hive"
+          sort: "created"
+          limit: 5
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge post>"
