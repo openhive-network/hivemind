@@ -426,6 +426,324 @@ declare
             "description": "Curation reward basis across the account''s pending votes; resolves to HP/VESTS outside Hivemind"
           }
         }
+      },
+      "hivemind_endpoints.bridge_post": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A post or comment as returned by `bridge.get_post`",
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "permlink": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "json_metadata": {
+            "type": "object"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "depth": {
+            "type": "integer"
+          },
+          "children": {
+            "type": "integer"
+          },
+          "net_rshares": {
+            "type": "integer"
+          },
+          "is_paidout": {
+            "type": "boolean"
+          },
+          "payout_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "payout": {
+            "type": "number"
+          },
+          "pending_payout_value": {
+            "type": "string"
+          },
+          "author_payout_value": {
+            "type": "string"
+          },
+          "curator_payout_value": {
+            "type": "string"
+          },
+          "promoted": {
+            "type": "string"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active_votes": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "author_reputation": {
+            "type": "number"
+          },
+          "stats": {
+            "type": "object"
+          },
+          "url": {
+            "type": "string"
+          },
+          "beneficiaries": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "max_accepted_payout": {
+            "type": "string"
+          },
+          "percent_hbd": {
+            "type": "integer"
+          },
+          "parent_author": {
+            "type": "string"
+          },
+          "parent_permlink": {
+            "type": "string"
+          },
+          "blacklists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "community": {
+            "type": "string"
+          },
+          "community_title": {
+            "type": "string"
+          },
+          "author_role": {
+            "type": "string"
+          },
+          "author_title": {
+            "type": "string"
+          },
+          "reblogs": {
+            "type": "integer"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_bridge_post": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.bridge_post"
+        }
+      },
+      "hivemind_endpoints.bridge_profile": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "An account profile as returned by `bridge.get_profile`",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "active": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "post_count": {
+            "type": "integer"
+          },
+          "reputation": {
+            "type": "number"
+          },
+          "blacklists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stats": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "context": {
+            "type": "object"
+          }
+        }
+      },
+      "hivemind_endpoints.follow": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A follow relation as returned by `condenser_api.get_followers` and `get_following`",
+        "properties": {
+          "follower": {
+            "type": "string"
+          },
+          "following": {
+            "type": "string"
+          },
+          "what": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_follow": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.follow"
+        }
+      },
+      "hivemind_endpoints.notification": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A notification as returned by `bridge.account_notifications`",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "msg": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_notification": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.notification"
+        }
+      },
+      "hivemind_endpoints.bridge_community": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A community as returned by `bridge.get_community` and `bridge.list_communities`",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "about": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "flag_text": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "is_nsfw": {
+            "type": "boolean"
+          },
+          "type_id": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "subscribers": {
+            "type": "integer"
+          },
+          "sum_pending": {
+            "type": "number"
+          },
+          "num_pending": {
+            "type": "integer"
+          },
+          "num_authors": {
+            "type": "integer"
+          },
+          "admins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "team": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "settings": {
+            "type": "object"
+          },
+          "context": {
+            "type": "object"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_bridge_community": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.bridge_community"
+        }
+      },
+      "hivemind_endpoints.array_of_string_tuple": {
+        "type": "array",
+        "description": "Rows given as arrays of strings, as several bridge methods return them",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
       }
     }
   },
@@ -886,6 +1204,372 @@ declare
         }
       }
     },
+    "/accounts/{account-name}/posts": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get an account''s posts",
+        "description": "Returns the account''s posts of the kind given by `sort`, the same list as `bridge.get_account_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_account_posts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose posts are listed"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Kind of posts: `blog`, `feed`, `posts`, `comments`, `replies` or `payout`\n"
+          },
+          {
+            "in": "query",
+            "name": "community",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Only posts in this community; allowed with `sort` `posts` and `comments`"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured), which is also the default"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account''s posts\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_post",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, community or start post, unsupported sort, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/profile": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get an account''s profile",
+        "description": "Returns the account''s profile, the same object as `bridge.get_profile`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_profile(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/profile''`\n",
+        "operationId": "hivemind_endpoints.get_account_profile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose profile is returned"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose relationship to the profiled account is reported in `context`. The response\nwithout an observer is the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account''s profile\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.bridge_profile",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/followers": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get an account''s followers",
+        "description": "Returns the accounts that follow (or, with `type=ignore`, mute) the account, the same list as `condenser_api.get_followers`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_followers(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/followers?type=blog&limit=100''`\n",
+        "operationId": "hivemind_endpoints.get_account_followers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose followers are listed"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "`blog` (follows, the default) or `ignore` (mutes)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of accounts to return, at most 1000 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Last account of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Follow relations\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_follow",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account or start account, unsupported type, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/following": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get the accounts an account follows",
+        "description": "Returns the accounts the account follows (or, with `type=ignore`, mutes), the same list as `condenser_api.get_following`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_following(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/following?type=blog&limit=100''`\n",
+        "operationId": "hivemind_endpoints.get_account_following",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose following are listed"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "`blog` (follows, the default) or `ignore` (mutes)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of accounts to return, at most 1000 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Last account of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Follow relations\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_follow",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account or start account, unsupported type, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/notifications": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get an account''s notifications",
+        "description": "Returns the account''s notifications of the last 90 days, newest first, the same list as\n`bridge.account_notifications`.\n\nTo fetch the next page pass the `id` of the last notification of the previous page as `last-id`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_notifications(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/notifications?type=reply,mention&limit=50''`\n",
+        "operationId": "hivemind_endpoints.get_account_notifications",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose notifications are listed"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Comma-separated notification types to return, e.g. `reply,mention`; all types when absent\n"
+          },
+          {
+            "in": "query",
+            "name": "community",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Only notifications about this community"
+          },
+          {
+            "in": "query",
+            "name": "min-score",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Minimum notification score, 0 to 100, 25 by default"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of notifications to return, at most 100 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "last-id",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "x-sql-datatype": "BIGINT",
+              "default": null
+            },
+            "description": "Id of the last notification of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account''s notifications\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_notification",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account or community, unknown notification type, or an invalid parameter"
+          }
+        }
+      }
+    },
     "/blog/reblogs": {
       "get": {
         "tags": [
@@ -1102,6 +1786,236 @@ declare
         }
       }
     },
+    "/posts": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get ranked posts",
+        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_ranked_posts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Ranking: `trending`, `hot`, `created`, `payout`, `payout_comments` or `muted`\n"
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Tag or community name (`hive-NNNNNN`); `my` lists the observer''s communities"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured), which is also the default"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked posts\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_post",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported sort, unknown tag or start post, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a post",
+        "description": "Returns one post or comment, the same object as `bridge.get_post`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post''`\n",
+        "operationId": "hivemind_endpoints.get_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.bridge_post",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown or deleted post, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}/replies": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get the replies to a post",
+        "description": "Returns the posts of `bridge.get_discussion` for the post other than the post itself, as a list\nordered by creation time (ties broken by `author/permlink`), so new replies are added at the end.\nEach reply is the same object as in `bridge.get_discussion`; its `replies` field names its own\ndirect replies. Like `bridge.get_discussion`, only the first 4000 posts of a thread are included.\n\nTo fetch the next page pass the `author` and `permlink` of the last reply of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_post_replies",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of replies to return, at most the posts-per-call limit (20 unless configured), which is also the default"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of the last reply of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of the last reply of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Replies to the post\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_post",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown post, a start reply that is not in the discussion, or an invalid parameter"
+          }
+        }
+      }
+    },
     "/posts/{author}/{permlink}/votes": {
       "get": {
         "tags": [
@@ -1176,6 +2090,391 @@ declare
           },
           "400": {
             "description": "Unknown post or unknown start voter"
+          }
+        }
+      }
+    },
+    "/communities": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "List communities",
+        "description": "Returns communities ordered by `sort`, optionally only those matching `query`, the same list as\n`bridge.list_communities`.\n\nTo fetch the next page pass the `name` of the last community of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_communities(''rank'', NULL, 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities?sort=rank&limit=20''`\n",
+        "operationId": "hivemind_endpoints.get_communities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "`rank` (the default), `new` or `subs`"
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Words the community''s title or about text must contain"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of communities to return, at most 100 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Name of the last community of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose subscription and role is reported in each community''s `context`. The response\nwithout an observer is the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Communities\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_community",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported sort, unknown last community, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/communities/{name}": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a community",
+        "description": "Returns the community, the same object as `bridge.get_community`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456''`\n",
+        "operationId": "hivemind_endpoints.get_community",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the community (`hive-NNNNNN`)"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose subscription and role is reported in `context`. The response\nwithout an observer is the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The community\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.bridge_community",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown community or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/communities/{name}/subscribers": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a community''s subscribers",
+        "description": "Returns the community''s subscribers in account name order, the same list as `bridge.list_subscribers`.\nEach row is `[account, role, title, subscribed_at]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_subscribers(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/subscribers?limit=100''`\n",
+        "operationId": "hivemind_endpoints.get_community_subscribers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the community (`hive-NNNNNN`)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of rows to return, at most 100 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account of the last subscriber of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a community''s subscribers\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_string_tuple",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown community, a last account that is not subscribed, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/communities/{name}/roles": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a community''s roles",
+        "description": "Returns the community''s accounts that have a role other than guest, highest role first, the same list as `bridge.list_community_roles`.\nEach row is `[account, role, title]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_roles(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/roles?limit=50''`\n",
+        "operationId": "hivemind_endpoints.get_community_roles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the community (`hive-NNNNNN`)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of rows to return, at most 1000 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account of the last row of the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a community''s roles\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_string_tuple",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown community or last account, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/search/posts": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Search posts",
+        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&limit=20''`\n",
+        "operationId": "hivemind_endpoints.search_posts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Search query; supports quoted phrases, `+`/`-` terms and field prefixes as `search-api.find_text` does\n"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "`relevance` or `created`"
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Only posts by this account"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured), which is also the default"
+          },
+          {
+            "in": "query",
+            "name": "start-author",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Author of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "start-permlink",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Permlink of the last post of the previous page"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching posts\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_post",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported sort, unknown account or start post, an invalid parameter, or no full-text search"
+          }
+        }
+      }
+    },
+    "/tags/trending": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get trending topics",
+        "description": "Returns the trending communities and tags, the same list as `bridge.get_trending_topics`.\nEach row is `[name, title]`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_trending_tags(10);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/tags/trending?limit=10''`\n",
+        "operationId": "hivemind_endpoints.get_trending_tags",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of topics to return, at most 25 (the default)"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Accepted for parity with `bridge.get_trending_topics`. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trending topics\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_string_tuple",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An invalid parameter"
           }
         }
       }

@@ -1,0 +1,127 @@
+[
+  {
+    "active_votes": [],
+    "author": "gary-smith",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 52.71,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "so frustrated was mining for a while found a few blocks and received no reward now i know why thank you !",
+    "category": "mining",
+    "children": 0,
+    "created": "2016-08-21T12:52:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "missing-rewards-while-mining",
+    "payout": 0.0,
+    "payout_at": "2016-08-28T12:52:06",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-missing-rewards-while-mining-20160821t125207685z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-21T12:52:06",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@gary-smith/re-gtg-missing-rewards-while-mining-20160821t125207685z"
+  },
+  {
+    "active_votes": [],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I encourage miners to visit [Steemit Chat](https://steemit.chat/channel/mining \"#mining\") where you can find help and share your experience.",
+    "category": "mining",
+    "children": 0,
+    "created": "2016-08-21T13:12:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemit.chat/channel/mining"
+      ],
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "missing-rewards-while-mining",
+    "payout": 0.0,
+    "payout_at": "2016-08-28T13:12:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-missing-rewards-while-mining-20160821t131242531z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-21T13:12:45",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@gtg/re-gtg-missing-rewards-while-mining-20160821t131242531z"
+  },
+  {
+    "active_votes": [],
+    "author": "timcliff",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.15,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Is there a way to check the \"total_missed\" count without using cli_wallet?",
+    "category": "mining",
+    "children": 3,
+    "created": "2016-08-27T14:13:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "missing-rewards-while-mining",
+    "payout": 0.0,
+    "payout_at": "2016-09-03T14:13:18",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-missing-rewards-while-mining-20160827t141319137z",
+    "reblogs": 0,
+    "replies": [
+      "gtg/re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z"
+    ],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-27T14:13:18",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@timcliff/re-gtg-missing-rewards-while-mining-20160827t141319137z"
+  }
+]

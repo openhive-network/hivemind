@@ -22,7 +22,9 @@ rewrite_dir="${endpoints}_openapi"
 input_file="rewrite_rules.conf"
 temp_output_file=$(mktemp)
 
-# Default directories with fixed order if none provided
+# Default directories with fixed order if none provided.
+# The generated rewrite rules are prefix matches tried in the reverse of this order,
+# so a path must come after every path that is a prefix of it (/posts before /posts/{author}/{permlink}).
 OUTPUT="$SCRIPTDIR/output"
 ENDPOINTS_IN_ORDER="
 ../$endpoints/endpoint_schema.sql
@@ -32,9 +34,23 @@ ENDPOINTS_IN_ORDER="
 ../$endpoints/accounts/get_account_pending_curation_rewards.sql
 ../$endpoints/accounts/get_account_relationships.sql
 ../$endpoints/accounts/get_account_votes.sql
+../$endpoints/accounts/get_account_posts.sql
+../$endpoints/accounts/get_account_profile.sql
+../$endpoints/accounts/get_account_followers.sql
+../$endpoints/accounts/get_account_following.sql
+../$endpoints/accounts/get_account_notifications.sql
 ../$endpoints/blog/get_reblogs.sql
 ../$endpoints/blog/get_votes.sql
+../$endpoints/posts/get_ranked_posts.sql
+../$endpoints/posts/get_post.sql
+../$endpoints/posts/get_post_replies.sql
 ../$endpoints/posts/get_post_votes.sql
+../$endpoints/communities/get_communities.sql
+../$endpoints/communities/get_community.sql
+../$endpoints/communities/get_community_subscribers.sql
+../$endpoints/communities/get_community_roles.sql
+../$endpoints/search/search_posts.sql
+../$endpoints/tags/get_trending_tags.sql
 ../$endpoints/other/get_sync_status.sql
 ../$endpoints/other/get_version.sql"
 
