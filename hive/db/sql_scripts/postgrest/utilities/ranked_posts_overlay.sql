@@ -32,7 +32,10 @@ BEGIN
     RAISE EXCEPTION 'observer is required for this endpoint';
   END IF;
 
-  _request.page_limit = GREATEST(LEAST(COALESCE(_limit, 20), hivemind_postgrest_utilities.get_max_posts_per_call_limit()), 1);
+  _request.page_limit = hivemind_postgrest_utilities.rest_page_size(
+    _limit,
+    least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+    hivemind_postgrest_utilities.get_max_posts_per_call_limit());
 
   _request.start_post_id = hivemind_postgrest_utilities.find_comment_id(
     hivemind_postgrest_utilities.valid_account(_start_author, True),

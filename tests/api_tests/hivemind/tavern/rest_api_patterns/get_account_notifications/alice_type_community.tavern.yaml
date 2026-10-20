@@ -17,7 +17,7 @@
         params:
           account-name: "alice"
           min-score: 15
-          limit: 100
+          page-size: 100
           type: "mute_post,follow"
           community: "hive-198723"
       response:

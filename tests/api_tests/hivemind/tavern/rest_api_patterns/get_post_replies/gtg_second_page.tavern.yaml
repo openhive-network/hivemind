@@ -17,7 +17,7 @@
         params:
           author: "gtg"
           permlink: "missing-rewards-while-mining"
-          limit: 3
+          page-size: 3
           start-author: "timcliff"
           start-permlink: "re-gtg-missing-rewards-while-mining-20160827t141319137z"
       response:

@@ -10,17 +10,15 @@
   stages:
     - name: test
       request:
-        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_account_posts"
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_post_votes"
         method: GET
         headers:
           accept: application/json
         params:
-          account-name: "gtg"
-          sort: "blog"
-          limit: 1
+          author: "xeroc"
+          permlink: "piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+          page-size: 25
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_rest_response_with_pattern
-          extra_kwargs:
-            ignore_tags: "<bridge posts>"

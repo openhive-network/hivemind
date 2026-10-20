@@ -16,7 +16,7 @@
           accept: application/json
         params:
           last: "hive-171488"
-          limit: 1
+          page-size: 1
           observer: "gtg"
       response:
         status_code: 200

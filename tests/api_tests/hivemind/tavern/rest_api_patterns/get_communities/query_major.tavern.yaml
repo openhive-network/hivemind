@@ -15,7 +15,7 @@
         headers:
           accept: application/json
         params:
-          limit: 100
+          page-size: 100
           query: "major"
       response:
         status_code: 200

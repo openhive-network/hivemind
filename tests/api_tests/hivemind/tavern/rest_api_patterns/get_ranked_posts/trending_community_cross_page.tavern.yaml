@@ -19,7 +19,7 @@
           tag: "hive-135485"
           start-author: "test-creator"
           start-permlink: "pinpost3"
-          limit: 10
+          page-size: 10
       response:
         status_code: 200
         verify_response_with:

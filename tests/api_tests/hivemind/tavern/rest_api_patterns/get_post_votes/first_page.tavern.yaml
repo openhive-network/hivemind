@@ -18,7 +18,7 @@
         json:
           author: "xeroc"
           permlink: "piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
-          limit: 3
+          page-size: 3
       response:
         status_code: 200
         verify_response_with:

@@ -1,0 +1,6 @@
+{
+  "code": "P0001",
+  "details": null,
+  "hint": null,
+  "message": "Assert Exception:limit = 0 outside valid range [1:100]"
+}

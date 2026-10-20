@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_community_roles(''hive-123456'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/communities/hive-123456/roles?limit=50''`
+      * `GET ''https://%1$s/hivemind-api/communities/hive-123456/roles?page-size=50''`
     operationId: hivemind_endpoints.get_community_roles
     parameters:
       - in: path
@@ -24,12 +24,12 @@
           type: string
         description: Name of the community (`hive-NNNNNN`)
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
           default: NULL
-        description: Maximum number of rows to return, at most 1000 (the default)
+        description: Maximum number of rows to return, at most 1000; the default is 50
       - in: query
         name: last
         required: false
@@ -55,7 +55,7 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_community_roles;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_community_roles(
     "name" TEXT,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "last" TEXT = NULL
 )
 RETURNS SETOF JSONB 
@@ -65,6 +65,6 @@ AS
 $$
 BEGIN
   RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', 'list_community_roles',
-    jsonb_build_object('community', "name", 'limit', hivemind_postgrest_utilities.rest_page_limit("limit", 1000), 'last', "last"));
+    jsonb_build_object('community', "name", 'limit', "page-size", 'last', "last"));
 END
 $$;

@@ -18,7 +18,7 @@
           q: "hive"
           sort: "relevance"
           author: "kental"
-          limit: 2
+          page-size: 2
           start-author: "kental"
           start-permlink: "secrets-of-the-beekeeper-subtlety-beekeeping-bees"
       response:

@@ -12,16 +12,16 @@
       * `SELECT hivemind_endpoints.get_trending_tags(10);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/tags/trending?limit=10''`
+      * `GET ''https://%1$s/hivemind-api/tags/trending?page-size=10''`
     operationId: hivemind_endpoints.get_trending_tags
     parameters:
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
           default: NULL
-        description: Maximum number of topics to return, at most 25 (the default)
+        description: Maximum number of topics to return, at most 25; the default is 10
       - in: query
         name: observer
         required: false
@@ -48,7 +48,7 @@
 -- openapi-generated-code-begin
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_trending_tags;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_trending_tags(
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "observer" TEXT = NULL
 )
 RETURNS SETOF JSONB 
@@ -58,6 +58,6 @@ AS
 $$
 BEGIN
   RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', 'get_trending_topics',
-    jsonb_build_object('limit', hivemind_postgrest_utilities.rest_page_limit("limit", 25), 'observer', "observer"));
+    jsonb_build_object('limit', "page-size", 'observer', "observer"));
 END
 $$;

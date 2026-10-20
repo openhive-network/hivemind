@@ -15,7 +15,7 @@
       * `SELECT * FROM hivemind_endpoints.get_votes(''trending'', '''', ''alice'', 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/blog/votes?sort=trending&observer=alice&limit=20''`
+      * `GET ''https://%1$s/hivemind-api/blog/votes?sort=trending&observer=alice&page-size=20''`
     operationId: hivemind_endpoints.get_votes
     parameters:
       - in: query
@@ -41,13 +41,13 @@
           default: NULL
         description: Account name to check vote status for (required)
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
           default: 20
           minimum: 1
-        description: Maximum number of posts to return
+        description: Maximum number of posts to return, at most the posts-per-call limit (20 unless configured)
       - in: query
         name: start-author
         required: false
@@ -95,7 +95,7 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_votes(
     "sort" TEXT,
     "tag" TEXT = '',
     "observer" TEXT = NULL,
-    "limit" INT = 20,
+    "page-size" INT = 20,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL
 )
@@ -108,7 +108,7 @@ DECLARE
   _request hivemind_postgrest_utilities.ranked_posts_overlay_request;
 BEGIN
   _request = hivemind_postgrest_utilities.valid_ranked_posts_overlay_request(
-    "sort", "tag", "observer", "limit", "start-author", "start-permlink");
+    "sort", "tag", "observer", "page-size", "start-author", "start-permlink");
 
   RETURN QUERY
     SELECT

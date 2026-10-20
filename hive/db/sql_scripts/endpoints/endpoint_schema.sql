@@ -1121,7 +1121,7 @@ declare
           "blog_api"
         ],
         "summary": "Get votes cast by an account, newest first",
-        "description": "Returns the votes cast by the account ordered by the time each vote was last updated, newest first\n(ties are broken by the vote''s internal id, newest first).\n\nTo fetch the next page pass the `last_update`, `author` and `permlink` of the last vote of the\nprevious page as `before`, `start-author` and `start-permlink`; consecutive pages then neither\nrepeat nor skip a vote. `before` alone returns the votes last updated strictly before that time.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_votes(''blocktrades'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20''`\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20&before=2016-09-15T19:47:21&start-author=alice&start-permlink=my-awesome-post''`\n",
+        "description": "Returns the votes cast by the account ordered by the time each vote was last updated, newest first\n(ties are broken by the vote''s internal id, newest first).\n\nTo fetch the next page pass the `last_update`, `author` and `permlink` of the last vote of the\nprevious page as `before`, `start-author` and `start-permlink`; consecutive pages then neither\nrepeat nor skip a vote. `before` alone returns the votes last updated strictly before that time.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_account_votes(''blocktrades'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?page-size=20''`\n* `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?page-size=20&before=2016-09-15T19:47:21&start-author=alice&start-permlink=my-awesome-post''`\n",
         "operationId": "hivemind_endpoints.get_account_votes",
         "parameters": [
           {
@@ -1135,14 +1135,15 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": 20,
-              "minimum": 1
+              "minimum": 1,
+              "maximum": 1000
             },
-            "description": "Maximum number of votes to return"
+            "description": "Maximum number of votes to return, at most 1000"
           },
           {
             "in": "query",
@@ -1210,7 +1211,7 @@ declare
           "blog_api"
         ],
         "summary": "Get an account''s posts",
-        "description": "Returns the account''s posts of the kind given by `sort`, the same list as `bridge.get_account_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&limit=20''`\n",
+        "description": "Returns the account''s posts of the kind given by `sort`, the same list as `bridge.get_account_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_account_posts",
         "parameters": [
           {
@@ -1244,7 +1245,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1354,7 +1355,7 @@ declare
           "blog_api"
         ],
         "summary": "Get an account''s followers",
-        "description": "Returns the accounts that follow (or, with `type=ignore`, mute) the account, the same list as `condenser_api.get_followers`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_followers(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/followers?type=blog&limit=100''`\n",
+        "description": "Returns the accounts that follow (or, with `type=ignore`, mute) the account, the same list as `condenser_api.get_followers`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_followers(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/followers?type=blog&page-size=100''`\n",
         "operationId": "hivemind_endpoints.get_account_followers",
         "parameters": [
           {
@@ -1378,7 +1379,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1421,7 +1422,7 @@ declare
           "blog_api"
         ],
         "summary": "Get the accounts an account follows",
-        "description": "Returns the accounts the account follows (or, with `type=ignore`, mutes), the same list as `condenser_api.get_following`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_following(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/following?type=blog&limit=100''`\n",
+        "description": "Returns the accounts the account follows (or, with `type=ignore`, mutes), the same list as `condenser_api.get_following`,\nin alphabetical order.\n\nTo fetch the next page pass the last account of the previous page as `start`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_following(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/following?type=blog&page-size=100''`\n",
         "operationId": "hivemind_endpoints.get_account_following",
         "parameters": [
           {
@@ -1445,7 +1446,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1488,7 +1489,7 @@ declare
           "blog_api"
         ],
         "summary": "Get an account''s notifications",
-        "description": "Returns the account''s notifications of the last 90 days, newest first, the same list as\n`bridge.account_notifications`.\n\nTo fetch the next page pass the `id` of the last notification of the previous page as `last-id`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_notifications(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/notifications?type=reply,mention&limit=50''`\n",
+        "description": "Returns the account''s notifications of the last 90 days, newest first, the same list as\n`bridge.account_notifications`.\n\nTo fetch the next page pass the `id` of the last notification of the previous page as `last-id`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_notifications(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/notifications?type=reply,mention&page-size=50''`\n",
         "operationId": "hivemind_endpoints.get_account_notifications",
         "parameters": [
           {
@@ -1532,7 +1533,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1576,7 +1577,7 @@ declare
           "blog_api"
         ],
         "summary": "Get reblog status for ranked posts",
-        "description": "Returns reblog status for posts matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_reblogs(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&limit=20''`\n",
+        "description": "Returns reblog status for posts matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers and whether the observer has reblogged each post.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_reblogs(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/reblogs?sort=trending&observer=alice&page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_reblogs",
         "parameters": [
           {
@@ -1618,14 +1619,14 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": 20,
               "minimum": 1
             },
-            "description": "Maximum number of posts to return"
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured)"
           },
           {
             "in": "query",
@@ -1683,7 +1684,7 @@ declare
           "blog_api"
         ],
         "summary": "Get vote status for ranked posts",
-        "description": "Returns the observer''s vote on each post matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers, whether the observer has voted on each post\nand the percent of that vote, so a front end can cache the anonymous feed and fetch this overlay separately.\nA vote the observer later removed is still reported as `voted` with `vote_percent` 0, as it still appears\nin the post''s active votes.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_votes(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/votes?sort=trending&observer=alice&limit=20''`\n",
+        "description": "Returns the observer''s vote on each post matching the same criteria as bridge.get_ranked_posts.\nThis is a lightweight endpoint that only returns post identifiers, whether the observer has voted on each post\nand the percent of that vote, so a front end can cache the anonymous feed and fetch this overlay separately.\nA vote the observer later removed is still reported as `voted` with `vote_percent` 0, as it still appears\nin the post''s active votes.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_votes(''trending'', '''', ''alice'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/blog/votes?sort=trending&observer=alice&page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_votes",
         "parameters": [
           {
@@ -1725,14 +1726,14 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": 20,
               "minimum": 1
             },
-            "description": "Maximum number of posts to return"
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured)"
           },
           {
             "in": "query",
@@ -1792,7 +1793,7 @@ declare
           "blog_api"
         ],
         "summary": "Get ranked posts",
-        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&limit=20''`\n",
+        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_ranked_posts",
         "parameters": [
           {
@@ -1817,7 +1818,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1936,7 +1937,7 @@ declare
           "blog_api"
         ],
         "summary": "Get the replies to a post",
-        "description": "Returns the posts of `bridge.get_discussion` for the post other than the post itself, as a list\nordered by creation time (ties broken by `author/permlink`), so new replies are added at the end.\nEach reply is the same object as in `bridge.get_discussion`; its `replies` field names its own\ndirect replies. Like `bridge.get_discussion`, only the first 4000 posts of a thread are included.\n\nTo fetch the next page pass the `author` and `permlink` of the last reply of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?limit=20''`\n",
+        "description": "Returns the posts of `bridge.get_discussion` for the post other than the post itself, as a list\nordered by creation time (ties broken by `author/permlink`), so new replies are added at the end.\nEach reply is the same object as in `bridge.get_discussion`; its `replies` field names its own\ndirect replies. Like `bridge.get_discussion`, only the first 4000 posts of a thread are included.\n\nTo fetch the next page pass the `author` and `permlink` of the last reply of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_post_replies",
         "parameters": [
           {
@@ -1959,7 +1960,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -2022,7 +2023,7 @@ declare
           "blog_api"
         ],
         "summary": "Get votes on a post",
-        "description": "Returns the votes on one post or comment, in the same order as `database_api.list_votes` with\n`by_comment_voter` (by the voter''s account id, i.e. account creation order).\n\nTo fetch the next page pass the `voter` of the last vote of the previous page as `start-voter`;\nthe page starts after that voter.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_post_votes(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/votes?limit=20''`\n",
+        "description": "Returns the votes on one post or comment, in the same order as `database_api.list_votes` with\n`by_comment_voter` (by the voter''s account id, i.e. account creation order).\n\nTo fetch the next page pass the `voter` of the last vote of the previous page as `start-voter`;\nthe page starts after that voter.\n\nSQL example\n* `SELECT * FROM hivemind_endpoints.get_post_votes(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/votes?page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_post_votes",
         "parameters": [
           {
@@ -2045,14 +2046,15 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": 20,
-              "minimum": 1
+              "minimum": 1,
+              "maximum": 1000
             },
-            "description": "Maximum number of votes to return"
+            "description": "Maximum number of votes to return, at most 1000"
           },
           {
             "in": "query",
@@ -2100,7 +2102,7 @@ declare
           "blog_api"
         ],
         "summary": "List communities",
-        "description": "Returns communities ordered by `sort`, optionally only those matching `query`, the same list as\n`bridge.list_communities`.\n\nTo fetch the next page pass the `name` of the last community of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_communities(''rank'', NULL, 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities?sort=rank&limit=20''`\n",
+        "description": "Returns communities ordered by `sort`, optionally only those matching `query`, the same list as\n`bridge.list_communities`.\n\nTo fetch the next page pass the `name` of the last community of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_communities(''rank'', NULL, 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities?sort=rank&page-size=20''`\n",
         "operationId": "hivemind_endpoints.get_communities",
         "parameters": [
           {
@@ -2125,7 +2127,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -2225,7 +2227,7 @@ declare
           "blog_api"
         ],
         "summary": "Get a community''s subscribers",
-        "description": "Returns the community''s subscribers in account name order, the same list as `bridge.list_subscribers`.\nEach row is `[account, role, title, subscribed_at]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_subscribers(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/subscribers?limit=100''`\n",
+        "description": "Returns the community''s subscribers in account name order, the same list as `bridge.list_subscribers`.\nEach row is `[account, role, title, subscribed_at]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_subscribers(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/subscribers?page-size=100''`\n",
         "operationId": "hivemind_endpoints.get_community_subscribers",
         "parameters": [
           {
@@ -2239,7 +2241,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -2282,7 +2284,7 @@ declare
           "blog_api"
         ],
         "summary": "Get a community''s roles",
-        "description": "Returns the community''s accounts that have a role other than guest, highest role first, the same list as `bridge.list_community_roles`.\nEach row is `[account, role, title]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_roles(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/roles?limit=50''`\n",
+        "description": "Returns the community''s accounts that have a role other than guest, highest role first, the same list as `bridge.list_community_roles`.\nEach row is `[account, role, title]`.\n\nTo fetch the next page pass the account name of the last row of the previous page as `last`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_community_roles(''hive-123456'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/communities/hive-123456/roles?page-size=50''`\n",
         "operationId": "hivemind_endpoints.get_community_roles",
         "parameters": [
           {
@@ -2296,13 +2298,13 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": null
             },
-            "description": "Maximum number of rows to return, at most 1000 (the default)"
+            "description": "Maximum number of rows to return, at most 1000; the default is 50"
           },
           {
             "in": "query",
@@ -2339,7 +2341,7 @@ declare
           "blog_api"
         ],
         "summary": "Search posts",
-        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&limit=20''`\n",
+        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`\n",
         "operationId": "hivemind_endpoints.search_posts",
         "parameters": [
           {
@@ -2374,7 +2376,7 @@ declare
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
@@ -2437,18 +2439,18 @@ declare
           "blog_api"
         ],
         "summary": "Get trending topics",
-        "description": "Returns the trending communities and tags, the same list as `bridge.get_trending_topics`.\nEach row is `[name, title]`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_trending_tags(10);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/tags/trending?limit=10''`\n",
+        "description": "Returns the trending communities and tags, the same list as `bridge.get_trending_topics`.\nEach row is `[name, title]`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_trending_tags(10);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/tags/trending?page-size=10''`\n",
         "operationId": "hivemind_endpoints.get_trending_tags",
         "parameters": [
           {
             "in": "query",
-            "name": "limit",
+            "name": "page-size",
             "required": false,
             "schema": {
               "type": "integer",
               "default": null
             },
-            "description": "Maximum number of topics to return, at most 25 (the default)"
+            "description": "Maximum number of topics to return, at most 25; the default is 10"
           },
           {
             "in": "query",

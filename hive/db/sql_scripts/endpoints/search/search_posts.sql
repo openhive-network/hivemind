@@ -15,7 +15,7 @@
       * `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&limit=20''`
+      * `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`
     operationId: hivemind_endpoints.search_posts
     parameters:
       - in: query
@@ -41,7 +41,7 @@
           default: NULL
         description: Only posts by this account
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -90,7 +90,7 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.search_posts(
     "q" TEXT = NULL,
     "sort" TEXT = NULL,
     "author" TEXT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL,
     "observer" TEXT = NULL
@@ -106,7 +106,7 @@ BEGIN
       'pattern', "q",
       'sort', "sort",
       'author', "author",
-      'limit', hivemind_postgrest_utilities.rest_page_limit("limit", hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+      'limit', "page-size",
       'start_author', "start-author",
       'start_permlink', "start-permlink",
       'observer', "observer"));

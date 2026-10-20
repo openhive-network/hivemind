@@ -3,6 +3,7 @@
 
   marks:
     - patterntest
+    - negative
 
   includes:
     - !include ../../common.yaml
@@ -10,14 +11,17 @@
   stages:
     - name: test
       request:
-        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_community_subscribers"
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_post_replies"
         method: GET
         headers:
           accept: application/json
         params:
-          name: "hive-135485"
-          limit: 1
+          author: "gtg"
+          permlink: "missing-rewards-while-mining"
+          page-size: 21
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            error_response: true

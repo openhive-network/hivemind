@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_communities(''rank'', NULL, 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/communities?sort=rank&limit=20''`
+      * `GET ''https://%1$s/hivemind-api/communities?sort=rank&page-size=20''`
     operationId: hivemind_endpoints.get_communities
     parameters:
       - in: query
@@ -32,7 +32,7 @@
           default: NULL
         description: Words the community''s title or about text must contain
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -73,7 +73,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_communities;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_communities(
     "sort" TEXT = NULL,
     "query" TEXT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "last" TEXT = NULL,
     "observer" TEXT = NULL
 )
@@ -84,6 +84,6 @@ AS
 $$
 BEGIN
   RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', 'list_communities',
-    jsonb_build_object('sort', "sort", 'query', "query", 'limit', hivemind_postgrest_utilities.rest_page_limit("limit", 100), 'last', "last", 'observer', "observer"));
+    jsonb_build_object('sort', "sort", 'query', "query", 'limit', "page-size", 'last', "last", 'observer', "observer"));
 END
 $$;

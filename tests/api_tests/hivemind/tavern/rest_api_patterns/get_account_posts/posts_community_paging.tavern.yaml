@@ -20,7 +20,7 @@
           community: "hive-171487"
           start-author: "alice"
           start-permlink: "Second-after-member-post-hive1"
-          limit: 2
+          page-size: 2
       response:
         status_code: 200
         verify_response_with:

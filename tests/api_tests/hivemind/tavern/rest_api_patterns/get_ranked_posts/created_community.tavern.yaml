@@ -17,7 +17,7 @@
         params:
           sort: "created"
           tag: "hive-117600"
-          limit: 5
+          page-size: 5
       response:
         status_code: 200
         verify_response_with:

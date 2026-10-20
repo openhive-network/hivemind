@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_account_notifications(''alice'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/accounts/alice/notifications?type=reply,mention&limit=50''`
+      * `GET ''https://%1$s/hivemind-api/accounts/alice/notifications?type=reply,mention&page-size=50''`
     operationId: hivemind_endpoints.get_account_notifications
     parameters:
       - in: path
@@ -46,7 +46,7 @@
           default: NULL
         description: Minimum notification score, 0 to 100, 25 by default
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -81,7 +81,7 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_account_notifications(
     "type" TEXT = NULL,
     "community" TEXT = NULL,
     "min-score" INT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "last-id" BIGINT = NULL
 )
 RETURNS SETOF JSONB 
@@ -96,7 +96,7 @@ BEGIN
       'type', to_jsonb(NULLIF(string_to_array("type", ','), '{}')),
       'community', "community",
       'min_score', "min-score",
-      'limit', hivemind_postgrest_utilities.rest_page_limit("limit", 100),
+      'limit', "page-size",
       'last_id', "last-id"));
 END
 $$;
