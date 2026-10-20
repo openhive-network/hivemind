@@ -19,7 +19,7 @@
           sort: "created"
           tag: "photography"
           observer: "coar"
-          limit: 10
+          page-size: 10
       response:
         status_code: 200
         verify_response_with:

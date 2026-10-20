@@ -15,7 +15,7 @@
       * `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&limit=20''`
+      * `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`
     operationId: hivemind_endpoints.get_ranked_posts
     parameters:
       - in: query
@@ -34,7 +34,7 @@
           default: NULL
         description: Tag or community name (`hive-NNNNNN`); `my` lists the observer''s communities
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -82,7 +82,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_ranked_posts;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_ranked_posts(
     "sort" TEXT = NULL,
     "tag" TEXT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL,
     "observer" TEXT = NULL
@@ -97,7 +97,7 @@ BEGIN
     jsonb_build_object(
       'sort', "sort",
       'tag', "tag",
-      'limit', hivemind_postgrest_utilities.rest_page_limit("limit", hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+      'limit', "page-size",
       'start_author', "start-author",
       'start_permlink', "start-permlink",
       'observer', "observer"));

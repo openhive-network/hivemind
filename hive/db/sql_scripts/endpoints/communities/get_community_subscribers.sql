@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_community_subscribers(''hive-123456'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/communities/hive-123456/subscribers?limit=100''`
+      * `GET ''https://%1$s/hivemind-api/communities/hive-123456/subscribers?page-size=100''`
     operationId: hivemind_endpoints.get_community_subscribers
     parameters:
       - in: path
@@ -24,7 +24,7 @@
           type: string
         description: Name of the community (`hive-NNNNNN`)
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -55,7 +55,7 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_community_subscribers;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_community_subscribers(
     "name" TEXT,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "last" TEXT = NULL
 )
 RETURNS SETOF JSONB 
@@ -65,6 +65,6 @@ AS
 $$
 BEGIN
   RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', 'list_subscribers',
-    jsonb_build_object('community', "name", 'limit', hivemind_postgrest_utilities.rest_page_limit("limit", 100), 'last', "last"));
+    jsonb_build_object('community', "name", 'limit', "page-size", 'last', "last"));
 END
 $$;

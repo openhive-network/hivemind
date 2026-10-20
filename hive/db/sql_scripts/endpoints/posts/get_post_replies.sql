@@ -17,7 +17,7 @@
       * `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?limit=20''`
+      * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?page-size=20''`
     operationId: hivemind_endpoints.get_post_replies
     parameters:
       - in: path
@@ -33,7 +33,7 @@
           type: string
         description: Permlink of the post
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -81,7 +81,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_post_replies;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_post_replies(
     "author" TEXT,
     "permlink" TEXT,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL,
     "observer" TEXT = NULL
@@ -96,6 +96,9 @@ DECLARE
   _root_key TEXT := "author" || '/' || "permlink";
   _start_key TEXT;
   _start_created TEXT;
+  _limit INT := hivemind_postgrest_utilities.rest_page_size("page-size",
+    least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+    hivemind_postgrest_utilities.get_max_posts_per_call_limit());
 BEGIN
   _discussion = hivemind_postgrest_utilities.rest_json_rpc_call('bridge', 'get_discussion',
     jsonb_build_object('author', "author", 'permlink', "permlink", 'observer', "observer"));
@@ -115,6 +118,6 @@ BEGIN
     WHERE reply.key <> _root_key
       AND (_start_key IS NULL OR ((reply.value ->> 'created') COLLATE "C", reply.key COLLATE "C") > (_start_created COLLATE "C", _start_key COLLATE "C"))
     ORDER BY (reply.value ->> 'created') COLLATE "C", reply.key COLLATE "C"
-    LIMIT hivemind_postgrest_utilities.rest_page_limit("limit", hivemind_postgrest_utilities.get_max_posts_per_call_limit());
+    LIMIT _limit;
 END
 $$;

@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&limit=20''`
+      * `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&page-size=20''`
     operationId: hivemind_endpoints.get_account_posts
     parameters:
       - in: path
@@ -39,7 +39,7 @@
           default: NULL
         description: Only posts in this community; allowed with `sort` `posts` and `comments`
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -88,7 +88,7 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_account_posts(
     "account-name" TEXT,
     "sort" TEXT = NULL,
     "community" TEXT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL,
     "observer" TEXT = NULL
@@ -104,7 +104,7 @@ BEGIN
       'account', "account-name",
       'sort', "sort",
       'community', "community",
-      'limit', hivemind_postgrest_utilities.rest_page_limit("limit", hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
+      'limit', "page-size",
       'start_author', "start-author",
       'start_permlink', "start-permlink",
       'observer', "observer"));

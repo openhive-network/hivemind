@@ -15,7 +15,7 @@
       * `SELECT * FROM hivemind_endpoints.get_post_votes(''alice'', ''my-awesome-post'', 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/votes?limit=20''`
+      * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/votes?page-size=20''`
     operationId: hivemind_endpoints.get_post_votes
     parameters:
       - in: path
@@ -31,13 +31,14 @@
           type: string
         description: Permlink of the post
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
           default: 20
           minimum: 1
-        description: Maximum number of votes to return
+          maximum: 1000
+        description: Maximum number of votes to return, at most 1000
       - in: query
         name: start-voter
         required: false
@@ -75,7 +76,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_post_votes;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_post_votes(
     "author" TEXT,
     "permlink" TEXT,
-    "limit" INT = 20,
+    "page-size" INT = 20,
     "start-voter" TEXT = NULL
 )
 RETURNS SETOF hivemind_endpoints.post_vote 
@@ -103,7 +104,7 @@ BEGIN
     RAISE EXCEPTION 'Account ''%'' does not exist', "start-voter";
   END IF;
 
-  _limit = GREATEST(LEAST(COALESCE("limit", 20), hivemind_postgrest_utilities.get_max_posts_per_call_limit()), 1);
+  _limit = hivemind_postgrest_utilities.rest_page_size("page-size", 20, 1000);
 
   RETURN QUERY
     SELECT *

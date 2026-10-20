@@ -17,7 +17,7 @@
           accept: application/json
         json:
           account-name: "gtg"
-          limit: 2
+          page-size: 2
           before: "2016-07-02T07:33:54"
       response:
         status_code: 200

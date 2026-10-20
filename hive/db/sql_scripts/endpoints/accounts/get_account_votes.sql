@@ -16,8 +16,8 @@
       * `SELECT * FROM hivemind_endpoints.get_account_votes(''blocktrades'', 20);`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20''`
-      * `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?limit=20&before=2016-09-15T19:47:21&start-author=alice&start-permlink=my-awesome-post''`
+      * `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?page-size=20''`
+      * `GET ''https://%1$s/hivemind-api/accounts/blocktrades/votes?page-size=20&before=2016-09-15T19:47:21&start-author=alice&start-permlink=my-awesome-post''`
     operationId: hivemind_endpoints.get_account_votes
     parameters:
       - in: path
@@ -27,13 +27,14 @@
           type: string
         description: Account whose votes are listed
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
           default: 20
           minimum: 1
-        description: Maximum number of votes to return
+          maximum: 1000
+        description: Maximum number of votes to return, at most 1000
       - in: query
         name: before
         required: false
@@ -84,7 +85,7 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.get_account_votes;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_account_votes(
     "account-name" TEXT,
-    "limit" INT = 20,
+    "page-size" INT = 20,
     "before" TIMESTAMP = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL
@@ -110,7 +111,7 @@ BEGIN
     RAISE EXCEPTION 'Account ''%'' does not exist', "account-name";
   END IF;
 
-  _limit = GREATEST(LEAST(COALESCE("limit", 20), hivemind_postgrest_utilities.get_max_posts_per_call_limit()), 1);
+  _limit = hivemind_postgrest_utilities.rest_page_size("page-size", 20, 1000);
 
   IF (COALESCE("start-author", '') = '') <> (COALESCE("start-permlink", '') = '') THEN
     RAISE EXCEPTION 'start-author and start-permlink must be given together';

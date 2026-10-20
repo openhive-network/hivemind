@@ -10,12 +10,13 @@
   stages:
     - name: test
       request:
-        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_trending_tags"
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_community_subscribers"
         method: GET
         headers:
           accept: application/json
         params:
-          limit: 26
+          name: "hive-135485"
+          page-size: 1
       response:
         status_code: 200
         verify_response_with:

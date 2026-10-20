@@ -14,7 +14,7 @@
       * `SELECT hivemind_endpoints.get_account_following(''alice'');`
 
       REST call example
-      * `GET ''https://%1$s/hivemind-api/accounts/alice/following?type=blog&limit=100''`
+      * `GET ''https://%1$s/hivemind-api/accounts/alice/following?type=blog&page-size=100''`
     operationId: hivemind_endpoints.get_account_following
     parameters:
       - in: path
@@ -31,7 +31,7 @@
           default: NULL
         description: '`blog` (follows, the default) or `ignore` (mutes)'
       - in: query
-        name: limit
+        name: page-size
         required: false
         schema:
           type: integer
@@ -63,7 +63,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.get_account_following;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.get_account_following(
     "account-name" TEXT,
     "type" TEXT = NULL,
-    "limit" INT = NULL,
+    "page-size" INT = NULL,
     "start" TEXT = NULL
 )
 RETURNS SETOF JSONB 
@@ -73,6 +73,6 @@ AS
 $$
 BEGIN
   RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('condenser_api', 'get_following',
-    jsonb_build_object('account', "account-name", 'start', "start", 'follow_type', "type", 'limit', hivemind_postgrest_utilities.rest_page_limit("limit", 1000)));
+    jsonb_build_object('account', "account-name", 'start', "start", 'follow_type', "type", 'limit', "page-size"));
 END
 $$;

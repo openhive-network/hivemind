@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+    - negative
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/rpc/get_post_votes"
+        method: GET
+        headers:
+          accept: application/json
+        params:
+          author: "xeroc"
+          permlink: "piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+          page-size: 1001
+      response:
+        status_code: 400
+        verify_response_with:
+          function: validate_response:compare_rest_response_with_pattern
+          extra_kwargs:
+            error_response: true

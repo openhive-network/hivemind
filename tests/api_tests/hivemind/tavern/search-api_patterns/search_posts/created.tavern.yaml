@@ -17,7 +17,7 @@
         params:
           q: "hive"
           sort: "created"
-          limit: 5
+          page-size: 5
       response:
         status_code: 200
         verify_response_with:

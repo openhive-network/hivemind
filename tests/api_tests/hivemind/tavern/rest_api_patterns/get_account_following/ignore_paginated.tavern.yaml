@@ -18,7 +18,7 @@
           account-name: "morganpearl"
           type: "ignore"
           start: "cryptos"
-          limit: 3
+          page-size: 3
       response:
         status_code: 200
         verify_response_with:

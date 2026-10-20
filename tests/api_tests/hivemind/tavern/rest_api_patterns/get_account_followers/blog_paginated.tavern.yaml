@@ -17,7 +17,7 @@
         params:
           account-name: "steemit"
           start: "steemlinks"
-          limit: 3
+          page-size: 3
       response:
         status_code: 200
         verify_response_with:

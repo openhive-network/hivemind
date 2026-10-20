@@ -19,7 +19,7 @@
           sort: "created"
           tag: "photography"
           observer: "coar"
-          limit: 10
+          page-size: 10
           start-author: "zaitsevalesyaa"
           start-permlink: "the-art-of-origami-bird-swan"
       response:

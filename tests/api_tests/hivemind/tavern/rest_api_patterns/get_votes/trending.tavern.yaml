@@ -19,7 +19,7 @@
           sort: "trending"
           tag: ""
           observer: "coar"
-          limit: 6
+          page-size: 6
       response:
         status_code: 200
         verify_response_with:
