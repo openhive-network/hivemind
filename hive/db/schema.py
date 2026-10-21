@@ -46,6 +46,10 @@ def _try_create_extension(db, ext_name) -> bool:
         return False
 
 
+# last_completed_block_num of a database no finalization has completed yet.
+SEED_LAST_COMPLETED_BLOCK = 1
+
+
 def insert_seed_data(db) -> None:
     """Insert the minimal seed rows required for hivemind to operate.
 
@@ -57,7 +61,7 @@ def insert_seed_data(db) -> None:
     """
     sqls = [
         f"INSERT INTO {SCHEMA_NAME}.hive_state (last_completed_block_num, db_version, hivemind_git_rev, hivemind_git_date, hivemind_version)"
-        f" VALUES (1, 0, '{GIT_REVISION}', '{GIT_DATE}', '{VERSION}')"
+        f" VALUES ({SEED_LAST_COMPLETED_BLOCK}, 0, '{GIT_REVISION}', '{GIT_DATE}', '{VERSION}')"
         f" ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '') ON CONFLICT DO NOTHING",
