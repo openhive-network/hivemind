@@ -1635,7 +1635,7 @@ BEGIN
       AND pr.muted_reasons IS NOT NULL
       AND pr.muted_reasons != 0
       AND pr.community_id IS NOT NULL
-      AND pr.block_num > hivemind_app.block_before_irreversible('90 days')
+      AND pr.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
       AND pr.community_id IS DISTINCT FROM pr.author_id
     ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING;
 

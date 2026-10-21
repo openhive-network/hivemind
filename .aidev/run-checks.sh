@@ -14,7 +14,9 @@
 #                as the hivemind image's `setup --with-apps` does it:
 #                scripts/setup_postgres.sh, the reputation_tracker and HAfAH
 #                submodules' install_app.sh, scripts/install_app.sh, then
-#                `hive build_schema` from this checkout
+#                `hive build_schema` from this checkout, then checks hivemind's block
+#                processing during an emulated keep-monotonic replay, in a transaction
+#                rolled back: .aidev/early_block_processing_check.sql
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -149,7 +151,12 @@ install_hivemind() {
     PYTHONPATH="$root" python3 -m hive.cli build_schema --database-url="$ADMIN_URL" || return 1
     psql "$ADMIN_URL" -v ON_ERROR_STOP=on -Atc \
         "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'hivemind_endpoints'" \
-        | awk '{ print "hivemind_endpoints functions: " $1; exit ($1 > 0 ? 0 : 1) }'
+        | awk '{ print "hivemind_endpoints functions: " $1; exit ($1 > 0 ? 0 : 1) }' || return 1
+    if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
+        echo "early block processing check skipped: this HAF predates hive/haf#379"
+        return 0
+    fi
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/early_block_processing_check.sql
 }
 
 install() {

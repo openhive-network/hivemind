@@ -876,7 +876,7 @@ BEGIN
               LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
               LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
               LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
-              WHERE hm.block_num > hivemind_app.block_before_irreversible('90 days')
+              WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
                 AND COALESCE(rep.rep, 25) > 0
                 AND hm.author_id IS DISTINCT FROM hm.account_id
                 AND m.follower IS NULL

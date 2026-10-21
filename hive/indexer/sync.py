@@ -274,6 +274,9 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
+                if not self._live_prepared and self._wait_while_haf_restores_indexes():
+                    report_enter_to_stage("live: waiting for HAF to restore its indexes")
+                    continue
                 DbState.set_massive_sync(False)
                 report_enter_to_stage(application_stage)
 
@@ -615,6 +618,27 @@ class SyncHiveDb:
             self._db.wait_for_block_notification(self.LIVE_SAFETY_WAIT_SECONDS)
         else:
             time.sleep(self.IDLE_POLL_SECONDS)
+
+    HAF_INDEX_RESTORE_POLL_SECONDS = 10.0
+
+    def _wait_while_haf_restores_indexes(self) -> bool:
+        """Hold off finalization while HAF restores its core indexes; True when it waited.
+
+        hived sets its sync state to LIVE before it rebuilds the indexes it
+        dropped or deferred for its massive sync, which takes hours on mainnet.
+        A context opted in to early block processing gets blocks during that
+        restore, and app_next_iteration then picks the stage from the distance
+        to the irreversible head, so hivemind, caught up with the replay, sees
+        `live`. Its finalization would compete with the restore for the
+        database, so the range is rolled back and re-taken once
+        hive.is_instance_ready() holds. Never true unless the context opted in:
+        otherwise HAF delivers no block before the instance is ready.
+        """
+        if self._db.query_one("SELECT hive.is_instance_ready()"):
+            return False
+        self._db.query_no_return("ROLLBACK")
+        time.sleep(self.HAF_INDEX_RESTORE_POLL_SECONDS)
+        return True
 
     def _process_live_blocks(self, lbound, ubound, active_connections_before) -> None:
         log.info(f"[SINGLE] Attempting to process blocks in range: <{lbound}:{ubound}>")
