@@ -18,7 +18,7 @@ from hive.conf import (
     SWAGGER_URL,
 )
 from hive.db.adapter import Db
-from hive.db.schema import perform_db_upgrade, setup, setup_runtime_code, teardown
+from hive.db.schema import SEED_LAST_COMPLETED_BLOCK, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
@@ -440,12 +440,12 @@ class DbState:
         Gates the machinery that is only justified (and only safe) when the
         database holds no irreplaceable state yet: UNLOGGED conversion, BM25
         drop/rebuild, and WAL-safety disabling. Cached per process — a crash
-        during initial sync restarts with last_completed still 0, so the gate
-        re-engages correctly.
+        during initial sync restarts with last_completed still at its seed
+        value, so the gate re-engages correctly.
         """
         if cls._initial_sync is None:
             last_completed = cls.db().query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state")
-            cls._initial_sync = (last_completed or 0) == 0
+            cls._initial_sync = (last_completed or 0) <= SEED_LAST_COMPLETED_BLOCK
         return cls._initial_sync
 
     @classmethod
