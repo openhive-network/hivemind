@@ -34,11 +34,36 @@ def prepare_app_context(db: Db) -> None:
         is_forking = db.query_one(f"SELECT hive.app_is_forking('{SCHEMA_NAME}') as is_forking;")
         log.info(f"is_forking={is_forking}")
 
+    _enable_early_block_processing(db)
+
     # Registration in the HAF application registry (register_application) is
     # done by setup_runtime_code, after the runtime SQL it depends on exists.
 
     # Note: custom_json_type index creation is deferred to sync startup
     # (SyncHiveDb.run) so that the install container finishes quickly.
+
+
+def _enable_early_block_processing(db: Db) -> None:
+    """Let HAF deliver blocks to hivemind while hived still replays (haf#379).
+
+    With hived's psql-massive-index-policy = keep-monotonic, the block-number
+    and operation-id indexes stay during the replay, and an opted-in context
+    starts its massive sync before hive.is_instance_ready(). Hivemind's block
+    processing reads hafd only by block range (operations_view, blocks_view)
+    and looks accounts up by name, so it needs no index HAF defers. It cannot
+    leave massive sync early either: the stage comes from hive.app_next_iteration,
+    which measures the distance to the estimated chain head while hived replays.
+    """
+    available = db.query_one(
+        "SELECT to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') IS NOT NULL"
+    )
+    if not available:
+        log.warning("HAF has no early block processing (hive.app_context_set_early_block_processing); not opting in")
+        return
+    db.query_no_return(
+        f"SELECT hive.app_context_set_early_block_processing(ARRAY['{SCHEMA_NAME}']::hive.contexts_group);"
+    )
+    log.info(f"'{SCHEMA_NAME}' context processes blocks while hived replays (early block processing)")
 
 
 def register_application(db: Db) -> None:

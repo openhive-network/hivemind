@@ -6,7 +6,7 @@ from time import perf_counter, sleep
 
 import psycopg2.extensions
 
-from hive.conf import ONE_WEEK_IN_BLOCKS, SCHEMA_NAME, Conf
+from hive.conf import SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -41,7 +41,6 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
-    _notification_min_block = None  # cached 90-day notification threshold
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -140,7 +139,10 @@ class Blocks:
         else:
             # after HF17 all posts are paid after 7 days which means it is safe to assume that
             # posts created at or before LIB - 7days will be paidout at the end of massive sync
-            cls._last_safe_cashout_block = lib - ONE_WEEK_IN_BLOCKS
+            # (while hived replays, every block up to LIB once LIB is 7 days old)
+            cls._last_safe_cashout_block = Db.instance().query_one(
+                f"SELECT {SCHEMA_NAME}.block_before_irreversible('7 days')"
+            )
 
     @classmethod
     def process_multi_sql(cls, first_block: int, last_block: int) -> None:
@@ -312,10 +314,10 @@ class Blocks:
         # window (live sync only) and its sole consumer is notification rendering,
         # so massive-era mentions would be built only to be bulk-deleted — and the
         # body re-reads they force are the flush statement's main detoast traffic.
+        # Taken per batch: while hived replays, the window moves with HAF's irreversible block.
         t0 = perf_counter()
-        if cls._notification_min_block is None:
-            cls._notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
-        PostDataCache.flush(process_mentions=last_block > cls._notification_min_block)
+        notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
+        PostDataCache.flush(process_mentions=last_block > notification_min_block)
         phase_times['flush'] = perf_counter() - t0
 
         # Phase 6: Parallel notification flush
@@ -324,7 +326,7 @@ class Blocks:
         # Post/follow/reblog notifications are skipped for blocks older than the 90-day
         # notification window (they would never appear in user notification feeds).
         t0 = perf_counter()
-        if last_block > cls._notification_min_block:
+        if last_block > notification_min_block:
             phase6_tasks = [
                 (
                     PostNotificationCache.db,
