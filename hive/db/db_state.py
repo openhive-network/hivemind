@@ -90,6 +90,17 @@ class DbState:
         'hive_post_data': 50000,
     }
 
+    # Tables finalization (_finish_all_tables) writes; frozen by the vacuum after it.
+    _FINALIZATION_WRITTEN_TABLES = [
+        'hive_posts',
+        'hive_feed_cache',
+        'hive_mentions',
+        'hive_communities',
+        'hive_state',
+        'hive_notification_cache',
+        'hive_accounts',
+    ]
+
     @staticmethod
     def _retry_ddl(fn, description, max_retries=None):
         """Retry a DDL operation that may deadlock with other HAF apps.
@@ -826,8 +837,11 @@ class DbState:
             # sync updates rshares incrementally per block.
             cls._finish_posts_rshares(cls.db())
 
-            # Vacuum hive_posts to clean dead tuples before Part 0 scans it
-            cls.vacuum_tables_in_threads([f"{SCHEMA_NAME}.hive_posts"])
+            # Vacuum hive_posts to clean dead tuples before Part 0 scans it. Plain: the
+            # freed space lets Part 0's updates stay on their pages (a compacted table made
+            # update_all_hive_posts_children_count 4x slower on the 5M fixture), and
+            # Part 0 rewrites the rows again anyway, so hive_posts is compacted after it.
+            cls.vacuum_tables_in_threads(plain=[f"{SCHEMA_NAME}.hive_posts"])
             cls._rshares_recalculated = True
 
         if cls._interrupted("Part 0 fills"):
@@ -945,24 +959,38 @@ class DbState:
         return due
 
     @classmethod
-    def vacuum_tables_in_threads(cls, tables) -> None:
-        def vacuum_table(table, db) -> None:
-            with AutoDbDisposer(db, "vacuum") as db_mgr:
-                log.info(f"Vacuuming table {table}")
-                if table == f"{SCHEMA_NAME}.hive_posts" or table == f"{SCHEMA_NAME}.hive_post_data":
-                    db_mgr.db.query_no_return_autocommit("VACUUM (FULL, VERBOSE,ANALYZE) " + table)
-                else:
-                    db_mgr.db.query_no_return_autocommit("VACUUM (VERBOSE,ANALYZE) " + table)
-                db_mgr.db.query_no_return_autocommit("VACUUM (VERBOSE,ANALYZE) " + table)
+    def vacuum_tables_in_threads(cls, plain=(), frozen=(), compacted=()) -> None:
+        """Vacuum each table once, in parallel, with ANALYZE: plain for `plain`, FREEZE for `frozen`, FULL for `compacted`.
 
-        methods = []
-        for table in tables:
-            methods.append(('VACUUM ' + table, vacuum_table, [table, cls.db()]))
+        FULL rewrites the table under ACCESS EXCLUSIVE (over an hour for the largest
+        tables at full scale) and discards its freeze and visibility map, so a
+        compacted table needs a frozen vacuum after its last write.
+        """
+
+        def vacuum_table(table, options, db) -> None:
+            with AutoDbDisposer(db, "vacuum") as db_mgr:
+                log.info(f"Vacuuming table {table} ({options})")
+                db_mgr.db.query_no_return_autocommit(f"VACUUM ({options}) {table}")
+
+        methods = [('VACUUM ' + table, vacuum_table, [table, "VERBOSE, ANALYZE", cls.db()]) for table in plain]
+        methods += [
+            ('VACUUM ' + table, vacuum_table, [table, "FREEZE, VERBOSE, ANALYZE", cls.db()]) for table in frozen
+        ]
+        methods += [
+            ('VACUUM ' + table, vacuum_table, [table, "FULL, VERBOSE, ANALYZE", cls.db()]) for table in compacted
+        ]
 
         cls.process_tasks_in_threads("Requesting vacuum on hivemind tables", methods)
 
     @classmethod
     def vacuum_all_hivemind_tables_in_threads(cls) -> None:
+        """Vacuum every hivemind table once before finalization.
+
+        Tables finalization doesn't write are frozen here, their last vacuum of
+        the sync (HAF queues no freeze for hive_post_data or hive_permlink_data,
+        which have no registered indexes). The tables it writes get a plain
+        vacuum so its updates reuse the freed space; they are frozen after it.
+        """
         log.info("Requesting vacuum on hivemind tables")
         sql = f"""
 SELECT table_schema || '.' || table_name AS table_name
@@ -970,11 +998,16 @@ FROM information_schema.tables
 WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
 """
         rows = cls.db().query_all(sql)
-        tables = []
-        for row in rows:
-            tables.append(row._mapping["table_name"])
+        tables = [row._mapping["table_name"] for row in rows]
+        written = cls._finalization_written_tables()
 
-        cls.vacuum_tables_in_threads(tables)
+        cls.vacuum_tables_in_threads(
+            plain=[t for t in tables if t in written], frozen=[t for t in tables if t not in written]
+        )
+
+    @classmethod
+    def _finalization_written_tables(cls):
+        return [f"{SCHEMA_NAME}.{table}" for table in cls._FINALIZATION_WRITTEN_TABLES]
 
     @classmethod
     def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks) -> bool:
@@ -1000,17 +1033,14 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
                 return True
 
             if is_initial_massive:
+                # The rshares recalculation and Part 0 each rewrite most of hive_posts; a
+                # plain vacuum would leave it ~47% larger (5M fixture), so compact it once,
+                # after its last write, then freeze it since the rewrite discards the freeze.
+                hive_posts = f"{SCHEMA_NAME}.hive_posts"
                 cls.vacuum_tables_in_threads(
-                    [
-                        f"{SCHEMA_NAME}.hive_posts",
-                        f"{SCHEMA_NAME}.hive_feed_cache",
-                        f"{SCHEMA_NAME}.hive_mentions",
-                        f"{SCHEMA_NAME}.hive_communities",
-                        f"{SCHEMA_NAME}.hive_state",
-                        f"{SCHEMA_NAME}.hive_notification_cache",
-                        f"{SCHEMA_NAME}.hive_accounts",
-                    ]
+                    frozen=[t for t in cls._finalization_written_tables() if t != hive_posts], compacted=[hive_posts]
                 )
+                cls.vacuum_tables_in_threads(frozen=[hive_posts])
 
             log.info("[MASSIVE] Massive sync complete!")
             return True
