@@ -134,6 +134,107 @@ quality:
       adapter: command
       args: ["python3", ".aidev/mypy_sarif.py", "hive"]
 
+# Production-traffic replay (aidev docs/operations/traffic-replay.md): `aidev replay
+# ab` replays the capture's hivemind calls against a full-scale haf_api_node, base
+# build against candidate. The target node is operator configuration, kept out of
+# this public repository: pass it with `--profile FILE` (aidev#15922), a copy of
+# this `replay:` mapping with a `target:` added. For steem-20's
+# /haf-pool/syncad/haf_api_node that target holds:
+#   build_env: HIVEMIND_VERSION    (selects hivemind, hivemind-install and the rewriter's images)
+#   services: [hivemind-install, hivemind-block-processing, hivemind-postgrest-server, hivemind-postgrest-rewriter]
+#   endpoint: http://127.0.0.1:17002   (hivemind-postgrest-rewriter, as seen from the host)
+#   freeze: {service: haf, env: ARGUMENTS, value: "--skip-hived"}
+#   database: {container: haf-haf-1, name: haf_block_log, user: haf_admin,
+#              schemas: [hivemind_app, hivemind_endpoints, hivemind_postgrest_utilities]}
+#   rest_prefix: /hivemind-api     (a target key: the loader refuses it at this level)
+# See .aidev/README.md, "Production-traffic replay".
+performance:
+  mode: observe
+  replay:
+    mode: observe
+    # api.hive.blog 2026-10-16, 15 min between drone and haproxy on the hivemind
+    # backend: what drone forwards to hivemind (translated, unbatched, cache misses
+    # only), 173,075 requests. The 2025-11-22 haproxy capture (583b0d0d…) holds only
+    # hived and hafah calls, none of hivemind's.
+    captures: [8d7e6cb73d0843b9c169468a0f2dc1318f7a07afb0bada30688a3faa7f5a18d2]
+    # Every method hive/db/sql_scripts/postgrest/utilities/get_api_method.sql
+    # dispatches. condenser_api and database_api are named one by one: the rest of
+    # both namespaces is hived's (and condenser_api.get_account_history & co. hafah's).
+    methods:
+      - "bridge.*"
+      - condenser_api.get_follow_count
+      - condenser_api.get_reblogged_by
+      - condenser_api.get_trending_tags
+      - condenser_api.get_state
+      - condenser_api.get_account_reputations
+      - condenser_api.get_blog
+      - condenser_api.get_blog_entries
+      - condenser_api.get_content
+      - condenser_api.get_content_replies
+      - condenser_api.get_followers
+      - condenser_api.get_following
+      - condenser_api.get_active_votes
+      - condenser_api.get_discussions_by_blog
+      - condenser_api.get_discussions_by_feed
+      - condenser_api.get_discussions_by_author_before_date
+      - condenser_api.get_discussions_by_comments
+      - condenser_api.get_replies_by_last_update
+      - condenser_api.get_discussions_by_created
+      - condenser_api.get_discussions_by_hot
+      - condenser_api.get_discussions_by_trending
+      - condenser_api.get_post_discussions_by_payout
+      - condenser_api.get_comment_discussions_by_payout
+      - condenser_api.get_account_votes
+      - "follow_api.*"
+      - "tags_api.*"
+      - database_api.find_votes
+      - database_api.list_votes
+      - database_api.find_comments
+      - "hive.*"
+      - "search-api.*"
+      - "search_api.*"
+      - "rest:/hivemind-api/*"
+    normalise: {jsonrpc: drone}
+    budgets:
+      timeout_ms: 5000
+      p95_ms: 2000
+      max_timeout_rate: 0.001
+      max_error_rate: 0.01
+      regression_ratio: 1.25
+      min_regression_ms: 5
+      min_ok_share: 0.95
+      max_consistent_error_rate: 0.05
+    expected:
+      - name: find-text-start-paging
+        methods: [search-api.find_text, search_api.find_text]
+        params: [start_author, start_permlink]
+        reason: find_text now resumes after the start post; before #381 a start_author/start_permlink request returned page one or an empty page
+    rules:
+      # find_text's response carries no score, so no rule can confine this to posts of
+      # equal score, and `params` tests parameter names, not `sort`'s value. The page
+      # is compared as a multiset instead: a reordering is absorbed, a different post
+      # on the page is not.
+      - name: find-text-relevance-ties
+        methods: [search-api.find_text, search_api.find_text]
+        unordered: [result]
+        reason: "#381 orders relevance ties by id DESC; before it their order was the plan's"
+      - name: hivemind-info-reports-build
+        methods: [hive.get_info]
+        ignore:
+          - result.hivemind_version
+          - result.hivemind_git_rev
+          - result.hivemind_git_date
+          - result.database_patch_date
+          - result.database_patched_to_revision
+          - result.database_schema_version
+        reason: hive.get_info reports the running build and the schema patch it installed
+    inputs:
+      - "hive/db/sql_scripts/**"
+      - rewrite_rules.conf
+      - docker/hivemind_nginx.conf.template
+      - docker/rewriter_entrypoint.sh
+      - Dockerfile.rewriter
+
 # Commit trailers AIDEV asks the implementing agent to declare (aidev#15385).
 # `Hivemind-Sync` tells CI's detect_changes whether the commit needs a full sync;
 # scripts/ci/sync_decision.sh applies it behind path guards.
