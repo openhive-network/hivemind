@@ -415,6 +415,21 @@ BEGIN
         FROM last_vote v
         FULL OUTER JOIN last_ecv e
             ON v.voter = e.voter AND v.author = e.author AND v.permlink = e.permlink
+    ),
+    -- Each account name is looked up once, however many votes it casts or receives.
+    account_ids AS (
+        SELECT ha.name, ha.id
+        FROM (
+            SELECT voter AS name FROM merged
+            UNION
+            SELECT author FROM merged
+        ) n
+        JOIN hivemind_app.hive_accounts ha ON ha.name = n.name
+    ),
+    -- Row order of _vote_batch decides the order hive_votes ids are drawn in
+    -- (step 2), so keep merged's order whichever side the joins below hash.
+    merged_ord AS (
+        SELECT row_number() OVER () AS ord, merged.* FROM merged
     )
     SELECT
         m.voter,
@@ -429,28 +444,49 @@ BEGIN
         m.is_effective,
         m.num_changes,
         m.block_num
-    FROM merged m
-    JOIN hivemind_app.hive_accounts ha_voter ON ha_voter.name = m.voter
-    JOIN hivemind_app.hive_accounts ha_author ON ha_author.name = m.author;
+    FROM merged_ord m
+    JOIN account_ids ha_voter ON ha_voter.name = m.voter
+    JOIN account_ids ha_author ON ha_author.name = m.author
+    ORDER BY m.ord;
 
     -- Step 2: Insert/update votes with resolved post_id
-    WITH vote_with_post AS (
+    WITH vote_target AS MATERIALIZED (
+        -- Many votes in a batch hit the same post: resolve each target post once.
+        -- MATERIALIZED, or the planner joins it back to the votes first and
+        -- looks the post up per vote again.
         SELECT
-            vb.*,
+            t.author_id,
+            t.permlink,
+            hpd.id AS permlink_id,
             hp.id AS post_id,
-            hpd.id AS permlink_id
-        FROM hivemind_app._vote_batch vb
-        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = vb.permlink
+            hp.block_num_created
+        FROM (
+            SELECT DISTINCT author_id, permlink FROM hivemind_app._vote_batch
+        ) t
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = t.permlink
         JOIN hivemind_app.hive_posts hp
-            ON hp.author_id = vb.author_id
+            ON hp.author_id = t.author_id
             AND hp.permlink_id = hpd.id
             AND hp.counter_deleted = 0
+    ),
+    vote_with_post AS (
+        SELECT
+            vb.*,
+            vt.post_id,
+            vt.permlink_id
+        FROM hivemind_app._vote_batch vb
+        JOIN vote_target vt
+            ON vt.author_id = vb.author_id
+            AND vt.permlink = vb.permlink
         -- Filter out votes cast before the post was recreated (delete/recreate cycle).
         -- The old Python code removed in-memory votes on delete, preventing stale votes
         -- from being flushed for recreated posts.
         -- Use block_num_created (not block_num) because block_num is updated on edits,
         -- which would incorrectly filter out votes cast between creation and edit.
-        WHERE vb.block_num >= hp.block_num_created
+        WHERE vb.block_num >= vt.block_num_created
+        -- Insert in _vote_batch order: hive_votes ids are drawn in insert order,
+        -- and vote notification counters follow hive_votes.id.
+        ORDER BY vb.ctid
     ),
     upserted AS (
         INSERT INTO hivemind_app.hive_votes
