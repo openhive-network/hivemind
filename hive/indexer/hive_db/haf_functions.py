@@ -5,9 +5,6 @@ from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
-# Custom JSON types that Hivemind processes
-HIVEMIND_CUSTOM_JSON_TYPES = ['follow', 'reblog', 'community', 'notify']
-
 
 def prepare_app_context(db: Db) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' and '{REPTRACKER_SCHEMA_NAME}' contexts.")
@@ -38,9 +35,6 @@ def prepare_app_context(db: Db) -> None:
 
     # Registration in the HAF application registry (register_application) is
     # done by setup_runtime_code, after the runtime SQL it depends on exists.
-
-    # Note: custom_json_type index creation is deferred to sync startup
-    # (SyncHiveDb.run) so that the install container finishes quickly.
 
 
 def _enable_early_block_processing(db: Db) -> None:
@@ -107,14 +101,3 @@ def register_application(db: Db) -> None:
         f"Registered '{SCHEMA_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)"
     )
 
-
-def ensure_custom_json_type_index(db: Db) -> None:
-    """Create partial index on hafd.operations for Hivemind's custom_json types."""
-    from time import perf_counter
-
-    types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]"
-    log.info(f"Creating custom_json_type index for types: {HIVEMIND_CUSTOM_JSON_TYPES} ...")
-    t0 = perf_counter()
-    db.query_no_return(f"SELECT hive.create_custom_json_type_index({types_array});")
-    elapsed = perf_counter() - t0
-    log.info(f"custom_json_type index ready in {elapsed:.1f}s")
