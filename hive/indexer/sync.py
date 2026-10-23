@@ -131,10 +131,10 @@ class SyncHiveDb:
         log.info("Attempting to build Hivemind database schema if needed")
 
     def run(self) -> None:
-        from hive.indexer.hive_db.haf_functions import ensure_custom_json_type_index
+        from hive.indexer.hive_db.haf_functions import request_custom_json_type_index
 
         start_time = perf()
-        ensure_custom_json_type_index(self._db)
+        request_custom_json_type_index(self._db)
         Blocks.set_head_date()
 
         # Kill leftover connections from previous process before opening new ones.

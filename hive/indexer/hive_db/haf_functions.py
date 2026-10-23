@@ -39,8 +39,8 @@ def prepare_app_context(db: Db) -> None:
     # Registration in the HAF application registry (register_application) is
     # done by setup_runtime_code, after the runtime SQL it depends on exists.
 
-    # Note: custom_json_type index creation is deferred to sync startup
-    # (SyncHiveDb.run) so that the install container finishes quickly.
+    # Note: the custom_json_type index is requested at sync startup
+    # (SyncHiveDb.run, request_custom_json_type_index).
 
 
 def _enable_early_block_processing(db: Db) -> None:
@@ -108,13 +108,21 @@ def register_application(db: Db) -> None:
     )
 
 
-def ensure_custom_json_type_index(db: Db) -> None:
-    """Create partial index on hafd.operations for Hivemind's custom_json types."""
-    from time import perf_counter
+def request_custom_json_type_index(db: Db) -> None:
+    """Ask HAF for the partial index on hafd.operations covering HIVEMIND_CUSTOM_JSON_TYPES.
 
-    types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]"
-    log.info(f"Creating custom_json_type index for types: {HIVEMIND_CUSTOM_JSON_TYPES} ...")
-    t0 = perf_counter()
-    db.query_no_return(f"SELECT hive.create_custom_json_type_index({types_array});")
-    elapsed = perf_counter() - t0
-    log.info(f"custom_json_type index ready in {elapsed:.1f}s")
+    HAF's indexes controller builds a registered index CONCURRENTLY, so the
+    request never blocks hived's inserts into hafd.operations. The blocking
+    hive.create_custom_json_type_index is deliberately not a fallback: on a
+    HAF without the registration function the request is skipped.
+    """
+    available = db.query_one("SELECT to_regprocedure('hive.register_custom_json_type_index(text, text[])') IS NOT NULL")
+    if not available:
+        log.warning(
+            "HAF cannot register custom_json type indexes (hive.register_custom_json_type_index); "
+            f"not requesting the index for {HIVEMIND_CUSTOM_JSON_TYPES}"
+        )
+        return
+    types_array = "ARRAY[" + ",".join(f"'{t}'" for t in HIVEMIND_CUSTOM_JSON_TYPES) + "]::TEXT[]"
+    db.query_no_return(f"SELECT hive.register_custom_json_type_index('{SCHEMA_NAME}', {types_array});")
+    log.info(f"Requested the custom_json_type index for types {HIVEMIND_CUSTOM_JSON_TYPES} from HAF")
