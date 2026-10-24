@@ -1,5 +1,6 @@
 """Conf handles reading run-time config and app-level settings."""
 
+import argparse
 import logging
 import re
 from typing import Final
@@ -38,6 +39,13 @@ def _sanitized_conf(parser):
     return re.sub(r'(?<=:)\w+(?=@)', '<redacted>', out)
 
 
+def _positive_int(value: str) -> int:
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError(f'expected an integer >= 1, got {value}')
+    return number
+
+
 class Conf:
     """Manages sync configuration via args, ENVs, and hive.conf."""
 
@@ -73,6 +81,14 @@ class Conf:
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
         add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=None)
+        add(
+            '--massive-vote-workers',
+            type=_positive_int,
+            env_var='MASSIVE_VOTE_WORKERS',
+            help='connections that upsert a batch\'s votes into hive_votes concurrently during massive sync '
+            '(1 = a single connection, as in live sync)',
+            default=4,
+        )
 
         # --sync-to-s3 seems to be unnecessary
         add(

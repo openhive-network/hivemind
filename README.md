@@ -544,6 +544,10 @@ Example:
 hive sync --reptracker-schema-name=reptracker_app --test-max-block=5000000 --database-url=<postgres url using role hivemind>
 ```
 
+During massive sync, each batch's votes are written into `hive_votes` by several database connections at once,
+4 by default. `--massive-vote-workers` (env `MASSIVE_VOTE_WORKERS`) sets how many; with `1` a single connection
+writes them, as in live sync. The result is the same for any number of workers, ids included.
+
 Additional options for the syncing process are available. You can view them with:
 ```bash
 hive sync --help
