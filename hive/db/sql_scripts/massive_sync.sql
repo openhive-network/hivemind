@@ -89,6 +89,24 @@ CREATE UNLOGGED TABLE hivemind_app._vote_batch (
     block_num   INT
 );
 
+-- hive_votes rows of a vote batch, ids already drawn (prepare_votes_from_staging),
+-- read by the upsert workers (upsert_votes_partition)
+DROP TABLE IF EXISTS hivemind_app._vote_upsert;
+CREATE UNLOGGED TABLE hivemind_app._vote_upsert (
+    id          BIGINT NOT NULL,
+    post_id     INT NOT NULL,
+    voter_id    INT NOT NULL,
+    author_id   INT NOT NULL,
+    permlink_id INT NOT NULL,
+    weight      NUMERIC,
+    rshares     BIGINT,
+    vote_percent INT,
+    last_update TIMESTAMP,
+    num_changes INT,
+    block_num   INT,
+    is_effective BOOLEAN
+);
+
 -- Persistent staging tables for reblog processing
 DROP TABLE IF EXISTS hivemind_app._reblog_final;
 DROP TABLE IF EXISTS hivemind_app._reblog_ops;
@@ -322,12 +340,11 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- 4. process_votes_from_staging()
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION hivemind_app.process_votes_from_staging(
-    _last_safe_cashout_block INT DEFAULT 0
-) RETURNS INT AS $function$
-DECLARE
-    _count INT := 0;
-    _affected_post_ids INT[];
+-- Builds the batch's hive_votes rows in _vote_upsert, each with its hive_votes id
+-- already drawn. upsert_votes_partition writes them; massive sync runs the
+-- partitions on separate connections once this has committed.
+CREATE OR REPLACE FUNCTION hivemind_app.prepare_votes_from_staging()
+RETURNS VOID AS $function$
 BEGIN
     -- Process vote ops (type 0) and effective_comment_vote ops (type 72)
     -- from the staging table.
@@ -449,7 +466,8 @@ BEGIN
     JOIN account_ids ha_author ON ha_author.name = m.author
     ORDER BY m.ord;
 
-    -- Step 2: Insert/update votes with resolved post_id
+    -- Step 2: Resolve each vote's post and draw its hive_votes id
+    TRUNCATE hivemind_app._vote_upsert;
     WITH vote_target AS MATERIALIZED (
         -- Many votes in a batch hit the same post: resolve each target post once.
         -- MATERIALIZED, or the planner joins it back to the votes first and
@@ -484,19 +502,43 @@ BEGIN
         -- Use block_num_created (not block_num) because block_num is updated on edits,
         -- which would incorrectly filter out votes cast between creation and edit.
         WHERE vb.block_num >= vt.block_num_created
-        -- Insert in _vote_batch order: hive_votes ids are drawn in insert order,
-        -- and vote notification counters follow hive_votes.id.
+        -- Draw ids in _vote_batch order: vote notification counters follow hive_votes.id.
         ORDER BY vb.ctid
-    ),
-    upserted AS (
+    )
+    -- One id per row, including the rows that will take the ON CONFLICT path:
+    -- the sequence ends where an INSERT drawing the column default would leave it.
+    INSERT INTO hivemind_app._vote_upsert
+        (id, post_id, voter_id, author_id, permlink_id, weight, rshares,
+         vote_percent, last_update, num_changes, block_num, is_effective)
+    SELECT
+        nextval('hivemind_app.hive_votes_id_seq'),
+        vwp.post_id, vwp.voter_id, vwp.author_id, vwp.permlink_id,
+        vwp.weight, vwp.rshares, vwp.vote_percent, vwp.last_update,
+        vwp.num_changes, vwp.block_num, vwp.is_effective
+    FROM vote_with_post vwp;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- Upserts the _vote_upsert rows with permlink_id % _parts = _part into hive_votes;
+-- returns how many it wrote. The partitions split the hive_votes unique key
+-- (voter_id, author_id, permlink_id), so concurrent partitions never touch the same row.
+CREATE OR REPLACE FUNCTION hivemind_app.upsert_votes_partition(_part INT, _parts INT)
+RETURNS INT AS $function$
+DECLARE
+    _count INT := 0;
+BEGIN
+    WITH upserted AS (
         INSERT INTO hivemind_app.hive_votes
-            (post_id, voter_id, author_id, permlink_id, weight, rshares,
+            (id, post_id, voter_id, author_id, permlink_id, weight, rshares,
              vote_percent, last_update, num_changes, block_num, is_effective)
         SELECT
-            vwp.post_id, vwp.voter_id, vwp.author_id, vwp.permlink_id,
-            vwp.weight, vwp.rshares, vwp.vote_percent, vwp.last_update,
-            vwp.num_changes, vwp.block_num, vwp.is_effective
-        FROM vote_with_post vwp
+            vu.id, vu.post_id, vu.voter_id, vu.author_id, vu.permlink_id,
+            vu.weight, vu.rshares, vu.vote_percent, vu.last_update,
+            vu.num_changes, vu.block_num, vu.is_effective
+        FROM hivemind_app._vote_upsert vu
+        WHERE vu.permlink_id % _parts = _part
+        ORDER BY vu.id
         ON CONFLICT ON CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk DO UPDATE SET
             post_id = EXCLUDED.post_id,
             weight = CASE EXCLUDED.is_effective
@@ -516,11 +558,9 @@ BEGIN
         WHERE hivemind_app.hive_votes.voter_id = EXCLUDED.voter_id
           AND hivemind_app.hive_votes.author_id = EXCLUDED.author_id
           AND hivemind_app.hive_votes.permlink_id = EXCLUDED.permlink_id
-        RETURNING post_id
+        RETURNING 1
     )
-    SELECT count(*), array_agg(DISTINCT post_id)
-    INTO _count, _affected_post_ids
-    FROM upserted;
+    SELECT count(*) INTO _count FROM upserted;
 
     -- Rshares aggregates (sc_hot, sc_trend, etc.) are NOT updated per-batch during
     -- massive sync. The key index (hive_votes_post_id_block_num_rshares_vote_is_effective_idx)
@@ -528,8 +568,18 @@ BEGIN
     -- expensive. Instead, recalculate_all_posts_rshares() runs once at finalization after
     -- indexes are recreated (see DbState._finish_posts_rshares).
 
-    -- Table is truncated at start of next call, no drop needed
     RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- The whole votes phase on one connection; returns the number of hive_votes rows written.
+CREATE OR REPLACE FUNCTION hivemind_app.process_votes_from_staging(
+    _last_safe_cashout_block INT DEFAULT 0
+) RETURNS INT AS $function$
+BEGIN
+    PERFORM hivemind_app.prepare_votes_from_staging();
+    RETURN hivemind_app.upsert_votes_partition(0, 1);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
