@@ -42,10 +42,12 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
+    _vote_workers = 1
 
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
+        cls._vote_workers = conf.get('massive_vote_workers')
 
     @classmethod
     def set_head_date(cls):
@@ -57,13 +59,14 @@ class Blocks:
             cls._head_block_date = head_date
             cls._current_block_date = head_date
 
-    @staticmethod
-    def setup_own_db_access(shared_db_adapter: Db) -> None:
+    @classmethod
+    def setup_own_db_access(cls, shared_db_adapter: Db) -> None:
         if DbState.is_massive_sync():
             DbAdapterHolder.open_common_blocks_in_background_processing_db()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
+        Votes.setup_worker_db_access(shared_db_adapter, cls._vote_workers)
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
@@ -205,10 +208,7 @@ class Blocks:
         # Phase 3.5: Votes (rshares deferred to finalization during initial massive sync;
         # must run BEFORE payouts).
         t0 = perf_counter()
-        assert Votes.db is not None, 'Votes has no db access; setup_own_db_access was not called'
-        Votes.db.query_no_return("START TRANSACTION")
-        Votes.db.query_no_return(f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")
-        Votes.db.query_no_return("COMMIT")
+        cls._process_votes_massive()
         phase_times['votes'] = perf_counter() - t0
 
         # Phase 3.6: Incremental rshares update for MASSIVE_WITH_INDEXES mode.
@@ -482,37 +482,64 @@ class Blocks:
 
             PostDataCache.add_data(post_id, post_data, is_new)
 
+    @classmethod
+    def _process_votes_massive(cls) -> int:
+        """Run the votes phase of a massive batch; return the number of hive_votes rows written.
+
+        With more than one worker, the batch's rows are prepared (ids drawn in
+        serial order) and committed on `Votes.db`, then upserted by the workers
+        in parallel, each on its own connection and its own share of the
+        hive_votes unique key. A deadlock retry re-runs every partition: one that
+        already committed upserts the same rows again, which the num_changes /
+        block_num replay guard turns into a no-op.
+        """
+        dbs = Votes.upsert_dbs()
+        if len(dbs) == 1:
+            return cls._run_parallel_sql(
+                [(dbs[0], f"SELECT {SCHEMA_NAME}.process_votes_from_staging({cls._last_safe_cashout_block})")]
+            )[0]
+
+        dbs[0].query_no_return("START TRANSACTION")
+        dbs[0].query_no_return(f"SELECT {SCHEMA_NAME}.prepare_votes_from_staging()")
+        dbs[0].query_no_return("COMMIT")
+        return sum(
+            cls._run_parallel_sql(
+                [
+                    (db, f"SELECT {SCHEMA_NAME}.upsert_votes_partition({part}, {len(dbs)})")
+                    for part, db in enumerate(dbs)
+                ]
+            )
+        )
+
     @staticmethod
     def _run_parallel_sql(tasks, max_retries=3):
         """Run multiple SQL functions in parallel on separate DB connections.
 
         Each task is a (db_connection, sql_string) tuple. Each function runs
         in its own transaction on its own connection. Retries the whole set on
-        deadlock (PostgreSQL error 40P01).
+        deadlock (PostgreSQL error 40P01). Returns each task's first result
+        column (None when it returned no row), in task order.
         """
 
         def run_one(db_conn, sql):
             db_conn.query_no_return("START TRANSACTION")
             try:
-                db_conn.query_all_raw(sql)  # Consume any results
+                rows = db_conn.query_all_raw(sql)
                 db_conn.query_no_return("COMMIT")
             except Exception:
                 with contextlib.suppress(Exception):
                     db_conn.query_no_return("ROLLBACK")
                 raise
+            return rows[0][0] if rows else None
 
         if len(tasks) <= 1:
-            for db_conn, sql in tasks:
-                run_one(db_conn, sql)
-            return
+            return [run_one(db_conn, sql) for db_conn, sql in tasks]
 
         for attempt in range(1, max_retries + 1):
             try:
                 with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
                     futures = [pool.submit(run_one, db_conn, sql) for db_conn, sql in tasks]
-                    for f in futures:
-                        f.result()
-                return
+                    return [f.result() for f in futures]
             except psycopg2.extensions.TransactionRollbackError:
                 if attempt == max_retries:
                     log.error("Parallel SQL deadlock persisted after %d attempts", max_retries)
