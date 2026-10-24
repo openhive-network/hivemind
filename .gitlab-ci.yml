@@ -1059,8 +1059,9 @@ e2e_benchmark_on_postgrest:
     echo "Hivemind server is ready"
 
     echo "Waiting for the postgrest-rewriter to serve /hivemind-api/version..."
+    # 127.0.0.1, not localhost: BusyBox wget tries ::1 first, and the rewriter's nginx listens on IPv4 only
     WAIT_START=$(date +%s)
-    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-rewriter wget -q -O /dev/null --timeout=5 "http://localhost/hivemind-api/version" 2>/dev/null; do
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-rewriter wget -q -O /dev/null --timeout=5 "http://127.0.0.1/hivemind-api/version" 2>/dev/null; do
       if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
         echo "ERROR: Timeout waiting for the postgrest-rewriter after ${WAIT_TIMEOUT}s"
         docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-rewriter
