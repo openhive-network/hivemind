@@ -1,8 +1,16 @@
 """Parametrizes the REST equivalence tests over the JSON-RPC tavern tests, read at collection."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 from rest_checks import service
 from rest_checks.equivalence import TAVERN_DIR, DerivedCase, coverage, derive_cases
+
+if TYPE_CHECKING:
+    # pytest exports TerminalReporter only from 8.4; tox.ini pins an earlier one.
+    from _pytest.terminal import TerminalReporter
 
 _CASES = derive_cases(TAVERN_DIR)
 
@@ -29,7 +37,7 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
         )
 
 
-def pytest_terminal_summary(terminalreporter: pytest.TerminalReporter) -> None:
+def pytest_terminal_summary(terminalreporter: TerminalReporter) -> None:
     terminalreporter.section("REST tests derived from JSON-RPC tests, per endpoint")
     for line in coverage(_CASES):
         terminalreporter.write_line(line)

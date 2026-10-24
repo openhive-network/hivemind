@@ -30,12 +30,20 @@ A group whose host precondition the clone lacks (search-api without pg_search)
 is not run and is reported `skip <group> (<reason>)`; the other groups get the reason
 as HIVEMIND_SKIP_SEARCH, which skips their own search-api tests.
 
-Exits 0 when every group run passes, 1 when one fails, SKIP (77) on a revision miss
+The suite runs on HIVEMIND_TAVERN_PYTHON (the runtime image's venv of the Python CI's
+tox runs on; this interpreter when unset), not through tox, so the step first checks
+that each `name==version` dep of tox.ini's [testenv:tavern] is installed there at that
+version and refuses, naming both versions, when one is not: an API a newer release
+has would pass here and fail in CI.
+
+Exits 0 when every group run passes, 1 when one fails or a pin differs, SKIP (77) on a revision miss
 or a provider whose clone API predates sync recipes;
 the last line printed is the reason.
 """
 
+import configparser
 import importlib.util
+import json
 import os
 import re
 import shutil
@@ -78,6 +86,20 @@ MARKER = "not postgrest_ignore"
 SEARCH_GROUP = "search-api_patterns"
 _SMOKETESTS_RE = re.compile(r"SMOKETESTS=\((.*?)\)", re.DOTALL)
 _SMOKETEST_ENTRY_RE = re.compile(r'"([^":\s]+):[^"\s]+"')
+TOX_ENV = "testenv:tavern"
+_TOX_REFERENCE_RE = re.compile(r"\{\[([^\]]+)\]deps\}")
+_TOX_PIN_RE = re.compile(r"([A-Za-z0-9_.-]+)(?:\[[^\]]*\])?==(\S+)")
+# Run on the tavern interpreter: its Python version and each named distribution's version.
+_VERSIONS_PY = """
+import importlib.metadata, json, platform, sys
+versions = {}
+for name in sys.argv[1:]:
+    try:
+        versions[name] = importlib.metadata.version(name)
+    except importlib.metadata.PackageNotFoundError:
+        versions[name] = None
+print(json.dumps({"python": platform.python_version(), "versions": versions}))
+"""
 
 
 class ProviderError(RuntimeError):
@@ -93,6 +115,42 @@ def smoketest_groups(gitlab_ci: str) -> list[str]:
     if not groups:
         raise ValueError("the SMOKETESTS list in .gitlab-ci.yml names no group")
     return groups
+
+
+def tox_pins(tox_ini: str, section: str = TOX_ENV) -> dict[str, str]:
+    """The `name==version` deps of tox.ini's `section`, its `{[other]deps}` references expanded."""
+    parser = configparser.ConfigParser(interpolation=None)
+    parser.read_string(tox_ini)
+    pins: dict[str, str] = {}
+    for line in parser.get(section, "deps", fallback="").splitlines():
+        line = line.strip()
+        reference = _TOX_REFERENCE_RE.fullmatch(line)
+        pin = _TOX_PIN_RE.fullmatch(line)
+        if reference:
+            pins.update(tox_pins(tox_ini, reference.group(1)))
+        elif pin:
+            pins[pin.group(1)] = pin.group(2)
+    return pins
+
+
+def _tavern_python() -> str:
+    return os.environ.get("HIVEMIND_TAVERN_PYTHON") or sys.executable
+
+
+def _installed_versions(python: str, names: list[str]) -> tuple[str, dict[str, str | None]]:
+    """`python`'s version and the installed version of each of `names` there, None when absent."""
+    proc = subprocess.run([python, "-c", _VERSIONS_PY, *names], capture_output=True, text=True, check=True)
+    report = json.loads(proc.stdout)
+    return report["python"], report["versions"]
+
+
+def _pin_mismatches(pins: dict[str, str], installed: dict[str, str | None]) -> list[str]:
+    """Each pin of `pins` that `installed` does not hold at its version, with both versions."""
+    return [
+        f"{name} {installed.get(name) or 'not installed'}, tox.ini pins {pinned}"
+        for name, pinned in pins.items()
+        if installed.get(name) != pinned
+    ]
 
 
 def _psql(url: str, sql: str, **variables: str) -> str:
@@ -189,7 +247,7 @@ def _run_group(group: str, port: int, rewriter_port: int, out: str, workers: str
         # The REST groups' search-api tests skip on the precondition that skips the search-api group.
         env["HIVEMIND_SKIP_SEARCH"] = search_skip
     args = [
-        sys.executable, "-m", "pytest", "-p", "no:cacheprovider",
+        _tavern_python(), "-m", "pytest", "-p", "no:cacheprovider",
         "-W", "ignore::pytest.PytestDeprecationWarning",
         "-n", workers, "--dist", "loadfile", "--max-worker-restart", "0",
         "-v", "--tb=short", "-m", MARKER,
@@ -260,6 +318,15 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
 
 def main(out: str) -> int:
     os.makedirs(out, exist_ok=True)
+    with open(os.path.join(ROOT, "tox.ini"), encoding="utf-8") as handle:
+        pins = tox_pins(handle.read())
+    python = _tavern_python()
+    python_version, installed = _installed_versions(python, sorted(pins))
+    print(f"tavern runs on {python}: Python {python_version}, pytest {installed.get('pytest')}")
+    mismatches = _pin_mismatches(pins, installed)
+    if mismatches:
+        print(f"{python} differs from tox.ini [{TOX_ENV}]: {'; '.join(mismatches)}. Rebuild .aidev/runtime")
+        return 1
     with open(os.path.join(ROOT, shared_fixture.PATCHLEVEL_SQL), encoding="utf-8") as handle:
         revision = shared_fixture.revision(handle.read())
     if revision is None:

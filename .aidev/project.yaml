@@ -29,7 +29,7 @@ environment:
   # Built by .aidev/runtime/build.sh from .aidev/runtime/Dockerfile and setup.cfg
   # (its install_requires are baked in). sandbox.shared.hivemind's
   # HIVEMIND_RUNTIME_IMAGE pins the same image: re-pin both together.
-  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
+  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:e561b4ce2695e9f6878d35a4284e7f88169b35d42f71d6cba1cc08861de40b13"
   inputs: [".aidev/runtime/Dockerfile", "setup.cfg"]
 
 issues:
@@ -78,7 +78,7 @@ sandbox:
         HAF_FIXTURE_COMMIT: "ce11487825c0fff3a22f145920f4d01133ab06ae"
         HAF_FIXTURE_DIGEST: "sha256:6dc0af433c773a56b59f47624f0067b6f72ed0b6c58525ee70589827cf81bd08"
         HIVEMIND_SHARED_DATA_ROOT: "/haf-pool/aidev-shared-hivemind"
-        HIVEMIND_RUNTIME_IMAGE: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
+        HIVEMIND_RUNTIME_IMAGE: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:e561b4ce2695e9f6878d35a4284e7f88169b35d42f71d6cba1cc08861de40b13"
         HIVEMIND_SHARED_SEED_REFS: "develop aidev/integration"
   external:
     - name: hivemind             # AIDEV_EXTERNAL_HIVEMIND_HOST / _PORT

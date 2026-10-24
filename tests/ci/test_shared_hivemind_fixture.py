@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -343,6 +344,7 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
         shutil.copy(AIDEV / name, root / '.aidev' / name)
     shutil.copy(FIXTURE_PY, root / '.aidev' / 'shared-hivemind' / 'shared_fixture.py')
+    (root / 'tox.ini').write_text('[testenv:tavern]\ndeps =\n  requests\n')
     (root / PATCHLEVEL).parent.mkdir(parents=True)
     (root / PATCHLEVEL).write_text(_patchlevel(REV_A, REV_B))
     (root / '.aidev' / 'project.yaml').write_text(f'      env:\n        HAF_FIXTURE_COMMIT: "{HAF}"\n')
@@ -424,6 +426,53 @@ def test_without_a_provider_the_step_skips_by_name(tree: Path, tmp_path: Path, m
 
     assert rc == SKIP
     assert 'AIDEV_EXTERNAL_HIVEMIND_HOST' in lines[-1]
+    assert calls == []
+
+
+def test_tox_pins_expand_references_and_leave_out_unpinned_deps() -> None:
+    tox_ini = (
+        '[testenv]\ndeps =\n  pytest==8.3.4\n'
+        '[testenv:tavern]\ndeps =\n  {[testenv]deps}\n  deepdiff[murmur]==8.1.1\n  requests\n'
+        '  git+https://example.org/x.git#egg=x\n'
+    )
+
+    assert _load_tavern().tox_pins(tox_ini) == {'pytest': '8.3.4', 'deepdiff': '8.1.1'}
+
+
+def test_a_package_off_its_tox_pin_refuses_naming_both_versions(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tree / 'tox.ini').write_text('[testenv:tavern]\ndeps =\n  pytest==0.0.1\n  no-such-package==1.0\n')
+    monkeypatch.setenv('HIVEMIND_TAVERN_PYTHON', sys.executable)
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    assert rc == 1
+    assert (
+        lines[0] == f'tavern runs on {sys.executable}: Python {platform.python_version()}, pytest {pytest.__version__}'
+    )
+    assert f'pytest {pytest.__version__}, tox.ini pins 0.0.1' in lines[-1]
+    assert 'no-such-package not installed, tox.ini pins 1.0' in lines[-1]
+    assert calls == []
+
+
+def test_the_pins_are_checked_on_the_tavern_interpreter(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tree / 'tox.ini').write_text('[testenv]\ndeps =\n  pytest==8.3.4\n[testenv:tavern]\ndeps =\n  {[testenv]deps}\n')
+    python = tmp_path / 'tavern-python'
+    python.write_text('#!/bin/sh\necho \'{"python": "3.12.15", "versions": {"pytest": "8.4.2"}}\'\n')
+    python.chmod(0o755)
+    monkeypatch.setenv('HIVEMIND_TAVERN_PYTHON', str(python))
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    assert rc == 1
+    assert lines[0] == f'tavern runs on {python}: Python 3.12.15, pytest 8.4.2'
+    assert (
+        lines[-1]
+        == f'{python} differs from tox.ini [testenv:tavern]: pytest 8.4.2, tox.ini pins 8.3.4. Rebuild .aidev/runtime'
+    )
     assert calls == []
 
 

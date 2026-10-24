@@ -59,6 +59,13 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
 `sandbox.external` names `hivemind` (`AIDEV_EXTERNAL_HIVEMIND_HOST` / `_PORT`).
 `.aidev/hivemind_tavern.py`:
 
+0. refuses, naming both versions, when a `name==version` dep of `tox.ini`
+   `[testenv:tavern]` (with `{[testenv]deps}`) is not installed at that version on the
+   interpreter the suite runs on, `HIVEMIND_TAVERN_PYTHON`: the runtime image's
+   `/opt/tavern` venv of Python 3.12, the Python CI's `tox -e tavern` runs on
+   (docker-builder). It runs the suite without tox, so this check is what keeps it on
+   CI's versions. On 3.14, where annotations are evaluated lazily, a conftest that
+   3.12 rejects would pass;
 1. reads the tree's key (`shared-hivemind/shared_fixture.py`):
    - its **schema revision**: the last quoted 40-hex hash in
      `hive/db/sql_scripts/upgrade/update_db_patchlevel.sql`, the key CI's
@@ -383,8 +390,11 @@ binary of `common-ci-configuration/postgrest` (the `POSTGREST_VERSION` of
 `Dockerfile`), `create_haf_app_role.sh` / `common.sh` from common-ci-configuration at a
 pinned commit (where `scripts/setup_postgres.sh` looks before it downloads them), and
 `setup.cfg`'s `install_requires` plus pytest, ruff and mypy, and `tox.ini`
-`[testenv:tavern]`'s deps (tavern, pytest-xdist, deepdiff, jsondiff) for the `tavern`
-step and the shared hivemind's seeder. Every base and download is pinned.
+`[testenv:tavern]`'s deps (tavern, pytest-xdist, deepdiff, jsondiff) for the shared
+hivemind's seeder. The `tavern` step runs on `/opt/tavern` (`HIVEMIND_TAVERN_PYTHON`), a
+venv of `python:3.12-slim-bookworm`'s Python with the same deps at `tox.ini`'s pins.
+When `tox.ini`'s tavern pins or CI's docker-builder Python change, change them here as
+well; otherwise the step refuses. Every base and download is pinned.
 
 When `runtime/Dockerfile` or `setup.cfg` changes, rebuild and re-pin **in the same
 commit**:
