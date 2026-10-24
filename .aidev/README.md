@@ -149,6 +149,60 @@ aren't checked, imports without stubs are ignored) and prints SARIF, because AID
 collector runs `mypy --strict` on every changed file, which no change to untyped code here
 could pass. Findings on lines a change doesn't touch are advisory.
 
+## Production-traffic replay (`performance.replay`)
+
+`project.yaml`'s `performance.replay` declares what `aidev replay` (aidev
+`docs/operations/traffic-replay.md`) replays of captured api.hive.blog traffic against a
+synced mainnet haf_api_node: the capture, the methods hivemind serves (every one
+`hive/db/sql_scripts/postgrest/utilities/get_api_method.sql` dispatches, plus
+`rest:/hivemind-api/*`), the budgets, and the differences between builds that are intended
+(`expected`, `rules`). It is in AIDEV's protected `performance` class: a change to it is
+pending until approved.
+
+The capture is the 2026-10-16 one taken between drone and haproxy on the hivemind backend
+(`8d7e6cb7…`): 173,075 calls, of which the declared methods select all but one
+(`condenser_api.get_discussions_by_promoted`, which hivemind doesn't dispatch). The 2025-11-22 haproxy capture (`583b0d0d…`) has no hivemind calls.
+To see what the declared methods select from a capture:
+
+```bash
+aidev replay profile <capture digest> --methods "$(python3 -c 'import yaml; print(",".join(yaml.safe_load(open(".aidev/project.yaml"))["performance"]["replay"]["methods"]))')"
+```
+
+The target node isn't in this repository. Copy the `replay:` mapping into a file outside
+it, add a `target:`, and pass the file with `--profile`. For steem-20:
+
+```yaml
+performance:
+  replay:
+    # … the mapping from .aidev/project.yaml, unchanged …
+    target:
+      host: steem-20.syncad.com
+      compose_dir: /haf-pool/syncad/haf_api_node
+      build_env: HIVEMIND_VERSION        # selects the hivemind, hivemind-install and rewriter images
+      endpoint: http://127.0.0.1:17002   # hivemind-postgrest-rewriter, as seen from steem-20
+      services: [hivemind-install, hivemind-block-processing, hivemind-postgrest-server, hivemind-postgrest-rewriter]
+      freeze: {service: haf, env: ARGUMENTS, value: "--skip-hived"}
+      database:
+        container: haf-haf-1
+        name: haf_block_log
+        user: haf_admin
+        schemas: [hivemind_app, hivemind_endpoints, hivemind_postgrest_utilities]
+      rest_prefix: /hivemind-api         # only valid under target:
+```
+
+A correctness pass of `develop` against `aidev/integration`, one request per distinct call:
+
+```bash
+aidev replay ab --base <develop sha> --candidate <aidev/integration sha> --unique --profile <target file>
+```
+
+Both builds must be published as `registry.gitlab.syncad.com/hive/hivemind:<sha>` and
+`…/hivemind/postgrest-rewriter:<sha>`: steem-20's `.env` sets
+`HIVE_API_NODE_REGISTRY=registry.gitlab.syncad.com/hive`. `replay ab` refuses a node whose running images differ from
+what `.env` recreates. On 2026-10-23 steem-20 ran `b2468ef2` while its `.env` said
+`HIVEMIND_VERSION=b64e31e4`. Freezing recreates HAF, so every app on the node loses its
+database twice and stops advancing until the restore has caught up.
+
 ## The HAF test stack (`test-stack.compose.yml`)
 
 One service, `haf`: the HAF testnet image for HAF commit `ce114878` (hive/haf#379, merged
