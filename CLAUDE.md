@@ -264,6 +264,7 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 - PostgREST exposes PostgreSQL functions as REST endpoints
 - Nginx/openresty rewrites JSON-RPC calls to `/rpc/home` endpoint
 - All API logic is in PL/pgSQL functions in `hive/db/sql_scripts/postgrest/`
+- The rewriter forwards a GET of `/rpc/<function>` (including the REST paths its rules rewrite) as a form-encoded POST (`rewrite_by_lua_block` in `docker/hivemind_nginx.conf.template`): in a GET's query string PostgREST reads a value starting with a filter operator (`not.`, `eq.`, `in.`, …) as a filter, never as an argument. A client calling PostgREST directly with such a value must POST too.
 
 **Entry Points (setup.cfg):**
 - `hive`: Main CLI (routes to sync, build_schema, upgrade_schema, status)

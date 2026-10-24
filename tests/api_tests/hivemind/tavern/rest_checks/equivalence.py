@@ -8,7 +8,6 @@ hivemind_postgrest_utilities.raise_rest_exception produces.
 """
 
 import os
-import re
 from collections import Counter
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -207,7 +206,6 @@ class DerivedCase:
     """The REST form of one JSON-RPC test, or why it has none (`skip_reason`).
 
     `source` is the JSON-RPC test's path under the tavern directory, without its extension.
-    `known_defect` names a defect of the REST surface the case is expected to fail on.
     """
 
     source: str
@@ -219,15 +217,6 @@ class DerivedCase:
     ignore_tags: str | list[str] | None = None
     allow_null_response: bool = False
     numeric_tolerance: float | None = None
-    known_defect: str | None = None
-
-
-# PostgREST reads a GET argument whose value starts with an operator as a filter, so such a
-# value (a valid Hive name like `not.existing`) never reaches the function.
-_POSTGREST_OPERATOR_PREFIX = re.compile(
-    r"^(eq|neq|gt|gte|lt|lte|like|ilike|match|imatch|in|is|isdistinct|fts|plfts|phfts|wfts"
-    r"|cs|cd|ov|sl|sr|nxr|nxl|adj|not)\."
-)
 
 
 class _Unmappable(Exception):
@@ -344,17 +333,11 @@ def _derive(source: str, document: dict[str, Any]) -> DerivedCase | None:
         rest_params = _rest_params(mapping, params)
     except _Unmappable as err:
         return _skipped(case, str(err))
-    operator_values = sorted(name for name, value in rest_params.items() if _POSTGREST_OPERATOR_PREFIX.match(value))
     return DerivedCase(
         source,
         mapping,
         marks,
         rest_params,
-        known_defect=(
-            f"PostgREST reads the value of {', '.join(operator_values)} as a filter operator"
-            if operator_values
-            else None
-        ),
         error_response=bool(kwargs.get("error_response", False)),
         ignore_tags=kwargs.get("ignore_tags"),
         allow_null_response=bool(kwargs.get("allow_null_response", False)),
@@ -403,8 +386,6 @@ def coverage(cases: list[DerivedCase]) -> list[str]:
         skipped = sum(reasons.values())
         lines.append(f"{mapping.endpoint} <- {mapping.method}: {len(own) - skipped} mapped, {skipped} skipped")
         lines.extend(f"    skipped {count}: {reason}" for reason, count in sorted(reasons.items()))
-        defects = Counter(case.known_defect for case in own if case.known_defect is not None)
-        lines.extend(f"    expected to fail {count}: {defect}" for defect, count in sorted(defects.items()))
     return lines
 
 

@@ -19,8 +19,6 @@ def _marks(case: DerivedCase) -> list[pytest.MarkDecorator]:
         marks.append(pytest.mark.skip(reason=case.skip_reason))
     elif search_skip is not None:
         marks.append(pytest.mark.skip(reason=search_skip))
-    if case.known_defect is not None:
-        marks.append(pytest.mark.xfail(strict=True, reason=case.known_defect))
     return marks
 
 

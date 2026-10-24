@@ -5,7 +5,10 @@ image's nginx applies it (docker/hivemind_nginx.conf.template): the rules in fil
 first whose regex matches the path wins (each ends in `break`), `$N` is the Nth capture, and a
 replacement with a query of its own gets the request's arguments appended to it. In front of
 that it strips the `/hivemind-api` prefix the API node's reverse proxy removes, so the tests
-can request the public URLs of the OpenAPI document. CI runs the rewriter image itself.
+can request the public URLs of the OpenAPI document. Behind the rules, as the template's
+rewrite_by_lua_block does, a GET of a `/rpc/` function goes upstream as a form-encoded POST
+whose body is the query string, so PostgREST takes no argument for a filter. CI runs the
+rewriter image itself.
 """
 
 import http.client
@@ -59,17 +62,30 @@ def rewrite(rules: list[tuple[re.Pattern[str], str]], target: str) -> str:
     return f"{path}?{split.query}" if split.query else path
 
 
+def _upstream_request(method: str, target: str) -> tuple[str, str, bytes | None]:
+    """The method, target and body the rewriter sends upstream for a `method` of rewritten `target`."""
+    path, _, query = target.partition("?")
+    if method == "GET" and path.startswith("/rpc/"):
+        return "POST", path, query.encode()
+    return method, target, None
+
+
 def start(rules_text: str, upstream_host: str, upstream_port: int, port: int) -> ThreadingHTTPServer:
     """Serves the rewriter on 127.0.0.1:`port` in a daemon thread; shut it down with .shutdown()."""
     rules = load_rules(rules_text)
 
     class Handler(BaseHTTPRequestHandler):
         def _proxy(self) -> None:
-            body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            body: bytes | None = self.rfile.read(int(self.headers.get("Content-Length") or 0)) or None
             headers = {name: value for name, value in self.headers.items() if name.lower() not in _HOP_HEADERS}
+            method, target, form = _upstream_request(self.command, rewrite(rules, self.path))
+            if form is not None:
+                body = form
+                headers = {name: value for name, value in headers.items() if name.lower() != "content-type"}
+                headers["Content-Type"] = "application/x-www-form-urlencoded"
             connection = http.client.HTTPConnection(upstream_host, upstream_port, timeout=120)
             try:
-                connection.request(self.command, rewrite(rules, self.path), body=body or None, headers=headers)
+                connection.request(method, target, body=body, headers=headers)
                 response = connection.getresponse()
                 payload = response.read()
             finally:
