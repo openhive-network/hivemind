@@ -6,6 +6,9 @@ from typing import Any
 import requests
 
 _TIMEOUT_SECONDS = 120
+# Query parameters PostgREST reserves, by name and by last dot-separated part of the name.
+_RESERVED = {"select", "columns", "on_conflict"}
+_RESERVED_LAST = {"limit", "offset", "order", "and", "or"}
 
 
 class ServiceNotConfigured(RuntimeError):
@@ -18,6 +21,10 @@ def _base_url(address_var: str, port_var: str) -> str:
     if not address or not port:
         raise ServiceNotConfigured(f"{address_var} and {port_var} must name the server to test")
     return f"http://{address}:{port}"
+
+
+def _is_reserved(name: str) -> bool:
+    return name in _RESERVED or name.rpartition(".")[2] in _RESERVED_LAST
 
 
 def server_url() -> str:
@@ -53,11 +60,15 @@ def rest_rpc(endpoint: str, params: dict[str, str] | None = None) -> requests.Re
 
     It is made as the rewriter forwards a REST GET: a POST with `params` form-encoded, whose
     fields PostgREST always takes as arguments. In a GET's query string PostgREST would take a
-    value starting with a filter operator (`not.`, `eq.`, ...) for a filter.
+    value starting with a filter operator (`not.`, `eq.`, ...) for a filter. PostgREST's
+    reserved parameters among `params` (`limit`, `offset`, ...) go in the query string instead.
     """
+    params = params or {}
+    reserved = {name: value for name, value in params.items() if _is_reserved(name)}
     return requests.post(
         f"{server_url()}/rpc/{endpoint}",
-        data=params or {},
+        params=reserved,
+        data={name: value for name, value in params.items() if name not in reserved},
         headers={"accept": "application/json", "content-type": "application/x-www-form-urlencoded"},
         timeout=_TIMEOUT_SECONDS,
     )

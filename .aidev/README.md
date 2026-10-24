@@ -109,7 +109,8 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
    interprets `rewrite_rules.conf` as the rewriter image's nginx applies it (rules in
    file order, first match, `break`), after stripping the `/hivemind-api` prefix the API
    node strips, and sends a GET of a `/rpc/` function on as the form-encoded POST the
-   template's `rewrite_by_lua_block` makes of it; CI's `e2e_benchmark_on_postgrest` runs the rewriter image itself;
+   template's `rewrite_by_lua_block` makes of it, PostgREST's reserved parameters
+   (`limit`, `offset`, `order`, `select`, ...) left in its query string; CI's `e2e_benchmark_on_postgrest` runs the rewriter image itself;
 5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
    in its order) as `scripts/ci/start-api-smoketest.sh` does in
    `e2e_benchmark_on_postgrest`: `-m "not postgrest_ignore" --dist loadfile`, with
