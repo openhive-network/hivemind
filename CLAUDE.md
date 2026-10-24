@@ -287,6 +287,11 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 - Download artifacts to `logs/tavern/<api_type>/<test_name>/<test>.out.json`
 - Use these `.out.json` files to see actual API responses and fix pattern mismatches
 
+**REST property groups** (plain pytest modules in the tavern directory, helpers in `rest_checks/`):
+- `rest_api_equivalence/`: at collection, every JSON-RPC tavern test of a method a REST endpoint wraps becomes a REST test checked against that test's own `.pat.json`, or a skip naming why it has no REST form; the job log prints the mapped/skipped count per endpoint. A new wrapping endpoint is added to `MAPPINGS` in `rest_checks/equivalence.py`.
+- `rest_api_rewriter/`: every path of the OpenAPI document, at its public `/hivemind-api/...` URL through the postgrest-rewriter (`HIVEMIND_REWRITER_ADDRESS`/`PORT`), must reach its own function. A new path needs an entry in `_REQUESTS`.
+- `rest_api_paging/`: following each paged REST endpoint's and JSON-RPC method's continuation with a small page size must give the one large page.
+
 **Tests that need real data:**
 
 A positive test's values come from CI's mock-data database (HAF replayed to 5M blocks + mocks + a

@@ -1,6 +1,6 @@
 # Docker Compose configuration for running tests against pre-synced HAF data
 # This file is used by e2e_benchmark_on_postgrest CI job in DinD mode
-# Unlike docker-compose-sync.yml, this only starts haf and hivemind server (no sync needed)
+# Unlike docker-compose-sync.yml, this only starts haf, hivemind server and the rewriter (no sync needed)
 
 name: 'hivemind-test'
 services:
@@ -61,10 +61,32 @@ services:
     ports:
       - "${HIVEMIND_PORT:-8080}:${HIVEMIND_PORT:-8080}"
     networks:
-      - haf-network
+      haf-network:
+        # The name the rewriter image's nginx proxies to (docker/hivemind_nginx.conf.template)
+        aliases:
+          - hivemind-postgrest-server
     depends_on:
       haf:
         condition: service_healthy
+
+  # The postgrest-rewriter image as deployed, serving the public REST URLs for the
+  # rest_api_rewriter tests. Its nginx proxies to port 8080, so HIVEMIND_PORT must stay 8080.
+  # The one line added to its config strips the /hivemind-api prefix of the OpenAPI document's
+  # server URL, which the API node's reverse proxy strips in a deployment.
+  hivemind-rewriter:
+    image: ${HIVEMIND_REWRITER_IMAGE:-registry.gitlab.syncad.com/hive/hivemind/postgrest-rewriter:latest}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sed -i 's|include rewrite_rules.conf;|rewrite ^/hivemind-api(/.*)$$ $$1; include rewrite_rules.conf;|' \
+          /usr/local/openresty/nginx/conf/nginx.conf.template
+        exec /entrypoint.sh
+    ports:
+      - "${HIVEMIND_REWRITER_PORT:-8081}:80"
+    networks:
+      - haf-network
+    depends_on:
+      - hivemind-server
 
 networks:
   haf-network:

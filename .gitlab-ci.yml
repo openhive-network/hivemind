@@ -309,6 +309,9 @@ default:
     "database_api_negative:api_smoketest_database_api_negative.xml"
     "rest_api_patterns:api_smoketest_rest_api_patterns.xml"
     "rest_api_negative:api_smoketest_rest_api_negative.xml"
+    "rest_api_equivalence:api_smoketest_rest_api_equivalence.xml"
+    "rest_api_rewriter:api_smoketest_rest_api_rewriter.xml"
+    "rest_api_paging:api_smoketest_rest_api_paging.xml"
     "hive_api_patterns:api_smoketest_hive_api.xml"
     "search-api_patterns:api_smoketest_search-api.xml"
     "postgrest_negative:postgrest_negative.xml"
@@ -322,6 +325,10 @@ default:
       -c "SELECT exists (SELECT 1 FROM pg_extension WHERE extname = 'pg_search')"); then
     echo "ERROR: cannot check whether pg_search is installed in the database under test"
     exit 1
+  fi
+  if [[ "$PG_SEARCH_INSTALLED" != "t" ]]; then
+    # The rest_api_* groups skip their own search-api tests on this reason.
+    export HIVEMIND_SKIP_SEARCH="the pg_search extension is not installed in the database under test"
   fi
 
   FAILED=0
@@ -944,6 +951,8 @@ e2e_benchmark_on_postgrest:
       --ansi never"
     # Hivemind server config
     HIVEMIND_PORT: "8080"
+    # The postgrest-rewriter in front of it, for rest_api_rewriter
+    HIVEMIND_REWRITER_PORT: "8081"
     # Test config
     RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
   before_script:
@@ -983,6 +992,8 @@ e2e_benchmark_on_postgrest:
     HIVEMIND_IMAGE=${HIVEMIND_IMAGE}
     HAF_DATA_DIRECTORY=${HAF_DATA_DIRECTORY}
     HIVEMIND_PORT=${HIVEMIND_PORT}
+    HIVEMIND_REWRITER_IMAGE=${HIVEMIND_REWRITER_IMAGE}
+    HIVEMIND_REWRITER_PORT=${HIVEMIND_REWRITER_PORT}
     LOG_LEVEL=info
     EOF
     cat "${CI_PROJECT_DIR}/docker/ci.env"
@@ -1046,6 +1057,18 @@ e2e_benchmark_on_postgrest:
       sleep 2
     done
     echo "Hivemind server is ready"
+
+    echo "Waiting for the postgrest-rewriter to serve /hivemind-api/version..."
+    WAIT_START=$(date +%s)
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-rewriter wget -q -O /dev/null --timeout=5 "http://localhost/hivemind-api/version" 2>/dev/null; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for the postgrest-rewriter after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-rewriter
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "postgrest-rewriter is ready"
     echo -e "\e[0Ksection_end:$(date +%s):wait_services\r\e[0K"
   - |
     # Initialize tests_api submodule for validate_response module
@@ -1085,6 +1108,8 @@ e2e_benchmark_on_postgrest:
     # The docker-compose ports mapping exposes services to the Docker host
     export RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME="docker"
     export RUNNER_HIVEMIND_SERVER_HTTP_PORT="${HIVEMIND_PORT}"
+    export HIVEMIND_REWRITER_ADDRESS="docker"
+    export HIVEMIND_REWRITER_PORT
     echo "Running smoketests against docker:${HIVEMIND_PORT}"
   - *run-all-smoketests
   after_script:
@@ -1093,6 +1118,7 @@ e2e_benchmark_on_postgrest:
     # Collect docker-compose logs
     docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs haf > haf-${CI_JOB_NAME}.log 2>&1 || true
     docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server > hivemind-server.log 2>&1 || true
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-rewriter > hivemind-rewriter.log 2>&1 || true
     echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
   - |
     echo -e "\e[0Ksection_start:$(date +%s):teardown[collapsed=true]\r\e[0KStopping docker-compose..."
@@ -1121,6 +1147,7 @@ e2e_benchmark_on_postgrest:
     - "*.xml"
     - haf-*.log
     - hivemind-server.log
+    - hivemind-rewriter.log
     - pg-stats
     - tests/api_tests/hivemind/tavern/**/*.out.json
     - version.log
