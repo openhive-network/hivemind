@@ -229,9 +229,15 @@ The report has one line per pair: calls compared, equal, differing and skipped. 
 skip reasons follow its line. `unmapped:0` is a call in a params form the pair doesn't
 map, such as a positional `bridge.get_post`. `missing:…` is a call without a value the REST
 path needs. `unmapped:<argument>` is an argument with no REST parameter. Up to three
-samples per pair follow, each showing both answers at their first difference. A sample
-where JSON-RPC answers `null` and REST answers `[]` is a list endpoint working as designed.
-Any other difference is a defect: file it as an issue. Exit 0 means no call differs, 1 that
+samples per pair follow, each showing both answers at their first difference.
+
+A list method's `null` result is a REST `[]` (no rows) by design (#383). So every pair whose
+endpoint returns rows (`SETOF JSONB` through `rest_json_rpc_rows`) declares
+`empty_equivalents: [null, []]`, and such a call counts as equal. It is reported apart, as an
+`equal N (of which M by empty_equivalents)` line under the pair. The single-object pairs
+(`post`, `account-profile`, `community`) declare none, so `null` against `[]` still differs
+there, as does `null` or `[]` against a non-empty answer. Any difference the report lists is a
+defect: file it as an issue. Exit 0 means no call differs, 1 that
 some do, and 2 that the check couldn't run.
 
 On the pinned capture, `--unique` selects 66,883 calls. The pairs map 66,746 of them, and

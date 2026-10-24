@@ -234,8 +234,11 @@ performance:
     # Every endpoint answers the method's whole result, so no pair needs a
     # result_path or volatile: the list endpoints return the list's elements as
     # rows, which PostgREST sends as the same JSON array. A list method's `null`
-    # result is a REST `[]` (no rows) by design (#383); such a call is reported as
-    # differing, `null` against `[]`, and is no defect.
+    # result is a REST `[]` (no rows) by design (#383), so every pair whose endpoint
+    # returns rows (`SETOF JSONB` via rest_json_rpc_rows) declares
+    # `empty_equivalents: [null, []]`: such a call counts as equal, reported apart
+    # as "of which N by empty_equivalents". The single-object pairs (post,
+    # account-profile, community) declare none, so a `null`/`[]` there still differs.
     # A pair maps the form the capture uses: named params for bridge and find_text,
     # positional for condenser_api. A call in the other form (bridge.get_post as
     # [author, permlink], a [{…}]-wrapped object) is skipped as unmapped:0 rather
@@ -254,6 +257,7 @@ performance:
           start-author: params.start_author
           start-permlink: params.start_permlink
           observer: params.observer
+        empty_equivalents: [null, []]
       - name: account-posts
         method: bridge.get_account_posts
         path: /accounts/{params.account}/posts
@@ -264,6 +268,7 @@ performance:
           start-author: params.start_author
           start-permlink: params.start_permlink
           observer: params.observer
+        empty_equivalents: [null, []]
       - name: post
         method: bridge.get_post
         path: /posts/{params.author}/{params.permlink}
@@ -281,6 +286,7 @@ performance:
           start: params.1
           type: params.2
           page-size: params.3
+        empty_equivalents: [null, []]
       - name: account-following
         method: condenser_api.get_following
         path: /accounts/{params.0}/following
@@ -288,6 +294,7 @@ performance:
           start: params.1
           type: params.2
           page-size: params.3
+        empty_equivalents: [null, []]
       - name: account-notifications
         method: bridge.account_notifications
         path: /accounts/{params.account}/notifications
@@ -297,6 +304,7 @@ performance:
           min-score: params.min_score
           page-size: params.limit
           last-id: params.last_id
+        empty_equivalents: [null, []]
       - name: communities
         method: bridge.list_communities
         path: /communities
@@ -306,6 +314,7 @@ performance:
           page-size: params.limit
           last: params.last
           observer: params.observer
+        empty_equivalents: [null, []]
       - name: community
         method: bridge.get_community
         path: /communities/{params.name}
@@ -317,12 +326,14 @@ performance:
         query:
           last: params.last
           page-size: params.limit
+        empty_equivalents: [null, []]
       - name: community-roles
         method: bridge.list_community_roles
         path: /communities/{params.community}/roles
         query:
           last: params.last
           page-size: params.limit
+        empty_equivalents: [null, []]
       - name: search-posts
         method: search-api.find_text
         path: /search/posts
@@ -334,12 +345,14 @@ performance:
           start-author: params.start_author
           start-permlink: params.start_permlink
           observer: params.observer
+        empty_equivalents: [null, []]
       - name: trending-tags
         method: bridge.get_trending_topics
         path: /tags/trending
         query:
           page-size: params.limit
           observer: params.observer
+        empty_equivalents: [null, []]
     inputs:
       - "hive/db/sql_scripts/**"
       - rewrite_rules.conf
