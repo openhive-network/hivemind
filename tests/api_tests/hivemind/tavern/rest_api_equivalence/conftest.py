@@ -1,8 +1,5 @@
 """Parametrizes the REST equivalence tests over the JSON-RPC tavern tests, read at collection."""
 
-# CI's tox runs this on Python 3.12, aidev on 3.14 (PEP 649): annotations stay unevaluated on both.
-from __future__ import annotations
-
 import pytest
 from rest_checks import service
 from rest_checks.equivalence import TAVERN_DIR, DerivedCase, coverage, derive_cases

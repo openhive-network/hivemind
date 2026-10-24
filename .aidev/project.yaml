@@ -26,11 +26,15 @@ branches:
 # How this project's suites execute (#13892): one kind, stated once.
 environment:
   kind: "container"
-  # Built by .aidev/runtime/build.sh from .aidev/runtime/Dockerfile and setup.cfg
-  # (its install_requires are baked in). sandbox.shared.hivemind's
-  # HIVEMIND_RUNTIME_IMAGE pins the same image: re-pin both together.
-  image: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
+  # The suites run in .aidev/runtime/Dockerfile built on common-ci-configuration's
+  # python-test-tools:develop, the image CI's tool versions come from: AIDEV rebuilds it
+  # when that tag moves or the Dockerfile or setup.cfg (its install_requires are baked
+  # in) changes. `image` is only the seed pin AIDEV reads before a slot resolves: the
+  # base's digest when hivemind started following it. See .aidev/README.md.
+  image: "registry.gitlab.syncad.com/hive/common-ci-configuration/python-test-tools@sha256:6f7fb3acf0c4f5551cf9fa58a382fbae66c9c47b06510b31685553581ef1409e"
   inputs: [".aidev/runtime/Dockerfile", "setup.cfg"]
+  build: {dockerfile: .aidev/runtime/Dockerfile, context: .}
+  base: {image: "registry.gitlab.syncad.com/hive/common-ci-configuration/python-test-tools:develop", follow: true}
 
 issues:
   intake_label: todo
@@ -78,6 +82,8 @@ sandbox:
         HAF_FIXTURE_COMMIT: "ce11487825c0fff3a22f145920f4d01133ab06ae"
         HAF_FIXTURE_DIGEST: "sha256:6dc0af433c773a56b59f47624f0067b6f72ed0b6c58525ee70589827cf81bd08"
         HIVEMIND_SHARED_DATA_ROOT: "/haf-pool/aidev-shared-hivemind"
+        # The seeder's image: hivemind's install_requires, psql and git (no test tool is
+        # used). A build of .aidev/runtime/build.sh; see .aidev/README.md.
         HIVEMIND_RUNTIME_IMAGE: "registry.gitlab.syncad.com/hive/hivemind/aidev-tests@sha256:5e11cad742290640c091b2f054e7d2b4684fc406e6ad6af7c00e73b007074ac7"
         HIVEMIND_SHARED_SEED_REFS: "develop aidev/integration"
   external:
