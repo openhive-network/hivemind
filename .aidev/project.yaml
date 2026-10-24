@@ -228,6 +228,118 @@ performance:
           - result.database_patched_to_revision
           - result.database_schema_version
         reason: hive.get_info reports the running build and the schema patch it installed
+    # `aidev replay pairs`: each REST endpoint that wraps a JSON-RPC method, as
+    # MAPPINGS in tests/api_tests/hivemind/tavern/rest_checks/equivalence.py states it;
+    # change the two together. Paths are under target.rest_prefix (/hivemind-api).
+    # Every endpoint answers the method's whole result, so no pair needs a
+    # result_path or volatile: the list endpoints return the list's elements as
+    # rows, which PostgREST sends as the same JSON array. A list method's `null`
+    # result is a REST `[]` (no rows) by design (#383); such a call is reported as
+    # differing, `null` against `[]`, and is no defect.
+    # A pair maps the form the capture uses: named params for bridge and find_text,
+    # positional for condenser_api. A call in the other form (bridge.get_post as
+    # [author, permlink], a [{…}]-wrapped object) is skipped as unmapped:0 rather
+    # than declared as a second pair, which would skip every named call instead.
+    # Arguments with no REST parameter (truncate_body, include_own,
+    # muted_reasons_filter) and a list `type` of account_notifications are skipped
+    # as unmapped or not-scalar.
+    pairs:
+      - name: ranked-posts
+        method: bridge.get_ranked_posts
+        path: /posts
+        query:
+          sort: params.sort
+          tag: params.tag
+          page-size: params.limit
+          start-author: params.start_author
+          start-permlink: params.start_permlink
+          observer: params.observer
+      - name: account-posts
+        method: bridge.get_account_posts
+        path: /accounts/{params.account}/posts
+        query:
+          sort: params.sort
+          community: params.community
+          page-size: params.limit
+          start-author: params.start_author
+          start-permlink: params.start_permlink
+          observer: params.observer
+      - name: post
+        method: bridge.get_post
+        path: /posts/{params.author}/{params.permlink}
+        query:
+          observer: params.observer
+      - name: account-profile
+        method: bridge.get_profile
+        path: /accounts/{params.account}/profile
+        query:
+          observer: params.observer
+      - name: account-followers
+        method: condenser_api.get_followers
+        path: /accounts/{params.0}/followers
+        query:
+          start: params.1
+          type: params.2
+          page-size: params.3
+      - name: account-following
+        method: condenser_api.get_following
+        path: /accounts/{params.0}/following
+        query:
+          start: params.1
+          type: params.2
+          page-size: params.3
+      - name: account-notifications
+        method: bridge.account_notifications
+        path: /accounts/{params.account}/notifications
+        query:
+          type: params.type
+          community: params.community
+          min-score: params.min_score
+          page-size: params.limit
+          last-id: params.last_id
+      - name: communities
+        method: bridge.list_communities
+        path: /communities
+        query:
+          sort: params.sort
+          query: params.query
+          page-size: params.limit
+          last: params.last
+          observer: params.observer
+      - name: community
+        method: bridge.get_community
+        path: /communities/{params.name}
+        query:
+          observer: params.observer
+      - name: community-subscribers
+        method: bridge.list_subscribers
+        path: /communities/{params.community}/subscribers
+        query:
+          last: params.last
+          page-size: params.limit
+      - name: community-roles
+        method: bridge.list_community_roles
+        path: /communities/{params.community}/roles
+        query:
+          last: params.last
+          page-size: params.limit
+      - name: search-posts
+        method: search-api.find_text
+        path: /search/posts
+        query:
+          q: params.pattern
+          sort: params.sort
+          author: params.author
+          page-size: params.limit
+          start-author: params.start_author
+          start-permlink: params.start_permlink
+          observer: params.observer
+      - name: trending-tags
+        method: bridge.get_trending_topics
+        path: /tags/trending
+        query:
+          page-size: params.limit
+          observer: params.observer
     inputs:
       - "hive/db/sql_scripts/**"
       - rewrite_rules.conf

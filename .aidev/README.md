@@ -212,6 +212,33 @@ what `.env` recreates. On 2026-10-23 steem-20 ran `b2468ef2` while its `.env` sa
 `HIVEMIND_VERSION=b64e31e4`. Freezing recreates HAF, so every app on the node loses its
 database twice and stops advancing until the restore has caught up.
 
+### REST against JSON-RPC (`pairs`)
+
+`performance.replay.pairs` maps each REST endpoint that wraps a JSON-RPC method to that
+method, as `MAPPINGS` in `tests/api_tests/hivemind/tavern/rest_checks/equivalence.py` does.
+`aidev replay pairs` sends every captured call of those methods to one node twice, as
+JSON-RPC and as the REST GET, and reports the calls whose two answers differ. The node must
+run a hivemind build that has the REST endpoints. It doesn't need freezing, but an idle or
+frozen node gives fewer spurious differences:
+
+```bash
+aidev replay pairs --unique --profile <target file>
+```
+
+The report has one line per pair: calls compared, equal, differing and skipped. Each pair's
+skip reasons follow its line. `unmapped:0` is a call in a params form the pair doesn't
+map, such as a positional `bridge.get_post`. `missing:…` is a call without a value the REST
+path needs. `unmapped:<argument>` is an argument with no REST parameter. Up to three
+samples per pair follow, each showing both answers at their first difference. A sample
+where JSON-RPC answers `null` and REST answers `[]` is a list endpoint working as designed.
+Any other difference is a defect: file it as an issue. Exit 0 means no call differs, 1 that
+some do, and 2 that the check couldn't run.
+
+On the pinned capture, `--unique` selects 66,883 calls. The pairs map 66,746 of them, and
+the rest (positional `bridge.get_post` calls, `[{…}]`-wrapped `bridge.get_profile` and
+`bridge.get_ranked_posts` calls, and `bridge.get_post` calls without an author) are skipped.
+The capture has no `find_text` calls, so `search-posts` compares none.
+
 ## The HAF test stack (`test-stack.compose.yml`)
 
 One service, `haf`: the HAF testnet image for HAF commit `ce114878` (hive/haf#379, merged
