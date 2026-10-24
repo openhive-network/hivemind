@@ -25,14 +25,30 @@ http {
                     # each argument reaches the function verbatim, whatever it starts with.
                     # This runs after the rewrite rules, so it sees the path segments they turn
                     # into arguments too.
+                    # PostgREST's reserved parameters stay in the query string, where they keep
+                    # their meaning (in the body they would be arguments): `select`, `columns`,
+                    # `on_conflict`, and any name whose last dot-separated part is `limit`,
+                    # `offset`, `order`, `and` or `or` (`not.or`, `child.limit`), the names a
+                    # GET straight to PostgREST takes for no argument either. Each part keeps
+                    # its encoding and order.
                     rewrite_by_lua_block {
                         if ngx.req.get_method() == "GET" and ngx.var.uri:sub(1, 5) == "/rpc/" then
-                            local args = ngx.var.args or ""
+                            local reserved = { select = true, columns = true, on_conflict = true }
+                            local reserved_last = { limit = true, offset = true, order = true, ["and"] = true, ["or"] = true }
+                            local body, query = {}, {}
+                            for part in (ngx.var.args or ""):gmatch("[^&]+") do
+                                local name = ngx.unescape_uri((part:match("^[^=]*"):gsub("%+", " ")))
+                                if reserved[name] or reserved_last[name:match("[^.]*$")] then
+                                    query[#query + 1] = part
+                                else
+                                    body[#body + 1] = part
+                                end
+                            end
                             ngx.req.read_body()
                             ngx.req.set_method(ngx.HTTP_POST)
                             ngx.req.set_header("Content-Type", "application/x-www-form-urlencoded")
-                            ngx.req.set_body_data(args)
-                            ngx.req.set_uri_args("")
+                            ngx.req.set_body_data(table.concat(body, "&"))
+                            ngx.req.set_uri_args(table.concat(query, "&"))
                         end
                     }
 

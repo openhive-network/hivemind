@@ -7,19 +7,23 @@ replacement with a query of its own gets the request's arguments appended to it.
 that it strips the `/hivemind-api` prefix the API node's reverse proxy removes, so the tests
 can request the public URLs of the OpenAPI document. Behind the rules, as the template's
 rewrite_by_lua_block does, a GET of a `/rpc/` function goes upstream as a form-encoded POST
-whose body is the query string, so PostgREST takes no argument for a filter. CI runs the
-rewriter image itself.
+whose body is the query string, so PostgREST takes no argument for a filter; PostgREST's
+reserved parameters (`limit`, `offset`, `order`, `select`, ...) stay in the query string. CI runs
+the rewriter image itself.
 """
 
 import http.client
 import re
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, unquote_plus, urlsplit
 
 PUBLIC_PREFIX = "/hivemind-api"
 _RULE_RE = re.compile(r"rewrite\s+(\S+)\s+(\S+)\s+break;")
 _CAPTURE_RE = re.compile(r"\$(\d)")
+# Query parameters PostgREST reserves, by name and by last dot-separated part of the name.
+_RESERVED = {"select", "columns", "on_conflict"}
+_RESERVED_LAST = {"limit", "offset", "order", "and", "or"}
 # Headers http.client sets itself or that describe one hop only.
 _HOP_HEADERS = {"connection", "keep-alive", "transfer-encoding", "host", "content-length"}
 
@@ -62,11 +66,19 @@ def rewrite(rules: list[tuple[re.Pattern[str], str]], target: str) -> str:
     return f"{path}?{split.query}" if split.query else path
 
 
+def _is_reserved(part: str) -> bool:
+    name = unquote_plus(part.partition("=")[0])
+    return name in _RESERVED or name.rpartition(".")[2] in _RESERVED_LAST
+
+
 def _upstream_request(method: str, target: str) -> tuple[str, str, bytes | None]:
     """The method, target and body the rewriter sends upstream for a `method` of rewritten `target`."""
     path, _, query = target.partition("?")
     if method == "GET" and path.startswith("/rpc/"):
-        return "POST", path, query.encode()
+        parts = [part for part in query.split("&") if part]
+        reserved = "&".join(part for part in parts if _is_reserved(part))
+        body = "&".join(part for part in parts if not _is_reserved(part))
+        return "POST", f"{path}?{reserved}" if reserved else path, body.encode()
     return method, target, None
 
 
