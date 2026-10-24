@@ -49,5 +49,15 @@ def rest_get(url: str, params: dict[str, str] | None = None) -> requests.Respons
 
 
 def rest_rpc(endpoint: str, params: dict[str, str] | None = None) -> requests.Response:
-    """A GET of the PostgREST function hivemind_endpoints.`endpoint`, bypassing the rewriter."""
-    return rest_get(f"{server_url()}/rpc/{endpoint}", params)
+    """A call of the PostgREST function hivemind_endpoints.`endpoint`, bypassing the rewriter.
+
+    It is made as the rewriter forwards a REST GET: a POST with `params` form-encoded, whose
+    fields PostgREST always takes as arguments. In a GET's query string PostgREST would take a
+    value starting with a filter operator (`not.`, `eq.`, ...) for a filter.
+    """
+    return requests.post(
+        f"{server_url()}/rpc/{endpoint}",
+        data=params or {},
+        headers={"accept": "application/json", "content-type": "application/x-www-form-urlencoded"},
+        timeout=_TIMEOUT_SECONDS,
+    )

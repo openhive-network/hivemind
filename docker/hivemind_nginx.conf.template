@@ -18,6 +18,24 @@ http {
                     # otherwise it will remain disabled
                     ${REWRITE_LOG}
 
+                    # PostgREST reads a GET argument whose value starts with a filter operator
+                    # (`not.`, `eq.`, `in.`, ...) as a filter on the result, never as an argument,
+                    # while every field of a form-encoded POST is an argument. So a GET of a
+                    # function goes upstream as that POST, its query string becoming the body:
+                    # each argument reaches the function verbatim, whatever it starts with.
+                    # This runs after the rewrite rules, so it sees the path segments they turn
+                    # into arguments too.
+                    rewrite_by_lua_block {
+                        if ngx.req.get_method() == "GET" and ngx.var.uri:sub(1, 5) == "/rpc/" then
+                            local args = ngx.var.args or ""
+                            ngx.req.read_body()
+                            ngx.req.set_method(ngx.HTTP_POST)
+                            ngx.req.set_header("Content-Type", "application/x-www-form-urlencoded")
+                            ngx.req.set_body_data(args)
+                            ngx.req.set_uri_args("")
+                        end
+                    }
+
                     proxy_pass  http://hivemind-postgrest-server:8080;  # my PostREST is  here!
 
                     proxy_set_header Host $host;
