@@ -38,23 +38,21 @@ echo "Starting tests on hivemind server running on ${HIVEMIND_ADDRESS}:${HIVEMIN
 
 echo "Selected test group (if empty all will be executed): ${TEST_GROUP}"
 
+# pytest, tavern and the plugins come from the job image (common-ci-configuration's
+# tool images); PYTHONPATH and the directory are what tox.ini's [testenv:tavern] sets.
+export PYTHONPATH="${PWD}/tests/tests_api/:${PWD}/tests/tests_api/scripts/:${PYTHONPATH:-}"
+MARKER_ARGS=()
 if [ -v RUN_TESTS_WITH_MARKER ]; then
-  tox -e tavern -- \
-    -W ignore::pytest.PytestDeprecationWarning \
-    -n "${JOBS}" \
-    --dist loadfile \
-    --max-worker-restart 0 \
-    -v \
-    --tb=short \
-    -m "${RUN_TESTS_WITH_MARKER}" \
-    --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
-else
-  tox -e tavern -- \
-    -W ignore::pytest.PytestDeprecationWarning \
-    -n "${JOBS}" \
-    --dist loadfile \
-    --max-worker-restart 0 \
-    -v \
-    --tb=short \
-    --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
+  MARKER_ARGS=(-m "${RUN_TESTS_WITH_MARKER}")
 fi
+
+cd "${TAVERN_DIR}"
+python3 -m pytest \
+  -W ignore::pytest.PytestDeprecationWarning \
+  -n "${JOBS}" \
+  --dist loadfile \
+  --max-worker-restart 0 \
+  -v \
+  --tb=short \
+  "${MARKER_ARGS[@]}" \
+  --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}

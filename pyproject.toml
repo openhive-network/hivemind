@@ -57,3 +57,8 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["hive"]
+
+[tool.mypy]
+# Most of hivemind's dependencies ship no type stubs, and CI's mypy runs without them
+# installed; hive/_version.py is written at build time.
+ignore_missing_imports = true

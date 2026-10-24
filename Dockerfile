@@ -78,10 +78,7 @@ USER hivemind
 
 ENV PATH=/home/hivemind/.local/bin:${PATH}
 
-RUN <<EOF
-  pip install --no-cache-dir --upgrade pip setuptools
-  pip install --no-cache-dir --verbose --user tox==4.23.2
-EOF
+RUN pip install --no-cache-dir --upgrade pip setuptools
 
 FROM ci-base-image AS builder
 

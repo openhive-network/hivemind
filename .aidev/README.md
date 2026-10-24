@@ -114,9 +114,8 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
 5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
    in its order) as `scripts/ci/start-api-smoketest.sh` does in
    `e2e_benchmark_on_postgrest`: `-m "not postgrest_ignore" --dist loadfile`, with
-   `HIVEMIND_TAVERN_WORKERS` workers (default 4). Tox is not used, because the check
-   container has no network to build its venv; the runtime image carries
-   `[testenv:tavern]`'s pins instead. As in CI, `search-api_patterns` counts like
+   `HIVEMIND_TAVERN_WORKERS` workers (default 4), on the runtime image's pytest and
+   tavern, the versions CI's docker-builder runs. As in CI, `search-api_patterns` counts like
    every other group when the clone has the `pg_search` extension, and is not run,
    printing `skip search-api_patterns (<reason naming pg_search>)`, when it has none;
    the other groups then get that reason as `HIVEMIND_SKIP_SEARCH` and skip their
@@ -378,27 +377,32 @@ sudo zfs create haf-pool/aidev-shared-hivemind       # mounted at /haf-pool/aide
 `test-stack.compose.yml` pins (hivemind's own HAF, which may differ from what hive/haf's
 `sandbox.shared.haf` pins). The next
 start copies that commit's cluster, and the seeder re-seeds the refs' revisions in it.
-The old commit's directory under the data root can then be destroyed. **Changing the
-runtime image** (`environment.image`): re-pin `HIVEMIND_RUNTIME_IMAGE` to the same digest.
+The old commit's directory under the data root can then be destroyed. **The seeder's
+image** (`HIVEMIND_RUNTIME_IMAGE`) is a build of `runtime/Dockerfile`; see the next section.
 
 ## The test runtime image (`runtime/`)
 
-The checks run in a container with your uid: `python:3.14-slim-bookworm` (the base of
-this project's own `Dockerfile`) with `postgresql-client` and `git`, the `postgrest`
-binary of `common-ci-configuration/postgrest` (the `POSTGREST_VERSION` of
-`Dockerfile`), `create_haf_app_role.sh` / `common.sh` from common-ci-configuration at a
-pinned commit (where `scripts/setup_postgres.sh` looks before it downloads them), and
-`setup.cfg`'s `install_requires` plus pytest, ruff and mypy, and `tox.ini`
-`[testenv:tavern]`'s deps (tavern, pytest-xdist, deepdiff, jsondiff) for the `tavern`
-step and the shared hivemind's seeder. Every base and download is pinned.
+The checks run in a container with your uid, built from `runtime/Dockerfile` on
+common-ci-configuration's `python-test-tools:develop` (`environment.base` in
+`project.yaml`, `follow: true`). That base is the image CI's tools come from: Python
+3.14 on Ubuntu 26.04, `psql`, `postgrest` and every test and lint tool (pytest,
+pytest-xdist, tavern, deepdiff, jsondiff, ruff, mypy, ...) at the versions of
+common-ci-configuration's `docker-bake.hcl`. The Dockerfile adds only
+`create_haf_app_role.sh` / `common.sh` from common-ci-configuration's develop (where
+`scripts/setup_postgres.sh` looks before it downloads them) and `setup.cfg`'s
+`install_requires`. Nothing in hivemind pins a tool version
+(`tests/ci/test_tool_versions_unpinned.py`): when the base's tag moves, or the
+Dockerfile or `setup.cfg` changes, AIDEV rebuilds the runtime on its next run, with no
+commit here. `environment.image` is only the seed pin AIDEV reads before a slot
+resolves, and never has to move.
 
-When `runtime/Dockerfile` or `setup.cfg` changes, rebuild and re-pin **in the same
-commit**:
+The shared hivemind's seeder still runs a pinned build
+(`sandbox.shared.hivemind.env.HIVEMIND_RUNTIME_IMAGE`); it uses hivemind's
+dependencies, `psql` and `git`, no test tool. To refresh it:
 
 ```bash
 .aidev/runtime/build.sh --push   # registry digest if aidev-<input hash> exists, else build + push
-# put the printed repo@sha256:<digest> into project.yaml environment.image
-# and sandbox.shared.hivemind.env.HIVEMIND_RUNTIME_IMAGE
+# put the printed repo@sha256:<digest> into sandbox.shared.hivemind.env.HIVEMIND_RUNTIME_IMAGE
 ```
 
 To build through a pull-through registry cache near the build host, set

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Build (and with --push, publish) the test runtime image of .aidev/runtime/Dockerfile
-# and print the digest-pinned reference to put in .aidev/project.yaml's
-# `environment.image`. See .aidev/README.md.
+# Build (and with --push, publish) .aidev/runtime/Dockerfile on the image
+# .aidev/project.yaml's followed base names now, and print the digest-pinned reference.
+# AIDEV builds the suites' runtime itself; this script is for the shared hivemind's
+# seeder (`sandbox.shared.hivemind.env.HIVEMIND_RUNTIME_IMAGE`). See .aidev/README.md.
 #
-# The tag is `aidev-<hash>`, the hash of the image inputs (the Dockerfile, whose
-# FROM lines and downloads are digest-pinned, and setup.cfg, whose install_requires it
-# bakes in); the registry cleanup policy keeps `aidev-*` tags. When
-# <repository>:aidev-<hash> is already in the registry nothing is built: the script
-# prints that image's digest.
+# The tag is `aidev-<hash>`, the hash of the image inputs (the base's digest, the
+# Dockerfile and setup.cfg, whose install_requires it bakes in); the registry cleanup
+# policy keeps `aidev-*` tags. When <repository>:aidev-<hash> is already in the
+# registry nothing is built: the script prints that image's digest.
 #
 #   .aidev/runtime/build.sh           # registry digest, or build locally and print the local tag
 #   .aidev/runtime/build.sh --push    # registry digest, or build + push and print repo@sha256:<digest>
@@ -17,26 +17,30 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 REPOSITORY="${AIDEV_RUNTIME_REPOSITORY:-registry.gitlab.syncad.com/hive/hivemind/aidev-tests}"
-
-# The Dockerfile copies setup.cfg and nothing else from the tree.
-input_hash() {
-    sha256sum .aidev/runtime/Dockerfile setup.cfg | sha256sum | cut -c1-16
-}
-TAG="aidev-$(input_hash)"
+BASE="$(sed -n 's/^  base: {image: "\([^"]*\)".*/\1/p' .aidev/project.yaml)"
 
 case "${1:-}" in
-    --tag) echo "$TAG"; exit 0 ;;
-    ""|--push) ;;
+    ""|--push|--tag) ;;
     *) echo "usage: $0 [--push|--tag]" >&2; exit 2 ;;
 esac
 
-# Digest of <repository>:<tag> in the registry, empty when the tag doesn't exist.
+# Digest of a registry reference, empty when it doesn't exist.
 registry_digest() {
-    docker buildx imagetools inspect "$REPOSITORY:$TAG" --format '{{json .Manifest}}' 2>/dev/null \
+    docker buildx imagetools inspect "$1" --format '{{json .Manifest}}' 2>/dev/null \
         | grep -o '"digest": *"sha256:[0-9a-f]*"' | head -1 | grep -o 'sha256:[0-9a-f]*' || true
 }
 
-digest="$(registry_digest)"
+base_digest="$(registry_digest "${BASE:?no environment.base image in .aidev/project.yaml}")"
+BASE_IMAGE="${BASE%:*}@${base_digest:?cannot resolve $BASE}"
+
+# The Dockerfile copies setup.cfg and nothing else from the tree.
+input_hash() {
+    { echo "$BASE_IMAGE"; sha256sum .aidev/runtime/Dockerfile setup.cfg; } | sha256sum | cut -c1-16
+}
+TAG="aidev-$(input_hash)"
+if [ "${1:-}" = "--tag" ]; then echo "$TAG"; exit 0; fi
+
+digest="$(registry_digest "$REPOSITORY:$TAG")"
 if [ -n "$digest" ]; then
     echo "$REPOSITORY:$TAG exists in the registry; not building" >&2
     echo "$REPOSITORY@$digest"
@@ -83,9 +87,10 @@ region_builder() {
 }
 builder="$(region_builder)"
 
-# Every FROM is digest-pinned, so no --pull. No provenance, so the pushed digest is a
+# The base is digest-pinned, so no --pull. No provenance, so the pushed digest is a
 # plain image manifest.
-build=(docker buildx build ${builder:+--builder "$builder"} --provenance=false -f .aidev/runtime/Dockerfile -t "$REPOSITORY:$TAG")
+build=(docker buildx build ${builder:+--builder "$builder"} --provenance=false --build-arg "BASE_IMAGE=$BASE_IMAGE"
+    -f .aidev/runtime/Dockerfile -t "$REPOSITORY:$TAG")
 if [ "${1:-}" != "--push" ]; then
     "${build[@]}" --load "$context" >&2
     echo "$REPOSITORY:$TAG"

@@ -278,7 +278,7 @@ Indexes are created when transitioning from massive to live sync (or when hittin
 **Testing Framework:**
 - Tavern (pytest plugin) for API tests (YAML-based)
 - Tests are in `tests/api_tests/hivemind/tavern/`
-- Run via tox with `-e tavern`
+- CI runs them on its job image's pytest and tavern (`scripts/ci/start-api-smoketest.sh`); locally, `tox -e tavern`
 
 **Tavern Test Pattern Files:**
 - Each test has a `.tavern.yaml` file and a corresponding `.pat.json` pattern file
@@ -346,7 +346,13 @@ The `.gitlab-ci.yaml` defines the build/test pipeline. Key jobs:
 - Build Docker images (base, instance, rewriter)
 - Sync to 5M blocks with mock data
 - Run API smoketests (bridge, condenser, negative)
+- Lint with ruff and type-check with mypy (configured in `pyproject.toml`)
 - Benchmarking tests
+
+**Tool versions:** hivemind pins no CI or test tool (pytest, tavern, ruff, mypy, tox, ...) and overrides none of
+common-ci-configuration's image tags. Jobs run in its images (`docker-builder`, `python-test-tools`), whose tool
+versions its `docker-bake.hcl` defines, and the aidev test runtime follows `python-test-tools:develop`
+(`.aidev/project.yaml` `environment.base`). `tests/ci/test_tool_versions_unpinned.py` checks this.
 
 Uses NFS cache at `/nfs/ci-cache` for sharing sync data across builders.
 
