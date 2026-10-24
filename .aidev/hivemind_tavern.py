@@ -18,7 +18,8 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
    it (scripts/ci/reload-postgrest-functions.sh, what CI's POSTGREST_ONLY path
    does), so query changes are tested without a re-sync, then has the provider
    install the admin-level scripts, which need a superuser (install_admin_script);
-3. serves the clone with PostgREST as scripts/start_postgrest.sh does, and runs
+3. serves the clone with PostgREST as scripts/start_postgrest.sh does, with
+   rewrite_rules.conf in front of it (hivemind_rewriter.py, for rest_api_rewriter), and runs
    each tavern group of .gitlab-ci.yml's SMOKETESTS the way
    scripts/ci/start-api-smoketest.sh does (RUN_TESTS_WITH_MARKER as in
    e2e_benchmark_on_postgrest), one junit report per group, OUT_DIR/tavern-<group>.xml;
@@ -26,7 +27,8 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
    OUT_DIR/tavern-out/ and drops the clone.
 
 A group whose host precondition the clone lacks (search-api without pg_search)
-is not run and is reported `skip <group> (<reason>)`.
+is not run and is reported `skip <group> (<reason>)`; the other groups get the reason
+as HIVEMIND_SKIP_SEARCH, which skips their own search-api tests.
 
 Exits 0 when every group run passes, 1 when one fails, SKIP (77) on a revision miss
 or a provider whose clone API predates sync recipes;
@@ -43,6 +45,7 @@ import time
 from types import ModuleType
 from typing import Any
 
+import hivemind_rewriter
 from hivemind_smoke import free_port, wait_until_serving
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -170,16 +173,21 @@ def precondition_skips(run_url: str, groups: list[str], can_install_admin: bool)
     return {}
 
 
-def _run_group(group: str, port: int, out: str, workers: str) -> int:
+def _run_group(group: str, port: int, rewriter_port: int, out: str, workers: str, search_skip: str | None) -> int:
     env = dict(
         os.environ,
         HIVEMIND_ADDRESS="127.0.0.1",
         HIVEMIND_PORT=str(port),
+        HIVEMIND_REWRITER_ADDRESS="127.0.0.1",
+        HIVEMIND_REWRITER_PORT=str(rewriter_port),
         TAVERN_DIR=TAVERN_DIR,
         PYTHONPATH=os.pathsep.join([TESTS_API_DIR, os.path.join(TESTS_API_DIR, "scripts"), ROOT]),
         PYTHONFAULTHANDLER="1",
         PYTHONUNBUFFERED="1",
     )
+    if search_skip is not None:
+        # The REST groups' search-api tests skip on the precondition that skips the search-api group.
+        env["HIVEMIND_SKIP_SEARCH"] = search_skip
     args = [
         sys.executable, "-m", "pytest", "-p", "no:cacheprovider",
         "-W", "ignore::pytest.PytestDeprecationWarning",
@@ -223,8 +231,12 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
     )
     workers = os.environ.get("HIVEMIND_TAVERN_WORKERS", "4")
     failed = []
+    with open(os.path.join(ROOT, "rewrite_rules.conf"), encoding="utf-8") as handle:
+        rules = handle.read()
+    rewriter_port = free_port()
     with open(log_path, "w") as log:
         proc = subprocess.Popen(["postgrest"], env=env, stdout=log, stderr=subprocess.STDOUT)
+        rewriter = hivemind_rewriter.start(rules, "127.0.0.1", port, rewriter_port)
         try:
             wait_until_serving(base, proc, log_path)
             for group in groups:
@@ -232,11 +244,12 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
                     print(f"skip {group} ({skips[group]})", flush=True)
                     continue
                 t0 = time.monotonic()
-                rc = _run_group(group, port, out, workers)
+                rc = _run_group(group, port, rewriter_port, out, workers, skips.get(SEARCH_GROUP))
                 print(f"{'ok  ' if rc == 0 else 'FAIL'} {group} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
                 if rc != 0:
                     failed.append(group)
         finally:
+            rewriter.shutdown()
             proc.terminate()
             try:
                 proc.wait(timeout=10)

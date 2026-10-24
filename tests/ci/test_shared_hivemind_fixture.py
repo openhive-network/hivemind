@@ -340,7 +340,7 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _git_identity(monkeypatch)
     root = tmp_path / 'tree'
     (root / '.aidev' / 'shared-hivemind').mkdir(parents=True)
-    for name in ('hivemind_tavern.py', 'hivemind_smoke.py'):
+    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
         shutil.copy(AIDEV / name, root / '.aidev' / name)
     shutil.copy(FIXTURE_PY, root / '.aidev' / 'shared-hivemind' / 'shared_fixture.py')
     (root / PATCHLEVEL).parent.mkdir(parents=True)

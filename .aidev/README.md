@@ -103,7 +103,12 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
    run's database. On a provider whose clone API predates it, the step says so and
    runs without them and skips search-api;
 4. serves the clone with PostgREST as `scripts/start_postgrest.sh` does, with
-   `PGRST_DB_ROOT_SPEC=home` standing in for the postgrest-rewriter's `/` → `/rpc/home`;
+   `PGRST_DB_ROOT_SPEC=home` standing in for the postgrest-rewriter's `/` → `/rpc/home`,
+   and puts `.aidev/hivemind_rewriter.py` in front of it for `rest_api_rewriter`
+   (`HIVEMIND_REWRITER_ADDRESS`/`PORT`). The runtime image has no nginx, so that module
+   interprets `rewrite_rules.conf` as the rewriter image's nginx applies it (rules in
+   file order, first match, `break`), after stripping the `/hivemind-api` prefix the API
+   node strips; CI's `e2e_benchmark_on_postgrest` runs the rewriter image itself;
 5. runs every group of `.gitlab-ci.yml`'s `SMOKETESTS` list (read from that file,
    in its order) as `scripts/ci/start-api-smoketest.sh` does in
    `e2e_benchmark_on_postgrest`: `-m "not postgrest_ignore" --dist loadfile`, with
@@ -112,6 +117,8 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
    `[testenv:tavern]`'s pins instead. As in CI, `search-api_patterns` counts like
    every other group when the clone has the `pg_search` extension, and is not run,
    printing `skip search-api_patterns (<reason naming pg_search>)`, when it has none;
+   the other groups then get that reason as `HIVEMIND_SKIP_SEARCH` and skip their
+   own search-api tests;
 6. moves the `.out.json` files tavern writes next to the patterns to
    `test-results/full/tavern-out/` and drops the clone, also when the run fails. A
    clone a killed run leaves behind is reaped after 6 hours.
