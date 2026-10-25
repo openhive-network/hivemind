@@ -589,8 +589,8 @@ BEGIN
     -- Rshares aggregates (sc_hot, sc_trend, etc.) are NOT updated per-batch during
     -- massive sync. The key index (hive_votes_post_id_block_num_rshares_vote_is_effective_idx)
     -- is dropped for write performance, making per-batch update_posts_rshares() extremely
-    -- expensive. Instead, recalculate_all_posts_rshares() runs once at finalization after
-    -- indexes are recreated (see DbState._finish_posts_rshares).
+    -- expensive. Instead, recalculate_all_posts_votes_and_children() runs once at finalization after
+    -- indexes are recreated (see DbState._finish_hive_posts).
 
     RETURN _count;
 END

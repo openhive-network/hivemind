@@ -34,13 +34,11 @@ def _initial_finalization_vacuums() -> list[tuple[str, str]]:
             if description.startswith('VACUUM '):
                 method(*args)
 
-    DbState._rshares_recalculated = False
     with (
         patch.object(DbState, 'db', staticmethod(lambda: db)),
         patch.object(DbState, 'process_tasks_in_threads', staticmethod(run_vacuums_only)),
         patch.multiple(
             DbState,
-            _finish_posts_rshares=staticmethod(lambda *a: None),
             _finish_reputation_notification_scores=staticmethod(lambda *a: None),
             _finalize_completion_marker=staticmethod(lambda *a: None),
         ),
@@ -72,10 +70,8 @@ def test_vacuums_of_each_table() -> None:
     # Written by finalization: plain before it, frozen after it.
     for table in ('hive_feed_cache', 'hive_notification_cache'):
         assert by_table[f'hivemind_app.{table}'] == ['VERBOSE, ANALYZE', 'FREEZE, VERBOSE, ANALYZE']
-    # hive_posts is also vacuumed after the rshares recalculation, before Part 0,
-    # and compacted after finalization, before its freeze.
+    # hive_posts is also compacted after finalization, before its freeze.
     assert by_table['hivemind_app.hive_posts'] == [
-        'VERBOSE, ANALYZE',
         'VERBOSE, ANALYZE',
         'FULL, VERBOSE, ANALYZE',
         'FREEZE, VERBOSE, ANALYZE',

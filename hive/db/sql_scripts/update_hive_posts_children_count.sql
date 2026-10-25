@@ -61,51 +61,5 @@ WHERE uhp.id = data_source.queried_parent
 END
 $BODY$;
 
+--- The full recomputation is recalculate_all_posts_votes_and_children (update_posts_rshares.sql).
 DROP FUNCTION IF EXISTS hivemind_app.update_all_hive_posts_children_count;
-CREATE OR REPLACE FUNCTION hivemind_app.update_all_hive_posts_children_count()
-  RETURNS void
-  LANGUAGE 'plpgsql'
-  VOLATILE
-AS $BODY$
-declare __depth INT;
-BEGIN
-  SELECT MAX(hp.depth) into __depth FROM hivemind_app.hive_posts hp ;
-
-  CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app.__post_children
-  (
-    id INT NOT NULL,
-    child_count INT NOT NULL,
-    CONSTRAINT __post_children_pkey PRIMARY KEY (id)
-  );
-
-  TRUNCATE TABLE hivemind_app.__post_children;
-  
-  WHILE __depth >= 0 LOOP
-    INSERT INTO hivemind_app.__post_children
-    (id, child_count)
-      SELECT
-        h1.parent_id AS queried_parent,
-        SUM(COALESCE(pc.child_count, 0) + 1) AS count
-      FROM hivemind_app.hive_posts h1
-      LEFT JOIN hivemind_app.__post_children pc ON pc.id = h1.id
-      WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
-      GROUP BY h1.parent_id
-
-    ON CONFLICT ON CONSTRAINT __post_children_pkey DO UPDATE
-      SET child_count = hivemind_app.__post_children.child_count + excluded.child_count
-    ;
-
-    __depth := __depth -1;
-  END LOOP;
-
-  UPDATE hivemind_app.hive_posts uhp
-  SET children = s.child_count
-  FROM
-  hivemind_app.__post_children s
-  WHERE s.id = uhp.id and s.child_count != uhp.children
-  ;
-  
-  TRUNCATE TABLE hivemind_app.__post_children;
-
-END
-$BODY$;

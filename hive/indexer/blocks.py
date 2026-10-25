@@ -214,7 +214,7 @@ class Blocks:
         # Phase 3.6: Incremental rshares update for MASSIVE_WITH_INDEXES mode.
         # When indexes are enabled, we must update rshares incrementally for votes
         # processed in this batch. During MASSIVE_WITHOUT_INDEXES (initial sync),
-        # indexes don't exist so this is skipped — the full recalculate_all_posts_rshares
+        # indexes don't exist so this is skipped — the full recalculate_all_posts_votes_and_children
         # runs at finalization. During MASSIVE_WITH_INDEXES (catch-up after restart
         # or post-finalization gap), indexes exist and the full recalculation won't
         # re-run, so incremental updates are essential.
