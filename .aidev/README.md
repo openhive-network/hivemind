@@ -94,11 +94,10 @@ Not covered yet: the python API client tests and the benchmarks. They stay in Gi
 3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>, <its recipe>)`) and
    reloads the tree's PostgREST SQL into the clone as `hivemind` with
    `scripts/ci/reload-postgrest-functions.sh` (what CI's POSTGREST_ONLY path does),
-   so query changes are tested without a re-sync. The reload cannot install the
-   admin-level scripts (`schema.py`'s `_setup_admin_runtime_code`, plpython3u):
-   `hivemind` owns their schema, so it drops the template's copy, and the CREATE is
-   refused with a warning, since only a superuser may create them. The step then
-   installs the tree's copy through the provider,
+   so query changes are tested without a re-sync; any script that fails to load fails
+   the step. The reload skips the admin-level scripts (`--skip-admin-scripts`;
+   `schema.py`'s `_setup_admin_runtime_code`, plpython3u), since only a superuser may
+   create them. The step then installs the tree's copy through the provider,
    `install_admin_script('<run id>', <script>)`, which runs it as `haf_admin` in that
    run's database. On a provider whose clone API predates it, the step says so and
    runs without them and skips search-api;

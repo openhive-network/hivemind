@@ -137,7 +137,7 @@ def _reload_sql(run_url: str, log_path: str) -> None:
             [
                 os.path.join(ROOT, "scripts", "ci", "reload-postgrest-functions.sh"),
                 f"--postgres-url={run_url}",
-                f"--admin-url={run_url}",
+                "--skip-admin-scripts",
                 "--verify",
             ],
             stdout=log,
@@ -148,8 +148,6 @@ def _reload_sql(run_url: str, log_path: str) -> None:
 
 
 def _install_admin_scripts(api_url: str, run_id: str) -> None:
-    # Only after the reload: it runs these scripts as `hivemind`, which owns their
-    # schema, so each DROP FUNCTION succeeds and the plpython3u CREATE is refused.
     for script in ADMIN_SQL_SCRIPTS:
         with open(os.path.join(SQL_SCRIPTS_DIR, script), encoding="utf-8") as handle:
             _psql(

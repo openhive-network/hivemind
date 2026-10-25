@@ -17,6 +17,7 @@
 # Options:
 #   --postgres-url=URL    PostgreSQL connection URL (required)
 #   --admin-url=URL       Admin PostgreSQL URL for plpython3u scripts (optional, defaults to haf_admin)
+#   --skip-admin-scripts  Do not load the plpython3u scripts (the caller installs them as a superuser)
 #   --verify              Verify functions exist after reload
 #   --help                Show this help message
 #
@@ -34,6 +35,7 @@ print_help() {
     echo "OPTIONS:"
     echo "  --postgres-url=URL    PostgreSQL connection URL (required)"
     echo "  --admin-url=URL       Admin PostgreSQL URL (optional)"
+    echo "  --skip-admin-scripts  Do not load the plpython3u scripts"
     echo "  --verify              Verify functions exist after reload"
     echo "  --help                Show this help message"
     echo
@@ -41,6 +43,7 @@ print_help() {
 
 POSTGRES_URL=""
 ADMIN_URL=""
+SKIP_ADMIN_SCRIPTS=false
 VERIFY=false
 
 while [ $# -gt 0 ]; do
@@ -50,6 +53,9 @@ while [ $# -gt 0 ]; do
             ;;
         --admin-url=*)
             ADMIN_URL="${1#*=}"
+            ;;
+        --skip-admin-scripts)
+            SKIP_ADMIN_SCRIPTS=true
             ;;
         --verify)
             VERIFY=true
@@ -81,6 +87,15 @@ fi
 SQL_SCRIPTS_DIR="$REPO_ROOT/hive/db/sql_scripts"
 LOAD_ORDER="$SQL_SCRIPTS_DIR/postgrest/load_order.sql"
 
+# endpoints/endpoint_schema.sql reads custom.swagger_url; set it to the value
+# hive/db/db_state.py sets before installing the runtime code.
+SWAGGER_URL=$(sed -n "s/^SWAGGER_URL = '\(.*\)'$/\1/p" "$REPO_ROOT/hive/conf.py")
+if [ -z "$SWAGGER_URL" ]; then
+    echo "ERROR: cannot read SWAGGER_URL from hive/conf.py"
+    exit 1
+fi
+SET_SWAGGER_URL="SET custom.swagger_url = '${SWAGGER_URL//\'/\'\'}'"
+
 echo "=== Reloading PostgREST SQL functions ==="
 echo "PostgreSQL URL: ${POSTGRES_URL%%@*}@..."
 echo "SQL scripts dir: $SQL_SCRIPTS_DIR"
@@ -98,21 +113,24 @@ load_sql() {
     local script="$2"
     local script_path="$SQL_SCRIPTS_DIR/$script"
 
-    if [ -f "$script_path" ]; then
-        echo "  Loading: $script"
-        if ! psql "$url" -v ON_ERROR_STOP=on -f "$script_path"; then
-            echo "    WARNING: Error loading $script (may be expected for existing objects)"
-        fi
-    else
-        echo "  WARNING: Script not found: $script"
+    if [ ! -f "$script_path" ]; then
+        echo "ERROR: Script not found: $script"
+        exit 1
+    fi
+    echo "  Loading: $script"
+    if ! psql "$url" -v ON_ERROR_STOP=on -c "$SET_SWAGGER_URL" -f "$script_path"; then
+        echo "ERROR: Failed to load $script"
+        exit 1
     fi
 }
 
 # First, execute admin-level scripts (plpython3u)
 # These are defined in setup_db() in schema.py
-echo ""
-echo "=== Installing admin-level scripts ==="
-load_sql "$ADMIN_URL" "postgrest/utilities/preprocess_search_query.sql"
+if [ "$SKIP_ADMIN_SCRIPTS" = false ]; then
+    echo ""
+    echo "=== Installing admin-level scripts ==="
+    load_sql "$ADMIN_URL" "postgrest/utilities/preprocess_search_query.sql"
+fi
 
 # Load PostgREST scripts in manifest order
 # This ensures proper dependency resolution
