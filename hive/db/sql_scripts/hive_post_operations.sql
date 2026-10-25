@@ -238,7 +238,6 @@ BEGIN
                     s.depth,
                     (s.composite).community_id,
                     s.category_id,
-                    s.root_id,
                     (s.composite).is_post_muted,
                     s.is_valid,
                     s.author_id,
@@ -259,7 +258,6 @@ BEGIN
                              hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,
                              0 AS parent_id, 0 AS depth,
                              (SELECT hcg.id FROM hivemind_app.hive_category_data hcg WHERE hcg.category = _parent_permlink) AS category_id,
-                             0 as root_id, -- will use id as root one if no parent
                              true AS is_valid,
                              ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
                              _date AS updated_at,
@@ -274,18 +272,26 @@ BEGIN
                          WHERE ha.name = _author and hpd.permlink = _permlink
                      ) s
             ), -- posts_data_to_insert
+                -- A root post is its own root: take its id from the sequence here, as
+                -- the column default would (once per row, edits included), so root_id
+                -- can be set in the same INSERT.
+                new_post_id AS MATERIALIZED (
+                    SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id
+                    FROM posts_data_to_insert
+                ),
                 inserted_post AS MATERIALIZED (
                     INSERT INTO hivemind_app.hive_posts as hp
-                        (parent_id, depth, community_id, category_id,
+                        (id, parent_id, depth, community_id, category_id,
                          root_id, is_muted, is_valid,
                          author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
                          active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons) -- removed tagsids
                         SELECT
+                            npi.id,
                             pdi.parent_id,
                             pdi.depth,
                             pdi.community_id,
                             pdi.category_id,
-                            pdi.root_id,
+                            npi.id,
                             pdi.is_post_muted,
                             pdi.is_valid,
                             pdi.author_id,
@@ -302,6 +308,7 @@ BEGIN
                             pdi.block_num_created,
                             pdi.post_muted_reasons
                         FROM posts_data_to_insert as pdi
+                        CROSS JOIN new_post_id npi
                         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
                             --- During post update it is disallowed to change: parent-post, category, community-id
                             --- then also depth, is_valid and is_post_muted is impossible to change
@@ -485,18 +492,26 @@ BEGIN
     FROM with_muting wm;
 
     RETURN QUERY
-    WITH inserted AS (
+    WITH new_posts AS MATERIALIZED (
+        -- A root post is its own root: take its id from the sequence here, in
+        -- seq_id order and once per row (edits included) as the column default
+        -- would, so root_id can be set in the same INSERT.
+        SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id, pb.*
+        FROM (SELECT * FROM hivemind_app._post_batch ORDER BY seq_id) pb
+    ),
+    inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
-            (parent_id, depth, community_id, category_id,
+            (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
              active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
         SELECT
+            wm.id,
             0, -- parent_id
             0, -- depth
             wm.community_id,
             wm.category_id,
-            0, -- root_id (will use id as root)
+            wm.id, -- root_id
             wm.is_muted,
             TRUE, -- is_valid
             wm.author_id,
@@ -512,7 +527,7 @@ BEGIN
             wm.block_num,
             wm.block_num, -- block_num_created
             wm.muted_reasons
-        FROM hivemind_app._post_batch wm
+        FROM new_posts wm
         ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,

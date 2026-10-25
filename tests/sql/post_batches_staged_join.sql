@@ -2,7 +2,9 @@
 -- copies of their implementation before the resolved rows moved to _post_batch and
 -- deleted_tags stopped being joined (pg_temp.old_*), on the same seeded posts and ops:
 -- the result rows of every wave, the hive_posts rows written (ids included) and the
--- post tags must be identical. Seeds its own accounts, communities, posts
+-- post tags must be identical. The old root batch wrote root_id = 0, which finalization
+-- (update_hive_posts_root_id) turned into the post's id; root_id is compared as that
+-- leaves it, and the current root batch must write it at insert. Seeds its own accounts, communities, posts
 -- and ops in a transaction it rolls back, so it runs on any installed hivemind schema,
 -- including an empty chain:
 --
@@ -493,7 +495,8 @@ BEGIN
   RETURN jsonb_build_object(
     'results', _results,
     'posts', (SELECT jsonb_agg(jsonb_build_object(
-                'id', hp.id, 'root_id', hp.root_id, 'parent_id', hp.parent_id, 'author_id', hp.author_id,
+                'id', hp.id, 'root_id', CASE WHEN hp.root_id = 0 AND hp.depth = 0 THEN hp.id ELSE hp.root_id END,
+                'parent_id', hp.parent_id, 'author_id', hp.author_id,
                 'permlink_id', hp.permlink_id, 'category_id', hp.category_id, 'community_id', hp.community_id,
                 'created_at', hp.created_at, 'updated_at', hp.updated_at, 'active', hp.active,
                 'payout_at', hp.payout_at, 'cashout_time', hp.cashout_time, 'depth', hp.depth,
@@ -507,6 +510,10 @@ BEGIN
              FROM hivemind_app.hive_post_tags hpt
              JOIN hivemind_app.hive_tag_data htd ON htd.id = hpt.tag_id
              WHERE htd.tag LIKE 'pb-%'),
+    'unrooted_new_roots', (SELECT count(*)
+              FROM jsonb_array_elements(_results) r
+              JOIN hivemind_app.hive_posts hp ON hp.id = (r->>'id')::INT
+              WHERE r->>'wave' = '0' AND (r->>'is_new_post')::BOOLEAN AND hp.root_id <> hp.id),
     'seq_after', (SELECT last_value FROM hivemind_app.hive_posts_id_seq));
 END
 $$;
@@ -546,6 +553,13 @@ BEGIN
   IF (SELECT count(*) FROM jsonb_array_elements(_new->'tags') t WHERE t->>1 LIKE 'pb-u%') = 0
      OR (SELECT count(*) FROM jsonb_array_elements(_new->'tags') t WHERE t->>1 LIKE 'pb-t%') = 0 THEN
     RAISE EXCEPTION 'setup: expected post tags from both tag passes: %', left((_new->'tags')::TEXT, 500);
+  END IF;
+
+  IF (_old->>'unrooted_new_roots')::INT = 0 THEN
+    RAISE EXCEPTION 'setup: expected the previous root batch to leave root_id = 0 on new roots';
+  END IF;
+  IF (_new->>'unrooted_new_roots')::INT <> 0 THEN
+    RAISE EXCEPTION '% new root posts were inserted with root_id != id', _new->>'unrooted_new_roots';
   END IF;
 
   FOREACH _key IN ARRAY ARRAY['results', 'posts', 'tags'] LOOP

@@ -43,7 +43,6 @@ class DbState:
     _original_synchronous_commit_mode = None
     _original_fsync = None
     _original_full_page_writes = None
-    _rshares_recalculated = False
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
     _initial_sync = None  # Cached: True until the first finalization commits last_completed_block
 
@@ -462,6 +461,11 @@ class DbState:
             # with-indexes processing time (measurements in #339). It is also
             # only *safe* here — a PostgreSQL crash truncates UNLOGGED tables,
             # acceptable solely when the data can be rebuilt from scratch.
+            # Against LOGGED from the start (5M fixture, wal_level = minimal,
+            # synchronous_commit off; two A/B pairs, one run concurrently): the
+            # batches took 2,059s vs 2,114s, the votes phase 14% and the flush
+            # 7.5% longer when LOGGED, the other phases within +-4%, while the
+            # conversion back costs 5.5s (#415).
 
             # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
             # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
@@ -547,25 +551,36 @@ class DbState:
 
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block) -> None:
+        """The hive_posts writes of finalization, on one connection, one after another.
+
+        Two long UPDATEs of hive_posts in parallel would wait on each other's row
+        locks for the length of the longer one, or deadlock; serialized, each sees
+        the other's committed rows, and they write disjoint columns.
+        """
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
-            # UPDATE: `children`
+            # UPDATE: vote aggregates and `children`, in one pass.
             # Only the initial-massive full recompute runs here: it is idempotent,
             # so it is safe to repeat if finalization is interrupted before the
-            # completion marker commits. The ranged variant applies *deltas* and
-            # must commit exactly once — it runs inside the completion-marker
-            # transaction instead (_finalize_completion_marker).
+            # completion marker commits. Catch-ups keep the vote aggregates up to
+            # date per batch (update_posts_rshares), and their ranged children update
+            # applies *deltas*, so it must commit exactly once — it runs inside the
+            # completion-marker transaction instead (_finalize_completion_marker).
             if massive_sync_preconditions:
                 time_start = perf_counter()
                 cls._execute_query_with_modified_work_mem(
-                    db=db_mgr.db, sql=f"SELECT {SCHEMA_NAME}.update_all_hive_posts_children_count()"
+                    db=db_mgr.db, sql=f"SELECT {SCHEMA_NAME}.recalculate_all_posts_votes_and_children()"
                 )
-                log.info("[MASSIVE] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
+                log.info(
+                    "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs", perf_counter() - time_start
+                )
 
             # UPDATE: `root_id`
-            # Update root_id for all root posts (depth=0 posts have root_id temporarily set to 0 on INSERT)
+            # Root posts are inserted with root_id = id and comments take their
+            # parent's, so this only repairs root posts written with the former
+            # root_id = 0 placeholder (a sync resumed across that change). It finds
+            # them through hive_posts_root_id_id_idx, so it costs nothing otherwise.
             time_start = perf_counter()
             if massive_sync_preconditions:
-                # Initial massive sync: update ALL root posts without block range restriction
                 sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id(NULL, NULL);"
             else:
                 sql = (
@@ -573,6 +588,9 @@ class DbState:
                 )
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+
+        if massive_sync_preconditions:
+            cls._finish_muted_parents(db)
 
     @classmethod
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block) -> None:
@@ -660,14 +678,6 @@ class DbState:
                     log.warning("Ignoring ROLLBACK failure while aborting finalization", exc_info=True)
                 raise
             log.info("[MASSIVE] finalization completion marker committed in %.4fs", perf_counter() - time_start)
-
-    @classmethod
-    def _finish_posts_rshares(cls, db) -> None:
-        with AutoDbDisposer(db, "finish_posts_rshares") as db_mgr:
-            time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.recalculate_all_posts_rshares();"
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] recalculate_all_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_notification_cache(cls, db) -> None:
@@ -826,27 +836,19 @@ class DbState:
 
         log.info("#############################################################################")
 
-        if cls._interrupted("rshares recalculation"):
-            return False
-
-        if massive_sync_preconditions and not cls._rshares_recalculated:
-            # Run rshares recalculation first (creates ~54M dead tuples on hive_posts).
-            # Must complete before Part 0 so update_all_hive_posts_children_count doesn't
-            # scan a bloated table 256 times in a loop. Only needs to run once per initial
-            # massive sync — small gaps on restart don't need full recalculation since live
-            # sync updates rshares incrementally per block.
-            cls._finish_posts_rshares(cls.db())
-
-            # Vacuum hive_posts to clean dead tuples before Part 0 scans it. Plain: the
-            # freed space lets Part 0's updates stay on their pages (a compacted table made
-            # update_all_hive_posts_children_count 4x slower on the 5M fixture), and
-            # Part 0 rewrites the rows again anyway, so hive_posts is compacted after it.
-            cls.vacuum_tables_in_threads(plain=[f"{SCHEMA_NAME}.hive_posts"])
-            cls._rshares_recalculated = True
-
         if cls._interrupted("Part 0 fills"):
             return False
 
+        # Dependency graph (A <- B: B reads what A writes), which the parts follow:
+        #   hive_posts: vote aggregates + children, root_id repair, muted parents
+        #       (one thread, see _finish_hive_posts) <- vote_notifications of the
+        #       initial path, which scores by vote_rshares/abs_rshares
+        #   feed cache, payout_stats_view, communities rank, BM25 index: read no
+        #       column a finalization task writes, so they run beside hive_posts
+        #   notification_cache, vote_notifications <- reputation scores
+        #   every task <- completion marker
+        # Part 0 is everything without a predecessor; its critical path is the
+        # hive_posts thread.
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             (
@@ -859,7 +861,6 @@ class DbState:
             methods += [
                 ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
                 ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
-                ('muted_parents', cls._finish_muted_parents, [cls.db()]),
             ]
         else:
             # The initial path backfills vote notifications in Part 1; short
@@ -872,8 +873,7 @@ class DbState:
                 )
             )
         # BM25 index creation is deferred from the index phase to here, running in
-        # parallel with the fills above. Takes ~31min but is hidden inside Part 0
-        # which takes ~48min, eliminating it from the critical path.
+        # parallel with the fills above, off their critical path.
         methods.append(('bm25_index', cls._restore_bm25_index, [cls.db()]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
@@ -1033,9 +1033,9 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
                 return True
 
             if is_initial_massive:
-                # The rshares recalculation and Part 0 each rewrite most of hive_posts; a
-                # plain vacuum would leave it ~47% larger (5M fixture), so compact it once,
-                # after its last write, then freeze it since the rewrite discards the freeze.
+                # The vote/children recompute rewrites most of hive_posts, so compact it
+                # once, after its last write, then freeze it since the rewrite discards
+                # the freeze.
                 hive_posts = f"{SCHEMA_NAME}.hive_posts"
                 cls.vacuum_tables_in_threads(
                     frozen=[t for t in cls._finalization_written_tables() if t != hive_posts], compacted=[hive_posts]

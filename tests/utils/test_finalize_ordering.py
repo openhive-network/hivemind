@@ -13,7 +13,6 @@ from hive.db.db_state import DbState
 
 BASE = {
     'db': MagicMock(return_value=MagicMock()),
-    '_finish_posts_rshares': None,
     'vacuum_tables_in_threads': None,
     '_finish_reputation_notification_scores': None,
 }
@@ -38,7 +37,6 @@ def _run(massive_sync_preconditions, allowed_continue_checks=None):
     def can_continue():
         return allowed_continue_checks is None or next(counter) < allowed_continue_checks
 
-    DbState._rshares_recalculated = False
     patches = {
         k: (v if v is not None else staticmethod(lambda *a, _name=k, **kw: calls.append((_name,))))
         for k, v in BASE.items()
@@ -63,6 +61,15 @@ def test_marker_is_last_write_initial_path():
         assert 'blocks_consistency_flag' not in names, "marker must not run as a parallel task"
 
 
+def test_hive_posts_writers_share_one_task():
+    """Concurrent UPDATEs of hive_posts would wait on each other's row locks; one Part 0 task owns them all."""
+    _, calls = _run(massive_sync_preconditions=True)
+    part0 = next(c[1] for c in calls if c[0] == 'parallel')
+    assert 'hive_posts' in part0
+    assert 'muted_parents' not in part0
+    assert ('vacuum_tables_in_threads',) not in calls, "no vacuum between hive_posts passes"
+
+
 def test_marker_is_last_write_non_initial_path():
     completed, calls = _run(massive_sync_preconditions=False)
     assert completed is True
@@ -77,7 +84,7 @@ def test_interrupt_before_fills_skips_everything():
 
 
 def test_interrupt_before_marker_leaves_marker_unset():
-    completed, calls = _run(massive_sync_preconditions=True, allowed_continue_checks=3)
+    completed, calls = _run(massive_sync_preconditions=True, allowed_continue_checks=2)
     assert completed is False
     assert any(c[0] == 'parallel' for c in calls), "fills should have run before the interrupt"
     assert not any(c[0] == 'marker' for c in calls), "marker must not be set on an interrupted finalization"
