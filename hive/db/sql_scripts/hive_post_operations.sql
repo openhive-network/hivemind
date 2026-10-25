@@ -436,7 +436,7 @@ DECLARE
 BEGIN
     --- Permlinks and categories are assumed to already be inserted by the caller.
 
-    TRUNCATE hivemind_app._post_batch;
+    DELETE FROM hivemind_app._post_batch;
 
     INSERT INTO hivemind_app._post_batch
         (seq_id, author_id, permlink_id, category_id, community_id, is_muted, muted_reasons,
@@ -650,7 +650,7 @@ DECLARE
 BEGIN
     --- Permlinks are assumed to already be inserted by the caller.
 
-    TRUNCATE hivemind_app._post_batch;
+    DELETE FROM hivemind_app._post_batch;
 
     INSERT INTO hivemind_app._post_batch
         (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id,

@@ -43,6 +43,11 @@ class Blocks:
     _current_block_date = None
     _last_safe_cashout_block = 0
     _vote_workers = 1
+    # The staging functions clear their tables with DELETE; every this many calls the
+    # dead rows are dropped by one TRUNCATE of all of them (see reset_staging_tables).
+    # Measured flat between 5 and 20 batches.
+    _STAGING_RESET_INTERVAL = 10
+    _calls_since_staging_reset = 0
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -352,6 +357,10 @@ class Blocks:
         DbState.run_boundary_vacuums()
         phase_times['vacuum'] = perf_counter() - t0
 
+        t0 = perf_counter()
+        cls._reset_staging_tables_if_due(db)
+        phase_times['staging_reset'] = perf_counter() - t0
+
         total = sum(phase_times.values())
         log.info(
             "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s",
@@ -435,6 +444,7 @@ class Blocks:
         log.info("[PROCESS LIVE SQL] Tables updating in live synchronization")
         cls.on_live_blocks_processed(first_block, last_block)
         cls._periodic_actions_by_num(last_block)
+        cls._reset_staging_tables_if_due(db)
 
         # Commit the entire block atomically
         db.query_no_return("COMMIT")
@@ -445,6 +455,15 @@ class Blocks:
             last_block,
             OPSM.stop(time_start),
         )
+
+    @classmethod
+    def _reset_staging_tables_if_due(cls, db) -> None:
+        """Truncate the staging tables once every _STAGING_RESET_INTERVAL calls (in the caller's transaction, if one is open)."""
+        cls._calls_since_staging_reset += 1
+        if cls._calls_since_staging_reset < cls._STAGING_RESET_INTERVAL:
+            return
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.reset_staging_tables()")
+        cls._calls_since_staging_reset = 0
 
     @classmethod
     def _process_post_results_for_cache(cls, post_results):
