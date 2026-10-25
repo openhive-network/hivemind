@@ -12,12 +12,18 @@ chain answers with (the testnet's genesis accounts exist, posts and communities
 don't), not chain data.
 
 Then runs the psql scripts in SQL_TESTS against the same database: they seed the
-data they need in a transaction they roll back, and fail by raising.
+data they need in a transaction they roll back, and fail by raising. A script still
+running after SQL_TEST_TIMEOUT_S fails: its backend's wait and blockers are reported
+and the backend is terminated, so its locks don't hold up the scripts after it.
+
+Each case's progress line and api-smoke.tsv row are flushed as it completes, so a run
+killed from outside keeps the cases before the one it was killed in.
 
 Writes OUT_DIR/api-smoke.xml (one junit case per call or script) and exits
 non-zero when any fails. To check another method or endpoint, add it to CHECKS.
 """
 
+import io
 import json
 import os
 import socket
@@ -30,6 +36,9 @@ from typing import Any
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STARTUP_TIMEOUT_S = 60
+HTTP_TIMEOUT_S = 30
+SQL_TEST_TIMEOUT_S = 180
+DIAGNOSE_TIMEOUT_S = 30
 
 
 def rpc(method, params):
@@ -210,13 +219,67 @@ SQL_TESTS = [
 ]
 
 
-def run_sql_test(path):
-    proc = subprocess.run(
-        ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-d", os.environ["HIVEMIND_TEST_USER_URL"], "-f", path],
-        capture_output=True,
-        text=True,
-    )
+def run_sql_test(path: str, name: str) -> tuple[int | None, str]:
+    """Run one SQL test; the exit code is None when it timed out."""
+    app = f"api-smoke {name}"
+    try:
+        proc = subprocess.run(
+            ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-d", os.environ["HIVEMIND_TEST_USER_URL"], "-f", path],
+            capture_output=True,
+            text=True,
+            env=dict(os.environ, PGAPPNAME=app),
+            timeout=SQL_TEST_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired as err:
+        partial = "".join(_text(part) for part in (err.stdout, err.stderr))
+        return None, f"{partial}timed out after {SQL_TEST_TIMEOUT_S}s; {_release_backend(app)}"
     return proc.returncode, proc.stdout + proc.stderr
+
+
+def _text(output: str | bytes | None) -> str:
+    if isinstance(output, bytes):
+        return output.decode("utf-8", "replace")
+    return output or ""
+
+
+# Killing psql leaves its backend waiting until the server next talks to the client,
+# still holding the test's locks; terminate it (the hivemind role may signal its own
+# backends) after recording what it waited on and who blocked it.
+_RELEASE_SQL = """
+SELECT format('backend %s %s, wait %s/%s, blocked by %s; statement: %s',
+         a.pid, a.state, a.wait_event_type, a.wait_event,
+         coalesce((SELECT string_agg(format('pid %s (%s, %s, %s): %s', b.pid, b.usename, b.application_name,
+                                            b.state, left(b.query, 200)), '; ')
+                   FROM pg_stat_activity b WHERE b.pid = ANY (pg_blocking_pids(a.pid))), 'nobody'),
+         left(a.query, 300)),
+       pg_terminate_backend(a.pid)
+FROM pg_stat_activity a
+WHERE a.application_name = :'app' AND a.pid <> pg_backend_pid()
+"""
+
+
+def _release_backend(app: str) -> str:
+    try:
+        proc = subprocess.run(
+            [
+                "psql",
+                "-X",
+                "-At",
+                "-F",
+                " terminated: ",
+                "-v",
+                f"app={app}",
+                "-d",
+                os.environ["HIVEMIND_TEST_USER_URL"],
+            ],
+            input=_RELEASE_SQL,
+            capture_output=True,
+            text=True,
+            timeout=DIAGNOSE_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        return f"diagnosing its backend timed out after {DIAGNOSE_TIMEOUT_S}s"
+    return (proc.stdout + proc.stderr).strip() or "its backend was gone"
 
 
 def free_port() -> int:
@@ -231,7 +294,7 @@ def call(base: str, request: tuple[str, str, dict[str, Any] | None]) -> tuple[in
     data = None if payload is None else json.dumps(payload).encode()
     req = urllib.request.Request(base + path, data=data, method=method, headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT_S) as resp:
             status, raw = resp.status, resp.read()
     except urllib.error.HTTPError as err:
         status, raw = err.code, err.read()
@@ -271,17 +334,21 @@ def main(out):
     )
     cases = os.path.join(out, "api-smoke.tsv")
     failed = 0
-    with open(log_path, "w") as log, open(cases, "w") as tsv:
+    with open(log_path, "w") as log, open(cases, "w", buffering=1) as tsv:
         proc = subprocess.Popen(["postgrest"], env=env, stdout=log, stderr=subprocess.STDOUT)
         try:
             wait_until_serving(base, proc, log_path)
             for name, request, check in CHECKS:
                 t0 = time.monotonic()
-                status, body, text = call(base, request)
                 try:
+                    status, body, text = call(base, request)
                     check(status, body)
                     verdict, message = "pass", ""
                     print(f"ok   {name}")
+                except OSError as err:
+                    failed += 1
+                    verdict, message = "fail", f"request failed: {err}"
+                    print(f"FAIL {name}: {message}")
                 except AssertionError as err:
                     failed += 1
                     verdict, message = "fail", str(err).replace("\t", " ").replace("\n", " ")[:300]
@@ -289,14 +356,15 @@ def main(out):
                 tsv.write(f"case\t{name}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
             for script in SQL_TESTS:
                 t0 = time.monotonic()
-                rc, output = run_sql_test(os.path.join(HERE, "..", script))
+                print(f"run  sql/{script}")
+                rc, output = run_sql_test(os.path.join(HERE, "..", script), f"sql/{script}")
                 if rc == 0:
                     verdict, message = "pass", ""
                     print(f"ok   sql/{script}\n{output}")
                 else:
                     failed += 1
-                    verdict, message = "fail", output.replace("\t", " ").replace("\n", " ")[-300:]
-                    print(f"FAIL sql/{script}: exit {rc}\n{output[-2000:]}")
+                    verdict, message = "fail", output.replace("\t", " ").replace("\n", " ")[-500:]
+                    print(f"FAIL sql/{script}: {'timed out' if rc is None else f'exit {rc}'}\n{output[-2000:]}")
                 tsv.write(f"case\tsql/{script}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
         finally:
             proc.terminate()
@@ -316,4 +384,6 @@ def main(out):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         sys.exit(f"usage: {sys.argv[0]} OUT_DIR")
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(line_buffering=True)
     sys.exit(main(sys.argv[1]))
