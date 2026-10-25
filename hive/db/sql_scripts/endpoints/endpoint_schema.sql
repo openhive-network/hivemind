@@ -744,6 +744,82 @@ declare
             ]
           }
         }
+      },
+      "hivemind_endpoints.discussion": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A thread as returned by `bridge.get_discussion`: each of its posts keyed by `author/permlink`,\nthe post itself included; each post''s `replies` names its direct replies in the thread\n",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/hivemind_endpoints.bridge_post"
+        }
+      },
+      "hivemind_endpoints.follow_list_entry": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "An account of a list as returned by `bridge.get_follow_list`",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "blacklist_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "muted_list_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_follow_list_entry": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/hivemind_endpoints.follow_list_entry"
+        }
+      },
+      "hivemind_endpoints.post_header": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "A post''s header as returned by `bridge.get_post_header`",
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "permlink": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "depth": {
+            "type": "integer"
+          }
+        }
+      },
+      "hivemind_endpoints.unread_notifications": {
+        "type": "object",
+        "x-sql-datatype": "JSONB",
+        "description": "An account''s unread notification count as returned by `bridge.unread_notifications`",
+        "properties": {
+          "lastread": {
+            "type": "string",
+            "description": "When the account last marked its notifications read, `YYYY-MM-DD HH24:MI:SS`"
+          },
+          "unread": {
+            "type": "integer",
+            "description": "Number of notifications of the last 90 days after `lastread`"
+          }
+        }
+      },
+      "hivemind_endpoints.array_of_string": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     }
   },
@@ -1571,6 +1647,173 @@ declare
         }
       }
     },
+    "/accounts/{account-name}/notifications/unread": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Count an account''s unread notifications",
+        "description": "Returns when the account last marked its notifications read and how many notifications of the\nlast 90 days it has had since, the same object as `bridge.unread_notifications`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_unread_notifications(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/notifications/unread?min-score=25''`\n",
+        "operationId": "hivemind_endpoints.get_account_unread_notifications",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose notifications are counted"
+          },
+          {
+            "in": "query",
+            "name": "min-score",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Minimum notification score, 0 to 100, 25 by default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The unread notification count\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.unread_notifications",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/follow-lists/{type}": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get one of an account''s follow lists",
+        "description": "Returns one of the account''s lists, the same list as `bridge.get_follow_list` with the account\nas `observer`, in alphabetical order:\n* `blacklisted`: the accounts it blacklists;\n* `muted`: the accounts it mutes;\n* `follow_blacklist`: the accounts whose blacklists it follows, with their list descriptions;\n* `follow_muted`: the accounts whose mute lists it follows, with their list descriptions.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_follow_list(''alice'', ''muted'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/follow-lists/muted''`\n",
+        "operationId": "hivemind_endpoints.get_account_follow_list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose list is returned"
+          },
+          {
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "`blacklisted`, `muted`, `follow_blacklist` or `follow_muted`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts of the list\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_follow_list_entry",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, unsupported type, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/follows-any-lists": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Tell whether an account follows any blacklist",
+        "description": "Returns `true` when the account follows the blacklist of some account, otherwise `false`,\nthe same value as `bridge.does_user_follow_any_lists` with the account as `observer`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_follows_any_lists(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/follows-any-lists''`\n",
+        "operationId": "hivemind_endpoints.get_account_follows_any_lists",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account to check"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Whether the account follows any blacklist\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/accounts/{account-name}/subscriptions": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get the communities an account subscribes to",
+        "description": "Returns the communities the account subscribes to, the same list as `bridge.list_all_subscriptions`:\nfor each one its name, title, the account''s role and the account''s title in it, the\ncommunities where the account has the highest role first.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_subscriptions(''alice'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/subscriptions''`\n",
+        "operationId": "hivemind_endpoints.get_account_subscriptions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account-name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Account whose subscriptions are listed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account''s subscriptions, as `[name, title, role, role title]`\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_string_tuple",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown account, or an invalid parameter"
+          }
+        }
+      }
+    },
     "/blog/reblogs": {
       "get": {
         "tags": [
@@ -2092,6 +2335,154 @@ declare
           },
           "400": {
             "description": "Unknown post or unknown start voter"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}/discussion": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a post''s whole discussion",
+        "description": "Returns the whole thread of the post in one response, the same object as `bridge.get_discussion`:\nevery post of the thread, the post itself included, keyed by `author/permlink`. Each post is the\nsame object as in `bridge.get_discussion`; its `replies` field names its direct replies, in the\norder they were made, so the tree is rebuilt from the post''s own entry down.\n\nThe response is not paged by the posts-per-call limit. Like `bridge.get_discussion`, it holds\nat most the first 4000 posts of a thread, in the order they were made; the `replies` of a cut\nthread name only the posts the response holds.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_discussion(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/discussion''`\n",
+        "operationId": "hivemind_endpoints.get_post_discussion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The discussion\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.discussion",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown post, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}/header": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get a post''s header",
+        "description": "Returns the author, permlink, category and depth of a post or comment, the same object as\n`bridge.get_post_header`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_header(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/header''`\n",
+        "operationId": "hivemind_endpoints.get_post_header",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post''s header\n\n* Returns `JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.post_header",
+                  "x-sql-datatype": "JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown or deleted post, or an invalid parameter"
+          }
+        }
+      }
+    },
+    "/posts/{author}/{permlink}/reblogged-by": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get the accounts that reblogged a post",
+        "description": "Returns the accounts that reblogged the post, the same list as `condenser_api.get_reblogged_by`,\nin alphabetical order.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_reblogged_by(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/reblogged-by''`\n",
+        "operationId": "hivemind_endpoints.get_post_reblogged_by",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts that reblogged the post\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_string",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown post, or an invalid parameter"
           }
         }
       }

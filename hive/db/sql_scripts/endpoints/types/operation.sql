@@ -661,3 +661,72 @@ hivemind_endpoints.array_of_string_tuple:
     items:
       type: ["string", "null"]
  */
+
+/** openapi:components:schemas
+hivemind_endpoints.discussion:
+  type: object
+  x-sql-datatype: JSONB
+  description: |
+    A thread as returned by `bridge.get_discussion`: each of its posts keyed by `author/permlink`,
+    the post itself included; each post''s `replies` names its direct replies in the thread
+  additionalProperties:
+    $ref: '#/components/schemas/hivemind_endpoints.bridge_post'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.follow_list_entry:
+  type: object
+  x-sql-datatype: JSONB
+  description: An account of a list as returned by `bridge.get_follow_list`
+  properties:
+    name:
+      type: string
+    blacklist_description:
+      type: ["string", "null"]
+    muted_list_description:
+      type: ["string", "null"]
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_follow_list_entry:
+  type: array
+  items:
+    $ref: '#/components/schemas/hivemind_endpoints.follow_list_entry'
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.post_header:
+  type: object
+  x-sql-datatype: JSONB
+  description: A post''s header as returned by `bridge.get_post_header`
+  properties:
+    author:
+      type: string
+    permlink:
+      type: string
+    category:
+      type: string
+    depth:
+      type: integer
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.unread_notifications:
+  type: object
+  x-sql-datatype: JSONB
+  description: An account''s unread notification count as returned by `bridge.unread_notifications`
+  properties:
+    lastread:
+      type: string
+      description: When the account last marked its notifications read, `YYYY-MM-DD HH24:MI:SS`
+    unread:
+      type: integer
+      description: Number of notifications of the last 90 days after `lastread`
+ */
+
+/** openapi:components:schemas
+hivemind_endpoints.array_of_string:
+  type: array
+  items:
+    type: string
+ */
