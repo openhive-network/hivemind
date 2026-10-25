@@ -448,6 +448,15 @@ JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = 'pb-r' || i
 JOIN hivemind_app.hive_posts hp ON hp.permlink_id = hpd.id
 ORDER BY i;
 
+-- The seeded rows are this transaction's, so an autovacuum running meanwhile counts
+-- none of them: it records these tables' grown page counts with ~0 live tuples, and the
+-- batch functions, replanned on that, scan them in nested loops for many minutes.
+-- ANALYZE here counts this transaction's rows, and the lock it holds until the rollback
+-- makes autovacuum skip these tables.
+ANALYZE hivemind_app.hive_accounts, hivemind_app.hive_communities, hivemind_app.hive_roles,
+  hivemind_app.hive_permlink_data, hivemind_app.hive_category_data, hivemind_app.hive_posts,
+  hivemind_app.hive_post_tags, hivemind_app.hive_tag_data;
+
 SELECT set_config('pb.seq', last_value::TEXT, true) FROM hivemind_app.hive_posts_id_seq \gset ignored_
 
 -- Runs the root batch and the comment waves with the _impl functions, from the same
