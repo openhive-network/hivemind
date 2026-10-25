@@ -19,6 +19,9 @@
 #   --admin-url=URL       Admin PostgreSQL URL for plpython3u scripts (optional, defaults to haf_admin)
 #   --skip-admin-scripts  Do not load the plpython3u scripts (the caller installs them as a superuser)
 #   --verify              Verify functions exist after reload
+#   --postgrest-url=URL   PostgREST server already serving this database: wait until its schema
+#                         cache shows the reloaded functions, failing after --postgrest-timeout
+#   --postgrest-timeout=S Seconds to wait for that (default 120)
 #   --help                Show this help message
 #
 
@@ -37,6 +40,8 @@ print_help() {
     echo "  --admin-url=URL       Admin PostgreSQL URL (optional)"
     echo "  --skip-admin-scripts  Do not load the plpython3u scripts"
     echo "  --verify              Verify functions exist after reload"
+    echo "  --postgrest-url=URL   Wait until the PostgREST server at URL serves the reloaded functions"
+    echo "  --postgrest-timeout=S Seconds to wait for that (default 120)"
     echo "  --help                Show this help message"
     echo
 }
@@ -45,6 +50,8 @@ POSTGRES_URL=""
 ADMIN_URL=""
 SKIP_ADMIN_SCRIPTS=false
 VERIFY=false
+POSTGREST_URL=""
+POSTGREST_TIMEOUT=120
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -59,6 +66,12 @@ while [ $# -gt 0 ]; do
             ;;
         --verify)
             VERIFY=true
+            ;;
+        --postgrest-url=*)
+            POSTGREST_URL="${1#*=}"
+            ;;
+        --postgrest-timeout=*)
+            POSTGREST_TIMEOUT="${1#*=}"
             ;;
         --help)
             print_help
@@ -193,6 +206,60 @@ EOF
     else
         echo "OK: Found $OVERLAY_COUNT ranked posts overlay functions"
     fi
+fi
+
+# PostgREST builds its schema cache at startup, so a running server keeps the old
+# function signatures until told to rebuild it (db-channel, default `pgrst`).
+notify_postgrest() {
+    if ! psql "$POSTGRES_URL" -v ON_ERROR_STOP=on -c "NOTIFY pgrst, 'reload schema'"; then
+        echo "ERROR: Failed to notify PostgREST to reload its schema cache"
+        exit 1
+    fi
+}
+
+echo ""
+echo "=== Refreshing the PostgREST schema cache ==="
+if [ -z "$POSTGREST_URL" ]; then
+    notify_postgrest
+else
+    # The cache is rebuilt from one catalog snapshot, so once a function created after
+    # the reload is served, every reloaded function is too.
+    PROBE="hivemind_endpoints.reload_probe_$$_$(date +%s)"
+    PROBE_PATH="$POSTGREST_URL/rpc/${PROBE#hivemind_endpoints.}"
+
+    probe_sql() {
+        if ! psql "$POSTGRES_URL" -v ON_ERROR_STOP=on -c "$1"; then
+            echo "ERROR: Failed to run: $1"
+            exit 1
+        fi
+    }
+
+    # Waits until GET of the probe answers HTTP $1; after the timeout, fails saying PostgREST did not "$2"
+    wait_for_probe() {
+        local expected="$1" what="$2" code="" start
+        start=$(date +%s)
+        while true; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$PROBE_PATH" || true)
+            if [ "$code" = "$expected" ]; then
+                return 0
+            fi
+            if [ $(($(date +%s) - start)) -ge "$POSTGREST_TIMEOUT" ]; then
+                echo "ERROR: PostgREST at $POSTGREST_URL did not $what within ${POSTGREST_TIMEOUT}s (last HTTP status: ${code:-none})"
+                psql "$POSTGRES_URL" -c "DROP FUNCTION IF EXISTS $PROBE()" || true
+                exit 1
+            fi
+            sleep 1
+        done
+    }
+
+    echo "Waiting for PostgREST at $POSTGREST_URL to reload its schema cache..."
+    probe_sql "CREATE FUNCTION $PROBE() RETURNS integer LANGUAGE sql IMMUTABLE AS 'SELECT 1'"
+    notify_postgrest
+    wait_for_probe 200 "reload its schema cache"
+    probe_sql "DROP FUNCTION $PROBE()"
+    notify_postgrest
+    wait_for_probe 404 "drop the reload probe from its schema cache"
+    echo "OK: PostgREST serves the reloaded functions"
 fi
 
 echo ""
