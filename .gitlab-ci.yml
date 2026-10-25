@@ -1041,7 +1041,7 @@ e2e_benchmark_on_postgrest:
     done
     echo "PostgreSQL is ready"
 
-    # If in PostgREST-only mode, reload SQL functions before server starts
+    # If in PostgREST-only mode, reload SQL functions and wait until the server's schema cache has them
     if [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]] || [[ -f "${CI_PROJECT_DIR}/.postgrest_only_mode" ]]; then
       echo ""
       echo "=== PostgREST-Only Mode: Reloading SQL functions ==="
@@ -1060,7 +1060,8 @@ e2e_benchmark_on_postgrest:
       "${CI_PROJECT_DIR}/scripts/ci/reload-postgrest-functions.sh" \
         --postgres-url="$POSTGRES_URL" \
         --admin-url="$ADMIN_URL" \
-        --verify
+        --verify \
+        --postgrest-url="http://docker:${HIVEMIND_PORT}"
       echo "SQL functions reloaded successfully"
       echo ""
     fi
