@@ -110,7 +110,8 @@ CREATE UNLOGGED TABLE hivemind_app._vote_batch (
     rshares     BIGINT,
     is_effective BOOLEAN,
     num_changes INT,
-    block_num   INT
+    block_num   INT,
+    ord         BIGINT NOT NULL   -- merged order: the order hive_votes ids are drawn in
 );
 
 -- hive_votes rows of a vote batch, ids already drawn (prepare_votes_from_staging),
@@ -164,6 +165,28 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._follow_notification_events (
     op_seq        BIGINT NOT NULL
 );
 
+-- The functions below clear their staging tables with DELETE, not TRUNCATE. A TRUNCATE
+-- gives the table a new relfilenode, and dropping the old one's buffers scans the whole
+-- buffer pool (once per committing transaction, and once per relation for a table
+-- truncated again in the same transaction): a fixed cost per call that grows with
+-- shared_buffers, against a few thousand rows to delete. The dead rows are bounded by
+-- this reset, which truncates every staging table in one statement, so one scan, every
+-- few batches (Blocks._reset_staging_tables_if_due).
+CREATE OR REPLACE FUNCTION hivemind_app.reset_staging_tables()
+RETURNS VOID AS $function$
+BEGIN
+    TRUNCATE hivemind_app._ops_staging,
+             hivemind_app._follow_notification_events,
+             hivemind_app._comment_staging,
+             hivemind_app._post_results,
+             hivemind_app._post_batch,
+             hivemind_app._vote_batch,
+             hivemind_app._vote_upsert,
+             hivemind_app._reblog_ops,
+             hivemind_app._reblog_final;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
 
 -- ============================================================================
 -- Helper: safe_parse_jsonb — parse text extracted via ->> back into jsonb
@@ -212,8 +235,8 @@ CREATE OR REPLACE FUNCTION hivemind_app.load_ops_staging(
     _last_block INT
 ) RETURNS VOID AS $function$
 BEGIN
-    TRUNCATE hivemind_app._ops_staging;
-    TRUNCATE hivemind_app._follow_notification_events;
+    DELETE FROM hivemind_app._ops_staging;
+    DELETE FROM hivemind_app._follow_notification_events;
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
     WITH block_dates AS (
@@ -383,7 +406,7 @@ BEGIN
     --   - num_changes = count of effective_comment_vote ops
 
     -- Step 1: Collect and deduplicate vote data
-    TRUNCATE hivemind_app._vote_batch;
+    DELETE FROM hivemind_app._vote_batch;
     INSERT INTO hivemind_app._vote_batch
     WITH vote_ops AS (
         -- Regular votes (type 0)
@@ -467,8 +490,8 @@ BEGIN
         ) n
         JOIN hivemind_app.hive_accounts ha ON ha.name = n.name
     ),
-    -- Row order of _vote_batch decides the order hive_votes ids are drawn in
-    -- (step 2), so keep merged's order whichever side the joins below hash.
+    -- ord decides the order hive_votes ids are drawn in (step 2); numbered before
+    -- the joins below, so it is merged's order whichever side they hash.
     merged_ord AS (
         SELECT row_number() OVER () AS ord, merged.* FROM merged
     )
@@ -484,14 +507,14 @@ BEGIN
         m.rshares,
         m.is_effective,
         m.num_changes,
-        m.block_num
+        m.block_num,
+        m.ord
     FROM merged_ord m
     JOIN account_ids ha_voter ON ha_voter.name = m.voter
-    JOIN account_ids ha_author ON ha_author.name = m.author
-    ORDER BY m.ord;
+    JOIN account_ids ha_author ON ha_author.name = m.author;
 
     -- Step 2: Resolve each vote's post and draw its hive_votes id
-    TRUNCATE hivemind_app._vote_upsert;
+    DELETE FROM hivemind_app._vote_upsert;
     WITH vote_target AS MATERIALIZED (
         -- Many votes in a batch hit the same post: resolve each target post once.
         -- MATERIALIZED, or the planner joins it back to the votes first and
@@ -526,8 +549,9 @@ BEGIN
         -- Use block_num_created (not block_num) because block_num is updated on edits,
         -- which would incorrectly filter out votes cast between creation and edit.
         WHERE vb.block_num >= vt.block_num_created
-        -- Draw ids in _vote_batch order: vote notification counters follow hive_votes.id.
-        ORDER BY vb.ctid
+        -- Draw ids in merged order: vote notification counters follow hive_votes.id.
+        -- Not physical order: rows refilled after a DELETE can land in any page.
+        ORDER BY vb.ord
     )
     -- One id per row, including the rows that will take the ON CONFLICT path:
     -- the sequence ends where an INSERT drawing the column default would leave it.
@@ -620,8 +644,8 @@ BEGIN
     -- Extract reblog custom_json ops from staging (type 18, custom_json_id = 'reblog' or 'follow')
     -- Reblogs come as custom_json with id='follow' or id='reblog' containing ["reblog", {...}]
 
-    TRUNCATE hivemind_app._reblog_ops;
-    TRUNCATE hivemind_app._reblog_final;
+    DELETE FROM hivemind_app._reblog_ops;
+    DELETE FROM hivemind_app._reblog_final;
 
     INSERT INTO hivemind_app._reblog_ops
     WITH raw_ops AS (
@@ -718,6 +742,9 @@ BEGIN
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = d.permlink
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+        -- hive_reblogs ids (and the reblog notification counters that follow them) are
+        -- drawn in _reblog_final's write order; its physical order need not keep it.
+        ORDER BY d.author, d.permlink, d.account
     )
     INSERT INTO hivemind_app.hive_reblogs (blogger_id, post_id, created_at, block_num)
     SELECT blogger_id, post_id, created_at, block_num FROM validated
@@ -725,7 +752,7 @@ BEGIN
 
     GET DIAGNOSTICS _count = ROW_COUNT;
 
-    -- Tables are truncated at start of next call, no drop needed
+    -- Tables are cleared at start of next call, no drop needed
     RETURN _count;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
@@ -1094,9 +1121,9 @@ DECLARE
     _current_pair TEXT;
     _new_post_id INT;
 BEGIN
-    -- Truncate persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
-    TRUNCATE hivemind_app._comment_staging;
-    TRUNCATE hivemind_app._post_results;
+    -- Persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
+    DELETE FROM hivemind_app._comment_staging;
+    DELETE FROM hivemind_app._post_results;
 
     -- Step 1: Collect ineffective delete keys (type 73)
     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
@@ -1752,8 +1779,7 @@ BEGIN
     -- Return all post results
     RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
 
-    -- Tables are truncated at start of next call, no drop needed
-    -- comment_staging is truncated at start of next call
+    -- Tables are cleared at start of next call, no drop needed
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
