@@ -71,6 +71,30 @@ CREATE INDEX _post_results_seq_id_idx ON hivemind_app._post_results (seq_id);
 DROP INDEX IF EXISTS hivemind_app._comment_staging_author_permlink_idx;
 CREATE INDEX _comment_staging_author_permlink_idx ON hivemind_app._comment_staging (author, permlink);
 
+-- Resolved hive_posts rows of one process_root_posts_batch / process_comments_batch call.
+-- The result rows are rebuilt by joining the insert's RETURNING to this table on its
+-- index: joined to a CTE instead, both sides are estimated at 1 row and the join is
+-- planned as a nested loop of two CTE scans, quadratic in the wave size.
+DROP TABLE IF EXISTS hivemind_app._post_batch;
+CREATE UNLOGGED TABLE hivemind_app._post_batch (
+    seq_id           INT NOT NULL,
+    author_id        INT NOT NULL,
+    permlink_id      INT NOT NULL,
+    parent_id        INT,
+    parent_author_id INT,
+    depth            INT,
+    category_id      INT,
+    root_id          INT,
+    community_id     INT,
+    is_valid         BOOLEAN,
+    is_muted         BOOLEAN,
+    muted_reasons    INT,
+    date             TIMESTAMP,
+    block_num        INT,
+    parent_permlink  VARCHAR
+);
+CREATE INDEX _post_batch_author_permlink_idx ON hivemind_app._post_batch (author_id, permlink_id);
+
 
 -- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead)
 DROP TABLE IF EXISTS hivemind_app._vote_batch;

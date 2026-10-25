@@ -429,7 +429,11 @@ DECLARE
 BEGIN
     --- Permlinks and categories are assumed to already be inserted by the caller.
 
-    RETURN QUERY
+    TRUNCATE hivemind_app._post_batch;
+
+    INSERT INTO hivemind_app._post_batch
+        (seq_id, author_id, permlink_id, category_id, community_id, is_muted, muted_reasons,
+         date, block_num, parent_permlink)
     WITH ops AS (
         SELECT t.seq_id, t.author, t.permlink, t.parent_permlink,
                t.date, t.community_support_start_block, t.block_num, t.metadata_tags
@@ -475,8 +479,13 @@ BEGIN
                 ELSE 0
             END AS muted_reasons
         FROM resolved r
-    ),
-    inserted AS (
+    )
+    SELECT wm.seq_id, wm.author_id, wm.permlink_id, wm.category_id, wm.community_id, wm.is_muted,
+           wm.muted_reasons, wm.date, wm.block_num, wm.parent_permlink
+    FROM with_muting wm;
+
+    RETURN QUERY
+    WITH inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
@@ -503,7 +512,7 @@ BEGIN
             wm.block_num,
             wm.block_num, -- block_num_created
             wm.muted_reasons
-        FROM with_muting wm
+        FROM hivemind_app._post_batch wm
         ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,
@@ -536,7 +545,7 @@ BEGIN
         ins.depth,
         ins.muted_reasons
     FROM inserted ins
-    INNER JOIN with_muting wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
+    INNER JOIN hivemind_app._post_batch wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
 END
 $function$;
 
@@ -598,7 +607,9 @@ deleted_tags AS (
 inserted_post_tags AS (
     INSERT INTO hivemind_app.hive_post_tags (post_id, tag_id)
     SELECT r.post_id, r.tag_id FROM resolved r
-    LEFT JOIN deleted_tags dt ON dt.post_id = 0  -- force evaluation of deleted_tags
+    -- force evaluation of deleted_tags; an InitPlan, run once (a join to the CTE
+    -- would rescan it for every row, quadratic in the batch size)
+    WHERE (SELECT count(*) FROM deleted_tags) >= 0
     ON CONFLICT DO NOTHING
     RETURNING post_id
 )
@@ -624,7 +635,11 @@ DECLARE
 BEGIN
     --- Permlinks are assumed to already be inserted by the caller.
 
-    RETURN QUERY
+    TRUNCATE hivemind_app._post_batch;
+
+    INSERT INTO hivemind_app._post_batch
+        (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id,
+         root_id, community_id, is_valid, is_muted, muted_reasons, date, block_num, parent_permlink)
     WITH ops AS (
         SELECT t.seq_id, t.author, t.permlink, t.parent_author, t.parent_permlink,
                t.date, t.community_support_start_block, t.block_num
@@ -698,8 +713,14 @@ BEGIN
                 ], NULL)
             ) AS muted_reasons
         FROM with_community wc
-    ),
-    inserted AS (
+    )
+    SELECT wm.seq_id, wm.author_id, wm.permlink_id, wm.parent_id, wm.parent_author_id, wm.depth,
+           wm.category_id, wm.root_id, wm.community_id, wm.is_valid, wm.is_muted, wm.muted_reasons,
+           wm.date, wm.block_num, wm.parent_permlink
+    FROM with_muting wm;
+
+    RETURN QUERY
+    WITH inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
@@ -726,7 +747,7 @@ BEGIN
             wm.block_num,
             wm.block_num,
             wm.muted_reasons
-        FROM with_muting wm
+        FROM hivemind_app._post_batch wm
         ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,
@@ -759,7 +780,7 @@ BEGIN
         ins.depth,
         ins.muted_reasons
     FROM inserted ins
-    INNER JOIN with_muting wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
+    INNER JOIN hivemind_app._post_batch wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id;
 END
 $function$;
 
@@ -810,8 +831,8 @@ BEGIN
               INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
                   SELECT DISTINCT m.post_id, m.account_id, m.block_num
                   FROM mentions AS m
-                  LEFT JOIN delete_old_mentions AS dom ON dom.id = 0 -- force evaluation
-                  WHERE NOT EXISTS (
+                  WHERE (SELECT count(*) FROM delete_old_mentions) >= 0 -- force evaluation, once
+                    AND NOT EXISTS (
                       SELECT 1 FROM
                       hivemind_app.hive_mentions AS hm
                       WHERE hm.post_id = m.post_id
@@ -871,12 +892,12 @@ BEGIN
                   '', '', ''
               FROM mentions_data AS hm
               LEFT JOIN author_rep AS rep ON rep.author_id = hm.author_id
-              LEFT JOIN insert_mentions AS im ON im.id = 0 -- force evaluation
-              LEFT JOIN delete_old_cache AS doc ON doc.id = 0 -- force evaluation
               LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
               LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
               LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
               WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
+                AND (SELECT count(*) FROM insert_mentions) >= 0 -- force evaluation, once
+                AND (SELECT count(*) FROM delete_old_cache) >= 0 -- force evaluation, once
                 AND COALESCE(rep.rep, 25) > 0
                 AND hm.author_id IS DISTINCT FROM hm.account_id
                 AND m.follower IS NULL
