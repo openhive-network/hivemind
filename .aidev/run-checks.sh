@@ -16,7 +16,9 @@
 #                submodules' install_app.sh, scripts/install_app.sh, then
 #                `hive build_schema` from this checkout, then checks hivemind's block
 #                processing during an emulated keep-monotonic replay, in a transaction
-#                rolled back: .aidev/early_block_processing_check.sql
+#                rolled back: .aidev/early_block_processing_check.sql; and that the
+#                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
+#                tables: .aidev/haf_control_table_privileges_check.sql
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -152,11 +154,27 @@ install_hivemind() {
     psql "$ADMIN_URL" -v ON_ERROR_STOP=on -Atc \
         "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'hivemind_endpoints'" \
         | awk '{ print "hivemind_endpoints functions: " $1; exit ($1 > 0 ? 0 : 1) }' || return 1
+    check_control_table_privileges || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
     fi
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/early_block_processing_check.sql
+}
+
+# hive/haf#348 added no function to probe for; what it changed is HAF's own grant, so
+# the probe is that grant: a HAF still giving hive_applications_group TRUNCATE on
+# hafd.contexts predates it.
+check_control_table_privileges() {
+    local before
+    before="$(psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc \
+        "select has_table_privilege('hive_applications_group', 'hafd.contexts', 'TRUNCATE')")" || return 1
+    if [ "$before" = t ]; then
+        echo "HAF control table privilege check skipped: this HAF predates hive/haf#348" \
+            "(hive_applications_group holds TRUNCATE on hafd.contexts)"
+        return 0
+    fi
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/haf_control_table_privileges_check.sql
 }
 
 install() {
