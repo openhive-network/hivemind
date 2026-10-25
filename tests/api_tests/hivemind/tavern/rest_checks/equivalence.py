@@ -60,6 +60,7 @@ MAPPINGS: tuple[EndpointMapping, ...] = (
             "start_author": ("start-author", _TEXT),
             "start_permlink": ("start-permlink", _TEXT),
             "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
         },
         ("sort", "start_author", "start_permlink", "limit", "tag", "observer", "muted_reasons_filter", "truncate_body"),
     ),
@@ -74,6 +75,7 @@ MAPPINGS: tuple[EndpointMapping, ...] = (
             "start_author": ("start-author", _TEXT),
             "start_permlink": ("start-permlink", _TEXT),
             "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
         },
         (
             "sort",
@@ -247,6 +249,7 @@ MAPPINGS: tuple[EndpointMapping, ...] = (
             "start_author": ("start-author", _TEXT),
             "start_permlink": ("start-permlink", _TEXT),
             "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
         },
         ("pattern", "sort", "author", "start_author", "start_permlink", "limit", "observer", "truncate_body"),
     ),

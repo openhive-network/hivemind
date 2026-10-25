@@ -16,6 +16,7 @@
 
       REST call example
       * `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`
+      * `GET ''https://%1$s/hivemind-api/posts?sort=trending&page-size=20&truncate-body=250''`
     operationId: hivemind_endpoints.get_ranked_posts
     parameters:
       - in: query
@@ -63,6 +64,16 @@
         description: |
           Account whose mutes and blacklists are applied. The response without an observer
           is the one meant for caching.
+      - in: query
+        name: truncate-body
+        required: false
+        schema:
+          type: integer
+          default: NULL
+        description: |
+          Cut each post''s `body` to at most this many characters, as the `truncate_body` argument
+          of the JSON-RPC method does, for clients that show post cards rather than whole posts.
+          `0`, the default, returns the whole body.
     responses:
       '200':
         description: |
@@ -85,7 +96,8 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.get_ranked_posts(
     "page-size" INT = NULL,
     "start-author" TEXT = NULL,
     "start-permlink" TEXT = NULL,
-    "observer" TEXT = NULL
+    "observer" TEXT = NULL,
+    "truncate-body" INT = NULL
 )
 RETURNS SETOF JSONB 
 -- openapi-generated-code-end
@@ -100,6 +112,7 @@ BEGIN
       'limit', "page-size",
       'start_author', "start-author",
       'start_permlink', "start-permlink",
-      'observer', "observer"));
+      'observer', "observer",
+      'truncate_body', "truncate-body"));
 END
 $$;

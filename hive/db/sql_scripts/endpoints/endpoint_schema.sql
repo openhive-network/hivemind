@@ -1358,6 +1358,16 @@ declare
               "default": null
             },
             "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "truncate-body",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
           }
         ],
         "responses": {
@@ -2036,7 +2046,7 @@ declare
           "blog_api"
         ],
         "summary": "Get ranked posts",
-        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`\n",
+        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&page-size=20&truncate-body=250''`\n",
         "operationId": "hivemind_endpoints.get_ranked_posts",
         "parameters": [
           {
@@ -2098,6 +2108,16 @@ declare
               "default": null
             },
             "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "truncate-body",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
           }
         ],
         "responses": {
@@ -2804,6 +2824,16 @@ declare
               "default": null
             },
             "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "truncate-body",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
           }
         ],
         "responses": {
