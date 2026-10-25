@@ -8,13 +8,14 @@
 # and schema into it (.aidev/run-checks.sh), so no hivemind image is built.
 #
 # HAF image: find_haf_image in .gitlab-ci.yml tracks HAF develop (the template's
-# default UPSTREAM_BRANCH); this is the testnet image of HAF commit ce114878, the
-# hive/haf#379 commit develop merged as 3b487ba9 (same tree), with early block processing.
+# default UPSTREAM_BRANCH); this is the testnet image of HAF commit 17c8606f, the
+# hive/haf#348 commit aidev/integration merged as 5b3c1a87 (same tree), with the
+# control tables' TRUNCATE/REFERENCES/TRIGGER revoked from application roles.
 # When CI's resolved HAF commit moves, bump this digest together with
 # HAF_FIXTURE_COMMIT/_DIGEST in project.yaml (see README.md).
 services:
   haf:
-    image: registry.gitlab.syncad.com/hive/haf/testnet@sha256:7ea12cf8f2aeb7237ecab7ae8c6da6625d22b13c5540a9d5a817143f1d97f816
+    image: registry.gitlab.syncad.com/hive/haf/testnet@sha256:c5f87ee2254246e31266132fe923e6b56af6438d4eaecbfa44f84d58c449df30
     command: ["--execute-maintenance-script=/home/hived/source/./scripts/maintenance-scripts/sleep_infinity.sh"]
     environment:
       PGCTLTIMEOUT: "600"

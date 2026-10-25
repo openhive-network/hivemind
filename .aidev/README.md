@@ -38,7 +38,7 @@ fills `hafd.events_queue` and `hafd.hive_state`. Without `events_queue`,
 (`get_sync_status`, which the smoke test waits on). A HAF older than hive/haf#354 also
 needed `hive_state` filled, or `hive.app_register_table` skipped `hive_rowid` and
 reputation_tracker's install failed with `child table is missing column "hive_rowid"`; the
-pinned `ce114878` includes #354, so only the `events_queue` reason remains.
+pinned `17c8606f` includes #354, so only the `events_queue` reason remains.
 
 | Slot | Steps | HAF stack |
 |---|---|---|
@@ -245,8 +245,8 @@ The capture has no `find_text` calls, so `search-posts` compares none.
 
 ## The HAF test stack (`test-stack.compose.yml`)
 
-One service, `haf`: the HAF testnet image for HAF commit `ce114878` (hive/haf#379, merged
-to develop as `3b487ba9` with the same tree), started
+One service, `haf`: the HAF testnet image for HAF commit `17c8606f` (hive/haf#348, merged
+to `aidev/integration` as `5b3c1a87` with the same tree), started
 empty with the `sleep_infinity` maintenance script. The checks reach it as `haf` on the
 stack's network. CI's `find_haf_image` tracks HAF `develop` (the common-ci-configuration
 template's default `UPSTREAM_BRANCH`; hivemind no longer overrides it), so the commit it
