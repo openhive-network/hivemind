@@ -79,8 +79,8 @@ sandbox:
         # HAF commit hivemind tests against: the one test-stack.compose.yml's testnet
         # image is pinned to. It follows hivemind's own HAF, not hive/haf's
         # sandbox.shared.haf pin, so the two may differ. Move it with that image.
-        HAF_FIXTURE_COMMIT: "ce11487825c0fff3a22f145920f4d01133ab06ae"
-        HAF_FIXTURE_DIGEST: "sha256:6dc0af433c773a56b59f47624f0067b6f72ed0b6c58525ee70589827cf81bd08"
+        HAF_FIXTURE_COMMIT: "17c8606f2c78ae6c5783e1189d59031be2b43fbe"
+        HAF_FIXTURE_DIGEST: "sha256:468c5b042c1f8eb9265eeccf66879e2a0cef79d2dd169c53ede1b84431561c41"
         HIVEMIND_SHARED_DATA_ROOT: "/haf-pool/aidev-shared-hivemind"
         # The seeder's image: hivemind's install_requires, psql and git (no test tool is
         # used). A build of .aidev/runtime/build.sh; see .aidev/README.md.
