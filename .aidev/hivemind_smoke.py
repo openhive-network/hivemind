@@ -206,6 +206,7 @@ SQL_TESTS = [
     "tests/sql/bridge_truncate_body.sql",
     "tests/sql/dispatch_lite_intercept.sql",
     "tests/sql/votes_partitioned_upsert.sql",
+    "tests/sql/post_batches_staged_join.sql",
 ]
 
 
