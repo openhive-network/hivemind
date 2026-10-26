@@ -311,9 +311,12 @@ owns hivemind's schemas, to reload SQL and serve PostgREST.
 
 **Access.** Over TCP only from the fleet's LAN, without a password, as on the shared
 HAF: `hivemind_shared_consumer` reaches only `hivemind_shared` and `run_*` databases,
-and `hivemind` only `run_*` databases. The LAN is `192.168.3.0/24`, `192.168.5.0/24`,
-`192.168.6.0/24`, plus `172.16.0.0/12` for the provider host's own connections through
-docker's NAT. The data is public chain data plus CI's mocks. `127.0.0.1` (trusted for
+and `hivemind` only `run_*` databases. Consumers are trusted by source address: the
+site LANs `192.168.3.0/24`, `192.168.5.0/24` and `192.168.6.0/24`; the inter-site VPN
+`100.64.0.0/10`, which carries only fleet traffic between site gateways, so a consumer at
+a site with no provider (PL) reaches one at another site; and `172.16.0.0/12` for the
+provider host's own connections through docker's NAT. hive/haf's shared HAF keeps its
+own copy of this list; change both together. The data is public chain data plus CI's mocks. `127.0.0.1` (trusted for
 every role) is the `hivemind` container's own network namespace, shared only with
 `seeder`.
 
