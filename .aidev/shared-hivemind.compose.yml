@@ -57,7 +57,8 @@ services:
       # - 192.168.3.0/24, 192.168.5.0/24, 192.168.6.0/24: the fleet's site LANs
       #   (192.168.3 is Jefferson's, 192.168.6 PL's);
       # - 100.64.0.0/10: the inter-site VPN, which carries only fleet traffic
-      #   between site gateways; a consumer at another site arrives from it;
+      #   between site gateways; a consumer at another site arrives from it
+      #   (PL's hosts as 100.64.0.10, their gateway's rewritten source);
       # - 172.16.0.0/12: docker's networks, which admit the provider host itself,
       #   whose connections arrive through docker's NAT.
       # 127.0.0.1 is this container's own network namespace, shared only with
