@@ -216,6 +216,7 @@ SQL_TESTS = [
     "tests/sql/dispatch_lite_intercept.sql",
     "tests/sql/votes_partitioned_upsert.sql",
     "tests/sql/post_batches_staged_join.sql",
+    "tests/sql/massive_sync_reply_parents.sql",
 ]
 
 

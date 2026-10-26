@@ -44,7 +44,20 @@ CREATE UNLOGGED TABLE hivemind_app._comment_staging (
     permlink    TEXT,
     parent_author TEXT,
     parent_permlink TEXT,
-    op_body     JSONB
+    op_body     JSONB,
+    is_replayed BOOLEAN NOT NULL DEFAULT FALSE  -- applied in chain order by Step 7b, not by Steps 4-5
+);
+
+-- Pairs whose ops process_posts_from_staging applies in chain order (Step 7b) rather
+-- than set-based: every comment op from replay_from on and every effective delete.
+-- replay_from is NULL for a pair only its deletes are replayed for (the parent of a
+-- replayed op, so that it is deleted after its reply is created).
+DROP TABLE IF EXISTS hivemind_app._replay_pairs;
+CREATE UNLOGGED TABLE hivemind_app._replay_pairs (
+    author      TEXT NOT NULL,
+    permlink    TEXT NOT NULL,
+    replay_from BIGINT,
+    PRIMARY KEY (author, permlink)
 );
 
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._post_results (
@@ -178,6 +191,7 @@ BEGIN
     TRUNCATE hivemind_app._ops_staging,
              hivemind_app._follow_notification_events,
              hivemind_app._comment_staging,
+             hivemind_app._replay_pairs,
              hivemind_app._post_results,
              hivemind_app._post_batch,
              hivemind_app._vote_batch,
@@ -1117,12 +1131,11 @@ DECLARE
     -- Step 7: delete handling
     _delete_count INT;
     _delete_create_pairs TEXT[];
-    _after_delete BOOLEAN;
-    _current_pair TEXT;
-    _new_post_id INT;
+    _changed INT;
 BEGIN
     -- Persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
     DELETE FROM hivemind_app._comment_staging;
+    DELETE FROM hivemind_app._replay_pairs;
     DELETE FROM hivemind_app._post_results;
 
     -- Step 1: Collect ineffective delete keys (type 73)
@@ -1166,6 +1179,65 @@ BEGIN
       AND (cs.parent_author IS DISTINCT FROM first_parent.parent_author
            OR cs.parent_permlink IS DISTINCT FROM first_parent.parent_permlink);
 
+    -- Identify author/permlink pairs that have delete-create cycles
+    _delete_create_pairs := COALESCE(ARRAY(
+        SELECT DISTINCT (s_del.val->>'author') || '/' || (s_del.val->>'permlink')
+        FROM hivemind_app._ops_staging s_del
+        WHERE s_del.op_type_id = 17
+          AND NOT ((s_del.val->>'author') || '/' || (s_del.val->>'permlink') = ANY(_ineffective_keys))
+          AND EXISTS (
+              SELECT 1 FROM hivemind_app._ops_staging s_cr
+              WHERE s_cr.op_type_id = 1
+                AND s_cr.val->>'author' = s_del.val->>'author'
+                AND s_cr.val->>'permlink' = s_del.val->>'permlink'
+                AND s_cr.id > s_del.id
+          )
+    ), '{}');
+
+    -- Step 2b: Choose the ops Step 7b replays in chain order (_replay_pairs, is_replayed).
+    -- Steps 4-5 run before any delete of the batch, so they resolve a comment's parent
+    -- as it was before those deletes. The replay takes over: for a pair deleted and
+    -- re-created in the batch, every op from its first delete on; for a comment op that
+    -- comes after the replay took over its parent's pair, every op of its own pair from
+    -- that one on (transitively); and every delete of those pairs and of the parents of
+    -- replayed comments, so that no parent is deleted before a reply created under it.
+    IF array_length(_delete_create_pairs, 1) > 0 THEN
+        INSERT INTO hivemind_app._replay_pairs (author, permlink, replay_from)
+        SELECT s.val->>'author', s.val->>'permlink', min(s.id)
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 17
+          AND (s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs)
+        GROUP BY 1, 2;
+
+        LOOP
+            INSERT INTO hivemind_app._replay_pairs AS rp (author, permlink, replay_from)
+            SELECT cs.author, cs.permlink, min(cs.staging_id)
+            FROM hivemind_app._comment_staging cs
+            JOIN hivemind_app._replay_pairs parent
+                ON parent.author = cs.op_body->>'parent_author'
+               AND parent.permlink = cs.op_body->>'parent_permlink'
+            WHERE cs.staging_id > parent.replay_from
+            GROUP BY cs.author, cs.permlink
+            ON CONFLICT (author, permlink) DO UPDATE SET replay_from = EXCLUDED.replay_from
+            WHERE EXCLUDED.replay_from < rp.replay_from;
+
+            GET DIAGNOSTICS _changed = ROW_COUNT;
+            EXIT WHEN _changed = 0;
+        END LOOP;
+
+        UPDATE hivemind_app._comment_staging cs
+        SET is_replayed = TRUE
+        FROM hivemind_app._replay_pairs rp
+        WHERE rp.author = cs.author AND rp.permlink = cs.permlink
+          AND cs.staging_id >= rp.replay_from;
+
+        INSERT INTO hivemind_app._replay_pairs (author, permlink)
+        SELECT DISTINCT cs.op_body->>'parent_author', cs.op_body->>'parent_permlink'
+        FROM hivemind_app._comment_staging cs
+        WHERE cs.is_replayed AND cs.op_body->>'parent_author' != ''
+        ON CONFLICT (author, permlink) DO NOTHING;
+    END IF;
+
     -- Step 3: Bulk-insert permlinks and categories
     INSERT INTO hivemind_app.hive_permlink_data (permlink)
     SELECT DISTINCT p FROM (
@@ -1194,7 +1266,7 @@ BEGIN
                        cs.block_date, _community_support_start_block,
                        cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
             FROM hivemind_app._comment_staging cs
-            WHERE cs.is_first
+            WHERE cs.is_first AND NOT cs.is_replayed
               AND (cs.parent_author IS NULL OR cs.parent_author = '')
             ORDER BY cs.seq_id
         )
@@ -1208,7 +1280,7 @@ BEGIN
         -- Count unprocessed first-occurrence comments (not yet in results)
         SELECT count(*) INTO _remaining
         FROM hivemind_app._comment_staging cs
-        WHERE cs.is_first
+        WHERE cs.is_first AND NOT cs.is_replayed
           AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
           AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id);
 
@@ -1226,7 +1298,7 @@ BEGIN
                            cs.block_date, _community_support_start_block,
                            cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
                 FROM hivemind_app._comment_staging cs
-                WHERE cs.is_first
+                WHERE cs.is_first AND NOT cs.is_replayed
                   AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
                   AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
                 ORDER BY cs.seq_id
@@ -1249,7 +1321,7 @@ BEGIN
     JOIN hivemind_app._comment_staging cs_first
         ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
     JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
-    WHERE NOT cs.is_first;
+    WHERE NOT cs.is_first AND NOT cs.is_replayed;
 
     -- Step 5c: Update updated_at and block_num for edit ops
     -- Edits (is_first=false) don't go through the batch functions, so updated_at and
@@ -1266,7 +1338,7 @@ BEGIN
         JOIN hivemind_app._comment_staging cs_first
             ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
         JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
-        WHERE NOT cs.is_first
+        WHERE NOT cs.is_first AND NOT cs.is_replayed
         ORDER BY pr.post_id, cs.seq_id DESC
     ) last_edit
     WHERE hp.id = last_edit.post_id;
@@ -1387,24 +1459,9 @@ BEGIN
     -- When a post is created, deleted, and re-created within the same batch,
     -- the old code processes these sequentially: each recreate gets a NEW row with
     -- a new post_id (so old votes don't carry over). We replicate this by:
-    --   (a) simple deletes: no create follows → just delete as before
-    --   (b) delete-create cycles: iterate ops chronologically, alternating
+    --   (a) simple deletes: no op of the pair is replayed → just delete as before
+    --   (b) replayed ops (Step 2b): iterate them in chain order, alternating
     --       delete_hive_post and INSERT of new rows
-
-    -- Identify author/permlink pairs that have delete-create cycles
-    _delete_create_pairs := COALESCE(ARRAY(
-        SELECT DISTINCT (s_del.val->>'author') || '/' || (s_del.val->>'permlink')
-        FROM hivemind_app._ops_staging s_del
-        WHERE s_del.op_type_id = 17
-          AND NOT ((s_del.val->>'author') || '/' || (s_del.val->>'permlink') = ANY(_ineffective_keys))
-          AND EXISTS (
-              SELECT 1 FROM hivemind_app._ops_staging s_cr
-              WHERE s_cr.op_type_id = 1
-                AND s_cr.val->>'author' = s_del.val->>'author'
-                AND s_cr.val->>'permlink' = s_del.val->>'permlink'
-                AND s_cr.id > s_del.id
-          )
-    ), '{}');
 
     -- (a) Simple deletes: set-based bulk operation instead of per-row loop.
     -- Resolves all author/permlink pairs to post IDs in one join, then does
@@ -1425,7 +1482,10 @@ BEGIN
             ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
         WHERE s.op_type_id = 17
           AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
-          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
+          AND NOT EXISTS (
+              SELECT 1 FROM hivemind_app._replay_pairs rp
+              WHERE rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+          )
     ),
     updated_posts AS (
         UPDATE hivemind_app.hive_posts hp
@@ -1458,104 +1518,50 @@ BEGIN
     )
     SELECT count(*) INTO _delete_count FROM updated_posts;
 
-    -- (b) Delete-create cycles: iterate ALL ops for affected pairs in chronological order.
-    -- Skip creates before any delete (already handled in Steps 3-5).
-    -- On delete: call delete_hive_post.
-    -- On create after a delete: INSERT a new row with fresh post_id.
-    _current_pair := '';
-    _after_delete := FALSE;
-
-    FOR _rec IN
-        SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink,
-               s.val->>'parent_author' AS parent_author,
-               s.val->>'parent_permlink' AS parent_permlink,
-               s.op_type_id, s.block_num, s.block_date, s.id AS staging_id
-        FROM hivemind_app._ops_staging s
-        WHERE ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
-          AND s.op_type_id IN (1, 17)
-        ORDER BY (s.val->>'author') || '/' || (s.val->>'permlink'), s.id
-    LOOP
-        -- Reset state when switching to a new (author, permlink) pair
-        IF (_rec.author || '/' || _rec.permlink) != _current_pair THEN
-            _current_pair := _rec.author || '/' || _rec.permlink;
-            _after_delete := FALSE;
-        END IF;
-
-        IF _rec.op_type_id = 17 AND NOT ((_rec.author || '/' || _rec.permlink) = ANY(_ineffective_keys)) THEN
-            -- Delete op
-            PERFORM hivemind_app.delete_hive_post(
-                _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
-            );
-            _after_delete := TRUE;
-
-        ELSIF _rec.op_type_id = 1 AND _after_delete THEN
-            -- Recreate after delete: INSERT a new row with a new post_id.
-            -- Resolve structural fields from the NEW create op's parent_author/parent_permlink
-            -- (not from the deleted row — the recreated post may have different structure,
-            -- e.g., root post deleted and recreated as a comment or vice versa).
-            SELECT id INTO _new_post_id
-            FROM hivemind_app.process_hive_post_operation(
-                _rec.author, _rec.permlink,
-                COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
-                _rec.block_date, _community_support_start_block, _rec.block_num,
-                '{}'::VARCHAR[]  -- tags handled separately in Step 7d
-            );
-
-            _after_delete := FALSE;
-        END IF;
-        -- If op_type_id = 1 AND NOT _after_delete: edit, already handled in Steps 3-5
-    END LOOP;
-
-    -- Step 7c: Update _post_results for recreated posts.
-    -- Creates that came after the LAST delete should point to the final new post_id
-    -- and the first such create should be marked is_new_post=TRUE (for PostDataCache).
+    -- (b) Replayed ops in chain order, across pairs: each comment op resolves its
+    -- parent as it is at that op. A create of a pair with no live row inserts a new
+    -- row with a fresh post_id; an edit updates the live one. Each op's result row
+    -- carries the row it was applied to.
     IF array_length(_delete_create_pairs, 1) > 0 THEN
-        WITH last_delete_per_pair AS (
-            SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
-                s.val->>'author' AS author, s.val->>'permlink' AS permlink,
-                s.id AS last_delete_staging_id
-            FROM hivemind_app._ops_staging s
-            WHERE s.op_type_id = 17
-              AND ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
-              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
-            ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
-        ),
-        final_active AS (
-            -- The newly created active row (counter_deleted=0, highest id) for each pair
-            SELECT DISTINCT ON (ha.name, hpd.permlink)
-                ha.name AS author, hpd.permlink, hp.id AS new_post_id
-            FROM hivemind_app.hive_posts hp
-            JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-            JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
-            WHERE hp.counter_deleted = 0
-              AND EXISTS (
-                  SELECT 1 FROM last_delete_per_pair ld
-                  WHERE ld.author = ha.name AND ld.permlink = hpd.permlink
-              )
-            ORDER BY ha.name, hpd.permlink, hp.id DESC
-        ),
-        first_recreate AS (
-            -- The seq_id of the FIRST create after the LAST delete (mark as is_new_post)
-            SELECT DISTINCT ON (cs.author, cs.permlink)
-                cs.author, cs.permlink, cs.seq_id AS first_seq_id
+        FOR _rec IN
+            SELECT cs.staging_id, cs.seq_id, 1 AS op_type_id, cs.author, cs.permlink,
+                   cs.op_body->>'parent_author' AS parent_author,
+                   cs.op_body->>'parent_permlink' AS parent_permlink,
+                   cs.block_num, cs.block_date, cs.op_body
             FROM hivemind_app._comment_staging cs
-            JOIN last_delete_per_pair ld ON ld.author = cs.author AND ld.permlink = cs.permlink
-            WHERE cs.staging_id > ld.last_delete_staging_id
-            ORDER BY cs.author, cs.permlink, cs.seq_id
-        )
-        UPDATE hivemind_app._post_results pr
-        SET post_id = fa.new_post_id,
-            is_new_post = (pr.seq_id = fr.first_seq_id)
-        FROM hivemind_app._comment_staging cs
-        JOIN last_delete_per_pair ld ON ld.author = cs.author AND ld.permlink = cs.permlink
-        JOIN final_active fa ON fa.author = cs.author AND fa.permlink = cs.permlink
-        JOIN first_recreate fr ON fr.author = cs.author AND fr.permlink = cs.permlink
-        WHERE cs.seq_id = pr.seq_id
-          AND cs.staging_id > ld.last_delete_staging_id;
+            WHERE cs.is_replayed
+            UNION ALL
+            SELECT s.id, NULL, 17, s.val->>'author', s.val->>'permlink', NULL, NULL,
+                   s.block_num, s.block_date, NULL
+            FROM hivemind_app._ops_staging s
+            JOIN hivemind_app._replay_pairs rp
+                ON rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+            WHERE s.op_type_id = 17
+              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            ORDER BY 1
+        LOOP
+            IF _rec.op_type_id = 17 THEN
+                PERFORM hivemind_app.delete_hive_post(
+                    _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
+                );
+            ELSE
+                -- Structural fields come from this op's own parent_author/parent_permlink
+                -- (a recreated post may differ, e.g. a root post recreated as a comment).
+                INSERT INTO hivemind_app._post_results
+                SELECT _rec.seq_id, op.id, op.is_new_post, op.author_id, op.permlink_id,
+                       op.depth, op.parent_id, op.parent_author_id, op.community_id,
+                       op.is_post_muted, op.muted_reasons, _rec.block_num, _rec.block_date, _rec.op_body
+                FROM hivemind_app.process_hive_post_operation(
+                    _rec.author, _rec.permlink,
+                    COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
+                    _rec.block_date, _community_support_start_block, _rec.block_num,
+                    '{}'::VARCHAR[]  -- tags handled separately in Step 7d
+                ) op;
+            END IF;
+        END LOOP;
 
         -- Step 7d: Re-process tags for recreated root posts.
         -- Tags for the old post_id were deleted by delete_hive_post; add them for the new post_id.
-        -- CTEs are re-derived since they were scoped to the Step 7c UPDATE statement.
         PERFORM hivemind_app.process_tags_batch(
             ARRAY(
                 WITH ld AS (
@@ -1609,21 +1615,21 @@ BEGIN
         );
     END IF;
 
-    -- Step 7f: Re-apply comment_options for recreated posts.
-    -- Step 6 ran before delete-create handling, so comment_options (beneficiaries,
+    -- Step 7f: Re-apply comment_options for posts created by the replay.
+    -- Step 6 ran before the replay, so comment_options (beneficiaries,
     -- max_accepted_payout, etc.) were applied to the original post which Step 7
-    -- then deleted. The recreated post has fresh defaults. Re-apply comment_options
-    -- ops that came AFTER the last delete for each affected pair.
+    -- then deleted, or to no row. The replayed post has fresh defaults. Re-apply
+    -- comment_options ops that came AFTER the last delete for each replayed pair.
     IF array_length(_delete_create_pairs, 1) > 0 THEN
         WITH last_delete AS (
-            SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
-                s.val->>'author' AS author, s.val->>'permlink' AS permlink,
-                s.id AS last_delete_id
-            FROM hivemind_app._ops_staging s
-            WHERE s.op_type_id = 17
-              AND ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_delete_create_pairs))
-              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
-            ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+            SELECT rp.author, rp.permlink, COALESCE(max(s.id), 0) AS last_delete_id
+            FROM hivemind_app._replay_pairs rp
+            LEFT JOIN hivemind_app._ops_staging s
+                ON s.op_type_id = 17
+               AND s.val->>'author' = rp.author AND s.val->>'permlink' = rp.permlink
+               AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            WHERE rp.replay_from IS NOT NULL
+            GROUP BY rp.author, rp.permlink
         ),
         co_for_recreated AS (
             SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
@@ -1658,39 +1664,6 @@ BEGIN
         JOIN hivemind_app.hive_accounts ha ON ha.name = co.author
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = co.permlink
         WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0;
-    END IF;
-
-    -- Step 7g: Re-link child comments whose parent_id points to a now-deleted row.
-    -- Steps 4/5 processed comments before Step 7 handled delete-create pairs.
-    -- Comments that arrived after a post was recreated (but within the same batch)
-    -- linked to the original row via counter_deleted=0 (which was still active at
-    -- Step 5 time). Step 7 then deleted that row and created a new one. These
-    -- children now point to a deleted parent, inheriting wrong category/community.
-    -- Fix: update parent_id, category_id, root_id, and community_id to match the
-    -- new active parent. EXISTS pre-check uses only PK lookups to skip the expensive
-    -- hive_posts author_id+permlink_id join when no children point to deleted parents.
-    IF array_length(_delete_create_pairs, 1) > 0
-       AND EXISTS (
-           SELECT 1 FROM hivemind_app._post_results pr
-           JOIN hivemind_app.hive_posts old_parent ON old_parent.id = pr.parent_id
-           WHERE old_parent.counter_deleted = 1 AND pr.depth > 0
-           LIMIT 1
-       )
-    THEN
-        UPDATE hivemind_app.hive_posts child
-        SET parent_id = new_parent.id,
-            category_id = new_parent.category_id,
-            root_id = CASE new_parent.root_id WHEN 0 THEN new_parent.id ELSE new_parent.root_id END,
-            community_id = new_parent.community_id
-        FROM hivemind_app._post_results pr
-        JOIN hivemind_app.hive_posts old_parent ON old_parent.id = pr.parent_id
-        JOIN hivemind_app.hive_posts new_parent
-            ON new_parent.author_id = old_parent.author_id
-            AND new_parent.permlink_id = old_parent.permlink_id
-            AND new_parent.counter_deleted = 0
-        WHERE child.id = pr.post_id
-          AND old_parent.counter_deleted = 1
-          AND pr.depth > 0;
     END IF;
 
     -- Step 7e: Correct community type muting for posts created BEFORE updateProps.
