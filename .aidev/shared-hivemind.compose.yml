@@ -52,10 +52,17 @@ services:
       # chain data and mocks): the consumer role only to the clone API and to run
       # databases, and `hivemind` only to run databases, where a run reloads its
       # SQL and serves PostgREST as the role owning hivemind's schemas.
-      # 172.16.0.0/12 admits the provider host itself, whose connections arrive
-      # through docker's NAT. 127.0.0.1 is this container's own network
-      # namespace, shared only with `seeder`. The image's trust rule is replaced.
-      PG_ACCESS: 'host all all 127.0.0.1/32 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.3.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.3.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.5.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.5.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.6.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.6.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 172.16.0.0/12 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 172.16.0.0/12 trust'
+      # The trusted source ranges, each with a `hivemind_shared` and a `run_*`
+      # entry (keep in step with hive/haf's shared-haf.compose.yml):
+      # - 192.168.3.0/24, 192.168.5.0/24, 192.168.6.0/24: the fleet's site LANs
+      #   (192.168.3 is Jefferson's, 192.168.6 PL's);
+      # - 100.64.0.0/10: the inter-site VPN, which carries only fleet traffic
+      #   between site gateways; a consumer at another site arrives from it;
+      # - 172.16.0.0/12: docker's networks, which admit the provider host itself,
+      #   whose connections arrive through docker's NAT.
+      # 127.0.0.1 is this container's own network namespace, shared only with
+      # `seeder`. The image's trust rule is replaced.
+      PG_ACCESS: 'host all all 127.0.0.1/32 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.3.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.3.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.5.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.5.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 192.168.6.0/24 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 192.168.6.0/24 trust\nhost hivemind_shared hivemind_shared_consumer 100.64.0.0/10 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 100.64.0.0/10 trust\nhost hivemind_shared hivemind_shared_consumer 172.16.0.0/12 trust\nhost /^run_[a-z0-9_-]+$$ hivemind_shared_consumer,hivemind 172.16.0.0/12 trust'
     ports:
       - "0.0.0.0:${AIDEV_PORT_PG:?}:5432"
     volumes:
