@@ -314,11 +314,20 @@ HAF: `hivemind_shared_consumer` reaches only `hivemind_shared` and `run_*` datab
 and `hivemind` only `run_*` databases. Consumers are trusted by source address: the
 site LANs `192.168.3.0/24`, `192.168.5.0/24` and `192.168.6.0/24`; the inter-site VPN
 `100.64.0.0/10`, which carries only fleet traffic between site gateways, so a consumer at
-a site with no provider (PL) reaches one at another site; and `172.16.0.0/12` for the
+a site with no provider (PL) reaches one at another site (PL's hosts arrive as their
+gateway's rewritten source, `100.64.0.10`); and `172.16.0.0/12` for the
 provider host's own connections through docker's NAT. hive/haf's shared HAF keeps its
 own copy of this list; change both together. The data is public chain data plus CI's mocks. `127.0.0.1` (trusted for
 every role) is the `hivemind` container's own network namespace, shared only with
-`seeder`.
+`seeder`. PostgreSQL's `pg_hba.conf` is written from `PG_ACCESS` when the `hivemind`
+container is created, so a changed list reaches a provider only when it is recreated:
+the hosting session does that when its tip moves a commit that changes this compose
+file, but a worker that restarts adopts the container it finds running as it is. To
+apply the checkout's list at once, stop the container on the provider's host
+(`docker stop <compose project>-hivemind-1`, the project named by `docker ps`); the
+session's next liveness tick, within a minute, brings it up again on the session tip.
+That also moves the provider to the HAF commit the tip pins, which a first start
+copies and freezes (up to 30 minutes) before templates are seeded again.
 
 **How it works.** Three services:
 
