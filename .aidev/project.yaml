@@ -99,7 +99,9 @@ sandbox:
 # candidate into an empty HAF testnet database and a PostgREST JSON-RPC smoke
 # test. `full` adds CI's tavern pattern suites against a clone of the shared
 # synced hivemind (skipped, named, while no fixture matches the tree's schema
-# revision); see .aidev/README.md.
+# revision), and `aidev db shape check` on the mainnet shape `performance.shape`
+# pins (db_shape: host-side, it drives the host's Docker; `not applicable` when
+# the diff cannot move a declared plan); see .aidev/README.md.
 verification:
   quick:
     adapter: command
@@ -107,9 +109,21 @@ verification:
     stack: false
     artifacts: ["test-results/quick/"]
   full:
-    adapter: command
-    args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke", "tavern"]
-    artifacts: ["test-results/full/"]
+    suites:
+      - name: checks
+        adapter: command
+        args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke", "tavern"]
+        artifacts: ["test-results/full/"]
+      # After `checks`, which creates test-results/ (`--report` writes no directory).
+      - name: db_shape
+        adapter: command
+        args: [aidev, db, shape, check, --report, test-results/db-shape-report.json]
+        stack: false
+        docker: true
+        # The shape server held about 70 MiB through copies, installs and nested calls.
+        memory: 2g
+        mode: advisory
+        reports: ["test-results/db-shape-report.json"]
   baseline:
     adapter: command
     args: [".aidev/run-checks.sh", "baseline", "install", "reinstall", "api-smoke"]
@@ -156,6 +170,216 @@ quality:
 # See .aidev/README.md, "Production-traffic replay".
 performance:
   mode: observe
+  # A full-scale mainnet shape (aidev docs/operations/db-shape.md): the schema, sizes
+  # and statistics of steem-20's haf_block_log, loaded into an empty Postgres, so
+  # `aidev db shape check|plan|compare|hypo|apply` plan at production size.
+  # Re-capture, and when to move the pin: .aidev/README.md, "The mainnet shape".
+  shape:
+    # haf-haf-1 on steem-20 at block 111,151,349, captured 2026-10-27 right after a
+    # full replay from an empty database: 629 relations, 5,032 GiB, hivemind_app and
+    # reptracker_app included. Published to the fleet store.
+    artifact: 9381e39f59cbf62a2d6568f150dbeb4217714992cfe7e3d17e6a56bee7f19d92
+    # Workflows may read it (explain --source, calibrate): read-only, two sessions at most.
+    source: {host: steem-20.syncad.com, container: haf-haf-1, database: haf_block_log, user: haf_admin, workflow_access: true}
+    # The image the source runs; it has the source's extensions (hive_fork_manager,
+    # pg_cron, plpython3u, ...), so the shape loads completely.
+    image: "registry.gitlab.syncad.com/hive/haf:17c8606f@sha256:0b9366e37b7674fba7f4ccb01d2fcdf44737aff23d60d3720c1a9e5edaf818e3"
+    # The tree's database code as `hive upgrade_schema` puts it on an installed
+    # database, streamed through $AIDEV_DB_SHAPE_PSQL; what it leaves out and why:
+    # the script's docstring.
+    apply: {command: [python3, .aidev/shape_apply.py]}
+  # What can move a declared plan: the check is `not applicable` for a diff touching
+  # none of these (or .aidev/project.yaml). An `apply` command reads files nobody
+  # declared, so without this list every changed path but docs would count.
+  inputs: ["hive/db/sql_scripts/**", "hive/db/schema.py", "scripts/install_app.sql", ".aidev/shape_apply.py"]
+  # The plans `aidev db shape check` compares, base tree against candidate, with the
+  # default plan budgets (max_cost_ratio 1.5, no new Seq Scan over 1 GiB); observe
+  # only, no time assertions. See .aidev/README.md, "The mainnet shape".
+  #
+  # The API calls are the hottest methods of the replay capture below (`aidev replay
+  # profile`): 11 methods, 94% of its 173,075 calls, each called through its
+  # hivemind_endpoints entry function (`nested`, so every statement inside is
+  # compared) with its most frequent real arguments. A shape's heaps are empty, so
+  # each call's `setup` inserts the rows its guards look up (find_account_id,
+  # find_comment_id, ...), with the source's ids so the statements after them plan
+  # for real values; replica mode skips the foreign keys. The setup is rolled back
+  # after the call.
+  #
+  # `parameters` name the skewed columns (an author with a million posts against
+  # one with a few), so a capture run with `--queries .aidev/project.yaml`
+  # catalogues their troublesome values. A parameter must appear in the query's
+  # SQL, so the call reads the argument from the stub row the value keys (`(SELECT
+  # name FROM hivemind_app.hive_accounts WHERE id = ${account})`). The pinned
+  # capture holds no catalog yet, so each query is planned once, at its `value`.
+  queries:
+    # 40.9 calls/s. A 1,008-reply thread; `post` is the stub's id and root_id.
+    - name: bridge-get-discussion
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_discussion(jsonb_build_object('author', 'leothreads', 'observer', 'hive.blog', 'permlink',
+        (SELECT hpd.permlink FROM hivemind_app.hive_posts hp JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id WHERE hp.id = ${post})))
+      nested: true
+      setup:
+        - &replica SET session_replication_role = replica
+        - &observer INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (1371790, 'hive.blog', '2020-03-17 14:02:30')
+        - &leothreads INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (2410041, 'leothreads', '2022-07-19 14:36:33')
+        - INSERT INTO hivemind_app.hive_permlink_data (id, permlink) VALUES (206192396, 'leothread-2026-10-11-15-16')
+        - >-
+          INSERT INTO hivemind_app.hive_posts (id, root_id, parent_id, author_id, permlink_id, category_id, community_id, created_at, depth, block_num, block_num_created)
+          VALUES (${post}, ${post}, 0, 2410041, 206192396, 7893654, 1341662, '2026-10-11 15:16:36', 0, 110683704, 110683704)
+      parameters:
+        post: {column: hivemind_app.hive_posts.root_id, value: 142537575}
+    # 31.5 calls/s.
+    - name: bridge-get-post
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_post('{"author": "keys-defender", "permlink": "phishing-db"}'::jsonb)
+      nested: true
+      setup:
+        - *replica
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (1359481, 'keys-defender', '2020-02-01 08:37:15')
+        - INSERT INTO hivemind_app.hive_permlink_data (id, permlink) VALUES (136866300, 'phishing-db')
+        - >-
+          INSERT INTO hivemind_app.hive_posts (id, root_id, parent_id, author_id, permlink_id, category_id, community_id, created_at, depth, block_num, block_num_created)
+          VALUES (94935271, 94869698, 94869698, 1359481, 136866300, 8358211, 1361897, '2021-03-20 04:22:51', 1, 103868895, 52290714)
+    # 29.4 calls/s.
+    - name: bridge-get-profile
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_profile(jsonb_build_object('observer', 'hive.blog', 'account',
+        (SELECT name FROM hivemind_app.hive_accounts WHERE id = ${account})))
+      nested: true
+      setup:
+        - *replica
+        - *observer
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (${account}, 'ai-summaries', '2024-02-17 08:31:27')
+      parameters:
+        account: {column: hivemind_app.hive_posts.author_id, value: 2487558}
+    # 24.7 calls/s.
+    - name: condenser-get-follow-count
+      sql: >-
+        SELECT hivemind_endpoints.condenser_api_get_follow_count('["gtg"]'::jsonb)
+      nested: true
+      setup:
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (14008, 'gtg', '2016-06-30 17:22:18')
+    # 16.1 calls/s (get_content_replies, 3.2 calls/s, below).
+    - name: condenser-get-content
+      sql: >-
+        SELECT hivemind_endpoints.condenser_api_get_content('["tdvtv", "agenda-2030-is-rolling-out-live-the-real-twoparty-system-behind-the-curtain-tk3fxd3lp4"]'::jsonb, false, true)
+      nested: true
+      setup:
+        - *replica
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (1425230, 'tdvtv', '2020-12-17 22:32:09')
+        - INSERT INTO hivemind_app.hive_permlink_data (id, permlink) VALUES (206250954, 'agenda-2030-is-rolling-out-live-the-real-twoparty-system-behind-the-curtain-tk3fxd3lp4')
+        - >-
+          INSERT INTO hivemind_app.hive_posts (id, root_id, parent_id, author_id, permlink_id, category_id, community_id, created_at, depth, block_num, block_num_created)
+          VALUES (142576883, 142576883, 0, 1425230, 206250954, 7919652, 1345317, '2026-10-15 14:19:33', 0, 110797390, 110797390)
+    # 10.1 calls/s, 46% sort=posts (sbi-tokens' page alone 326 calls), 33% sort=blog.
+    - name: bridge-get-account-posts-posts
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_account_posts(jsonb_build_object('sort', 'posts', 'limit', 10, 'account',
+        (SELECT name FROM hivemind_app.hive_accounts WHERE id = ${author})))
+      nested: true
+      setup:
+        - *replica
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (${author}, 'sbi-tokens', '2019-07-31 04:48:36')
+      parameters:
+        author: {column: hivemind_app.hive_posts.author_id, value: 1301538}
+    - name: bridge-get-account-posts-blog
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_account_posts(jsonb_build_object('sort', 'blog', 'limit', 20, 'observer', 'hive.blog', 'account',
+        (SELECT name FROM hivemind_app.hive_accounts WHERE id = ${blogger})))
+      nested: true
+      setup:
+        - *replica
+        - *observer
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (${blogger}, 'hiveio', '2020-03-06 12:22:48')
+      parameters:
+        blogger: {column: hivemind_app.hive_feed_cache.account_id, value: 1370485}
+    # 7.9 calls/s.
+    - name: bridge-get-community
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_community(jsonb_build_object('observer', 'hive.blog', 'name',
+        (SELECT name FROM hivemind_app.hive_communities WHERE id = ${community})))
+      nested: true
+      setup:
+        - *replica
+        - *observer
+        - INSERT INTO hivemind_app.hive_communities (id, type_id, name, created_at, block_num) VALUES (${community}, 1, 'hive-167922', '2019-11-26 17:25:27', 38518287)
+      parameters:
+        community: {column: hivemind_app.hive_posts.community_id, value: 1341662}
+    # 6.4 calls/s; 45% ask for 1000 followers. appreciator has 18,071.
+    - name: condenser-get-followers
+      sql: >-
+        SELECT hivemind_endpoints.condenser_api_get_followers(jsonb_build_array(
+        (SELECT name FROM hivemind_app.hive_accounts WHERE id = ${account}), '', 'blog', 1000), true)
+      nested: true
+      setup:
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (${account}, 'appreciator', '2017-07-01 05:55:21')
+      parameters:
+        account: {column: hivemind_app.follows.following, value: 236847}
+    # 6.3 calls/s; 40% ask for 1000. neoxian follows 5,314.
+    - name: condenser-get-following
+      sql: >-
+        SELECT hivemind_endpoints.condenser_api_get_following(jsonb_build_array(
+        (SELECT name FROM hivemind_app.hive_accounts WHERE id = ${account}), '', 'blog', 1000), true)
+      nested: true
+      setup:
+        - INSERT INTO hivemind_app.hive_accounts (id, name, created_at) VALUES (${account}, 'neoxian', '2016-07-10 17:45:18')
+      parameters:
+        account: {column: hivemind_app.follows.follower, value: 16334}
+    # 4.4 calls/s: 54% sort=trending (mostly the front page, tag ""), 26% sort=created
+    # (lassecash's tag page alone 334 calls, all asking for 50, which is refused: the
+    # declared call asks for the limit's maximum, 20).
+    - name: bridge-get-ranked-posts-trending
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_ranked_posts('{"sort": "trending", "tag": "", "limit": 20, "observer": "hive.blog"}'::jsonb)
+      nested: true
+      setup:
+        - *replica
+        - *observer
+    - name: bridge-get-ranked-posts-created-tag
+      sql: >-
+        SELECT hivemind_endpoints.bridge_api_get_ranked_posts(jsonb_build_object('sort', 'created', 'limit', 20, 'tag',
+        (SELECT tag FROM hivemind_app.hive_tag_data WHERE id = ${tag})))
+      nested: true
+      setup:
+        - *replica
+        - INSERT INTO hivemind_app.hive_tag_data (id, tag) VALUES (${tag}, 'lassecash')
+        - INSERT INTO hivemind_app.hive_category_data (id, category) VALUES (7299195, 'lassecash')
+      parameters:
+        tag: {column: hivemind_app.hive_post_tags.tag_id, value: 33109531}
+    - name: condenser-get-content-replies
+      sql: >-
+        SELECT hivemind_endpoints.condenser_api_get_content(jsonb_build_array('leothreads',
+        (SELECT hpd.permlink FROM hivemind_app.hive_posts hp JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id WHERE hp.id = ${post})), true, true)
+      nested: true
+      setup:
+        - *replica
+        - *leothreads
+        - INSERT INTO hivemind_app.hive_permlink_data (id, permlink) VALUES (206192396, 'leothread-2026-10-11-15-16')
+        - >-
+          INSERT INTO hivemind_app.hive_posts (id, root_id, parent_id, author_id, permlink_id, category_id, community_id, created_at, depth, block_num, block_num_created)
+          VALUES (${post}, ${post}, 0, 2410041, 206192396, 7893654, 1341662, '2026-10-11 15:16:36', 0, 110683704, 110683704)
+      parameters:
+        post: {column: hivemind_app.hive_posts.parent_id, value: 142537575}
+    # Initial sync finalization (recalculate_all_posts_votes_and_children, run once
+    # after massive sync): the child-count SELECT it runs per depth level, deepest
+    # first, and the hive_votes per-post aggregation its UPDATE reads. `depth` is the
+    # loop variable; 1 is the largest level (47% of hive_posts).
+    - name: finalize-child-count-per-depth
+      sql: >-
+        SELECT h1.parent_id AS queried_parent, SUM(COALESCE(pc.child_count, 0) + 1) AS count
+        FROM hivemind_app.hive_posts h1
+        LEFT JOIN hivemind_app.__post_children pc ON pc.id = h1.id
+        WHERE (h1.parent_id != 0 OR ${depth} = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = ${depth}
+        GROUP BY h1.parent_id
+      parameters:
+        depth: {column: hivemind_app.hive_posts.depth, value: 1}
+    - name: finalize-votes-per-post
+      sql: >-
+        SELECT hv.post_id, SUM(hv.rshares) AS rshares, SUM(ABS(hv.rshares)) AS abs_rshares,
+        SUM(CASE hv.is_effective WHEN True THEN 1 ELSE 0 END) AS total_votes,
+        SUM(CASE WHEN hv.rshares > 0 THEN 1 WHEN hv.rshares = 0 THEN 0 ELSE -1 END) AS net_votes
+        FROM hivemind_app.hive_votes hv
+        GROUP BY hv.post_id
   replay:
     mode: observe
     # api.hive.blog 2026-10-16, 15 min between drone and haproxy on the hivemind
