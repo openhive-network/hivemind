@@ -44,7 +44,7 @@ pinned `17c8606f` includes #354, so only the `events_queue` reason remains.
 |---|---|---|
 | quick | unit, ruff | no |
 | coverage | unit | no |
-| full | unit, ruff, install, reinstall, mock-wrapper, api-smoke, tavern | yes, and the shared hivemind |
+| full | unit, ruff, install, reinstall, mock-wrapper, api-smoke, tavern; then `db_shape` (see [The mainnet shape](#the-mainnet-shape-performanceshape-performancequeries)) | yes, and the shared hivemind |
 | canary | unit, ruff, install, reinstall, mock-wrapper, api-smoke | yes |
 | baseline | install, reinstall, api-smoke | yes |
 
@@ -242,6 +242,106 @@ On the pinned capture, `--unique` selects 66,883 calls. The pairs map 66,746 of 
 the rest (positional `bridge.get_post` calls, `[{…}]`-wrapped `bridge.get_profile` and
 `bridge.get_ranked_posts` calls, and `bridge.get_post` calls without an author) are skipped.
 The capture has no `find_text` calls, so `search-posts` compares none.
+
+## The mainnet shape (`performance.shape`, `performance.queries`)
+
+The test databases are an empty HAF testnet and the 5M-block fixture; neither shows how a
+statement plans against mainnet's 137M `hive_posts` rows or 130 GB `hive_votes`. aidev's
+`aidev db shape` (aidev `docs/operations/db-shape.md`) loads a full-scale database's schema,
+sizes and statistics, captured read-only, into an empty Postgres, so `EXPLAIN` picks the
+production plan. Nothing is executed for its result: the shape's heaps are empty.
+
+`performance.shape` pins one, captured from steem-20's `haf-haf-1` / `haf_block_log` at
+block 111,151,349 on 2026-10-27, right after a full replay from an empty database: 629
+relations, 5,032 GiB, `hivemind_app` and `reptracker_app` included. It loads completely on
+`performance.shape.image`, the HAF image steem-20 runs. `performance` is AIDEV's protected
+class, so a change to the section is pending until approved, and every command below reads the
+*approved* section.
+
+**The check.** `full`'s `db_shape` suite runs `aidev db shape check` host-side (it drives
+the host's Docker; the shape server is a container of its own) and writes
+`test-results/db-shape-report.json`. For each declared query it installs the base tree's
+code on one sparse copy of the shape and the candidate's on another, plans the query on both,
+and reports the cost ratio and the plan diff. The suite is advisory and the section is
+`mode: observe`: nothing blocks. The check runs only when the diff touches
+`.aidev/project.yaml` or a path in `performance.inputs`, otherwise it reports `not
+applicable` within seconds. With the shape already loaded it took 100–210 s on steem-13,
+most of it the two copies and installs.
+
+**Installing a tree's code** (`performance.shape.apply`): `.aidev/shape_apply.py` puts the
+tree's SQL on the copy the way `hive upgrade_schema` puts it on an installed database:
+`scripts/install_app.sql`, `perform_db_upgrade`'s scripts and the admin-level ones, then
+`setup_runtime_code`'s as the `hivemind` role (`python3 .aidev/shape_apply.py --list` prints
+them). It reads those lists from `hive/db/schema.py` and `postgrest/load_order.sql`, so a
+script added there is applied too. The shape server has no network, so `hive build_schema`
+can't connect: each script goes to `$AIDEV_DB_SHAPE_PSQL`. Before the scripts, the copy gets
+back the source's owners, which a shape doesn't keep. Without them the scripts that
+`SET ROLE hivemind` can't replace hivemind's objects or read `reptracker_app`. Left out, and
+none of them changes a plan:
+
+- `scripts/setup_postgres.sh` and `install_app.sh`'s role grants: they're cluster-wide, and
+  the shape's roles and memberships are the source's.
+- The `reputation_tracker` and `hafah` installs: they're other applications' code, and the
+  shape has them at the versions steem-20 runs.
+- The rows `setup_runtime_code` writes: the patch level (`upgrade/update_db_patchlevel.sql`)
+  and `hive_state`. Also the HAF application registration. A shape's indexes hold their
+  columns' extreme keys, so an insert there collides.
+
+`aidev db shape apply` runs the install on a throwaway copy, in about 16 s plus the copy.
+`payout_stats_view`, which `payout_stats_view.sql` recreates, plans as empty on the copies.
+
+**The declared queries** come in two groups:
+
+- The hottest API methods of the replay capture `performance.replay` names, by call
+  frequency (`aidev replay profile`). There are 11 of them, 94% of its calls, and
+  `get_account_posts` and `get_ranked_posts` are split by their two main sorts. Each is
+  called through its `hivemind_endpoints` entry function with its most frequent real
+  arguments, as a `nested` query, so every statement the call runs is compared. A shape has
+  no rows, so a call would stop at its first guard (`Account … does not exist`). Each
+  query's `setup` therefore inserts the rows its guards look up, with the source's ids, so
+  the statements after the guard plan for real values. `session_replication_role = replica`
+  skips the foreign keys, and the setup is rolled back after the call.
+- Two reads of the initial-sync finalization (`recalculate_all_posts_votes_and_children`):
+  the child-count `SELECT` it runs per depth level, and the `hive_votes` per-post
+  aggregation its `UPDATE` reads.
+
+`parameters` name the skewed columns: the thread for `get_discussion`, the author for
+`get_account_posts`, the depth level. A parameter has to appear in the query's SQL, so the
+call reads its argument from the stub row the value keys:
+`(SELECT name FROM hivemind_app.hive_accounts WHERE id = ${account})`. The pinned capture
+was taken without `--queries`, so it holds no value catalog. Until the next capture, each
+query is planned once, at its `value`, and the check warns about it.
+
+**While implementing**, `aidev db shape plan --sql … [--nested --setup …] [--candidate]`
+shows a statement's plan at mainnet size, `compare` compares the base tree's plan with the
+worktree's, `hypo --index "CREATE INDEX …"` tries an index without building it, and `apply`
+checks that the tree's code installs. `explain --source` and `calibrate` run the queries on
+steem-20 itself (`workflow_access`): read-only, at most two sessions at once.
+
+**Re-capturing.** Run this on a host with ssh access to steem-20. It catalogues the declared
+parameters' troublesome values and publishes the shape to the fleet store:
+
+```bash
+aidev db shape capture --host steem-20.syncad.com \
+  --source-container haf-haf-1 --database haf_block_log --user haf_admin \
+  --marker block_num="SELECT hive.app_get_irreversible_block()" \
+  --queries .aidev/project.yaml
+```
+
+Pin the printed digest as `performance.shape.artifact`. Confirm it with
+`aidev db shape load <digest> --image <performance.shape.image>`, which must print no
+`PARTIAL` line, then with `aidev db shape apply`. Update the capture's description in the
+comment above it.
+
+**When to move the pin:**
+
+- A change that adds or drops hivemind tables or indexes (`hive/db/sql_scripts/schema/`,
+  `register_indexes.sql`, `upgrade/`) once it runs on steem-20. Until then the shape plans
+  with the old set. `check` sizes a candidate's new indexes itself, so the change can be
+  judged before the pin moves.
+- A HAF version move on steem-20. Re-capture, and set `performance.shape.image` to the image
+  `docker inspect haf-haf-1` names there.
+- A replay or resync that changes the data's skew a lot.
 
 ## The HAF test stack (`test-stack.compose.yml`)
 
