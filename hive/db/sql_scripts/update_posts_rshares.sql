@@ -56,9 +56,9 @@ DROP FUNCTION IF EXISTS hivemind_app.recalculate_all_posts_rshares;
 DROP FUNCTION IF EXISTS hivemind_app.recalculate_all_posts_votes_and_children;
 --- Full recomputation of the vote aggregates (update_posts_rshares' columns) and
 --- `children` of every post. Both are written by one UPDATE, so a hive_posts row
---- gets one new version instead of one per aggregate: this runs with every
---- hive_posts index in place, and a version that changes sc_hot or sc_trend
---- (both indexed) is inserted into each of them.
+--- gets one new version instead of one per aggregate. An initial sync runs it
+--- before hive_posts' registered indexes are restored (DbState defers them), so
+--- it must not depend on any of them: only the primary key is guaranteed.
 CREATE OR REPLACE FUNCTION hivemind_app.recalculate_all_posts_votes_and_children()
 RETURNS VOID
 LANGUAGE 'plpgsql'
@@ -70,7 +70,18 @@ DECLARE
 BEGIN
 SET LOCAL work_mem='4GB';
 
-  SELECT MAX(hp.depth) INTO __depth FROM hivemind_app.hive_posts hp;
+  -- The posts the child count reads, in one scan of hive_posts, grouped by depth so
+  -- that each level of the loop below reads only its own pages.
+  DROP TABLE IF EXISTS hivemind_app.__post_tree;
+  CREATE UNLOGGED TABLE hivemind_app.__post_tree AS
+    SELECT hp.id, hp.parent_id, hp.depth
+    FROM hivemind_app.hive_posts hp
+    WHERE hp.counter_deleted = 0 AND hp.id != 0
+    ORDER BY hp.depth;
+  CREATE INDEX __post_tree_depth_idx ON hivemind_app.__post_tree (depth);
+  ANALYZE hivemind_app.__post_tree;
+
+  SELECT MAX(pt.depth) INTO __depth FROM hivemind_app.__post_tree pt;
 
   CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app.__post_children
   (
@@ -88,9 +99,9 @@ SET LOCAL work_mem='4GB';
       SELECT
         h1.parent_id AS queried_parent,
         SUM(COALESCE(pc.child_count, 0) + 1) AS count
-      FROM hivemind_app.hive_posts h1
+      FROM hivemind_app.__post_tree h1
       LEFT JOIN hivemind_app.__post_children pc ON pc.id = h1.id
-      WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
+      WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.depth = __depth
       GROUP BY h1.parent_id
 
     ON CONFLICT ON CONSTRAINT __post_children_pkey DO UPDATE
@@ -150,6 +161,7 @@ SET LOCAL work_mem='4GB';
   AND ((s.voted AND hp.counter_deleted = 0) OR s.child_count != hp.children);
 
   TRUNCATE TABLE hivemind_app.__post_children;
+  DROP TABLE hivemind_app.__post_tree;
 
 RESET work_mem;
 
