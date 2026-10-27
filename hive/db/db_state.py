@@ -4,6 +4,7 @@
 
 import logging
 import time
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
 
@@ -31,7 +32,7 @@ log = logging.getLogger(__name__)
 class DbState:
     """Manages database state: sync status, migrations, etc."""
 
-    _db = None
+    _db: Db | None = None
     _admin_db = None  # Admin connection for privileged operations like ALTER SYSTEM
 
     # prop is true until massive sync complete
@@ -44,7 +45,8 @@ class DbState:
     _original_fsync = None
     _original_full_page_writes = None
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
-    _initial_sync = None  # Cached: True until the first finalization commits last_completed_block
+    _initial_sync: bool | None = None  # Cached: True until the first finalization commits last_completed_block
+    _deferred_index_tables: list[str] = []  # Tables whose registered indexes wait for finalization's recompute
 
     # Tables that have registered indexes (via register_indexes.sql)
     _TABLES_WITH_REGISTERED_INDEXES = [
@@ -88,6 +90,11 @@ class DbState:
     MASSIVE_VACUUM_THRESHOLDS = {
         'hive_post_data': 50000,
     }
+
+    # Tables whose index restore an initial sync defers to finalization, after the
+    # full recompute that rewrites most of their rows: with the indexes in place,
+    # every new row version is inserted into each of them.
+    _INDEX_RESTORE_DEFERRED_TABLES = ['hive_posts']
 
     # Tables finalization (_finish_all_tables) writes; frozen by the vacuum after it.
     _FINALIZATION_WRITTEN_TABLES = [
@@ -175,7 +182,7 @@ class DbState:
         teardown(cls.db())
 
     @classmethod
-    def db(cls):
+    def db(cls) -> Db:
         """Get a db adapter instance."""
         if not cls._db:
             cls._db = Db.instance()
@@ -309,8 +316,8 @@ class DbState:
         FOSM.clear()
 
     @classmethod
-    def _restore_indexes_in_threads(cls) -> None:
-        """Restore all registered indexes in parallel across tables.
+    def _restore_indexes_in_threads(cls, deferred: Sequence[str] = ()) -> None:
+        """Restore all registered indexes in parallel across tables, except those of `deferred`.
 
         Excludes hive_post_data — the BM25 index is deferred to the fills phase
         where it runs in parallel with other finalization work.
@@ -319,6 +326,9 @@ class DbState:
 
         methods = []
         for table in cls._TABLES_WITH_REGISTERED_INDEXES:
+            if table in deferred:
+                log.info("[MASSIVE] Deferring index restore of %s.%s to finalization", SCHEMA_NAME, table)
+                continue
             full_name = f'{SCHEMA_NAME}.{table}'
             methods.append((table, cls._restore_indexes_per_table, [cls.db(), full_name]))
         # Include reptracker index
@@ -433,7 +443,7 @@ class DbState:
         log.info("[MASSIVE] WAL safety features restored")
 
     @classmethod
-    def is_initial_sync(cls):
+    def is_initial_sync(cls) -> bool:
         """True until the first massive finalization commits last_completed_block_num.
 
         Gates the machinery that is only justified (and only safe) when the
@@ -478,6 +488,7 @@ class DbState:
 
         cls.disable_autovacuum_for_massive_sync()
 
+        cls._deferred_index_tables = []
         cls._indexes_were_disabled = True
         cls._indexes_were_enabled = False
         log.info("[MASSIVE] Indexes are disabled")
@@ -506,8 +517,17 @@ class DbState:
         return cls._indexes_were_enabled
 
     @classmethod
-    def ensure_indexes_are_enabled(cls) -> None:
+    def ensure_indexes_are_enabled(cls, defer_to_finalization: bool = False) -> None:
+        """Restore the registered indexes and set the tables back to LOGGED.
+
+        With `defer_to_finalization` on an initial sync, the indexes of
+        _INDEX_RESTORE_DEFERRED_TABLES are left for the finalization that follows
+        (ensure_finalize_massive_sync) to restore after its recompute. Without it,
+        indexes an earlier call deferred are restored too.
+        """
         if cls.are_indexes_enabled():
+            if not defer_to_finalization:
+                cls._restore_deferred_indexes()
             return
 
         start_time = perf_counter()
@@ -520,7 +540,11 @@ class DbState:
         set_logged_table_attribute(cls.db(), True)
 
         log.info("Creating indexes: started")
-        cls._restore_indexes_in_threads()
+        if defer_to_finalization and cls.is_initial_sync():
+            cls._deferred_index_tables = list(cls._INDEX_RESTORE_DEFERRED_TABLES)
+        cls._restore_indexes_in_threads(deferred=cls._deferred_index_tables)
+        if not defer_to_finalization:
+            cls._restore_deferred_indexes()
         log.info("Creating indexes: finished")
 
         cls._indexes_were_disabled = False
@@ -528,6 +552,13 @@ class DbState:
         log.info("Indexes are enabled")
         end_time = perf_counter()
         log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
+
+    @classmethod
+    def _restore_deferred_indexes(cls) -> None:
+        """Restore the indexes ensure_indexes_are_enabled deferred to finalization, if any."""
+        for table in cls._deferred_index_tables:
+            cls._restore_indexes_per_table(cls.db(), f'{SCHEMA_NAME}.{table}')
+        cls._deferred_index_tables = []
 
     @classmethod
     def ensure_fk_are_enabled(cls) -> None:
@@ -556,6 +587,10 @@ class DbState:
         Two long UPDATEs of hive_posts in parallel would wait on each other's row
         locks for the length of the longer one, or deadlock; serialized, each sees
         the other's committed rows, and they write disjoint columns.
+
+        The indexes an initial sync deferred are restored after the recompute and
+        before the root_id repair and the muted-parent propagation, which find
+        their rows through them.
         """
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             # UPDATE: vote aggregates and `children`, in one pass.
@@ -573,6 +608,8 @@ class DbState:
                 log.info(
                     "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs", perf_counter() - time_start
                 )
+
+            cls._restore_deferred_indexes()
 
             # UPDATE: `root_id`
             # Root posts are inserted with root_id = id and comments take their
@@ -1030,6 +1067,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
                 # Interrupted by a shutdown request before the completion marker
                 # was committed; the next startup re-runs finalization with the
                 # same range. Skip the post-finalization vacuums.
+                cls._restore_deferred_indexes()
                 return True
 
             if is_initial_massive:
@@ -1044,6 +1082,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
 
             log.info("[MASSIVE] Massive sync complete!")
             return True
+        cls._restore_deferred_indexes()
         return False
 
     @staticmethod

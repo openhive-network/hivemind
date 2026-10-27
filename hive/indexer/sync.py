@@ -266,7 +266,10 @@ class SyncHiveDb:
                 DbState.ensure_fk_are_disabled()
                 if not DbState.are_indexes_enabled():
                     self._wait_for_massive_consume()
-                    DbState.ensure_indexes_are_enabled()
+                    # Batches run the SQL of the stage without indexes, plus an rshares
+                    # update by primary key, so hive_posts' registered indexes can wait
+                    # for finalization's recompute.
+                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif application_stage == "live":
@@ -287,7 +290,7 @@ class SyncHiveDb:
                     self._db.query_no_return("ROLLBACK")
 
                     DbState.ensure_on_synchronous_commit()
-                    DbState.ensure_indexes_are_enabled()
+                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
                     DbState.restore_wal_safety_after_massive_sync()
                     DbState.close_admin_db()  # No longer needed after massive sync
 
@@ -556,7 +559,7 @@ class SyncHiveDb:
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
-            DbState.ensure_indexes_are_enabled()
+            DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
