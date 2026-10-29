@@ -13,8 +13,7 @@ from hive.conf import SCHEMA_NAME
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
-from hive.utils.misc import UniqueCounter, chunks
-from hive.utils.normalize import escape_characters
+from hive.utils.misc import UniqueCounter
 from hive.utils.stats import FlushStatusManager as FSM
 
 log = logging.getLogger(__name__)
@@ -258,11 +257,6 @@ class CommunityOp:
 
     _notification_first_block = None
     _counter = UniqueCounter()
-    _moderation_log_buffer = []
-
-    @classmethod
-    def sync_tx_active(cls):
-        return False
 
     # pylint: disable=too-many-instance-attributes
 
@@ -428,14 +422,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'set_role', payload=Role(self.role_id).name):
-                old_role_id = result['old_role_id'] if result['old_role_id'] is not None else 0
-                self._log_moderation(
-                    self.MOD_ACTION_SET_ROLE,
-                    target_account_id=self.account_id,
-                    old_value=Role(old_role_id).name,
-                    new_value=Role(self.role_id).name,
-                )
+            self._handle_result(result, 'set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -447,13 +434,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'set_title', payload=self.title):
-                self._log_moderation(
-                    self.MOD_ACTION_SET_TITLE,
-                    target_account_id=self.account_id,
-                    old_value=result['old_title'] or '',
-                    new_value=self.title,
-                )
+            self._handle_result(result, 'set_title', payload=self.title)
         # Post-level actions
         elif action == 'mutePost':
             result = (
@@ -470,15 +451,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'mute_post', payload=self.notes):
-                self._log_moderation(
-                    self.MOD_ACTION_MUTE_POST,
-                    target_account_id=self.account_id,
-                    target_post_id=result['post_id'],
-                    old_value='unmuted',
-                    new_value='muted',
-                    notes=self.notes,
-                )
+            self._handle_result(result, 'mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
             result = (
@@ -494,15 +467,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'unmute_post', payload=self.notes):
-                self._log_moderation(
-                    self.MOD_ACTION_UNMUTE_POST,
-                    target_account_id=self.account_id,
-                    target_post_id=result['post_id'],
-                    old_value='muted',
-                    new_value='unmuted',
-                    notes=self.notes,
-                )
+            self._handle_result(result, 'unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
             result = (
@@ -518,14 +483,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'pin_post', payload=self.notes):
-                self._log_moderation(
-                    self.MOD_ACTION_PIN_POST,
-                    target_account_id=self.account_id,
-                    target_post_id=result['post_id'],
-                    old_value='unpinned',
-                    new_value='pinned',
-                )
+            self._handle_result(result, 'pin_post', payload=self.notes)
         elif action == 'unpinPost':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -540,14 +498,7 @@ class CommunityOp:
                 )
                 ._mapping
             )
-            if self._handle_result(result, 'unpin_post', payload=self.notes):
-                self._log_moderation(
-                    self.MOD_ACTION_UNPIN_POST,
-                    target_account_id=self.account_id,
-                    target_post_id=result['post_id'],
-                    old_value='pinned',
-                    new_value='unpinned',
-                )
+            self._handle_result(result, 'unpin_post', payload=self.notes)
         elif action == 'flagPost':
             result = (
                 DbAdapterHolder.common_block_processing_db()
@@ -566,13 +517,6 @@ class CommunityOp:
             if self._handle_result(result):
                 self._notify_team(
                     'flag_post', team_members=result['team_members'], post_id=result['post_id'], payload=self.notes
-                )
-                self._log_moderation(
-                    self.MOD_ACTION_FLAG_POST,
-                    target_account_id=self.account_id,
-                    target_post_id=result['post_id'],
-                    new_value='flagged',
-                    notes=self.notes,
                 )
 
         FSM.flush_stat('Community', perf_counter() - time_start, 1)
@@ -619,91 +563,6 @@ class CommunityOp:
             score=score,
             **kwargs,
         )
-
-    # Moderation log action type constants
-    MOD_ACTION_SET_ROLE = 1
-    MOD_ACTION_SET_TITLE = 2
-    MOD_ACTION_MUTE_POST = 3
-    MOD_ACTION_UNMUTE_POST = 4
-    MOD_ACTION_PIN_POST = 5
-    MOD_ACTION_UNPIN_POST = 6
-    MOD_ACTION_FLAG_POST = 7
-
-    def _log_moderation(
-        self, action_type, target_account_id=None, target_post_id=None, old_value=None, new_value=None, notes=None
-    ):
-        """Buffer or insert a moderation audit log entry."""
-        from hive.db.db_state import DbState
-
-        entry = (
-            self.community_id,
-            action_type,
-            self.actor_id,
-            target_account_id,
-            target_post_id,
-            old_value,
-            new_value,
-            notes,
-            self.block_num,
-            self.date,
-        )
-
-        if DbState.is_massive_sync():
-            CommunityOp._moderation_log_buffer.append(entry)
-        else:
-            sql = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
-                      (community_id, action, actor_id, target_account_id, target_post_id,
-                       old_value, new_value, notes, block_num, created_at)
-                      VALUES (:community_id, :action, :actor_id, :target_account_id,
-                              :target_post_id, :old_value, :new_value, :notes,
-                              :block_num, :created_at)"""
-            DbAdapterHolder.common_block_processing_db().query_no_return(
-                sql,
-                community_id=self.community_id,
-                action=action_type,
-                actor_id=self.actor_id,
-                target_account_id=target_account_id,
-                target_post_id=target_post_id,
-                old_value=old_value,
-                new_value=new_value,
-                notes=notes,
-                block_num=self.block_num,
-                created_at=self.date,
-            )
-
-    @classmethod
-    def flush_moderation_log(cls):
-        """Flush buffered moderation log entries in bulk."""
-        n = len(cls._moderation_log_buffer)
-        if n == 0:
-            return n
-
-        def _to_sql_values(entry):
-            community_id, action, actor_id, target_account_id, target_post_id, old_value, new_value, notes, block_num, created_at = entry
-            return "({}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp)".format(
-                community_id,
-                action,
-                actor_id,
-                target_account_id if target_account_id is not None else "NULL",
-                target_post_id if target_post_id is not None else "NULL",
-                escape_characters(old_value) if old_value is not None else "NULL",
-                escape_characters(new_value) if new_value is not None else "NULL",
-                escape_characters(notes) if notes is not None else "NULL",
-                block_num,
-                created_at,
-            )
-
-        sql_template = f"""INSERT INTO {SCHEMA_NAME}.hive_moderation_log
-                           (community_id, action, actor_id, target_account_id, target_post_id,
-                            old_value, new_value, notes, block_num, created_at)
-                           VALUES {{}}"""
-
-        values = [_to_sql_values(entry) for entry in cls._moderation_log_buffer]
-        for chunk in chunks(values, 1000):
-            DbAdapterHolder.common_block_processing_db().query_no_return(sql_template.format(','.join(chunk)))
-
-        cls._moderation_log_buffer.clear()
-        return n
 
     def _notify_team(self, op, team_members=None, post_id=None, **kwargs):
         """Send notifications to all team members (mod, admin, owner) in a community."""
