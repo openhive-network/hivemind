@@ -64,14 +64,20 @@ BEGIN
       'date', hivemind_postgrest_utilities.json_date(ml.created_at),
       'notes', ml.notes
     ) AS row_json
-    FROM hivemind_app.hive_moderation_log ml
+    -- WITH TIES keeps every entry sharing the last created_at on this page, so the next
+    -- page (created_at < last_date) cannot skip any of them.
+    FROM (
+      SELECT ml.*
+      FROM hivemind_app.hive_moderation_log ml
+      WHERE ml.target_account_id = _account_id
+        AND (_community_id IS NULL OR ml.community_id = _community_id)
+        AND (_last_date IS NULL OR ml.created_at < _last_date)
+      ORDER BY ml.created_at DESC
+      FETCH FIRST (_limit) ROWS WITH TIES
+    ) ml
     JOIN hivemind_app.hive_accounts actor_acc ON actor_acc.id = ml.actor_id
     JOIN hivemind_app.hive_communities hc ON hc.id = ml.community_id
-    WHERE ml.target_account_id = _account_id
-      AND (_community_id IS NULL OR ml.community_id = _community_id)
-      AND (_last_date IS NULL OR ml.created_at < _last_date)
     ORDER BY ml.created_at DESC, ml.id DESC
-    LIMIT _limit
   ) sub;
 
   _result = jsonb_build_object(
