@@ -9,13 +9,14 @@ DECLARE
 _community_id INT;
 _action_type TEXT;
 _action_id SMALLINT;
+_last_id BIGINT;
 _last_date TIMESTAMP;
 _limit INT;
 _result JSONB;
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(
     _params,
-    '{"community": "string", "action_type": "string", "last_date": "string", "limit": "number"}',
+    '{"community": "string", "action_type": "string", "last_id": "number", "limit": "number"}',
     1,
     NULL
   );
@@ -33,7 +34,15 @@ BEGIN
     _action_id = hivemind_postgrest_utilities.get_moderation_action_id(_action_type);
   END IF;
 
-  _last_date = hivemind_postgrest_utilities.parse_argument_from_json(_params, 'last_date', False)::TIMESTAMP;
+  -- Paging cursor is (created_at, id): ids do not follow created_at across a massive-sync batch.
+  _last_id = hivemind_postgrest_utilities.parse_bigint_argument_from_json(_params, 'last_id', False);
+  _last_id = hivemind_postgrest_utilities.valid_bigint(_last_id, 0, NULL, NULL, 'last_id');
+  IF _last_id <> 0 THEN
+    _last_date = (SELECT created_at FROM hivemind_app.hive_moderation_log WHERE id = _last_id);
+    IF _last_date IS NULL THEN
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('last_id ' || _last_id || ' does not exist');
+    END IF;
+  END IF;
 
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 1000, 'limit');
@@ -41,6 +50,7 @@ BEGIN
   _result = (
     SELECT jsonb_agg(row_json) FROM (
       SELECT jsonb_build_object(
+        'id', ml.id::TEXT,
         'action', hivemind_postgrest_utilities.get_moderation_action_name(ml.action),
         'actor', actor_acc.name,
         'target_account', target_acc.name,
@@ -51,23 +61,17 @@ BEGIN
         'notes', ml.notes,
         'date', hivemind_postgrest_utilities.json_date(ml.created_at)
       ) AS row_json
-      -- WITH TIES keeps every entry sharing the last created_at on this page, so the next
-      -- page (created_at < last_date) cannot skip any of them.
-      FROM (
-        SELECT ml.*
-        FROM hivemind_app.hive_moderation_log ml
-        WHERE ml.community_id = _community_id
-          AND (_action_id IS NULL OR ml.action = _action_id)
-          AND (_last_date IS NULL OR ml.created_at < _last_date)
-        ORDER BY ml.created_at DESC
-        FETCH FIRST (_limit) ROWS WITH TIES
-      ) ml
+      FROM hivemind_app.hive_moderation_log ml
       JOIN hivemind_app.hive_accounts actor_acc ON actor_acc.id = ml.actor_id
       LEFT JOIN hivemind_app.hive_accounts target_acc ON target_acc.id = ml.target_account_id
       LEFT JOIN hivemind_app.hive_posts hp ON hp.id = ml.target_post_id
       LEFT JOIN hivemind_app.hive_accounts post_author ON post_author.id = hp.author_id
       LEFT JOIN hivemind_app.hive_permlink_data pd ON pd.id = hp.permlink_id
+      WHERE ml.community_id = _community_id
+        AND (_action_id IS NULL OR ml.action = _action_id)
+        AND (_last_date IS NULL OR (ml.created_at, ml.id) < (_last_date, _last_id))
       ORDER BY ml.created_at DESC, ml.id DESC
+      LIMIT _limit
     ) sub
   );
 

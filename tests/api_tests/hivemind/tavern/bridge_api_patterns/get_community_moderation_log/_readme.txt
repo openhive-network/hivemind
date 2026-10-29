@@ -12,9 +12,10 @@ params:
     optional, filter by action: "set_role", "set_title", "mute_post",
     "unmute_post", "pin_post", "unpin_post", "flag_post"
 
-  "last_date":"{datetime}",
+  "last_id":{number},
 
-    optional, cursor for keyset pagination (entries with date < last_date)
+    optional, id of the last entry of the previous page; returns the entries
+    that come after it in (date, id) descending order
 
   "limit":{number}
 
