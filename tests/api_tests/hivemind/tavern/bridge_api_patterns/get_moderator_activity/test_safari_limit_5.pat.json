@@ -58,5 +58,17 @@
     "target_account": "alice",
     "target_post_author": "alice",
     "target_post_permlink": "after-member-comment-to-please-comment-hive2"
+  },
+  {
+    "action": "unmute_post",
+    "community": "hive-171487",
+    "community_title": "Banana",
+    "date": "2016-09-15T18:02:09",
+    "new_value": "unmuted",
+    "notes": "hive1 Unmute first comment",
+    "old_value": "muted",
+    "target_account": "alice",
+    "target_post_author": "alice",
+    "target_post_permlink": "after-member-comment-to-please-comment-hive1"
   }
 ]
