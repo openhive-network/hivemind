@@ -1,14 +1,5 @@
 {
   "account": "alice",
-  "stats": {
-    "posts_pinned": 0,
-    "posts_unpinned": 0,
-    "role_changes": 9,
-    "times_flagged": 0,
-    "times_muted": 36,
-    "times_unmuted": 18,
-    "title_changes": 0
-  },
   "actions": [
     {
       "action": "set_role",
@@ -16,6 +7,7 @@
       "community": "hive-198723",
       "community_title": "",
       "date": "2016-09-15T18:02:00",
+      "id": "25",
       "notes": null
     },
     {
@@ -24,6 +16,7 @@
       "community": "hive-157439",
       "community_title": "",
       "date": "2016-09-15T18:02:00",
+      "id": "24",
       "notes": null
     },
     {
@@ -32,6 +25,7 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:02:00",
+      "id": "23",
       "notes": null
     },
     {
@@ -40,6 +34,7 @@
       "community": "hive-198723",
       "community_title": "",
       "date": "2016-09-15T18:01:57",
+      "id": "94",
       "notes": "Unmute first post hive3"
     },
     {
@@ -48,6 +43,7 @@
       "community": "hive-157439",
       "community_title": "",
       "date": "2016-09-15T18:01:57",
+      "id": "93",
       "notes": "Unmute first post hive2"
     },
     {
@@ -56,6 +52,7 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:01:57",
+      "id": "92",
       "notes": "Unmute first post hive1"
     },
     {
@@ -64,6 +61,7 @@
       "community": "hive-198723",
       "community_title": "",
       "date": "2016-09-15T18:01:57",
+      "id": "91",
       "notes": "Unmute first comment hive3"
     },
     {
@@ -72,6 +70,7 @@
       "community": "hive-157439",
       "community_title": "",
       "date": "2016-09-15T18:01:57",
+      "id": "90",
       "notes": "Unmute first comment hive2"
     },
     {
@@ -80,6 +79,7 @@
       "community": "hive-171487",
       "community_title": "Banana",
       "date": "2016-09-15T18:01:57",
+      "id": "89",
       "notes": "Unmute first comment hive1"
     },
     {
@@ -88,7 +88,17 @@
       "community": "hive-188204",
       "community_title": "",
       "date": "2016-09-15T18:01:57",
+      "id": "21",
       "notes": null
     }
-  ]
+  ],
+  "stats": {
+    "posts_pinned": 0,
+    "posts_unpinned": 0,
+    "role_changes": 9,
+    "times_flagged": 0,
+    "times_muted": 36,
+    "times_unmuted": 18,
+    "title_changes": 0
+  }
 }

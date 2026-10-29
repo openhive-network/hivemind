@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_community_moderation_log"
-          params: {"community":"hive-135485", "last_date":"2016-09-15T18:02:00"}
+          params: {"community":"hive-135485", "last_id":26}
       response:
         status_code: 200
         verify_response_with:
