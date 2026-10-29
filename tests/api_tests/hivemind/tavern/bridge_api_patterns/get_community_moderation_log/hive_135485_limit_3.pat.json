@@ -3,6 +3,7 @@
     "action": "pin_post",
     "actor": "blocktrades",
     "date": "2016-09-15T18:02:03",
+    "id": "107",
     "new_value": "pinned",
     "notes": null,
     "old_value": "unpinned",
@@ -14,6 +15,7 @@
     "action": "pin_post",
     "actor": "blocktrades",
     "date": "2016-09-15T18:02:00",
+    "id": "105",
     "new_value": "pinned",
     "notes": null,
     "old_value": "unpinned",
@@ -25,66 +27,12 @@
     "action": "pin_post",
     "actor": "blocktrades",
     "date": "2016-09-15T18:02:00",
+    "id": "104",
     "new_value": "pinned",
     "notes": null,
     "old_value": "unpinned",
     "target_account": "blocktrades",
     "target_post_author": "blocktrades",
     "target_post_permlink": "crocodile02"
-  },
-  {
-    "action": "unmute_post",
-    "actor": "blocktrades",
-    "date": "2016-09-15T18:02:00",
-    "new_value": "unmuted",
-    "notes": "I hate crocodiles 03, but they are cool",
-    "old_value": "muted",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "crocodile03"
-  },
-  {
-    "action": "mute_post",
-    "actor": "blocktrades",
-    "date": "2016-09-15T18:02:00",
-    "new_value": "muted",
-    "notes": "I hate crocodiles 03",
-    "old_value": "unmuted",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "crocodile03"
-  },
-  {
-    "action": "mute_post",
-    "actor": "blocktrades",
-    "date": "2016-09-15T18:02:00",
-    "new_value": "muted",
-    "notes": "I hate crocodiles 02",
-    "old_value": "unmuted",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "crocodile02"
-  },
-  {
-    "action": "mute_post",
-    "actor": "blocktrades",
-    "date": "2016-09-15T18:02:00",
-    "new_value": "muted",
-    "notes": "I hate crocodiles 01",
-    "old_value": "unmuted",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "crocodile01"
-  },
-  {
-    "action": "set_role",
-    "actor": "hive-135485",
-    "date": "2016-09-15T18:02:00",
-    "new_value": "admin",
-    "notes": null,
-    "old_value": "mod",
-    "target_account": "blocktrades",
-    "target_post_author": null,
-    "target_post_permlink": null
   }
 ]
