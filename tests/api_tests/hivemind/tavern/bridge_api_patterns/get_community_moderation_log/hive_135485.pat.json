@@ -11,17 +11,6 @@
     "target_post_permlink": "elephant01"
   },
   {
-    "action": "mute_post",
-    "actor": "blocktrades",
-    "date": "2016-09-15T18:02:03",
-    "new_value": "muted",
-    "notes": "I don't like elephants",
-    "old_value": "unmuted",
-    "target_account": "blocktrades",
-    "target_post_author": "blocktrades",
-    "target_post_permlink": "elephant01"
-  },
-  {
     "action": "pin_post",
     "actor": "blocktrades",
     "date": "2016-09-15T18:02:00",

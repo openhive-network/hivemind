@@ -1,16 +1,5 @@
 [
   {
-    "action": "mute_post",
-    "actor": "test-safari",
-    "date": "2016-09-15T18:02:03",
-    "new_value": "muted",
-    "notes": "I dont like it",
-    "old_value": "unmuted",
-    "target_account": "test-safari",
-    "target_post_author": "test-safari",
-    "target_post_permlink": "secrets6"
-  },
-  {
     "action": "pin_post",
     "actor": "test-safari",
     "date": "2016-09-15T18:02:03",
@@ -196,17 +185,6 @@
     "target_account": "test-safari",
     "target_post_author": "test-safari",
     "target_post_permlink": "muted-and-edited"
-  },
-  {
-    "action": "mute_post",
-    "actor": "test-safari",
-    "date": "2016-09-15T18:01:39",
-    "new_value": "muted",
-    "notes": "Test",
-    "old_value": "unmuted",
-    "target_account": "test-safari",
-    "target_post_author": "test-safari",
-    "target_post_permlink": "muted-and-recreated"
   },
   {
     "action": "mute_post",
