@@ -54,6 +54,29 @@ ALTER TABLE hivemind_app.hive_posts ADD COLUMN IF NOT EXISTS last_payout_block I
 -- Superseded: database_api.list_votes by_voter_comment pages on hive_votes_voter_id_author_id_permlink_id_uk
 DROP INDEX IF EXISTS hivemind_app.hive_votes_voter_id_post_id_idx;
 
+-- Community moderation audit log; indexes created before registering so HAF records them as 'created'
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_moderation_log (
+    id BIGSERIAL PRIMARY KEY,
+    community_id INTEGER NOT NULL,
+    action SMALLINT NOT NULL,
+    actor_id INTEGER NOT NULL,
+    target_account_id INTEGER,
+    target_post_id INTEGER,
+    old_value VARCHAR(256),
+    new_value VARCHAR(256),
+    notes VARCHAR(256),
+    block_num INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_community_id_created_at_idx ON hivemind_app.hive_moderation_log (community_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_actor_id_created_at_idx ON hivemind_app.hive_moderation_log (actor_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num);
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_community_id_created_at_idx ON hivemind_app.hive_moderation_log (community_id, created_at DESC, id DESC)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_actor_id_created_at_idx ON hivemind_app.hive_moderation_log (actor_id, created_at DESC, id DESC)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num)');
+
 RESET ROLE;
 
 -- HAF has no per-index deregistration and applications cannot write hafd.indexes_constraints, so this runs as
