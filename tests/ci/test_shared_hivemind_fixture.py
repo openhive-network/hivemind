@@ -402,7 +402,7 @@ def test_a_recipe_miss_clones_the_newest_of_the_revision_with_an_advisory_and_re
     assert seeds == [{'rev': REV_B, 'recipe': recipe, 'commit': _git(tree, 'rev-parse', 'HEAD')}]
     assert fixture.fallback_message(_template(REV_B, RECIPE_B), recipe, requested=True) in lines
     assert [(clone['rev'], clone['recipe']) for clone in clones] == [(REV_B, RECIPE_B)]
-    assert rc == 1
+    assert rc == 2
     assert 'reloading the tree' in lines[-1]
 
 
@@ -439,7 +439,7 @@ def test_an_exact_hit_clones_that_template_without_a_seed_request_and_drops_the_
 
     clones = [call['vars'] for call in calls if 'clone_run_database' in call['sql']]
     drops = [call['vars'] for call in calls if 'drop_run_database' in call['sql']]
-    assert rc == 1
+    assert rc == 2
     assert 'reloading the tree' in lines[-1]
     assert not any('advisory' in line for line in lines)
     assert not any("request_seed(:" in call['sql'] for call in calls)
@@ -527,3 +527,50 @@ def test_a_selector_naming_no_test_fails_the_step_before_cloning(
     assert rc == 2
     assert lines[-1] == 'selectors naming no test of a tavern group: bridge_api_patterns.nothing.tavern.yaml::Hivemind'
     assert calls == []
+
+
+def test_a_step_that_crashes_before_any_group_exits_unreported(tree: Path, tmp_path: Path) -> None:
+    (tree / '.gitlab-ci.yml').unlink()
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    assert rc == 2
+    assert lines[-1] == 'tavern step crashed; see the traceback above'
+    assert any('FileNotFoundError' in line for line in lines)
+    assert calls == []
+
+
+_FAILED_REPORT = '<testsuite><testcase classname="g.a.tavern.yaml" name="Hivemind"><failure/></testcase></testsuite>'
+_COLLECTION_ERROR_REPORT = (
+    '<testsuite><testcase classname="" name="g"><error message="collection failure"/></testcase></testsuite>'
+)
+
+
+@pytest.mark.parametrize(
+    ('rc', 'report', 'status'),
+    [
+        (0, None, 0),
+        (1, _FAILED_REPORT, 1),
+        (1, None, 2),
+        (2, _COLLECTION_ERROR_REPORT, 2),
+        (2, _FAILED_REPORT, 2),
+        (3, _FAILED_REPORT, 2),
+        (-9, _FAILED_REPORT, 2),
+    ],
+)
+def test_only_a_group_that_ran_its_tests_and_recorded_its_failures_exits_1(
+    tmp_path: Path, rc: int, report: str | None, status: int
+) -> None:
+    tavern = _load_tavern()
+    if report is not None:
+        (tmp_path / 'tavern-g.xml').write_text(report)
+
+    assert tavern.run_status(str(tmp_path), {'g': ['g/']}, {}, {'g': rc}, False, []) == status
+
+
+def test_a_failing_group_recorded_per_test_does_not_hide_a_later_crashed_one(tmp_path: Path) -> None:
+    tavern = _load_tavern()
+    (tmp_path / 'tavern-a.xml').write_text(_FAILED_REPORT)
+    (tmp_path / 'tavern-b.xml').write_text(_COLLECTION_ERROR_REPORT)
+
+    assert tavern.run_status(str(tmp_path), {'a': ['a/'], 'b': ['b/']}, {}, {'a': 1, 'b': 2}, False, []) == 2

@@ -58,10 +58,13 @@ aidev reads every `.xml` under a suite's `artifacts:`, so a failing test is repo
 once, under its own id: a step that exits 1 and whose per-test report (`unit.xml`,
 `api-smoke.xml`, `tavern-*.xml`) records the failure is written *skipped* in
 `junit.xml`, pointing at that report (`.aidev/junit_cases.py`). Exit 1 is how those
-steps say every failure is in their report; `hivemind_tavern.py` exits 2 when a group
-failed without recording one (a crash, a collection error it could not report). A
-step that fails any other way, or writes no report, still fails as itself and
-blocks, as do `ruff` and the install steps.
+steps say every failure is in their report, so `hivemind_tavern.py` exits 1 only
+when each failing group ran its tests (its runner exited 1) and recorded the failures.
+Anything else exits 2: a group that crashed, failed to collect (its report then holds
+one `<error>` case, no test of the group having run) or recorded nothing, a setup
+error, the provider refusing, an uncaught exception. A step that fails any other
+way, or writes no report, still fails as itself and blocks, as do `ruff` and the
+install steps.
 
 The ids are the junit's: `tests/utils/test_x.py::test_y` (unit),
 `bridge_api_patterns.get_post.foo.tavern.yaml::Hivemind` (tavern: pytest's dotted
@@ -86,6 +89,11 @@ clone of the shared hivemind. It exits 0 only when every named test ran and pass
 an id no listed step owns, a tavern file no SMOKETESTS group holds, or an owning
 step that skips (no fixture, search-api without `pg_search`) fails it. A file whose
 tests `-m "not postgrest_ignore"` all deselects has nothing to re-run and passes.
+An owning step exiting other than 0 or 1 (a skip, a crash, a setup or collection
+error) reached no verdict, and aidev's causality check reads a re-run report that
+does not name the id as the id being absent on base, so new. Such a re-run leaves
+no `.xml`: its reports are renamed `<name>.xml.no-verdict`, and with no report the
+non-zero exit reads as the id failing on base.
 
 Each rule's `file_pattern` accepts only what that slot's steps run, as ids and as
 the changed files repeat-new-tests repeats: `quick` and `canary` the unit tests,

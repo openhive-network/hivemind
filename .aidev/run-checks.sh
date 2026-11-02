@@ -55,7 +55,11 @@
 # Neither step needs another first: unit runs from the checkout, tavern on its own
 # clone. The exit status is 0 only when every named test ran and passed: an
 # argument no listed step owns, or an owning step that skips, fails the re-run,
-# since a test that never ran must not read as passing.
+# since a test that never ran must not read as passing. An owning step exiting
+# other than 0 or 1 (a skip, a crash, a setup or collection error) reached no
+# verdict, and a report naming other tests would read as one, the named id absent:
+# the re-run then leaves no .xml, its reports kept as <name>.xml.no-verdict, so
+# aidev reads the id as failing, not as absent.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 root="$PWD"
@@ -97,6 +101,7 @@ export HIVEMIND_TEST_USER_URL="postgresql://hivemind@$DB_HOST/haf_block_log"
 REPTRACKER_SCHEMA=reptracker_app
 
 status=0
+no_verdict=()
 SKIP_RC=77
 # record CASES_FILE NAME RC SECONDS LOG [TESTS_JUNIT]
 record() {
@@ -121,6 +126,7 @@ step() {  # NAME TESTS_JUNIT COMMAND...  (TESTS_JUNIT: the per-test junit it wri
         status=1; tail -40 "$log" >&2
     fi
     [ "$rc" -eq 1 ] || tests_junit=""
+    [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] || no_verdict+=("$name")
     record "$cases" "$name" "$rc" "$((SECONDS - t0))" "$log" "$tests_junit"
 }
 
@@ -293,5 +299,11 @@ else
     fi
 fi
 [ -n "$stage" ] && rm -rf "$stage"
-python3 .aidev/junit_cases.py "$out/junit.xml" "$suite" "$cases"
+if [ ${#rerun[@]} -gt 0 ] && [ ${#no_verdict[@]} -gt 0 ]; then
+    echo "re-run reached no verdict in: ${no_verdict[*]}; its reports are kept as *.xml.no-verdict" >&2
+    find "$out" -name '*.xml' -print0 | while IFS= read -r -d '' report; do mv "$report" "$report.no-verdict"; done
+    python3 .aidev/junit_cases.py "$out/junit.xml.no-verdict" "$suite" "$cases"
+else
+    python3 .aidev/junit_cases.py "$out/junit.xml" "$suite" "$cases"
+fi
 exit "$status"
