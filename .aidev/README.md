@@ -89,11 +89,16 @@ clone of the shared hivemind. It exits 0 only when every named test ran and pass
 an id no listed step owns, a tavern file no SMOKETESTS group holds, or an owning
 step that skips (no fixture, search-api without `pg_search`) fails it. A file whose
 tests `-m "not postgrest_ignore"` all deselects has nothing to re-run and passes.
-An owning step exiting other than 0 or 1 (a skip, a crash, a setup or collection
-error) reached no verdict, and aidev's causality check reads a re-run report that
-does not name the id as the id being absent on base, so new. Such a re-run leaves
-no `.xml`: its reports are renamed `<name>.xml.no-verdict`, and with no report the
-non-zero exit reads as the id failing on base.
+aidev's causality check reads a re-run report that does not name the id as the id
+being absent on base, so new. An id naming no test of the tree is that verdict, the
+way a test the change adds shows up on base: a unit node id pytest does not collect
+(exit 4 or 5 on `--collect-only`) is not run and fails the re-run as the
+`rerun-absent` case of `junit.xml`, and a tavern selector no SMOKETESTS group holds
+fails it as the `rerun-ids` case of `tavern-rerun-ids.xml`, written before the
+provider is asked for anything. An owning step exiting other than 0 or 1 (a skip,
+a crash, a setup or collection error) reached no verdict: its own reports and
+`junit.xml` are renamed `<name>.xml.no-verdict`, so with no report the non-zero
+exit reads as the id failing on base. Another owning step's reports are kept.
 
 Each rule's `file_pattern` accepts only what that slot's steps run, as ids and as
 the changed files repeat-new-tests repeats: `quick` and `canary` the unit tests,

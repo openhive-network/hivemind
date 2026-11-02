@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 from types import ModuleType
@@ -516,7 +517,7 @@ def test_selectors_resolve_to_the_files_and_node_ids_of_ci_groups() -> None:
     ]
 
 
-def test_a_selector_naming_no_test_fails_the_step_before_cloning(
+def test_a_selector_naming_no_test_is_recorded_and_fails_the_step_before_cloning(
     tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     recipe = fixture.recipe_of_tree(str(tree), HAF)
@@ -524,9 +525,20 @@ def test_a_selector_naming_no_test_fails_the_step_before_cloning(
 
     rc, lines, calls = _run_step(tree, tmp_path / 'out', 'bridge_api_patterns.nothing.tavern.yaml::Hivemind')
 
-    assert rc == 2
+    assert rc == 1
     assert lines[-1] == 'selectors naming no test of a tavern group: bridge_api_patterns.nothing.tavern.yaml::Hivemind'
     assert calls == []
+    report = ET.parse(tmp_path / 'out' / 'tavern-rerun-ids.xml').getroot()
+    assert [(case.get('classname'), case.get('name')) for case in report.iter('testcase')] == [('tavern', 'rerun-ids')]
+    assert report.find('testcase/failure') is not None
+
+
+def test_an_unresolved_selector_beside_failures_recorded_per_test_exits_1(tmp_path: Path) -> None:
+    tavern = _load_tavern()
+    (tmp_path / 'tavern-g.xml').write_text(_FAILED_REPORT)
+
+    assert tavern.run_status(str(tmp_path), {'g': ['g/']}, {}, {'g': 1}, True, ['x.tavern.yaml']) == 1
+    assert tavern.run_status(str(tmp_path), {'g': ['g/']}, {}, {'g': 0}, True, ['x.tavern.yaml']) == 1
 
 
 def test_a_step_that_crashes_before_any_group_exits_unreported(tree: Path, tmp_path: Path) -> None:
