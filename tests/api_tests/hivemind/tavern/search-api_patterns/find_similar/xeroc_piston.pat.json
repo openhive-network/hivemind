@@ -1,0 +1,3564 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": -864498292406,
+        "voter": "liondani"
+      },
+      {
+        "rshares": -1911946532824,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 22645392645,
+        "voter": "yefet"
+      },
+      {
+        "rshares": -457602975116,
+        "voter": "cryptogee"
+      },
+      {
+        "rshares": 1032033214,
+        "voter": "allyourbase"
+      },
+      {
+        "rshares": -151304222639,
+        "voter": "repholder"
+      },
+      {
+        "rshares": 219488181,
+        "voter": "eduardf"
+      },
+      {
+        "rshares": 3461074214,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 206294417,
+        "voter": "fiona777"
+      },
+      {
+        "rshares": 2012690785,
+        "voter": "jayjustmay"
+      },
+      {
+        "rshares": 90692976938,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 18828721486,
+        "voter": "proto"
+      },
+      {
+        "rshares": 5885675419,
+        "voter": "taker"
+      },
+      {
+        "rshares": 1251336,
+        "voter": "softpunk"
+      },
+      {
+        "rshares": 61515602,
+        "voter": "beautiful.girls"
+      }
+    ],
+    "author": "beautiful.girls",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 8.89,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<p>\u00a0<img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png\" /></p>\n<h1>Piston.web - Standalone User Interface</h1>\n<p>Many may already know <code>piston</code> as a tool that simplifies interaction with Steem/Steemit. You can read, post, comment, edit, transfer funds and much more, if you are willing to use the command line.This changes <strong>now</strong>. With <code>piston.web</code>, the toolbox now comes with <strong>graphical user interface</strong>that you can access via your browser. It is <strong>fully independent of steemit.com</strong>, which means that you can do what you love doing on Steem, even if steemit.com goes down.</p>\n<h1>Available Features</h1>\n<ul>\n  <li>browsing steem posts</li>\n  <li>reading full posts and comments</li>\n  <li>reply to topics and comments</li>\n  <li>upvote/downvote</li>\n  <li>read account details\n    <ul>\n      <li>recommended posts</li>\n      <li>blog posts</li>\n      <li>funds</li>\n      <li>transaction history</li>\n    </ul>\n  </li>\n  <li>integrated wallet</li>\n  <li>full encrypted (AES + BIP32) for private keys</li>\n  <li>import keys from account name and password</li>\n</ul>\n<h1>Screenshots</h1>\n<h2>Browse:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c17ace1.png\" /></p>\n<h2>Account</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c1dbdc5.png\" /></p>\n<h2>Funds:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2ae8a0.png\" /></p>\n<h2>Post:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c26f1d0.png\" /></p>\n<h2>Wallet:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2e7b58.png\" /></p>\n<h1>Installation</h1>\n<p>Until we leave pre-alpha, piston.web is on a different branch.</p>\n<pre><code>git clone https://github.com/xeroc/piston<br />\n<br />\ncd piston<br />\n<br />\ngit checkout feature/standalone-web<br />\n<br />\nmake install-user<br />\n<br />\n# install extra requirements for piston.web<br />\n<br />\npip install -r requirements-web.txt<br />\n<br />\n</code></pre>\n<h1>Usage</h1>\n<pre><code>piston web<br />\n<br />\n</code></pre>\n<p>On first run, you will be asked to provide a passphrase for your new wallet. Empty password are allowed but result in private keys being stored in plain text.After that, you will see</p>\n<pre><code>* Running on http://127.0.0.1:5054/ (Press CTRL+C to quit)<br />\n<br />\n * Restarting with stat<br />\n<br />\n * Debugger is active!<br />\n<br />\n * Debugger pin code: 227-869-909<br />\n<br />\n</code></pre>\n<p>Ignore the debugging output and start using piston.web in your browser<br />\nby accessing</p>\n<pre><code>http://127.0.0.1:5054/<br />\n<br />\n</code></pre>\n<p>NOTE: piston.web will only be reachable from the same machine (localhost).</p>\n<h1>Technologies</h1>\n<h2>Backend</h2>\n<p>The backend is written in python using</p>\n<ul>\n  <li>Flask (with Jinja2)</li>\n  <li>python-steem.</li>\n</ul>\n<p>It offers the HTML files and a Socket-IO for real-time communications.</p>\n<h2>Frontend</h2>\n<p>These technologies have been used so far in piston.web:</p>\n<ul>\n  <li>Bootstrap</li>\n  <li>Markdown</li>\n  <li>Font-Awesome</li>\n  <li>Plain Javascript</li>\n</ul>\n<h2>Wallet</h2>\n<p>The wallet is only accessible from the backend. All keys are encrypted with a random master password that is stored in an SQLite3 database in its AES encrypted form. Each private key is encrypted with the master password using BIP32 and stored in a SQLite3 database. The wallet will make backups of the SQLite3 database every week and keep several weeks of backup.</p>\n<h1>Todos</h1>\n<ul>\n  <li>Transfer of funds</li>\n  <li>PowerUp, PowerDown</li>\n  <li>Trading</li>\n  <li>Account Administration (changing keys etc)</li>\n  <li>Allow to attach JSON object to posts</li>\n  <li>Secure socket.io with a password</li>\n  <li>layout and style improvements</li>\n</ul>\n<h1>Contributions</h1>\n<p>Currently, we are looking for the bravest of the bravest to help us test what is already there and give</p>\n<ul>\n  <li>bug reports</li>\n  <li>improvement proposals</li>\n  <li>feature request</li>\n</ul>\n<p>Please use the <a href=\"https://github.com/xeroc/piston/issues\" rel=\"noopener\">github issue tracker</a> to make it easier for us to remember all the feedback.</p>\n<h1>Important Note</h1>\n<p>piston.web is alpha software. For that reason, you need to expect it to break at any time. Use at your own risk.</p>\n<h1>Update 1</h1>\n<p>I'd like to clarify that this GUI is <strong>not</strong> meant to replace steemit.com or be used as a hosted, public site. It rather offers a <em>personal</em>, <em>localhost-only</em> page that you can use to access your wallet. Exposing the piston.web to a publicly accessible port is <strong>not</strong> recommended!</p>\n<h1>Update 2</h1>\n<p>I fixed the <code>sqlite3.OperationalError: unable to open database file</code> error earlier today so that people can actually take a look.</p>\n<h1>Update 3</h1>\n<p>More short-term fixes for the weekend-testers:</p>\n<pre><code>* [2016-07-23][bf3dae5] | [setup] make sure the user uses python3<br />\n<br />\n* [2016-07-23][c31eec7] | [web] highlight own posts<br />\n<br />\n* [2016-07-23][03e0d2f] | [web] fix reply identifier not in the form</code></pre>",
+    "category": "piston",
+    "children": 7,
+    "created": "2016-08-01T19:13:33",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c17ace1.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c1dbdc5.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2ae8a0.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c26f1d0.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2e7b58.png"
+      ],
+      "links": [
+        "https://github.com/xeroc/piston/issues"
+      ],
+      "tags": [
+        "piston",
+        "opensource",
+        "steemit",
+        "tester",
+        ""
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": -3240304908748,
+    "payout": 0.0,
+    "payout_at": "2016-09-01T07:33:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-web-first-open-source-steem-gui-searching-for-alpha-testers",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 3.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 15
+    },
+    "title": "[piston.web] First Open Source Steem GUI - Searching for alpha testers",
+    "updated": "2016-08-01T19:13:33",
+    "url": "/piston/@beautiful.girls/piston-web-first-open-source-steem-gui-searching-for-alpha-testers"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": -781973087906,
+        "voter": "cyrano.witness"
+      },
+      {
+        "rshares": 262375695,
+        "voter": "thhiggi"
+      },
+      {
+        "rshares": -9637209059,
+        "voter": "konstantin"
+      },
+      {
+        "rshares": -734699657,
+        "voter": "jsteck"
+      },
+      {
+        "rshares": 1979747465,
+        "voter": "gustavopasquini"
+      },
+      {
+        "rshares": 65748721,
+        "voter": "johnn"
+      }
+    ],
+    "author": "johnn",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 16.31,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "http://i.imgur.com/izRUG2n.jpg\n\npiston\n\n[piston.web] First Open Source Steem GUI - Searching for alpha testers\n1 week ago by xeroc in piston\n\n\nPiston.web - Standalone User Interface\n\nMany may already know piston as a tool that simplifies interaction with Steem/Steemit. You can read, post, comment, edit, transfer funds and much more, if you are willing to use the command line.\n\nThis changes now. With piston.web, the toolbox now comes with graphical user interface that you can access via your browser. It is fully independent of steemit.com, which means that you can do what you love doing on Steem, even if steemit.com goes down.\n\nAvailable Features\n\nBrowsing steem posts\nReading full posts and comments\nReply to topics and comments\nUpvote/downvote\nRead account details\nRecommended posts\nBlog posts\nFunds\nTransaction history\nIntegrated wallet\nFull encrypted (AES + BIP32) for private keys\nImport keys from account name and password\n\n\nScreenshots\n\nBrowse:\nhttp://i.imgur.com/zSsURgS.jpg\n\n\nAccount:\nhttp://i.imgur.com/qmoblsh.jpg\n\nFunds:\nhttp://i.imgur.com/5vsMrfK.jpg\n\nPost:\nhttp://i.imgur.com/uqVGGr5.jpg\n\nWallet:\nhttp://i.imgur.com/jBp5MM7.jpg\n\nInstallation\n\nUntil we leave pre-alpha, piston.web is on a different branch.\n\ngit clone https://github.com/xeroc/piston\ncd piston\ngit checkout feature/standalone-web\nmake install-user\n# install extra requirements for piston.web\npip install -r requirements-web.txt\n\nUsage\n\npiston web\nOn first run, you will be asked to provide a passphrase for your new wallet. Empty password are allowed but result in private keys being stored in plain text.\n\nAfter that, you will see\n\n * Running on http://127.0.0.1:5054/ (Press CTRL+C to quit)\n * Restarting with stat\n * Debugger is active!\n * Debugger pin code: 227-869-909\nIgnore the debugging output and start using piston.web in your browser\nby accessing\n\nhttp://127.0.0.1:5054/\nNOTE: piston.web will only be reachable from the same machine (localhost).\n\npiston\n\n[piston.web] First Open Source Steem GUI - Searching for alpha testers\n1 week ago by xeroc in piston\n\n\nPiston.web - Standalone User Interface\n\nMany may already know piston as a tool that simplifies interaction with Steem/Steemit. You can read, post, comment, edit, transfer funds and much more, if you are willing to use the command line.\n\nThis changes now. With piston.web, the toolbox now comes with graphical user interface that you can access via your browser. It is fully independent of steemit.com, which means that you can do what you love doing on Steem, even if steemit.com goes down.\n\nAvailable Features\n\nbrowsing steem posts\nreading full posts and comments\nreply to topics and comments\nupvote/downvote\nread account details\nrecommended posts\nblog posts\nfunds\ntransaction history\nintegrated wallet\nfull encrypted (AES + BIP32) for private keys\nimport keys from account name and password\nScreenshots\n\nBrowse:\n\n\n\nAccount\n\n\n\nFunds:\n\n\n\nPost:\n\n\n\nWallet:\n\n\n\nInstallation\n\nUntil we leave pre-alpha, piston.web is on a different branch.\n\ngit clone https://github.com/xeroc/piston\ncd piston\ngit checkout feature/standalone-web\nmake install-user\n# install extra requirements for piston.web\npip install -r requirements-web.txt\nUsage\n\npiston web\nOn first run, you will be asked to provide a passphrase for your new wallet. Empty password are allowed but result in private keys being stored in plain text.\n\nAfter that, you will see\n\n * Running on http://127.0.0.1:5054/ (Press CTRL+C to quit)\n * Restarting with stat\n * Debugger is active!\n * Debugger pin code: 227-869-909\nIgnore the debugging output and start using piston.web in your browser\nby accessing\n\nhttp://127.0.0.1:5054/\nNOTE: piston.web will only be reachable from the same machine (localhost).\n\nTechnologies\n\nBackend\n\nThe backend is written in python using\n\nFlask (with Jinja2)\npython-steem.\nIt offers the HTML files and a Socket-IO for real-time communications.\n\nFrontend\n\nThese technologies have been used so far in piston.web:\n\nBootstrap\nMarkdown\nFont-Awesome\nPlain Javascript\n\nWallet\n\nThe wallet is only accessible from the backend. All keys are encrypted with a random master password that is stored in an SQLite3 database in its AES encrypted form. Each private key is encrypted with the master password using BIP32 and stored in a SQLite3 database. The wallet will make backups of the SQLite3 database every week and keep several weeks of backup.\n\nTodos\n\nTransfer of funds\nPowerUp, PowerDown\nTrading\nAccount Administration (changing keys etc)\nAllow to attach JSON object to posts\nSecure socket.io with a password\nlayout and style improvements\nContributions\n\nCurrently, we are looking for the bravest of the bravest to help us test what is already there and give\n\nBug reports\nImprovement proposals\nFeature request\nPlease use the github issue tracker to make it easier for us to remember all the feedback.\n\nImportant Note\n\npiston.web is alpha software. For that reason, you need to expect it to break at any time. Use at your own risk.\n\nUpdate 1\n\nI'd like to clarify that this GUI is not meant to replace steemit.com or be used as a hosted, public site. It rather offers a personal, localhost-only page that you can use to access your wallet. Exposing the piston.web to a publicly accessible port is not recommended!\n\nUpdate 2\n\nI fixed the sqlite3.OperationalError: unable to open database file error earlier today so that people can actually take a look.\n\nUpdate 3\n\nMore short-term fixes for the weekend-testers:\n\n* [2016-07-23][bf3dae5] | [setup] make sure the user uses python3\n* [2016-07-23][c31eec7] | [web] highlight own posts\n* [2016-07-23][03e0d2f] | [web] fix reply identifier not in the form",
+    "category": "steemit",
+    "children": 6,
+    "created": "2016-07-30T17:35:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "http://i.imgur.com/izRUG2n.jpg"
+      ],
+      "tags": [
+        "steemit",
+        "crypto-news"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": -790037124741,
+    "payout": 0.0,
+    "payout_at": "2016-08-30T05:48:39",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-web-by-xenoc-first-open-source-steem-gui-searching-for-alpha-testers",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 2.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 6
+    },
+    "title": "Piston.web by xeroc:  First Open Source Steem GUI - Searching for alpha testers !",
+    "updated": "2016-07-30T17:37:03",
+    "url": "/steemit/@johnn/piston-web-by-xenoc-first-open-source-steem-gui-searching-for-alpha-testers"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 7493987904416,
+        "voter": "steempty"
+      },
+      {
+        "rshares": 1471058371134,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 16416573807917,
+        "voter": "rainman"
+      },
+      {
+        "rshares": 127010183645,
+        "voter": "penambang"
+      },
+      {
+        "rshares": 96474562329,
+        "voter": "highasfuck"
+      },
+      {
+        "rshares": 6220915710783,
+        "voter": "wackou"
+      },
+      {
+        "rshares": 2334065458576,
+        "voter": "hr1"
+      },
+      {
+        "rshares": 446552737635,
+        "voter": "justin"
+      },
+      {
+        "rshares": 1098449549649,
+        "voter": "silver"
+      },
+      {
+        "rshares": 3666485917945,
+        "voter": "wang"
+      },
+      {
+        "rshares": 3685829770,
+        "voter": "boy"
+      },
+      {
+        "rshares": 1921741610038,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 4472411375,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 1008286505,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 2700072826731,
+        "voter": "complexring"
+      },
+      {
+        "rshares": 60761213457,
+        "voter": "bue"
+      },
+      {
+        "rshares": 3269735858,
+        "voter": "chloe"
+      },
+      {
+        "rshares": 3276104297,
+        "voter": "jen"
+      },
+      {
+        "rshares": 21893585492,
+        "voter": "danknugs"
+      },
+      {
+        "rshares": 264510683230,
+        "voter": "steemservices"
+      },
+      {
+        "rshares": 1976289963,
+        "voter": "mini"
+      },
+      {
+        "rshares": 289161118,
+        "voter": "moon"
+      },
+      {
+        "rshares": 69136581,
+        "voter": "kelly"
+      },
+      {
+        "rshares": 9637660012,
+        "voter": "bentley"
+      },
+      {
+        "rshares": 2831501561390,
+        "voter": "recursive"
+      },
+      {
+        "rshares": 101979704458,
+        "voter": "stan"
+      },
+      {
+        "rshares": 1241635926418,
+        "voter": "steempower"
+      },
+      {
+        "rshares": 813404331497,
+        "voter": "cass"
+      },
+      {
+        "rshares": 26901471296,
+        "voter": "proctologic"
+      },
+      {
+        "rshares": 733572590,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 27274226633,
+        "voter": "rimantas"
+      },
+      {
+        "rshares": 1231491148,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 489620350,
+        "voter": "sophia"
+      },
+      {
+        "rshares": 129758363755,
+        "voter": "team"
+      },
+      {
+        "rshares": 89155965946,
+        "voter": "jchch"
+      },
+      {
+        "rshares": 106127270565,
+        "voter": "linouxis9"
+      },
+      {
+        "rshares": 26897794094,
+        "voter": "alexgr"
+      },
+      {
+        "rshares": 401322500,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 22222017748,
+        "voter": "yefet"
+      },
+      {
+        "rshares": 129206669493,
+        "voter": "chris4210"
+      },
+      {
+        "rshares": 14044862054,
+        "voter": "valtr"
+      },
+      {
+        "rshares": 210972022272,
+        "voter": "noaommerrr"
+      },
+      {
+        "rshares": 90116305823,
+        "voter": "edgeland"
+      },
+      {
+        "rshares": 13957555741,
+        "voter": "sandwich"
+      },
+      {
+        "rshares": 151045077057,
+        "voter": "vato"
+      },
+      {
+        "rshares": 141615582819,
+        "voter": "jamtaylor"
+      },
+      {
+        "rshares": 3637423455,
+        "voter": "kenmonkey"
+      },
+      {
+        "rshares": 5909696072,
+        "voter": "jademont"
+      },
+      {
+        "rshares": 419025216,
+        "voter": "paco-steem"
+      },
+      {
+        "rshares": 4820280893,
+        "voter": "spaninv"
+      },
+      {
+        "rshares": 41088694330,
+        "voter": "james-show"
+      },
+      {
+        "rshares": 970621916,
+        "voter": "gekko"
+      },
+      {
+        "rshares": 246578509133,
+        "voter": "teamsteem"
+      },
+      {
+        "rshares": 656185957837,
+        "voter": "nanzo-scoop"
+      },
+      {
+        "rshares": 202315287424,
+        "voter": "pal"
+      },
+      {
+        "rshares": 16014851210,
+        "voter": "canhazlulz"
+      },
+      {
+        "rshares": 13835252029,
+        "voter": "fact"
+      },
+      {
+        "rshares": 58895215074,
+        "voter": "hannixx42"
+      },
+      {
+        "rshares": 238659512996,
+        "voter": "mummyimperfect"
+      },
+      {
+        "rshares": 4700063367,
+        "voter": "xav"
+      },
+      {
+        "rshares": 1395073987,
+        "voter": "murh"
+      },
+      {
+        "rshares": 17924191419,
+        "voter": "b4bb4r-5h3r"
+      },
+      {
+        "rshares": 45590938033,
+        "voter": "nphacker"
+      },
+      {
+        "rshares": 7382045732,
+        "voter": "bogdanberkut"
+      },
+      {
+        "rshares": 421587106500,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 141926071,
+        "voter": "irit"
+      },
+      {
+        "rshares": 1622497502,
+        "voter": "cm-steem"
+      },
+      {
+        "rshares": 328015755,
+        "voter": "stiletto"
+      },
+      {
+        "rshares": 313194206,
+        "voter": "yonatann"
+      },
+      {
+        "rshares": 194947045878,
+        "voter": "wingz"
+      },
+      {
+        "rshares": 17379551965,
+        "voter": "minfon"
+      },
+      {
+        "rshares": 77496176460,
+        "voter": "tim-johnston"
+      },
+      {
+        "rshares": 272202230969,
+        "voter": "trogdor"
+      },
+      {
+        "rshares": 1229501511,
+        "voter": "tee-em"
+      },
+      {
+        "rshares": 32847562873,
+        "voter": "michaelx"
+      },
+      {
+        "rshares": 30856573790,
+        "voter": "geoffrey"
+      },
+      {
+        "rshares": 85011218373,
+        "voter": "truthtaco"
+      },
+      {
+        "rshares": 191177220367,
+        "voter": "lukestokes"
+      },
+      {
+        "rshares": 21429647532,
+        "voter": "jparty"
+      },
+      {
+        "rshares": 24127704899,
+        "voter": "m0se"
+      },
+      {
+        "rshares": 31980201765,
+        "voter": "karnal"
+      },
+      {
+        "rshares": 1258272170,
+        "voter": "superfreek"
+      },
+      {
+        "rshares": 8122956762,
+        "voter": "primus"
+      },
+      {
+        "rshares": 35379865172,
+        "voter": "clement"
+      },
+      {
+        "rshares": 4221872432,
+        "voter": "azaan"
+      },
+      {
+        "rshares": 8253650712,
+        "voter": "dasha"
+      },
+      {
+        "rshares": 3553029911,
+        "voter": "dennygalindo"
+      },
+      {
+        "rshares": 1677875154,
+        "voter": "orly"
+      },
+      {
+        "rshares": 1965197186,
+        "voter": "ustas"
+      },
+      {
+        "rshares": 1603902795,
+        "voter": "stranger27"
+      },
+      {
+        "rshares": 16434525904,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 322992658,
+        "voter": "maxb"
+      },
+      {
+        "rshares": 270324825,
+        "voter": "field"
+      },
+      {
+        "rshares": 352949060,
+        "voter": "wintrop"
+      },
+      {
+        "rshares": 249654342,
+        "voter": "hammurabi"
+      },
+      {
+        "rshares": 263172670,
+        "voter": "fydel"
+      },
+      {
+        "rshares": 2115182708,
+        "voter": "owdy"
+      },
+      {
+        "rshares": 212499504,
+        "voter": "ghozia"
+      },
+      {
+        "rshares": 86164020929,
+        "voter": "knircky"
+      },
+      {
+        "rshares": 8596350826,
+        "voter": "ausbitbank"
+      },
+      {
+        "rshares": 8000474466,
+        "voter": "akareyon"
+      },
+      {
+        "rshares": 3970974315,
+        "voter": "sebastien"
+      },
+      {
+        "rshares": 3800440987,
+        "voter": "gikitiki"
+      },
+      {
+        "rshares": 128690825950,
+        "voter": "paco"
+      },
+      {
+        "rshares": 3036957117,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 49719004416,
+        "voter": "sephiroth"
+      },
+      {
+        "rshares": 241441374,
+        "voter": "hankrearden"
+      },
+      {
+        "rshares": 7123363695,
+        "voter": "sylv3se"
+      },
+      {
+        "rshares": 10116444697,
+        "voter": "bycz"
+      },
+      {
+        "rshares": 383490595,
+        "voter": "mrshade"
+      },
+      {
+        "rshares": 11986136230,
+        "voter": "anduweb"
+      },
+      {
+        "rshares": 6828866833,
+        "voter": "andrewsanderson"
+      },
+      {
+        "rshares": 124593393,
+        "voter": "dimon14"
+      },
+      {
+        "rshares": 4327695743,
+        "voter": "warrensteem"
+      },
+      {
+        "rshares": 4376059376,
+        "voter": "madillorama"
+      },
+      {
+        "rshares": 1578235313,
+        "voter": "imp3"
+      },
+      {
+        "rshares": 250811026,
+        "voter": "lenar79"
+      },
+      {
+        "rshares": 146005525541,
+        "voter": "blueorgy"
+      },
+      {
+        "rshares": 1058220796,
+        "voter": "poseidon"
+      },
+      {
+        "rshares": 1631642989,
+        "voter": "iamwne"
+      },
+      {
+        "rshares": 2075932451,
+        "voter": "smolalit"
+      },
+      {
+        "rshares": 3409329543,
+        "voter": "davidr"
+      },
+      {
+        "rshares": 112312748,
+        "voter": "nataschasielers"
+      },
+      {
+        "rshares": 327872468,
+        "voter": "rules169"
+      },
+      {
+        "rshares": 24817323431,
+        "voter": "royaltiffany"
+      },
+      {
+        "rshares": 6793814193,
+        "voter": "geronimo"
+      },
+      {
+        "rshares": 109501547,
+        "voter": "firedesire"
+      },
+      {
+        "rshares": 29478606345,
+        "voter": "rea"
+      },
+      {
+        "rshares": 604807646,
+        "voter": "cliro"
+      },
+      {
+        "rshares": 493715031,
+        "voter": "qonq99"
+      },
+      {
+        "rshares": 87259407543,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 139944161,
+        "voter": "meteor78"
+      },
+      {
+        "rshares": 896599758,
+        "voter": "yarly"
+      },
+      {
+        "rshares": 247805387,
+        "voter": "yarly2"
+      },
+      {
+        "rshares": 242428449,
+        "voter": "yarly3"
+      },
+      {
+        "rshares": 140416932,
+        "voter": "yarly4"
+      },
+      {
+        "rshares": 148602796,
+        "voter": "yarly5"
+      },
+      {
+        "rshares": 41309064,
+        "voter": "yarly6"
+      },
+      {
+        "rshares": 79636186,
+        "voter": "yarly7"
+      },
+      {
+        "rshares": 19833828,
+        "voter": "yarly8"
+      },
+      {
+        "rshares": 4821453199,
+        "voter": "prufarchy"
+      },
+      {
+        "rshares": 3798530846,
+        "voter": "rayphu"
+      },
+      {
+        "rshares": 6407003254,
+        "voter": "alsprinting"
+      },
+      {
+        "rshares": 2671313171,
+        "voter": "anca3drandom"
+      },
+      {
+        "rshares": 188237078,
+        "voter": "turretkilo"
+      },
+      {
+        "rshares": 72003886097,
+        "voter": "johnsmith"
+      },
+      {
+        "rshares": 4318998060,
+        "voter": "lemooljiang"
+      },
+      {
+        "rshares": 126020115,
+        "voter": "xcode18"
+      },
+      {
+        "rshares": 13219948775,
+        "voter": "proto"
+      },
+      {
+        "rshares": 2356856558,
+        "voter": "anon.news"
+      },
+      {
+        "rshares": 2215957393,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 198778079,
+        "voter": "yarly10"
+      },
+      {
+        "rshares": 112677985,
+        "voter": "yarly11"
+      },
+      {
+        "rshares": 58144907,
+        "voter": "yarly12"
+      },
+      {
+        "rshares": 38791389,
+        "voter": "yarly13"
+      },
+      {
+        "rshares": 19937173005,
+        "voter": "celebr1ty"
+      },
+      {
+        "rshares": 10308631583,
+        "voter": "rznag"
+      },
+      {
+        "rshares": 1940380665,
+        "voter": "mialolita"
+      },
+      {
+        "rshares": 804522031,
+        "voter": "belkins"
+      },
+      {
+        "rshares": 24753155049,
+        "voter": "jasonstaggers"
+      },
+      {
+        "rshares": 110302430,
+        "voter": "picker"
+      },
+      {
+        "rshares": 2557318884,
+        "voter": "jed78"
+      },
+      {
+        "rshares": 735391125,
+        "voter": "metaflute"
+      },
+      {
+        "rshares": 85944158,
+        "voter": "alrx6918"
+      },
+      {
+        "rshares": 6353455248,
+        "voter": "taker"
+      },
+      {
+        "rshares": 1390970417563,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 5972175462,
+        "voter": "rawnetics"
+      },
+      {
+        "rshares": 5975307826,
+        "voter": "capitalism"
+      },
+      {
+        "rshares": 59996755,
+        "voter": "persianqueen"
+      },
+      {
+        "rshares": 62321801,
+        "voter": "nurik"
+      },
+      {
+        "rshares": 4310836434,
+        "voter": "gmurph"
+      },
+      {
+        "rshares": 310329339,
+        "voter": "viktor.phuket"
+      },
+      {
+        "rshares": 2192294725,
+        "voter": "darrenturetzky"
+      },
+      {
+        "rshares": 61862491,
+        "voter": "bidv"
+      },
+      {
+        "rshares": 18210988594,
+        "voter": "poteshnik83"
+      },
+      {
+        "rshares": 128820091,
+        "voter": "joele"
+      },
+      {
+        "rshares": 25089203,
+        "voter": "erikkartmen"
+      },
+      {
+        "rshares": 1570558951,
+        "voter": "kainmarx"
+      },
+      {
+        "rshares": 57181375,
+        "voter": "aiaconelli707"
+      },
+      {
+        "rshares": 16462452,
+        "voter": "ciao"
+      },
+      {
+        "rshares": 7393331,
+        "voter": "steemo"
+      },
+      {
+        "rshares": 3687129,
+        "voter": "steema"
+      },
+      {
+        "rshares": 1233506,
+        "voter": "sugarfromhell"
+      },
+      {
+        "rshares": 558491788,
+        "voter": "erikclark13"
+      },
+      {
+        "rshares": 11331734,
+        "voter": "confucius"
+      },
+      {
+        "rshares": 1222934,
+        "voter": "koolaidssss"
+      },
+      {
+        "rshares": 60886073,
+        "voter": "tomeraddady"
+      },
+      {
+        "rshares": 10376903120,
+        "voter": "nomorealex"
+      },
+      {
+        "rshares": 54041023,
+        "voter": "nazarzs"
+      },
+      {
+        "rshares": 7485839,
+        "voter": "jarvis"
+      },
+      {
+        "rshares": 10597050326,
+        "voter": "matrixdweller"
+      },
+      {
+        "rshares": 4841122552,
+        "voter": "mabiturm"
+      },
+      {
+        "rshares": 51811442,
+        "voter": "filmaker"
+      },
+      {
+        "rshares": 57289213,
+        "voter": "thecurator"
+      },
+      {
+        "rshares": 45976693,
+        "voter": "krishbas"
+      },
+      {
+        "rshares": 58563677,
+        "voter": "geckogates"
+      },
+      {
+        "rshares": 53551308,
+        "voter": "oedipus"
+      },
+      {
+        "rshares": 32526493,
+        "voter": "metu2222"
+      },
+      {
+        "rshares": 52199764,
+        "voter": "bitchplease"
+      },
+      {
+        "rshares": 57956893,
+        "voter": "yongwoon"
+      },
+      {
+        "rshares": 35908700,
+        "voter": "brucy"
+      },
+      {
+        "rshares": 53275985,
+        "voter": "jelloducky"
+      },
+      {
+        "rshares": 56733561,
+        "voter": "blueeyedpunk"
+      },
+      {
+        "rshares": 3424657,
+        "voter": "deejayehn"
+      },
+      {
+        "rshares": 44168992,
+        "voter": "malxdrakon"
+      },
+      {
+        "rshares": 134382695,
+        "voter": "l0k1"
+      }
+    ],
+    "author": "xeroc",
+    "author_payout_value": "776.712 HBD",
+    "author_reputation": 69.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "# Release 0.3\n\nThis release is a major update with significant changes under the hood (see below). It now already comes with a basic piston.web version (documentation available in `README-web.md`) and fixes quite a lot of nasty littly bugs.\n\nAs usual, [bug reports are welcome](https://github.com/xeroc/piston/issues).\n\n## Howto upgrade\n\n    pip3 install steem-piston --upgrade     [--user]\n\n## New:\n\n - [piston] show history in cli\n - [piston] allow to provide tags or any arbitray data in the frontmatter header\n - [piston] add powerdownroute command\n - [piston] show interest payments and when they can happen the earliest\n - [wallet] allow to overwrite password promt by means of an environmental variable 'UNLOCK'\n - [piston] delkey, getkey and minor fixes in the wallet\n - [steem] add get_account_history call\n - [steem] allow sorting of posts by total_payout_value\n - [steem] get_comments call\n - [wallet] implement masterpassword\n\n## piston.web:\n\n - [web] cleanup and singelton websocket connection\n - [web] funds: add interest payments\n - [web] improvments and index page\n - [web] tokenize tags\n - [readme.web] piston now in develop (later master) branch, howto for windows7\n - [web] README-web: add dependencies for apt-get\n - [web] allow to specify --host to listen to, defaults to 127.0.0.1\n - [web] show root posts for replies\n - [web] list more transactions and filter by type\n - [web] Readme some dependencies\n - [web] voting spinners\n - [web] add a footer and some bottom distance\n - [web] simplify html/markdown presentation\n - [web] settings page\n - [web] properly show comment_reward in the tx history\n - [web] remove lxml dependency\n - [web] highlight own posts\n - [web] fix reply identifier not in the form\n - [web] README\n - [web] fixes for the wallet import procedure\n - [web] massive update\n - [web] more structure, content and the ability to post\n - [web] initial browse view\n - [web] initial work on standalone piston.web\n - [browse] allow to browse more than 10 posts\n\n## Fixes:\n\n - [Makefile] don't intend the git tag message\n - [account] properly use graphene-inherited account module for key related stuff\n - [docs] a page about this.piston.rocks API server\n - [docs] documentation of source code\n - [piston] add a piston.py file for development\n - [piston] ensure on startup that the piston node is available\n - [piston] fix author on posts\n - [piston] fix default_author for replies\n - [piston] fix transfer amount/asset distinction\n - [setup] cleanup dependencies\n - [setup] fix flask/egg issue by disallowing zip\n - [setup] make sure the user uses python3\n - [setup] update dependencies\n - [sqlwallet] initial commit\n - [steem] don't randomly throw any keys in create_account\n - [steem] fix Post when used with an indentifier\n - [steem] fix account creation\n - [steem] fix get_recommended when no recommendation returned\n - [steem] remove recommended\n - [storage] Backup solution\n - [storage] create app_data dir if not present\n - [storage] enable multithreaded access to storage\n - [storage] more robust backup\n - [utils] don't exit on exception\n - [wallet] ensure to overwrite the keys if manually passed\n - [wallet] legacy wallet code cleanup\n\n# Important Notes:\n\n* If you had a piston wallet before, you will need to migrate your\n  existing wallet into the more modern SQLite-based wallet. This works\n  as easy as running\n\n      piston listaccounts\n\n  You will be asked to provide the old password and a new password. Afterwards,\n  your private keys will be BIP32 encrypted and stored in your local piston\n  wallet.\n\n* The piston wallet stores it's database in your appdir:\n\n   **OSX:**\n\n    * `~/Library/Application Support/piston`\n\n   **Windows:**\n\n    * `C:\\Documents and Settings\\<User>\\Application Data\\Local Settings\\Fabian Schuh\\piston`\n    * `C:\\Documents and Settings\\<User>\\Application Data\\Fabian Schuh\\piston`\n\n   **Linux:**\n\n    * `~/.local/share/piston`\n\n* The piston wallet will create backups of your local database now and then and\n  store them in the `backups/` folder  next to the database (see above)\n\n* If you use the `steem.transfer()` call you will need to modify your calls to\n  now distinguish asset (string) from amount (float).\n\n* The piston.create_account no longer generates a password for your, you will\n  need to either provide a password or the public keys for creating new\n  accounts.",
+    "category": "piston",
+    "children": 25,
+    "created": "2016-08-04T11:40:45",
+    "curator_payout_value": "59.667 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 55878926304295,
+    "payout": 836.379,
+    "payout_at": "2016-09-04T01:26:54",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "changelog-piston-0-3",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 206
+    },
+    "title": "[Changelog] Piston 0.3",
+    "updated": "2016-08-04T11:50:06",
+    "url": "/piston/@xeroc/changelog-piston-0-3"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 28844265533,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 124519787887,
+        "voter": "penambang"
+      },
+      {
+        "rshares": 3685381662,
+        "voter": "boy"
+      },
+      {
+        "rshares": 1882514701451,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 4471849494,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 1008134811,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 60724234979,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1976064746,
+        "voter": "mini"
+      },
+      {
+        "rshares": 289128610,
+        "voter": "moon"
+      },
+      {
+        "rshares": 1232463317303,
+        "voter": "steempower"
+      },
+      {
+        "rshares": 733495969,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 1231309658,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 401276448,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 87283739116,
+        "voter": "unosuke"
+      },
+      {
+        "rshares": 34110405913,
+        "voter": "noisy"
+      },
+      {
+        "rshares": 512983803,
+        "voter": "kaj-huisman"
+      },
+      {
+        "rshares": 7715913360,
+        "voter": "nate-atkins"
+      },
+      {
+        "rshares": 9486686625,
+        "voter": "acidyo"
+      },
+      {
+        "rshares": 1394844885,
+        "voter": "murh"
+      },
+      {
+        "rshares": 2751473170,
+        "voter": "calamus056"
+      },
+      {
+        "rshares": 3949733973,
+        "voter": "innocent22"
+      },
+      {
+        "rshares": 106797961982,
+        "voter": "kenny-crane"
+      },
+      {
+        "rshares": 119643412721,
+        "voter": "omarb"
+      },
+      {
+        "rshares": 19493667712,
+        "voter": "crypto-fan"
+      },
+      {
+        "rshares": 5667943547,
+        "voter": "magnebit"
+      },
+      {
+        "rshares": 15407368035,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 1528607769,
+        "voter": "mrgreen"
+      },
+      {
+        "rshares": 79270017293,
+        "voter": "jesta"
+      },
+      {
+        "rshares": 2819689386,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 241421637,
+        "voter": "hankrearden"
+      },
+      {
+        "rshares": 132380480,
+        "voter": "dimon14"
+      },
+      {
+        "rshares": 234499098,
+        "voter": "maximaug"
+      },
+      {
+        "rshares": 234425474,
+        "voter": "fiona777"
+      },
+      {
+        "rshares": 58496223,
+        "voter": "nataschasielers"
+      },
+      {
+        "rshares": 39519166,
+        "voter": "williamger"
+      },
+      {
+        "rshares": 515180902,
+        "voter": "qonq99"
+      },
+      {
+        "rshares": 81016104789,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 13218154840,
+        "voter": "proto"
+      },
+      {
+        "rshares": 198673579,
+        "voter": "yarly10"
+      },
+      {
+        "rshares": 112662118,
+        "voter": "yarly11"
+      },
+      {
+        "rshares": 19524890846,
+        "voter": "celebr1ty"
+      },
+      {
+        "rshares": 8546372907,
+        "voter": "michiel"
+      },
+      {
+        "rshares": 1920394210,
+        "voter": "extricati0n"
+      },
+      {
+        "rshares": 2429914877,
+        "voter": "shortcut"
+      },
+      {
+        "rshares": 5898947546,
+        "voter": "taker"
+      },
+      {
+        "rshares": 424116931,
+        "voter": "feedthemachine"
+      },
+      {
+        "rshares": 3198082608,
+        "voter": "bitcalm"
+      },
+      {
+        "rshares": 31743477,
+        "voter": "pjheinz"
+      },
+      {
+        "rshares": 59097612,
+        "voter": "thegoldencookie"
+      },
+      {
+        "rshares": 60480413,
+        "voter": "cryptomental"
+      },
+      {
+        "rshares": 53551308,
+        "voter": "oedipus"
+      }
+    ],
+    "author": "cryptomental",
+    "author_payout_value": "7.275 HBD",
+    "author_reputation": 54.79,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "This is for everyone that finds the 'Swiss army knife for STEEM' Piston project useful.\nI created and deployed Docker images on Docker Hub for Piston and Piston.web Alpha version.\n\n# Now you can run [Piston] and [Piston.web] Alpha inside Docker container.\n\nThis solution has several advantages: now you can run Piston and Piston.web alpha on your Mac/ Ubuntu/Fedora/Gentoo/Windows using a simple 'docker run' command. Piston and its dependencies will not pollute your OS as everything sits inside the Docker container.\n\n## [Piston]\n\n### Pulling the image from Docker Hub\n```\n$ docker pull cryptomental/steem-piston\nlatest: Pulling from cryptomental/steem-piston\n...\nDigest: sha256:c1cadfef0fd92ca5edd537464f727cbd47406d59f08bf6431c0f413e850161d4\nStatus: Downloaded newer image for cryptomental/steem-piston:latest\n```\n\n### Running the image\n```\n$ docker run -it cryptomental/steem-piston\n```\n\nYou should end up in Docker container shell with Piston support and be able to execute Piston commands:\n\n```\n$ piston read @xeroc/piston-cli-quickstart\n```\n\nIf everything goes well you should see Piston quickstart message:\n\nhttp://i.imgsafe.org/2f610ec3e9.png\n\n## [Piston.web] Alpha\n\n### Pulling the image from Docker Hub\n\n```\n$ docker pull cryptomental/steem-piston-web\nlatest: Pulling from cryptomental/steem-piston-web\n...\nDigest: sha256:a65d7cfcbe79826bbf2b20420c74515850c92300488d1a75d0a35347750140b3\nStatus: Downloaded newer image for cryptomental/steem-piston-web:latest\n```\n\n### Running the image\n\n```\n$ docker run --net=host -it cryptomental/steem-piston-web\n```\n\nYou should end up in Docker container shell with Piston.web Alpha support and be able to execute start Piston.web:\n\n```\npiston@cryptomental-lin:~$ piston web\nPlease provide a password for the new wallet\nPassphrase: \nYou have chosen an empty password! We assume you understand the risks!\n```\n\nNow open your web browser and navigate to http://127.0.0.1:5054\nYou should be able to access [Piston.web] interface!\n\nhttp://i.imgsafe.org/2f7b4b5d48.png\n\n\nI hope you enjoy my contribution and I suspect this will spread the work about Piston.web and help to alpha test it. I will be maintaining the [Piston.web] Docker image until it is merged to master branch and becomes an official part of Piston.\n\nDockerfile GitHub repositories are here: \n\nhttps://github.com/cryptomental/docker-steem-piston\nhttps://github.com/cryptomental/docker-steem-piston-web\n\nLet me know if you are curious how I created the images, set up Docker Hub and connected it to GitHub. I will then describe the procedure in my next post!\n\nCheers!\n\nP.S. This is my day 3 of Steem lean start-up 90 day challenge. I am still reading [Mastering Bitcoin](https://github.com/bitcoinbook/bitcoinbook) book and my head is turning from 4:3 to 16:9.",
+    "category": "steem",
+    "children": 2,
+    "created": "2016-08-04T08:15:09",
+    "curator_payout_value": "0.754 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "http://i.imgsafe.org/2f610ec3e9.png"
+      ],
+      "tags": [
+        "steem",
+        "learntocode",
+        "docker",
+        "piston"
+      ],
+      "users": [
+        "xeroc"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3978846508882,
+    "payout": 8.029,
+    "payout_at": "2016-09-03T21:42:30",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-and-piston-web-dockerized",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 51
+    },
+    "title": "[Piston] and [Piston.web] Dockerized !",
+    "updated": "2016-08-04T08:15:09",
+    "url": "/steem/@cryptomental/piston-and-piston-web-dockerized"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 127531666842,
+        "voter": "penambang"
+      },
+      {
+        "rshares": 8588168705,
+        "voter": "boy"
+      },
+      {
+        "rshares": 1951355011134,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 10419624001,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 4740821104,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 140739102550,
+        "voter": "bue"
+      },
+      {
+        "rshares": 4605033853,
+        "voter": "mini"
+      },
+      {
+        "rshares": 1401226431,
+        "voter": "moon"
+      },
+      {
+        "rshares": 651652785602,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 1709501039,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 5952367669,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 1944553746,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 14219259777,
+        "voter": "ervin-lemark"
+      },
+      {
+        "rshares": 4678902002,
+        "voter": "jerome-colley"
+      },
+      {
+        "rshares": 1045272135,
+        "voter": "murh"
+      },
+      {
+        "rshares": 1223677680,
+        "voter": "kennyskitchen"
+      },
+      {
+        "rshares": 6085778055,
+        "voter": "kingofchaos"
+      },
+      {
+        "rshares": 4217871291,
+        "voter": "azaan"
+      },
+      {
+        "rshares": 39677589860,
+        "voter": "robrigo"
+      },
+      {
+        "rshares": 3861241812,
+        "voter": "auxon"
+      },
+      {
+        "rshares": 28057032805,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 2575823331,
+        "voter": "beanhead"
+      },
+      {
+        "rshares": 3246808922,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 6426725731,
+        "voter": "bycz"
+      },
+      {
+        "rshares": 5596026104,
+        "voter": "generalspecific"
+      },
+      {
+        "rshares": 24397809321,
+        "voter": "inertia"
+      },
+      {
+        "rshares": 7589349238,
+        "voter": "q00p"
+      },
+      {
+        "rshares": 81609621939,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 2513464,
+        "voter": "cire81"
+      },
+      {
+        "rshares": 16014062692,
+        "voter": "proto"
+      },
+      {
+        "rshares": 5435487701,
+        "voter": "taker"
+      },
+      {
+        "rshares": 19325583,
+        "voter": "auxonoxua"
+      },
+      {
+        "rshares": 7961712512,
+        "voter": "sunshine"
+      },
+      {
+        "rshares": 134326835090,
+        "voter": "glitterfart"
+      },
+      {
+        "rshares": 3677533,
+        "voter": "etz"
+      },
+      {
+        "rshares": 94291809,
+        "voter": "btc.ctb"
+      },
+      {
+        "rshares": 20566412,
+        "voter": "alexander1"
+      },
+      {
+        "rshares": 108023596,
+        "voter": "boloyang"
+      },
+      {
+        "rshares": 50769578,
+        "voter": "etherguy"
+      },
+      {
+        "rshares": 103468301,
+        "voter": "kainmarx"
+      },
+      {
+        "rshares": 1277307,
+        "voter": "countrytalented"
+      }
+    ],
+    "author": "etz",
+    "author_payout_value": "2.703 HBD",
+    "author_reputation": 44.3,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "# Piston.web, standalone user interface for steem is [searching for alpha testers](https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers).\n\nSo, we can install it on Windows. We need python 3.5, Visual Studio 2015, OpenSSL and git for that.\n\n![piston on windows](https://raw.githubusercontent.com/MotovilovIvan/stuff/master/2016-07-31/piston.web.png)\n## 1. Install python from [python.org](https://www.python.org/downloads/windows/)\n* Select appropriate version for you windows architecture (64 or 32)\n* \u0421heck \"Add python to to enviromoment variables\" and \"Precompile standard library\"\n\n## 2. Install Visual Studio 2015 community from [microsoft](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx)\n* select C++ and python tools\n\n## 3. Install WinOpenSSL from [slproweb.com](http://slproweb.com/products/Win32OpenSSL.html)\n* Select appropriate version for you windows architecture (64 or 32)\n* Do not take the light version, it does not contain needed library\n\n## 4. Prepare and build scrypt python module\nDownload and unzip scrypt module from [bitbucket](https://bitbucket.org/mhallin/py-scrypt/downloads). Enter to directory (```mhallin-py-scrypt-119842611360``` in my case) and open with you preferred text editor (notepad work) file\n### ```setup.py```\n\nWe need specify exact path's to openssl library and header files we have installed early. Search string ```sys.platform.startswith('win32'):``` and edit it accordingly OpenSSL installed directory:\n(In my case it will be ```c:\\Python35\\OpenSSL-Win64\\lib``` and ```c:\\Python35\\OpenSSL-Win64\\include```\n```python\nelif sys.platform.startswith('win32'):\n    define_macros = [('inline', '__inline')]\n>    library_dirs = ['c:\\OpenSSL-Win64\\lib']\n    libraries = ['libeay32', 'advapi32']\n>    includes = ['c:\\OpenSSL-Win64\\include', 'scrypt-windows-stubs/include']\n```\n* Symbol \">\" is just marking lines to change, do not enter it. \n\nAfter that enter the directory ```scrypt-1.1.6\\lib\\scryptenc\\``` and find file\n\n### ```scryptenc_cpuperf.c```\nSearch for ```#ifdef _WIN32``` and append before and after \"if\" block:\n```python\n>#ifdef HAVE_STRUCT_TIMESPEC\n#ifdef _WIN32\nstruct timespec {\n       time_t tv_sec;\n       long tv_nsec;\n};\n#endif\n>#endif\n```\n\nReturn to directory with setup.py (```mhallin-py-scrypt-119842611360```) and install it.\n\n_For running commands in particular directory I'm using FAR manager, you can use you preffered file manager, or even cmd.exe, but typing all the directories with \"cd\" command can be tedious._\n```cmd\npython setup.py build\npython setup.py install\n```\n## 5. Install Git from [git-for-windows](https://git-for-windows.github.io/)\nGit has many options, feel free to change it, if you know what you doing. I'm select next adjustment: \n* Checkout as-is, commit as-is\n* Use Windows default console window\n* uncheck Enable Git Credential Manager\n\nAfter installing it would be good to put path to git.exe in enviromoment variables. Open properties of \"My computer\", select \"advanced system settings\" and \"enviromoment variables\". In that windows create (or edit if it exists) variable PATH with value ```c:\\Python35\\Git\\mingw64\\bin``` (that for my case, adjust it with you Git directory). Values in PATH variable separated by \";\".\n\nSo, now we can get piston repository and build it.\n```cmd\ngit clone https://github.com/xeroc/piston\ncd piston\ngit checkout feature/standalone-web\npython setup.py build\npython setup.py install --user\npip install -r requirements-web.txt\n```\n\n## 6. Run: ```piston web```\n\nIt prompt for password (twice) for new wallet. Generate (with [pwgen](http://8-p.info/pwgen/) for example) and enter.\n\nPiston tells us to install some websocket module for perfomance, eventlet or gevent, but with this modules posting is not working, so do not install them.\n\nOpen piston.web in browser http://127.0.0.1:5054/\n\n* unlock you wallet if you see **icon of closed lock**\n* Click **Wallet**\n* Put in section **Import (any) Private Key** you private key (it can be obtain on http://steemit.com/@YouUserName/permissions in \"POSTING\" line, when you click \"Show private key\")\n* Select you account in **Account** link\n\nDone! You can browse, upvote, look at you funds, post and all that stuff. (_Well, this is alpha version, so not all will be just fine._)\n\nAlso, you can use piston for command line action, look at [the piston docs](http://piston.rocks)",
+    "category": "piston",
+    "children": 11,
+    "created": "2016-07-31T22:02:48",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+      ],
+      "tags": [
+        "piston",
+        "steem",
+        "steemit",
+        "gui",
+        "client"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3309290664257,
+    "payout": 2.703,
+    "payout_at": "2016-08-31T10:24:03",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-web-install-a-steem-gui-on-windows-7",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 41
+    },
+    "title": "[piston.web] Install a steem GUI on Windows 7",
+    "updated": "2016-07-31T22:02:48",
+    "url": "/piston/@etz/piston-web-install-a-steem-gui-on-windows-7"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 18054421438265,
+        "voter": "itsascam"
+      },
+      {
+        "rshares": 706121060696,
+        "voter": "barrie"
+      },
+      {
+        "rshares": 646783342318,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 1471047281332,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 125030851118,
+        "voter": "penambang"
+      },
+      {
+        "rshares": 15044870552553,
+        "voter": "summon"
+      },
+      {
+        "rshares": 5977992296842,
+        "voter": "freedom"
+      },
+      {
+        "rshares": 2110298818836,
+        "voter": "steemroller"
+      },
+      {
+        "rshares": 99682885964,
+        "voter": "highasfuck"
+      },
+      {
+        "rshares": 467808392791,
+        "voter": "modprobe"
+      },
+      {
+        "rshares": 16744982246219,
+        "voter": "steemed"
+      },
+      {
+        "rshares": 584707911311,
+        "voter": "justin"
+      },
+      {
+        "rshares": 122902426994,
+        "voter": "sandra"
+      },
+      {
+        "rshares": 5512691473157,
+        "voter": "kushed"
+      },
+      {
+        "rshares": 1272526574710,
+        "voter": "silver"
+      },
+      {
+        "rshares": 1047739352295,
+        "voter": "ihashfury"
+      },
+      {
+        "rshares": 3513674308132,
+        "voter": "wang"
+      },
+      {
+        "rshares": 4909374414,
+        "voter": "boy"
+      },
+      {
+        "rshares": 1873467234151,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 204177612369,
+        "voter": "steem-id"
+      },
+      {
+        "rshares": 5956520525,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 1581678457,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 2819910264593,
+        "voter": "complexring"
+      },
+      {
+        "rshares": 487544063576,
+        "voter": "ajvest"
+      },
+      {
+        "rshares": 80674421958,
+        "voter": "bue"
+      },
+      {
+        "rshares": 4138999333,
+        "voter": "chloe"
+      },
+      {
+        "rshares": 4146078470,
+        "voter": "jen"
+      },
+      {
+        "rshares": 29597742352,
+        "voter": "danknugs"
+      },
+      {
+        "rshares": 308474394398,
+        "voter": "steemservices"
+      },
+      {
+        "rshares": 2632416357,
+        "voter": "mini"
+      },
+      {
+        "rshares": 453690175,
+        "voter": "moon"
+      },
+      {
+        "rshares": 209204758731,
+        "voter": "lovejoy"
+      },
+      {
+        "rshares": 131022405662,
+        "voter": "alex90342fastn1"
+      },
+      {
+        "rshares": 25920604494,
+        "voter": "aizensou"
+      },
+      {
+        "rshares": 4743144419056,
+        "voter": "au1nethyb1"
+      },
+      {
+        "rshares": 42804416924,
+        "voter": "jason"
+      },
+      {
+        "rshares": 87573002,
+        "voter": "kelly"
+      },
+      {
+        "rshares": 12200028610,
+        "voter": "bentley"
+      },
+      {
+        "rshares": 5431523681,
+        "voter": "idolhacked"
+      },
+      {
+        "rshares": 3176522361360,
+        "voter": "recursive"
+      },
+      {
+        "rshares": 1007207906847,
+        "voter": "boombastic"
+      },
+      {
+        "rshares": 100828597781,
+        "voter": "smooth.witness"
+      },
+      {
+        "rshares": 1227562517822,
+        "voter": "steempower"
+      },
+      {
+        "rshares": 826742571149,
+        "voter": "cass"
+      },
+      {
+        "rshares": 24691899472,
+        "voter": "proctologic"
+      },
+      {
+        "rshares": 977176337,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 11908229987,
+        "voter": "jpb3"
+      },
+      {
+        "rshares": 418282808633,
+        "voter": "cob"
+      },
+      {
+        "rshares": 1931774218,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 647695600,
+        "voter": "sophia"
+      },
+      {
+        "rshares": 21111060065,
+        "voter": "dedriss"
+      },
+      {
+        "rshares": 760881871919,
+        "voter": "steemrollin"
+      },
+      {
+        "rshares": 129669652037,
+        "voter": "team"
+      },
+      {
+        "rshares": 42699365876,
+        "voter": "steem-samiam"
+      },
+      {
+        "rshares": 92946058029,
+        "voter": "jchch"
+      },
+      {
+        "rshares": 338738739123,
+        "voter": "ash"
+      },
+      {
+        "rshares": 105171008603,
+        "voter": "linouxis9"
+      },
+      {
+        "rshares": 629627207,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 87073144070,
+        "voter": "unosuke"
+      },
+      {
+        "rshares": 8188097242,
+        "voter": "bhokor"
+      },
+      {
+        "rshares": 306800578365,
+        "voter": "noaommerrr"
+      },
+      {
+        "rshares": 87316622483,
+        "voter": "acidsun"
+      },
+      {
+        "rshares": 828885131,
+        "voter": "moh-rokib"
+      },
+      {
+        "rshares": 34782590302,
+        "voter": "noisy"
+      },
+      {
+        "rshares": 75555967549,
+        "voter": "nenad-ristic"
+      },
+      {
+        "rshares": 176396910784,
+        "voter": "craig-grant"
+      },
+      {
+        "rshares": 23671126824,
+        "voter": "mod-tamichh"
+      },
+      {
+        "rshares": 17265882854,
+        "voter": "max-infeld"
+      },
+      {
+        "rshares": 374701853,
+        "voter": "radium"
+      },
+      {
+        "rshares": 17375138083,
+        "voter": "ninzacode"
+      },
+      {
+        "rshares": 775666356,
+        "voter": "romangelsi"
+      },
+      {
+        "rshares": 6077800978,
+        "voter": "fran2k"
+      },
+      {
+        "rshares": 446115991,
+        "voter": "paco-steem"
+      },
+      {
+        "rshares": 470812875,
+        "voter": "ereismatias"
+      },
+      {
+        "rshares": 1002234184037,
+        "voter": "hipster"
+      },
+      {
+        "rshares": 4549401406,
+        "voter": "spaninv"
+      },
+      {
+        "rshares": 925895189,
+        "voter": "gekko"
+      },
+      {
+        "rshares": 266055534533,
+        "voter": "teamsteem"
+      },
+      {
+        "rshares": 678468693496,
+        "voter": "nanzo-scoop"
+      },
+      {
+        "rshares": 247245097568,
+        "voter": "pal"
+      },
+      {
+        "rshares": 271175583,
+        "voter": "fact"
+      },
+      {
+        "rshares": 443627272,
+        "voter": "nasato"
+      },
+      {
+        "rshares": 58889053752,
+        "voter": "hannixx42"
+      },
+      {
+        "rshares": 240308999528,
+        "voter": "mummyimperfect"
+      },
+      {
+        "rshares": 383983844656,
+        "voter": "kevinwong"
+      },
+      {
+        "rshares": 1394332439,
+        "voter": "murh"
+      },
+      {
+        "rshares": 19191790274,
+        "voter": "mughat"
+      },
+      {
+        "rshares": 11691647142,
+        "voter": "worstdevever"
+      },
+      {
+        "rshares": 1737581288,
+        "voter": "dmitry"
+      },
+      {
+        "rshares": 18282655444,
+        "voter": "b4bb4r-5h3r"
+      },
+      {
+        "rshares": 351465067939,
+        "voter": "blakemiles84"
+      },
+      {
+        "rshares": 403020703285,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 46639510663,
+        "voter": "pixellated"
+      },
+      {
+        "rshares": 141926071,
+        "voter": "irit"
+      },
+      {
+        "rshares": 250938187429,
+        "voter": "billbutler"
+      },
+      {
+        "rshares": 12286304137,
+        "voter": "zebbra2014"
+      },
+      {
+        "rshares": 9931927902,
+        "voter": "johnerfx"
+      },
+      {
+        "rshares": 352376849646,
+        "voter": "taoteh1221"
+      },
+      {
+        "rshares": 13540122345,
+        "voter": "syadastinasti"
+      },
+      {
+        "rshares": 6369007783,
+        "voter": "evan7"
+      },
+      {
+        "rshares": 349346528,
+        "voter": "stiletto"
+      },
+      {
+        "rshares": 52787914963,
+        "voter": "martin-wichmann"
+      },
+      {
+        "rshares": 104555132549,
+        "voter": "kenny-crane"
+      },
+      {
+        "rshares": 69242022691,
+        "voter": "ratel"
+      },
+      {
+        "rshares": 17300556005,
+        "voter": "minfon"
+      },
+      {
+        "rshares": 31557181088,
+        "voter": "wongshiying"
+      },
+      {
+        "rshares": 182840689887,
+        "voter": "will-zewe"
+      },
+      {
+        "rshares": 47241044777,
+        "voter": "brandonp"
+      },
+      {
+        "rshares": 374713016,
+        "voter": "lyubovnam"
+      },
+      {
+        "rshares": 670545424,
+        "voter": "menace.coin"
+      },
+      {
+        "rshares": 22241717474,
+        "voter": "ossama-benjohn"
+      },
+      {
+        "rshares": 595974669,
+        "voter": "johnerminer"
+      },
+      {
+        "rshares": 307534894,
+        "voter": "ropes"
+      },
+      {
+        "rshares": 1482843247,
+        "voter": "ethbull"
+      },
+      {
+        "rshares": 275430474,
+        "voter": "starik69"
+      },
+      {
+        "rshares": 3475544630,
+        "voter": "ozzy-vega"
+      },
+      {
+        "rshares": 298975870,
+        "voter": "oleim"
+      },
+      {
+        "rshares": 1801920475,
+        "voter": "acec"
+      },
+      {
+        "rshares": 1023600463,
+        "voter": "alex-hulsmeier"
+      },
+      {
+        "rshares": 691326146,
+        "voter": "mammasitta"
+      },
+      {
+        "rshares": 3618172451,
+        "voter": "svamiva"
+      },
+      {
+        "rshares": 5460355557,
+        "voter": "angusleung100"
+      },
+      {
+        "rshares": 59382605,
+        "voter": "fuck.off"
+      },
+      {
+        "rshares": 138700831,
+        "voter": "iloveporn"
+      },
+      {
+        "rshares": 49553996,
+        "voter": "the.bot"
+      },
+      {
+        "rshares": 142966084,
+        "voter": "johnbradshaw"
+      },
+      {
+        "rshares": 8429311775,
+        "voter": "primus"
+      },
+      {
+        "rshares": 300766288,
+        "voter": "mrhankeh"
+      },
+      {
+        "rshares": 35992904413,
+        "voter": "clement"
+      },
+      {
+        "rshares": 3792638404,
+        "voter": "steskoff"
+      },
+      {
+        "rshares": 5009179084,
+        "voter": "arcaneinfo"
+      },
+      {
+        "rshares": 117641924,
+        "voter": "the.whale"
+      },
+      {
+        "rshares": 4009283035,
+        "voter": "spikykevin"
+      },
+      {
+        "rshares": 1040482455,
+        "voter": "michaellamden68"
+      },
+      {
+        "rshares": 9601970731,
+        "voter": "nobodyishome"
+      },
+      {
+        "rshares": 8583727627,
+        "voter": "dasha"
+      },
+      {
+        "rshares": 145064092899,
+        "voter": "asmolokalo"
+      },
+      {
+        "rshares": 1358397729,
+        "voter": "romanskv"
+      },
+      {
+        "rshares": 111473459,
+        "voter": "unicornfarts"
+      },
+      {
+        "rshares": 9122106947,
+        "voter": "konstantin"
+      },
+      {
+        "rshares": 36730043575,
+        "voter": "robrigo"
+      },
+      {
+        "rshares": 9432888539,
+        "voter": "stealthtrader"
+      },
+      {
+        "rshares": 117656607,
+        "voter": "vote"
+      },
+      {
+        "rshares": 897282800,
+        "voter": "lontong"
+      },
+      {
+        "rshares": 20818077317,
+        "voter": "hakise"
+      },
+      {
+        "rshares": 1602818186,
+        "voter": "stranger27"
+      },
+      {
+        "rshares": 143779360,
+        "voter": "aidar88"
+      },
+      {
+        "rshares": 4759721792,
+        "voter": "jackkang"
+      },
+      {
+        "rshares": 60696338882,
+        "voter": "jasonmcz"
+      },
+      {
+        "rshares": 48566014764,
+        "voter": "ozcap"
+      },
+      {
+        "rshares": 80508446,
+        "voter": "kissmybutt"
+      },
+      {
+        "rshares": 16088163912,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 660710516,
+        "voter": "jaysanz"
+      },
+      {
+        "rshares": 240192907,
+        "voter": "ukrainian"
+      },
+      {
+        "rshares": 945458742,
+        "voter": "sputnik"
+      },
+      {
+        "rshares": -1582273021,
+        "voter": "sergei"
+      },
+      {
+        "rshares": 7711334753,
+        "voter": "picokernel"
+      },
+      {
+        "rshares": 270107221,
+        "voter": "field"
+      },
+      {
+        "rshares": 352552828,
+        "voter": "wintrop"
+      },
+      {
+        "rshares": 5447951673,
+        "voter": "gatoso"
+      },
+      {
+        "rshares": 345680909642,
+        "voter": "neoxian"
+      },
+      {
+        "rshares": 317819434,
+        "voter": "busser"
+      },
+      {
+        "rshares": 115530148631,
+        "voter": "crypt0"
+      },
+      {
+        "rshares": 13076556407,
+        "voter": "lovenugz"
+      },
+      {
+        "rshares": 120607170,
+        "voter": "ardina"
+      },
+      {
+        "rshares": 3353676563,
+        "voter": "autosmile13"
+      },
+      {
+        "rshares": 4939724409,
+        "voter": "jpdimensions"
+      },
+      {
+        "rshares": 44752134150,
+        "voter": "mraytekin"
+      },
+      {
+        "rshares": 1417190132,
+        "voter": "marcgodard"
+      },
+      {
+        "rshares": 4178554819,
+        "voter": "sebastien"
+      },
+      {
+        "rshares": 3093376930,
+        "voter": "gikitiki"
+      },
+      {
+        "rshares": 18393765320,
+        "voter": "flyingmind"
+      },
+      {
+        "rshares": 33733972532,
+        "voter": "w4lterwyte"
+      },
+      {
+        "rshares": 71939692050,
+        "voter": "jesta"
+      },
+      {
+        "rshares": 3693909547,
+        "voter": "thegoodguy"
+      },
+      {
+        "rshares": 353247378,
+        "voter": "suicidemime"
+      },
+      {
+        "rshares": 117586836251,
+        "voter": "paco"
+      },
+      {
+        "rshares": 1590358144,
+        "voter": "incomemonthly"
+      },
+      {
+        "rshares": 1090501823,
+        "voter": "lukeerico"
+      },
+      {
+        "rshares": 2817345121,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 47543364041,
+        "voter": "sephiroth"
+      },
+      {
+        "rshares": 6170720760,
+        "voter": "cryptosi"
+      },
+      {
+        "rshares": 241421637,
+        "voter": "hankrearden"
+      },
+      {
+        "rshares": 341580625541,
+        "voter": "nabilov"
+      },
+      {
+        "rshares": 253746318,
+        "voter": "ostomdamasceno"
+      },
+      {
+        "rshares": 3336497401,
+        "voter": "robinlight-cbd"
+      },
+      {
+        "rshares": 7160050353,
+        "voter": "btcupload"
+      },
+      {
+        "rshares": 31736076746,
+        "voter": "stephencurry"
+      },
+      {
+        "rshares": 11162431,
+        "voter": "doctorstrange"
+      },
+      {
+        "rshares": 28127370495,
+        "voter": "msutyler"
+      },
+      {
+        "rshares": 1388664381,
+        "voter": "vorsseli"
+      },
+      {
+        "rshares": 258598525,
+        "voter": "breathe3000"
+      },
+      {
+        "rshares": 3666495784,
+        "voter": "abharana"
+      },
+      {
+        "rshares": 159917968318,
+        "voter": "knozaki2015"
+      },
+      {
+        "rshares": 8054385193,
+        "voter": "shla-rafia"
+      },
+      {
+        "rshares": 7591755495,
+        "voter": "artific"
+      },
+      {
+        "rshares": 7261827927,
+        "voter": "lichtblick"
+      },
+      {
+        "rshares": 7732863853,
+        "voter": "creemej"
+      },
+      {
+        "rshares": 4453941955,
+        "voter": "r-niki09"
+      },
+      {
+        "rshares": 105786266,
+        "voter": "dimon14"
+      },
+      {
+        "rshares": 5017495555,
+        "voter": "warrensteem"
+      },
+      {
+        "rshares": 14372673094,
+        "voter": "martin1"
+      },
+      {
+        "rshares": 231415584,
+        "voter": "m34ndy0u"
+      },
+      {
+        "rshares": 263121612,
+        "voter": "natali22"
+      },
+      {
+        "rshares": 4181198633,
+        "voter": "btcbtcbtc20155"
+      },
+      {
+        "rshares": 178383848,
+        "voter": "delik"
+      },
+      {
+        "rshares": 2541363316,
+        "voter": "algimantas"
+      },
+      {
+        "rshares": 238181810,
+        "voter": "autorss21"
+      },
+      {
+        "rshares": 4931732390,
+        "voter": "inti"
+      },
+      {
+        "rshares": 210843840,
+        "voter": "sarpton2"
+      },
+      {
+        "rshares": 346346852,
+        "voter": "lenar79"
+      },
+      {
+        "rshares": 234269297,
+        "voter": "kathise"
+      },
+      {
+        "rshares": 249680973,
+        "voter": "willytrader"
+      },
+      {
+        "rshares": 139471474512,
+        "voter": "blueorgy"
+      },
+      {
+        "rshares": 187348236,
+        "voter": "juliap4"
+      },
+      {
+        "rshares": 220098611,
+        "voter": "jennyfeger"
+      },
+      {
+        "rshares": 3476960207,
+        "voter": "davidr"
+      },
+      {
+        "rshares": 22156164430,
+        "voter": "ubg"
+      },
+      {
+        "rshares": 8229856960,
+        "voter": "magz8716"
+      },
+      {
+        "rshares": 6360081057,
+        "voter": "geronimo"
+      },
+      {
+        "rshares": 6571387756,
+        "voter": "cryptobro"
+      },
+      {
+        "rshares": 114331362,
+        "voter": "wildflower3"
+      },
+      {
+        "rshares": 10576542665,
+        "voter": "exitmass"
+      },
+      {
+        "rshares": 4715974562,
+        "voter": "tarindel"
+      },
+      {
+        "rshares": 118791206,
+        "voter": "steemwitherika"
+      },
+      {
+        "rshares": 22539029835,
+        "voter": "beowulfoflegend"
+      },
+      {
+        "rshares": 51633000689,
+        "voter": "liberosist"
+      },
+      {
+        "rshares": 114108681,
+        "voter": "emily-s"
+      },
+      {
+        "rshares": 81777512,
+        "voter": "quigonjinn"
+      },
+      {
+        "rshares": 156497552917,
+        "voter": "baronofbitcoin"
+      },
+      {
+        "rshares": 4165731766,
+        "voter": "rainchen"
+      },
+      {
+        "rshares": 72178119,
+        "voter": "jackstiller"
+      },
+      {
+        "rshares": 5800200527,
+        "voter": "sauravrungta"
+      },
+      {
+        "rshares": 46493136,
+        "voter": "williamger"
+      },
+      {
+        "rshares": 4110152207,
+        "voter": "vapekings14"
+      },
+      {
+        "rshares": 276107435,
+        "voter": "outerlimits"
+      },
+      {
+        "rshares": 116168043,
+        "voter": "elmusic"
+      },
+      {
+        "rshares": 970801526,
+        "voter": "dbendorf"
+      },
+      {
+        "rshares": 155789703,
+        "voter": "xand"
+      },
+      {
+        "rshares": 75865436679,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 155089796,
+        "voter": "meteor78"
+      },
+      {
+        "rshares": 118172793,
+        "voter": "johnsnow"
+      },
+      {
+        "rshares": 115771056,
+        "voter": "michael-brown"
+      },
+      {
+        "rshares": 115756618,
+        "voter": "timclarke"
+      },
+      {
+        "rshares": 2573569586,
+        "voter": "lostnuggett"
+      },
+      {
+        "rshares": 174155697,
+        "voter": "makgorn"
+      },
+      {
+        "rshares": 22140087,
+        "voter": "yarly8"
+      },
+      {
+        "rshares": 115556903,
+        "voter": "anet20061"
+      },
+      {
+        "rshares": 112810002,
+        "voter": "kindmorning"
+      },
+      {
+        "rshares": 5958245297,
+        "voter": "alsprinting"
+      },
+      {
+        "rshares": 1638346884,
+        "voter": "gustavopasquini"
+      },
+      {
+        "rshares": 1253407074,
+        "voter": "politicasan2"
+      },
+      {
+        "rshares": 14044389014,
+        "voter": "fleuri"
+      },
+      {
+        "rshares": 3060878177,
+        "voter": "carlidos"
+      },
+      {
+        "rshares": 645311008,
+        "voter": "tony.jennings"
+      },
+      {
+        "rshares": 298901876,
+        "voter": "atx"
+      },
+      {
+        "rshares": 71921611583,
+        "voter": "johnsmith"
+      },
+      {
+        "rshares": 439775827,
+        "voter": "quigua"
+      },
+      {
+        "rshares": 2753098,
+        "voter": "cire81"
+      },
+      {
+        "rshares": 111567557,
+        "voter": "iigor"
+      },
+      {
+        "rshares": 8490077532,
+        "voter": "krabgat"
+      },
+      {
+        "rshares": 13205820856,
+        "voter": "proto"
+      },
+      {
+        "rshares": 226199122,
+        "voter": "natedogg"
+      },
+      {
+        "rshares": 652546195,
+        "voter": "curator"
+      },
+      {
+        "rshares": 222647547,
+        "voter": "bahar"
+      },
+      {
+        "rshares": 2403361037,
+        "voter": "anon.news"
+      },
+      {
+        "rshares": 2109587813,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 206627014,
+        "voter": "yarly10"
+      },
+      {
+        "rshares": 15308463551,
+        "voter": "noodles.pan"
+      },
+      {
+        "rshares": 2495706404,
+        "voter": "logic"
+      },
+      {
+        "rshares": 851510458,
+        "voter": "nelu.ceban"
+      },
+      {
+        "rshares": 129126926,
+        "voter": "lenka"
+      },
+      {
+        "rshares": 19266680686,
+        "voter": "celebr1ty"
+      },
+      {
+        "rshares": 88582940,
+        "voter": "elliottgodard"
+      },
+      {
+        "rshares": 10289567607,
+        "voter": "rznag"
+      },
+      {
+        "rshares": 518058305,
+        "voter": "beenasty"
+      },
+      {
+        "rshares": 5836562746,
+        "voter": "dimitarj"
+      },
+      {
+        "rshares": 181782479,
+        "voter": "taz"
+      },
+      {
+        "rshares": 111997656,
+        "voter": "wunju"
+      },
+      {
+        "rshares": 2062812954,
+        "voter": "sotura"
+      },
+      {
+        "rshares": 109203987,
+        "voter": "renader792"
+      },
+      {
+        "rshares": 2199637940,
+        "voter": "sulev"
+      },
+      {
+        "rshares": 111198322,
+        "voter": "nicoleta"
+      },
+      {
+        "rshares": 821096429,
+        "voter": "belkins"
+      },
+      {
+        "rshares": 2000197393,
+        "voter": "extricati0n"
+      },
+      {
+        "rshares": 144540785,
+        "voter": "aleksg"
+      },
+      {
+        "rshares": 171203048,
+        "voter": "mahekg"
+      },
+      {
+        "rshares": 1039675028,
+        "voter": "metaflute"
+      },
+      {
+        "rshares": 94758943,
+        "voter": "alrx6918"
+      },
+      {
+        "rshares": 445366639,
+        "voter": "litrbooh"
+      },
+      {
+        "rshares": 5440915117,
+        "voter": "taker"
+      },
+      {
+        "rshares": 430607,
+        "voter": "thegodfather"
+      },
+      {
+        "rshares": 20569744,
+        "voter": "thedon"
+      },
+      {
+        "rshares": 50190904,
+        "voter": "johnblow"
+      },
+      {
+        "rshares": 823728386,
+        "voter": "felixxx"
+      },
+      {
+        "rshares": 7252907377,
+        "voter": "bulkygangsta"
+      },
+      {
+        "rshares": 5812715100,
+        "voter": "rawnetics"
+      },
+      {
+        "rshares": 8629117831,
+        "voter": "flandude"
+      },
+      {
+        "rshares": 2129982539,
+        "voter": "yng-entrepreneur"
+      },
+      {
+        "rshares": 67312696,
+        "voter": "olga83"
+      },
+      {
+        "rshares": 211909048,
+        "voter": "elizabetemaia"
+      },
+      {
+        "rshares": 1442207274,
+        "voter": "random-potato"
+      },
+      {
+        "rshares": 65110965,
+        "voter": "mariadianaelaine"
+      },
+      {
+        "rshares": 667030997,
+        "voter": "brendio"
+      },
+      {
+        "rshares": 4389453151,
+        "voter": "gmurph"
+      },
+      {
+        "rshares": 573449803,
+        "voter": "viktor.phuket"
+      },
+      {
+        "rshares": 64919359,
+        "voter": "dvaryani"
+      },
+      {
+        "rshares": 189564503,
+        "voter": "littleboo"
+      },
+      {
+        "rshares": 64996375,
+        "voter": "abusiness"
+      },
+      {
+        "rshares": 7045453238,
+        "voter": "mrweed"
+      },
+      {
+        "rshares": 63689146,
+        "voter": "mangous"
+      },
+      {
+        "rshares": 49669521,
+        "voter": "sindibober"
+      },
+      {
+        "rshares": 187455292,
+        "voter": "etz"
+      },
+      {
+        "rshares": 63415964,
+        "voter": "heruglyphics"
+      },
+      {
+        "rshares": 2239150482,
+        "voter": "darrenturetzky"
+      },
+      {
+        "rshares": 11176885299,
+        "voter": "r0achtheunsavory"
+      },
+      {
+        "rshares": 4546290354,
+        "voter": "stephen.king989"
+      },
+      {
+        "rshares": 3187563541,
+        "voter": "veralynn"
+      },
+      {
+        "rshares": 61862491,
+        "voter": "bidv"
+      },
+      {
+        "rshares": 64507391,
+        "voter": "impigrum"
+      },
+      {
+        "rshares": 18209145793,
+        "voter": "poteshnik83"
+      },
+      {
+        "rshares": 64337332,
+        "voter": "freevoid"
+      },
+      {
+        "rshares": 61751719,
+        "voter": "admhrust"
+      },
+      {
+        "rshares": 860092357,
+        "voter": "antfield"
+      },
+      {
+        "rshares": 2459517728,
+        "voter": "capper2016"
+      },
+      {
+        "rshares": 99110452,
+        "voter": "alitas"
+      },
+      {
+        "rshares": 1887080000,
+        "voter": "randyclemens"
+      },
+      {
+        "rshares": 63938453,
+        "voter": "rockmoss"
+      },
+      {
+        "rshares": 5060190550,
+        "voter": "hermes999"
+      },
+      {
+        "rshares": 3817983138,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 105338214,
+        "voter": "kainmarx"
+      },
+      {
+        "rshares": 63412334,
+        "voter": "bayern000"
+      },
+      {
+        "rshares": 62153668,
+        "voter": "aiaconelli707"
+      },
+      {
+        "rshares": 330467771,
+        "voter": "hms818"
+      },
+      {
+        "rshares": 1246628766,
+        "voter": "driv3n"
+      },
+      {
+        "rshares": 266097179,
+        "voter": "alifton"
+      },
+      {
+        "rshares": 16462452,
+        "voter": "ciao"
+      },
+      {
+        "rshares": 48670421,
+        "voter": "gek70rus"
+      },
+      {
+        "rshares": 60647863,
+        "voter": "zmb"
+      },
+      {
+        "rshares": 230069316,
+        "voter": "thebotkiller"
+      },
+      {
+        "rshares": 992359363,
+        "voter": "dercoco"
+      },
+      {
+        "rshares": 6719919009,
+        "voter": "nicolaennio"
+      },
+      {
+        "rshares": 63021973,
+        "voter": "keithmax"
+      },
+      {
+        "rshares": 62928860,
+        "voter": "session101"
+      },
+      {
+        "rshares": 3696665,
+        "voter": "steemo"
+      },
+      {
+        "rshares": 627499807,
+        "voter": "nixonnox"
+      },
+      {
+        "rshares": 1670935298,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 3687129,
+        "voter": "steema"
+      },
+      {
+        "rshares": 61410790,
+        "voter": "ropedancer"
+      },
+      {
+        "rshares": 579938399,
+        "voter": "erikclark13"
+      },
+      {
+        "rshares": 62523503,
+        "voter": "perduta"
+      },
+      {
+        "rshares": 12931921,
+        "voter": "confucius"
+      },
+      {
+        "rshares": 12340437837,
+        "voter": "borran"
+      },
+      {
+        "rshares": 1892926333,
+        "voter": "loveangel"
+      },
+      {
+        "rshares": 536297613,
+        "voter": "bledarus"
+      },
+      {
+        "rshares": 60963761,
+        "voter": "simo"
+      },
+      {
+        "rshares": 62103794,
+        "voter": "tomeraddady"
+      },
+      {
+        "rshares": 10161530527,
+        "voter": "nomorealex"
+      },
+      {
+        "rshares": 60833479,
+        "voter": "kensy"
+      },
+      {
+        "rshares": 1483558665,
+        "voter": "stylo"
+      },
+      {
+        "rshares": 664157660,
+        "voter": "solar"
+      },
+      {
+        "rshares": 59465832,
+        "voter": "talrasha"
+      },
+      {
+        "rshares": 7485839,
+        "voter": "jarvis"
+      },
+      {
+        "rshares": 57528101,
+        "voter": "ashwim"
+      },
+      {
+        "rshares": 61882449,
+        "voter": "iamnotalbert"
+      },
+      {
+        "rshares": 51784441,
+        "voter": "botfather"
+      },
+      {
+        "rshares": 50516156,
+        "voter": "filmaker"
+      },
+      {
+        "rshares": 75823958,
+        "voter": "thecurator"
+      },
+      {
+        "rshares": 5453216618,
+        "voter": "steemit8"
+      },
+      {
+        "rshares": 59252229,
+        "voter": "neglect"
+      },
+      {
+        "rshares": 255468173,
+        "voter": "serejandmyself"
+      },
+      {
+        "rshares": 59419427,
+        "voter": "legio"
+      },
+      {
+        "rshares": 60572907,
+        "voter": "bkk"
+      },
+      {
+        "rshares": 59379075,
+        "voter": "napafe"
+      },
+      {
+        "rshares": 60816781,
+        "voter": "gmskov"
+      },
+      {
+        "rshares": 50929529,
+        "voter": "pointonoff"
+      },
+      {
+        "rshares": 620959606,
+        "voter": "steemmcqueen"
+      },
+      {
+        "rshares": 58914512,
+        "voter": "thomasaustin"
+      },
+      {
+        "rshares": 57703760,
+        "voter": "renkv1969"
+      },
+      {
+        "rshares": 58829611,
+        "voter": "easy-peasy"
+      },
+      {
+        "rshares": 34105847,
+        "voter": "nastyasaranchuk"
+      },
+      {
+        "rshares": 55220105,
+        "voter": "prophet"
+      },
+      {
+        "rshares": 59895938,
+        "voter": "milkmayne"
+      },
+      {
+        "rshares": 57545759,
+        "voter": "rociorg"
+      },
+      {
+        "rshares": 39926613,
+        "voter": "violino"
+      },
+      {
+        "rshares": 58695564,
+        "voter": "a11at"
+      },
+      {
+        "rshares": 39882786,
+        "voter": "vasilii"
+      },
+      {
+        "rshares": 56232738,
+        "voter": "holtdigidydog"
+      },
+      {
+        "rshares": 3511231,
+        "voter": "cryptogaijin"
+      },
+      {
+        "rshares": 58483114,
+        "voter": "revelbrooks"
+      },
+      {
+        "rshares": 60008649,
+        "voter": "hd0"
+      },
+      {
+        "rshares": 57307257,
+        "voter": "davidmitchell"
+      },
+      {
+        "rshares": 51454592,
+        "voter": "johnhill"
+      },
+      {
+        "rshares": 58466534,
+        "voter": "afzizul"
+      },
+      {
+        "rshares": -58391325,
+        "voter": "basay07"
+      },
+      {
+        "rshares": 5791725,
+        "voter": "brucy"
+      },
+      {
+        "rshares": 3424657,
+        "voter": "deejayehn"
+      },
+      {
+        "rshares": 10206814603,
+        "voter": "yangyang"
+      }
+    ],
+    "author": "xeroc",
+    "author_payout_value": "2034.594 HBD",
+    "author_reputation": 69.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Let's start at the beginning:\n\n## Steem pays you interest on your SteemDollars!\n\nThe interest rate is set by the witnesses and is currently 10% (to encourage holding/buying).\n\n## When is interest payed?\n\nAccording to the [code](https://github.com/steemit/steem/blob/master/libraries/chain/include/steemit/chain/account_object.hpp#L49-L60)\n\n>  Every time the sbd_balance is updated the sbd_seconds is also updated. If at least STEEMIT_MIN_COMPOUNDING_INTERVAL_SECONDS has past since sbd_last_interest_payment then interest is added to sbd_balance.\n\nWhere `STEEMIT_MIN_COMPOUNDING_INTERVAL_SECONDS` is set to 30 days. These 30 days have now passed.\n\n**That means:**\n\n## If you change your SteemDollar balance today, you will receive your interest for the last 30 days!\n\nI simply moved 1SBD to one of my other accounts and my interest was added to my account:\n\n![](https://i.imgsafe.org/1a67583231.png)\n\nIf you don't have another account, you are free to send 0.001 SteemDollar to me (or anyone else) :D\n\n## Update 1\n\n@ash made me aware of the fact that initial interst payments have happend on different times. That means that you might not yet be able to retrieve your own interest just yet.\nHowever, the first 30 days have probably past for many Steemians already so it's worth a try. If it doesn't work for you, just wait another day or so and try again.\n\n## Update 2\n\nSince this post has received quite some response, I added a corresponding call to `piston`. It looks like this:\n```\n$ piston interest xeroc\n+---------+-----------------------+---------------------+---------------+-----------+\n| Account | Last Interest Payment |        Next Payment | Interest rate |  Interest |\n+---------+-----------------------+---------------------+---------------+-----------+\n|   xeroc |   2016-08-03 08:04:00 | 2016-09-02 08:04:00 |         10.0% | 1.046 SBD |\n+---------+-----------------------+---------------------+---------------+-----------+\n```\n\npiston.web now also shows some data about the interest payments:\n\n![](https://i.imgsafe.org/1dc32aaa98.png)",
+    "category": "steem",
+    "children": 89,
+    "created": "2016-08-03T08:09:21",
+    "curator_payout_value": "107.673 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "links": [
+        "https://github.com/steemit/steem/blob/master/libraries/chain/include/steemit/chain/account_object.hpp#L49-L60"
+      ],
+      "tags": [
+        "steem"
+      ],
+      "users": [
+        "ash"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 101375146215865,
+    "payout": 2142.267,
+    "payout_at": "2016-09-02T22:08:42",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "if-you-change-your-steemdollar-balance-now-you-will-receive-your-interest",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 398
+    },
+    "title": "If you change your SteemDollar balance now, you will receive your interest",
+    "updated": "2016-08-03T11:57:54",
+    "url": "/steem/@xeroc/if-you-change-your-steemdollar-balance-now-you-will-receive-your-interest"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 3653651131,
+        "voter": "riscadox"
+      },
+      {
+        "rshares": 154678652,
+        "voter": "adamgud"
+      },
+      {
+        "rshares": 11516515418,
+        "voter": "ausbitbank"
+      },
+      {
+        "rshares": 2513464,
+        "voter": "cire81"
+      }
+    ],
+    "author": "riscadox",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 54.87,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "First, I want to thank @roelandp for creating this wonderful collection of tools, and all its creators.\n\n<a href=\"http://superfaucetlist.wixsite.com/bitcoins-altcoins/steemtools\" target=_blank><img src=\"http://i.imgsafe.org/e61a075ce2.png\"></a>\n\nSteemTools by @roelandp\nSteemPress by @jesta\nSteem Share by @originate\nSteemCap by @ausbitbank\nSteem Paperwallet by @xeroc\nSteemStream by @roelandp\nSteemJS by @fabien\nSteemFighter by @roelandp\nSteemit Pond by @mynameisbrian\nSteemle by @jabbasteem\nSteemWiki by @dragon\nSteem Dollar by @mauricemikkers\nSteemification by @fleuri\nSteemItChat by @blueorgy\nSteemIMG by @blueorgy\nSteemStats by @jesta\nSteemWatch by @void\nSteemShovel by @kaptainkrayola\nSteemitMETA.com by @r4fken\nSteemViz by @ausbitbank\nSteem on Telegran by @fleuri\nPiston by @xeroc\nSteem Whales by @heimindanger\nSteem.link by @cryptotony\nEzSteem by @omotherhen\nSteemBoard by @muffin2013\nStreemian by @xeroc\nSteemMarket  by @msutyler\nSteem.ly by @anduweb\nSteemd by @roadscape\nSteemStory by @roelandp\nCatch A Whale by @blueorgy\nSteemitX by @discombulated\nSteemit Help by @sitaru\nSteem Prices by @jasonmcz\nSteem Url   by @originate\nPiston.web by @xeroc\n\n<a href=\"http://superfaucetlist.wixsite.com/bitcoins-altcoins\" target=_blank><img src=\"http://i.imgsafe.org/e5a6fb5f5f.png\"></a>\n\nYeah man, it's a free website, but that fits all my purposes in the world of cryptocurrency. It works as a portal with a collection of websites and useful links.\n\n<a href=\"http://superfaucetlist.wixsite.com/bitcoins-altcoins\" target=_blank><img src=\"http://i.imgsafe.org/e704ecf25f.png\"></a>\n\nWith this initiative, I hope to attract the largest number of people of all cryptocurrency communities.\n\n<a href=\"http://superfaucetlist.wixsite.com/bitcoins-altcoins\" target=_blank><img src=\"http://i.imgsafe.org/e7587441dd.png\"></a>\n\nI invite everyone to know my website :)\n\n\n<a href=\"http://superfaucetlist.wixsite.com/bitcoins-altcoins/steem\" target=_blank><img src=\"http://i.imgsafe.org/e712d4b944.png\"></a>",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-07-31T22:13:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "http://i.imgsafe.org/e61a075ce2.png",
+        "http://i.imgsafe.org/e5a6fb5f5f.png",
+        "http://i.imgsafe.org/e704ecf25f.png",
+        "http://i.imgsafe.org/e7587441dd.png",
+        "http://i.imgsafe.org/e712d4b944.png"
+      ],
+      "links": [
+        "http://superfaucetlist.wixsite.com/bitcoins-altcoins/steemtools",
+        "http://superfaucetlist.wixsite.com/bitcoins-altcoins",
+        "http://superfaucetlist.wixsite.com/bitcoins-altcoins/steem"
+      ],
+      "tags": [
+        "steemit"
+      ],
+      "users": [
+        "roelandp",
+        "jesta",
+        "originate",
+        "ausbitbank",
+        "xeroc",
+        "fabien",
+        "mynameisbrian",
+        "jabbasteem",
+        "dragon",
+        "mauricemikkers",
+        "fleuri",
+        "blueorgy",
+        "void",
+        "kaptainkrayola",
+        "r4fken",
+        "heimindanger",
+        "cryptotony",
+        "omotherhen",
+        "muffin2013",
+        "msutyler",
+        "anduweb",
+        "roadscape",
+        "discombulated",
+        "sitaru",
+        "jasonmcz"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 15327358665,
+    "payout": 0.0,
+    "payout_at": "2016-08-31T10:54:00",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "i-put-a-banner-and-incorporated-the-steamtools-to-my-website",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "I put a banner and incorporated the Steamtools to my website",
+    "updated": "2016-07-31T22:13:36",
+    "url": "/steemit/@riscadox/i-put-a-banner-and-incorporated-the-steamtools-to-my-website"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 863362298,
+        "voter": "nastrom"
+      },
+      {
+        "rshares": 16491126619,
+        "voter": "ninzacode"
+      },
+      {
+        "rshares": 6379492216,
+        "voter": "moch-yusuf"
+      },
+      {
+        "rshares": 192426260,
+        "voter": "wisehammer"
+      },
+      {
+        "rshares": 25452505,
+        "voter": "jackkang"
+      },
+      {
+        "rshares": 813318349551,
+        "voter": "renohq"
+      },
+      {
+        "rshares": 5805896745,
+        "voter": "blockchainbilly"
+      },
+      {
+        "rshares": 66606958,
+        "voter": "eduardf"
+      },
+      {
+        "rshares": 17343344,
+        "voter": "luisucv34"
+      },
+      {
+        "rshares": 1341417848,
+        "voter": "slocum"
+      },
+      {
+        "rshares": 4656248,
+        "voter": "maurizio"
+      },
+      {
+        "rshares": 127362456,
+        "voter": "politicasan2"
+      },
+      {
+        "rshares": 16571966,
+        "voter": "usnewspress"
+      }
+    ],
+    "author": "blockchainbilly",
+    "author_payout_value": "1.046 HBD",
+    "author_reputation": 47.77,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<p>&nbsp;<img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png\" width=\"1680\" height=\"760\"/><br>\n<img src=\"http://www.thezombieinfection.com/uploads/profile/photo-thumb-634378.png?_r=1450551096\" width=\"100\" height=\"100\"/><strong>So..&nbsp;Is the new (piston.web) Steem GUI (Graphic User Interface) worth using or should most steemers hold off until it at least reaches Beta??</strong></p>\n<p><strong>&nbsp;</strong>&nbsp;</p>\n<p>This is something on a lot of people's minds. &nbsp;Especially new Steemit users. &nbsp;Who I\u2019m sure were immediately,and shockingly impressed with the value of the post announcing the release of the new GUI. And the search for new Alpa Testers.. You know the one worth almost $50K &nbsp;</p>\n<p>&nbsp;Im sure a newbie somewhere will be like\u201dOooh Alpha tester that sounds cool\" and \"wow this really looks cool!\".. \"I wanna be an Alpha tester!\u201d &nbsp;\u2026..Lol\u2026..smh. &nbsp;&nbsp;If you don't know the potential risks and of what you're getting into and you don't know exactly how it works. And does that outweigh the benefit or convenience it may provide, or its potential and what &nbsp;if anything you might contribute to its development..... &nbsp;</p>\n<p>If you don\u2019t know any of this you probably might want to leave the testing to others. &nbsp;And wait for newer versions to debut and read about it in reviews\u2026before deciding. &nbsp;Many people are interested in this obviously. But many of us who been around wonder about vulnerabilities or bugs that may compromise security. &nbsp;Its open source &nbsp;but I don't know how to read code and neither do most people.. &nbsp;But Hackers do\u2026&nbsp;</p>\n<p><img src=\"http://www1-lw.xda-cdn.com/files/2013/04/Guinea_Pigs-810x298_c.jpg\" width=\"810\" height=\"298\"/><strong>Alpha tester is a euphemism for guinea pig....</strong></p>\n<p>&nbsp;Listen being a guinea pig for a good cause is noble at best. Developers need testers and feedback in order to improve their work faster. &nbsp;Eventually I'm sure we will have a great Interface and the overall user experience will continue to improve dramatically. &nbsp;Steemit is a powerhouse of innovation and ideas. Only a matter of time\u2026<br>\nHowever Im a cautious adapter and a bit of a purist so I'm gonna stick with the original basic web interface for now\u2026 to be safe\u2026</p>\n<p><br>\n<strong>So If you are currently testing it or are planning on testing please comment...</strong> &nbsp;The more we know the better for everybody....</p>\n<p>B.Blockchain</p>\n<p>#steemit #gui #piston #new<br>\n<strong>If you want it get it \u2026. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>https://github.com/xeroc/piston</p>\n<p>H<strong>ere is the Original Post\u2026.. &nbsp;&nbsp;&nbsp;</strong></p>\n<p>https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers<br>\n&nbsp;</p>\n</html>",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-07-23T16:58:48",
+    "curator_payout_value": "0.087 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png",
+        "http://www.thezombieinfection.com/uploads/profile/photo-thumb-634378.png?_r=1450551096",
+        "http://www1-lw.xda-cdn.com/files/2013/04/Guinea_Pigs-810x298_c.jpg"
+      ],
+      "links": [
+        "https://github.com/xeroc/piston",
+        "https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+      ],
+      "tags": [
+        "new",
+        "help",
+        "technology",
+        "steem",
+        "questions",
+        "news",
+        "steemit",
+        "piston",
+        "gui"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 844650065014,
+    "payout": 1.133,
+    "payout_at": "2016-08-23T17:09:54",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "question-is-the-new-piston-web-steem-gui-worth-using-or-should-most-steemers-hold-off-till-beta",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 13
+    },
+    "title": "Is the new (piston.web) Steem GUI worth using or should most steemers hold off till Beta????",
+    "updated": "2016-07-23T18:20:15",
+    "url": "/steemit/@blockchainbilly/question-is-the-new-piston-web-steem-gui-worth-using-or-should-most-steemers-hold-off-till-beta"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 672129856193,
+        "voter": "fuzzyvest"
+      },
+      {
+        "rshares": 312519994045,
+        "voter": "officialfuzzy"
+      },
+      {
+        "rshares": 1799035396,
+        "voter": "murh"
+      },
+      {
+        "rshares": 55557382564,
+        "voter": "sonzweil"
+      },
+      {
+        "rshares": 56140887,
+        "voter": "soupernerd"
+      },
+      {
+        "rshares": 55165844,
+        "voter": "aidar88"
+      },
+      {
+        "rshares": 55118400,
+        "voter": "weenis"
+      },
+      {
+        "rshares": 474629118108,
+        "voter": "glitterfart"
+      },
+      {
+        "rshares": 815880147,
+        "voter": "cjclaro"
+      },
+      {
+        "rshares": 255779632,
+        "voter": "nonamer"
+      },
+      {
+        "rshares": 55301206,
+        "voter": "whitezombie"
+      },
+      {
+        "rshares": 369426668,
+        "voter": "xanoxt"
+      },
+      {
+        "rshares": 121327662,
+        "voter": "l0k1"
+      },
+      {
+        "rshares": 50150180,
+        "voter": "angrb0da"
+      }
+    ],
+    "author": "l0k1",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I have had two big problems come up with my Steem user experience. \n\n1. On big threads, the javascript slows my Fitlet A10 (with 8gb of ram) down so much that keyboard input lags badly and scrolling is very slow, not to mention despite my 2MB/S connection, it loads these pages very slowly. The fault is that the interface loads the entire discussion thread instead of just what is rendered plus a bit more under so it is ready to load content as you scroll down. The sorting algorithm aims to put the more interesting stuff at the top, so this crap that is slowing my browser down is crap I probably am not so interested in.\n2. When I 'mute' a user whose rubbish I don't want to see, their content is still rendering on my page. That seems a bit stupid to me. If I don't want to see something why should my computer and internet connection be wasted on it? If I tell the interface to make someone disappear, they should disappear, their content dropped, not even pulled down if it is possible to not pull it down.\n\nTo solve these problems, I am going to apply my skills at python scripting, building on the piston backend. I also see that posts about apps get a lot of upvotes, and I don't expect this from nothing to show you just yet, but I will be posting up when I have got the basic functions to the standard of the Piston.web interface alpha ready.\n\nThe only caveat is that I am developing this not for a web browser interface, because I personally hate web browsers. Why should mobile users get all the great apps, when there is easy to code for GUI's for desktop/laptop computers? Sorry windows users, although I am sure that someone can port it, but I am targeting Gnome 3 on Ubuntu, although it should work fine on almost any ubuntu install, since most have this API and required libraries already installed, even when KDE or LXDE etc are the primary interface.\n\nAfter losing what was going to be my next month's rent payment, from some unpleasant other user on this site, and seeing that stuff that interests me has not yet got enough of an audience for it on here yet, I am switching tacks rather than moaning, powering down and running away. I know I can put together a very nice python/gtk3 app, and that there is at least enough people here that such work would be funded just by publishing an announcement with links and instructions, so why get down in the dumps because like most places on the internet there is people who enjoy hurting other people, who claim to be about fairness but damage the financial situation of someone who is only 6 weeks away from landing back on the street after 2 years living on the street.\n\nNo, I don't want sympathy. I am mad as hell and I am going to make sure that I have an interface that lets these trolls get the screen real estate and bandwidth on my computer that they deserve.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-08-18T09:11:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit",
+        "interface",
+        "app",
+        "gtk3",
+        "gnome"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1518469676932,
+    "payout": 0.621,
+    "payout_at": "2016-08-25T09:11:12",
+    "pending_payout_value": "0.621 HBD",
+    "percent_hbd": 10000,
+    "permlink": "beginning-a-new-python-project-for-steem",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 14
+    },
+    "title": "Beginning a new Python Project for Steem",
+    "updated": "2016-08-18T09:11:42",
+    "url": "/steemit/@l0k1/beginning-a-new-python-project-for-steem"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 0,
+        "voter": "proctologic"
+      },
+      {
+        "rshares": 30794370520,
+        "voter": "intelliguy"
+      },
+      {
+        "rshares": 5916752423,
+        "voter": "simoneighties"
+      },
+      {
+        "rshares": 301462555,
+        "voter": "wisehammer"
+      },
+      {
+        "rshares": 1872724272,
+        "voter": "sunshinecrypto"
+      },
+      {
+        "rshares": 2172970705,
+        "voter": "brunopro"
+      },
+      {
+        "rshares": 1808703688,
+        "voter": "nioctib"
+      },
+      {
+        "rshares": 193748124,
+        "voter": "irena-irena"
+      },
+      {
+        "rshares": 4833678,
+        "voter": "seagul"
+      },
+      {
+        "rshares": 1382975966,
+        "voter": "condra"
+      },
+      {
+        "rshares": 7009465,
+        "voter": "cire81"
+      },
+      {
+        "rshares": 82536708,
+        "voter": "dimniki198"
+      },
+      {
+        "rshares": 73328865,
+        "voter": "nelu.ceban"
+      },
+      {
+        "rshares": 115347762,
+        "voter": "admiral"
+      },
+      {
+        "rshares": 29581655588,
+        "voter": "cryptomarket"
+      }
+    ],
+    "author": "nioctib",
+    "author_payout_value": "0.080 HBD",
+    "author_reputation": 42.27,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<p><strong>What is STEEM?</strong></p>\n<p><a href=\"https://steem.io/\">https://steem.io/</a></p>\n<p><br></p>\n<p><strong>Steemit Image Hosting</strong></p>\n<p><a href=\"https://www.steemimg.com/\">https://www.steemimg.com/</a></p>\n<p><br></p>\n<p><strong>Steemit Chat</strong></p>\n<p><a href=\"http://steemitchat.com\">http://steemitchat.com</a></p>\n<p><br></p>\n<p><strong>streemian.com</strong> - <em>Make a profit off your content by streeming your posts from elsewhere into steemit.com</em></p>\n<p><a href=\"https://streemian.com/\">https://streemian.com/</a></p>\n<p><br></p>\n<p>&nbsp;<strong>Steem Streem</strong> &nbsp;&nbsp;<em>View all activity for all Steem users realtime. With Desktop notifications, speed analysis and more</em></p>\n<p><a href=\"http://steemstream.com/\">http://steemstream.com/</a></p>\n<p><br></p>\n<p><strong>Steem Press &nbsp;&nbsp;&nbsp;(</strong>A simple blog view based on <a href=\"https://steemit.com/\">steemit</a> and the <a href=\"http://steem.io/\">steem</a> blockchain.) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p><a href=\"http://steempress.io/\">http://steempress.io/</a></p>\n<p><br></p>\n<p><strong>Steemit Help</strong></p>\n<p><a href=\"http://www.steemithelp.com\">http://www.steemithelp.com</a></p>\n<p><br></p>\n<p><strong>Steemit Stats&nbsp;</strong></p>\n<p><a href=\"http://steemstats.com\">http://steemstats.com</a></p>\n<p><br></p>\n<p><strong>Steemit url - shortening</strong></p>\n<p><a href=\"http://www.steemurl.com/\">http://www.steemurl.com/</a></p>\n<p><br></p>\n<p><strong>Steemit FAQ</strong></p>\n<p><a href=\"https://steemit.com/steemit/@intelliguy/steemit-faq-frequently-asked-questions-common-myths-and-misconceptions\">https://steemit.com/steemit/@intelliguy/steemit-faq-frequently-asked-questions-common-myths-and-misconceptions</a></p>\n<p><br></p>\n<p><strong>Steemit whales </strong><em>ranking site for steemians</em></p>\n<p><a href=\"http://steemwhales.com/\">http://steemwhales.com/</a></p>\n<p><br></p>\n<p><strong>trade Steemit</strong></p>\n<p><a href=\"www.poloniex.com\">www.poloniex.com</a> &nbsp;&nbsp;or &nbsp;<a href=\"www.bittrex.com\">www.bittrex.com</a></p>\n<p><br></p>\n<p><br></p>\n<p><strong>Steemit Domains 4 Sale</strong></p>\n<p>www.beststeemitlinks.com</p>\n<p>www.beststeemitsites.com</p>\n<p><br></p>\n<p><img src=\"http://i.imgsafe.org/1dbfd34d5f.jpg\" width=\"341\" height=\"339\"/></p>\n<p>more usefull links:</p>\n<p><strong>steem- whitepaper</strong></p>\n<p><a href=\"https://steem.io/#whitepaper\">https://steem.io/#whitepaper</a></p>\n<p><br></p>\n<p>[piston.web] <strong>First Open Source Steem GUI</strong></p>\n<p><a href=\"https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers\">https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers</a></p>\n</html>",
+    "category": "steem",
+    "children": 8,
+    "created": "2016-07-22T08:41:06",
+    "curator_payout_value": "0.014 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "http://i.imgsafe.org/1dbfd34d5f.jpg"
+      ],
+      "links": [
+        "https://steem.io/",
+        "https://www.steemimg.com/",
+        "http://steemitchat.com",
+        "https://streemian.com/",
+        "http://steemstream.com/",
+        "https://steemit.com/",
+        "http://steem.io/",
+        "http://steempress.io/",
+        "http://www.steemithelp.com",
+        "http://steemstats.com",
+        "http://www.steemurl.com/",
+        "https://steemit.com/steemit/@intelliguy/steemit-faq-frequently-asked-questions-common-myths-and-misconceptions",
+        "http://steemwhales.com/",
+        "www.poloniex.com",
+        "www.bittrex.com",
+        "https://steem.io/#whitepaper",
+        "https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+      ],
+      "tags": [
+        "steem",
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 74308420319,
+    "payout": 0.094,
+    "payout_at": "2016-08-22T13:34:27",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "best-steemit-links",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 14
+    },
+    "title": "best steemit links/ sites",
+    "updated": "2016-07-22T19:52:09",
+    "url": "/steem/@nioctib/best-steemit-links"
+  }
+]

@@ -45,6 +45,7 @@ _REQUESTS: dict[str, tuple[dict[str, str], dict[str, str]]] = {
     "/posts/{author}/{permlink}/discussion": (_DISCUSSED_POST, {}),
     "/posts/{author}/{permlink}/header": (_POST, {}),
     "/posts/{author}/{permlink}/reblogged-by": ({"author": "skypilot", "permlink": "melting-rock"}, {}),
+    "/posts/{author}/{permlink}/similar": (_POST, {"page-size": "3"}),
     "/communities": ({}, {"page-size": "3"}),
     "/communities/{name}": ({"name": "hive-117600"}, {}),
     "/communities/{name}/subscribers": ({"name": "hive-165317"}, {"page-size": "3"}),
@@ -68,9 +69,9 @@ def test_every_path_of_the_spec_is_requested() -> None:
 
 @pytest.mark.parametrize("path", sorted(_OPERATIONS))
 def test_path_reaches_its_endpoint(path: str) -> None:
-    if path.startswith("/search/") and service.search_skip_reason() is not None:
-        pytest.skip(service.search_skip_reason())
     function = _OPERATIONS[path]
+    if function.startswith("hivemind_endpoints.search_") and service.search_skip_reason() is not None:
+        pytest.skip(service.search_skip_reason())
     path_params, query = _REQUESTS[path]
     url = _public_url(path, path_params)
 

@@ -614,6 +614,13 @@ performance:
           start-permlink: params.start_permlink
           observer: params.observer
         empty_equivalents: [null, []]
+      - name: similar-posts
+        method: search-api.find_similar
+        path: /posts/{params.author}/{params.permlink}/similar
+        query:
+          page-size: params.limit
+          observer: params.observer
+        empty_equivalents: [null, []]
       - name: trending-tags
         method: bridge.get_trending_topics
         path: /tags/trending

@@ -57,6 +57,7 @@ ENDPOINTS_IN_ORDER="
 ../$endpoints/communities/get_community_subscribers.sql
 ../$endpoints/communities/get_community_roles.sql
 ../$endpoints/search/search_posts.sql
+../$endpoints/search/search_similar_posts.sql
 ../$endpoints/tags/get_trending_tags.sql
 ../$endpoints/other/get_sync_status.sql
 ../$endpoints/other/get_version.sql"
