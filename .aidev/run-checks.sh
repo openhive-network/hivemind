@@ -55,11 +55,14 @@
 # Neither step needs another first: unit runs from the checkout, tavern on its own
 # clone. The exit status is 0 only when every named test ran and passed: an
 # argument no listed step owns, or an owning step that skips, fails the re-run,
-# since a test that never ran must not read as passing. An owning step exiting
-# other than 0 or 1 (a skip, a crash, a setup or collection error) reached no
-# verdict, and a report naming other tests would read as one, the named id absent:
-# the re-run then leaves no .xml, its reports kept as <name>.xml.no-verdict, so
-# aidev reads the id as failing, not as absent.
+# since a test that never ran must not read as passing. An id naming no test of
+# this tree (a unit node id pytest does not collect, a tavern selector no group
+# holds) is a verdict, not here: the re-run fails with a case for it that does not
+# name it, so aidev reads the id as absent. An owning step exiting other than 0 or
+# 1 (a skip, a crash, a setup or collection error) reached no verdict, and a report
+# naming other tests would read as one, the named id absent: the re-run then keeps
+# that step's reports and junit.xml as <name>.xml.no-verdict, so with no report of
+# its own aidev reads the id as failing, not as absent.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 root="$PWD"
@@ -102,6 +105,7 @@ REPTRACKER_SCHEMA=reptracker_app
 
 status=0
 no_verdict=()
+no_verdict_reports=()
 SKIP_RC=77
 # record CASES_FILE NAME RC SECONDS LOG [TESTS_JUNIT]
 record() {
@@ -125,8 +129,11 @@ step() {  # NAME TESTS_JUNIT COMMAND...  (TESTS_JUNIT: the per-test junit it wri
     elif [ "$rc" -ne 0 ]; then
         status=1; tail -40 "$log" >&2
     fi
+    if [ "$rc" -ne 0 ] && [ "$rc" -ne 1 ]; then
+        no_verdict+=("$name")
+        [ -z "$tests_junit" ] || no_verdict_reports+=("${tests_junit#"$out/"}")
+    fi
     [ "$rc" -eq 1 ] || tests_junit=""
-    [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] || no_verdict+=("$name")
     record "$cases" "$name" "$rc" "$((SECONDS - t0))" "$log" "$tests_junit"
 }
 
@@ -255,6 +262,25 @@ mock_wrapper() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_next_block_wrapper_check.sql
 }
 
+# Whether NODE_ID may name a test of this tree: pytest exiting 4 (not found) or 5
+# (no tests collected) on it says it names none, unless a module failed to
+# collect; that, like any other failure, is left for the run to report as itself.
+unit_names_a_test() {  # NODE_ID
+    local scratch log rc=0
+    [ -e "$root/${1%%::*}" ] || return 1
+    ensure_version
+    scratch="$(mktemp -d)"
+    log="$scratch.log"
+    (cd "$scratch" && PYTHONPATH="$root" python3 -m pytest -p no:cacheprovider --rootdir="$root" \
+        --collect-only -q "$root/$1") > "$log" 2>&1 < /dev/null || rc=$?
+    cat "$log" >> "$out/unit-collect.log"
+    rm -rf "$scratch"
+    if { [ "$rc" -eq 4 ] || [ "$rc" -eq 5 ]; } && ! grep -q ' ERROR collecting ' "$log"; then
+        rm -f "$log"; return 1
+    fi
+    rm -f "$log"
+}
+
 rerun_owner() {  # ARG: the step that runs the test it names
     local file="${1%%::*}" dir
     if [[ "$file" == *.py ]]; then
@@ -278,13 +304,13 @@ if [ ${#rerun[@]} -eq 0 ]; then
         esac
     done
 else
-    unit_ids=(); tavern_ids=(); unowned=()
+    unit_ids=(); tavern_ids=(); unowned=(); absent=()
     for arg in "${rerun[@]}"; do
         owner="$(rerun_owner "$arg")"
         if [[ " ${steps[*]} " != *" $owner "* ]]; then
             unowned+=("$arg")
         elif [ "$owner" = unit ]; then
-            unit_ids+=("$arg")
+            if unit_names_a_test "$arg"; then unit_ids+=("$arg"); else absent+=("$arg"); fi
         else
             tavern_ids+=("$arg")
         fi
@@ -297,11 +323,22 @@ else
         echo "re-run ids no listed step (${steps[*]}) runs: ${unowned[*]}" >&2
         printf 'case\trerun-ids\tfail\t0\tre-run ids no listed step runs: %s\n' "${unowned[*]}" >> "$cases"
     fi
+    if [ ${#absent[@]} -gt 0 ]; then
+        status=1
+        echo "re-run ids naming no unit test of this tree: ${absent[*]}" >&2
+        printf 'case\trerun-absent\tfail\t0\tre-run ids naming no unit test of this tree: %s\n' "${absent[*]}" >> "$cases"
+    fi
 fi
 [ -n "$stage" ] && rm -rf "$stage"
 if [ ${#rerun[@]} -gt 0 ] && [ ${#no_verdict[@]} -gt 0 ]; then
-    echo "re-run reached no verdict in: ${no_verdict[*]}; its reports are kept as *.xml.no-verdict" >&2
-    find "$out" -name '*.xml' -print0 | while IFS= read -r -d '' report; do mv "$report" "$report.no-verdict"; done
+    echo "re-run reached no verdict in: ${no_verdict[*]}; their reports are kept as *.xml.no-verdict" >&2
+    for pattern in "${no_verdict_reports[@]}"; do
+        # A report name under $out, or a glob of them: expand it.
+        # shellcheck disable=SC2086
+        for report in "$out"/$pattern; do
+            [ -f "$report" ] && mv "$report" "$report.no-verdict"
+        done
+    done
     python3 .aidev/junit_cases.py "$out/junit.xml.no-verdict" "$suite" "$cases"
 else
     python3 .aidev/junit_cases.py "$out/junit.xml" "$suite" "$cases"

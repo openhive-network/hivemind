@@ -39,16 +39,21 @@ or a path under the tavern directory or the repository root:
   so a file name holding a dot (`bing.com.tavern.yaml`) resolves;
 - a test of a plain Python group (rest_api_*), `<group>/<module>.py[::<test>]`:
   the node id runs as given.
-A selector naming no file of a group in SMOKETESTS runs nothing and fails the run;
-one whose tests MARKER deselects (postgrest_ignore) has nothing to run and passes.
+A selector naming no file of a group in SMOKETESTS names no test of this tree:
+that is a verdict, reached before the provider is asked for anything, so it is
+recorded as the failing case `rerun-ids` of OUT_DIR/tavern-rerun-ids.xml, which
+does not name it, and fails the run (exit 1). A selector whose tests MARKER
+deselects (postgrest_ignore) has nothing to run and passes.
 
 Exits 0 when every group run passes; 1 only when every group that failed ran its
-tests (pytest exit 1) and its tavern-<group>.xml records its failures; 2 for any
-other failure, so the step fails as itself: a group whose pytest exited otherwise
-(an interrupted or crashed run, a collection error, whatever its report holds) or
-recorded no failure, a selector that ran nothing, a setup error, the provider
-refusing or an uncaught exception; SKIP (77) on a revision miss or a provider whose
-clone API predates sync recipes; the last line printed is the reason.
+tests (pytest exit 1) and its tavern-<group>.xml records its failures, and every
+selector naming no test is recorded in tavern-rerun-ids.xml; 2 for any other
+failure, so the step fails as itself: a group whose pytest exited otherwise (an
+interrupted or crashed run, a collection error, whatever its report holds) or
+recorded no failure, a selected group skipped on its precondition, a setup error,
+the provider refusing or an uncaught exception; SKIP (77) on a revision miss, no
+provider or a provider whose clone API predates sync recipes; the last line
+printed is the reason.
 """
 
 import importlib.util
@@ -61,6 +66,7 @@ import time
 import traceback
 from types import ModuleType
 from typing import Any
+from xml.sax.saxutils import quoteattr
 
 import hivemind_rewriter
 from hivemind_smoke import free_port, wait_until_serving
@@ -149,6 +155,18 @@ def resolve_selectors(selectors: list[str], groups: list[str]) -> tuple[dict[str
 
 def _group_of(target: str) -> str:
     return os.path.normpath(target).split(os.sep)[0]
+
+
+def write_unresolved_report(out: str, unresolved: list[str]) -> None:
+    """Record `unresolved` as one failing case of OUT_DIR/tavern-rerun-ids.xml, under a name none of them is."""
+    message = quoteattr(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
+    with open(os.path.join(out, "tavern-rerun-ids.xml"), "w", encoding="utf-8") as report:
+        report.write(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<testsuite name="tavern" tests="1" failures="1" errors="0" skipped="0">\n'
+            f'<testcase classname="tavern" name="rerun-ids"><failure message={message}/></testcase>\n'
+            "</testsuite>\n"
+        )
 
 
 def _psql(url: str, sql: str, **variables: str) -> str:
@@ -316,6 +334,17 @@ def _serve_and_test(run_url: str, out: str, selected: dict[str, list[str]], skip
 
 def main(out: str, selectors: list[str]) -> int:
     os.makedirs(out, exist_ok=True)
+    with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
+        groups = smoketest_groups(handle.read())
+    if selectors:
+        selected, unresolved = resolve_selectors(selectors, groups)
+        if unresolved:
+            print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
+            write_unresolved_report(out, unresolved)
+        if not selected:
+            return TESTS_FAILED
+    else:
+        selected, unresolved = {group: [f"{group}/"] for group in groups}, []
     with open(os.path.join(ROOT, shared_fixture.PATCHLEVEL_SQL), encoding="utf-8") as handle:
         revision = shared_fixture.revision(handle.read())
     if revision is None:
@@ -336,16 +365,6 @@ def main(out: str, selectors: list[str]) -> int:
     if not host or not port:
         print("no shared hivemind service: AIDEV_EXTERNAL_HIVEMIND_HOST/PORT unset (sandbox.external hivemind)")
         return SKIP
-    with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
-        groups = smoketest_groups(handle.read())
-    if selectors:
-        selected, unresolved = resolve_selectors(selectors, groups)
-        if unresolved:
-            print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
-        if not selected:
-            return UNREPORTED
-    else:
-        selected, unresolved = {group: [f"{group}/"] for group in groups}, []
 
     api_url = f"postgresql://hivemind_shared_consumer@{host}:{port}/hivemind_shared"
     # serve.sh installs admin.sql only when the provider starts.
@@ -430,9 +449,9 @@ def run_status(
     not_run = [group for group in selected if group in skips]
     if rerun and not_run:
         print(f"selected tests not run, their group skipped: {', '.join(not_run)}")
-    if unreported or unresolved or (rerun and not_run):
+    if unreported or (rerun and not_run):
         return UNREPORTED
-    if failed:
+    if failed or unresolved:
         return TESTS_FAILED
     return 0
 

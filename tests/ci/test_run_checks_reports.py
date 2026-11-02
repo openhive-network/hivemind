@@ -180,3 +180,130 @@ def test_the_tavern_step_case_is_demoted_only_when_it_exits_1(
     out = tree / 'test-results' / 'full'
     assert _cases(out / 'junit.xml')['tavern'][0] == outcome
     assert _cases(out / 'tavern-g.xml') == {'Hivemind': ('failure', '')}
+
+
+def _names(junit: Path) -> set[str]:
+    """The ids `junit`'s cases go by: each case's name, and `<classname>::<name>`."""
+    names = set()
+    for case in ET.parse(junit).getroot().iter('testcase'):
+        names |= {case.get('name', ''), f"{case.get('classname', '')}::{case.get('name', '')}"}
+    return names
+
+
+@pytest.mark.parametrize(
+    'missing', ['tests/utils/test_does_not_exist.py::test_x', 'tests/utils/test_sample.py::test_does_not_exist']
+)
+def test_a_unit_rerun_of_an_id_naming_no_test_of_the_tree_is_a_verdict_of_absent(tree: Path, missing: str) -> None:
+    proc = _run(tree, 'quick', 'unit', '--rerun', missing)
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'quick' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'junit.xml']
+    outcome, message = _cases(rerun / 'junit.xml')['rerun-absent']
+    assert outcome == 'failure'
+    assert message == f're-run ids naming no unit test of this tree: {missing}'
+    assert not any(missing.endswith(name) for name in _names(rerun / 'junit.xml'))
+
+
+def test_a_unit_rerun_still_runs_the_named_tests_beside_one_naming_no_test(tree: Path) -> None:
+    proc = _run(
+        tree, 'quick', 'unit', '--rerun', 'tests/utils/test_sample.py::test_passes', 'tests/utils/test_gone.py::test_x'
+    )
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'quick' / 'rerun' / '1'
+    assert _cases(rerun / 'unit.xml') == {'test_passes': ('pass', '')}
+    assert _cases(rerun / 'junit.xml') == {
+        'unit': ('pass', ''),
+        'rerun-absent': ('failure', 're-run ids naming no unit test of this tree: tests/utils/test_gone.py::test_x'),
+    }
+
+
+def test_a_unit_rerun_whose_collection_fails_still_reaches_no_verdict(tree: Path) -> None:
+    (tree / 'tests' / 'utils' / 'test_broken.py').write_text('def test_x(:\n')
+
+    proc = _run(tree, 'quick', 'unit', '--rerun', 'tests/utils/test_broken.py::test_x')
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'quick' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    assert _cases(rerun / 'junit.xml.no-verdict')['unit'][0] == 'failure'
+
+
+def test_a_rerun_keeps_the_reports_of_a_step_that_reached_a_verdict_beside_one_that_did_not(
+    tree: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _fake_tavern(tree, monkeypatch, 77)
+
+    proc = _run(tree, 'full', 'unit', 'tavern', '--rerun', 'tests/utils/test_sample.py::test_fails', _FIND_TEXT_ID)
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'unit.xml']
+    assert _cases(rerun / 'unit.xml') == {'test_fails': ('failure', 'assert False')}
+    assert (rerun / 'tavern-g.xml.no-verdict').is_file()
+    assert _cases(rerun / 'junit.xml.no-verdict')['tavern'][0] == 'skipped'
+
+
+_EXISTING_TAVERN_ID = 'bridge_api_patterns.get_post.gtg.tavern.yaml::Hivemind'
+
+
+@pytest.fixture
+def tavern_tree(tree: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """`tree` with the real tavern step, the files it reads before asking the provider, and one tavern test."""
+    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
+        shutil.copy(AIDEV / name, tree / '.aidev' / name)
+    (tree / '.aidev' / 'shared-hivemind').mkdir()
+    shutil.copy(AIDEV / 'shared-hivemind' / 'shared_fixture.py', tree / '.aidev' / 'shared-hivemind')
+    patchlevel = tree / 'hive' / 'db' / 'sql_scripts' / 'upgrade' / 'update_db_patchlevel.sql'
+    patchlevel.parent.mkdir(parents=True)
+    patchlevel.write_text(f"values (now(), '{'a' * 40}') -- merge request\n")
+    (tree / '.aidev' / 'project.yaml').write_text(f'      env:\n        HAF_FIXTURE_COMMIT: "{"b" * 40}"\n')
+    (tree / '.gitlab-ci.yml').write_text('  SMOKETESTS=(\n    "bridge_api_patterns:api_smoketest_bridge.xml"\n  )\n')
+    test = tree / 'tests' / 'api_tests' / 'hivemind' / 'tavern' / 'bridge_api_patterns' / 'get_post' / 'gtg.tavern.yaml'
+    test.parent.mkdir(parents=True)
+    test.write_text('test_name: Hivemind\n')
+    for variable in ('GIT_AUTHOR_NAME', 'GIT_COMMITTER_NAME'):
+        monkeypatch.setenv(variable, 'test')
+    for variable in ('GIT_AUTHOR_EMAIL', 'GIT_COMMITTER_EMAIL'):
+        monkeypatch.setenv(variable, 'test@example.com')
+    for args in (['init', '-q'], ['add', '-A'], ['commit', '-q', '-m', 'tree']):
+        subprocess.run(['git', '-C', str(tree), *args], check=True)
+    for name in [name for name in os.environ if name.startswith('AIDEV_EXTERNAL_HIVEMIND_')]:
+        monkeypatch.delenv(name)
+    return tree
+
+
+@pytest.mark.parametrize('provider', [False, True])
+def test_a_tavern_rerun_of_a_file_not_in_the_tree_is_a_verdict_of_absent(
+    tavern_tree: Path, monkeypatch: pytest.MonkeyPatch, provider: bool
+) -> None:
+    if provider:
+        # Unreachable: the selector is resolved before the provider is asked for anything.
+        monkeypatch.setenv('AIDEV_EXTERNAL_HIVEMIND_HOST', 'hivemind.invalid')
+        monkeypatch.setenv('AIDEV_EXTERNAL_HIVEMIND_PORT', '5432')
+
+    proc = _run(tavern_tree, 'full', 'tavern', '--rerun', 'does_not.exist.tavern.yaml::Hivemind')
+
+    assert proc.returncode == 1
+    rerun = tavern_tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'junit.xml', rerun / 'tavern-rerun-ids.xml']
+    assert _cases(rerun / 'tavern-rerun-ids.xml') == {
+        'rerun-ids': ('failure', 'selectors naming no test of a tavern group: does_not.exist.tavern.yaml::Hivemind')
+    }
+    assert _cases(rerun / 'junit.xml')['tavern'][0] == 'skipped'
+    for report in _xml_reports(rerun):
+        assert 'does_not.exist.tavern.yaml::Hivemind' not in _names(report)
+
+
+def test_a_tavern_rerun_of_a_file_in_the_tree_without_a_provider_skips_and_leaves_no_report(
+    tavern_tree: Path,
+) -> None:
+    proc = _run(tavern_tree, 'full', 'tavern', '--rerun', _EXISTING_TAVERN_ID)
+
+    assert proc.returncode == 1
+    rerun = tavern_tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    outcome, message = _cases(rerun / 'junit.xml.no-verdict')['tavern']
+    assert outcome == 'skipped'
+    assert 'AIDEV_EXTERNAL_HIVEMIND_HOST/PORT unset' in message
