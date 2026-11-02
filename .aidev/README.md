@@ -52,6 +52,48 @@ pinned `17c8606f` includes #354, so only the `events_queue` reason remains.
 
 Not covered yet: the python API client tests and the benchmarks. They stay in GitLab CI.
 
+## Re-runs and the quarantine ledger
+
+aidev reads every `.xml` under a suite's `artifacts:`, so a failing test is reported
+once, under its own id: a step that exits 1 and whose per-test report (`unit.xml`,
+`api-smoke.xml`, `tavern-*.xml`) records the failure is written *skipped* in
+`junit.xml`, pointing at that report (`.aidev/junit_cases.py`). Exit 1 is how those
+steps say every failure is in their report; `hivemind_tavern.py` exits 2 when a group
+failed without recording one (a crash, a collection error it could not report). A
+step that fails any other way, or writes no report, still fails as itself and
+blocks, as do `ruff` and the install steps.
+
+The ids are the junit's: `tests/utils/test_x.py::test_y` (unit),
+`bridge_api_patterns.get_post.foo.tavern.yaml::Hivemind` (tavern: pytest's dotted
+classname and the file's `test_name`), `rest_api_paging/test_paging.py::test_z`
+(the plain Python tavern groups), `api-smoke::<call>`. The suites declare
+`honor_quarantine: true`, so an id in `.aidev/known_failures.txt` (`aidev test
+quarantine <id> --reason "see #N"`) is pardoned with its tracking issue named.
+
+`rerun:` lets aidev's isolation re-run, same-SHA flake detector, causality check and
+repeat-new-tests re-run failing ids through the wrapper:
+
+    .aidev/run-checks.sh full unit tavern --rerun <id-or-file>...
+
+It runs only the named tests, through the listed steps owning them (a `.py` under
+`tests/utils`, `tests/steem` or `tests/ci` is `unit`'s, anything else `tavern`'s), and
+reports to `test-results/<suite>/rerun/<n>/`, leaving the run's own reports intact.
+A tavern id re-runs its whole file: titles repeat across files (`Hivemind`). The
+wrapper maps the dotted classname back to the file by matching it against the
+tree's files rather than turning dots into slashes, because a file name may hold a
+dot (`get_following/ignore/bing.com.tavern.yaml`). A tavern re-run takes its own
+clone of the shared hivemind. It exits 0 only when every named test ran and passed:
+an id no listed step owns, a tavern file no SMOKETESTS group holds, or an owning
+step that skips (no fixture, search-api without `pg_search`) fails it. A file whose
+tests `-m "not postgrest_ignore"` all deselects has nothing to re-run and passes.
+
+Each rule's `file_pattern` accepts only what that slot's steps run, as ids and as
+the changed files repeat-new-tests repeats: `quick` and `canary` the unit tests,
+`full` also the tavern files under `tests/api_tests/hivemind/tavern/` (not
+`tavern_full_sync/`) and the `rest_api_*` modules. `baseline` declares no `rerun:`,
+since none of its ids can be re-run. `api-smoke` ids have no rule either: they
+block unless quarantined.
+
 ## The `tavern` step
 
 `full` runs CI's tavern API suite (`tests/api_tests/hivemind/tavern/`) against the
