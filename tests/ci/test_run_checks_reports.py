@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
@@ -100,3 +101,82 @@ def test_a_malformed_invocation_is_refused_before_any_step(tree: Path, args: lis
 
     assert proc.returncode == 2
     assert not (tree / 'test-results').exists()
+
+
+# A tavern step stand-in: writes a report failing another test, then exits with $FAKE_TAVERN_RC.
+_FAKE_TAVERN = '''import os, sys
+with open(os.path.join(sys.argv[1], 'tavern-g.xml'), 'w') as report:
+    report.write('<testsuite><testcase classname="g.other.tavern.yaml" name="Hivemind"><failure/></testcase></testsuite>')
+print('fake tavern step')
+sys.exit(int(os.environ['FAKE_TAVERN_RC']))
+'''
+_FIND_TEXT_ID = 'search-api_patterns.find_text.nyunya_punctuation_relevance.tavern.yaml::Hivemind'
+
+
+def _fake_tavern(tree: Path, monkeypatch: pytest.MonkeyPatch, rc: int) -> None:
+    (tree / '.aidev' / 'hivemind_tavern.py').write_text(_FAKE_TAVERN)
+    monkeypatch.setenv('FAKE_TAVERN_RC', str(rc))
+
+
+def _xml_reports(out: Path) -> list[Path]:
+    return sorted(out.rglob('*.xml'))
+
+
+def test_a_rerun_of_the_real_tavern_step_without_a_provider_leaves_no_report(
+    tree: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
+        shutil.copy(AIDEV / name, tree / '.aidev' / name)
+    (tree / '.aidev' / 'shared-hivemind').mkdir()
+    shutil.copy(AIDEV / 'shared-hivemind' / 'shared_fixture.py', tree / '.aidev' / 'shared-hivemind')
+    for name in [name for name in os.environ if name.startswith('AIDEV_EXTERNAL_HIVEMIND_')]:
+        monkeypatch.delenv(name)
+
+    proc = _run(tree, 'full', 'tavern', '--rerun', _FIND_TEXT_ID)
+
+    assert proc.returncode != 0
+    rerun = tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    assert _cases(rerun / 'junit.xml.no-verdict')['tavern'][0] in ('failure', 'skipped')
+
+
+@pytest.mark.parametrize('rc', [2, 77])
+def test_a_rerun_whose_step_reached_no_verdict_keeps_no_report_naming_other_tests(
+    tree: Path, monkeypatch: pytest.MonkeyPatch, rc: int
+) -> None:
+    _fake_tavern(tree, monkeypatch, rc)
+
+    proc = _run(tree, 'full', 'tavern', '--rerun', _FIND_TEXT_ID)
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    assert _cases(rerun / 'tavern-g.xml.no-verdict') == {'Hivemind': ('failure', '')}
+    assert _cases(rerun / 'junit.xml.no-verdict')['tavern'][0] == ('failure' if rc == 2 else 'skipped')
+
+
+def test_a_rerun_whose_failures_are_recorded_per_test_keeps_its_reports(
+    tree: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _fake_tavern(tree, monkeypatch, 1)
+
+    proc = _run(tree, 'full', 'tavern', '--rerun', _FIND_TEXT_ID)
+
+    assert proc.returncode == 1
+    rerun = tree / 'test-results' / 'full' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'junit.xml', rerun / 'tavern-g.xml']
+    assert _cases(rerun / 'junit.xml')['tavern'][0] == 'skipped'
+
+
+@pytest.mark.parametrize(('rc', 'outcome'), [(1, 'skipped'), (2, 'failure')])
+def test_the_tavern_step_case_is_demoted_only_when_it_exits_1(
+    tree: Path, monkeypatch: pytest.MonkeyPatch, rc: int, outcome: str
+) -> None:
+    _fake_tavern(tree, monkeypatch, rc)
+
+    proc = _run(tree, 'full', 'tavern')
+
+    assert proc.returncode == 1
+    out = tree / 'test-results' / 'full'
+    assert _cases(out / 'junit.xml')['tavern'][0] == outcome
+    assert _cases(out / 'tavern-g.xml') == {'Hivemind': ('failure', '')}

@@ -42,10 +42,12 @@ or a path under the tavern directory or the repository root:
 A selector naming no file of a group in SMOKETESTS runs nothing and fails the run;
 one whose tests MARKER deselects (postgrest_ignore) has nothing to run and passes.
 
-Exits 0 when every group run passes; 1 when one fails and every failing group's
-tavern-<group>.xml records its failures; 2 when a group failed without recording
-one (a crash, a collection the run could not report) or a selector ran nothing,
-so the step fails as itself; SKIP (77) on a revision miss or a provider whose
+Exits 0 when every group run passes; 1 only when every group that failed ran its
+tests (pytest exit 1) and its tavern-<group>.xml records its failures; 2 for any
+other failure, so the step fails as itself: a group whose pytest exited otherwise
+(an interrupted or crashed run, a collection error, whatever its report holds) or
+recorded no failure, a selector that ran nothing, a setup error, the provider
+refusing or an uncaught exception; SKIP (77) on a revision miss or a provider whose
 clone API predates sync recipes; the last line printed is the reason.
 """
 
@@ -56,6 +58,7 @@ import shutil
 import subprocess
 import sys
 import time
+import traceback
 from types import ModuleType
 from typing import Any
 
@@ -83,7 +86,8 @@ shared_fixture = _load_shared_fixture()
 
 SKIP = 77
 UNREPORTED = 2
-# The test runner's exit status when it ran no test.
+# The test runner's exit statuses: some test failed; it ran no test.
+TESTS_FAILED = 1
 NO_TESTS = 5
 TAVERN_DIR = os.path.join(ROOT, "tests", "api_tests", "hivemind", "tavern")
 TESTS_API_DIR = os.path.join(ROOT, "tests", "tests_api")
@@ -316,17 +320,17 @@ def main(out: str, selectors: list[str]) -> int:
         revision = shared_fixture.revision(handle.read())
     if revision is None:
         print(f"{shared_fixture.PATCHLEVEL_SQL} names no schema revision")
-        return 1
+        return UNREPORTED
     with open(os.path.join(ROOT, shared_fixture.PROJECT_YAML), encoding="utf-8") as handle:
         haf_commit = shared_fixture.haf_fixture_commit(handle.read())
     if haf_commit is None:
         print(f"{shared_fixture.PROJECT_YAML} names no HAF_FIXTURE_COMMIT")
-        return 1
+        return UNREPORTED
     try:
         recipe = shared_fixture.recipe_of_tree(ROOT, haf_commit)
     except shared_fixture.RecipeError as err:
         print(f"no sync recipe: {err}")
-        return 1
+        return UNREPORTED
     host = os.environ.get("AIDEV_EXTERNAL_HIVEMIND_HOST")
     port = os.environ.get("AIDEV_EXTERNAL_HIVEMIND_PORT")
     if not host or not port:
@@ -390,25 +394,46 @@ def main(out: str, selectors: list[str]) -> int:
             print(f"dropped {database}")
         except ProviderError as err:
             print(f"dropping {database} failed ({err}); the provider's reaper drops it after its TTL")
-    deselected = [group for group, rc in exits.items() if rc == NO_TESTS] if selectors else []
+    status = run_status(out, selected, skips, exits, bool(selectors), unresolved)
+    if status == 0:
+        not_run = sum(1 for group in selected if group in skips)
+        skipped = f", {not_run} skipped" if not_run else ""
+        print(f"{len(selected) - not_run} tavern groups passed{skipped} against {template.database}")
+    return status
+
+
+def run_status(
+    out: str,
+    selected: dict[str, list[str]],
+    skips: dict[str, str],
+    exits: dict[str, int],
+    rerun: bool,
+    unresolved: list[str],
+) -> int:
+    """The step's exit status for the group runs `exits` (the module docstring's 0, 1 or 2), printing why."""
+    deselected = [group for group, rc in exits.items() if rc == NO_TESTS] if rerun else []
     if deselected:
         # Every run deselects them, so there is no result to re-run.
         print(f"the selected tests of {', '.join(deselected)} are all deselected by -m '{MARKER}'")
     failed = [group for group, rc in exits.items() if rc != 0 and group not in deselected]
     if failed:
         print(f"tavern groups failed: {', '.join(failed)}")
-    unreported = [group for group in failed if not recorded_failures(os.path.join(out, f"tavern-{group}.xml"))]
+    # Only a run that ran its tests says its report holds every failure: a collection error's report records
+    # one <error> case for a group none of whose tests ran.
+    unreported = [
+        group
+        for group in failed
+        if exits[group] != TESTS_FAILED or not recorded_failures(os.path.join(out, f"tavern-{group}.xml"))
+    ]
     if unreported:
-        print(f"tavern groups failed without a per-test failure in their report: {', '.join(unreported)}")
+        print(f"tavern groups failed without running their tests and recording each failure: {', '.join(unreported)}")
     not_run = [group for group in selected if group in skips]
-    if selectors and not_run:
+    if rerun and not_run:
         print(f"selected tests not run, their group skipped: {', '.join(not_run)}")
-    if unreported or unresolved or (selectors and not_run):
+    if unreported or unresolved or (rerun and not_run):
         return UNREPORTED
     if failed:
-        return 1
-    skipped = f", {len(not_run)} skipped" if not_run else ""
-    print(f"{len(selected) - len(not_run)} tavern groups passed{skipped} against {template.database}")
+        return TESTS_FAILED
     return 0
 
 
@@ -419,4 +444,9 @@ if __name__ == "__main__":
         sys.exit(main(sys.argv[1], sys.argv[2:]))
     except ProviderError as err:
         print(f"shared hivemind service: {err}")
-        sys.exit(1)
+        sys.exit(UNREPORTED)
+    except Exception:
+        # Exit 1 would say every failure is recorded per test, though the groups after this one never ran.
+        traceback.print_exc(file=sys.stdout)
+        print("tavern step crashed; see the traceback above")
+        sys.exit(UNREPORTED)
