@@ -2854,6 +2854,82 @@ declare
         }
       }
     },
+    "/posts/{author}/{permlink}/similar": {
+      "get": {
+        "tags": [
+          "blog_api"
+        ],
+        "summary": "Get posts similar to a post",
+        "description": "Returns the top-level posts most similar in wording to the given post, the same list as\n`search-api.find_similar`, most similar first and without the post itself. Similarity is\nthe BM25 score of a more-like-this query built from the post''s title and body, so it needs\nthe `pg_search` extension. A comment, or a post too short to have distinctive terms,\nhas no similar posts.\n\nSQL example\n* `SELECT hivemind_endpoints.search_similar_posts(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10''`\n",
+        "operationId": "hivemind_endpoints.search_similar_posts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Author of the post"
+          },
+          {
+            "in": "path",
+            "name": "permlink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Permlink of the post"
+          },
+          {
+            "in": "query",
+            "name": "page-size",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Maximum number of posts to return, at most the posts-per-call limit (20 unless configured), which is also the default"
+          },
+          {
+            "in": "query",
+            "name": "observer",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": null
+            },
+            "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "truncate-body",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": null
+            },
+            "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Similar posts\n\n* Returns `SETOF JSONB`\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/hivemind_endpoints.array_of_bridge_post",
+                  "x-sql-datatype": "SETOF JSONB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown post, an invalid parameter, or no full-text search"
+          }
+        }
+      }
+    },
     "/tags/trending": {
       "get": {
         "tags": [

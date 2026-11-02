@@ -1,0 +1,30 @@
+{
+  "code": -32602,
+  "data": {
+    "assert_hash": "4d5e6f7a8b9c0d1e2f3a",
+    "code": 10,
+    "extension": {
+      "assertion_expression": "Post gtg/not-existing-permlink does not exist"
+    },
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "",
+          "hostname": "",
+          "level": "error",
+          "line": 0,
+          "method": "",
+          "thread_name": "",
+          "timestamp": "2026-11-02T20:23:32"
+        },
+        "data": {
+          "category": "hivemind"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Assert Exception:Post gtg/not-existing-permlink does not exist"
+}

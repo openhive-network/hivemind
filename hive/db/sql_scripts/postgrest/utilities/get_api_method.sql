@@ -280,6 +280,8 @@ BEGIN
     CASE
         WHEN __method_type = 'find_text' THEN
             result := hivemind_endpoints.search_api_find_text(__params);
+        WHEN __method_type = 'find_similar' THEN
+            result := hivemind_endpoints.search_api_find_similar(__params);
         ELSE
             RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search-api' || __method_type);
         END CASE;

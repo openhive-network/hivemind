@@ -100,6 +100,7 @@
 \ir bridge_api/bridge_api_get_profiles.sql
 \ir utilities/valid_accounts.sql
 \ir search-api/find_text.sql
+\ir search-api/find_similar.sql
 \ir utilities/rest_json_rpc_call.sql
 \ir ../endpoints/endpoint_schema.sql
 \ir ../endpoints/types/operation.sql
@@ -131,6 +132,7 @@
 \ir ../endpoints/communities/get_community_subscribers.sql
 \ir ../endpoints/communities/get_community_roles.sql
 \ir ../endpoints/search/search_posts.sql
+\ir ../endpoints/search/search_similar_posts.sql
 \ir ../endpoints/tags/get_trending_tags.sql
 \ir ../endpoints/other/get_sync_status.sql
 \ir ../endpoints/other/get_version.sql

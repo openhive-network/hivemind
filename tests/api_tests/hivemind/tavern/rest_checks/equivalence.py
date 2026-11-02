@@ -254,6 +254,19 @@ MAPPINGS: tuple[EndpointMapping, ...] = (
         ("pattern", "sort", "author", "start_author", "start_permlink", "limit", "observer", "truncate_body"),
     ),
     EndpointMapping(
+        "search_similar_posts",
+        "search-api.find_similar",
+        {
+            "author": ("author", _TEXT),
+            "permlink": ("permlink", _TEXT),
+            "limit": ("page-size", _INT),
+            "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
+        },
+        ("author", "permlink", "limit", "observer", "truncate_body"),
+        required=("author", "permlink"),
+    ),
+    EndpointMapping(
         "get_trending_tags",
         "bridge.get_trending_topics",
         {"limit": ("page-size", _INT), "observer": ("observer", _TEXT)},
