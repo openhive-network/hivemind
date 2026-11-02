@@ -1,0 +1,7 @@
+# Quarantine ledger: tests listed here won't block merges on the slots that
+# declare honor_quarantine (.aidev/project.yaml). One test id per line, as the
+# junit reports name it: a unit test's node id (tests/utils/test_x.py::test_y),
+# a tavern test's <dotted.path>.tavern.yaml::<title>, api-smoke::<call>. Add one
+# with `aidev test quarantine <id> --reason "see #N"` so its tracking issue is
+# recorded. Remove entries when the tests are fixed.
+# Empty file = all failures block.

@@ -340,7 +340,7 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _git_identity(monkeypatch)
     root = tmp_path / 'tree'
     (root / '.aidev' / 'shared-hivemind').mkdir(parents=True)
-    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
+    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py', 'junit_cases.py'):
         shutil.copy(AIDEV / name, root / '.aidev' / name)
     shutil.copy(FIXTURE_PY, root / '.aidev' / 'shared-hivemind' / 'shared_fixture.py')
     (root / PATCHLEVEL).parent.mkdir(parents=True)
@@ -365,9 +365,11 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return root
 
 
-def _run_step(tree: Path, out: Path) -> tuple[int, list[str], list[dict[str, Any]]]:
+def _run_step(tree: Path, out: Path, *selectors: str) -> tuple[int, list[str], list[dict[str, Any]]]:
     proc = subprocess.run(
-        [sys.executable, str(tree / '.aidev' / 'hivemind_tavern.py'), str(out)], capture_output=True, text=True
+        [sys.executable, str(tree / '.aidev' / 'hivemind_tavern.py'), str(out), *selectors],
+        capture_output=True,
+        text=True,
     )
     log = Path(os.environ['FAKE_PSQL_LOG'])
     calls = [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
@@ -480,3 +482,48 @@ def test_without_search_api_no_precondition_is_queried(tree: Path) -> None:
 
     assert tavern.precondition_skips('postgresql://hivemind@hivemind:5432/run_x', ['bridge_api_patterns'], False) == {}
     assert not Path(os.environ['FAKE_PSQL_LOG']).exists()
+
+
+def test_selectors_resolve_to_the_files_and_node_ids_of_ci_groups() -> None:
+    tavern = _load_tavern()
+    groups = tavern.smoketest_groups((ROOT / '.gitlab-ci.yml').read_text())
+
+    selected, unresolved = tavern.resolve_selectors(
+        [
+            # The junit's dotted classname, for a file whose name holds a dot.
+            'condenser_api_patterns.get_following.ignore.bing.com.tavern.yaml::Hivemind',
+            'condenser_api_patterns.get_following.ignore.bing.com.tavern.yaml',
+            'tests/api_tests/hivemind/tavern/bridge_api_patterns/get_post/gtg.tavern.yaml',
+            'rest_api_paging/test_paging.py::test_x[a::b]',
+            'tests/api_tests/hivemind/tavern/rest_api_paging/test_paging.py',
+            'bridge_api_patterns.get_post.no_such_file.tavern.yaml::Hivemind',
+            'tests/api_tests/hivemind/tavern_full_sync/bridge_api_negative/get_post_header/deleted.tavern.yaml',
+            'rest_checks/equivalence.py',
+        ],
+        groups,
+    )
+
+    assert selected == {
+        'condenser_api_patterns': ['condenser_api_patterns/get_following/ignore/bing.com.tavern.yaml'],
+        'bridge_api_patterns': ['bridge_api_patterns/get_post/gtg.tavern.yaml'],
+        'rest_api_paging': ['rest_api_paging/test_paging.py::test_x[a::b]', 'rest_api_paging/test_paging.py'],
+    }
+    assert list(selected) == [group for group in groups if group in selected]
+    assert unresolved == [
+        'bridge_api_patterns.get_post.no_such_file.tavern.yaml::Hivemind',
+        'tests/api_tests/hivemind/tavern_full_sync/bridge_api_negative/get_post_header/deleted.tavern.yaml',
+        'rest_checks/equivalence.py',
+    ]
+
+
+def test_a_selector_naming_no_test_fails_the_step_before_cloning(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    recipe = fixture.recipe_of_tree(str(tree), HAF)
+    monkeypatch.setenv('FAKE_TEMPLATES', f'{REV_B}:{recipe}')
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out', 'bridge_api_patterns.nothing.tavern.yaml::Hivemind')
+
+    assert rc == 2
+    assert lines[-1] == 'selectors naming no test of a tavern group: bridge_api_patterns.nothing.tavern.yaml::Hivemind'
+    assert calls == []

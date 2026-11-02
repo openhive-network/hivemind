@@ -4,7 +4,7 @@
 # The checks AIDEV's verification slots run (.aidev/project.yaml), as one junit
 # report per suite: each named step is a test case, its log the failure body.
 #
-#   .aidev/run-checks.sh <suite> <step>...
+#   .aidev/run-checks.sh <suite> <step>... [--rerun <id>...]
 #
 #   - unit       pytest on tests/utils, tests/steem and tests/ci, those that exist (the
 #                Makefile's test-utils / test-steem); one junit case per test in unit.xml
@@ -34,14 +34,61 @@
 # precondition is the host environment's (tavern: no fixture for this tree's schema
 # revision yet); the last line it printed is the reason.
 # Reports go to test-results/<suite>/: junit.xml (one case per step) plus
-# unit.xml, api-smoke.xml and tavern-<group>.xml.
+# unit.xml, api-smoke.xml and tavern-<group>.xml, one case per test. A step that
+# exits 1 with failures recorded there is reported skipped in junit.xml, pointing
+# at them (.aidev/junit_cases.py), so each failure is reported once, under the
+# test's own id, where .aidev/known_failures.txt or a re-run can name it. Exit 1 is
+# how unit, api-smoke and tavern say their failures are recorded per test; a step
+# failing any other way (a crash, a group that wrote no report) fails as itself.
+#
+# --rerun runs only the named tests, through the listed steps that own them, and
+# reports to test-results/<suite>/rerun/<n>/, leaving the run it re-runs intact.
+# That is under the slot's declared artifacts path, so aidev's causality check
+# reads a re-run on the base tree as a verdict: an id its report does not name is
+# absent on base. aidev reads and keeps a run's own reports before re-running any
+# of its failures, so a re-run's report never joins them; the next run's rm -rf
+# removes it. Each argument is a test id as the junit reports name it, or a file:
+#   - `<path>.py[::<test>]` under one of UNIT_DIRS: unit, the node id as given;
+#   - anything else: tavern, as .aidev/hivemind_tavern.py's selectors — a tavern id
+#     (`<dotted.path>.tavern.yaml::<title>`, which re-runs its whole file), a tavern
+#     file, or a rest_api_* test (`<group>/<module>.py::<test>`).
+# Neither step needs another first: unit runs from the checkout, tavern on its own
+# clone. The exit status is 0 only when every named test ran and passed: an
+# argument no listed step owns, or an owning step that skips, fails the re-run,
+# since a test that never ran must not read as passing.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 root="$PWD"
 
-suite="${1:?usage: $0 <suite> <step>...}"; shift
-out="$root/test-results/$suite"
-rm -rf "$out"; mkdir -p "$out"
+suite="${1:?usage: $0 <suite> <step>... [--rerun <id>...]}"; shift
+steps=()
+while [ $# -gt 0 ] && [ "$1" != --rerun ]; do steps+=("$1"); shift; done
+rerun=()
+if [ $# -gt 0 ]; then
+    shift
+    rerun=("$@")
+    [ ${#rerun[@]} -gt 0 ] || { echo "--rerun needs at least one test id" >&2; exit 2; }
+fi
+for s in "${steps[@]}"; do
+    case "$s" in
+        unit|ruff|install|reinstall|mock-wrapper|api-smoke|tavern) ;;
+        *) echo "unknown step: $s" >&2; exit 2 ;;
+    esac
+done
+for s in "${rerun[@]}"; do
+    # The arguments reach the test runners' argv: none may pass as an option.
+    [[ "$s" != -* ]] || { echo "--rerun: not a test id: $s" >&2; exit 2; }
+done
+
+if [ ${#rerun[@]} -eq 0 ]; then
+    out="$root/test-results/$suite"
+    rm -rf "$out"; mkdir -p "$out"
+else
+    mkdir -p "$root/test-results/$suite/rerun"
+    n=1
+    until mkdir "$root/test-results/$suite/rerun/$n" 2>/dev/null; do n=$((n + 1)); done
+    out="$root/test-results/$suite/rerun/$n"
+fi
 cases="$out/cases.tsv"; : > "$cases"
 
 DB_HOST="${HIVEMIND_TEST_DB_HOST:-haf}"
@@ -51,28 +98,30 @@ REPTRACKER_SCHEMA=reptracker_app
 
 status=0
 SKIP_RC=77
-# record CASES_FILE NAME RC SECONDS LOG
+# record CASES_FILE NAME RC SECONDS LOG [TESTS_JUNIT]
 record() {
     if [ "$3" -eq 0 ]; then
         printf 'case\t%s\tpass\t%s\t\n' "$2" "$4" >> "$1"
     elif [ "$3" -eq "$SKIP_RC" ]; then
         printf 'case\t%s\tskip\t%s\t%s\n' "$2" "$4" "$(grep -v '^[[:space:]]*$' "$5" | tail -1 | tr '\t' ' ')" >> "$1"
     else
-        printf 'case\t%s\tfail\t%s\texit %s\t%s\n' "$2" "$4" "$3" "$5" >> "$1"
+        printf 'case\t%s\tfail\t%s\texit %s\t%s\t%s\n' "$2" "$4" "$3" "$5" "${6:-}" >> "$1"
     fi
 }
 
-step() {
-    local name="$1"; shift
+step() {  # NAME TESTS_JUNIT COMMAND...  (TESTS_JUNIT: the per-test junit it writes, a path or glob, or "")
+    local name="$1" tests_junit="$2"; shift 2
     local log="$out/$name.log" t0=$SECONDS rc=0
     echo "== $name" >&2
     "$@" > "$log" 2>&1 < /dev/null || rc=$?
     if [ "$rc" -eq "$SKIP_RC" ]; then
         echo "skipped: $(grep -v '^[[:space:]]*$' "$log" | tail -1)" >&2
+        [ ${#rerun[@]} -eq 0 ] || status=1
     elif [ "$rc" -ne 0 ]; then
         status=1; tail -40 "$log" >&2
     fi
-    record "$cases" "$name" "$rc" "$((SECONDS - t0))" "$log"
+    [ "$rc" -eq 1 ] || tests_junit=""
+    record "$cases" "$name" "$rc" "$((SECONDS - t0))" "$log" "$tests_junit"
 }
 
 # hive/_version.py is generated by versioningit at `pip install` time and gitignored;
@@ -89,17 +138,21 @@ ensure_version() {
 # directory: run them from a scratch one so the checkout stays clean. A directory
 # of UNIT_DIRS that doesn't exist is skipped, so removing one doesn't break the step.
 UNIT_DIRS=(tests/utils tests/steem tests/ci)
-unit() {
+unit() {  # [NODE_ID...]  (repository-relative; default: every test under UNIT_DIRS)
     ensure_version
-    local scratch dir rc=0
-    local -a dirs=()
-    for dir in "${UNIT_DIRS[@]}"; do
-        [ -d "$dir" ] && dirs+=("$root/$dir")
-    done
-    [ "${#dirs[@]}" -gt 0 ] || { echo "none of ${UNIT_DIRS[*]} exists"; return 1; }
+    local scratch dir id rc=0
+    local -a targets=()
+    if [ $# -gt 0 ]; then
+        for id in "$@"; do targets+=("$root/$id"); done
+    else
+        for dir in "${UNIT_DIRS[@]}"; do
+            [ -d "$dir" ] && targets+=("$root/$dir")
+        done
+        [ "${#targets[@]}" -gt 0 ] || { echo "none of ${UNIT_DIRS[*]} exists"; return 1; }
+    fi
     scratch="$(mktemp -d)"
     (cd "$scratch" && PYTHONPATH="$root" python3 -m pytest -p no:cacheprovider --rootdir="$root" \
-        --junitxml="$out/unit.xml" -o junit_suite_name=unit "${dirs[@]}") || rc=$?
+        --junitxml="$out/unit.xml" -o junit_suite_name=unit "${targets[@]}") || rc=$?
     rm -rf "$scratch"
     return "$rc"
 }
@@ -196,18 +249,49 @@ mock_wrapper() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_next_block_wrapper_check.sql
 }
 
-for s in "$@"; do
-    case "$s" in
-        unit) step unit unit ;;
-        ruff) step ruff run_ruff ;;
-        install) step install install ;;
-        reinstall) step reinstall reinstall ;;
-        mock-wrapper) step mock-wrapper mock_wrapper ;;
-        api-smoke) step api-smoke python3 .aidev/hivemind_smoke.py "$out" ;;
-        tavern) step tavern python3 .aidev/hivemind_tavern.py "$out" ;;
-        *) echo "unknown step: $s" >&2; exit 2 ;;
-    esac
-done
+rerun_owner() {  # ARG: the step that runs the test it names
+    local file="${1%%::*}" dir
+    if [[ "$file" == *.py ]]; then
+        for dir in "${UNIT_DIRS[@]}"; do
+            [[ "$file" == "$dir"/* ]] && { echo unit; return; }
+        done
+    fi
+    echo tavern
+}
+
+if [ ${#rerun[@]} -eq 0 ]; then
+    for s in "${steps[@]}"; do
+        case "$s" in
+            unit) step unit "$out/unit.xml" unit ;;
+            ruff) step ruff "" run_ruff ;;
+            install) step install "" install ;;
+            reinstall) step reinstall "" reinstall ;;
+            mock-wrapper) step mock-wrapper "" mock_wrapper ;;
+            api-smoke) step api-smoke "$out/api-smoke.xml" python3 .aidev/hivemind_smoke.py "$out" ;;
+            tavern) step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" ;;
+        esac
+    done
+else
+    unit_ids=(); tavern_ids=(); unowned=()
+    for arg in "${rerun[@]}"; do
+        owner="$(rerun_owner "$arg")"
+        if [[ " ${steps[*]} " != *" $owner "* ]]; then
+            unowned+=("$arg")
+        elif [ "$owner" = unit ]; then
+            unit_ids+=("$arg")
+        else
+            tavern_ids+=("$arg")
+        fi
+    done
+    [ ${#unit_ids[@]} -eq 0 ] || step unit "$out/unit.xml" unit "${unit_ids[@]}"
+    [ ${#tavern_ids[@]} -eq 0 ] ||
+        step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" "${tavern_ids[@]}"
+    if [ ${#unowned[@]} -gt 0 ]; then
+        status=1
+        echo "re-run ids no listed step (${steps[*]}) runs: ${unowned[*]}" >&2
+        printf 'case\trerun-ids\tfail\t0\tre-run ids no listed step runs: %s\n' "${unowned[*]}" >> "$cases"
+    fi
+fi
 [ -n "$stage" ] && rm -rf "$stage"
 python3 .aidev/junit_cases.py "$out/junit.xml" "$suite" "$cases"
 exit "$status"

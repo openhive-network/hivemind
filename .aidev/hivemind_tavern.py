@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the tavern API suite against a clone of the shared synced hivemind.
 
-    hivemind_tavern.py OUT_DIR
+    hivemind_tavern.py OUT_DIR [SELECTOR...]
 
 The provider is the shared hivemind service (`sandbox.external` `hivemind`,
 reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
@@ -30,9 +30,23 @@ A group whose host precondition the clone lacks (search-api without pg_search)
 is not run and is reported `skip <group> (<reason>)`; the other groups get the reason
 as HIVEMIND_SKIP_SEARCH, which skips their own search-api tests.
 
-Exits 0 when every group run passes, 1 when one fails, SKIP (77) on a revision miss
-or a provider whose clone API predates sync recipes;
-the last line printed is the reason.
+With SELECTORs only the tests they name run (a re-run, .aidev/run-checks.sh --rerun),
+each in its group's run and report. A selector is a test id as the junit names it,
+or a path under the tavern directory or the repository root:
+- a tavern test, `<dotted.path>.tavern.yaml::<title>` (the junit classname), its
+  dotted path alone, or the file's path: the whole file runs, since titles repeat
+  across files (`Hivemind`). The dotted path is matched against the tree's files,
+  so a file name holding a dot (`bing.com.tavern.yaml`) resolves;
+- a test of a plain Python group (rest_api_*), `<group>/<module>.py[::<test>]`:
+  the node id runs as given.
+A selector naming no file of a group in SMOKETESTS runs nothing and fails the run;
+one whose tests MARKER deselects (postgrest_ignore) has nothing to run and passes.
+
+Exits 0 when every group run passes; 1 when one fails and every failing group's
+tavern-<group>.xml records its failures; 2 when a group failed without recording
+one (a crash, a collection the run could not report) or a selector ran nothing,
+so the step fails as itself; SKIP (77) on a revision miss or a provider whose
+clone API predates sync recipes; the last line printed is the reason.
 """
 
 import importlib.util
@@ -47,6 +61,7 @@ from typing import Any
 
 import hivemind_rewriter
 from hivemind_smoke import free_port, wait_until_serving
+from junit_cases import recorded_failures
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -67,6 +82,9 @@ def _load_shared_fixture() -> ModuleType:
 shared_fixture = _load_shared_fixture()
 
 SKIP = 77
+UNREPORTED = 2
+# The test runner's exit status when it ran no test.
+NO_TESTS = 5
 TAVERN_DIR = os.path.join(ROOT, "tests", "api_tests", "hivemind", "tavern")
 TESTS_API_DIR = os.path.join(ROOT, "tests", "tests_api")
 SQL_SCRIPTS_DIR = os.path.join(ROOT, "hive", "db", "sql_scripts")
@@ -93,6 +111,40 @@ def smoketest_groups(gitlab_ci: str) -> list[str]:
     if not groups:
         raise ValueError("the SMOKETESTS list in .gitlab-ci.yml names no group")
     return groups
+
+
+def resolve_selectors(selectors: list[str], groups: list[str]) -> tuple[dict[str, list[str]], list[str]]:
+    """The test arguments each group runs for `selectors`, in `groups`' order, and the selectors naming none."""
+    prefix = os.path.relpath(TAVERN_DIR, ROOT) + os.sep
+    dotted: dict[str, list[str]] = {}
+    for directory, _, files in os.walk(TAVERN_DIR):
+        for name in sorted(files):
+            if name.endswith(".tavern.yaml"):
+                path = os.path.relpath(os.path.join(directory, name), TAVERN_DIR)
+                dotted.setdefault(path.replace(os.sep, "."), []).append(path)
+    selected: dict[str, list[str]] = {}
+    unresolved = []
+    for selector in selectors:
+        file, sep, rest = selector.partition("::")
+        file = file.removeprefix(prefix)
+        if file.endswith(".py"):
+            targets = [file + sep + rest] if os.path.isfile(os.path.join(TAVERN_DIR, file)) else []
+        elif file.endswith(".tavern.yaml"):
+            targets = [file] if os.path.isfile(os.path.join(TAVERN_DIR, file)) else dotted.get(file, [])
+        else:
+            targets = []
+        targets = [target for target in targets if _group_of(target) in groups]
+        if not targets:
+            unresolved.append(selector)
+        for target in targets:
+            group = selected.setdefault(_group_of(target), [])
+            if target not in group:
+                group.append(target)
+    return {group: selected[group] for group in groups if group in selected}, unresolved
+
+
+def _group_of(target: str) -> str:
+    return os.path.normpath(target).split(os.sep)[0]
 
 
 def _psql(url: str, sql: str, **variables: str) -> str:
@@ -171,7 +223,9 @@ def precondition_skips(run_url: str, groups: list[str], can_install_admin: bool)
     return {}
 
 
-def _run_group(group: str, port: int, rewriter_port: int, out: str, workers: str, search_skip: str | None) -> int:
+def _run_group(
+    group: str, targets: list[str], port: int, rewriter_port: int, out: str, workers: str, search_skip: str | None
+) -> int:
     env = dict(
         os.environ,
         HIVEMIND_ADDRESS="127.0.0.1",
@@ -192,7 +246,7 @@ def _run_group(group: str, port: int, rewriter_port: int, out: str, workers: str
         "-n", workers, "--dist", "loadfile", "--max-worker-restart", "0",
         "-v", "--tb=short", "-m", MARKER,
         f"--junitxml={os.path.join(out, f'tavern-{group}.xml')}",
-        f"{group}/",
+        *targets,
     ]  # fmt: skip
     with open(os.path.join(out, f"tavern-{group}.log"), "w") as log:
         return subprocess.run(args, cwd=TAVERN_DIR, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
@@ -211,7 +265,8 @@ def _collect_outputs(out: str) -> int:
     return moved
 
 
-def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, str]) -> list[str]:
+def _serve_and_test(run_url: str, out: str, selected: dict[str, list[str]], skips: dict[str, str]) -> dict[str, int]:
+    """Each group run's exit status; a group of `skips` is not run."""
     port = free_port()
     base = f"http://127.0.0.1:{port}"
     log_path = os.path.join(out, "tavern-postgrest.log")
@@ -228,7 +283,7 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
         PGRST_SERVER_PORT=str(port),
     )
     workers = os.environ.get("HIVEMIND_TAVERN_WORKERS", "4")
-    failed = []
+    exits = {}
     with open(os.path.join(ROOT, "rewrite_rules.conf"), encoding="utf-8") as handle:
         rules = handle.read()
     rewriter_port = free_port()
@@ -237,15 +292,14 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
         rewriter = hivemind_rewriter.start(rules, "127.0.0.1", port, rewriter_port)
         try:
             wait_until_serving(base, proc, log_path)
-            for group in groups:
+            for group, targets in selected.items():
                 if group in skips:
                     print(f"skip {group} ({skips[group]})", flush=True)
                     continue
                 t0 = time.monotonic()
-                rc = _run_group(group, port, rewriter_port, out, workers, skips.get(SEARCH_GROUP))
+                rc = _run_group(group, targets, port, rewriter_port, out, workers, skips.get(SEARCH_GROUP))
                 print(f"{'ok  ' if rc == 0 else 'FAIL'} {group} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
-                if rc != 0:
-                    failed.append(group)
+                exits[group] = rc
         finally:
             rewriter.shutdown()
             proc.terminate()
@@ -253,10 +307,10 @@ def _serve_and_test(run_url: str, out: str, groups: list[str], skips: dict[str, 
                 proc.wait(timeout=10)
             except subprocess.TimeoutExpired:
                 proc.kill()
-    return failed
+    return exits
 
 
-def main(out: str) -> int:
+def main(out: str, selectors: list[str]) -> int:
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(ROOT, shared_fixture.PATCHLEVEL_SQL), encoding="utf-8") as handle:
         revision = shared_fixture.revision(handle.read())
@@ -280,6 +334,14 @@ def main(out: str) -> int:
         return SKIP
     with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
         groups = smoketest_groups(handle.read())
+    if selectors:
+        selected, unresolved = resolve_selectors(selectors, groups)
+        if unresolved:
+            print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
+        if not selected:
+            return UNREPORTED
+    else:
+        selected, unresolved = {group: [f"{group}/"] for group in groups}, []
 
     api_url = f"postgresql://hivemind_shared_consumer@{host}:{port}/hivemind_shared"
     # serve.sh installs admin.sql only when the provider starts.
@@ -320,7 +382,7 @@ def main(out: str) -> int:
                 "next start. Until then the clone lacks the admin-level scripts and search-api is skipped"
             )
         skips = precondition_skips(run_url, groups, can_install_admin)
-        failed = _serve_and_test(run_url, out, groups, skips)
+        exits = _serve_and_test(run_url, out, selected, skips)
     finally:
         print(f"moved {_collect_outputs(out)} .out.json files to {os.path.join(out, 'tavern-out')}")
         try:
@@ -328,19 +390,33 @@ def main(out: str) -> int:
             print(f"dropped {database}")
         except ProviderError as err:
             print(f"dropping {database} failed ({err}); the provider's reaper drops it after its TTL")
+    deselected = [group for group, rc in exits.items() if rc == NO_TESTS] if selectors else []
+    if deselected:
+        # Every run deselects them, so there is no result to re-run.
+        print(f"the selected tests of {', '.join(deselected)} are all deselected by -m '{MARKER}'")
+    failed = [group for group, rc in exits.items() if rc != 0 and group not in deselected]
     if failed:
         print(f"tavern groups failed: {', '.join(failed)}")
+    unreported = [group for group in failed if not recorded_failures(os.path.join(out, f"tavern-{group}.xml"))]
+    if unreported:
+        print(f"tavern groups failed without a per-test failure in their report: {', '.join(unreported)}")
+    not_run = [group for group in selected if group in skips]
+    if selectors and not_run:
+        print(f"selected tests not run, their group skipped: {', '.join(not_run)}")
+    if unreported or unresolved or (selectors and not_run):
+        return UNREPORTED
+    if failed:
         return 1
-    skipped = f", {len(skips)} skipped" if skips else ""
-    print(f"{len(groups) - len(skips)} tavern groups passed{skipped} against {template.database}")
+    skipped = f", {len(not_run)} skipped" if not_run else ""
+    print(f"{len(selected) - len(not_run)} tavern groups passed{skipped} against {template.database}")
     return 0
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(f"usage: {sys.argv[0]} OUT_DIR")
+    if len(sys.argv) < 2:
+        sys.exit(f"usage: {sys.argv[0]} OUT_DIR [SELECTOR...]")
     try:
-        sys.exit(main(sys.argv[1]))
+        sys.exit(main(sys.argv[1], sys.argv[2:]))
     except ProviderError as err:
         print(f"shared hivemind service: {err}")
         sys.exit(1)

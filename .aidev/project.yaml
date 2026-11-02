@@ -102,18 +102,52 @@ sandbox:
 # revision), and `aidev db shape check` on the mainnet shape `performance.shape`
 # pins (db_shape: host-side, it drives the host's Docker; `not applicable` when
 # the diff cannot move a declared plan); see .aidev/README.md.
+#
+# Failures are reported under each test's own id (a step whose per-test junit
+# records them reads skipped in junit.xml): unit's node ids, tavern's
+# `<dotted.path>.tavern.yaml::<title>`, the rest_api_* groups'
+# `<group>/<module>.py::<test>`, api-smoke's `api-smoke::<call>`. So
+# `.aidev/known_failures.txt` pardons them (honor_quarantine), and aidev's flake
+# layers re-run them through `run-checks.sh <suite> <step>... --rerun <id>...`
+# (`rerun:`): unit and rest_api_* ids as given, a tavern id by its file, since
+# titles repeat across files; the wrapper maps the dotted classname back to the
+# file. Each rule's file_pattern takes only the files its slot's steps run, as
+# ids and as the changed files repeat-new-tests repeats. api-smoke and a failing
+# step (a crash, install, ruff) have no rule and block. See .aidev/README.md,
+# "Re-runs and the quarantine ledger".
 verification:
   quick:
     adapter: command
     args: [".aidev/run-checks.sh", "quick", "unit", "ruff"]
     stack: false
     artifacts: ["test-results/quick/"]
+    honor_quarantine: true
+    rerun:
+      - &unit_rerun
+        classify: true
+        match: "^tests/(utils|steem|ci)/"
+        file_pattern: "^tests/(utils|steem|ci)/(.+/)?(test_[^/]*|[^/]*_test)\\.py$"
+        ids: ["--rerun", "{ids}"]
+        files: ["--rerun", "{files}"]
   full:
     suites:
       - name: checks
         adapter: command
         args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke", "tavern"]
         artifacts: ["test-results/full/"]
+        honor_quarantine: true
+        rerun:
+          - classify: true
+            match: "\\.tavern\\.yaml::"
+            file_pattern: "^(tests/api_tests/hivemind/tavern/[^/]+/.+|[^/]+)\\.tavern\\.yaml$"
+            ids: ["--rerun", "{files}"]
+            files: ["--rerun", "{files}"]
+          - classify: true
+            match: "^rest_api_[^/]+/[^/]+\\.py::"
+            file_pattern: "^(tests/api_tests/hivemind/tavern/)?rest_api_[^/]+/(test_[^/]*|[^/]*_test)\\.py$"
+            ids: ["--rerun", "{ids}"]
+            files: ["--rerun", "{files}"]
+          - *unit_rerun
       # After `checks`, which creates test-results/ (`--report` writes no directory).
       - name: db_shape
         adapter: command
@@ -128,10 +162,14 @@ verification:
     adapter: command
     args: [".aidev/run-checks.sh", "baseline", "install", "reinstall", "api-smoke"]
     artifacts: ["test-results/baseline/"]
+    # No `rerun:`: none of its ids (api-smoke's, the steps') has a re-run.
+    honor_quarantine: true
   canary:
     adapter: command
     args: [".aidev/run-checks.sh", "canary", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke"]
     artifacts: ["test-results/canary/"]
+    honor_quarantine: true
+    rerun: [*unit_rerun]
   # There is no coverage tooling in the image yet; `coverage` runs the unit tests
   # (AIDEV runs it in the post-implementation scan only). `static` and `system`
   # are left unbound: AIDEV runs neither for a project.
