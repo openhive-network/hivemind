@@ -22,7 +22,7 @@ its precondition belongs to the host environment, not to the change.
 | `install` | into the stack's HAF database as `haf_admin`, the way the hivemind image's `setup --with-apps` does it: `scripts/setup_postgres.sh`, the `reputation_tracker` and `hafah` submodules' `install_app.sh`, `scripts/install_app.sh`, then `hive build_schema` from this checkout; passes when `hivemind_endpoints` has functions and, on a HAF with hive/haf#348, the `hivemind` role holds no `TRUNCATE`, `REFERENCES` or `TRIGGER` on HAF's control tables (`.aidev/haf_control_table_privileges_check.sql`; skipped with a printed reason on an older HAF, whose `hive_applications_group` still holds `TRUNCATE` on `hafd.contexts`) |
 | `reinstall` | `scripts/uninstall_app.sh`, then the hivemind half of `install` again |
 | `mock-wrapper` | `.aidev/app_next_block_wrapper_check.sql`: applies `scripts/ci/wrapper_for_app_next_block.sql` (which `scripts/ci/add-mocks-to-db.sh` applies in CI's `sync` and the shared hivemind's seed) twice to the stack's HAF, in a transaction it rolls back, and checks that the 3-argument `hive.app_next_block` delegates to `app_next_block_haf`, that re-applying changes nothing, the 4999979 cap with HAF's range stubbed, and that `hive.get_estimated_hive_head_block` returns `hive.get_irreversible_head_block()` with HAF's original kept as `get_estimated_hive_head_block_haf` and its EXECUTE grants matched |
-| `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with, then the psql scripts of its `SQL_TESTS`; a script still running after `SQL_TEST_TIMEOUT_S` fails with what its backend waited on and who blocked it, and is terminated. Each case's line in `api-smoke.log` and row in `api-smoke.tsv` is flushed as it completes, and a script's `run` line before it starts, so a killed run names the case it was in |
+| `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with, then the psql scripts of its `SQL_TESTS`; a script still running after `SQL_TEST_TIMEOUT_S` fails with what its backend waited on and who blocked it, and is terminated. A failing script's case carries its psql output and how psql ended (its exit code, or the signal that killed it and whether the container's memory cgroup did) as its failure text (`sql/<script>.log`). Each case's line in `api-smoke.log` and row in `api-smoke.tsv` is flushed as it completes, and a script's `run` line before it starts, so a killed run names the case it was in |
 | `tavern` | `.aidev/hivemind_tavern.py`: CI's tavern API suite against a per-run clone of the shared synced hivemind, with this tree's PostgREST SQL reloaded into it; see [The `tavern` step](#the-tavern-step) |
 
 The install steps copy `scripts/`, `reputation_tracker/` and `hafah/` to a scratch
@@ -79,8 +79,12 @@ repeat-new-tests re-run failing ids through the wrapper:
     .aidev/run-checks.sh full unit tavern --rerun <id-or-file>...
 
 It runs only the named tests, through the listed steps owning them (a `.py` under
-`tests/utils`, `tests/steem` or `tests/ci` is `unit`'s, anything else `tavern`'s), and
-reports to `test-results/<suite>/rerun/<n>/`, leaving the run's own reports intact.
+`tests/utils`, `tests/steem` or `tests/ci` is `unit`'s, an `api-smoke::<call>` id
+`api-smoke`'s, anything else `tavern`'s), and reports to
+`test-results/<suite>/rerun/<n>/`, leaving the run's own reports intact. An
+`api-smoke` re-run makes only the named calls (`hivemind_smoke.py OUT CALL...`,
+named as `hivemind_smoke.py --list` prints them) after the `install` step, when
+the suite lists it, puts the schema in the stack's database.
 A tavern id re-runs its whole file: titles repeat across files (`Hivemind`). The
 wrapper maps the dotted classname back to the file by matching it against the
 tree's files rather than turning dots into slashes, because a file name may hold a
@@ -92,20 +96,24 @@ tests `-m "not postgrest_ignore"` all deselects has nothing to re-run and passes
 aidev's causality check reads a re-run report that does not name the id as the id
 being absent on base, so new. An id naming no test of the tree is that verdict, the
 way a test the change adds shows up on base: a unit node id pytest does not collect
-(exit 4 or 5 on `--collect-only`) is not run and fails the re-run as the
-`rerun-absent` case of `junit.xml`, and a tavern selector no SMOKETESTS group holds
+(exit 4 or 5 on `--collect-only`) or an api-smoke call `--list` does not name is
+not run and fails the re-run as the `rerun-absent` case of `junit.xml`, and a
+tavern selector no SMOKETESTS group holds
 fails it as the `rerun-ids` case of `tavern-rerun-ids.xml`, written before the
 provider is asked for anything. An owning step exiting other than 0 or 1 (a skip,
-a crash, a setup or collection error) reached no verdict: its own reports and
-`junit.xml` are renamed `<name>.xml.no-verdict`, so with no report the non-zero
-exit reads as the id failing on base. Another owning step's reports are kept.
+a crash, a setup or collection error; for `api-smoke`, PostgREST not serving or
+`install` failing first) reached no verdict: its own reports and `junit.xml` are
+renamed `<name>.xml.no-verdict`, so with no report the non-zero exit reads as the
+id failing on base. Another owning step's reports are kept.
 
 Each rule's `file_pattern` accepts only what that slot's steps run, as ids and as
 the changed files repeat-new-tests repeats: `quick` and `canary` the unit tests,
 `full` also the tavern files under `tests/api_tests/hivemind/tavern/` (not
-`tavern_full_sync/`) and the `rest_api_*` modules. `baseline` declares no `rerun:`,
-since none of its ids can be re-run. `api-smoke` ids have no rule either: they
-block unless quarantined.
+`tavern_full_sync/`) and the `rest_api_*` modules. `full`'s `checks`, `canary` and
+`baseline`, which run `api-smoke`, also re-run its ids; an `api-smoke` id names a
+call rather than a file, so that rule declares no `files:` and repeat-new-tests
+repeats no changed file through it. A failing step (`install`, `ruff`, a crash)
+has no rule and blocks unless quarantined.
 
 ## The `tavern` step
 

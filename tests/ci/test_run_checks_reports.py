@@ -201,7 +201,7 @@ def test_a_unit_rerun_of_an_id_naming_no_test_of_the_tree_is_a_verdict_of_absent
     assert _xml_reports(rerun) == [rerun / 'junit.xml']
     outcome, message = _cases(rerun / 'junit.xml')['rerun-absent']
     assert outcome == 'failure'
-    assert message == f're-run ids naming no unit test of this tree: {missing}'
+    assert message == f're-run ids naming no test of this tree: {missing}'
     assert not any(missing.endswith(name) for name in _names(rerun / 'junit.xml'))
 
 
@@ -215,7 +215,7 @@ def test_a_unit_rerun_still_runs_the_named_tests_beside_one_naming_no_test(tree:
     assert _cases(rerun / 'unit.xml') == {'test_passes': ('pass', '')}
     assert _cases(rerun / 'junit.xml') == {
         'unit': ('pass', ''),
-        'rerun-absent': ('failure', 're-run ids naming no unit test of this tree: tests/utils/test_gone.py::test_x'),
+        'rerun-absent': ('failure', 're-run ids naming no test of this tree: tests/utils/test_gone.py::test_x'),
     }
 
 
@@ -307,3 +307,172 @@ def test_a_tavern_rerun_of_a_file_in_the_tree_without_a_provider_skips_and_leave
     outcome, message = _cases(rerun / 'junit.xml.no-verdict')['tavern']
     assert outcome == 'skipped'
     assert 'AIDEV_EXTERNAL_HIVEMIND_HOST/PORT unset' in message
+
+
+_SMOKE_SQL_ID = 'api-smoke::sql/tests/sql/post_batches_staged_join.sql'
+
+# An api-smoke step stand-in: the real call list; a run keeps its argv, writes a report passing the
+# calls it is given and another one, then exits with $FAKE_SMOKE_RC.
+_FAKE_SMOKE = '''import json, os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'real'))
+import hivemind_smoke
+if sys.argv[1:] == ['--list']:
+    print('\\n'.join(hivemind_smoke.call_names()))
+    sys.exit(0)
+with open(os.path.join(sys.argv[1], 'smoke-argv.json'), 'w') as handle:
+    json.dump(sys.argv[2:], handle)
+cases = ''.join(f'<testcase classname="api-smoke" name="{name}"/>' for name in sys.argv[2:] + ['other'])
+with open(os.path.join(sys.argv[1], 'api-smoke.xml'), 'w') as report:
+    report.write(f'<testsuite>{cases}</testsuite>')
+sys.exit(int(os.environ.get('FAKE_SMOKE_RC', '0')))
+'''
+
+
+@pytest.fixture
+def smoke_tree(tree: Path) -> Path:
+    # `tree` with an api-smoke step stand-in that lists the real calls.
+    (tree / '.aidev' / 'real').mkdir()
+    shutil.copy(AIDEV / 'hivemind_smoke.py', tree / '.aidev' / 'real' / 'hivemind_smoke.py')
+    (tree / '.aidev' / 'hivemind_smoke.py').write_text(_FAKE_SMOKE)
+    return tree
+
+
+def test_an_api_smoke_rerun_makes_only_the_named_call_and_reports_it_under_its_id(smoke_tree: Path) -> None:
+    proc = _run(smoke_tree, 'baseline', 'api-smoke', '--rerun', _SMOKE_SQL_ID)
+
+    assert proc.returncode == 0, proc.stderr
+    rerun = smoke_tree / 'test-results' / 'baseline' / 'rerun' / '1'
+    assert (rerun / 'smoke-argv.json').read_text() == '["sql/tests/sql/post_batches_staged_join.sql"]'
+    assert _xml_reports(rerun) == [rerun / 'api-smoke.xml', rerun / 'junit.xml']
+    assert _SMOKE_SQL_ID in _names(rerun / 'api-smoke.xml')
+    assert _cases(rerun / 'junit.xml') == {'api-smoke': ('pass', '')}
+
+
+def test_an_api_smoke_rerun_of_a_call_the_tree_does_not_make_is_a_verdict_of_absent(smoke_tree: Path) -> None:
+    missing = 'api-smoke::sql/tests/sql/does_not_exist.sql'
+
+    proc = _run(smoke_tree, 'baseline', 'install', 'api-smoke', '--rerun', missing)
+
+    assert proc.returncode == 1
+    rerun = smoke_tree / 'test-results' / 'baseline' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'junit.xml']
+    assert _cases(rerun / 'junit.xml') == {
+        'rerun-absent': ('failure', f're-run ids naming no test of this tree: {missing}')
+    }
+    assert missing not in _names(rerun / 'junit.xml')
+
+
+def test_an_api_smoke_rerun_whose_install_fails_leaves_no_report(smoke_tree: Path) -> None:
+    # The scratch tree has no install scripts to stage, so install fails before reaching any database.
+    proc = _run(smoke_tree, 'baseline', 'install', 'reinstall', 'api-smoke', '--rerun', _SMOKE_SQL_ID)
+
+    assert proc.returncode == 1
+    rerun = smoke_tree / 'test-results' / 'baseline' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    assert not (rerun / 'smoke-argv.json').exists()
+    assert _cases(rerun / 'junit.xml.no-verdict') == {'install': ('failure', 'exit 1')}
+
+
+def test_an_api_smoke_rerun_whose_step_reached_no_verdict_keeps_no_report_naming_other_calls(
+    smoke_tree: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv('FAKE_SMOKE_RC', '2')
+
+    proc = _run(smoke_tree, 'baseline', 'api-smoke', '--rerun', _SMOKE_SQL_ID)
+
+    assert proc.returncode == 1
+    rerun = smoke_tree / 'test-results' / 'baseline' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    assert (rerun / 'api-smoke.xml.no-verdict').is_file()
+    assert _cases(rerun / 'junit.xml.no-verdict')['api-smoke'] == ('failure', 'exit 2')
+
+
+def _smoke(out: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ['python3', str(AIDEV / 'hivemind_smoke.py'), str(out), *args],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=env,
+    )
+
+
+def test_the_api_smoke_step_lists_the_calls_its_report_names() -> None:
+    proc = subprocess.run(
+        ['python3', str(AIDEV / 'hivemind_smoke.py'), '--list'], capture_output=True, text=True, timeout=60
+    )
+
+    assert proc.returncode == 0
+    names = proc.stdout.splitlines()
+    assert 'sql/tests/sql/post_batches_staged_join.sql' in names
+    assert 'jsonrpc/hive.get_info' in names
+    assert len(names) == len(set(names))
+
+
+def test_the_api_smoke_step_reaches_no_verdict_on_a_call_it_does_not_make(tmp_path: Path) -> None:
+    proc = _smoke(tmp_path, 'jsonrpc/hive.get_info', 'jsonrpc/no_such_call')
+
+    assert proc.returncode == 2
+    assert 'no such api-smoke calls: jsonrpc/no_such_call' in proc.stdout
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_the_api_smoke_step_reaches_no_verdict_when_it_crashes(tmp_path: Path) -> None:
+    env = {name: value for name, value in os.environ.items() if name != 'HIVEMIND_TEST_USER_URL'}
+
+    proc = _smoke(tmp_path, 'jsonrpc/hive.get_info', env=env)
+
+    assert proc.returncode == 2
+    assert 'api-smoke step crashed' in proc.stdout
+    assert not (tmp_path / 'api-smoke.xml').exists()
+
+
+_FAKE_POSTGREST = '''#!/usr/bin/env python3
+import http.server, os
+
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(b'{}')
+
+    def log_message(self, *args):
+        pass
+
+
+http.server.HTTPServer(('127.0.0.1', int(os.environ['PGRST_SERVER_PORT'])), Handler).serve_forever()
+'''
+
+
+@pytest.mark.parametrize(
+    ('psql', 'expected'),
+    [
+        (
+            "echo 'psql:post_batches_staged_join.sql:560: ERROR:  results differ' >&2; exit 3",
+            'psql exited 3: psql:post_batches_staged_join.sql:560: ERROR:  results differ',
+        ),
+        ('kill -9 $$', 'psql was killed by SIGKILL'),
+    ],
+)
+def test_a_failing_sql_script_reports_how_psql_ended_in_its_junit_case(
+    tmp_path: Path, psql: str, expected: str
+) -> None:
+    bin_dir = tmp_path / 'bin'
+    bin_dir.mkdir()
+    for name, body in (('postgrest', _FAKE_POSTGREST), ('psql', f'#!/bin/sh\n{psql}\n')):
+        (bin_dir / name).write_text(body)
+        (bin_dir / name).chmod(0o755)
+    out = tmp_path / 'out'
+    env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}", HIVEMIND_TEST_USER_URL='postgresql://x@127.0.0.1/x')
+
+    proc = _smoke(out, 'sql/tests/sql/post_batches_staged_join.sql', env=env)
+
+    assert proc.returncode == 1, proc.stdout
+    case = next(ET.parse(out / 'api-smoke.xml').getroot().iter('testcase'))
+    failure = case.find('failure')
+    assert case.get('name') == 'sql/tests/sql/post_batches_staged_join.sql'
+    assert failure is not None
+    assert failure.get('message', '').startswith(expected)
+    assert expected.split(': ')[-1] in (failure.text or '')

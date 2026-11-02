@@ -527,19 +527,26 @@ BEGIN
 END
 $$;
 
-SAVEPOINT old;
-SELECT pg_temp.pb_run('pg_temp.old_') AS old_run \gset
-ROLLBACK TO SAVEPOINT old;
-SELECT set_config('pb.old', :'old_run', true) \gset ignored_
-
+-- The previous implementation runs in a subtransaction its own exception rolls back;
+-- its result survives in a PL/pgSQL variable. Each run's JSONB is several MB: handed
+-- through psql (\gset, then interpolated back) it tripled psql's memory, and a runtime
+-- container capped at its usual peak killed psql (exit -9, no output).
 DO $$
 DECLARE
-  _old JSONB := current_setting('pb.old')::JSONB;
-  _new JSONB := pg_temp.pb_run('hivemind_app.');
+  _old JSONB;
+  _new JSONB;
   _n INT;
   _key TEXT;
   _first RECORD;
 BEGIN
+  BEGIN
+    _old := pg_temp.pb_run('pg_temp.old_');
+    RAISE SQLSTATE 'PBOLD';
+  EXCEPTION WHEN SQLSTATE 'PBOLD' THEN
+    NULL;
+  END;
+  _new := pg_temp.pb_run('hivemind_app.');
+
   -- The seeded cases must be reached, or the comparison proves little.
   SELECT count(*) INTO _n FROM jsonb_array_elements(_new->'results') r WHERE r->>'wave' <> '0';
   IF _n <> 5040 - 80 THEN

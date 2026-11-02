@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Serve the installed hivemind schema with PostgREST and check its API answers.
 
-    hivemind_smoke.py OUT_DIR
+    hivemind_smoke.py OUT_DIR [CALL...]
+    hivemind_smoke.py --list
 
 Starts `postgrest` the way scripts/start_postgrest.sh does (schema
 hivemind_endpoints, anonymous role hivemind) on a free loopback port, against
@@ -16,20 +17,28 @@ data they need in a transaction they roll back, and fail by raising. A script st
 running after SQL_TEST_TIMEOUT_S fails: its backend's wait and blockers are reported
 and the backend is terminated, so its locks don't hold up the scripts after it.
 
+A failing script's psql output, and how psql ended (an exit code, or the signal that
+killed it and whether the container's memory cgroup did), go to OUT_DIR/sql/<script>.log,
+the body of its junit case, and the tail of them to the case's message.
+
 Each case's progress line and api-smoke.tsv row are flushed as it completes, so a run
 killed from outside keeps the cases before the one it was killed in.
 
-Writes OUT_DIR/api-smoke.xml (one junit case per call or script) and exits
-non-zero when any fails. To check another method or endpoint, add it to CHECKS.
+Writes OUT_DIR/api-smoke.xml (one junit case per call or script, named as `--list`
+prints them) and exits 1 when any fails. Given CALLs, makes only those. Exits 2 when
+it reached no verdict (an unknown CALL, PostgREST not serving, a crash): the cases it
+did not make are in no report. To check another method or endpoint, add it to CHECKS.
 """
 
 import io
 import json
 import os
+import signal
 import socket
 import subprocess
 import sys
 import time
+import traceback
 import urllib.error
 import urllib.request
 from typing import Any
@@ -39,6 +48,12 @@ STARTUP_TIMEOUT_S = 60
 HTTP_TIMEOUT_S = 30
 SQL_TEST_TIMEOUT_S = 180
 DIAGNOSE_TIMEOUT_S = 30
+TESTS_FAILED = 1
+UNREPORTED = 2
+MESSAGE_TAIL_CHARS = 500
+# cgroup v2, as the runtime container sees its own
+CGROUP_MEMORY_EVENTS = "/sys/fs/cgroup/memory.events"
+CGROUP_MEMORY_MAX = "/sys/fs/cgroup/memory.max"
 
 
 def rpc(method, params):
@@ -220,6 +235,11 @@ SQL_TESTS = [
 ]
 
 
+def call_names() -> list[str]:
+    """Every case's name, in run order: the calls of CHECKS, then `sql/<script>` for SQL_TESTS."""
+    return [name for name, _request, _check in CHECKS] + [f"sql/{script}" for script in SQL_TESTS]
+
+
 def run_sql_test(path: str, name: str) -> tuple[int | None, str]:
     """Run one SQL test; the exit code is None when it timed out."""
     app = f"api-smoke {name}"
@@ -283,6 +303,45 @@ def _release_backend(app: str) -> str:
     return (proc.stdout + proc.stderr).strip() or "its backend was gone"
 
 
+def _oom_kills() -> int | None:
+    """The container memory cgroup's OOM kills so far; None where it is not readable (no cgroup v2)."""
+    try:
+        with open(CGROUP_MEMORY_EVENTS, encoding="ascii") as handle:
+            for line in handle:
+                key, _, value = line.partition(" ")
+                if key == "oom_kill":
+                    return int(value)
+    except OSError:
+        return None
+    return None
+
+
+def _memory_max() -> str:
+    try:
+        with open(CGROUP_MEMORY_MAX, encoding="ascii") as handle:
+            return handle.read().strip()
+    except OSError:
+        return "unknown"
+
+
+def sql_failure(rc: int | None, output: str, oom_kills_before: int | None, oom_kills_after: int | None) -> str:
+    """How a failed script ended, as the last line of its failure text."""
+    if rc is None:
+        return f"psql timed out after {SQL_TEST_TIMEOUT_S}s"
+    if rc >= 0:
+        return f"psql exited {rc}"
+    try:
+        name = signal.Signals(-rc).name
+    except ValueError:
+        name = f"signal {-rc}"
+    reason = f"psql was killed by {name}"
+    if oom_kills_before is not None and oom_kills_after is not None and oom_kills_after > oom_kills_before:
+        reason += f" from the container's memory cgroup OOM killer (memory.max {_memory_max()} bytes)"
+    if not output.strip():
+        reason += ", before printing anything"
+    return reason
+
+
 def free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -320,7 +379,13 @@ def wait_until_serving(base: str, proc: subprocess.Popen[bytes], log_path: str) 
     raise RuntimeError(f"postgrest not serving after {STARTUP_TIMEOUT_S}s; see {log_path}")
 
 
-def main(out):
+def main(out: str, selected: list[str]) -> int:
+    unknown = [name for name in selected if name not in call_names()]
+    if unknown:
+        print(f"no such api-smoke calls: {' '.join(unknown)}; --list names them")
+        return UNREPORTED
+    checks = [entry for entry in CHECKS if not selected or entry[0] in selected]
+    sql_tests = [script for script in SQL_TESTS if not selected or f"sql/{script}" in selected]
     os.makedirs(out, exist_ok=True)
     port = free_port()
     base = f"http://127.0.0.1:{port}"
@@ -338,8 +403,12 @@ def main(out):
     with open(log_path, "w") as log, open(cases, "w", buffering=1) as tsv:
         proc = subprocess.Popen(["postgrest"], env=env, stdout=log, stderr=subprocess.STDOUT)
         try:
-            wait_until_serving(base, proc, log_path)
-            for name, request, check in CHECKS:
+            try:
+                wait_until_serving(base, proc, log_path)
+            except RuntimeError as err:
+                print(err)
+                return UNREPORTED
+            for name, request, check in checks:
                 t0 = time.monotonic()
                 try:
                     status, body, text = call(base, request)
@@ -355,18 +424,27 @@ def main(out):
                     verdict, message = "fail", str(err).replace("\t", " ").replace("\n", " ")[:300]
                     print(f"FAIL {name}: {message}\n     response: {text[:500]}")
                 tsv.write(f"case\t{name}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
-            for script in SQL_TESTS:
+            for script in sql_tests:
                 t0 = time.monotonic()
                 print(f"run  sql/{script}")
+                kills_before = _oom_kills()
                 rc, output = run_sql_test(os.path.join(HERE, "..", script), f"sql/{script}")
+                case_log = ""
                 if rc == 0:
                     verdict, message = "pass", ""
                     print(f"ok   sql/{script}\n{output}")
                 else:
                     failed += 1
-                    verdict, message = "fail", output.replace("\t", " ").replace("\n", " ")[-500:]
-                    print(f"FAIL sql/{script}: {'timed out' if rc is None else f'exit {rc}'}\n{output[-2000:]}")
-                tsv.write(f"case\tsql/{script}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\n")
+                    reason = sql_failure(rc, output, kills_before, _oom_kills())
+                    case_log = os.path.join(out, "sql", f"{script}.log")
+                    os.makedirs(os.path.dirname(case_log), exist_ok=True)
+                    with open(case_log, "w", encoding="utf-8") as handle:
+                        handle.write("".join(f"{part}\n" for part in (output.rstrip(), reason) if part))
+                    text = f"{reason}: {output.strip()}" if output.strip() else reason
+                    verdict = "fail"
+                    message = text.replace("\t", " ").replace("\n", " ")[-MESSAGE_TAIL_CHARS:]
+                    print(f"FAIL sql/{script}: {reason}\n{output[-2000:]}")
+                tsv.write(f"case\tsql/{script}\t{verdict}\t{time.monotonic() - t0:.3f}\t{message}\t{case_log}\n")
         finally:
             proc.terminate()
             try:
@@ -377,14 +455,24 @@ def main(out):
         [sys.executable, os.path.join(HERE, "junit_cases.py"), os.path.join(out, "api-smoke.xml"), "api-smoke", cases],
         check=True,
     )
-    total = len(CHECKS) + len(SQL_TESTS)
+    total = len(checks) + len(sql_tests)
     print(f"{total - failed}/{total} calls and scripts answered as expected")
-    return 1 if failed else 0
+    return TESTS_FAILED if failed else 0
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(f"usage: {sys.argv[0]} OUT_DIR")
+    if sys.argv[1:] == ["--list"]:
+        print("\n".join(call_names()))
+        sys.exit(0)
+    if len(sys.argv) < 2 or sys.argv[1].startswith("-"):
+        print(f"usage: {sys.argv[0]} OUT_DIR [CALL...] | --list", file=sys.stderr)
+        sys.exit(UNREPORTED)
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(line_buffering=True)
-    sys.exit(main(sys.argv[1]))
+    try:
+        sys.exit(main(sys.argv[1], sys.argv[2:]))
+    except Exception:
+        # Exit 1 would say every failure is recorded per call, though the calls after this one never ran.
+        traceback.print_exc(file=sys.stdout)
+        print("api-smoke step crashed; see the traceback above")
+        sys.exit(UNREPORTED)
