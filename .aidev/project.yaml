@@ -109,12 +109,13 @@ sandbox:
 # `<group>/<module>.py::<test>`, api-smoke's `api-smoke::<call>`. So
 # `.aidev/known_failures.txt` pardons them (honor_quarantine), and aidev's flake
 # layers re-run them through `run-checks.sh <suite> <step>... --rerun <id>...`
-# (`rerun:`): unit and rest_api_* ids as given, a tavern id by its file, since
-# titles repeat across files; the wrapper maps the dotted classname back to the
-# file. Each rule's file_pattern takes only the files its slot's steps run, as
-# ids and as the changed files repeat-new-tests repeats. api-smoke and a failing
-# step (a crash, install, ruff) have no rule and block. See .aidev/README.md,
-# "Re-runs and the quarantine ledger".
+# (`rerun:`): unit, api-smoke and rest_api_* ids as given, a tavern id by its file,
+# since titles repeat across files; the wrapper maps the dotted classname back to
+# the file. Each rule's file_pattern takes only the files its slot's steps run, as
+# ids and as the changed files repeat-new-tests repeats; an api-smoke id names a
+# call, not a file, so its rule repeats no changed file. A failing step (a crash,
+# install, ruff) has no rule and blocks. See .aidev/README.md, "Re-runs and the
+# quarantine ledger".
 verification:
   quick:
     adapter: command
@@ -148,6 +149,11 @@ verification:
             ids: ["--rerun", "{ids}"]
             files: ["--rerun", "{files}"]
           - *unit_rerun
+          - &api_smoke_rerun
+            classify: true
+            match: "^api-smoke::"
+            file_pattern: "^api-smoke$"
+            ids: ["--rerun", "{ids}"]
       # After `checks`, which creates test-results/ (`--report` writes no directory).
       - name: db_shape
         adapter: command
@@ -162,14 +168,14 @@ verification:
     adapter: command
     args: [".aidev/run-checks.sh", "baseline", "install", "reinstall", "api-smoke"]
     artifacts: ["test-results/baseline/"]
-    # No `rerun:`: none of its ids (api-smoke's, the steps') has a re-run.
     honor_quarantine: true
+    rerun: [*api_smoke_rerun]
   canary:
     adapter: command
     args: [".aidev/run-checks.sh", "canary", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke"]
     artifacts: ["test-results/canary/"]
     honor_quarantine: true
-    rerun: [*unit_rerun]
+    rerun: [*unit_rerun, *api_smoke_rerun]
   # There is no coverage tooling in the image yet; `coverage` runs the unit tests
   # (AIDEV runs it in the post-implementation scan only). `static` and `system`
   # are left unbound: AIDEV runs neither for a project.
