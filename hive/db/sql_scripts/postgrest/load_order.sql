@@ -99,6 +99,8 @@
 \ir utilities/find_subscription_id.sql
 \ir bridge_api/bridge_api_get_profiles.sql
 \ir utilities/valid_accounts.sql
+\ir utilities/json_metadata_matches.sql
+\ir bridge_api/bridge_api_query_json_metadata.sql
 \ir search-api/find_text.sql
 \ir search-api/find_similar.sql
 \ir utilities/rest_json_rpc_call.sql

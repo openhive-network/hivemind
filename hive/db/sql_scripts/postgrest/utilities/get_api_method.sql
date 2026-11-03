@@ -170,6 +170,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_list_all_subscriptions(__params);
     WHEN __method_type = 'list_pop_communities' THEN
       result := hivemind_endpoints.bridge_api_list_pop_communities(__params);
+    WHEN __method_type = 'query_json_metadata' THEN
+      result := hivemind_endpoints.bridge_api_query_json_metadata(__params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('bridge_api' || __method_type);
   END CASE;

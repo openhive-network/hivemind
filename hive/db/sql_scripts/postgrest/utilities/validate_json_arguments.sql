@@ -1,5 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.validate_json_arguments;
 -- _expected_args has to be a JSON, because it preserve ordering, jsonb does not guarantee order of fields
+-- a type may list alternatives separated by '|', e.g. "string|array"
 CREATE FUNCTION hivemind_postgrest_utilities.validate_json_arguments(IN _given_args JSONB, IN _expected_args JSON, IN _min_args_number INT, IN _special_errors_if_type_not_valid JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
@@ -93,7 +94,7 @@ BEGIN
     _idx = _idx + 1;
 
     IF (_expected_arg_type = 'number' AND _arg_type NOT IN ('number', 'string','null', 'array')) OR
-        (_expected_arg_type <> 'number' AND _arg_type <> _expected_arg_type AND _arg_type <> 'null') THEN
+        (_expected_arg_type <> 'number' AND _arg_type <> ALL(string_to_array(_expected_arg_type, '|')) AND _arg_type <> 'null') THEN
       IF _special_errors_if_type_not_valid IS NOT NULL AND _special_errors_if_type_not_valid ? _arg_name THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_special_errors_if_type_not_valid->>_arg_name);
       ELSE
