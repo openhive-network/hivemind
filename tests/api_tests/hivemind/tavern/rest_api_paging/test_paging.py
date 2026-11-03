@@ -183,6 +183,14 @@ _LISTINGS = {
         25,
         1000,
     ),
+    "json-rpc bridge.query_json_metadata": json_rpc_listing(
+        "bridge.query_json_metadata",
+        {"key": ["profile", "version"], "value": "2", "type": "posting"},
+        lambda name: {"last": name},
+        lambda name: name,
+        1,
+        100,
+    ),
 }
 
 
