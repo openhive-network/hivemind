@@ -24,6 +24,11 @@ labels:
     color: "#108548"
     description: "New capability."
     authority: executive
+  - name: analyze
+    group: type
+    color: "#6b4fbb"
+    description: "Analysis-only task: a report and follow-up issues, no code change. analyze + todo = approved for submit."
+    authority: executive
   - name: todo
     group: status
     color: "#ff9500"
