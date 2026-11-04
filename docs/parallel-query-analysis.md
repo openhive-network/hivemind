@@ -212,6 +212,46 @@ costs 1,432 against 46,963 for the current text (acidyo, limit 25).
   with parallelism off). Not recommended at that size for 6.4 calls/s; leave the
   limit-1000 path as is.
 
+### The walk as implemented
+
+`condenser_api_get_followers` now decides per call, from `hive_accounts.followers`
+(F) and `pg_class.reltuples` of `hive_accounts` (A, 2.62 million on steem-20).
+Assuming followers spread evenly over names, a page of L takes about L·A/F probes.
+It walks when 2·L·A/F < F and gives up after 2·L·A/F accounts, falling back to
+today's query when the page is not full. The walk runs as a PL/pgSQL `FOR` loop,
+whose query is planned without parallelism. Left to itself, the planner puts the
+walk under a 4-worker Gather Merge on steem-20 and on the shape, and every worker
+then walks until it alone has 25 rows: acidyo limit 25 took 175 ms cold that way.
+
+`EXPLAIN (ANALYZE, BUFFERS)` on steem-20, 2026-11-04, today's query against the
+bounded serial walk, two runs each. Today's first runs were cold (acidyo 25: 192 ms,
+cryptoriddler 25: 501 ms). The walk's runs came after other walks had warmed part of
+`hive_accounts_ux1`.
+
+| account (followers) | limit | today, second run | walk, first / second run | accounts walked (budget) |
+|---|---|---|---|---|
+| acidyo (33,164) | 25 | 49.0 ms | 1.40 / 0.16 ms, 739 buffers | 144 (3,954) |
+| acidyo | 100 | 48.3 ms | 15.8 / 6.9 ms | 4,134 (15,814) |
+| appreciator (18,072) | 25 | 31.9 ms | 1.06 / 0.79 ms | 736 (7,256) |
+| blocktrades (30,987) | 25 | 49.0 ms | 0.43 / 0.38 ms | 351 (4,232) |
+| blocktrades | 100 | 45.7 ms | 8.3 / 6.0 ms | 5,312 (16,925) |
+| cryptoriddler (101,888) | 25 | 142.0 ms | 0.19 / 0.13 ms | 118 (1,287) |
+| cryptoriddler | 1000 | 135.2 ms | 32.9 / 19.4 ms | 15,670 (51,474) |
+| dtube (89,695) | 1000 | 139.3 ms | 38.7 / 35.3 ms | 26,199 (58,471) |
+| ptthuy888 (50,506) | 25 | 21.1 ms | 2.97 / 2.41 ms, finds 3, falls back | 2,596 (2,596) |
+| ptthuy888 | 100 | 22.0 ms | 12.2 / 11.0 ms, finds 4, falls back | 10,384 (10,384) |
+
+Every page that filled used under 0.45 of its budget. At limit 1000, acidyo,
+appreciator and blocktrades stay on today's plan (their 2·L·A/F exceeds F).
+Unbounded, the walk would cost them 73.6, 42.8 and 67.3 ms warm. The bound is
+there for accounts whose followers cluster in one name range. Unbounded,
+ptthuy888's limit-25 walk took 136 ms warm and 927 ms cold, against today's 21 ms.
+Bounded, the wasted walk costs it 2.4 ms (limit 25) or 11 ms (limit 100) before
+the fallback. On the shape, the nested call for acidyo limit 25 costs 71 in total
+(the walk 58.6), and for appreciator 111 against 32,133. At limit 1000 it keeps
+today's plan (47,120 for acidyo), and the declared `condenser-get-followers` query
+compares at ratio 1.000.
+
 ## Under load: replay A/B
 
 `aidev replay ab --base a751721d --candidate 2f1f2805 --capacity 2x,5x

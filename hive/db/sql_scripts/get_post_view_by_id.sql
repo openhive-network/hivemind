@@ -68,6 +68,7 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
 CREATE OR REPLACE FUNCTION hivemind_app.extract_img_url_from_json_metadata(json_metadata_as_string TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
+IMMUTABLE PARALLEL SAFE
 AS $$
 DECLARE
     json_data   jsonb;
