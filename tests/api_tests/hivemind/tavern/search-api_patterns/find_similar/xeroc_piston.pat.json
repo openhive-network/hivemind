@@ -3235,114 +3235,6 @@
   {
     "active_votes": [
       {
-        "rshares": 863362298,
-        "voter": "nastrom"
-      },
-      {
-        "rshares": 16491126619,
-        "voter": "ninzacode"
-      },
-      {
-        "rshares": 6379492216,
-        "voter": "moch-yusuf"
-      },
-      {
-        "rshares": 192426260,
-        "voter": "wisehammer"
-      },
-      {
-        "rshares": 25452505,
-        "voter": "jackkang"
-      },
-      {
-        "rshares": 813318349551,
-        "voter": "renohq"
-      },
-      {
-        "rshares": 5805896745,
-        "voter": "blockchainbilly"
-      },
-      {
-        "rshares": 66606958,
-        "voter": "eduardf"
-      },
-      {
-        "rshares": 17343344,
-        "voter": "luisucv34"
-      },
-      {
-        "rshares": 1341417848,
-        "voter": "slocum"
-      },
-      {
-        "rshares": 4656248,
-        "voter": "maurizio"
-      },
-      {
-        "rshares": 127362456,
-        "voter": "politicasan2"
-      },
-      {
-        "rshares": 16571966,
-        "voter": "usnewspress"
-      }
-    ],
-    "author": "blockchainbilly",
-    "author_payout_value": "1.046 HBD",
-    "author_reputation": 47.77,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "<html>\n<p>&nbsp;<img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png\" width=\"1680\" height=\"760\"/><br>\n<img src=\"http://www.thezombieinfection.com/uploads/profile/photo-thumb-634378.png?_r=1450551096\" width=\"100\" height=\"100\"/><strong>So..&nbsp;Is the new (piston.web) Steem GUI (Graphic User Interface) worth using or should most steemers hold off until it at least reaches Beta??</strong></p>\n<p><strong>&nbsp;</strong>&nbsp;</p>\n<p>This is something on a lot of people's minds. &nbsp;Especially new Steemit users. &nbsp;Who I\u2019m sure were immediately,and shockingly impressed with the value of the post announcing the release of the new GUI. And the search for new Alpa Testers.. You know the one worth almost $50K &nbsp;</p>\n<p>&nbsp;Im sure a newbie somewhere will be like\u201dOooh Alpha tester that sounds cool\" and \"wow this really looks cool!\".. \"I wanna be an Alpha tester!\u201d &nbsp;\u2026..Lol\u2026..smh. &nbsp;&nbsp;If you don't know the potential risks and of what you're getting into and you don't know exactly how it works. And does that outweigh the benefit or convenience it may provide, or its potential and what &nbsp;if anything you might contribute to its development..... &nbsp;</p>\n<p>If you don\u2019t know any of this you probably might want to leave the testing to others. &nbsp;And wait for newer versions to debut and read about it in reviews\u2026before deciding. &nbsp;Many people are interested in this obviously. But many of us who been around wonder about vulnerabilities or bugs that may compromise security. &nbsp;Its open source &nbsp;but I don't know how to read code and neither do most people.. &nbsp;But Hackers do\u2026&nbsp;</p>\n<p><img src=\"http://www1-lw.xda-cdn.com/files/2013/04/Guinea_Pigs-810x298_c.jpg\" width=\"810\" height=\"298\"/><strong>Alpha tester is a euphemism for guinea pig....</strong></p>\n<p>&nbsp;Listen being a guinea pig for a good cause is noble at best. Developers need testers and feedback in order to improve their work faster. &nbsp;Eventually I'm sure we will have a great Interface and the overall user experience will continue to improve dramatically. &nbsp;Steemit is a powerhouse of innovation and ideas. Only a matter of time\u2026<br>\nHowever Im a cautious adapter and a bit of a purist so I'm gonna stick with the original basic web interface for now\u2026 to be safe\u2026</p>\n<p><br>\n<strong>So If you are currently testing it or are planning on testing please comment...</strong> &nbsp;The more we know the better for everybody....</p>\n<p>B.Blockchain</p>\n<p>#steemit #gui #piston #new<br>\n<strong>If you want it get it \u2026. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>https://github.com/xeroc/piston</p>\n<p>H<strong>ere is the Original Post\u2026.. &nbsp;&nbsp;&nbsp;</strong></p>\n<p>https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers<br>\n&nbsp;</p>\n</html>",
-    "category": "steemit",
-    "children": 1,
-    "created": "2016-07-23T16:58:48",
-    "curator_payout_value": "0.087 HBD",
-    "depth": 0,
-    "is_paidout": true,
-    "json_metadata": {
-      "image": [
-        "https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png",
-        "http://www.thezombieinfection.com/uploads/profile/photo-thumb-634378.png?_r=1450551096",
-        "http://www1-lw.xda-cdn.com/files/2013/04/Guinea_Pigs-810x298_c.jpg"
-      ],
-      "links": [
-        "https://github.com/xeroc/piston",
-        "https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
-      ],
-      "tags": [
-        "new",
-        "help",
-        "technology",
-        "steem",
-        "questions",
-        "news",
-        "steemit",
-        "piston",
-        "gui"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 844650065014,
-    "payout": 1.133,
-    "payout_at": "2016-08-23T17:09:54",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "question-is-the-new-piston-web-steem-gui-worth-using-or-should-most-steemers-hold-off-till-beta",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 13
-    },
-    "title": "Is the new (piston.web) Steem GUI worth using or should most steemers hold off till Beta????",
-    "updated": "2016-07-23T18:20:15",
-    "url": "/steemit/@blockchainbilly/question-is-the-new-piston-web-steem-gui-worth-using-or-should-most-steemers-hold-off-till-beta"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 672129856193,
         "voter": "fuzzyvest"
       },
@@ -3560,5 +3452,104 @@
     "title": "best steemit links/ sites",
     "updated": "2016-07-22T19:52:09",
     "url": "/steem/@nioctib/best-steemit-links"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 129855721675,
+        "voter": "nkdk"
+      },
+      {
+        "rshares": 8160243768,
+        "voter": "jerome-colley"
+      },
+      {
+        "rshares": 127266954,
+        "voter": "akaninyene-etuk"
+      },
+      {
+        "rshares": 3817019116,
+        "voter": "x9twm"
+      },
+      {
+        "rshares": 259884294,
+        "voter": "apes"
+      },
+      {
+        "rshares": 41574290,
+        "voter": "zhuvazhuva"
+      },
+      {
+        "rshares": 4301006397,
+        "voter": "sebastien"
+      },
+      {
+        "rshares": 95152798,
+        "voter": "eduardf"
+      },
+      {
+        "rshares": 439689495,
+        "voter": "lukeerico"
+      },
+      {
+        "rshares": 63760247,
+        "voter": "dimon14"
+      },
+      {
+        "rshares": 392475248,
+        "voter": "mosab"
+      },
+      {
+        "rshares": 1258819054,
+        "voter": "eristoddle"
+      }
+    ],
+    "author": "apes",
+    "author_payout_value": "0.158 HBD",
+    "author_reputation": 47.75,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I am not aware of any other project in crypto or in general where so much helper sites are popping up, every day! They are so many, that you can not keep with them and you can already found a site who will show you the best of them. \n\nIf you are developer it make's sense to spend your time to code something for STEEM, if the Community likes it they will reward you. Just look at the last post of @xeroc with his new https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers Piston.web ->1255 Votes , 47.000 Dollars. \n\nWhat i wanted to share are the most 5 useful for the \"Enduser\". Some are missing, but i considered them as to complicated or not to useful.\n\nSo here are my top 5.\n\n# 1. Steemwhales - http://steemwhales.com/\n![](https://s31.postimg.org/5t3jd93uj/steemwhales.png)\n\nEasy to use, and you get a lot of information out of it. How much Steempower has some account and how compares it to other accounts. A good startingpoint.\n\n# 2. Steemstats - http://steemstats.com/\n![](https://s31.postimg.org/cmgq13a6j/steamstats.png)\n\nFantastic site! The Interface is so easy to understand i think every granny could use it. As an example. You like one Steemer and want to upvote more then one post, just watch for his account and select \"Posts\" \"Comments\". Every post or comment from this user you see and can instantly upvote. Really, really cool!\n\n# 3 Steemtools - http://steemtools.com/\n![](https://s31.postimg.org/tdjpbq2hn/steamtools.png)\n\nGreat collection of more then just 5 pages, so this is the place to look into Steem related websites. You look for an URL shortener? No problem. Or a place to host your pictures? Absolutely possible.\n\n# 4  Steemstream - http://steemstream.com/\nhttps://s32.postimg.org/huufacgxh/steemstream.png\n\nMaybe not so useful, but a lot of fun to watch, what is happening at this moment on the network.\n\n# 5  Steemprices - http://steemprices.com/\n\n![](https://s31.postimg.org/fbhj1g7wr/steemprices.png)\n\nI love to know how much is everything worth, so a place to compare everything you hold in the STEEM ecosystem is great.\n\n--------------------\nThey are so many more and i think this is really a good indicator, that this community is going faster as many other communities out there.\n\n#steem #steemwhales #steemstream #steemstats #steemprices #steemtools",
+    "category": "steem",
+    "children": 1,
+    "created": "2016-07-23T20:06:27",
+    "curator_payout_value": "0.003 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/piston/@xeroc/piston-web-first-open-source-steem-gui---searching-for-alpha-testers"
+      ],
+      "tags": [
+        "steem",
+        "steemwhales",
+        "steemstream",
+        "steemstats",
+        "steeemprices",
+        "steemtools",
+        "steemprices"
+      ],
+      "users": [
+        "xeroc"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 148812613336,
+    "payout": 0.161,
+    "payout_at": "2016-08-23T20:13:24",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "5-steemhelpers-you-want-to-know",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 12
+    },
+    "title": "5 Steemhelpers you want to know!",
+    "updated": "2016-07-23T21:09:48",
+    "url": "/steem/@apes/5-steemhelpers-you-want-to-know"
   }
 ]

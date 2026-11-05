@@ -61,9 +61,17 @@ BEGIN
     -- down as a TopK scan (see find_text). Ordering ties by id keeps the result stable
     -- among equal scores. The candidate limit over-fetches to leave room for posts of
     -- muted authors.
+    -- The post itself is excluded outside the LIMIT rather than by `hpd.id <> $1`: pg_search
+    -- pushes that down as `exists(id) AND NOT term(id)`, which adds 0 or 1 to a document's
+    -- score depending on how the index build laid out its segments, so independent builds
+    -- of the same data ranked the candidates differently. The post matches itself, so the
+    -- candidate limit leaves room for it.
+    -- Scores are rounded before ranking: the same document's score differs in its last
+    -- float bit between index builds (segments sum it in a different order), so two posts
+    -- with equal scores would otherwise rank by that noise instead of by id.
     -- Parameters: $1 post id, $2 candidate limit, $3..$5 the more_like_this constants.
     EXECUTE $sql$
-        SELECT array_agg(c.id), array_agg(c.score)
+        SELECT array_agg(c.id), array_agg(round(c.score::numeric, 4)::real)
         FROM (
             SELECT hpd.id, paradedb.score(hpd.id) AS score
             FROM hivemind_app.hive_post_data hpd
@@ -71,13 +79,13 @@ BEGIN
                                              min_term_frequency => $3, min_doc_frequency => $4,
                                              max_query_terms => $5)
               AND hivemind_app.is_top_level_post(hpd.id)
-              AND hpd.id <> $1
             ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
             LIMIT $2
         ) c
+        WHERE c.id <> $1
         $sql$
         INTO _candidate_ids, _candidate_scores
-        USING _post_id, _limit * 2, _MIN_TERM_FREQUENCY, _MIN_DOC_FREQUENCY, _MAX_QUERY_TERMS;
+        USING _post_id, _limit * 2 + 1, _MIN_TERM_FREQUENCY, _MIN_DOC_FREQUENCY, _MAX_QUERY_TERMS;
 
     _result = (
         SELECT jsonb_agg (
