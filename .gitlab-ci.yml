@@ -38,6 +38,11 @@ include:
   - '/templates/test_jobs.gitlab-ci.yml'
   - '/templates/haf_app_testing.gitlab-ci.yml'
   - '/templates/source_change_detection.gitlab-ci.yml'
+# The Python API client: generated, built, tested and published by wax-spec-generator's template. Pinned to the
+# commit that delivers the template (wax-spec-generator#10), which its main branch does not have yet.
+- project: 'hive/wax-spec-generator'
+  ref: b3c02922afcf3f846f5194efc4d7975d7151194f
+  file: '/templates/python_api_package.gitlab-ci.yml'
 
 variables:
   # Common CI configuration reference
@@ -46,8 +51,11 @@ variables:
   # Cache manager configuration (from common-ci-configuration)
   CACHE_MANAGER: "/tmp/cache-manager.sh"
   CACHE_MANAGER_REF: "develop"
-  # Dependency testing: when "true", poetry update is run before install to test latest versions
-  TEST_WITH_LATEST_DEPENDENCIES: "false"
+  # Python API client (wax-spec-generator's templates/python_api_package.gitlab-ci.yml)
+  PYTHON_API_SWAGGER_JSON: "${CI_PROJECT_DIR}/build/swagger-doc.json"
+  PYTHON_API_DISTRIBUTION_NAME: "hiveio-hivemind-api"
+  PYTHON_API_PACKAGE_NAME: "hiveio_hivemind_api"
+  PYTHON_API_NAMESPACE: "hivemind_api_client"
   # =============================================================================
   # Quick Test / Auto-Skip Mode
   # =============================================================================
@@ -491,20 +499,6 @@ type_check_with_mypy:
   - python3 -V
   tags: *shared_tags
 
-verify_poetry_lock_stability_api_package:
-  stage: lint
-  extends: .verify_poetry_lock_stability_template
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
-  tags: *shared_tags
-
-verify_poetry_lock_stability_api_generation:
-  stage: lint
-  extends: .verify_poetry_lock_stability_template
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/api_generation"
-  tags: *shared_tags
-
 extract-swagger-json:
   extends: .filter_out_swagger_json
   stage: build
@@ -514,31 +508,20 @@ extract-swagger-json:
   - public-runner-docker
 
 generate_python_api_client:
-  extends: .project_develop_configuration_template
+  extends: .python_api_package_generate
   stage: build
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/api_generation"
   needs:
   - job: extract-swagger-json
     artifacts: true
-  script:
-  - ${PYPROJECT_DIR}/generate_hivemind_api_client.sh
-  artifacts:
-    paths:
-    - "${CI_PROJECT_DIR}/scripts/python_api_package/hiveio_hivemind_api"
-    - "${CI_PROJECT_DIR}/scripts/python_api_package/hiveio_hivemind_api/hivemind_api_client"
   tags:
   - public-runner-docker
 
-
 build_python_api_client_wheel:
-  extends: .build_wheel_template
+  extends: .python_api_package_build
   stage: build
   needs:
   - job: generate_python_api_client
     artifacts: true
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
   tags:
   - public-runner-docker
 
@@ -1180,46 +1163,57 @@ e2e_benchmark_on_postgrest:
   - data-cache-storage
   - fastest
 
-python_api_client_test:
-  extends: .project_develop_configuration_template
-  stage: tests
-  needs:
-  - job: generate_python_api_client
-    artifacts: true
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
-    GIT_SUBMODULE_STRATEGY: none
-  parallel:
-    matrix:
-    - PYTHON_VERSION: ["3.14"]
-  before_script:
-  - !reference [.project_develop_configuration_template, before_script]
-  - !reference [.update_deps_for_tests, script]
-  script:
-  - poetry run -C "${PYPROJECT_DIR}" pytest "${PYPROJECT_DIR}/tests/test_generated_api_client.py"
-  tags:
-  - public-runner-docker
-
 test_python_api_wheel:
-  extends: .project_develop_configuration_template
+  extends: .python_api_package_test
   stage: tests
   needs:
   - job: build_python_api_client_wheel
     artifacts: true
   variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
-    DIST_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package/dist"
     GIT_SUBMODULE_STRATEGY: none
-  parallel:
-    matrix:
-    - PYTHON_VERSION: ["3.14"]
-  before_script:
-  - !reference [.configuration_template, before_script]
-  - !reference [.update_deps_for_tests, script]
-  - poetry -C "${PYPROJECT_DIR}" install --no-root
+  tags:
+  - public-runner-docker
+
+# One call of the installed wheel through the runtime package's transport, against the first public endpoint answering
+python_api_client_test:
+  extends: .python_api_package_base
+  stage: tests
+  needs:
+  - job: build_python_api_client_wheel
+    artifacts: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+    PYTHON_API_TEST_ENDPOINTS: "https://api.syncad.com https://api.hive.blog"
+    PYTHON_API_TEST_ACCOUNT: "gtg"
   script:
-  - pip install --no-deps "${DIST_DIR}"/*.whl
-  - pytest "${PYPROJECT_DIR}/tests/test_package_import.py" -v
+  - pip install --index-url "${PYTHON_API_INDEX_URL}" ${PYTHON_API_PIP_EXTRA_ARGS} "${PYTHON_API_DIST_DIR}"/*.whl
+  - |
+    python3 - <<'EOF'
+    import asyncio
+    import os
+    import sys
+
+    from hiveio_api_client import AsyncRemoteHandle, HttpUrl, RemoteHandleSettings
+    from hiveio_api_client.exceptions import HiveioApiClientError
+    from hiveio_hivemind_api.hivemind_api_client.hivemind_api_client import HivemindApi
+
+    async def main() -> None:
+        account = os.environ["PYTHON_API_TEST_ACCOUNT"]
+        for endpoint in os.environ["PYTHON_API_TEST_ENDPOINTS"].split():
+            handle = AsyncRemoteHandle(RemoteHandleSettings(http_endpoint=HttpUrl(endpoint)), api=HivemindApi)
+            try:
+                result = await handle.api.accounts_operations(account)
+            except HiveioApiClientError as error:
+                print(f"{endpoint}: {error!r}")
+                continue
+            if not isinstance(result.operations_result, list) or not isinstance(result.total_operations, int):
+                sys.exit(f"{endpoint}: unexpected response {result!r}")
+            print(f"{endpoint}: {result.total_operations} operations of {account}")
+            return
+        sys.exit("No endpoint answered")
+
+    asyncio.run(main())
+    EOF
   tags:
   - public-runner-docker
 
@@ -1231,18 +1225,13 @@ publish_images:
   tags: *shared_tags
 
 deploy_python_api_package_to_gitlab:
+  extends: .python_api_package_publish
   stage: publish
   needs:
   - job: build_python_api_client_wheel
     artifacts: true
-  - job: generate_python_api_client
-    artifacts: true
   - job: python_api_client_test
   - job: test_python_api_wheel
-  extends: .deploy_wheel_to_gitlab_template
-  variables:
-    PYPROJECT_DIR: "${CI_PROJECT_DIR}/scripts/python_api_package"
-  when: on_success
   tags:
   - public-runner-docker
 
