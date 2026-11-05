@@ -38,10 +38,9 @@ include:
   - '/templates/test_jobs.gitlab-ci.yml'
   - '/templates/haf_app_testing.gitlab-ci.yml'
   - '/templates/source_change_detection.gitlab-ci.yml'
-# The Python API client: generated, built, tested and published by wax-spec-generator's template. Pinned to the
-# commit that delivers the template (wax-spec-generator#10), which its main branch does not have yet.
+# The Python API client: generated, built, tested and published by wax-spec-generator's template.
 - project: 'hive/wax-spec-generator'
-  ref: b3c02922afcf3f846f5194efc4d7975d7151194f
+  ref: main
   file: '/templates/python_api_package.gitlab-ci.yml'
 
 variables:
