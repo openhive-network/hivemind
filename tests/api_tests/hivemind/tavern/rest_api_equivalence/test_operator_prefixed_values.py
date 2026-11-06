@@ -34,7 +34,8 @@ _TARGETS: dict[str, tuple[str, str, dict[str, Any]]] = {
     "community": ("get_account_notifications", "community", {"account": "gtg"}),
 }
 
-_BY_ENDPOINT = {mapping.endpoint: mapping for mapping in MAPPINGS}
+# The mapping of each endpoint's plain form, without the parameters that make it call another method.
+_BY_ENDPOINT = {mapping.endpoint: mapping for mapping in MAPPINGS if not mapping.fixed}
 _SPEC = openapi.load_spec()
 _PUBLIC_PREFIX = _SPEC["servers"][0]["url"]
 _PUBLIC_PATHS = {function.split(".", 1)[1]: path for path, function in openapi.get_operations(_SPEC).items()}

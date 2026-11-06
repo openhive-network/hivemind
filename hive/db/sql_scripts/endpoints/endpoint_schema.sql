@@ -1287,7 +1287,7 @@ declare
           "blog_api"
         ],
         "summary": "Get an account''s posts",
-        "description": "Returns the account''s posts of the kind given by `sort`, the same list as `bridge.get_account_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&page-size=20''`\n",
+        "description": "Returns the account''s posts of the kind given by `sort`, the same list as `bridge.get_account_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_account_posts(''alice'', ''blog'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/accounts/alice/posts?sort=blog&page-size=20&votes=summary''`\n",
         "operationId": "hivemind_endpoints.get_account_posts",
         "parameters": [
           {
@@ -1368,6 +1368,21 @@ declare
               "default": null
             },
             "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each post, for clients that list posts and do not show every vote:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `bridge.get_account_posts_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. With `none` the posts'' votes\nare not read at all, so the page is both much smaller and faster to build.\n"
           }
         ],
         "responses": {
@@ -2046,7 +2061,7 @@ declare
           "blog_api"
         ],
         "summary": "Get ranked posts",
-        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&page-size=20&truncate-body=250''`\n",
+        "description": "Returns posts ranked by `sort`, optionally within a tag or community, the same list as\n`bridge.get_ranked_posts`.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_ranked_posts(''trending'', ''photography'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&tag=photography&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&page-size=20&truncate-body=250''`\n* `GET ''https://%1$s/hivemind-api/posts?sort=trending&page-size=20&truncate-body=200&votes=none''`\n",
         "operationId": "hivemind_endpoints.get_ranked_posts",
         "parameters": [
           {
@@ -2118,6 +2133,21 @@ declare
               "default": null
             },
             "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each post, for clients that list posts and do not show every vote:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `bridge.get_ranked_posts_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. With `none` the posts'' votes\nare not read at all, so the page is both much smaller and faster to build.\n"
           }
         ],
         "responses": {
