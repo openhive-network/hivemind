@@ -38,7 +38,9 @@ class EndpointMapping:
     that parameter's kind; `positional` is the method's argument order, as its
     validate_json_arguments template gives it, for calls with positional params; `required`
     the arguments whose REST parameter has no default. `rows` says the endpoint returns the
-    method's list as rows (rest_json_rpc_rows), so a null list is an empty one.
+    method's list as rows (rest_json_rpc_rows), so a null list is an empty one. `fixed` are REST
+    parameters every request of the mapping carries, those that select the method among the ones
+    the endpoint can call.
     """
 
     endpoint: str
@@ -47,6 +49,7 @@ class EndpointMapping:
     positional: tuple[str, ...]
     required: tuple[str, ...] = ()
     rows: bool = True
+    fixed: dict[str, str] = field(default_factory=dict)
 
 
 MAPPINGS: tuple[EndpointMapping, ...] = (
@@ -89,6 +92,59 @@ MAPPINGS: tuple[EndpointMapping, ...] = (
             "community",
         ),
         required=("account",),
+    ),
+    EndpointMapping(
+        "get_ranked_posts",
+        "bridge.get_ranked_posts_v2",
+        {
+            "sort": ("sort", _TEXT),
+            "tag": ("tag", _TEXT),
+            "limit": ("page-size", _INT),
+            "start_author": ("start-author", _TEXT),
+            "start_permlink": ("start-permlink", _TEXT),
+            "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
+        },
+        (
+            "sort",
+            "start_author",
+            "start_permlink",
+            "limit",
+            "tag",
+            "observer",
+            "muted_reasons_filter",
+            "top_votes",
+            "truncate_body",
+        ),
+        fixed={"votes": "none"},
+    ),
+    EndpointMapping(
+        "get_account_posts",
+        "bridge.get_account_posts_v2",
+        {
+            "account": ("account-name", _TEXT),
+            "sort": ("sort", _TEXT),
+            "community": ("community", _TEXT),
+            "limit": ("page-size", _INT),
+            "start_author": ("start-author", _TEXT),
+            "start_permlink": ("start-permlink", _TEXT),
+            "observer": ("observer", _TEXT),
+            "truncate_body": ("truncate-body", _INT),
+        },
+        (
+            "sort",
+            "account",
+            "start_author",
+            "start_permlink",
+            "limit",
+            "observer",
+            "top_votes",
+            "truncate_body",
+            "include_own",
+            "community",
+        ),
+        required=("account",),
+        fixed={"votes": "none"},
     ),
     EndpointMapping(
         "get_post",
@@ -358,7 +414,7 @@ def _rest_params(mapping: EndpointMapping, params: Any) -> dict[str, str]:
     A null argument is left out: the endpoint passes an absent parameter on as an absent
     argument. Raises _Unmappable naming the first argument with no REST form.
     """
-    rest = {}
+    rest = dict(mapping.fixed)
     args = _named_args(mapping, params)
     for arg in mapping.required:
         if args.get(arg) is None:

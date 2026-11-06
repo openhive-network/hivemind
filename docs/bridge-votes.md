@@ -35,6 +35,25 @@ in exactly these ways:
  "params": {"author": "gtg", "permlink": "heavy-duty-witness-node-infrastructure", "observer": "alice", "top_votes": 3}}
 ```
 
+## REST: `votes`
+
+The REST post lists `/posts` (`bridge.get_ranked_posts`) and
+`/accounts/{account-name}/posts` (`bridge.get_account_posts`) take `votes`:
+
+| `votes` | Each post |
+|---|---|
+| `full` (default) | `active_votes`, the JSON-RPC method's response unchanged |
+| `summary` | the vote-free shape with `top_votes` = 10 |
+| `none` | the vote-free shape without `top_votes` |
+
+`summary` and `none` call the `*_v2` method, so `observer_vote` is present and, with
+`none`, the posts' votes are not read at all. Together with `truncate-body` this gives a
+page sized for a post list:
+
+```
+GET /hivemind-api/posts?sort=trending&page-size=20&truncate-body=200&votes=none
+```
+
 ## `bridge.get_posts`
 
 Fetches many posts in one call, in the vote-free shape above.
