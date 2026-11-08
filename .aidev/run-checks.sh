@@ -18,7 +18,10 @@
 #                processing during an emulated keep-monotonic replay, in a transaction
 #                rolled back: .aidev/early_block_processing_check.sql; and that the
 #                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
-#                tables: .aidev/haf_control_table_privileges_check.sql
+#                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
+#                registered in HAF's application registry as 'hivemind', refuses a row of its
+#                context under the old name 'hivemind_app' and keeps a paused registration
+#                over a re-install: .aidev/app_registry_check.sql
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -220,11 +223,12 @@ install_hivemind() {
     (cd "$stage" && bash scripts/install_app.sh --postgres-url="$ADMIN_URL" \
         --reptracker-schema-name="$REPTRACKER_SCHEMA") || return 1
     ensure_version
-    PYTHONPATH="$root" python3 -m hive.cli build_schema --database-url="$ADMIN_URL" || return 1
+    build_schema || return 1
     psql "$ADMIN_URL" -v ON_ERROR_STOP=on -Atc \
         "select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'hivemind_endpoints'" \
         | awk '{ print "hivemind_endpoints functions: " $1; exit ($1 > 0 ? 0 : 1) }' || return 1
     check_control_table_privileges || return 1
+    check_app_registry || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
@@ -245,6 +249,52 @@ check_control_table_privileges() {
         return 0
     fi
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/haf_control_table_privileges_check.sql
+}
+
+build_schema() {
+    PYTHONPATH="$root" python3 -m hive.cli build_schema --database-url="$ADMIN_URL"
+}
+
+registry_row() {  # NAME: the row's contexts, owner and paused flag, or nothing
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc \
+        "select contexts::text || ' ' || owner || ' ' || paused from hafd.applications where name = '$1'"
+}
+
+# hivemind registers under its lock name 'hivemind'; an install refuses a row of its
+# context under another name (an older hivemind's 'hivemind_app') and leaves it, and a
+# re-install over its own row keeps the row's paused flag.
+check_app_registry() {
+    if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') is null")" = t ]; then
+        echo "HAF application registry check skipped: this HAF predates hive/haf#341"
+        return 0
+    fi
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_registry_check.sql || return 1
+
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_pause('hivemind')" || return 1
+    build_schema || { echo "re-install over the hivemind registration failed"; return 1; }
+    [ "$(psql "$ADMIN_URL" -Atc "select paused from hafd.applications where name = 'hivemind'")" = t ] \
+        || { echo "re-install did not keep the hivemind registration paused"; return 1; }
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_resume('hivemind')" || return 1
+    echo "re-install over the hivemind registration kept it paused"
+
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_unregister('hivemind'); \
+        select hive.app_register('hivemind_app', ARRAY['hivemind_app']::hive.contexts_group, NULL, 'hivemind_app.completed_block_num')" || return 1
+    local planted refused
+    planted="$(registry_row hivemind_app)" || return 1
+    refused="$(mktemp)"
+    if build_schema > "$refused" 2>&1; then
+        cat "$refused"; echo "install over a hivemind_app registration did not fail"; return 1
+    fi
+    grep -F "registered in the HAF application registry as 'hivemind_app'" "$refused" \
+        && grep -qF "SELECT hive.app_unregister('hivemind_app');" "$refused" \
+        || { cat "$refused"; echo "install over a hivemind_app registration failed without naming the row"; return 1; }
+    [ "$(registry_row hivemind_app)" = "$planted" ] && [ -z "$(registry_row hivemind)" ] \
+        || { echo "the refused install changed the registry: hivemind_app $(registry_row hivemind_app), hivemind $(registry_row hivemind)"; return 1; }
+    echo "install over a hivemind_app registration refused, row left as $planted"
+
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_unregister('hivemind_app')" || return 1
+    build_schema || return 1
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_registry_check.sql
 }
 
 install() {

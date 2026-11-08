@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import re
 from time import perf_counter as perf
+from typing import Any
 
 import psycopg2
 import psycopg2.extensions
@@ -21,7 +22,7 @@ log = logging.getLogger(__name__)
 _PARAM_RE = re.compile(r'(?<![:\w]):([a-zA-Z_]\w*)')
 
 
-def _convert_named_params(sql):
+def _convert_named_params(sql: str) -> str:
     """Convert :param style bindings to %(param)s for psycopg2."""
     return _PARAM_RE.sub(r'%(\1)s', sql)
 
@@ -303,7 +304,7 @@ class Db:
         rows = self._query(sql, **kwargs)
         return [r[0] for r in rows]
 
-    def query_one(self, sql, **kwargs):
+    def query_one(self, sql: str, **kwargs: Any) -> Any:
         """Perform a `SELECT 1*1`"""
         rows = self._query(sql, **kwargs)
         if rows:
@@ -327,7 +328,7 @@ class Db:
         if trx:
             self.query("COMMIT")
 
-    def _query(self, sql, **kwargs):
+    def _query(self, sql: str, **kwargs: Any) -> list[Row]:
         """Execute a query using psycopg2."""
         if sql == 'START TRANSACTION':
             assert not self._trx_active

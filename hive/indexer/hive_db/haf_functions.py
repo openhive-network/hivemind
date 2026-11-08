@@ -1,6 +1,6 @@
 import logging
 
-from hive.conf import MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME
+from hive.conf import APP_NAME, MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
@@ -65,8 +65,9 @@ def register_application(db: Db) -> None:
 
     Hivemind drives its own loop (no process procedure), so the registration
     exists for other applications: hivesense and proxy-whitelist declare a
-    dependency on 'hivemind_app', and HAF then withholds from them every block
-    hivemind has not committed yet.
+    dependency on it, and HAF then withholds from them every block hivemind has
+    not committed yet. It is registered under APP_NAME, the name it locks as,
+    because HAF's lock helpers find the registry row by the lock name.
 
     That gating normally reads a dependency's hafd.contexts.current_block_num,
     which is right for loops that commit the position together with the block's
@@ -94,9 +95,28 @@ def register_application(db: Db) -> None:
     if not registry_available:
         log.warning("HAF application registry not available (hive.app_register); skipping hivemind registration")
         return
+    _refuse_registration_under_another_name(db)
     db.query_no_return(
-        f"SELECT hive.app_register('{SCHEMA_NAME}', ARRAY['{SCHEMA_NAME}']::hive.contexts_group, NULL, '{SCHEMA_NAME}.completed_block_num');"
+        f"SELECT hive.app_register('{APP_NAME}', ARRAY['{SCHEMA_NAME}']::hive.contexts_group, NULL, '{SCHEMA_NAME}.completed_block_num');"
     )
     log.info(
-        f"Registered '{SCHEMA_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)"
+        f"Registered '{APP_NAME}' in the HAF application registry (self-driven, completed block via {SCHEMA_NAME}.completed_block_num)"
     )
+
+
+def _refuse_registration_under_another_name(db: Db) -> None:
+    """Fail when the context is registered under a name other than APP_NAME.
+
+    Such a row is a registration by an older hivemind (as 'hivemind_app').
+    hive.app_register would see the context as embedded in that application,
+    NOTICE and return, so the lock name would never find a row. It is not
+    migrated in place: hivemind is replayed from scratch.
+    """
+    other = db.query_one(
+        f"SELECT name FROM hafd.applications WHERE name != '{APP_NAME}' AND contexts @> ARRAY['{SCHEMA_NAME}'] LIMIT 1"
+    )
+    if other is not None:
+        raise RuntimeError(
+            f"Context '{SCHEMA_NAME}' is registered in the HAF application registry as '{other}', not '{APP_NAME}'. "
+            f"Replay hivemind from scratch, or run SELECT hive.app_unregister('{other}'); and reinstall."
+        )
