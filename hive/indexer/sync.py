@@ -12,7 +12,7 @@ from typing import Any
 
 import psycopg2
 
-from hive.conf import SCHEMA_NAME, Conf
+from hive.conf import APP_NAME, SCHEMA_NAME, Conf
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -77,13 +77,13 @@ class SyncHiveDb:
             # NOTICE logging every minute) until any active installer of
             # those apps releases its EXCLUSIVE lock.
             self._db.query_no_return_autocommit(
-                "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind', 'reputation_tracker'])"
+                f"SELECT hive.acquire_app_block_processor_locks(ARRAY['{APP_NAME}', 'reputation_tracker'])"
             )
         else:
             # Installer (build_schema / upgrade_schema): try EXCLUSIVE lock.
             # If a block-processor is holding the shared lock the function
             # NOTICEs the holder and returns false; skip rather than racing.
-            if not self._db.query_one("SELECT hive.try_acquire_app_install_lock('hivemind')"):
+            if not self._db.query_one(f"SELECT hive.try_acquire_app_install_lock('{APP_NAME}')"):
                 log.info("Skipping hivemind schema install (see NOTICE above).")
                 sys.exit(0)
 
@@ -332,7 +332,7 @@ class SyncHiveDb:
                 # The advisory locks acquired in __enter__ died with the old
                 # session; re-acquire them before touching hivemind state again.
                 self._db.query_no_return_autocommit(
-                    "SELECT hive.acquire_app_block_processor_locks(ARRAY['hivemind', 'reputation_tracker'])"
+                    f"SELECT hive.acquire_app_block_processor_locks(ARRAY['{APP_NAME}', 'reputation_tracker'])"
                 )
                 log.warning(f"Reconnected to the database after {attempt} attempt(s); resuming synchronization")
                 return

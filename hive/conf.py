@@ -16,6 +16,9 @@ SCHEMA_NAME: Final[str] = 'hivemind_app'
 REPTRACKER_SCHEMA_NAME = 'reptracker_app'
 SWAGGER_URL = '{hivemind-host}'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
+# The name hivemind locks as and registers under in the HAF application registry;
+# HAF's lock helpers find the registry row by the lock name.
+APP_NAME: Final[str] = 'hivemind'
 ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 
 # Distance behind head at which sync enters MASSIVE_WITHOUT_INDEXES (drop
