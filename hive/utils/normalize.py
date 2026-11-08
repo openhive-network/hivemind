@@ -189,7 +189,7 @@ def load_json_key(obj, key):
     return ret
 
 
-def trunc(string, maxlen):
+def trunc(string: str | None, maxlen: int) -> str | None:
     """Truncate a string, with a 3-char penalty if maxlen exceeded."""
     if string:
         string = string.strip()

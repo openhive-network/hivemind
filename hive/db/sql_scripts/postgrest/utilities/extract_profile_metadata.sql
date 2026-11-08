@@ -50,8 +50,9 @@ BEGIN
     IF _metadata ? 'name' THEN
       _profile_text_field = _metadata->>'name';
       IF LEFT(_profile_text_field, 1) <> '@' AND POSITION('\x00' IN _profile_text_field) = 0 THEN
-        IF LENGTH(_profile_text_field) > 20 THEN
-          _profile_text_field = LEFT(_profile_text_field, 17) || '...';
+        -- the display name is capped at 50 characters, the last 3 of them '...'
+        IF LENGTH(_profile_text_field) > 50 THEN
+          _profile_text_field = LEFT(_profile_text_field, 47) || '...';
         END IF;
         _profile = jsonb_set(_profile, '{profile,name}', to_jsonb(_profile_text_field));
       END IF;
