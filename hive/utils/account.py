@@ -103,16 +103,16 @@ def process_profile(prof: dict[str, Any]) -> dict[str, str]:
     if cover_image and len(cover_image) > 1024:
         cover_image = None
 
-    return dict(
-        name=name or '',
-        about=about or '',
-        location=location or '',
-        website=website or '',
-        profile_image=profile_image or '',
-        cover_image=cover_image or '',
-        blacklist_description=blacklist_description or '',
-        muted_list_description=muted_list_description or '',
-    )
+    return {
+        "name": name or '',
+        "about": about or '',
+        "location": location or '',
+        "website": website or '',
+        "profile_image": profile_image or '',
+        "cover_image": cover_image or '',
+        "blacklist_description": blacklist_description or '',
+        "muted_list_description": muted_list_description or '',
+    }
 
 
 def safe_db_profile_metadata(posting_json_metadata: str | None, json_metadata: str | None) -> dict[str, str]:
