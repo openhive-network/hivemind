@@ -1,8 +1,12 @@
 """Methods for normalizing/sanitizing steemd account metadata."""
 
+from typing import Any
+
 import ujson as json
 
 from hive.utils.normalize import trunc
+
+_MAX_NAME_LENGTH = 50
 
 
 def get_profile_str(account):
@@ -18,7 +22,7 @@ def get_profile_str(account):
     return (_posting_json_metadata, _json_metadata)
 
 
-def get_db_profile(posting_json_metadata, json_metadata):
+def get_db_profile(posting_json_metadata: str | None, json_metadata: str | None) -> dict[str, Any]:
     prof = {}
     json_metadata_is_read = False
 
@@ -40,7 +44,7 @@ def get_db_profile(posting_json_metadata, json_metadata):
     return prof
 
 
-def get_profile(account):
+def get_profile(account: dict[str, Any]) -> dict[str, Any]:
     prof = {}
 
     try:
@@ -59,7 +63,7 @@ def get_profile(account):
     return prof
 
 
-def process_profile(prof):
+def process_profile(prof: dict[str, Any]) -> dict[str, str]:
     """Returns profile data."""
 
     name = str(prof['name']) if 'name' in prof else None
@@ -77,7 +81,7 @@ def process_profile(prof):
     blacklist_description = _char_police(blacklist_description)
     muted_list_description = _char_police(muted_list_description)
 
-    name = trunc(name, 20)
+    name = trunc(name, _MAX_NAME_LENGTH)
     about = trunc(about, 160)
     location = trunc(location, 30)
     blacklist_description = trunc(blacklist_description, 256)
@@ -111,22 +115,22 @@ def process_profile(prof):
     )
 
 
-def safe_db_profile_metadata(posting_json_metadata, json_metadata):
+def safe_db_profile_metadata(posting_json_metadata: str | None, json_metadata: str | None) -> dict[str, str]:
     prof = get_db_profile(posting_json_metadata, json_metadata)
     return process_profile(prof)
 
 
-def safe_profile_metadata(account):
+def safe_profile_metadata(account: dict[str, Any]) -> dict[str, str]:
     prof = get_profile(account)
     return process_profile(prof)
 
 
-def _valid_url_proto(url):
+def _valid_url_proto(url: str) -> bool:
     assert url
     return url[0:7] == 'http://' or url[0:8] == 'https://'
 
 
-def _char_police(string):
+def _char_police(string: str | None) -> str | None:
     """If a string has bad chars, ignore it.
 
     Unclear how a NUL would get in profile data,

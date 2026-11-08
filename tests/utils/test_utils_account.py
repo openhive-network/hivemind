@@ -22,9 +22,17 @@ def test_valid_account() -> None:
     assert safe_profile == expected
 
 
+def test_name_of_max_length_is_kept() -> None:
+    name = 'NameOfExactlyFiftyChars' + 'x' * 27
+    account = {'name': 'foo', 'posting_json_metadata': json.dumps({'profile': {'name': name, 'version': 2}})}
+
+    assert len(name) == 50
+    assert safe_profile_metadata(account)['name'] == name
+
+
 def test_invalid_account() -> None:
     raw_profile = {
-        'name': 'NameIsTooBigByOneChar',
+        'name': 'NameIsTooBigByOneChar' + 'x' * 30,
         'location': 'Florence\x00',
         'website': 'davincilife.com/',
         'cover_image': 'example.com/avatar.jpg',
@@ -40,7 +48,7 @@ def test_invalid_account() -> None:
     }
 
     safe_profile = safe_profile_metadata(account)
-    assert safe_profile['name'] == 'NameIsTooBigByOne...'
+    assert safe_profile['name'] == 'NameIsTooBigByOneChar' + 'x' * 26 + '...'
     assert safe_profile['about'] == ''
     assert safe_profile['location'] == ''
     assert safe_profile['website'] == 'http://davincilife.com/'  # TODO: should normalize to https?
