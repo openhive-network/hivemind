@@ -89,8 +89,10 @@ def register_application(db: Db) -> None:
                 )
             $$;"""
     )
+    # By name, not signature: hive.app_register gained arguments with defaults (hive/haf#454).
     registry_available = db.query_one(
-        "SELECT to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') IS NOT NULL"
+        "SELECT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace"
+        " WHERE n.nspname = 'hive' AND p.proname = 'app_register')"
     )
     if not registry_available:
         log.warning("HAF application registry not available (hive.app_register); skipping hivemind registration")

@@ -266,7 +266,8 @@ registry_row() {  # NAME: the row's contexts, owner and paused flag, or nothing
 # context under another name (an older hivemind's 'hivemind_app') and leaves it, and a
 # re-install over its own row keeps the row's paused flag.
 check_app_registry() {
-    if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_register(text, hive.contexts_group, text, text)') is null")" = t ]; then
+    if [ "$(psql "$ADMIN_URL" -Atc "select not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'hive' and p.proname = 'app_register')")" = t ]; then
         echo "HAF application registry check skipped: this HAF predates hive/haf#341"
         return 0
     fi
