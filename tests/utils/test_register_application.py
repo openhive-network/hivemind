@@ -15,10 +15,15 @@ from hive.indexer.hive_db.haf_functions import register_application
 
 
 class _Db:
-    """Answers the registry probes; `other_name` is the row holding hivemind_app under another name."""
+    """Answers the registry probes.
 
-    def __init__(self, other_name: str | None) -> None:
+    `registry` is whether HAF has hive.app_register; `other_name` is the row holding
+    hivemind_app under another name.
+    """
+
+    def __init__(self, other_name: str | None, registry: bool = True) -> None:
         self._other_name = other_name
+        self._registry = registry
         self.statements: list[str] = []
 
     def query_no_return(self, sql: str) -> None:
@@ -26,8 +31,8 @@ class _Db:
 
     def query_one(self, sql: str) -> Any:
         self.statements.append(sql)
-        if 'to_regprocedure' in sql:
-            return True
+        if "p.proname = 'app_register'" in sql:
+            return self._registry
         if 'hafd.applications' in sql:
             return self._other_name
         raise AssertionError(f'unexpected query: {sql}')
@@ -57,3 +62,22 @@ def test_refuses_the_context_registered_under_another_name() -> None:
     assert "registered in the HAF application registry as 'hivemind_app', not 'hivemind'" in str(refused.value)
     assert "SELECT hive.app_unregister('hivemind_app');" in str(refused.value)
     assert _app_register_calls(db) == []
+
+
+def test_probes_the_registry_by_name_not_signature() -> None:
+    db = _Db(other_name=None)
+
+    register_application(cast(Db, db))
+
+    probe = next(sql for sql in db.statements if 'app_register' in sql)
+    assert "n.nspname = 'hive' AND p.proname = 'app_register'" in probe
+    assert 'to_regprocedure' not in probe
+
+
+def test_skips_registration_without_the_registry() -> None:
+    db = _Db(other_name=None, registry=False)
+
+    register_application(cast(Db, db))
+
+    assert _app_register_calls(db) == []
+    assert not any('hafd.applications' in sql for sql in db.statements)
