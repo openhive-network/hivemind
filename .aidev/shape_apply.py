@@ -18,6 +18,11 @@ everything in them but the untrusted-language functions, and its HAF context's
 table and sequence. Without that the scripts that SET ROLE hivemind cannot
 replace them, nor read reptracker_app.
 
+Nor does a shape keep rows, so the copy then gets the one HAF row the scripts
+read (CONTEXT_SQL): hivemind_app's hafd.contexts row, which upgrade_table_schema.sql's
+hive.app_register_index_dependency calls look up and raise without. HAF's own
+functions run unchanged.
+
 The shape server has no network, so there is no DSN for `hive build_schema` to
 connect with: each script goes to `$AIDEV_DB_SHAPE_PSQL` (a psql reading SQL on
 its standard input, stopping at the first error), one session per script. Left
@@ -26,7 +31,8 @@ role grants (cluster-wide; the shape's roles and memberships are the source's),
 the reputation_tracker and HAfAH installs (other applications' code, at the
 versions the source runs), and the patch-level and hive_state rows and HAF
 application registration setup_runtime_code writes (DATA_ONLY_SCRIPTS and its
-Python side).
+Python side; the context row above is the part of that registration the scripts
+read, and only that part is seeded).
 
 --list prints the scripts, with the role each runs as, instead of running them.
 Exits non-zero naming the script that failed.
@@ -88,6 +94,22 @@ BEGIN
   END LOOP;
 END
 $$;
+"""
+
+
+# The source's hivemind_app context (steem-20, read 2026-11-11), which the upgrade scripts'
+# hive.app_register_index_dependency calls look up by name and record by id. Its block
+# numbers are those the capture's contexts stood at (pg_stats of hafd.contexts on the
+# shape); fork_id, events_id and loop are left NULL, since they reference hafd.fork and
+# hafd.events_queue rows a shape lacks. Run as the admin, as HAF's app_create_context does.
+CONTEXT_SQL = """
+INSERT INTO hafd.contexts (id, name, schema, current_block_num, irreversible_block, back_from_fork, owner,
+                           registering_state_provider, is_forking, last_active_at, baseclass_id, stages,
+                           early_block_processing)
+VALUES (8, 'hivemind_app', 'hivemind_app', 111151339, 111151339, FALSE, 'hivemind', FALSE, FALSE,
+        '2026-10-27 22:45:05.960852', 'hivemind_app.hivemind_app'::regclass,
+        '{"(MASSIVE_WITHOUT_INDEXES,2000000,1000,00:00:20)","(MASSIVE_WITH_INDEXES,101,1000,00:00:20)","(live,0,1,00:00:03)"}',
+        TRUE);
 """
 
 
@@ -175,6 +197,7 @@ def _run(psql: list[str], name: str, sql: str) -> None:
 
 def apply(psql: list[str]) -> None:
     _run(psql, "restoring the source's owners", OWNERSHIP_SQL)
+    _run(psql, "seeding the hivemind_app context", CONTEXT_SQL)
     for role, script in plan():
         name = script.relative_to(ROOT)
         try:
