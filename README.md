@@ -329,6 +329,11 @@ include setting the database URL, defining the block after which synchronization
    ```bash 
    docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:newverison  --upgrade-schema --database-url=postgresql://hivemind@haf/haf_block_log
    ```
+
+   The community moderation log (`bridge.get_community_moderation_log`, `bridge.get_account_moderation_stats`,
+   `bridge.get_moderator_activity`) is filled only while blocks are synced. Upgrading creates the log empty, so an
+   upgraded node reports only moderation actions from blocks processed after the upgrade. To get the full history,
+   uninstall hivemind and sync it again from scratch (see below).
    
 #### Uninstall hivemind from HAF database
 Sometimes it is required to uninstall hivemind from HAF database and then

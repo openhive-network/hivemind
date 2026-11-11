@@ -263,6 +263,16 @@ Stickies a post to the top of the community homepage. If multiple posts are stic
 }]
 ```
 
+### Moderation Log
+
+Every accepted `setRole`, `setUserTitle`, `mutePost`, `unmutePost`, `pinPost`, `unpinPost` and `flagPost` operation is
+recorded in the moderation log, which is served by `bridge.get_community_moderation_log`,
+`bridge.get_account_moderation_stats` and `bridge.get_moderator_activity`.
+
+The log is written as blocks are synced and is not backfilled. A node upgraded from a version without the log starts
+with an empty one and returns only the actions from blocks processed after the upgrade, so its results (for example
+`times_muted`) are lower than those of a node synced from scratch. A full resync is needed to get the complete history.
+
 ### Guest Operations
 
 #### Un/subscribe to a community

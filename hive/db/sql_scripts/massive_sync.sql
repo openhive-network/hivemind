@@ -1844,7 +1844,8 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_community_op(
     _data JSONB,
     _date TIMESTAMP,
     _block_num INT,
-    _counter_in INT DEFAULT 0
+    _counter_in INT DEFAULT 0,
+    _staging_op_id BIGINT DEFAULT NULL
 ) RETURNS INT AS $function$
 DECLARE
     _actor_id INT;
@@ -1866,6 +1867,15 @@ DECLARE
     _post_id INT;
     _props_title TEXT;
     _valid_props_keys TEXT[] := ARRAY['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id'];
+    _fallback_action_id SMALLINT := NULL;
+    _fallback_old_value TEXT := NULL;
+    _fallback_new_value TEXT := NULL;
+    _fallback_notes TEXT := NULL;
+    _fallback_prev_op_type INT;
+    _fallback_is_muted BOOLEAN;
+    _fallback_is_pinned BOOLEAN;
+    _fallback_parent_id INT;
+    _fallback_accepted BOOLEAN;
 BEGIN
     -- ========= KEY VALIDATION (matches Python CommunityOp.SCHEMA + assert_keys_match) =========
     -- Python rejects ops with extraneous or missing keys; replicate that here.
@@ -2058,15 +2068,29 @@ BEGIN
             SELECT * INTO _result FROM hivemind_app.community_set_role(
                 _actor_id, _account_id, _community_id, _role_id, _date, 100, 4
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 2, _counter_in),
-                    _block_num, 2, _date, _actor_id, _account_id, NULL, NULL, _score, _role, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 1, _actor_id, _account_id, NULL,
+                    CASE COALESCE(_result.old_role_id, 0)
+                        WHEN -2 THEN 'muted' WHEN 0 THEN 'guest' WHEN 2 THEN 'member'
+                        WHEN 4 THEN 'mod' WHEN 6 THEN 'admin' WHEN 8 THEN 'owner'
+                        ELSE 'guest'
+                    END,
+                    _role, NULL, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 2, _counter_in),
+                        _block_num, 2, _date, _actor_id, _account_id, NULL, NULL, _score, _role, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
             END IF;
 
         WHEN 'setUserTitle' THEN
@@ -2076,90 +2100,264 @@ BEGIN
             SELECT * INTO _result FROM hivemind_app.community_set_title(
                 _actor_id, _account_id, _community_id, _title, _date
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 4, _counter_in),
-                    _block_num, 4, _date, _actor_id, _account_id, NULL, NULL, _score, _title, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 2, _actor_id, _account_id, NULL,
+                    COALESCE(_result.old_title, ''), _title, NULL, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 4, _counter_in),
+                        _block_num, 4, _date, _actor_id, _account_id, NULL, NULL, _score, _title, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
             END IF;
 
         WHEN 'mutePost' THEN
             SELECT * INTO _result FROM hivemind_app.community_mute_post(
                 _actor_id, _community_id, _account_id, _permlink, 1  -- muted_reasons bitmask: bit 0 = community moderation
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 5, _counter_in),
-                    _block_num, 5, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 3, _actor_id, _account_id, _result.post_id,
+                    'unmuted', 'muted', _notes, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 5, _counter_in),
+                        _block_num, 5, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 3;
+                _fallback_old_value := 'unmuted';
+                _fallback_new_value := 'muted';
+                _fallback_notes := _notes;
             END IF;
 
         WHEN 'unmutePost' THEN
             SELECT * INTO _result FROM hivemind_app.community_unmute_post(
                 _actor_id, _community_id, _account_id, _permlink
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 6, _counter_in),
-                    _block_num, 6, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 4, _actor_id, _account_id, _result.post_id,
+                    'muted', 'unmuted', _notes, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 6, _counter_in),
+                        _block_num, 6, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 4;
+                _fallback_old_value := 'muted';
+                _fallback_new_value := 'unmuted';
+                _fallback_notes := _notes;
             END IF;
 
         WHEN 'pinPost' THEN
             SELECT * INTO _result FROM hivemind_app.community_pin_post(
                 _actor_id, _community_id, _account_id, _permlink
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 7, _counter_in),
-                    _block_num, 7, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 5, _actor_id, _account_id, _result.post_id,
+                    'unpinned', 'pinned', NULL, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 7, _counter_in),
+                        _block_num, 7, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 5;
+                _fallback_old_value := 'unpinned';
+                _fallback_new_value := 'pinned';
+                _fallback_notes := NULL;
             END IF;
 
         WHEN 'unpinPost' THEN
             SELECT * INTO _result FROM hivemind_app.community_unpin_post(
                 _actor_id, _community_id, _account_id, _permlink
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
-                _counter_in := _counter_in + 1;
-                INSERT INTO hivemind_app.hive_notification_cache
-                (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
                 VALUES (
-                    hivemind_app.notification_id(_date, 8, _counter_in),
-                    _block_num, 8, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
-                ) ON CONFLICT DO NOTHING;
+                    _community_id, 6, _actor_id, _account_id, _result.post_id,
+                    'pinned', 'unpinned', NULL, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    _score := CASE WHEN _result.is_subscribed THEN 35 ELSE 15 END;
+                    _counter_in := _counter_in + 1;
+                    INSERT INTO hivemind_app.hive_notification_cache
+                    (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+                    VALUES (
+                        hivemind_app.notification_id(_date, 8, _counter_in),
+                        _block_num, 8, _date, _actor_id, _account_id, _result.post_id, _result.post_id, _score, _notes, _community_name, ''
+                    ) ON CONFLICT DO NOTHING;
+                END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 6;
+                _fallback_old_value := 'pinned';
+                _fallback_new_value := 'unpinned';
+                _fallback_notes := NULL;
             END IF;
 
         WHEN 'flagPost' THEN
             SELECT * INTO _result FROM hivemind_app.community_flag_post(
                 _actor_id, _community_id, _account_id, _permlink, _community_name
             );
-            IF _result.success AND _block_num > _notification_first_block THEN
-                SELECT hivemind_app._community_notify_team(
-                    _block_num, 9, _actor_id, _community_id, _date, _result.post_id, _result.team_members, _notes, _counter_in
-                ) INTO _counter_in;
+            IF _result.success THEN
+                INSERT INTO hivemind_app.hive_moderation_log
+                    (community_id, action, actor_id, target_account_id, target_post_id,
+                     old_value, new_value, notes, block_num, created_at)
+                VALUES (
+                    _community_id, 7, _actor_id, _account_id, _result.post_id,
+                    NULL, 'flagged', _notes, _block_num, _date
+                );
+                IF _block_num > _notification_first_block THEN
+                    SELECT hivemind_app._community_notify_team(
+                        _block_num, 9, _actor_id, _community_id, _date, _result.post_id, _result.team_members, _notes, _counter_in
+                    ) INTO _counter_in;
+                END IF;
+            ELSIF _result.error_message LIKE 'post does not exists%' THEN
+                _fallback_action_id := 7;
+                _fallback_old_value := NULL;
+                _fallback_new_value := 'flagged';
+                _fallback_notes := _notes;
             END IF;
 
         ELSE
             RETURN _counter_in;  -- Unknown action
     END CASE;
+
+    -- Post-targeting op on a post deleted later in the same batch. The post row is already
+    -- marked deleted by the time this runs, so the community_* function could not find it.
+    -- Find the row that was live when the op was issued and repeat the checks the function
+    -- makes, so the log holds what a block-by-block sync records.
+    IF _fallback_action_id IS NOT NULL AND _staging_op_id IS NOT NULL THEN
+        IF EXISTS (
+            SELECT 1 FROM hivemind_app._ops_staging d
+            WHERE d.op_type_id = 17  -- delete_comment
+              AND d.val->>'author' = _account_name
+              AND d.val->>'permlink' = _permlink
+              AND d.id > _staging_op_id
+        ) THEN
+            -- Last comment (1) / delete_comment (17) of this post before the op, when the batch has one.
+            SELECT s.op_type_id INTO _fallback_prev_op_type
+            FROM hivemind_app._ops_staging s
+            WHERE s.op_type_id IN (1, 17)
+              AND s.val->>'author' = _account_name
+              AND s.val->>'permlink' = _permlink
+              AND s.id < _staging_op_id
+            ORDER BY s.id DESC LIMIT 1;
+
+            -- A deleted row keeps its creation date and takes the block of its deletion, so the row
+            -- live at the op was created no later than the op and deleted no earlier. A delete just
+            -- before the op means nothing was live; with no earlier op in the batch, a row created
+            -- in the op's own block was created after it.
+            _post_id := NULL;
+            IF _fallback_prev_op_type IS DISTINCT FROM 17 THEN
+                SELECT hp.id, hp.is_muted, hp.is_pinned, hp.parent_id
+                INTO _post_id, _fallback_is_muted, _fallback_is_pinned, _fallback_parent_id
+                FROM hivemind_app.hive_posts hp
+                JOIN hivemind_app.hive_permlink_data hpd ON hp.permlink_id = hpd.id
+                WHERE hp.author_id = _account_id
+                  AND hpd.permlink = _permlink
+                  AND hp.community_id = _community_id
+                  AND hp.counter_deleted <> 0
+                  AND hp.block_num >= _block_num
+                  AND (hp.created_at < _date OR (_fallback_prev_op_type = 1 AND hp.created_at = _date))
+                ORDER BY hp.id DESC LIMIT 1;
+            END IF;
+
+            IF _post_id IS NOT NULL THEN
+                -- Same conditions and flag updates as community_{mute,unmute,pin,unpin,flag}_post,
+                -- so a repeated action in the batch is rejected like it is on a live post.
+                _fallback_accepted := FALSE;
+                CASE _fallback_action_id
+                    WHEN 3 THEN
+                        IF NOT _fallback_is_muted THEN
+                            UPDATE hivemind_app.hive_posts SET is_muted = true, muted_reasons = 1 WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 4 THEN
+                        IF _fallback_is_muted AND NOT COALESCE(
+                            (SELECT php.is_muted FROM hivemind_app.hive_posts php WHERE php.id = _fallback_parent_id), FALSE
+                        ) THEN
+                            UPDATE hivemind_app.hive_posts SET is_muted = false, muted_reasons = 0 WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 5 THEN
+                        IF NOT _fallback_is_pinned THEN
+                            UPDATE hivemind_app.hive_posts SET is_pinned = true WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 6 THEN
+                        IF _fallback_is_pinned THEN
+                            UPDATE hivemind_app.hive_posts SET is_pinned = false WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 7 THEN
+                        -- community_flag_post finds an earlier flag by its notification, which exists
+                        -- only past _notification_first_block; this path writes none, so use the log.
+                        _fallback_accepted := NOT EXISTS (
+                            SELECT 1 FROM hivemind_app.hive_moderation_log ml
+                            WHERE ml.target_post_id = _post_id
+                              AND ml.action = 7
+                              AND ml.actor_id = _actor_id
+                              AND ml.community_id = _community_id
+                              AND ml.block_num > _notification_first_block
+                        );
+                    ELSE
+                        NULL;
+                END CASE;
+
+                IF _fallback_accepted THEN
+                    INSERT INTO hivemind_app.hive_moderation_log
+                        (community_id, action, actor_id, target_account_id, target_post_id,
+                         old_value, new_value, notes, block_num, created_at)
+                    VALUES (
+                        _community_id, _fallback_action_id, _actor_id, _account_id, _post_id,
+                        _fallback_old_value, _fallback_new_value, _fallback_notes, _block_num, _date
+                    );
+                END IF;
+            END IF;
+        END IF;
+    END IF;
 
     -- Generate error notification on failure
     IF _result IS NOT NULL AND NOT _result.success AND _result.error_message IS NOT NULL AND _result.error_message != '' THEN
@@ -2328,7 +2526,7 @@ BEGIN
         -- propagate rather than be silently swallowed. The old wrapper also created an
         -- implicit savepoint per iteration (PL/pgSQL subtransaction), adding overhead.
         SELECT hivemind_app.process_community_op(
-            _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter
+            _auth_account, _action, _data, _rec.block_date, _rec.block_num, _community_counter, _rec.id
         ) INTO _community_counter;
         _count := _count + 1;
     END LOOP;
