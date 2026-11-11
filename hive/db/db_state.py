@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
 from typing import Any
 
+import psycopg2.errors
 import psycopg2.extensions
 
 import hive.db.schema as schema_module
@@ -85,6 +86,14 @@ class DbState:
     # Max retries for DDL operations that can deadlock with other HAF apps
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
     _DDL_MAX_RETRIES = 5
+
+    # pg_search's non-concurrent build scans hive_post_data with SnapshotAny and
+    # detoasts every row version the heap still holds, recently dead ones
+    # included, so it can reach a dead version whose toast an earlier vacuum
+    # already removed (a VACUUM's heap and toast passes compute their horizons
+    # separately) and fail with DataCorrupted (#450). A plain VACUUM prunes such
+    # a version; the build is retried once after it.
+    _BM25_BUILD_ATTEMPTS = 2
 
     # During massive sync, autovacuum on hive_post_data races the flush
     # statement's toast reads of post bodies (missing/unexpected-chunk failures,
@@ -305,15 +314,32 @@ class DbState:
             return
 
         with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
-            log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
-            time_start = perf_counter()
-            db_mgr.db.query_no_return(
-                f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data "
-                "USING bm25 (id, title, body) WITH (key_field = 'id', "
-                "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
-                f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
-            )
-            log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
+            for attempt in range(1, cls._BM25_BUILD_ATTEMPTS + 1):
+                log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
+                time_start = perf_counter()
+                try:
+                    db_mgr.db.query_no_return(
+                        f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data "
+                        "USING bm25 (id, title, body) WITH (key_field = 'id', "
+                        "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
+                        f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
+                    )
+                except psycopg2.errors.DataCorrupted as exc:
+                    if attempt == cls._BM25_BUILD_ATTEMPTS:
+                        log.error("[MASSIVE] BM25 index build failed again after a vacuum of hive_post_data: %s", exc)
+                        raise
+                    log.warning(
+                        "[MASSIVE] BM25 index build hit a toast-chunk error after %.4fs (attempt %d/%d): %s; "
+                        "vacuuming hive_post_data and retrying",
+                        perf_counter() - time_start,
+                        attempt,
+                        cls._BM25_BUILD_ATTEMPTS,
+                        str(exc).strip(),
+                    )
+                    cls._run_vacuum(db, "bm25_retry_vacuum", f"VACUUM {SCHEMA_NAME}.hive_post_data")
+                    continue
+                log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
+                return
 
     @classmethod
     def _drop_indexes_in_threads(cls) -> None:
