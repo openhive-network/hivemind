@@ -1871,6 +1871,11 @@ DECLARE
     _fallback_old_value TEXT := NULL;
     _fallback_new_value TEXT := NULL;
     _fallback_notes TEXT := NULL;
+    _fallback_prev_op_type INT;
+    _fallback_is_muted BOOLEAN;
+    _fallback_is_pinned BOOLEAN;
+    _fallback_parent_id INT;
+    _fallback_accepted BOOLEAN;
 BEGIN
     -- ========= KEY VALIDATION (matches Python CommunityOp.SCHEMA + assert_keys_match) =========
     -- Python rejects ops with extraneous or missing keys; replicate that here.
@@ -2259,8 +2264,10 @@ BEGIN
             RETURN _counter_in;  -- Unknown action
     END CASE;
 
-    -- For post-targeting ops on posts deleted in the same batch: log the moderation
-    -- action using the post id from hive_posts (including deleted rows).
+    -- Post-targeting op on a post deleted later in the same batch. The post row is already
+    -- marked deleted by the time this runs, so the community_* function could not find it.
+    -- Find the row that was live when the op was issued and repeat the checks the function
+    -- makes, so the log holds what a block-by-block sync records.
     IF _fallback_action_id IS NOT NULL AND _staging_op_id IS NOT NULL THEN
         IF EXISTS (
             SELECT 1 FROM hivemind_app._ops_staging d
@@ -2269,21 +2276,85 @@ BEGIN
               AND d.val->>'permlink' = _permlink
               AND d.id > _staging_op_id
         ) THEN
-            SELECT hp.id INTO _post_id
-            FROM hivemind_app.hive_posts hp
-            JOIN hivemind_app.hive_permlink_data hpd ON hp.permlink_id = hpd.id
-            WHERE hp.author_id = _account_id
-              AND hpd.permlink = _permlink
-              AND hp.community_id = _community_id
-            ORDER BY hp.id DESC LIMIT 1;
+            -- Last comment (1) / delete_comment (17) of this post before the op, when the batch has one.
+            SELECT s.op_type_id INTO _fallback_prev_op_type
+            FROM hivemind_app._ops_staging s
+            WHERE s.op_type_id IN (1, 17)
+              AND s.val->>'author' = _account_name
+              AND s.val->>'permlink' = _permlink
+              AND s.id < _staging_op_id
+            ORDER BY s.id DESC LIMIT 1;
+
+            -- A deleted row keeps its creation date and takes the block of its deletion, so the row
+            -- live at the op was created no later than the op and deleted no earlier. A delete just
+            -- before the op means nothing was live; with no earlier op in the batch, a row created
+            -- in the op's own block was created after it.
+            _post_id := NULL;
+            IF _fallback_prev_op_type IS DISTINCT FROM 17 THEN
+                SELECT hp.id, hp.is_muted, hp.is_pinned, hp.parent_id
+                INTO _post_id, _fallback_is_muted, _fallback_is_pinned, _fallback_parent_id
+                FROM hivemind_app.hive_posts hp
+                JOIN hivemind_app.hive_permlink_data hpd ON hp.permlink_id = hpd.id
+                WHERE hp.author_id = _account_id
+                  AND hpd.permlink = _permlink
+                  AND hp.community_id = _community_id
+                  AND hp.counter_deleted <> 0
+                  AND hp.block_num >= _block_num
+                  AND (hp.created_at < _date OR (_fallback_prev_op_type = 1 AND hp.created_at = _date))
+                ORDER BY hp.id DESC LIMIT 1;
+            END IF;
+
             IF _post_id IS NOT NULL THEN
-                INSERT INTO hivemind_app.hive_moderation_log
-                    (community_id, action, actor_id, target_account_id, target_post_id,
-                     old_value, new_value, notes, block_num, created_at)
-                VALUES (
-                    _community_id, _fallback_action_id, _actor_id, _account_id, _post_id,
-                    _fallback_old_value, _fallback_new_value, _fallback_notes, _block_num, _date
-                );
+                -- Same conditions and flag updates as community_{mute,unmute,pin,unpin,flag}_post,
+                -- so a repeated action in the batch is rejected like it is on a live post.
+                _fallback_accepted := FALSE;
+                CASE _fallback_action_id
+                    WHEN 3 THEN
+                        IF NOT _fallback_is_muted THEN
+                            UPDATE hivemind_app.hive_posts SET is_muted = true, muted_reasons = 1 WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 4 THEN
+                        IF _fallback_is_muted AND NOT COALESCE(
+                            (SELECT php.is_muted FROM hivemind_app.hive_posts php WHERE php.id = _fallback_parent_id), FALSE
+                        ) THEN
+                            UPDATE hivemind_app.hive_posts SET is_muted = false, muted_reasons = 0 WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 5 THEN
+                        IF NOT _fallback_is_pinned THEN
+                            UPDATE hivemind_app.hive_posts SET is_pinned = true WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 6 THEN
+                        IF _fallback_is_pinned THEN
+                            UPDATE hivemind_app.hive_posts SET is_pinned = false WHERE id = _post_id;
+                            _fallback_accepted := TRUE;
+                        END IF;
+                    WHEN 7 THEN
+                        -- community_flag_post finds an earlier flag by its notification, which exists
+                        -- only past _notification_first_block; this path writes none, so use the log.
+                        _fallback_accepted := NOT EXISTS (
+                            SELECT 1 FROM hivemind_app.hive_moderation_log ml
+                            WHERE ml.target_post_id = _post_id
+                              AND ml.action = 7
+                              AND ml.actor_id = _actor_id
+                              AND ml.community_id = _community_id
+                              AND ml.block_num > _notification_first_block
+                        );
+                    ELSE
+                        NULL;
+                END CASE;
+
+                IF _fallback_accepted THEN
+                    INSERT INTO hivemind_app.hive_moderation_log
+                        (community_id, action, actor_id, target_account_id, target_post_id,
+                         old_value, new_value, notes, block_num, created_at)
+                    VALUES (
+                        _community_id, _fallback_action_id, _actor_id, _account_id, _post_id,
+                        _fallback_old_value, _fallback_new_value, _fallback_notes, _block_num, _date
+                    );
+                END IF;
             END IF;
         END IF;
     END IF;
