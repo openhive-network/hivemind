@@ -16,6 +16,8 @@ from hive.db.db_state import DbState
 _RESTORE_HIVE_POSTS = "SELECT hive.app_restore_indexes('hivemind_app', 'hivemind_app.hive_posts')"
 _RESTORE_HIVE_VOTES = "SELECT hive.app_restore_indexes('hivemind_app', 'hivemind_app.hive_votes')"
 _RECOMPUTE = "SELECT hivemind_app.recalculate_all_posts_votes_and_children()"
+_MUTED_PARENTS = "SELECT hivemind_app.propagate_all_muted_parents();"
+_MARKER = "completion marker"
 
 
 @contextmanager
@@ -63,7 +65,7 @@ def _db_state(initial_sync: bool) -> Iterator[list[str]]:
             _indexes_were_disabled=True,
             _deferred_index_tables=[],
             _finish_reputation_notification_scores=staticmethod(lambda *a: None),
-            _finalize_completion_marker=staticmethod(lambda *a: None),
+            _finalize_completion_marker=staticmethod(lambda *a: statements.append(_MARKER)),
         ),
         patch('hive.db.schema.set_logged_table_attribute', lambda *a: None),
         patch('hive.signals.can_continue_thread', lambda: True),
@@ -118,3 +120,43 @@ def test_interrupted_finalization_still_restores_deferred_indexes() -> None:
 
     assert _RECOMPUTE not in statements
     assert _RESTORE_HIVE_POSTS in statements
+
+
+class _ProcessExit(BaseException):
+    """The process ending mid-finalization: no finalization code catches it."""
+
+
+def _finalize(statements: list[str]) -> list[str]:
+    DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
+    DbState.ensure_finalize_massive_sync(10**8, 1)
+    return list(statements)
+
+
+def test_finalization_exited_after_muted_parents_reruns_and_commits_the_marker_once() -> None:
+    with _db_state(initial_sync=True) as statements:
+        uninterrupted = _finalize(statements)
+
+    finish_muted_parents = DbState._finish_muted_parents
+
+    def exit_after_muted_parents(db: Any) -> None:
+        finish_muted_parents(db)
+        raise _ProcessExit
+
+    with _db_state(initial_sync=True) as first:
+        with patch.object(DbState, '_finish_muted_parents', staticmethod(exit_after_muted_parents)):
+            try:
+                _finalize(first)
+            except _ProcessExit:
+                pass
+            else:
+                raise AssertionError("finalization did not reach the simulated exit")
+
+    with _db_state(initial_sync=True) as restarted:
+        _finalize(restarted)
+
+    assert first[-1] == _MUTED_PARENTS
+    assert first == uninterrupted[: len(first)]
+    assert _MARKER not in first
+    assert restarted == uninterrupted
+    assert (first + restarted).count(_MARKER) == 1
+    assert restarted[-1] == _MARKER
