@@ -8,7 +8,8 @@ VOLATILE
 AS
 $BODY$
 BEGIN
-SET LOCAL work_mem='4GB';
+-- One batch's voted posts: its hash aggregate holds about 430 bytes per post.
+SET LOCAL work_mem='512MB';
 SET LOCAL enable_seqscan = off;
 
   UPDATE hivemind_app.hive_posts hp
@@ -68,7 +69,10 @@ $BODY$
 DECLARE
   __depth INT;
 BEGIN
-SET LOCAL work_mem='4GB';
+-- Each hash node may hold work_mem * hash_mem_multiplier, and the host this runs on
+-- is shared: a bound of 512MB lets the child-count loop's hash nodes spill to disk
+-- instead of growing to many GB.
+SET LOCAL work_mem='512MB';
 
   -- The posts the child count reads, in one scan of hive_posts, grouped by depth so
   -- that each level of the loop below reads only its own pages.
@@ -116,6 +120,13 @@ SET LOCAL work_mem='4GB';
   -- none of whose values change is not written: a finalization re-run after an
   -- interruption finds hive_posts' indexes restored, and rewriting every row
   -- would insert each new version into all of them.
+  -- Hash-free: hive_votes is read in post_id order and __post_children by its
+  -- primary key, so a sorted aggregate and a merge full join need no memory. A
+  -- hash aggregate holds about 430 bytes per voted post (tens of GB on mainnet),
+  -- and the planner picks it whenever it underestimates the post count, e.g. on
+  -- __post_children, whose statistics predate its contents.
+  SET LOCAL enable_hashagg = off;
+  SET LOCAL enable_hashjoin = off;
   UPDATE hivemind_app.hive_posts hp
   SET
       abs_rshares = CASE WHEN s.voted AND hp.counter_deleted = 0 THEN s.abs_rshares ELSE hp.abs_rshares END
@@ -181,6 +192,8 @@ SET LOCAL work_mem='4GB';
   TRUNCATE TABLE hivemind_app.__post_children;
   DROP TABLE hivemind_app.__post_tree;
 
+RESET enable_hashjoin;
+RESET enable_hashagg;
 RESET work_mem;
 
 END;
