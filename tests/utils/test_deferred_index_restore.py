@@ -33,7 +33,9 @@ def _db_state(initial_sync: bool) -> Iterator[list[str]]:
 
     db.query_one.side_effect = query_one
 
-    def run_tasks(info: str, methods: Sequence[tuple[str, Callable[..., None], list[Any]]]) -> None:
+    def run_tasks(
+        info: str, methods: Sequence[tuple[str, Callable[..., None], list[Any]]], max_workers: int | None = None
+    ) -> None:
         for description, method, args in methods:
             if description.startswith('VACUUM ') or description in (
                 'hive_feed_cache',

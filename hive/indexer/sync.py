@@ -88,6 +88,7 @@ class SyncHiveDb:
                 sys.exit(0)
 
         Community.start_block = self._conf.get("community_start_block")
+        DbState.vacuum_workers = self._conf.get("vacuum_workers")
         DbState.initialize(self._enter_sync, self._upgrade_schema)
 
         Blocks.setup(conf=self._conf)

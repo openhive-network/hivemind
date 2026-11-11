@@ -3,7 +3,7 @@
 import argparse
 import logging
 import re
-from typing import Final
+from typing import Any, Final
 
 import configargparse
 
@@ -90,6 +90,13 @@ class Conf:
             env_var='MASSIVE_VOTE_WORKERS',
             help='connections that upsert a batch\'s votes into hive_votes concurrently during massive sync '
             '(1 = a single connection, as in live sync)',
+            default=4,
+        )
+        add(
+            '--vacuum-workers',
+            type=_positive_int,
+            env_var='VACUUM_WORKERS',
+            help='vacuums of hivemind tables run at most this many at a time, each on a connection of its own',
             default=4,
         )
 
@@ -268,7 +275,7 @@ class Conf:
 
         return self._db
 
-    def get(self, param):
+    def get(self, param: str) -> Any:
         """Reads a single property, e.g. `database_url`."""
         assert self._args, "run init_argparse()"
         return self._args[param]

@@ -7,6 +7,7 @@ stop finalization before the marker, leaving it unset so the next startup
 re-runs finalization with the same range.
 """
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from hive.db.db_state import DbState
@@ -26,7 +27,7 @@ def _run(massive_sync_preconditions, allowed_continue_checks=None):
     """
     calls = []
 
-    def fake_tasks(info, methods):
+    def fake_tasks(info: str, methods: list[tuple[str, Any, Any]], max_workers: int | None = None) -> None:
         calls.append(('parallel', sorted(name for name, _, _ in methods)))
 
     def fake_marker(db, preconds, first, last):
