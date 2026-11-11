@@ -1,9 +1,12 @@
+from hive.db.adapter import Db
+
+
 class AutoDbDisposer:
     """Manages whole lifecycle of a database.
     Object of this class should be created by `with` context.
     """
 
-    def __init__(self, db, name):
+    def __init__(self, db: Db, name: str) -> None:
         self.db = db.clone(name)
 
     def __enter__(self):

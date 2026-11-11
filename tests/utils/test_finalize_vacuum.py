@@ -29,7 +29,9 @@ def _initial_finalization_vacuums() -> list[tuple[str, str]]:
     db.query_all.return_value = [MagicMock(_mapping={'table_name': t}) for t in TABLES]
     db.clone.return_value.query_no_return_autocommit.side_effect = statements.append
 
-    def run_vacuums_only(info: str, methods: Sequence[tuple[str, Callable[..., None], list[Any]]]) -> None:
+    def run_vacuums_only(
+        info: str, methods: Sequence[tuple[str, Callable[..., None], list[Any]]], max_workers: int | None = None
+    ) -> None:
         for description, method, args in methods:
             if description.startswith('VACUUM '):
                 method(*args)

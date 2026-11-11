@@ -4,9 +4,10 @@
 
 import logging
 import time
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
+from typing import Any
 
 import psycopg2.extensions
 
@@ -72,6 +73,13 @@ class DbState:
         'hive_reblogs',
         'hive_mentions',
     ]
+
+    # Vacuums run at most this many at a time, each on a connection of its own; set
+    # from --vacuum-workers. Not Db.max_connections: the server's slots are shared
+    # with the other HAF apps.
+    vacuum_workers = 4
+    _VACUUM_CONNECT_ATTEMPTS = 5
+    _VACUUM_CONNECT_BACKOFF_SECONDS = 2.0
 
     # Max retries for DDL operations that can deadlock with other HAF apps
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
@@ -818,26 +826,35 @@ class DbState:
         return FOSM.stop(startTime)
 
     @classmethod
-    def process_tasks_in_threads(cls, info, methods):
+    def process_tasks_in_threads(
+        cls,
+        info: str,
+        methods: Sequence[tuple[str, Callable[..., Any], Sequence[Any]]],
+        max_workers: int | None = None,
+    ) -> None:
+        """Run each (description, method, args) task in a pool of `max_workers` threads (default Db.max_connections).
+
+        Returns once every task finished. When a task fails, the tasks not started yet are
+        cancelled and the running ones are waited for before the first failure is re-raised,
+        so no task (and no statement it issued) outlives the call.
+        """
         start_time = perf_counter()
-        futures = []
-        pool = ThreadPoolExecutor(max_workers=Db.max_connections)
-        futures = {
-            pool.submit(cls.time_collector, method, args): (description) for (description, method, args) in methods
-        }
-
         completedThreads = 0
-        for future in as_completed(futures):
-            description = futures[future]
-            completedThreads = completedThreads + 1
-            try:
-                elapsedTime = future.result()
-                FOSM.final_stat(description, elapsedTime)
-            except Exception as exc:
-                log.error(f'{description!r} generated an exception: {exc}')
-                raise exc
+        with ThreadPoolExecutor(max_workers=max_workers or Db.max_connections) as pool:
+            futures = {
+                pool.submit(cls.time_collector, method, args): (description) for (description, method, args) in methods
+            }
+            for future in as_completed(futures):
+                description = futures[future]
+                completedThreads = completedThreads + 1
+                try:
+                    elapsedTime = future.result()
+                    FOSM.final_stat(description, elapsedTime)
+                except Exception as exc:
+                    log.error(f'{description!r} generated an exception: {exc}')
+                    pool.shutdown(wait=True, cancel_futures=True)
+                    raise exc
 
-        pool.shutdown()
         log.info(f'{info} Real elapsed time: {perf_counter() - start_time:.3f}, completed threads: {completedThreads}')
 
     @classmethod
@@ -988,11 +1005,10 @@ class DbState:
             return []
 
         def vacuum_table(table, db) -> None:
-            with AutoDbDisposer(db, "boundary_vacuum") as db_mgr:
-                db_mgr.db.query_no_return_autocommit(f"VACUUM {SCHEMA_NAME}.{table}")
+            cls._run_vacuum(db, "boundary_vacuum", f"VACUUM {SCHEMA_NAME}.{table}")
 
         methods = [('VACUUM ' + table, vacuum_table, [table, cls.db()]) for table in due]
-        cls.process_tasks_in_threads("Boundary vacuum on hivemind tables", methods)
+        cls.process_tasks_in_threads("Boundary vacuum on hivemind tables", methods, max_workers=cls.vacuum_workers)
         return due
 
     @classmethod
@@ -1005,9 +1021,8 @@ class DbState:
         """
 
         def vacuum_table(table, options, db) -> None:
-            with AutoDbDisposer(db, "vacuum") as db_mgr:
-                log.info(f"Vacuuming table {table} ({options})")
-                db_mgr.db.query_no_return_autocommit(f"VACUUM ({options}) {table}")
+            log.info(f"Vacuuming table {table} ({options})")
+            cls._run_vacuum(db, "vacuum", f"VACUUM ({options}) {table}")
 
         methods = [('VACUUM ' + table, vacuum_table, [table, "VERBOSE, ANALYZE", cls.db()]) for table in plain]
         methods += [
@@ -1017,7 +1032,35 @@ class DbState:
             ('VACUUM ' + table, vacuum_table, [table, "FULL, VERBOSE, ANALYZE", cls.db()]) for table in compacted
         ]
 
-        cls.process_tasks_in_threads("Requesting vacuum on hivemind tables", methods)
+        cls.process_tasks_in_threads("Requesting vacuum on hivemind tables", methods, max_workers=cls.vacuum_workers)
+
+    @classmethod
+    def _run_vacuum(cls, db: Db, name: str, sql: str) -> None:
+        """Run a VACUUM statement on a connection of its own; skip it when no connection can be opened.
+
+        The database is shared with other HAF apps, so its connection slots may be
+        exhausted (too many clients, slots reserved for superusers). A vacuum only
+        speeds up what follows it, so after a few attempts it is skipped (autovacuum
+        covers the table later) rather than failing finalization.
+        """
+        for attempt in range(1, cls._VACUUM_CONNECT_ATTEMPTS + 1):
+            try:
+                disposer = AutoDbDisposer(db, name)
+                break
+            except psycopg2.OperationalError as exc:
+                if attempt == cls._VACUUM_CONNECT_ATTEMPTS:
+                    log.warning("Skipping %s: no connection after %d attempts: %s", sql, attempt, exc)
+                    return
+                log.warning(
+                    "Cannot connect for %s (attempt %d/%d): %s; retrying after backoff",
+                    sql,
+                    attempt,
+                    cls._VACUUM_CONNECT_ATTEMPTS,
+                    exc,
+                )
+                sleep(cls._VACUUM_CONNECT_BACKOFF_SECONDS * attempt)
+        with disposer as db_mgr:
+            db_mgr.db.query_no_return_autocommit(sql)
 
     @classmethod
     def vacuum_all_hivemind_tables_in_threads(cls) -> None:
