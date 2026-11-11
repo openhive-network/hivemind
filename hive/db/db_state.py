@@ -904,7 +904,7 @@ class DbState:
         #   every task <- completion marker
         # Part 0 is everything without a predecessor; its critical path is the
         # hive_posts thread.
-        methods = [
+        methods: list[tuple[str, Callable[..., Any], Sequence[Any]]] = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             (
                 'hive_posts',
