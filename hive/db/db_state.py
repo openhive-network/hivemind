@@ -56,6 +56,7 @@ class DbState:
         'hive_votes',
         'hive_subscriptions',
         'hive_communities',
+        'hive_moderation_log',
         'hive_notification_cache',
         'follows',
         'muted',

@@ -1,0 +1,86 @@
+[
+  {
+    "action": "mute_post",
+    "actor": "blocktrades",
+    "date": "2016-09-15T18:02:00",
+    "id": "102",
+    "new_value": "muted",
+    "notes": "I hate crocodiles 03",
+    "old_value": "unmuted",
+    "target_account": "blocktrades",
+    "target_post_author": "blocktrades",
+    "target_post_permlink": "crocodile03"
+  },
+  {
+    "action": "mute_post",
+    "actor": "blocktrades",
+    "date": "2016-09-15T18:02:00",
+    "id": "101",
+    "new_value": "muted",
+    "notes": "I hate crocodiles 02",
+    "old_value": "unmuted",
+    "target_account": "blocktrades",
+    "target_post_author": "blocktrades",
+    "target_post_permlink": "crocodile02"
+  },
+  {
+    "action": "mute_post",
+    "actor": "blocktrades",
+    "date": "2016-09-15T18:02:00",
+    "id": "100",
+    "new_value": "muted",
+    "notes": "I hate crocodiles 01",
+    "old_value": "unmuted",
+    "target_account": "blocktrades",
+    "target_post_author": "blocktrades",
+    "target_post_permlink": "crocodile01"
+  },
+  {
+    "action": "mute_post",
+    "actor": "test-safari",
+    "date": "2016-09-15T18:01:51",
+    "id": "61",
+    "new_value": "muted",
+    "notes": "nothing special",
+    "old_value": "unmuted",
+    "target_account": "test-creator",
+    "target_post_author": "test-creator",
+    "target_post_permlink": "muted-post"
+  },
+  {
+    "action": "mute_post",
+    "actor": "test-safari",
+    "date": "2016-09-15T18:01:39",
+    "id": "33",
+    "new_value": "muted",
+    "notes": "secrets2 are a spam",
+    "old_value": "unmuted",
+    "target_account": "test-safari",
+    "target_post_author": "test-safari",
+    "target_post_permlink": "secrets2"
+  },
+  {
+    "action": "mute_post",
+    "actor": "test-safari",
+    "date": "2016-09-15T18:01:39",
+    "id": "32",
+    "new_value": "muted",
+    "notes": "secrets1 are a spam",
+    "old_value": "unmuted",
+    "target_account": "test-safari",
+    "target_post_author": "test-safari",
+    "target_post_permlink": "secrets1"
+  },
+  {
+    "action": "mute_post",
+    "actor": "test-safari",
+    "date": "2016-09-15T18:01:33",
+    "id": "27",
+    "new_value": "muted",
+    "notes": "spamming",
+    "old_value": "unmuted",
+    "target_account": "test-safari",
+    "target_post_author": "test-safari",
+    "target_post_permlink": "secrets1"
+  }
+]

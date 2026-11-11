@@ -478,6 +478,7 @@ class SyncHiveDb:
         # dependent tables first, then referenced tables.
         data_tables = [
             'hive_notification_cache',
+            'hive_moderation_log',
             'hive_feed_cache',
             'hive_reblogs',
             'hive_mentions',
