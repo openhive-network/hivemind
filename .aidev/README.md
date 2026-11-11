@@ -339,7 +339,12 @@ them). It reads those lists from `hive/db/schema.py` and `postgrest/load_order.s
 script added there is applied too. The shape server has no network, so `hive build_schema`
 can't connect: each script goes to `$AIDEV_DB_SHAPE_PSQL`. Before the scripts, the copy gets
 back the source's owners, which a shape doesn't keep. Without them the scripts that
-`SET ROLE hivemind` can't replace hivemind's objects or read `reptracker_app`. Left out, and
+`SET ROLE hivemind` can't replace hivemind's objects or read `reptracker_app`. Then it gets
+the one row of HAF's data the scripts read: `hivemind_app`'s `hafd.contexts` row (the
+source's id, owner, base table and stages; its fork and event references left NULL, since
+those rows aren't on a shape). `upgrade_table_schema.sql` registers indexes with
+`hive.app_register_index_dependency('hivemind_app', …)`, which looks the context up by name
+and raises without it. The HAF functions run unchanged, as in production. Left out, and
 none of them changes a plan:
 
 - `scripts/setup_postgres.sh` and `install_app.sh`'s role grants: they're cluster-wide, and
@@ -351,6 +356,12 @@ none of them changes a plan:
   columns' extreme keys, so an insert there collides.
 
 `aidev db shape apply` runs the install on a throwaway copy, in about 16 s plus the copy.
+
+**When a compare can't install a tree** (`performance.shape.apply` fails for the base or the
+candidate), the change's database analysis records the failure, with the failing script and
+its error, and plans read-only against the shape instead (`aidev db shape plan`, `hypo`). Long
+`EXPLAIN ANALYZE` runs on the production HAF host are no substitute: that host is shared, and
+a heavy statement there competes with the HAF node and the applications it serves.
 `payout_stats_view`, which `payout_stats_view.sql` recreates, plans as empty on the copies.
 
 **The declared queries** come in two groups:

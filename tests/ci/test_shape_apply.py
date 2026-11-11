@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -96,22 +97,42 @@ def _sessions(log: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
 
 
-def test_each_script_runs_in_its_own_session_after_the_owners_are_restored(fake_psql: Path) -> None:
+def test_each_script_runs_in_its_own_session_after_the_owners_and_context_are_restored(fake_psql: Path) -> None:
     result = _apply()
 
     assert result.returncode == 0, result.stdout + result.stderr
     sessions = _sessions(fake_psql)
     steps = shape_apply.plan()
-    assert len(sessions) == len(steps) + 1
+    assert len(sessions) == len(steps) + 2
     assert all(session['argv'] == ['-X', '-d', 'shape copy'] for session in sessions)
     assert sessions[0]['sql'] == shape_apply.OWNERSHIP_SQL
-    for session, (role, path) in zip(sessions[1:], steps, strict=True):
+    assert sessions[1]['sql'] == shape_apply.CONTEXT_SQL
+    for session, (role, path) in zip(sessions[2:], steps, strict=True):
         assert session['sql'].endswith(path.read_text())
         assert '\\set REPTRACKER_SCHEMA reptracker_app' in session['sql']
         owner_preamble = (
             f"SET ROLE hivemind;\nSET search_path TO reptracker_app;\nSET custom.swagger_url = '{SWAGGER_URL}';"
         )
         assert (owner_preamble in session['sql']) == (role == shape_apply.OWNER)
+
+
+def test_every_context_the_scripts_register_indexes_for_is_seeded() -> None:
+    scripts = '\n'.join(path.read_text() for _role, path in shape_apply.plan())
+    registered = set(re.findall(r"hive\.app_register_index_dependency\(\s*'([^']+)'", scripts))
+    seeded = set(re.findall(r"^VALUES \(\d+, '([^']+)'", shape_apply.CONTEXT_SQL, re.MULTILINE))
+
+    assert seeded == {'hivemind_app'}
+    assert registered <= seeded
+
+
+def test_a_failing_context_seed_stops_before_any_script(fake_psql: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv('FAKE_PSQL_FAIL', 'INSERT INTO hafd.contexts')
+
+    result = _apply()
+
+    assert result.returncode == 1
+    assert 'shape apply: seeding the hivemind_app context failed (exit 3)' in result.stderr
+    assert len(_sessions(fake_psql)) == 2
 
 
 def test_a_failing_script_stops_the_install_naming_it(fake_psql: Path, monkeypatch: pytest.MonkeyPatch) -> None:
