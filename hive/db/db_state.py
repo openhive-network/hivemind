@@ -605,7 +605,9 @@ class DbState:
             # UPDATE: vote aggregates and `children`, in one pass.
             # Only the initial-massive full recompute runs here: it is idempotent,
             # so it is safe to repeat if finalization is interrupted before the
-            # completion marker commits. Catch-ups keep the vote aggregates up to
+            # completion marker commits, and it writes only the rows whose values
+            # change, so a repeat that finds hive_posts' indexes already restored
+            # does not rewrite them for every row. Catch-ups keep the vote aggregates up to
             # date per batch (update_posts_rshares), and their ranged children update
             # applies *deltas*, so it must commit exactly once — it runs inside the
             # completion-marker transaction instead (_finalize_completion_marker).

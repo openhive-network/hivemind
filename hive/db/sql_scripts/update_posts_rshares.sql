@@ -112,7 +112,10 @@ SET LOCAL work_mem='4GB';
   END LOOP;
 
   -- Vote aggregates go to posts with votes that are not deleted, `children` to
-  -- posts with a count that differs; each keeps its old value elsewhere.
+  -- posts with a count that differs; each keeps its old value elsewhere. A row
+  -- none of whose values change is not written: a finalization re-run after an
+  -- interruption finds hive_posts' indexes restored, and rewriting every row
+  -- would insert each new version into all of them.
   UPDATE hivemind_app.hive_posts hp
   SET
       abs_rshares = CASE WHEN s.voted AND hp.counter_deleted = 0 THEN s.abs_rshares ELSE hp.abs_rshares END
@@ -158,7 +161,22 @@ SET LOCAL work_mem='4GB';
       FULL JOIN hivemind_app.__post_children pc ON pc.id = votes_rshares.post_id
     ) as s
   WHERE hp.id = s.post_id
-  AND ((s.voted AND hp.counter_deleted = 0) OR s.child_count != hp.children);
+  AND (
+    s.child_count != hp.children
+    OR (
+      s.voted AND hp.counter_deleted = 0
+      AND (hp.abs_rshares, hp.vote_rshares, hp.total_votes, hp.net_votes, hp.sc_hot, hp.sc_trend)
+        IS DISTINCT FROM
+        (
+            s.abs_rshares
+          , s.rshares
+          , s.total_votes
+          , s.net_votes
+          , CASE WHEN hp.is_paidout OR hp.parent_id > 0 THEN 0 ELSE hivemind_app.calculate_hot( s.rshares, hp.created_at) END
+          , CASE WHEN hp.is_paidout OR hp.parent_id > 0 THEN 0 ELSE hivemind_app.calculate_trending( s.rshares, hp.created_at) END
+        )
+    )
+  );
 
   TRUNCATE TABLE hivemind_app.__post_children;
   DROP TABLE hivemind_app.__post_tree;

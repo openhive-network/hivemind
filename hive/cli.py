@@ -2,6 +2,8 @@
 
 """CLI service router"""
 
+import atexit
+import faulthandler
 import logging
 import os
 import time
@@ -9,6 +11,8 @@ import time
 from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
+
+log = logging.getLogger(__name__)
 
 
 def setup_logging(conf):
@@ -34,8 +38,55 @@ def setup_logging(conf):
         logging.basicConfig(format=fmt)
 
 
-def run():
-    """Run the service specified in the `--mode` argument."""
+def run() -> None:
+    """Run the service specified in the `--mode` argument, logging why and with which code the process ends.
+
+    Python waits for the non-daemon threads still running when the main thread
+    ends, so the process may end long after the reason is logged; the exit code
+    is logged again when it does. A fatal signal dumps every thread's stack
+    (faulthandler); SIGKILL leaves no trace.
+    """
+    faulthandler.enable()
+    try:
+        _run()
+    except SystemExit as exc:
+        _log_exit(_system_exit_code(exc), f'SystemExit({exc.code!r})')
+        raise
+    except KeyboardInterrupt:
+        _log_exit(_SIGINT_EXIT_CODE, 'KeyboardInterrupt')
+        raise
+    except BaseException as exc:
+        _log_exit(1, f'{type(exc).__name__}: {exc}')
+        raise
+    _log_exit(0, 'finished')
+
+
+# Python ends a process that a KeyboardInterrupt ended by re-raising SIGINT.
+_SIGINT_EXIT_CODE = 130
+
+
+def _system_exit_code(exc: SystemExit) -> int:
+    if exc.code is None:
+        return 0
+    return exc.code if isinstance(exc.code, int) else 1
+
+
+def _log_exit(code: int, reason: str) -> None:
+    level = logging.INFO if code == 0 else logging.ERROR
+    log.log(level, "Main thread ended (%s); exit code %d", reason, code)
+    main_ended = time.perf_counter()
+    atexit.register(
+        lambda: log.log(
+            level,
+            "Process exiting with code %d, %.1fs after the main thread ended (%s)",
+            code,
+            time.perf_counter() - main_ended,
+            reason,
+        )
+    )
+
+
+def _run() -> None:
     with Conf() as conf:
         conf.init_argparse()
         mode = conf.mode()
