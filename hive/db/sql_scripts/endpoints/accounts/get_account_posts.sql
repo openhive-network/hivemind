@@ -132,7 +132,7 @@ LANGUAGE 'plpgsql' STABLE
 AS
 $$
 BEGIN
-  RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_post_rows('get_account_posts',
+  RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_post_rows('bridge', 'get_account_posts',
     jsonb_build_object(
       'account', "account-name",
       'sort', "sort",

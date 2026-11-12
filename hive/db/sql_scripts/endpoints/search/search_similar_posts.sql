@@ -16,6 +16,7 @@
 
       REST call example
       * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10''`
+      * `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10&votes=none''`
     operationId: hivemind_endpoints.search_similar_posts
     parameters:
       - in: path
@@ -56,6 +57,26 @@
           Cut each post''s `body` to at most this many characters, as the `truncate_body` argument
           of the JSON-RPC method does, for clients that show post cards rather than whole posts.
           `0`, the default, returns the whole body.
+      - in: query
+        name: votes
+        required: false
+        schema:
+          type: string
+          enum: [full, summary, none]
+          default: full
+        description: |
+          Votes included in each post, with the same values as on `/posts`:
+
+          * `full`, the default: `active_votes`, as the JSON-RPC method returns it.
+          * `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest
+            absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,
+            leaving out voters the observer muted.
+          * `none`: no `active_votes` and no `top_votes`.
+
+          With `summary` and `none` each post also has `observer_vote`, the observer''s vote
+          (`rshares` and `percent`) or `null`, as in `search-api.find_similar_v2`. The vote count
+          (`stats.total_votes`) and `net_rshares` are in every form. The posts and their order
+          are the same with every `votes`.
     responses:
       '200':
         description: |
@@ -77,7 +98,8 @@ CREATE OR REPLACE FUNCTION hivemind_endpoints.search_similar_posts(
     "permlink" TEXT,
     "page-size" INT = NULL,
     "observer" TEXT = NULL,
-    "truncate-body" INT = NULL
+    "truncate-body" INT = NULL,
+    "votes" TEXT = 'full'
 )
 RETURNS SETOF JSONB 
 -- openapi-generated-code-end
@@ -85,12 +107,13 @@ LANGUAGE 'plpgsql' STABLE
 AS
 $$
 BEGIN
-  RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('search-api', 'find_similar',
+  RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_post_rows('search-api', 'find_similar',
     jsonb_build_object(
       'author', "author",
       'permlink', "permlink",
       'limit', "page-size",
       'observer', "observer",
-      'truncate_body', "truncate-body"));
+      'truncate_body', "truncate-body"),
+    "votes");
 END
 $$;

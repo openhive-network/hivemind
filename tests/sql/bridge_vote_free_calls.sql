@@ -28,6 +28,8 @@ SELECT :post_id, :post_id, 0,
   (SELECT id FROM hivemind_app.hive_category_data WHERE category = 'vt-cat'),
   '2016-06-01', 0, 1, 1, 1101;
 INSERT INTO hivemind_app.hive_post_data (id, title, body, json) VALUES (:post_id, 'votes', 'a post with 1101 votes', '{}');
+INSERT INTO hivemind_app.hive_tag_data (tag) VALUES ('vt-tag');
+INSERT INTO hivemind_app.hive_post_tags (post_id, tag_id) SELECT :post_id, id FROM hivemind_app.hive_tag_data WHERE tag = 'vt-tag';
 
 INSERT INTO hivemind_app.hive_votes (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, block_num)
 SELECT hp.id, ha.id, hp.author_id, hp.permlink_id, 1,
@@ -120,7 +122,8 @@ BEGIN
     SELECT * FROM (VALUES
       ('bridge.get_ranked_posts', '{"sort": "created", "limit": 1, "observer": "vt-late"}'::JSONB),
       ('bridge.get_account_posts', '{"sort": "posts", "account": "vt-author", "limit": 1, "observer": "vt-late"}'::JSONB),
-      ('bridge.get_discussion', '{"author": "vt-author", "permlink": "vt-post", "observer": "vt-late"}'::JSONB)
+      ('bridge.get_discussion', '{"author": "vt-author", "permlink": "vt-post", "observer": "vt-late"}'::JSONB),
+      ('bridge.get_account_posts_by_tag', '{"account": "vt-author", "tag": "vt-tag", "limit": 1, "observer": "vt-late"}'::JSONB)
     ) AS c(method, params)
   LOOP
     _old = hivemind_endpoints.home(json_build_object('jsonrpc', '2.0', 'id', 1, 'method', _call.method, 'params', _call.params))::JSONB;
@@ -144,6 +147,38 @@ BEGIN
     IF (_old - 'active_votes') <> (_new - 'observer_vote') THEN
       RAISE EXCEPTION '%_v2 differs from % outside votes: % vs %', _call.method, _call.method, _new - 'observer_vote', _old - 'active_votes';
     END IF;
+  END LOOP;
+END
+$$;
+
+-- top_votes on the by-tag and search *_v2 calls: validated as on the other *_v2 methods
+DO $$
+DECLARE
+  _call RECORD;
+  _bad JSONB;
+  _r JSONB;
+BEGIN
+  _r = hivemind_endpoints.home('{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts_by_tag_v2", "params": {"account": "vt-author", "tag": "vt-tag", "top_votes": 2}}')::JSONB;
+  IF _r->'result'->0->'top_votes' IS DISTINCT FROM
+     '[{"voter": "vt-0001", "rshares": -5000000, "percent": -10000}, {"voter": "vt-1100", "rshares": 1100000, "percent": 10000}]'::JSONB THEN
+    RAISE EXCEPTION 'get_account_posts_by_tag_v2 top_votes=2: got %', _r;
+  END IF;
+
+  FOR _call IN
+    SELECT * FROM (VALUES
+      ('bridge.get_account_posts_by_tag_v2', '{"account": "vt-author", "tag": "vt-tag"}'::JSONB),
+      ('search-api.find_text_v2', '{"pattern": "votes", "sort": "created"}'::JSONB),
+      ('search-api.find_similar_v2', '{"author": "vt-author", "permlink": "vt-post"}'::JSONB)
+    ) AS c(method, params)
+  LOOP
+    FOREACH _bad IN ARRAY ARRAY['{"top_votes": -1}', '{"top_votes": 11}', '{"extra_parameter": 1}']::JSONB[]
+    LOOP
+      _r = hivemind_endpoints.home(json_build_object('jsonrpc', '2.0', 'id', 1, 'method', _call.method, 'params', _call.params || _bad))::JSONB;
+      -- the error names the argument, so an unknown method does not pass for a refusal
+      IF NOT _r->'error'->>'message' LIKE '%' || (SELECT k FROM jsonb_object_keys(_bad) k) || '%' THEN
+        RAISE EXCEPTION '% must refuse %, got %', _call.method, _bad, _r;
+      END IF;
+    END LOOP;
   END LOOP;
 END
 $$;

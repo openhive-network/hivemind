@@ -54,6 +54,9 @@ _LISTINGS = {
     "rest get_post_replies": _rest_posts(
         "get_post_replies", {"author": _DISCUSSED_POST[0], "permlink": _DISCUSSED_POST[1]}
     ),
+    "rest get_post_replies votes=none": _rest_posts(
+        "get_post_replies", {"author": _DISCUSSED_POST[0], "permlink": _DISCUSSED_POST[1], "votes": "none"}
+    ),
     "rest get_votes": _rest_posts("get_votes", {"sort": "trending", "tag": "", "observer": "gtg"}),
     "rest get_reblogs": _rest_posts("get_reblogs", {"sort": "trending", "tag": "", "observer": "gtg"}),
     "rest get_post_votes": rest_listing(

@@ -1,6 +1,7 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.search_api_find_similar;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.search_api_find_similar(
-    _params jsonb)
+    _params jsonb,
+    _votes_mode SMALLINT DEFAULT 0)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
     COST 100
@@ -15,11 +16,13 @@ DECLARE
     _post_id INT;
     _observer_id INT;
     _truncate_body INT;
+    _top_votes INT;
     _result JSONB;
     _candidate_ids INT[];
     _candidate_scores REAL[];
 BEGIN
-    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"author": "string", "permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}', 2, '{"permlink": "permlink must be string"}');
+    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"author": "string", "permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}'
+                                                                   ELSE '{"author": "string", "permlink": "string", "limit": "number", "observer": "string", "top_votes": "number", "truncate_body": "number"}' END)::JSON, 2, '{"permlink": "permlink must be string"}');
 
     _post_id = hivemind_postgrest_utilities.find_comment_id(
             hivemind_postgrest_utilities.valid_account(
@@ -36,6 +39,11 @@ BEGIN
             hivemind_postgrest_utilities.valid_account(
                     hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False),
                 /* allow_empty */ True ), True);
+
+    _top_votes = (CASE
+        WHEN _votes_mode = 0 THEN 0
+        ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+    END);
 
     _truncate_body =
             hivemind_postgrest_utilities.valid_number(
@@ -89,7 +97,7 @@ BEGIN
 
     _result = (
         SELECT jsonb_agg (
-                       hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
+                       hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
                ) FROM (
                       WITH similar_posts AS (
                                SELECT c.id, c.score

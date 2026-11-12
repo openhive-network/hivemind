@@ -1,0 +1,129 @@
+[
+  {
+    "active_votes": [],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "yes, you can want to use [steemd.com/@youraccount](https://steemd.com) link to check witness details (at the time of generating block your miner become witness)",
+    "category": "mining",
+    "children": 2,
+    "created": "2016-08-27T15:38:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemd.com"
+      ],
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "timcliff",
+    "parent_permlink": "re-gtg-missing-rewards-while-mining-20160827t141319137z",
+    "payout": 0.0,
+    "payout_at": "2016-09-03T15:38:00",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z",
+    "reblogs": 0,
+    "replies": [
+      "timcliff/re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z"
+    ],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-27T15:38:00",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@gtg/re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z"
+  },
+  {
+    "active_votes": [],
+    "author": "timcliff",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.15,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I've been mining since last Friday and haven't found a block yet, so there are no witness details for my account yet. I wanted to check the \"total_missed\" count, since it sounds like this post could be describing my issue. After talking to peeps on Steemit chat, it sounds like I need to change the keys I'm using. I'm currently using my 'owner private' key for both.",
+    "category": "mining",
+    "children": 1,
+    "created": "2016-08-27T15:51:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 3,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "re-timcliff-re-gtg-missing-rewards-while-mining-20160827t153756820z",
+    "payout": 0.0,
+    "payout_at": "2016-09-03T15:51:15",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z",
+    "reblogs": 0,
+    "replies": [
+      "gtg/re-timcliff-re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t183943508z"
+    ],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-27T15:51:15",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@timcliff/re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z"
+  },
+  {
+    "active_votes": [],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Please use your **active private key** for a miner, instead your owner key.",
+    "category": "mining",
+    "children": 0,
+    "created": "2016-08-27T18:39:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "mining"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "timcliff",
+    "parent_permlink": "re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z",
+    "payout": 0.0,
+    "payout_at": "2016-09-03T18:39:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-timcliff-re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t183943508z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Missing rewards while mining - common mistake with keys",
+    "updated": "2016-08-27T18:39:45",
+    "url": "/mining/@gtg/missing-rewards-while-mining#@gtg/re-timcliff-re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t183943508z"
+  }
+]

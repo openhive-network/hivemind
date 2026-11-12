@@ -1,0 +1,107 @@
+[
+  {
+    "author": "beautiful.girls",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 8.89,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<p>\u00a0<img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png\" /></p>\n<h1>Piston.web - Standalone User Interface</h1>\n<p>Many may already know <code>piston</code> as a tool that simplifies interaction with Steem/Steemit. You can read, post, comment, edit, transfer funds and much more, if you are willing to use the command line.This changes <strong>now</strong>. With <code>piston.web</code>, the toolbox now comes with <strong>graphical user interface</strong>that you can access via your browser. It is <strong>fully independent of steemit.com</strong>, which means that you can do what you love doing on Steem, even if steemit.com goes down.</p>\n<h1>Available Features</h1>\n<ul>\n  <li>browsing steem posts</li>\n  <li>reading full posts and comments</li>\n  <li>reply to topics and comments</li>\n  <li>upvote/downvote</li>\n  <li>read account details\n    <ul>\n      <li>recommended posts</li>\n      <li>blog posts</li>\n      <li>funds</li>\n      <li>transaction history</li>\n    </ul>\n  </li>\n  <li>integrated wallet</li>\n  <li>full encrypted (AES + BIP32) for private keys</li>\n  <li>import keys from account name and password</li>\n</ul>\n<h1>Screenshots</h1>\n<h2>Browse:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c17ace1.png\" /></p>\n<h2>Account</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c1dbdc5.png\" /></p>\n<h2>Funds:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2ae8a0.png\" /></p>\n<h2>Post:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c26f1d0.png\" /></p>\n<h2>Wallet:</h2>\n<p><img src=\"https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2e7b58.png\" /></p>\n<h1>Installation</h1>\n<p>Until we leave pre-alpha, piston.web is on a different branch.</p>\n<pre><code>git clone https://github.com/xeroc/piston<br />\n<br />\ncd piston<br />\n<br />\ngit checkout feature/standalone-web<br />\n<br />\nmake install-user<br />\n<br />\n# install extra requirements for piston.web<br />\n<br />\npip install -r requirements-web.txt<br />\n<br />\n</code></pre>\n<h1>Usage</h1>\n<pre><code>piston web<br />\n<br />\n</code></pre>\n<p>On first run, you will be asked to provide a passphrase for your new wallet. Empty password are allowed but result in private keys being stored in plain text.After that, you will see</p>\n<pre><code>* Running on http://127.0.0.1:5054/ (Press CTRL+C to quit)<br />\n<br />\n * Restarting with stat<br />\n<br />\n * Debugger is active!<br />\n<br />\n * Debugger pin code: 227-869-909<br />\n<br />\n</code></pre>\n<p>Ignore the debugging output and start using piston.web in your browser<br />\nby accessing</p>\n<pre><code>http://127.0.0.1:5054/<br />\n<br />\n</code></pre>\n<p>NOTE: piston.web will only be reachable from the same machine (localhost).</p>\n<h1>Technologies</h1>\n<h2>Backend</h2>\n<p>The backend is written in python using</p>\n<ul>\n  <li>Flask (with Jinja2)</li>\n  <li>python-steem.</li>\n</ul>\n<p>It offers the HTML files and a Socket-IO for real-time communications.</p>\n<h2>Frontend</h2>\n<p>These technologies have been used so far in piston.web:</p>\n<ul>\n  <li>Bootstrap</li>\n  <li>Markdown</li>\n  <li>Font-Awesome</li>\n  <li>Plain Javascript</li>\n</ul>\n<h2>Wallet</h2>\n<p>The wallet is only accessible from the backend. All keys are encrypted with a random master password that is stored in an SQLite3 database in its AES encrypted form. Each private key is encrypted with the master password using BIP32 and stored in a SQLite3 database. The wallet will make backups of the SQLite3 database every week and keep several weeks of backup.</p>\n<h1>Todos</h1>\n<ul>\n  <li>Transfer of funds</li>\n  <li>PowerUp, PowerDown</li>\n  <li>Trading</li>\n  <li>Account Administration (changing keys etc)</li>\n  <li>Allow to attach JSON object to posts</li>\n  <li>Secure socket.io with a password</li>\n  <li>layout and style improvements</li>\n</ul>\n<h1>Contributions</h1>\n<p>Currently, we are looking for the bravest of the bravest to help us test what is already there and give</p>\n<ul>\n  <li>bug reports</li>\n  <li>improvement proposals</li>\n  <li>feature request</li>\n</ul>\n<p>Please use the <a href=\"https://github.com/xeroc/piston/issues\" rel=\"noopener\">github issue tracker</a> to make it easier for us to remember all the feedback.</p>\n<h1>Important Note</h1>\n<p>piston.web is alpha software. For that reason, you need to expect it to break at any time. Use at your own risk.</p>\n<h1>Update 1</h1>\n<p>I'd like to clarify that this GUI is <strong>not</strong> meant to replace steemit.com or be used as a hosted, public site. It rather offers a <em>personal</em>, <em>localhost-only</em> page that you can use to access your wallet. Exposing the piston.web to a publicly accessible port is <strong>not</strong> recommended!</p>\n<h1>Update 2</h1>\n<p>I fixed the <code>sqlite3.OperationalError: unable to open database file</code> error earlier today so that people can actually take a look.</p>\n<h1>Update 3</h1>\n<p>More short-term fixes for the weekend-testers:</p>\n<pre><code>* [2016-07-23][bf3dae5] | [setup] make sure the user uses python3<br />\n<br />\n* [2016-07-23][c31eec7] | [web] highlight own posts<br />\n<br />\n* [2016-07-23][03e0d2f] | [web] fix reply identifier not in the form</code></pre>",
+    "category": "piston",
+    "children": 7,
+    "created": "2016-08-01T19:13:33",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {
+      "image": [
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/2411b61f27.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c17ace1.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c1dbdc5.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2ae8a0.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c26f1d0.png",
+        "https://img1.steemit.com/0x0/https://i.imgsafe.org/219c2e7b58.png"
+      ],
+      "links": [
+        "https://github.com/xeroc/piston/issues"
+      ],
+      "tags": [
+        "piston",
+        "opensource",
+        "steemit",
+        "tester",
+        ""
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": -3240304908748,
+    "observer_vote": null,
+    "payout": 0.0,
+    "payout_at": "2016-09-01T07:33:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "piston-web-first-open-source-steem-gui-searching-for-alpha-testers",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 3.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 15
+    },
+    "title": "[piston.web] First Open Source Steem GUI - Searching for alpha testers",
+    "top_votes": [
+      {
+        "percent": -10000,
+        "rshares": -1911946532824,
+        "voter": "xeroc"
+      },
+      {
+        "percent": -10000,
+        "rshares": -864498292406,
+        "voter": "liondani"
+      },
+      {
+        "percent": -10000,
+        "rshares": -457602975116,
+        "voter": "cryptogee"
+      },
+      {
+        "percent": -10000,
+        "rshares": -151304222639,
+        "voter": "repholder"
+      },
+      {
+        "percent": 10000,
+        "rshares": 90692976938,
+        "voter": "jl777"
+      },
+      {
+        "percent": 10000,
+        "rshares": 22645392645,
+        "voter": "yefet"
+      },
+      {
+        "percent": 10000,
+        "rshares": 18828721486,
+        "voter": "proto"
+      },
+      {
+        "percent": 10000,
+        "rshares": 5885675419,
+        "voter": "taker"
+      },
+      {
+        "percent": 10000,
+        "rshares": 3461074214,
+        "voter": "karen13"
+      },
+      {
+        "percent": 10000,
+        "rshares": 2012690785,
+        "voter": "jayjustmay"
+      }
+    ],
+    "updated": "2016-08-01T19:13:33",
+    "url": "/piston/@beautiful.girls/piston-web-first-open-source-steem-gui-searching-for-alpha-testers"
+  }
+]

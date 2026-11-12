@@ -125,6 +125,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_account_posts(__params, /* _votes_mode */ 1::SMALLINT);
     WHEN __method_type = 'get_account_posts_by_tag' THEN
       result := hivemind_endpoints.bridge_api_get_account_posts_by_tag(__params);
+    WHEN __method_type = 'get_account_posts_by_tag_v2' THEN
+      result := hivemind_endpoints.bridge_api_get_account_posts_by_tag(__params, /* _votes_mode */ 1::SMALLINT);
     WHEN __method_type = 'get_relationship_between_accounts' THEN
       result := hivemind_endpoints.bridge_api_get_relationship_between_accounts(__params);
     WHEN __method_type = 'unread_notifications' THEN
@@ -288,8 +290,12 @@ BEGIN
     CASE
         WHEN __method_type = 'find_text' THEN
             result := hivemind_endpoints.search_api_find_text(__params);
+        WHEN __method_type = 'find_text_v2' THEN
+            result := hivemind_endpoints.search_api_find_text(__params, /* _votes_mode */ 1::SMALLINT);
         WHEN __method_type = 'find_similar' THEN
             result := hivemind_endpoints.search_api_find_similar(__params);
+        WHEN __method_type = 'find_similar_v2' THEN
+            result := hivemind_endpoints.search_api_find_similar(__params, /* _votes_mode */ 1::SMALLINT);
         ELSE
             RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search-api' || __method_type);
         END CASE;
