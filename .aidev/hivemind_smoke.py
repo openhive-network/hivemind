@@ -249,7 +249,7 @@ SQL_TESTS = [
     "tests/sql/bridge_get_discussion_cap.sql",
     "tests/sql/bridge_get_posts.sql",
     "tests/sql/bridge_truncate_body.sql",
-    "tests/sql/condenser_get_followers_walk.sql",
+    "tests/sql/condenser_get_followers.sql",
     "tests/sql/dispatch_lite_intercept.sql",
     "tests/sql/votes_partitioned_upsert.sql",
     "tests/sql/post_batches_staged_join.sql",

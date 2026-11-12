@@ -308,8 +308,8 @@ BEGIN
     -- Track which ones are genuinely new (for counter updates)
     CREATE TEMP TABLE _new_follows AS
     WITH ins AS (
-        INSERT INTO hivemind_app.follows (follower, following, block_num)
-        SELECT follower_id, following_id, block_num
+        INSERT INTO hivemind_app.follows (follower, following, block_num, follower_name)
+        SELECT follower_id, following_id, block_num, follower_name
         FROM _final_actions WHERE action IN ('blog', 'follow')
         ON CONFLICT (follower, following) DO UPDATE SET block_num = EXCLUDED.block_num
         RETURNING follower, following,

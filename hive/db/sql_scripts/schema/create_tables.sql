@@ -280,9 +280,10 @@ CREATE TABLE IF NOT EXISTS hivemind_app.follows (
     follower INTEGER NOT NULL,
     following INTEGER NOT NULL,
     block_num INTEGER NOT NULL,
+    follower_name VARCHAR(16) COLLATE "C" NOT NULL, -- the follower's hive_accounts.name, which never changes
     PRIMARY KEY (follower, following)
 );
-CREATE INDEX IF NOT EXISTS follows_following_idx ON hivemind_app.follows (following);
+CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
 CREATE INDEX IF NOT EXISTS follows_block_num_idx ON hivemind_app.follows (block_num);
 
 -- muted

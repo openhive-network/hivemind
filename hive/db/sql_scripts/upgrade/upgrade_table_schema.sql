@@ -77,6 +77,23 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num)');
 
+-- condenser_api.get_followers pages on (following, follower_name). Account names never change, so the copy
+-- filled once here never goes stale. follows_following_idx, which the new index replaces, is dropped before the
+-- backfill so the UPDATE does not maintain it; the new index is built after it.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT NULL FROM information_schema.columns WHERE table_schema = 'hivemind_app' AND table_name = 'follows' AND column_name = 'follower_name') THEN
+    RAISE NOTICE 'Filling hivemind_app.follows.follower_name';
+    DROP INDEX IF EXISTS hivemind_app.follows_following_idx;
+    ALTER TABLE hivemind_app.follows ADD COLUMN follower_name VARCHAR(16) COLLATE "C";
+    UPDATE hivemind_app.follows f SET follower_name = ha.name FROM hivemind_app.hive_accounts ha WHERE ha.id = f.follower;
+    ALTER TABLE hivemind_app.follows ALTER COLUMN follower_name SET NOT NULL;
+  END IF;
+END
+$$;
+CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
+
 RESET ROLE;
 
 -- HAF has no per-index deregistration and applications cannot write hafd.indexes_constraints, so this runs as
@@ -86,3 +103,10 @@ SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name =
 WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_voter_id_post_id_idx';
 DELETE FROM hafd.indexes_constraints
 WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_voter_id_post_id_idx' AND cardinality(contexts) = 0;
+
+-- Superseded by follows_following_follower_name_idx, which has the same leading column.
+UPDATE hafd.indexes_constraints
+SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name = 'hivemind_app'))
+WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx';
+DELETE FROM hafd.indexes_constraints
+WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx' AND cardinality(contexts) = 0;
