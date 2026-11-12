@@ -1,7 +1,8 @@
 # Votes in bridge post calls
 
 Every post object returned by `bridge.get_ranked_posts`, `bridge.get_account_posts`,
-`bridge.get_post` and `bridge.get_discussion` embeds `active_votes`: up to 1000 votes,
+`bridge.get_account_posts_by_tag`, `bridge.get_post`, `bridge.get_discussion`,
+`search-api.find_text` and `search-api.find_similar` embeds `active_votes`: up to 1000 votes,
 ordered by voter account id. On popular posts that list is most of the response, and
 on posts with more than 1000 votes it drops the newest accounts' votes, so a client
 can't use it to tell whether the logged-in user voted.
@@ -16,8 +17,14 @@ Those calls are unchanged. The calls below are added next to them.
 | `bridge.get_account_posts_v2` | `bridge.get_account_posts` |
 | `bridge.get_post_v2` | `bridge.get_post` |
 | `bridge.get_discussion_v2` | `bridge.get_discussion` |
+| `bridge.get_account_posts_by_tag_v2` | `bridge.get_account_posts_by_tag` |
+| `search-api.find_text_v2` | `search-api.find_text` |
+| `search-api.find_similar_v2` | `search-api.find_similar` |
 
 Each accepts its counterpart's parameters plus `top_votes` (integer 0–10, default 0).
+The search methods return the same posts in the same order as their counterparts. They
+follow the bridge `_v2` convention rather than adding a parameter to `find_text` and
+`find_similar`, so those two accept the same parameters and answer the same as before.
 Each post object (every entry of a list or discussion) differs from the counterpart's
 in exactly these ways:
 
@@ -37,8 +44,17 @@ in exactly these ways:
 
 ## REST: `votes`
 
-The REST post lists `/posts` (`bridge.get_ranked_posts`) and
-`/accounts/{account-name}/posts` (`bridge.get_account_posts`) take `votes`:
+Every REST path returning bridge posts takes `votes`:
+
+| Path | `full` calls | `summary` and `none` call |
+|---|---|---|
+| `/posts` | `bridge.get_ranked_posts` | `bridge.get_ranked_posts_v2` |
+| `/accounts/{account-name}/posts` | `bridge.get_account_posts` | `bridge.get_account_posts_v2` |
+| `/posts/{author}/{permlink}` | `bridge.get_post` | `bridge.get_post_v2` |
+| `/posts/{author}/{permlink}/discussion` | `bridge.get_discussion` | `bridge.get_discussion_v2` |
+| `/posts/{author}/{permlink}/replies` | `bridge.get_discussion` | `bridge.get_discussion_v2` |
+| `/search/posts` | `search-api.find_text` | `search-api.find_text_v2` |
+| `/posts/{author}/{permlink}/similar` | `search-api.find_similar` | `search-api.find_similar_v2` |
 
 | `votes` | Each post |
 |---|---|
@@ -47,11 +63,18 @@ The REST post lists `/posts` (`bridge.get_ranked_posts`) and
 | `none` | the vote-free shape without `top_votes` |
 
 `summary` and `none` call the `*_v2` method, so `observer_vote` is present and, with
-`none`, the posts' votes are not read at all. Together with `truncate-body` this gives a
-page sized for a post list:
+`none`, the posts' votes are not read at all. The posts, their order and the paging are the
+same with every `votes`; any other value is refused with a 400. Together with
+`truncate-body` this gives a page sized for a post list:
 
 ```
 GET /hivemind-api/posts?sort=trending&page-size=20&truncate-body=200&votes=none
+```
+
+and a thread a client can render without every reply's voter list:
+
+```
+GET /hivemind-api/posts/alice/my-awesome-post/discussion?votes=none
 ```
 
 ## `bridge.get_posts`

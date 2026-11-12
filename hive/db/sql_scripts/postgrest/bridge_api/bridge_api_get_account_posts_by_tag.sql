@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_account_posts_by_tag;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts_by_tag(IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_account_posts_by_tag(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -10,6 +10,7 @@ _account_id INT;
 _observer_id INT;
 _post_id INT;
 _limit INT;
+_top_votes INT;
 _tag TEXT;
 _truncate_body INT;
 
@@ -18,7 +19,8 @@ _permlink TEXT;
 
 BEGIN
   _params = hivemind_postgrest_utilities.validate_json_arguments(_params,
-                                                                 '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "truncate_body": "number"}',
+                                                                 (CASE WHEN _votes_mode = 0 THEN '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "truncate_body": "number"}'
+                                                                  ELSE '{"account": "string", "tag": "string", "start_author": "string", "start_permlink": "string","limit": "number", "observer": "string", "top_votes": "number", "truncate_body": "number"}' END)::JSON,
                                                                  2,
                                                                  '{"start_permlink": "permlink must be string"}');
 
@@ -50,11 +52,16 @@ BEGIN
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'observer', False), True),
     True);
 
+  _top_votes = (CASE
+    WHEN _votes_mode = 0 THEN 0
+    ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+  END);
+
   _truncate_body = hivemind_postgrest_utilities.valid_number(
     hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'truncate_body', False),
     0, 0, NULL, 'truncate_body');
 
-  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit, _truncate_body);
+  RETURN hivemind_postgrest_utilities.get_account_posts_by_tag(_account_id, _tag, _post_id, _observer_id, _limit, _truncate_body, _votes_mode, _top_votes);
 END
 $$
 ;

@@ -2174,7 +2174,7 @@ declare
           "blog_api"
         ],
         "summary": "Get a post",
-        "description": "Returns one post or comment, the same object as `bridge.get_post`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post''`\n",
+        "description": "Returns one post or comment, the same object as `bridge.get_post`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post''`\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post?votes=summary''`\n",
         "operationId": "hivemind_endpoints.get_post",
         "parameters": [
           {
@@ -2204,6 +2204,21 @@ declare
               "default": null
             },
             "description": "Account whose mutes and blacklists are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in the post, with the same values as on `/posts`:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` the post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `bridge.get_post_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. `bridge.list_votes` pages\nthrough all of the post''s votes.\n"
           }
         ],
         "responses": {
@@ -2230,7 +2245,7 @@ declare
           "blog_api"
         ],
         "summary": "Get the replies to a post",
-        "description": "Returns the posts of `bridge.get_discussion` for the post other than the post itself, as a list\nordered by creation time (ties broken by `author/permlink`), so new replies are added at the end.\nEach reply is the same object as in `bridge.get_discussion`; its `replies` field names its own\ndirect replies. Like `bridge.get_discussion`, only the first 4000 posts of a thread are included.\n\nTo fetch the next page pass the `author` and `permlink` of the last reply of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?page-size=20''`\n",
+        "description": "Returns the posts of `bridge.get_discussion` for the post other than the post itself, as a list\nordered by creation time (ties broken by `author/permlink`), so new replies are added at the end.\nEach reply is the same object as in `bridge.get_discussion`; its `replies` field names its own\ndirect replies. Like `bridge.get_discussion`, only the first 4000 posts of a thread are included.\n\nTo fetch the next page pass the `author` and `permlink` of the last reply of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_replies(''alice'', ''my-awesome-post'', 20);`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?page-size=20''`\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/replies?page-size=20&votes=none''`\n",
         "operationId": "hivemind_endpoints.get_post_replies",
         "parameters": [
           {
@@ -2290,6 +2305,21 @@ declare
               "default": null
             },
             "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each reply, with the same values as on `/posts`:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each reply also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `bridge.get_discussion_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. The replies and their\norder, and so the paging, are the same with every `votes`.\n"
           }
         ],
         "responses": {
@@ -2395,7 +2425,7 @@ declare
           "blog_api"
         ],
         "summary": "Get a post''s whole discussion",
-        "description": "Returns the whole thread of the post in one response, the same object as `bridge.get_discussion`:\nevery post of the thread, the post itself included, keyed by `author/permlink`. Each post is the\nsame object as in `bridge.get_discussion`; its `replies` field names its direct replies, in the\norder they were made, so the tree is rebuilt from the post''s own entry down.\n\nThe response is not paged by the posts-per-call limit. Like `bridge.get_discussion`, it holds\nat most the first 4000 posts of a thread, in the order they were made; the `replies` of a cut\nthread name only the posts the response holds.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_discussion(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/discussion''`\n",
+        "description": "Returns the whole thread of the post in one response, the same object as `bridge.get_discussion`:\nevery post of the thread, the post itself included, keyed by `author/permlink`. Each post is the\nsame object as in `bridge.get_discussion`; its `replies` field names its direct replies, in the\norder they were made, so the tree is rebuilt from the post''s own entry down.\n\nThe response is not paged by the posts-per-call limit. Like `bridge.get_discussion`, it holds\nat most the first 4000 posts of a thread, in the order they were made; the `replies` of a cut\nthread name only the posts the response holds.\n\nSQL example\n* `SELECT hivemind_endpoints.get_post_discussion(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/discussion''`\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/discussion?votes=none''`\n",
         "operationId": "hivemind_endpoints.get_post_discussion",
         "parameters": [
           {
@@ -2425,6 +2455,21 @@ declare
               "default": null
             },
             "description": "Account whose mutes are applied. The response without an observer\nis the one meant for caching.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each post of the discussion, with the same values as on `/posts`:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `bridge.get_discussion_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. With `none` the posts''\nvotes are not read at all, so a large thread is both much smaller and faster to build.\n"
           }
         ],
         "responses": {
@@ -2782,7 +2827,7 @@ declare
           "blog_api"
         ],
         "summary": "Search posts",
-        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`\n",
+        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20&truncate-body=200&votes=none''`\n",
         "operationId": "hivemind_endpoints.search_posts",
         "parameters": [
           {
@@ -2864,6 +2909,21 @@ declare
               "default": null
             },
             "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each post, with the same values as on `/posts`:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `search-api.find_text_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. The posts and their order\nare the same with every `votes`.\n"
           }
         ],
         "responses": {
@@ -2890,7 +2950,7 @@ declare
           "blog_api"
         ],
         "summary": "Get posts similar to a post",
-        "description": "Returns the top-level posts most similar in wording to the given post, the same list as\n`search-api.find_similar`, most similar first and without the post itself. Similarity is\nthe BM25 score of a more-like-this query built from the post''s title and body, so it needs\nthe `pg_search` extension. A comment, or a post too short to have distinctive terms,\nhas no similar posts.\n\nSQL example\n* `SELECT hivemind_endpoints.search_similar_posts(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10''`\n",
+        "description": "Returns the top-level posts most similar in wording to the given post, the same list as\n`search-api.find_similar`, most similar first and without the post itself. Similarity is\nthe BM25 score of a more-like-this query built from the post''s title and body, so it needs\nthe `pg_search` extension. A comment, or a post too short to have distinctive terms,\nhas no similar posts.\n\nSQL example\n* `SELECT hivemind_endpoints.search_similar_posts(''alice'', ''my-awesome-post'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10''`\n* `GET ''https://%1$s/hivemind-api/posts/alice/my-awesome-post/similar?page-size=10&votes=none''`\n",
         "operationId": "hivemind_endpoints.search_similar_posts",
         "parameters": [
           {
@@ -2940,6 +3000,21 @@ declare
               "default": null
             },
             "description": "Cut each post''s `body` to at most this many characters, as the `truncate_body` argument\nof the JSON-RPC method does, for clients that show post cards rather than whole posts.\n`0`, the default, returns the whole body.\n"
+          },
+          {
+            "in": "query",
+            "name": "votes",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "summary",
+                "none"
+              ],
+              "default": "full"
+            },
+            "description": "Votes included in each post, with the same values as on `/posts`:\n\n* `full`, the default: `active_votes`, as the JSON-RPC method returns it.\n* `summary`: no `active_votes`; `top_votes` lists the 10 votes with the largest\n  absolute `rshares` (ties by voter account id) as `voter`, `rshares` and `percent`,\n  leaving out voters the observer muted.\n* `none`: no `active_votes` and no `top_votes`.\n\nWith `summary` and `none` each post also has `observer_vote`, the observer''s vote\n(`rshares` and `percent`) or `null`, as in `search-api.find_similar_v2`. The vote count\n(`stats.total_votes`) and `net_rshares` are in every form. The posts and their order\nare the same with every `votes`.\n"
           }
         ],
         "responses": {

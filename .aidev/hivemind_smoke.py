@@ -41,6 +41,7 @@ import time
 import traceback
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from typing import Any
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +57,7 @@ CGROUP_MEMORY_EVENTS = "/sys/fs/cgroup/memory.events"
 CGROUP_MEMORY_MAX = "/sys/fs/cgroup/memory.max"
 
 
-def rpc(method, params):
+def rpc(method: str, params: Any) -> tuple[str, str, dict[str, Any]]:
     return ("POST", "/rpc/home", {"jsonrpc": "2.0", "method": method, "params": params, "id": 1})
 
 
@@ -70,16 +71,16 @@ def result_has(*keys):
     return check
 
 
-def result_is(expected):
-    def check(status, body) -> None:
+def result_is(expected: Any) -> Callable[[int, Any], None]:
+    def check(status: int, body: Any) -> None:
         assert status == 200, f"HTTP {status}"
         assert body.get("result") == expected, f"result {body.get('result')!r}, expected {expected!r}"
 
     return check
 
 
-def rpc_error(code):
-    def check(status, body) -> None:
+def rpc_error(code: int) -> Callable[[int, Any], None]:
+    def check(status: int, body: Any) -> None:
         assert status == 200, f"HTTP {status}"
         assert body.get("error", {}).get("code") == code, f"expected error {code}, got {body}"
 
@@ -203,6 +204,26 @@ CHECKS = [
     (
         "jsonrpc/bridge.get_discussion_v2.unknown",
         rpc("bridge.get_discussion_v2", {"author": "initminer", "permlink": "nope"}),
+        rpc_error(-32602),
+    ),
+    (
+        "jsonrpc/bridge.get_account_posts_by_tag_v2",
+        rpc("bridge.get_account_posts_by_tag_v2", {"account": "initminer", "tag": "nope", "top_votes": 3}),
+        result_is([]),
+    ),
+    (
+        "jsonrpc/bridge.get_account_posts_by_tag_v2.top_votes_11",
+        rpc("bridge.get_account_posts_by_tag_v2", {"account": "initminer", "tag": "nope", "top_votes": 11}),
+        rpc_error(-32602),
+    ),
+    (
+        "jsonrpc/search-api.find_text_v2.top_votes_negative",
+        rpc("search-api.find_text_v2", {"pattern": "hive", "sort": "created", "top_votes": -1}),
+        rpc_error(-32602),
+    ),
+    (
+        "jsonrpc/search-api.find_similar_v2.unknown",
+        rpc("search-api.find_similar_v2", {"author": "initminer", "permlink": "nope"}),
         rpc_error(-32602),
     ),
     (

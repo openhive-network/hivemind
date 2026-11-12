@@ -1,6 +1,7 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.search_api_find_text;
 CREATE OR REPLACE FUNCTION hivemind_endpoints.search_api_find_text(
-    _params jsonb)
+    _params jsonb,
+    _votes_mode SMALLINT DEFAULT 0)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
     COST 100
@@ -13,6 +14,7 @@ DECLARE
     _pattern TEXT;
     _sort_type TEXT;
     _truncate_body INT;
+    _top_votes INT;
     _result JSONB;
     _author_id INT;
     _search_query TEXT;
@@ -24,7 +26,8 @@ DECLARE
     _tie_ids INT[];
     _tie_scores REAL[];
 BEGIN
-    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, '{"pattern": "string", "sort": "string", "author": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}', 1, '{"start_permlink": "permlink must be string"}');
+    _params = hivemind_postgrest_utilities.validate_json_arguments(_params, (CASE WHEN _votes_mode = 0 THEN '{"pattern": "string", "sort": "string", "author": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "truncate_body": "number"}'
+                                                                   ELSE '{"pattern": "string", "sort": "string", "author": "string", "start_author": "string", "start_permlink": "string", "limit": "number", "observer": "string", "top_votes": "number", "truncate_body": "number"}' END)::JSON, 1, '{"start_permlink": "permlink must be string"}');
 
     _limit = hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'limit', False),
                                                        least(20, hivemind_postgrest_utilities.get_max_posts_per_call_limit()),
@@ -48,6 +51,11 @@ BEGIN
             hivemind_postgrest_utilities.valid_account(
                     hivemind_postgrest_utilities.parse_argument_from_json(_params, 'author', False),
                 /* allow_empty */ True ), True);
+
+    _top_votes = (CASE
+        WHEN _votes_mode = 0 THEN 0
+        ELSE hivemind_postgrest_utilities.valid_number(hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, 'top_votes', False), 0, 0, 10, 'top_votes')
+    END);
 
     _truncate_body =
             hivemind_postgrest_utilities.valid_number(
@@ -246,7 +254,7 @@ BEGIN
 
     _result = (
         SELECT jsonb_agg (
-                       hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True)
+                       hivemind_postgrest_utilities.create_bridge_post_object(_observer_id, row, _truncate_body, NULL, row.is_pinned, True, NULL, _votes_mode, _top_votes)
                ) FROM (
                       WITH -- _candidate_scores stays NULL for the created sort; unnest pads it with NULLs
                            bm25_posts AS (

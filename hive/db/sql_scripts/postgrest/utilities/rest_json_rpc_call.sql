@@ -60,13 +60,13 @@ $$
 $$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.rest_post_rows;
--- rest_json_rpc_rows() for a bridge method listing posts, with the votes of each post chosen by
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.rest_post_call;
+-- rest_json_rpc_call() for a method returning bridge posts, with the votes of each post chosen by
 -- the endpoint's `votes`: `full` calls `_method_type` itself, whose posts embed `active_votes`;
 -- `summary` and `none` call its vote-free `_v2` form (docs/bridge-votes.md), which never reads
 -- the post's vote list, with the 10 largest votes as `top_votes` or none.
-CREATE FUNCTION hivemind_postgrest_utilities.rest_post_rows(_method_type TEXT, _params JSONB, _votes TEXT)
-RETURNS SETOF JSONB
+CREATE FUNCTION hivemind_postgrest_utilities.rest_post_call(_api_type TEXT, _method_type TEXT, _params JSONB, _votes TEXT)
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS
@@ -74,15 +74,29 @@ $$
 BEGIN
   CASE _votes
     WHEN 'full' THEN
-      RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', _method_type, _params);
+      RETURN hivemind_postgrest_utilities.rest_json_rpc_call(_api_type, _method_type, _params);
     WHEN 'summary' THEN
-      RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', _method_type || '_v2', _params || jsonb_build_object('top_votes', 10));
+      RETURN hivemind_postgrest_utilities.rest_json_rpc_call(_api_type, _method_type || '_v2', _params || jsonb_build_object('top_votes', 10));
     WHEN 'none' THEN
-      RETURN QUERY SELECT * FROM hivemind_postgrest_utilities.rest_json_rpc_rows('bridge', _method_type || '_v2', _params);
+      RETURN hivemind_postgrest_utilities.rest_json_rpc_call(_api_type, _method_type || '_v2', _params);
     ELSE
       RAISE EXCEPTION 'votes must be full, summary or none, got ''%''', _votes;
   END CASE;
 END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.rest_post_rows;
+-- rest_post_call() for a method listing posts: one row per post, in list order, as rest_json_rpc_rows() gives them.
+CREATE FUNCTION hivemind_postgrest_utilities.rest_post_rows(_api_type TEXT, _method_type TEXT, _params JSONB, _votes TEXT)
+RETURNS SETOF JSONB
+LANGUAGE 'sql'
+STABLE
+AS
+$$
+  SELECT element.value
+  FROM jsonb_array_elements(hivemind_postgrest_utilities.rest_post_call(_api_type, _method_type, _params, _votes)) WITH ORDINALITY AS element(value, ord)
+  ORDER BY element.ord
 $$
 ;
 
