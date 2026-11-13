@@ -14,7 +14,7 @@ import psycopg2
 
 from hive.conf import APP_NAME, SCHEMA_NAME, Conf
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
+from hive.db.db_state import DbState, TableSchemaBehindError
 from hive.indexer.accounts import Accounts
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
@@ -84,12 +84,15 @@ class SyncHiveDb:
             # If a block-processor is holding the shared lock the function
             # NOTICEs the holder and returns false; skip rather than racing.
             if not self._db.query_one(f"SELECT hive.try_acquire_app_install_lock('{APP_NAME}')"):
-                log.info("Skipping hivemind schema install (see NOTICE above).")
-                sys.exit(0)
+                self._skip_locked_out_install()
 
         Community.start_block = self._conf.get("community_start_block")
         DbState.vacuum_workers = self._conf.get("vacuum_workers")
-        DbState.initialize(self._enter_sync, self._upgrade_schema)
+        try:
+            DbState.initialize(self._enter_sync, self._upgrade_schema)
+        except TableSchemaBehindError as exc:
+            log.error("Refusing to sync: %s", exc)
+            sys.exit(1)
 
         Blocks.setup(conf=self._conf)
 
@@ -126,6 +129,26 @@ class SyncHiveDb:
 
         if self._databases:
             self._databases.close()
+
+    @staticmethod
+    def _skip_locked_out_install() -> None:
+        """Exit an install the lock holders keep out: 0 when it had nothing to do, 1 when they block pending work.
+
+        A compose `service_completed_successfully` dependency must not take a
+        skipped install for a done one.
+        """
+        holders = DbState.install_lock_holders(APP_NAME)
+        pending = DbState.pending_install_work()
+        if pending:
+            log.error(
+                "Cannot install hivemind: its lock is held by %s, and the install has pending work: %s. "
+                "Stop those processes and rerun the install.",
+                holders,
+                '; '.join(pending),
+            )
+            sys.exit(1)
+        log.info("Skipping hivemind schema install: its lock is held by %s and the database is up to date.", holders)
+        sys.exit(0)
 
     def build_database_schema(self) -> None:
         # whole code building it is already placed inside __enter__ handler, here was added only explicit messaging

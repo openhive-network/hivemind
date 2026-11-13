@@ -1,12 +1,17 @@
 """Db schema definitions and setup routines."""
 
+import hashlib
 import logging
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from hive.conf import SCHEMA_NAME, SCHEMA_OWNER_NAME
 from hive.indexer.hive_db.haf_functions import prepare_app_context
 from hive.version import GIT_DATE, GIT_REVISION, VERSION
+
+if TYPE_CHECKING:
+    from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
@@ -188,6 +193,8 @@ def setup(db, admin_db) -> None:
 
     _setup_admin_runtime_code(admin_db)
 
+    record_table_schema(db)
+
 
 def _setup_admin_runtime_code(admin_db) -> None:
     """(Re)create the plpython3u runtime functions, which need admin privileges."""
@@ -315,10 +322,41 @@ def perform_db_upgrade(db, admin_db) -> None:
     )
 
     if needs_vacuum:
-        log.info("Attempting to run VACUUM FULL on upgraded database")
+        log.warning("A migration requested VACUUM FULL: running VACUUM FULL VERBOSE ANALYZE on the whole database")
         admin_db.query_no_return("VACUUM FULL VERBOSE ANALYZE;")
     else:
         log.info("Skipping VACUUM FULL on upgraded database (no vacuum request)")
+
+    record_table_schema(db)
+
+
+# The scripts perform_db_upgrade runs that bring an installed database's tables and data to this code's.
+_TABLE_UPGRADE_SCRIPTS = ("upgrade/upgrade_table_schema.sql", "upgrade/upgrade_runtime_migration.sql")
+
+
+def table_schema_digest() -> str:
+    """The digest of this code's table upgrade scripts, which a database records once its tables match them."""
+    digest = hashlib.sha256()
+    for script in _TABLE_UPGRADE_SCRIPTS:
+        digest.update((Path(__file__).parent / 'sql_scripts' / script).read_bytes())
+    return digest.hexdigest()
+
+
+def recorded_table_schema(db: Db) -> str | None:
+    """The table schema digest the database records, None when it records none (installed before the record)."""
+    if not db.query_one(f"SELECT to_regclass('{SCHEMA_NAME}.hive_table_schema') IS NOT NULL"):
+        return None
+    recorded = db.query_one(f"SELECT upgrade_digest FROM {SCHEMA_NAME}.hive_table_schema")
+    return None if recorded is None else str(recorded)
+
+
+def record_table_schema(db: Db) -> None:
+    """Record that the database's tables are at this code's table schema."""
+    db.query_no_return(f"CREATE TABLE IF NOT EXISTS {SCHEMA_NAME}.hive_table_schema (upgrade_digest TEXT NOT NULL)")
+    db.query_no_return(
+        f"DELETE FROM {SCHEMA_NAME}.hive_table_schema; "
+        f"INSERT INTO {SCHEMA_NAME}.hive_table_schema (upgrade_digest) VALUES ('{table_schema_digest()}')"
+    )
 
 
 def reset_autovac(db) -> None:

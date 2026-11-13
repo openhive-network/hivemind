@@ -26,6 +26,7 @@ def _db_state(initial_sync: bool) -> Iterator[list[str]]:
     statements: list[str] = []
     db = MagicMock()
     db.query_all.return_value = []
+    db.query_col.return_value = []
     db.clone.return_value = db
     db.query_no_return.side_effect = statements.append
 
