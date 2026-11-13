@@ -108,9 +108,10 @@ BEGIN
     RETURNING 1
   ),
   inserted_follows AS (
-    INSERT INTO hivemind_app.follows (follower, following, block_num)
-    SELECT v.follower_id, v.following_id, v.block_num
+    INSERT INTO hivemind_app.follows (follower, following, block_num, follower_name)
+    SELECT v.follower_id, v.following_id, v.block_num, ha.name
     FROM UNNEST(_changes) AS v(follower_id, following_id, block_num)
+    JOIN hivemind_app.hive_accounts AS ha ON ha.id = v.follower_id
     ORDER BY v.block_num
     ON CONFLICT (follower, following) DO NOTHING
     RETURNING follower, following

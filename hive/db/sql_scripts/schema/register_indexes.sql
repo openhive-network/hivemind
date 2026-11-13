@@ -51,7 +51,7 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_score_idx ON hivemind_app.hive_notification_cache (dst, score) WHERE dst IS NOT NULL');
 
 -- follows/muted/blacklisted indexes
-SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_idx ON hivemind_app.follows (following)');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS muted_following_idx ON hivemind_app.muted (following)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS blacklisted_following_idx ON hivemind_app.blacklisted (following)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follow_muted_following_idx ON hivemind_app.follow_muted (following)');
