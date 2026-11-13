@@ -22,7 +22,10 @@
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
 #                registered in HAF's application registry as 'hivemind', refuses a row of its
 #                context under the old name 'hivemind_app' and keeps a paused registration
-#                over a re-install: .aidev/app_registry_check.sql
+#                over a re-install: .aidev/app_registry_check.sql; and, on the schema before
+#                follows.follower_name, that sync refuses to start, an install locked out by a
+#                lock holder fails naming it, and build_schema applies the table upgrade:
+#                check_table_schema_upgrade
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -231,6 +234,7 @@ install_hivemind() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/endpoint_volatility_check.sql || return 1
     check_control_table_privileges || return 1
     check_app_registry || return 1
+    check_table_schema_upgrade || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
@@ -298,6 +302,81 @@ check_app_registry() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_unregister('hivemind_app')" || return 1
     build_schema || return 1
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_registry_check.sql
+}
+
+hold_hivemind_lock() {  # hold hivemind's HAF application lock shared, as a dependent app's block processing does
+    PGAPPNAME=lock_holder_check psql "$ADMIN_URL" -X -Atc \
+        "select pg_advisory_lock_shared(hashtext('hive_fork_manager_app_lock'), hashtext('hivemind')); select pg_sleep(600)" \
+        > /dev/null 2>&1 &
+    lock_holder=$!
+    local i
+    for i in $(seq 30); do
+        [ "$(psql "$ADMIN_URL" -Atc "select count(*) from pg_locks l join pg_stat_activity a on a.pid = l.pid
+            where a.application_name = 'lock_holder_check' and l.locktype = 'advisory' and l.granted")" = 1 ] && return 0
+        sleep 1
+    done
+    echo "the lock holder did not get hivemind's lock"; release_hivemind_lock; return 1
+}
+
+release_hivemind_lock() {
+    kill "$lock_holder" 2>/dev/null; wait "$lock_holder" 2>/dev/null
+    psql "$ADMIN_URL" -Atc "select pg_terminate_backend(pid) from pg_stat_activity where application_name = 'lock_holder_check'" > /dev/null
+}
+
+expect_fail() {  # LABEL PATTERN... -- COMMAND...: COMMAND exits non-zero and its output holds every PATTERN
+    local label="$1" log; shift
+    local patterns=()
+    while [ "$1" != -- ]; do patterns+=("$1"); shift; done; shift
+    log="$(mktemp)"
+    if timeout 300 "$@" > "$log" 2>&1; then cat "$log"; echo "$label: exited 0"; return 1; fi
+    local p
+    for p in "${patterns[@]}"; do
+        grep -qF -- "$p" "$log" || { cat "$log"; echo "$label: its output does not name '$p'"; return 1; }
+    done
+    echo "$label: exited non-zero naming ${patterns[*]}"
+    LAST_LOG="$log"
+}
+
+# A database behind the code's table schema (the one before follows.follower_name, recording an older table
+# upgrade): sync refuses it before dropping anything, an install the HAF lock keeps out fails naming the holder,
+# build_schema applies the upgrade, and then a locked-out install has nothing to do and exits 0.
+check_table_schema_upgrade() {
+    local digest
+    digest="$(PYTHONPATH="$root" python3 -c 'from hive.db.schema import table_schema_digest; print(table_schema_digest())')" || return 1
+    [ "$(psql "$ADMIN_URL" -Atc "select upgrade_digest from hivemind_app.hive_table_schema")" = "$digest" ] \
+        || { echo "the install did not record table schema $digest"; return 1; }
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "alter table hivemind_app.follows drop column follower_name;
+        update hivemind_app.hive_table_schema set upgrade_digest = 'behind'" || return 1
+
+    expect_fail "sync on a behind table schema" "Refusing to sync" "upgrade_schema" -- \
+        env PYTHONPATH="$root" python3 -m hive.cli sync --database-url="$HIVEMIND_TEST_USER_URL" || return 1
+    ! grep -q "Dropping foreign keys\|Dropping all registered indexes" "$LAST_LOG" \
+        || { cat "$LAST_LOG"; echo "sync dropped foreign keys or indexes before refusing"; return 1; }
+
+    hold_hivemind_lock || return 1
+    local mode rc=0
+    for mode in build_schema upgrade_schema; do
+        expect_fail "locked-out $mode with a pending upgrade" "lock_holder_check" "table schema is behind" -- \
+            env PYTHONPATH="$root" python3 -m hive.cli "$mode" --database-url="$ADMIN_URL" || rc=1
+    done
+    release_hivemind_lock
+    [ "$rc" -eq 0 ] || return 1
+
+    build_schema || { echo "build_schema on a behind table schema failed"; return 1; }
+    [ "$(psql "$ADMIN_URL" -Atc "select count(*) from information_schema.columns
+        where table_schema = 'hivemind_app' and table_name = 'follows' and column_name = 'follower_name'")" = 1 ] \
+        || { echo "build_schema did not apply the table upgrade (no follows.follower_name)"; return 1; }
+    [ "$(psql "$ADMIN_URL" -Atc "select upgrade_digest from hivemind_app.hive_table_schema")" = "$digest" ] \
+        || { echo "build_schema did not record table schema $digest"; return 1; }
+    echo "build_schema applied the pending table upgrade and recorded it"
+
+    hold_hivemind_lock || return 1
+    for mode in build_schema upgrade_schema; do
+        PYTHONPATH="$root" python3 -m hive.cli "$mode" --database-url="$ADMIN_URL" \
+            || { echo "locked-out $mode with nothing pending exited non-zero"; rc=1; }
+    done
+    release_hivemind_lock
+    [ "$rc" -eq 0 ] && echo "locked-out build_schema and upgrade_schema with nothing pending exited 0"
 }
 
 install() {

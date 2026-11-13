@@ -299,7 +299,7 @@ class Db:
         rows = self._query(sql, **kwargs)
         return rows[0] if rows else None
 
-    def query_col(self, sql, **kwargs):
+    def query_col(self, sql: str, **kwargs: Any) -> list[Any]:
         """Perform a `SELECT n*1`"""
         rows = self._query(sql, **kwargs)
         return [r[0] for r in rows]

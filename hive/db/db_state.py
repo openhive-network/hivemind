@@ -21,14 +21,32 @@ from hive.conf import (
     SWAGGER_URL,
 )
 from hive.db.adapter import Db
-from hive.db.schema import SEED_LAST_COMPLETED_BLOCK, perform_db_upgrade, setup, setup_runtime_code, teardown
+from hive.db.schema import (
+    SEED_LAST_COMPLETED_BLOCK,
+    perform_db_upgrade,
+    recorded_table_schema,
+    setup,
+    setup_runtime_code,
+    table_schema_digest,
+    teardown,
+)
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
 from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import FinalOperationStatusManager as FOSM
+from hive.version import GIT_REVISION
 
 log = logging.getLogger(__name__)
+
+_RUN_UPGRADE = (
+    "run `hive upgrade_schema` (the docker image's `setup --upgrade-schema`), or `hive build_schema` (`setup`), "
+    "which applies a pending table upgrade, before starting sync"
+)
+
+
+class TableSchemaBehindError(Exception):
+    """The database's tables are not at the schema this code reads and writes."""
 
 
 class DbState:
@@ -165,16 +183,23 @@ class DbState:
 
         log.info("Welcome to hive!")
 
+        schema_loaded = cls._is_schema_loaded()
+        table_schema_current = schema_loaded and cls._is_table_schema_current()
+        if enter_massive and schema_loaded and not table_schema_current:
+            raise TableSchemaBehindError(f"{cls._table_schema_behind_reason()}; {_RUN_UPGRADE}")
+
         db_setup_owner = cls.db().impersonated_clone('setup_owner', SCHEMA_OWNER_NAME)
 
         # create db schema if needed
-        if not cls._is_schema_loaded():
+        if not schema_loaded:
             log.info("Create db schema...")
             db_setup_admin = cls.db().clone('setup_admin')
 
             setup(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
-        elif schema_upgrade is True:
+        elif schema_upgrade is True or not table_schema_current:
+            if not schema_upgrade:
+                log.warning("%s; applying the table upgrade", cls._table_schema_behind_reason())
             log.info("Attempting to perform db schema upgrade...")
             db_setup_admin = cls.db().clone('setup_admin')
             perform_db_upgrade(admin_db=db_setup_admin, db=db_setup_owner)
@@ -193,6 +218,56 @@ class DbState:
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()
+
+    @classmethod
+    def _is_table_schema_current(cls) -> bool:
+        return recorded_table_schema(cls.db()) == table_schema_digest()
+
+    @classmethod
+    def _table_schema_behind_reason(cls) -> str:
+        recorded = recorded_table_schema(cls.db())
+        return (
+            f"hivemind's table schema is behind this code: the database records table upgrade "
+            f"{recorded[:12] if recorded else 'none'}, this code's is {table_schema_digest()[:12]}"
+        )
+
+    @classmethod
+    def pending_install_work(cls) -> list[str]:
+        """What an install (build_schema / upgrade_schema) would change in the database; empty when nothing."""
+        if not cls._is_schema_loaded():
+            return ["the hivemind schema is not installed"]
+        pending = []
+        if not cls._is_table_schema_current():
+            pending.append(cls._table_schema_behind_reason())
+        runtime_revision = cls.db().query_one(f"SELECT hivemind_git_rev FROM {SCHEMA_NAME}.hive_state")
+        if runtime_revision != GIT_REVISION:
+            pending.append(f"the runtime code is of revision {runtime_revision}, this code is {GIT_REVISION}")
+        return pending
+
+    @classmethod
+    def install_lock_holders(cls, app_name: str) -> str:
+        """The sessions holding `app_name`'s HAF application or installer lock, as HAF's lock NOTICEs name them."""
+        holders = cls.db().query_one(
+            "SELECT string_agg(format('%%s (pid=%%s)', a.application_name, a.pid), ', ' ORDER BY a.pid) "
+            "FROM pg_locks l JOIN pg_stat_activity a ON a.pid = l.pid "
+            "WHERE l.locktype = 'advisory' AND l.granted AND l.pid <> pg_backend_pid() "
+            "AND l.objid = hashtext(:app_name) "
+            "AND l.classid IN (hashtext('hive_fork_manager_app_lock'), hashtext('hive_fork_manager_app_installer_lock'))",
+            app_name=app_name,
+        )
+        return holders or '(unknown: released since)'
+
+    @classmethod
+    def _ensure_tables_exist(cls, tables: Sequence[str]) -> None:
+        """Raise TableSchemaBehindError naming those of `tables` that are not in the database."""
+        missing = cls.db().query_col(
+            "SELECT t FROM unnest(CAST(:tables AS TEXT[])) t WHERE to_regclass(:schema || '.' || t) IS NULL",
+            tables=list(tables),
+            schema=SCHEMA_NAME,
+        )
+        if missing:
+            names = ', '.join(f'{SCHEMA_NAME}.{t}' for t in missing)
+            raise TableSchemaBehindError(f"hivemind's table schema is behind this code: no {names}; {_RUN_UPGRADE}")
 
     @classmethod
     def teardown(cls) -> None:
@@ -357,6 +432,7 @@ class DbState:
         Excludes hive_post_data — the BM25 index is deferred to the fills phase
         where it runs in parallel with other finalization work.
         """
+        cls._ensure_tables_exist(cls._TABLES_WITH_REGISTERED_INDEXES)
         start_time = FOSM.start()
 
         methods = []
@@ -532,6 +608,8 @@ class DbState:
     def ensure_fk_are_disabled(cls) -> None:
         if cls._fk_were_disabled:
             return
+
+        cls._ensure_tables_exist(cls._TABLES_WITH_FKS + cls._TABLES_WITH_REGISTERED_INDEXES)
 
         log.info("Dropping foreign keys")
         time_start = perf_counter()
@@ -1169,7 +1247,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
         }
 
     @classmethod
-    def _is_schema_loaded(cls):
+    def _is_schema_loaded(cls) -> bool:
         """Check if the schema has been loaded into db yet."""
         return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
 

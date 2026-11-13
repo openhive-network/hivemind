@@ -330,6 +330,19 @@ include setting the database URL, defining the block after which synchronization
    docker run --rm --network=haf --name=hivemind registry.gitlab.syncad.com/hive/hivemind/instance:newverison  --upgrade-schema --database-url=postgresql://hivemind@haf/haf_block_log
    ```
 
+   The database records which table upgrade it has (a digest of `upgrade/upgrade_table_schema.sql` and
+   `upgrade/upgrade_runtime_migration.sql`, in `hivemind_app.hive_table_schema`). A plain `setup` (`build_schema`) on
+   an existing database whose record differs from the image's applies the table upgrade too, as `--upgrade-schema`
+   does; it runs `VACUUM FULL` only when a migration asks for it, and logs a warning first. `sync` refuses to start on
+   a database whose tables are behind its code, before it drops any foreign key or index, and exits non-zero naming
+   `upgrade_schema`. A database installed before this record existed has none, so its first `setup` of a newer image
+   runs the (idempotent) table upgrade.
+
+   The install takes hivemind's HAF lock exclusively. When other processes hold it (hivemind's own block processing,
+   or an application that depends on hivemind, such as haf_fyp or hivesense) the install is skipped: it exits 0 if the
+   database was already up to date, and non-zero, naming the holders and what is pending, if it was not. Stop those
+   processes and rerun it.
+
    The community moderation log (`bridge.get_community_moderation_log`, `bridge.get_account_moderation_stats`,
    `bridge.get_moderator_activity`) is filled only while blocks are synced. Upgrading creates the log empty, so an
    upgraded node reports only moderation actions from blocks processed after the upgrade. To get the full history,
