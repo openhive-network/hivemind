@@ -359,6 +359,10 @@ def record_table_schema(db: Db) -> None:
     )
 
 
+_AUTOVAC_INSERT_TABLES = ('hive_votes', 'hive_post_data', 'hive_permlink_data', 'hive_post_tags', 'hive_feed_cache')
+_AUTOVAC_INSERT_THRESHOLD = 100000
+
+
 def reset_autovac(db) -> None:
     """Initializes/resets per-table autovacuum/autoanalyze params.
 
@@ -379,6 +383,16 @@ ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
                                   autovacuum_analyze_threshold = {n_analyze});
 """
         db.query(sql)
+
+    # Append-mostly tables. With the default insert scale factor (0.2 of a table of
+    # ~1 B rows) autovacuum would not return to them for months, leaving the pages
+    # written since unmarked in the visibility map, so index-only scans read the heap.
+    # Keep the list in step with upgrade/upgrade_table_schema.sql.
+    for table in _AUTOVAC_INSERT_TABLES:
+        db.query(
+            f"ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_insert_scale_factor = 0, "
+            f"autovacuum_vacuum_insert_threshold = {_AUTOVAC_INSERT_THRESHOLD})"
+        )
 
 
 def set_fillfactor(db) -> None:

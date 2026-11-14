@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Sequence
 from time import perf_counter as perf
 from typing import Any
 
@@ -258,11 +259,11 @@ class Db:
             log.warning("[SQL-ERR] %s in autocommit query %s", e.__class__.__name__, sql)
             raise e
 
-    def query_all(self, sql, **kwargs):
+    def query_all(self, sql: str, **kwargs: Any) -> list[Row]:
         """Perform a `SELECT n*m`"""
         return self._query(sql, **kwargs)
 
-    def query_all_raw(self, sql, params=None):
+    def query_all_raw(self, sql: str, params: Sequence[Any] | None = None) -> list[Row]:
         """Execute raw SQL with psycopg2 %s-style parameter binding.
 
         Use for queries with string-interpolated content that may contain

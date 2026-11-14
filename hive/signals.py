@@ -72,5 +72,5 @@ def clear_exception_thrown():
     EXCEPTION_THROWN.decrement()
 
 
-def can_continue_thread():
-    return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0
+def can_continue_thread() -> bool:
+    return bool(EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0)

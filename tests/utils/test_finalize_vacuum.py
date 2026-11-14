@@ -26,7 +26,9 @@ def _initial_finalization_vacuums() -> list[tuple[str, str]]:
     """Run the initial-sync path of ensure_finalize_massive_sync and return its VACUUM statements in order."""
     statements: list[str] = []
     db = MagicMock()
-    db.query_all.return_value = [MagicMock(_mapping={'table_name': t}) for t in TABLES]
+    db.query_all.side_effect = lambda sql: (
+        [MagicMock(_mapping={'table_name': t}) for t in TABLES] if 'information_schema.tables' in sql else []
+    )
     db.clone.return_value.query_no_return_autocommit.side_effect = statements.append
 
     def run_vacuums_only(

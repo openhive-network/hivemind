@@ -21,6 +21,7 @@ _DBSTATE_LIVE_ENTRY = (
     'close_admin_db',
     'ensure_finalize_massive_sync',
     'ensure_fk_are_enabled',
+    'start_visibility_watch',
 )
 
 
@@ -78,4 +79,5 @@ def test_live_stage_finalizes_once_haf_is_ready() -> None:
     dbstate['ensure_finalize_massive_sync'].assert_called_once_with(4999990, 4999000)
     dbstate['set_massive_sync'].assert_called_once_with(False)
     dbstate['ensure_fk_are_enabled'].assert_called_once_with()
+    dbstate['start_visibility_watch'].assert_called_once_with()
     assert 'SELECT hive.is_instance_ready()' in statements

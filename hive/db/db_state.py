@@ -30,6 +30,7 @@ from hive.db.schema import (
     table_schema_digest,
     teardown,
 )
+from hive.db.visibility import VisibilityWatch, log_coverage
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import get_memory_amount
@@ -67,6 +68,7 @@ class DbState:
     _wal_safety_disable_attempted = False  # Track if we already tried to disable WAL safety
     _initial_sync: bool | None = None  # Cached: True until the first finalization commits last_completed_block
     _deferred_index_tables: list[str] = []  # Tables whose registered indexes wait for finalization's recompute
+    _visibility_watch: VisibilityWatch | None = None
 
     # Tables that have registered indexes (via register_indexes.sql)
     _TABLES_WITH_REGISTERED_INDEXES = [
@@ -100,6 +102,7 @@ class DbState:
     vacuum_workers = 4
     _VACUUM_CONNECT_ATTEMPTS = 5
     _VACUUM_CONNECT_BACKOFF_SECONDS = 2.0
+    _VISIBILITY_VACUUM_NAME = "visibility_vacuum"
 
     # Max retries for DDL operations that can deadlock with other HAF apps
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
@@ -1170,6 +1173,42 @@ class DbState:
             db_mgr.db.query_no_return_autocommit(sql)
 
     @classmethod
+    def start_visibility_watch(cls) -> None:
+        """Start, once per process, the background VisibilityWatch that vacuums the large tables until all-visible."""
+        if cls._visibility_watch is not None:
+            return
+        cls._visibility_watch = VisibilityWatch(cls.db(), cls._vacuum_for_visibility)
+        cls._visibility_watch.start()
+
+    @classmethod
+    def stop_visibility_watch(cls, timeout: float = 30.0) -> None:
+        """Stop the visibility watch, cancelling its running vacuums, and wait up to `timeout` seconds for it."""
+        watch = cls._visibility_watch
+        if watch is None or not watch.is_alive():
+            return
+        watch.stop()
+        try:
+            cls.db().query_no_return(
+                "SELECT pg_cancel_backend(pid) FROM pg_stat_activity "
+                f"WHERE application_name = 'hivemind_{cls._VISIBILITY_VACUUM_NAME}' AND usename = current_user"
+            )
+        except psycopg2.Error as exc:
+            # Its vacuums then end with their connections, at the latest when the
+            # next start terminates the leftover hivemind_* connections.
+            log.warning("Cannot cancel the visibility vacuums: %s", exc)
+        watch.join(timeout)
+        if watch.is_alive():
+            log.warning("The visibility watch did not stop within %.0fs", timeout)
+
+    @classmethod
+    def _vacuum_for_visibility(cls, tables: Sequence[str]) -> None:
+        def vacuum_table(table: str, db: Db) -> None:
+            cls._run_vacuum(db, cls._VISIBILITY_VACUUM_NAME, f"VACUUM {table}")
+
+        methods = [('VACUUM ' + table, vacuum_table, [table, cls.db()]) for table in tables]
+        cls.process_tasks_in_threads("Visibility vacuum on hivemind tables", methods, max_workers=cls.vacuum_workers)
+
+    @classmethod
     def vacuum_all_hivemind_tables_in_threads(cls) -> None:
         """Vacuum every hivemind table once before finalization.
 
@@ -1230,6 +1269,7 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
                 )
                 cls.vacuum_tables_in_threads(frozen=[hive_posts])
 
+            log_coverage(cls.db(), "[MASSIVE] After finalization")
             log.info("[MASSIVE] Massive sync complete!")
             return True
         cls._restore_deferred_indexes()
