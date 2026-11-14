@@ -94,6 +94,14 @@ $$;
 CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
 
+-- Autovacuum the append-mostly tables every 100,000 inserts, keeping their visibility maps current for index-only
+-- scans. Same list as hive/db/schema.py's reset_autovac, which sets them on a fresh install.
+ALTER TABLE hivemind_app.hive_votes SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+ALTER TABLE hivemind_app.hive_post_data SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+ALTER TABLE hivemind_app.hive_permlink_data SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+ALTER TABLE hivemind_app.hive_post_tags SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+ALTER TABLE hivemind_app.hive_feed_cache SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+
 RESET ROLE;
 
 -- HAF has no per-index deregistration and applications cannot write hafd.indexes_constraints, so this runs as

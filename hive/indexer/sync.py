@@ -111,6 +111,8 @@ class SyncHiveDb:
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
 
+            DbState.stop_visibility_watch()
+
             try:
                 PayoutStats.generate(self._db, separate_transaction=True)
             except Exception:
@@ -322,6 +324,7 @@ class SyncHiveDb:
                         self.print_summary()
 
                     DbState.ensure_fk_are_enabled()
+                    DbState.start_visibility_watch()
                     self._live_prepared = True
                     continue
 
