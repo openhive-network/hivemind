@@ -589,7 +589,10 @@ class DbState:
             # synchronous_commit off; two A/B pairs, one run concurrently): the
             # batches took 2,059s vs 2,114s, the votes phase 14% and the flush
             # 7.5% longer when LOGGED, the other phases within +-4%, while the
-            # conversion back costs 5.5s (#415).
+            # conversion back costs 5.5s (#415). At mainnet scale it no longer pays
+            # for itself: LOGGED adds ~765s to a full sync while SET LOGGED costs
+            # 1,034s plus the vacuum it forces (#460,
+            # docs/measurements/unlogged-massive-sync).
 
             # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
             # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
