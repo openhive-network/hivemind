@@ -68,7 +68,7 @@ def _db_state(initial_sync: bool) -> Iterator[list[str]]:
             _finish_reputation_notification_scores=staticmethod(lambda *a: None),
             _finalize_completion_marker=staticmethod(lambda *a: statements.append(_MARKER)),
         ),
-        patch('hive.db.schema.set_logged_table_attribute', lambda *a: None),
+        patch('hive.db.schema.ensure_tables_logged', lambda *a: None),
         patch('hive.signals.can_continue_thread', lambda: True),
     ):
         yield statements

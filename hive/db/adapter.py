@@ -205,7 +205,7 @@ class Db:
         role_url = psycopg2.extensions.make_dsn(self._url, user=role)
         return Db(role_url, name, self.__autoexplain is not None)
 
-    def close(self):
+    def close(self) -> None:
         """Close connection."""
         try:
             if self._conn is not None and not self._conn.closed:

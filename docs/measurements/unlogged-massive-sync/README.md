@@ -210,6 +210,22 @@ there restores LOGGED and indexes before exit to protect UNLOGGED tables, so rev
 `hive/conf.py`, the comment in `db_state.py`, and `CLAUDE.md`'s description of massive sync. Then compare the
 next steem-20 rebuild's `[PHASE-SUMMARY]` per range with the table above.
 
+## Outcome
+
+#461 implemented the recommendation: massive sync no longer converts the 8 tables in either direction.
+`ensure_indexes_are_disabled` keeps its BM25 drop, which is still wanted without the conversion: the BM25
+index is not HAF-registered, so without it every massive insert into `hive_post_data` would maintain it and
+finalization's `CREATE INDEX IF NOT EXISTS` would not build it once over the finished table. Measured on steem-4
+(2026-11-14, `paradedb/paradedb:0.25.3-pg17`, `wal_level=minimal`, `fsync=off`, `full_page_writes=off`,
+`synchronous_commit=off`; `psql -U postgres -v rows=1000000 < bm25_gen.sql` in a container `pg461`, then `bm25_run.sh noindex|bm25` twice each): inserting 1 M synthetic
+posts (8-word titles, 150-word bodies, 1.1 GB) in 20 batches into a LOGGED table with only its primary key took
+10.37 s and 10.15 s; with the BM25 index (hivemind's definition, partial on every 5th id) maintained, 21.51 s and
+21.34 s. Building the index afterwards took 2.60 s and 1.64 s. Maintaining it during the batches would double
+their `hive_post_data` insert time for an index finalization builds in a fraction of that.
+`ensure_indexes_are_enabled` runs `SET LOGGED` only on the tables `pg_class.relpersistence` reports as `'u'`
+(a database left mid-sync by an older hivemind), and `_check_unlogged_data_consistency` runs only while some
+of them are.
+
 ## Reproducing
 
 `schema.sql`, `run.sh` and `run2.sh` are in this directory. Start PostgreSQL 18 with the settings above in a

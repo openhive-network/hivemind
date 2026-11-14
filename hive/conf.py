@@ -24,8 +24,8 @@ ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 # Distance behind head at which sync enters MASSIVE_WITHOUT_INDEXES (drop
 # indexes for the catch-up; also gates the full-recompute finalization path).
 # Empirical basis (hbt5, 2026-08, measurements in hivemind#339): the machinery's
-# fixed overhead is ~12,100s (index rebuild 3,692s; UNLOGGED round-trip 6,566s
-# and BM25 rebuild ~1,860s, both since gated to initial sync only), while the
+# fixed overhead was ~12,100s (index rebuild 3,692s; UNLOGGED round-trip 6,566s,
+# since removed, and BM25 rebuild ~1,860s, since gated to initial sync only), while the
 # per-block saving is ~4.5ms (sustained 137 bps with indexes vs ~355 bps
 # without), putting break-even at ~2.3-2.7M blocks (~3 months behind). Real
 # whole-stack outages are bound by hived's p2p delivery (~47 bps) anyway, so
