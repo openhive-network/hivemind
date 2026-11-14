@@ -3,7 +3,7 @@
 import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -18,6 +18,9 @@ class _FakeConnection:
 
     def close(self) -> None:
         self.closed = True
+
+    def cursor(self) -> MagicMock:
+        return MagicMock()
 
 
 @contextmanager
