@@ -406,59 +406,52 @@ def set_fillfactor(db) -> None:
         db.query(sql)
 
 
-def set_logged_table_attribute(db, logged):
-    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intensively updated.
+# Tables an older hivemind made UNLOGGED for massive sync. Small tables with FKs
+# to the main ones come last: PostgreSQL refuses SET LOGGED on a table that
+# references an UNLOGGED one.
+_FK_DEPENDENT_LOGGED_TABLES = ('hive_reblogs', 'hive_mentions')
+_MAIN_LOGGED_TABLES = (
+    'hive_votes',
+    'hive_post_data',
+    'hive_posts',
+    'hive_permlink_data',
+    'hive_post_tags',
+    'hive_accounts',
+)
 
-    Tables are converted in parallel to minimize total conversion time.
-    The largest table (hive_votes at ~319GB) is the bottleneck.
 
-    Tables with foreign key relationships must be converted together. PostgreSQL
-    requires that if a referenced table is UNLOGGED, all tables with FKs pointing
-    to it must also be UNLOGGED (and vice versa). We convert in two phases:
-      Phase 1: small dependent tables (hive_reblogs, hive_mentions) that have FKs
-               to hive_accounts and hive_posts
-      Phase 2: the main large tables (including hive_accounts, hive_posts)
+def unlogged_tables(db: Db) -> list[str]:
+    """Return those of the tables an older hivemind made UNLOGGED that still are."""
+    names = ', '.join(f"'{table}'" for table in _MAIN_LOGGED_TABLES + _FK_DEPENDENT_LOGGED_TABLES)
+    tables: list[str] = db.query_col(
+        f"SELECT relname FROM pg_class WHERE relnamespace = '{SCHEMA_NAME}'::regnamespace "
+        f"AND relname IN ({names}) AND relpersistence = 'u' ORDER BY relname"
+    )
+    return tables
+
+
+def ensure_tables_logged(db: Db) -> None:
+    """SET LOGGED the tables unlogged_tables reports, in parallel; a no-op when none are.
+
+    Massive sync keeps these tables LOGGED; only a database left mid-sync by an
+    older hivemind still has UNLOGGED ones.
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from time import perf_counter
 
-    # Phase 1: small tables with FKs referencing tables in phase 2.
-    # Must be converted first when going to UNLOGGED, last when going to LOGGED.
-    fk_dependent_tables = [
-        'hive_reblogs',  # FKs to hive_accounts, hive_posts
-        'hive_mentions',  # FKs to hive_posts, hive_accounts
-    ]
+    unlogged = set(unlogged_tables(db))
+    if not unlogged:
+        return
 
-    # Phase 2: large tables, ordered by size descending for better parallelism
-    main_tables = [
-        'hive_votes',  # ~319 GB
-        'hive_post_data',  # ~127 GB
-        'hive_posts',  # ~83 GB
-        'hive_permlink_data',  # ~27 GB
-        'hive_post_tags',  # ~12 GB
-        'hive_accounts',  # ~748 MB
-    ]
-
-    mode = 'LOGGED' if logged else 'UNLOGGED'
-
-    # When setting UNLOGGED: dependents first, then referenced tables
-    # When setting LOGGED: referenced tables first, then dependents
-    if logged:
-        phases = [('main', main_tables), ('dependent', fk_dependent_tables)]
-    else:
-        phases = [('dependent', fk_dependent_tables), ('main', main_tables)]
-
-    all_tables = fk_dependent_tables + main_tables
-    log.info(f"Converting {len(all_tables)} tables to {mode} in two phases...")
+    log.info(f"Converting {len(unlogged)} tables left UNLOGGED by an older hivemind to LOGGED...")
     start_time = perf_counter()
 
-    def convert_table(table):
+    def convert_table(table: str) -> tuple[str, float, Exception | None]:
         """Convert a single table - runs in separate thread with own connection."""
         table_start = perf_counter()
         thread_db = db.clone(f'logged_convert_{table}')
         try:
-            sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET {mode}"
-            thread_db.query_no_return(sql)
+            thread_db.query_no_return(f"ALTER TABLE {SCHEMA_NAME}.{table} SET LOGGED")
             elapsed = perf_counter() - table_start
             return (table, elapsed, None)
         except Exception as e:
@@ -467,19 +460,21 @@ def set_logged_table_attribute(db, logged):
         finally:
             thread_db.close()
 
-    for _phase_name, tables in phases:
+    for phase in (_MAIN_LOGGED_TABLES, _FK_DEPENDENT_LOGGED_TABLES):
+        tables = [table for table in phase if table in unlogged]
+        if not tables:
+            continue
         with ThreadPoolExecutor(max_workers=len(tables)) as executor:
             futures = {executor.submit(convert_table, table): table for table in tables}
 
             for future in as_completed(futures):
                 table, elapsed, error = future.result()
                 if error:
-                    log.error(f"Failed to set {mode} on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
+                    log.error(f"Failed to set LOGGED on {SCHEMA_NAME}.{table} after {elapsed:.1f}s: {error}")
                     raise error
-                log.info(f"Set {mode} on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
+                log.info(f"Set LOGGED on {SCHEMA_NAME}.{table} in {elapsed:.1f}s")
 
-    total_elapsed = perf_counter() - start_time
-    log.info(f"All {len(all_tables)} tables converted to {mode} in {total_elapsed:.1f}s")
+    log.info(f"All {len(unlogged)} tables converted to LOGGED in {perf_counter() - start_time:.1f}s")
 
 
 def execute_sql_script(query_executor, path_to_script):

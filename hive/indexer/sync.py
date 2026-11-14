@@ -165,8 +165,8 @@ class SyncHiveDb:
         # to open flush connections — otherwise we'd kill our own fresh connections.
         self._terminate_stale_connections()
 
-        # Detect data loss from UNLOGGED tables after a PostgreSQL crash.
-        # Must run before _replay_crashed_batch: if PostgreSQL truncated the
+        # Detect data loss from tables an older hivemind left UNLOGGED, after a
+        # PostgreSQL crash. Must run before _replay_crashed_batch: if PostgreSQL truncated the
         # UNLOGGED tables while a batch was in flight, replaying that batch
         # against empty tables fails before the reset logic would ever run,
         # crash-looping the process.
@@ -467,12 +467,14 @@ class SyncHiveDb:
     def _check_unlogged_data_consistency(self) -> None:
         """Detect and recover from UNLOGGED table data loss after a PostgreSQL crash.
 
-        During massive sync, hivemind converts several tables (hive_accounts,
-        hive_posts, hive_votes, etc.) to UNLOGGED for write performance. If
-        PostgreSQL crashes while these tables are UNLOGGED, crash recovery
-        truncates them — but the HAF context (in a LOGGED table) survives,
-        creating a mismatch: the context says "processed up to block N" while
-        the data tables are empty.
+        Older hivemind versions converted several tables (hive_accounts,
+        hive_posts, hive_votes, etc.) to UNLOGGED for massive sync, and a
+        database they left mid-sync keeps them UNLOGGED until
+        DbState.ensure_indexes_are_enabled converts them. If PostgreSQL crashes
+        meanwhile, crash recovery truncates them — but the HAF context (in a
+        LOGGED table) survives, creating a mismatch: the context says
+        "processed up to block N" while the data tables are empty. Crash
+        recovery keeps them UNLOGGED, so the check runs only while some are.
 
         Detection: the seed account with id=0 is inserted during initial schema
         setup and is never deleted during normal operation. If it's missing AND
@@ -481,10 +483,15 @@ class SyncHiveDb:
         Recovery: truncate all data tables, reset the HAF context to block 0,
         re-insert seed data, and let the sync restart from the beginning.
         """
+        from hive.db.schema import unlogged_tables
+
         context_block = Blocks.last_imported()
         completed_block = Blocks.last_completed()
 
         if context_block <= completed_block:
+            return
+
+        if not unlogged_tables(self._db):
             return
 
         has_seed_account = self._db.query_one(f"SELECT EXISTS(SELECT 1 FROM {SCHEMA_NAME}.hive_accounts WHERE id = 0)")
@@ -712,9 +719,9 @@ class SyncHiveDb:
                 "SIGINT during massive sync — relying on batch queue for crash recovery, skipping index/FK rebuild"
             )
         else:
-            # Ensure tables are converted back to LOGGED before shutdown.
-            # UNLOGGED tables are truncated during crash recovery, which can happen
-            # if PostgreSQL is killed (e.g., docker timeout) instead of graceful shutdown.
+            # Leave the database with its indexes and foreign keys, as the API and
+            # live sync need them (and with any table an older hivemind left
+            # UNLOGGED converted, which crash recovery would truncate).
             DbState.ensure_indexes_are_enabled()
             DbState.ensure_fk_are_enabled()
 

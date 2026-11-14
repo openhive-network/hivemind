@@ -378,10 +378,11 @@ class DbState:
     def _restore_bm25_index(cls, db) -> None:
         """Create the BM25 index on hive_post_data directly.
 
-        Not registered with HAF because pg_search leaves internal metadata
-        (MetaPage) that prevents UNLOGGED conversion even after the index is
-        dropped. Instead we manage this index manually: created here during
-        the fills phase, dropped explicitly in ensure_indexes_are_disabled.
+        Not registered with HAF because pg_search left internal metadata
+        (MetaPage) that prevented the UNLOGGED conversion older versions did,
+        even after the index was dropped. Instead we manage this index manually:
+        created here during the fills phase, dropped explicitly in
+        ensure_indexes_are_disabled.
 
         Skipped when pg_search extension is not available.
         """
@@ -561,8 +562,8 @@ class DbState:
         """True until the first massive finalization commits last_completed_block_num.
 
         Gates the machinery that is only justified (and only safe) when the
-        database holds no irreplaceable state yet: UNLOGGED conversion, BM25
-        drop/rebuild, and WAL-safety disabling. Cached per process — a crash
+        database holds no irreplaceable state yet: BM25 drop/rebuild and
+        WAL-safety disabling. Cached per process — a crash
         during initial sync restarts with last_completed still at its seed
         value, so the gate re-engages correctly.
         """
@@ -579,29 +580,16 @@ class DbState:
         cls._drop_indexes_in_threads()
 
         if cls.is_initial_sync():
-            # UNLOGGED conversion (and the BM25 drop it requires) only pays for
-            # itself on initial sync: the round-trip costs ~6,600s + ~1,860s BM25
-            # rebuild on production-class hardware, while WAL waits are <=2% of
-            # with-indexes processing time (measurements in #339). It is also
-            # only *safe* here — a PostgreSQL crash truncates UNLOGGED tables,
-            # acceptable solely when the data can be rebuilt from scratch.
-            # Against LOGGED from the start (5M fixture, wal_level = minimal,
-            # synchronous_commit off; two A/B pairs, one run concurrently): the
-            # batches took 2,059s vs 2,114s, the votes phase 14% and the flush
-            # 7.5% longer when LOGGED, the other phases within +-4%, while the
-            # conversion back costs 5.5s (#415). At mainnet scale it no longer pays
-            # for itself: LOGGED adds ~765s to a full sync while SET LOGGED costs
-            # 1,034s plus the vacuum it forces (#460,
-            # docs/measurements/unlogged-massive-sync).
-
-            # Drop BM25 index explicitly (not HAF-managed due to pg_search MetaPage issue).
-            # Must be dropped before UNLOGGED conversion. Safe on first run (IF EXISTS).
+            # The tables stay LOGGED: at mainnet scale the UNLOGGED round trip cost
+            # more than the WAL it saved, and a crash truncated UNLOGGED tables
+            # (#460, docs/measurements/unlogged-massive-sync).
+            #
+            # The BM25 index is not HAF-registered, so _drop_indexes_in_threads
+            # leaves it. Drop it like the registered indexes: otherwise every
+            # massive insert into hive_post_data maintains it, and
+            # _restore_bm25_index (IF NOT EXISTS) would never build it once over
+            # the finished table. Safe on first run (IF EXISTS).
             cls.db().query_no_return("DROP INDEX IF EXISTS hivemind_app.hive_post_data_bm25_idx")
-
-            # Set tables to UNLOGGED for faster inserts (no WAL writes)
-            from hive.db.schema import set_logged_table_attribute
-
-            set_logged_table_attribute(cls.db(), False)
 
         cls.disable_autovacuum_for_massive_sync()
 
@@ -637,7 +625,7 @@ class DbState:
 
     @classmethod
     def ensure_indexes_are_enabled(cls, defer_to_finalization: bool = False) -> None:
-        """Restore the registered indexes and set the tables back to LOGGED.
+        """Restore the registered indexes, after SET LOGGED on any table still UNLOGGED.
 
         With `defer_to_finalization` on an initial sync, the indexes of
         _INDEX_RESTORE_DEFERRED_TABLES are left for the finalization that follows
@@ -651,12 +639,12 @@ class DbState:
 
         start_time = perf_counter()
 
-        # Set tables back to LOGGED before creating indexes
-        # This must happen before index creation because some indexes (e.g., BM25/pg_search)
-        # don't support UNLOGGED tables
-        from hive.db.schema import set_logged_table_attribute
+        # A database left mid-sync by an older hivemind may still have UNLOGGED
+        # tables; convert them before index creation, as BM25/pg_search does not
+        # support UNLOGGED tables. Costs nothing when all are LOGGED.
+        from hive.db.schema import ensure_tables_logged
 
-        set_logged_table_attribute(cls.db(), True)
+        ensure_tables_logged(cls.db())
 
         log.info("Creating indexes: started")
         if defer_to_finalization and cls.is_initial_sync():
