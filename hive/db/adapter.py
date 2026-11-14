@@ -149,6 +149,13 @@ class Db:
         self._conn = psycopg2.connect(self._url, application_name=f'hivemind_{self.name}')
         self._conn.notices = _NoticeLogger(self.name)
         self._conn.autocommit = True
+        # A synchronized seq scan starts where an earlier scan of the table last
+        # reported, and a scan stopped part way (a cancelled API query on a table
+        # whose indexes massive sync dropped) leaves that hint mid-table. Table
+        # rewrites (SET LOGGED, VACUUM FULL) and INSERT ... SELECT copy rows in scan
+        # order, so they would copy a table rotated, scattering what is read by locality.
+        with self._conn.cursor() as cur:
+            cur.execute("SET synchronize_seqscans = off")
         register_default_jsonb(self._conn, loads=ujson.loads)
         self._listening = False
 
