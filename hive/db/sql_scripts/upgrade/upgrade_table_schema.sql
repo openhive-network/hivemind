@@ -26,6 +26,70 @@ TRUNCATE TABLE hivemind_app.hive_db_vacuum_needed;
 
 --- Put schema upgrade code here.
 
+-- condenser_api.get_followers pages on (following, follower_name). Account names never change, so the copy
+-- filled here never goes stale. follows is rebuilt rather than UPDATEd: an UPDATE writes a second version of every
+-- row, which leaves the table and its indexes doubled. Tables upgraded that way are rebuilt too, recognised by a heap
+-- of over 80 bytes per row (a rebuilt one takes 54).
+-- The rows are copied under a SHARE lock, which blocks only writes. Readers wait only from the TRUNCATE to the end
+-- of this script: the refill and the index builds, about a minute for mainnet's 103 M rows. TRUNCATE, unlike a
+-- swapped-in table, keeps the OID other applications' views of follows (hafsql.follows) depend on. The copy keeps
+-- the heap's order: a serial scan, hash-joined in memory, with synchronized seq scans off.
+-- This block comes first, so the locks this script's later statements take are not held through the copy.
+-- follows_following_idx is not rebuilt: follows_following_follower_name_idx, created after it, replaces it.
+-- The rebuilt pages are not all-visible until vacuumed: the sync's visibility watch vacuums follows when it starts.
+DO $$
+DECLARE
+  _has_name BOOLEAN := EXISTS (SELECT NULL FROM pg_attribute WHERE attrelid = 'hivemind_app.follows'::regclass AND attname = 'follower_name' AND NOT attisdropped);
+  _create TEXT[];
+  _drop TEXT[];
+  _ddl TEXT;
+BEGIN
+  IF _has_name AND (SELECT c.reltuples <= 0 OR pg_relation_size(c.oid) < 1024^3 OR pg_relation_size(c.oid) <= 80 * c.reltuples
+                    FROM pg_class c WHERE c.oid = 'hivemind_app.follows'::regclass) THEN
+    RETURN;
+  END IF;
+  LOCK TABLE hivemind_app.follows IN SHARE MODE;
+  -- With no rows there is nothing to copy. This also keeps a shape's empty, full-size files and its statistics.
+  IF NOT EXISTS (SELECT NULL FROM hivemind_app.follows) THEN
+    DROP INDEX IF EXISTS hivemind_app.follows_following_idx;
+    ALTER TABLE hivemind_app.follows ADD COLUMN IF NOT EXISTS follower_name VARCHAR(16) COLLATE "C" NOT NULL;
+    RETURN;
+  END IF;
+  RAISE NOTICE 'Rebuilding hivemind_app.follows with follower_name';
+  PERFORM set_config('max_parallel_workers_per_gather', '0', true);
+  PERFORM set_config('work_mem', '1GB', true);
+  PERFORM set_config('synchronize_seqscans', 'off', true);
+  CREATE TEMP TABLE follows_rebuild ON COMMIT DROP AS
+  SELECT f.follower, f.following, f.block_num, ha.name AS follower_name
+  FROM hivemind_app.follows f LEFT JOIN hivemind_app.hive_accounts ha ON ha.id = f.follower;
+
+  -- Recreated after the refill as they are now, except follows_following_idx.
+  SELECT array_agg(format('ALTER TABLE hivemind_app.follows ADD CONSTRAINT %I %s', conname, pg_get_constraintdef(oid))),
+         array_agg(format('ALTER TABLE hivemind_app.follows DROP CONSTRAINT %I', conname))
+  INTO _create, _drop
+  FROM pg_constraint WHERE conrelid = 'hivemind_app.follows'::regclass AND contype IN ('p', 'u', 'x');
+  SELECT coalesce(_create, '{}') || coalesce(array_agg(pg_get_indexdef(i.indexrelid)) FILTER (WHERE i.indexrelid IS DISTINCT FROM to_regclass('hivemind_app.follows_following_idx')), '{}'),
+         coalesce(_drop, '{}') || coalesce(array_agg(format('DROP INDEX %s', i.indexrelid::regclass)), '{}')
+  INTO _create, _drop
+  FROM pg_index i
+  WHERE i.indrelid = 'hivemind_app.follows'::regclass AND NOT EXISTS (SELECT NULL FROM pg_constraint c WHERE c.conindid = i.indexrelid);
+
+  FOREACH _ddl IN ARRAY _drop LOOP
+    EXECUTE _ddl;
+  END LOOP;
+  TRUNCATE hivemind_app.follows;
+  ALTER TABLE hivemind_app.follows ADD COLUMN IF NOT EXISTS follower_name VARCHAR(16) COLLATE "C" NOT NULL;
+  INSERT INTO hivemind_app.follows (follower, following, block_num, follower_name)
+  SELECT follower, following, block_num, follower_name FROM follows_rebuild;
+  FOREACH _ddl IN ARRAY _create LOOP
+    EXECUTE _ddl;
+  END LOOP;
+  ANALYZE hivemind_app.follows;
+END
+$$;
+CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
+
 DROP INDEX IF EXISTS hive_posts_tags_ids_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_post_cond_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_cond_idx;
@@ -76,23 +140,6 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_actor_id_created_at_idx ON hivemind_app.hive_moderation_log (actor_id, created_at DESC, id DESC)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num)');
-
--- condenser_api.get_followers pages on (following, follower_name). Account names never change, so the copy
--- filled once here never goes stale. follows_following_idx, which the new index replaces, is dropped before the
--- backfill so the UPDATE does not maintain it; the new index is built after it.
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT NULL FROM information_schema.columns WHERE table_schema = 'hivemind_app' AND table_name = 'follows' AND column_name = 'follower_name') THEN
-    RAISE NOTICE 'Filling hivemind_app.follows.follower_name';
-    DROP INDEX IF EXISTS hivemind_app.follows_following_idx;
-    ALTER TABLE hivemind_app.follows ADD COLUMN follower_name VARCHAR(16) COLLATE "C";
-    UPDATE hivemind_app.follows f SET follower_name = ha.name FROM hivemind_app.hive_accounts ha WHERE ha.id = f.follower;
-    ALTER TABLE hivemind_app.follows ALTER COLUMN follower_name SET NOT NULL;
-  END IF;
-END
-$$;
-CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
-SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
 
 -- Autovacuum the append-mostly tables every 100,000 inserts, keeping their visibility maps current for index-only
 -- scans. Same list as hive/db/schema.py's reset_autovac, which sets them on a fresh install.
