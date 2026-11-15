@@ -5,6 +5,14 @@ set -euo pipefail
 # clear out block processing startup time recorded by previous runs
 rm -f /tmp/block_processing_startup_time.txt
 
+# LOG_FILE is the name haf_api_node sets for every HAF app; LOG_PATH is its older alias here.
+LOG_FILE=${LOG_FILE:-${LOG_PATH:-}}
+if [[ -n "$LOG_FILE" ]]; then
+  # Append (O_APPEND) so a restart keeps earlier runs' lines and writes after logrotate's
+  # copytruncate land at the new end of the file instead of leaving it sparse.
+  exec > >(tee -a -i "$LOG_FILE") 2>&1
+fi
+
 # Logger function
 function log () {
     local -r category=$1
@@ -20,7 +28,6 @@ SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 COMMAND="$1"
 HIVEMIND_ARGS=()
 ADD_MOCKS=${ADD_MOCKS:-false}
-LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 INSTALL_APP=0
@@ -87,40 +94,24 @@ run_hive_no_exec() {
   local db_url=${1:-"${POSTGRES_URL}"}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
-  if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
-    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
-  else
-    log "run_hive" "Starting Hivemind..."
-    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
-  fi
+  log "run_hive" "Starting Hivemind..."
+  hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
 }
 
 run_hive() {
   local db_url=${POSTGRES_URL}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
-  if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting Hivemind with log '$LOG_PATH'"
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
-  else
-    log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}"
-  fi
+  log "run_hive" "Starting Hivemind..."
+  exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name="${REPTRACKER_SCHEMA}" --swagger-url="${SWAGGER_URL}" --database-url="${db_url}"
 }
 
 run_server() {
   local db_url=${POSTGRES_URL}
   # shellcheck source=/dev/null
-  if [[ -n "$LOG_PATH" ]]; then
-    log "run_hive" "Starting hivemind postgrest server with log $LOG_PATH"
-    echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}" > >( tee -i "$LOG_PATH" ) 2>&1
-  else
-    log "run_hive" "Starting hivemind postgrest server..."
-    echo "Running postgrest setup..."
-    exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
-  fi
+  log "run_hive" "Starting hivemind postgrest server..."
+  echo "Running postgrest setup..."
+  exec "$SCRIPT_DIR/app/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
 }
 
 
