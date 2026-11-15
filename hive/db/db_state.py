@@ -885,7 +885,8 @@ class DbState:
     def _finish_reputation_notification_scores(cls, db) -> None:
         """Recalculate reputation-based notification scores using final reputation data.
 
-        During massive sync, post/follow/reblog notification scores are computed
+        During massive sync, the scores of the notifications scored by their
+        source's reputation (subscribe, reply, reblog, follow, mention) are computed
         from reptracker_app.account_reputations at flush time. Since the reputation
         tracker runs concurrently, scores may reflect incomplete reputation data.
         This finalization step corrects them using the final values.
@@ -911,7 +912,7 @@ class DbState:
                 FROM {SCHEMA_NAME}.hive_accounts ha
                 JOIN final_rep fr ON ha.haf_id = fr.account_id
                 WHERE hnc.src = ha.id
-                    AND hnc.type_id IN (12, 13, 14, 15)
+                    AND hnc.type_id IN (11, 12, 13, 14, 15, 16)
                     AND hnc.score != COALESCE(fr.rep, 25)
             """
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
