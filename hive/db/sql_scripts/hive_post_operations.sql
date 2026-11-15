@@ -913,7 +913,7 @@ BEGIN
               WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
                 AND (SELECT count(*) FROM insert_mentions) >= 0 -- force evaluation, once
                 AND (SELECT count(*) FROM delete_old_cache) >= 0 -- force evaluation, once
-                AND COALESCE(rep.rep, 25) > 0
+                AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(rep.rep, 25) > 0)
                 AND hm.author_id IS DISTINCT FROM hm.account_id
                 AND m.follower IS NULL
                 AND mi.following IS NULL

@@ -889,7 +889,10 @@ class DbState:
         source's reputation (subscribe, reply, reblog, follow, mention) are computed
         from reptracker_app.account_reputations at flush time. Since the reputation
         tracker runs concurrently, scores may reflect incomplete reputation data.
-        This finalization step corrects them using the final values.
+        This finalization step corrects them using the final values. The initial
+        sync's flushes keep these rows whatever their score
+        (reputation_notification_cut_deferred), so the score > 0 cut that live
+        sync applies at write time is applied here, on the final scores.
         """
         with AutoDbDisposer(db, "finish_reputation_notification_scores") as db_mgr:
             time_start = perf_counter()
@@ -915,7 +918,15 @@ class DbState:
                     AND hnc.type_id IN (11, 12, 13, 14, 15, 16)
                     AND hnc.score != COALESCE(fr.rep, 25)
             """
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+            delete_sql = f"""
+                DELETE FROM {SCHEMA_NAME}.hive_notification_cache
+                WHERE type_id IN (11, 12, 13, 14, 15, 16)
+                    AND score <= 0
+            """
+            db_mgr.db.query("START TRANSACTION")
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql, separate_transaction=False)
+            cls._execute_query(db_mgr.db, delete_sql)
+            db_mgr.db.query("COMMIT")
             log.info(
                 "[MASSIVE] finish_reputation_notification_scores executed in %.4fs",
                 perf_counter() - time_start,
@@ -1044,9 +1055,11 @@ class DbState:
             # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
             cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
-            # Recalculate reputation-based notification scores after all notifications are
-            # flushed and muted ones cleared. Runs sequentially to avoid concurrent access
-            # to hive_notification_cache with the tasks above.
+        # Recalculate reputation-based notification scores after all notifications are
+        # flushed (and, on the initial-massive path, muted ones cleared). Runs sequentially
+        # to avoid concurrent access to hive_notification_cache with the tasks above. Every
+        # initial sync needs it, however short: its flushes deferred the score > 0 cut here.
+        if massive_sync_preconditions or last_imported_block <= SEED_LAST_COMPLETED_BLOCK:
             cls._finish_reputation_notification_scores(cls.db())
 
         if cls._interrupted("completion marker"):

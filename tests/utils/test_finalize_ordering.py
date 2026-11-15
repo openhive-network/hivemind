@@ -19,26 +19,28 @@ BASE = {
 }
 
 
-def _run(massive_sync_preconditions, allowed_continue_checks=None):
+def _run(
+    massive_sync_preconditions: bool, allowed_continue_checks: int | None = None, last_completed: int = 100
+) -> tuple[bool, list[tuple[Any, ...]]]:
     """Run _finish_all_tables with recorded task order and an optional interrupt point.
 
     allowed_continue_checks: number of can_continue_thread() calls that return
     True before the simulated shutdown request; None means never interrupted.
     """
-    calls = []
+    calls: list[tuple[Any, ...]] = []
 
     def fake_tasks(info: str, methods: list[tuple[str, Any, Any]], max_workers: int | None = None) -> None:
         calls.append(('parallel', sorted(name for name, _, _ in methods)))
 
-    def fake_marker(db, preconds, first, last):
+    def fake_marker(db: Any, preconds: bool, first: int, last: int) -> None:
         calls.append(('marker', preconds, first, last))
 
     counter = iter(range(1000))
 
-    def can_continue():
+    def can_continue() -> bool:
         return allowed_continue_checks is None or next(counter) < allowed_continue_checks
 
-    patches = {
+    patches: dict[str, Any] = {
         k: (v if v is not None else staticmethod(lambda *a, _name=k, **kw: calls.append((_name,))))
         for k, v in BASE.items()
     }
@@ -48,7 +50,7 @@ def _run(massive_sync_preconditions, allowed_continue_checks=None):
         patch.object(DbState, '_finalize_completion_marker', staticmethod(fake_marker)),
         patch('hive.signals.can_continue_thread', can_continue),
     ):
-        completed = DbState._finish_all_tables(massive_sync_preconditions, 100, 200)
+        completed = DbState._finish_all_tables(massive_sync_preconditions, last_completed, 200)
     return completed, calls
 
 
@@ -76,6 +78,13 @@ def test_marker_is_last_write_non_initial_path():
     assert completed is True
     assert [c[0] for c in calls] == ['parallel', 'marker']
     assert calls[-1] == ('marker', False, 100, 200)
+
+
+def test_short_initial_sync_rescores_reputation_notifications_before_marker() -> None:
+    """An initial sync's flushes defer the score > 0 cut to the rescore, whatever its length."""
+    completed, calls = _run(massive_sync_preconditions=False, last_completed=1)
+    assert completed is True
+    assert [c[0] for c in calls] == ['parallel', '_finish_reputation_notification_scores', 'marker']
 
 
 def test_interrupt_before_fills_skips_everything():
