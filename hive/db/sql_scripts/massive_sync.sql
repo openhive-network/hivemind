@@ -2715,6 +2715,20 @@ RETURNS INT AS $$
 $$ LANGUAGE sql STABLE;
 
 
+-- True while a batch of the initial massive sync runs: a batch is in flight
+-- (_batch_queue holds its range; live sync leaves it empty) and no finalization
+-- has completed yet (hive_state still holds its seed). reptracker syncs beside
+-- that sync, so a source's reputation at flush time is not its final one: the
+-- writers of reputation-scored notifications (types 11-16) then keep a row
+-- whatever its score, and finalization (_finish_reputation_notification_scores)
+-- rescores the rows from final reputations and deletes those scoring <= 0.
+CREATE OR REPLACE FUNCTION hivemind_app.reputation_notification_cut_deferred()
+RETURNS BOOLEAN AS $$
+    SELECT EXISTS (SELECT 1 FROM hivemind_app._batch_queue)
+       AND (SELECT last_completed_block_num FROM hivemind_app.hive_state) <= 1;
+$$ LANGUAGE sql STABLE;
+
+
 -- 11b. flush_post_notifications_for_blocks
 CREATE OR REPLACE FUNCTION hivemind_app.flush_post_notifications_for_blocks(
     _first_block INT, _last_block INT
@@ -2722,8 +2736,10 @@ CREATE OR REPLACE FUNCTION hivemind_app.flush_post_notifications_for_blocks(
 DECLARE
     _count INT := 0;
     _min_block INT;
+    _cut_deferred BOOLEAN;
 BEGIN
     _min_block := hivemind_app.block_before_irreversible('90 days');
+    _cut_deferred := hivemind_app.reputation_notification_cut_deferred();
 
     IF _last_block <= _min_block THEN
         RETURN 0;
@@ -2766,7 +2782,7 @@ BEGIN
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nc.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nc.src
     WHERE nc.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
       AND nc.src IS DISTINCT FROM nc.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nc.block_num, nc.created_at, nc.src, nc.dst, nc.dst_post_id, nc.post_id
@@ -2785,8 +2801,10 @@ CREATE OR REPLACE FUNCTION hivemind_app.flush_follow_notifications_for_blocks(
 DECLARE
     _count INT := 0;
     _min_block INT;
+    _cut_deferred BOOLEAN;
 BEGIN
     _min_block := hivemind_app.block_before_irreversible('90 days');
+    _cut_deferred := hivemind_app.reputation_notification_cut_deferred();
 
     IF _last_block <= _min_block THEN
         RETURN 0;
@@ -2824,7 +2842,7 @@ BEGIN
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nf.following
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nf.follower
     WHERE nf.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0)
       AND nf.follower IS DISTINCT FROM nf.following
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nf.block_num, nf.created_at, nf.follower, nf.following
@@ -2843,8 +2861,10 @@ CREATE OR REPLACE FUNCTION hivemind_app.flush_reblog_notifications_for_blocks(
 DECLARE
     _count INT := 0;
     _min_block INT;
+    _cut_deferred BOOLEAN;
 BEGIN
     _min_block := hivemind_app.block_before_irreversible('90 days');
+    _cut_deferred := hivemind_app.reputation_notification_cut_deferred();
 
     IF _last_block <= _min_block THEN
         RETURN 0;
@@ -2877,7 +2897,7 @@ BEGIN
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nr.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nr.src
     WHERE nr.block_num > _min_block
-      AND COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
       AND nr.src IS DISTINCT FROM nr.dst
       AND m.follower IS NULL AND mi.following IS NULL
     ORDER BY nr.block_num, nr.created_at, nr.src, nr.dst, nr.dst_post_id, nr.post_id

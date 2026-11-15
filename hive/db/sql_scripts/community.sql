@@ -44,7 +44,7 @@ BEGIN
         FROM hivemind_app.hive_accounts AS r
         JOIN hivemind_app.hive_communities AS hc ON hc.id = _community_id
         WHERE r.id = _actor_id
-            AND COALESCE(hivemind_app.reputation_score(r.haf_id), 25) > 0
+            AND (hivemind_app.reputation_notification_cut_deferred() OR COALESCE(hivemind_app.reputation_score(r.haf_id), 25) > 0)
             AND r.id IS DISTINCT FROM hc.id
         ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING;
     END IF;
