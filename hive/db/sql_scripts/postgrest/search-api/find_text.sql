@@ -92,11 +92,18 @@ BEGIN
     -- 33-138 s (3.35M heap fetches) versus 0.23 s with `ORDER BY hpd.id DESC`, past the 5 s
     -- statement_timeout of haf_api_node. Relevance survived only because a custom plan
     -- folds the CASE; a generic plan kept it and lost the TopK scan as well.
-    -- The same holds for the LIMIT: a generic plan keeps `LIMIT _limit * 2` as an expression
-    -- and loses the TopK scan, while a bare `LIMIT _candidate_limit` is pushed down. The
-    -- author filter is an `id = ANY(array)` for the same reason: pg_search folds it into the
-    -- index query as a term set, whereas a join to hive_posts leaves the LIMIT above the
-    -- join and the scan reads every match (3.3M rows for 'hive').
+    -- The same holds for the LIMIT: a generic plan keeps it as an expression and loses the
+    -- TopK scan, while a constant LIMIT is pushed down. The author filter is an
+    -- `id = ANY(array)` for the same reason: pg_search folds it into the index query as a
+    -- term set, whereas a join to hive_posts leaves the LIMIT above the join and the scan
+    -- reads every match (3.3M rows for 'hive').
+    -- Every candidate statement runs through EXECUTE, so that each call gets a one-shot
+    -- plan with the search query, ids, score and limit as constants. As static SQL,
+    -- its plan was cached per backend and, after five calls, the plan cache switched to a
+    -- generic plan when that looked cheaper, as it does for common words (1016 against
+    -- 1015-1017 per custom plan plus planning on mainnet). With the search query as a plpgsql
+    -- variable pg_search 0.25.3 returns no rows from that plan, so the backend answered every
+    -- later search with [] until it exited.
     -- is_top_level_post(hpd.id) must match the partial bm25 index predicate
     -- (hive_post_data_bm25_idx WHERE is_top_level_post(id)). pg_search <=0.19.5 rejected an
     -- explicit predicate and inferred it; 0.21.13 reversed that and raises "Unsupported
@@ -105,11 +112,18 @@ BEGIN
     -- Relevance candidates are ordered by (score, id), the same key as the final ranking, so
     -- that the window is deterministic among equal scores and a page can resume after its
     -- last post.
+    -- Parameters of every candidate statement: $1 search query, $2 author id, $3 start post
+    -- id, $4 start post score, $5 candidate limit.
     _candidate_limit = _limit * 2;
+    IF _author_id > 0 THEN
+        _author_filter = 'AND hpd.id = ANY(ARRAY(
+                      SELECT hp.id FROM hivemind_app.hive_posts hp
+                      WHERE hp.author_id = $2 AND hp.depth = 0))';
+    END IF;
+
     IF _post_id > 0 THEN
         -- Paging: candidates start right after the start post in the requested order, a
         -- keyset on id (created) or on (score, id) (relevance).
-        -- These statements run through EXECUTE so that each gets a one-shot custom plan:
         -- pg_search pushes `paradedb.score(id) < value` down as a score filter of the TopK
         -- scan only when the value is a constant; with a generic plan's parameter it raises
         -- "Unsupported query shape" or sorts every match.
@@ -119,14 +133,6 @@ BEGIN
         -- clauses. The start post and the id bound are therefore matched through
         -- const_score(0, ...), which adds exactly 0. An `OR` of the two keyset halves cannot
         -- be used: pg_search 0.25.3 turns it into an empty boolean query.
-        -- Parameters: $1 search query, $2 author id, $3 start post id, $4 start post score,
-        -- $5 candidate limit.
-        IF _author_id > 0 THEN
-            _author_filter = 'AND hpd.id = ANY(ARRAY(
-                          SELECT hp.id FROM hivemind_app.hive_posts hp
-                          WHERE hp.author_id = $2 AND hp.depth = 0))';
-        END IF;
-
         EXECUTE format($sql$
             SELECT paradedb.score(hpd.id)
             FROM hivemind_app.hive_post_data hpd
@@ -200,56 +206,36 @@ BEGIN
                 INTO _candidate_ids
                 USING _search_query, _author_id, _post_id, _start_score, _candidate_limit;
         END IF;
-    ELSIF _author_id > 0 THEN
-        IF _sort_type = 'relevance' THEN
-            SELECT array_agg(c.id), array_agg(c.score) INTO _candidate_ids, _candidate_scores
+    ELSIF _sort_type = 'relevance' THEN
+        EXECUTE format($sql$
+            SELECT array_agg(c.id), array_agg(c.score)
             FROM (
                 SELECT hpd.id, paradedb.score(hpd.id) AS score
                 FROM hivemind_app.hive_post_data hpd
-                WHERE hpd @@@ paradedb.parse(_search_query)
+                WHERE hpd @@@ paradedb.parse($1)
                   AND hivemind_app.is_top_level_post(hpd.id)
-                  AND hpd.id = ANY(ARRAY(
-                      SELECT hp.id FROM hivemind_app.hive_posts hp
-                      WHERE hp.author_id = _author_id AND hp.depth = 0))
+                  %s
                 ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
-                LIMIT _candidate_limit
-            ) c;
-        ELSE
-            SELECT array_agg(c.id) INTO _candidate_ids
-            FROM (
-                SELECT hpd.id
-                FROM hivemind_app.hive_post_data hpd
-                WHERE hpd @@@ paradedb.parse(_search_query)
-                  AND hivemind_app.is_top_level_post(hpd.id)
-                  AND hpd.id = ANY(ARRAY(
-                      SELECT hp.id FROM hivemind_app.hive_posts hp
-                      WHERE hp.author_id = _author_id AND hp.depth = 0))
-                ORDER BY hpd.id DESC
-                LIMIT _candidate_limit
-            ) c;
-        END IF;
+                LIMIT $5
+            ) c
+            $sql$, _author_filter)
+            INTO _candidate_ids, _candidate_scores
+            USING _search_query, _author_id, _post_id, _start_score, _candidate_limit;
     ELSE
-        IF _sort_type = 'relevance' THEN
-            SELECT array_agg(c.id), array_agg(c.score) INTO _candidate_ids, _candidate_scores
-            FROM (
-                SELECT hpd.id, paradedb.score(hpd.id) AS score
-                FROM hivemind_app.hive_post_data hpd
-                WHERE hpd @@@ paradedb.parse(_search_query)
-                  AND hivemind_app.is_top_level_post(hpd.id)
-                ORDER BY paradedb.score(hpd.id) DESC, hpd.id DESC
-                LIMIT _candidate_limit
-            ) c;
-        ELSE
-            SELECT array_agg(c.id) INTO _candidate_ids
+        EXECUTE format($sql$
+            SELECT array_agg(c.id)
             FROM (
                 SELECT hpd.id
                 FROM hivemind_app.hive_post_data hpd
-                WHERE hpd @@@ paradedb.parse(_search_query)
+                WHERE hpd @@@ paradedb.parse($1)
                   AND hivemind_app.is_top_level_post(hpd.id)
+                  %s
                 ORDER BY hpd.id DESC
-                LIMIT _candidate_limit
-            ) c;
-        END IF;
+                LIMIT $5
+            ) c
+            $sql$, _author_filter)
+            INTO _candidate_ids
+            USING _search_query, _author_id, _post_id, _start_score, _candidate_limit;
     END IF;
 
     _result = (
