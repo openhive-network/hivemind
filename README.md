@@ -343,6 +343,14 @@ include setting the database URL, defining the block after which synchronization
    database was already up to date, and non-zero, naming the holders and what is pending, if it was not. Stop those
    processes and rerun it.
 
+   An upgrade from a database without `hivemind_app.follows.follower_name` rebuilds `follows` with that column. So
+   does one from a database that got the column from the earlier in-place UPDATE, which left the table and its
+   indexes about twice their size. The rows are copied while readers continue. Then everything that reads `follows`
+   (`get_followers`, `get_following`, feeds, follow checks) waits while the table is refilled and its indexes are
+   rebuilt: about a minute for mainnet's 103 M rows, measured on a copy of steem-20 (56 s from the database
+   without the column, 60 s from the doubled one). Until hivemind's sync next starts and vacuums
+   the table, `get_followers` pages read the heap as well as the index.
+
    The community moderation log (`bridge.get_community_moderation_log`, `bridge.get_account_moderation_stats`,
    `bridge.get_moderator_activity`) is filled only while blocks are synced. Upgrading creates the log empty, so an
    upgraded node reports only moderation actions from blocks processed after the upgrade. To get the full history,
