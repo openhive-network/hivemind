@@ -27,57 +27,57 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185208490z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
     "updated": "2016-09-15T18:52:09",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-gtg-re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185208490z"
   },
   {
     "active_votes": [],
-    "author": "woman-onthe-wing",
+    "author": "arcange",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 50.31,
+    "author_reputation": 55.76,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Thanks very much!",
-    "category": "introducemyself",
-    "children": 0,
-    "created": "2016-09-15T15:04:09",
+    "body": "Lol. You're welcome!\nBut I suspect you're working hard to hit the top 20 chart with your two comments :p",
+    "category": "stats",
+    "children": 1,
+    "created": "2016-09-15T13:24:15",
     "curator_payout_value": "0.000 HBD",
-    "depth": 2,
+    "depth": 4,
     "is_paidout": false,
     "json_metadata": {
       "tags": [
-        "introducemyself"
+        "stats"
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 0,
     "parent_author": "gtg",
-    "parent_permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
+    "parent_permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
     "payout": 0.0,
-    "payout_at": "2016-09-22T15:04:09",
+    "payout_at": "2016-09-22T13:24:15",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
-    "replies": [],
+    "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
-    "updated": "2016-09-15T15:04:09",
-    "url": "/introducemyself/@woman-onthe-wing/introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle#@woman-onthe-wing/re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z"
+    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
+    "updated": "2016-09-15T13:24:15",
+    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z"
   },
   {
     "active_votes": [
@@ -112,57 +112,17 @@
     "pending_payout_value": "0.271 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142108544z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "total_votes": 1
     },
-    "title": "RE: A balanced voting system is impossible with current witness’s payouts.",
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
     "updated": "2016-09-15T14:21:09",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142108544z"
-  },
-  {
-    "active_votes": [],
-    "author": "arcange",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 55.76,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Lol. You're welcome!\nBut I suspect you're working hard to hit the top 20 chart with your two comments :p",
-    "category": "stats",
-    "children": 1,
-    "created": "2016-09-15T13:24:15",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 4,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "stats"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "parent_author": "gtg",
-    "parent_permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
-    "payout": 0.0,
-    "payout_at": "2016-09-22T13:24:15",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
-    "replies": [],
-    "reblogs": 0,
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 0
-    },
-    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
-    "updated": "2016-09-15T13:24:15",
-    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z"
   },
   {
     "active_votes": [],
@@ -192,8 +152,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -203,6 +163,46 @@
     "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
     "updated": "2016-09-15T13:06:18",
     "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z"
+  },
+  {
+    "active_votes": [],
+    "author": "woman-onthe-wing",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 50.31,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Thanks very much!",
+    "category": "introducemyself",
+    "children": 0,
+    "created": "2016-09-15T15:04:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "introducemyself"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:04:09",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
+    "updated": "2016-09-15T15:04:09",
+    "url": "/introducemyself/@woman-onthe-wing/introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle#@woman-onthe-wing/re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z"
   },
   {
     "active_votes": [],
@@ -232,8 +232,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t075443671z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -272,8 +272,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-lilmisjenn-re-gtg-re-lilmisjenn-do-you-have-a-drinking-problem-20160901t141846983z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -329,8 +329,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-witness-gtg",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -369,8 +369,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-melissarhiann-lasting-impression-20160831t021708505z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -409,8 +409,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t170611218z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -466,8 +466,8 @@
     "pending_payout_value": "0.010 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t164004703z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -506,8 +506,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-emsenn-introducing-myself-bitcoin-early-adopter-content-producer-and-designer-20160829t224534386z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -546,8 +546,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-lilmisjenn-do-you-have-a-drinking-problem-20160828t114559502z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -586,8 +586,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-timcliff-re-gtg-missing-rewards-while-mining-20160827t155116406z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -626,8 +626,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-missing-rewards-while-mining-20160827t141319137z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -666,8 +666,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-eternalmoon-this-is-my-about-me-entry-enjoy-20160827t041549494z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -706,8 +706,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-ania-hello-world-20160826t211629005z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -746,8 +746,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-orcish-my-introduction-20160826t185829224z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -786,8 +786,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-bumblebrii-about-me-20160826t182001959z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -826,8 +826,8 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-mynomadicyear-16-months-out-of-a-suitcase-20160826t132929538z",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

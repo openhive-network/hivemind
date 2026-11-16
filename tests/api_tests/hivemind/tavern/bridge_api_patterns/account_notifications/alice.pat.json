@@ -164,7 +164,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:02:00",
-    "id": "4060709050646532",
+    "id": "4060709050646535",
     "msg": "@hive-198723 set your role to member",
     "score": 35,
     "type": "set_role",
@@ -173,7 +173,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:02:00",
-    "id": "4060709050646531",
+    "id": "4060709050646534",
     "msg": "@hive-157439 set your role to member",
     "score": 35,
     "type": "set_role",
@@ -182,7 +182,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:02:00",
-    "id": "4060709050646530",
+    "id": "4060709050646533",
     "msg": "@hive-171487 set your role to member",
     "score": 35,
     "type": "set_role",
@@ -191,7 +191,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117383",
+    "id": "4060708262117382",
     "msg": "@test-safari unmuted your post - Unmute first post hive3",
     "score": 35,
     "type": "unmute_post",
@@ -200,7 +200,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117382",
+    "id": "4060708262117381",
     "msg": "@test-safari unmuted your post - Unmute first post hive2",
     "score": 35,
     "type": "unmute_post",
@@ -209,7 +209,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117381",
+    "id": "4060708262117380",
     "msg": "@test-safari unmuted your post - Unmute first post hive1",
     "score": 35,
     "type": "unmute_post",
@@ -218,7 +218,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117380",
+    "id": "4060708262117379",
     "msg": "@test-safari unmuted your post - Unmute first comment hive3",
     "score": 35,
     "type": "unmute_post",
@@ -227,7 +227,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117379",
+    "id": "4060708262117378",
     "msg": "@test-safari unmuted your post - Unmute first comment hive2",
     "score": 35,
     "type": "unmute_post",
@@ -236,7 +236,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:57",
-    "id": "4060708262117378",
+    "id": "4060708262117377",
     "msg": "@test-safari unmuted your post - Unmute first comment hive1",
     "score": 35,
     "type": "unmute_post",
@@ -254,7 +254,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616717",
+    "id": "4060707452616716",
     "msg": "@test-safari muted your post - I hate second posts too-hive3!",
     "score": 35,
     "type": "mute_post",
@@ -263,7 +263,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616716",
+    "id": "4060707452616715",
     "msg": "@test-safari muted your post - I hate second posts too-hive2!",
     "score": 35,
     "type": "mute_post",
@@ -272,7 +272,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616715",
+    "id": "4060707452616714",
     "msg": "@test-safari muted your post - I hate second posts too-hive1!",
     "score": 35,
     "type": "mute_post",
@@ -281,7 +281,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616714",
+    "id": "4060707452616713",
     "msg": "@test-safari muted your post - I hate first posts-hive3!",
     "score": 35,
     "type": "mute_post",
@@ -290,7 +290,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616713",
+    "id": "4060707452616712",
     "msg": "@test-safari muted your post - I hate first posts-hive2!",
     "score": 35,
     "type": "mute_post",
@@ -299,7 +299,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616712",
+    "id": "4060707452616711",
     "msg": "@test-safari muted your post - I hate first posts-hive1!",
     "score": 35,
     "type": "mute_post",
@@ -308,7 +308,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616711",
+    "id": "4060707452616710",
     "msg": "@test-safari muted your post - I hate second comments too-hive3!",
     "score": 35,
     "type": "mute_post",
@@ -317,7 +317,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616710",
+    "id": "4060707452616709",
     "msg": "@test-safari muted your post - I hate second comments too-hive2!",
     "score": 35,
     "type": "mute_post",
@@ -326,7 +326,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616709",
+    "id": "4060707452616708",
     "msg": "@test-safari muted your post - I hate second comments too-hive1!",
     "score": 35,
     "type": "mute_post",
@@ -335,7 +335,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616708",
+    "id": "4060707452616707",
     "msg": "@test-safari muted your post - I hate first comments-hive3!",
     "score": 35,
     "type": "mute_post",
@@ -344,7 +344,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616707",
+    "id": "4060707452616706",
     "msg": "@test-safari muted your post - I hate first comments-hive2!",
     "score": 35,
     "type": "mute_post",
@@ -353,7 +353,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:54",
-    "id": "4060707452616706",
+    "id": "4060707452616705",
     "msg": "@test-safari muted your post - I hate first comments-hive1!",
     "score": 35,
     "type": "mute_post",
@@ -362,7 +362,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:48",
-    "id": "4060705871364101",
+    "id": "4060705871364100",
     "msg": "@test-safari replied to your post",
     "score": 25,
     "type": "reply",
@@ -371,7 +371,7 @@
   {
     "community": "hive-157439",
     "date": "2016-09-15T18:01:48",
-    "id": "4060705871364100",
+    "id": "4060705871364099",
     "msg": "@test-safari replied to your post",
     "score": 25,
     "type": "reply",
@@ -380,7 +380,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:48",
-    "id": "4060705871364099",
+    "id": "4060705871364098",
     "msg": "@test-safari replied to your post",
     "score": 25,
     "type": "reply",
@@ -596,7 +596,7 @@
   {
     "community": "hive-171487",
     "date": "2016-09-15T18:01:33",
-    "id": "4060701802889235",
+    "id": "4060701802889230",
     "msg": "@hive-171487 set your role to muted",
     "score": 15,
     "type": "set_role",
@@ -605,7 +605,7 @@
   {
     "community": "hive-167892",
     "date": "2016-09-15T18:01:33",
-    "id": "4060701802889234",
+    "id": "4060701802889229",
     "msg": "@hive-167892 set your role to muted",
     "score": 15,
     "type": "set_role",
@@ -614,7 +614,7 @@
   {
     "community": "hive-198723",
     "date": "2016-09-15T18:01:33",
-    "id": "4060701802889233",
+    "id": "4060701802889228",
     "msg": "@hive-198723 set your role to member",
     "score": 15,
     "type": "set_role",
@@ -685,6 +685,14 @@
     "url": "@adamt/the-birth-of-the-new-whale-with-apologies-and-acknowledgements-to-the-legend-of-the-monkey-king"
   },
   {
+    "date": "2016-08-28T11:40:03",
+    "id": "3637086552850433",
+    "msg": "@adamt mentioned you and 4 others",
+    "score": 49,
+    "type": "mention",
+    "url": "@adamt/the-birth-of-the-new-whale-with-apologies-and-acknowledgements-to-the-legend-of-the-monkey-king"
+  },
+  {
     "date": "2016-08-28T10:13:48",
     "id": "3635697399365633",
     "msg": "@adamt mentioned you and 4 others",
@@ -695,6 +703,22 @@
   {
     "date": "2016-08-28T09:57:06",
     "id": "3635428427038721",
+    "msg": "@adamt mentioned you and 4 others",
+    "score": 49,
+    "type": "mention",
+    "url": "@adamt/the-birth-of-the-new-whale-with-apologies-and-acknowledgements-to-the-legend-of-the-monkey-king"
+  },
+  {
+    "date": "2016-08-28T09:56:15",
+    "id": "3635414736830465",
+    "msg": "@adamt mentioned you and 4 others",
+    "score": 49,
+    "type": "mention",
+    "url": "@adamt/the-birth-of-the-new-whale-with-apologies-and-acknowledgements-to-the-legend-of-the-monkey-king"
+  },
+  {
+    "date": "2016-08-28T09:49:21",
+    "id": "3635303604551681",
     "msg": "@adamt mentioned you and 4 others",
     "score": 49,
     "type": "mention",
@@ -843,29 +867,5 @@
     "score": 51,
     "type": "mention",
     "url": "@profitgenerator/follow-the-whales"
-  },
-  {
-    "date": "2016-08-13T00:24:00",
-    "id": "3278305650278401",
-    "msg": "@profitgenerator followed you",
-    "score": 51,
-    "type": "follow",
-    "url": "@profitgenerator"
-  },
-  {
-    "date": "2016-08-10T03:32:33",
-    "id": "3211763990396930",
-    "msg": "@karchersmith followed you",
-    "score": 42,
-    "type": "follow",
-    "url": "@karchersmith"
-  },
-  {
-    "date": "2016-08-09T22:46:30",
-    "id": "3207156832665602",
-    "msg": "@steemgateway followed you",
-    "score": 25,
-    "type": "follow",
-    "url": "@steemgateway"
   }
 ]

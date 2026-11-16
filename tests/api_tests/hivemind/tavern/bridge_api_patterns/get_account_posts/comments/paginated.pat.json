@@ -169,120 +169,6 @@
   {
     "active_votes": [
       {
-        "rshares": 171113317466,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 64927439887,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 121293651,
-        "voter": "cheetah40"
-      },
-      {
-        "rshares": 100285774,
-        "voter": "cheetah41"
-      },
-      {
-        "rshares": 100095194,
-        "voter": "cheetah42"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay, I have banned @amansapps.",
-    "category": "earn",
-    "children": 0,
-    "created": "2016-09-11T17:33:30",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 236362431972,
-    "parent_author": "predator",
-    "parent_permlink": "re-amansapps-forced-bitcoin-matrix-20160911t173205002z",
-    "payout": 0.071,
-    "payout_at": "2016-09-18T17:33:30",
-    "pending_payout_value": "0.071 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-re-amansapps-forced-bitcoin-matrix-20160911t173205002z-20160911t173322",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: Forced bitcoin Matrix",
-    "updated": "2016-09-11T17:33:30",
-    "url": "/earn/@amansapps/forced-bitcoin-matrix#@cheetah/re-re-amansapps-forced-bitcoin-matrix-20160911t173205002z-20160911t173322"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 171113317466,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 17225463686,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 100706960,
-        "voter": "cheetah37"
-      },
-      {
-        "rshares": 121078651,
-        "voter": "cheetah38"
-      },
-      {
-        "rshares": 100105437,
-        "voter": "cheetah39"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay, I have banned @boss-money.",
-    "category": "new",
-    "children": 0,
-    "created": "2016-09-11T17:29:51",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 188660672200,
-    "parent_author": "predator",
-    "parent_permlink": "re-boss-money-new-cars-for-2016-infiniti-20160911t172804384z",
-    "payout": 0.056,
-    "payout_at": "2016-09-18T17:29:51",
-    "pending_payout_value": "0.056 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-re-boss-money-new-cars-for-2016-infiniti-20160911t172804384z-20160911t172944",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: New Cars for 2016: Infiniti",
-    "updated": "2016-09-11T17:29:51",
-    "url": "/new/@boss-money/new-cars-for-2016-infiniti#@cheetah/re-re-boss-money-new-cars-for-2016-infiniti-20160911t172804384z-20160911t172944"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 174754026348,
         "voter": "anyx"
       },
@@ -877,63 +763,6 @@
   {
     "active_votes": [
       {
-        "rshares": 182035444113,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 66247821324,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 101857729,
-        "voter": "cheetah17"
-      },
-      {
-        "rshares": 101760456,
-        "voter": "cheetah18"
-      },
-      {
-        "rshares": 123906339,
-        "voter": "cheetah19"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Warning! This user is on my black list, likely as a known plagiarist, spammer or ID thief. Please be cautious with this post!\nTo get off this list, please chat with us in the #steemitabuse-appeals channel in [steemit.chat](http://steemit.chat).",
-    "category": "nfl",
-    "children": 0,
-    "created": "2016-09-11T15:02:03",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 248610789961,
-    "parent_author": "livehdvsstream",
-    "parent_permlink": "http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live",
-    "payout": 0.074,
-    "payout_at": "2016-09-18T15:02:03",
-    "pending_payout_value": "0.074 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live-20160911t150154",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: http://us-livesports.com/buffalo-bills-vs-baltimore-ravens-live/",
-    "updated": "2016-09-11T15:02:03",
-    "url": "/nfl/@livehdvsstream/http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live#@cheetah/re-http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live-20160911t150154"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 185676152995,
         "voter": "anyx"
       },
@@ -987,6 +816,226 @@
     "title": "RE: Sketch #4 Birds in Love",
     "updated": "2016-09-11T12:48:15",
     "url": "/art/@dailybest/sketch-4-birds-in-love#@cheetah/re-re-dailybest-sketch-4-birds-in-love-20160911t123342655z-20160911t124805"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 182035444113,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 15897791194,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 141989550,
+        "voter": "cheetah50"
+      },
+      {
+        "rshares": 121050357,
+        "voter": "cheetah48"
+      },
+      {
+        "rshares": 99997502,
+        "voter": "cheetah49"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Okay, I have banned @yanik.",
+    "category": "creative",
+    "children": 0,
+    "created": "2016-09-11T07:33:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 198296272716,
+    "parent_author": "predator",
+    "parent_permlink": "re-yanik-girl-painting-20160911t073141227z",
+    "payout": 0.061,
+    "payout_at": "2016-09-18T07:33:18",
+    "pending_payout_value": "0.061 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-yanik-girl-painting-20160911t073141227z-20160911t073308",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "RE: Girl Painting",
+    "updated": "2016-09-11T07:33:18",
+    "url": "/creative/@yanik/girl-painting#@cheetah/re-re-yanik-girl-painting-20160911t073141227z-20160911t073308"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 15897791194,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 162864949,
+        "voter": "cheetah46"
+      },
+      {
+        "rshares": 121089288,
+        "voter": "cheetah45"
+      },
+      {
+        "rshares": 121107772,
+        "voter": "cheetah47"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "They are already banned!",
+    "category": "art",
+    "children": 0,
+    "created": "2016-09-11T07:18:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 16302853203,
+    "parent_author": "pfunk",
+    "parent_permlink": "re-kyleb15-superhero-inking-20160911t065131911z",
+    "payout": 0.006,
+    "payout_at": "2016-09-18T07:18:36",
+    "pending_payout_value": "0.006 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-kyleb15-superhero-inking-20160911t065131911z-20160911t071826",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: Superhero Inking",
+    "updated": "2016-09-11T07:18:36",
+    "url": "/art/@kyleb15/superhero-inking#@cheetah/re-re-kyleb15-superhero-inking-20160911t065131911z-20160911t071826"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 62266348844,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 100095194,
+        "voter": "cheetah42"
+      },
+      {
+        "rshares": 100261624,
+        "voter": "cheetah43"
+      },
+      {
+        "rshares": 141949259,
+        "voter": "cheetah44"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Okay, I have banned @kyleb15.",
+    "category": "art",
+    "children": 0,
+    "created": "2016-09-11T07:11:21",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 62608654921,
+    "parent_author": "pfunk",
+    "parent_permlink": "re-kyleb15-superhero-inking-20160911t065131911z",
+    "payout": 0.024,
+    "payout_at": "2016-09-18T07:11:21",
+    "pending_payout_value": "0.024 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-kyleb15-superhero-inking-20160911t065131911z-20160911t071112",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: Superhero Inking",
+    "updated": "2016-09-11T07:11:21",
+    "url": "/art/@kyleb15/superhero-inking#@cheetah/re-re-kyleb15-superhero-inking-20160911t065131911z-20160911t071112"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 182035444113,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 66247821324,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 101857729,
+        "voter": "cheetah17"
+      },
+      {
+        "rshares": 101760456,
+        "voter": "cheetah18"
+      },
+      {
+        "rshares": 123906339,
+        "voter": "cheetah19"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Warning! This user is on my black list, likely as a known plagiarist, spammer or ID thief. Please be cautious with this post!\nTo get off this list, please chat with us in the #steemitabuse-appeals channel in [steemit.chat](http://steemit.chat).",
+    "category": "nfl",
+    "children": 0,
+    "created": "2016-09-11T15:02:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 248610789961,
+    "parent_author": "livehdvsstream",
+    "parent_permlink": "http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live",
+    "payout": 0.074,
+    "payout_at": "2016-09-18T15:02:03",
+    "pending_payout_value": "0.074 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live-20160911t150154",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "RE: http://us-livesports.com/buffalo-bills-vs-baltimore-ravens-live/",
+    "updated": "2016-09-11T15:02:03",
+    "url": "/nfl/@livehdvsstream/http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live#@cheetah/re-http-us-livesports-com-buffalo-bills-vs-baltimore-ravens-live-20160911t150154"
   },
   {
     "active_votes": [
@@ -1101,62 +1150,5 @@
     "title": "RE: I love steem @cheetah true apology",
     "updated": "2016-09-11T08:14:57",
     "url": "/art/@kyleb15/i-love-steem-cheetah-true-apology#@cheetah/re-i-love-steem-cheetah-true-apology-20160911t081449"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 182035444113,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 15897791194,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 141989550,
-        "voter": "cheetah50"
-      },
-      {
-        "rshares": 121050357,
-        "voter": "cheetah48"
-      },
-      {
-        "rshares": 99997502,
-        "voter": "cheetah49"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay, I have banned @yanik.",
-    "category": "creative",
-    "children": 0,
-    "created": "2016-09-11T07:33:18",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 198296272716,
-    "parent_author": "predator",
-    "parent_permlink": "re-yanik-girl-painting-20160911t073141227z",
-    "payout": 0.061,
-    "payout_at": "2016-09-18T07:33:18",
-    "pending_payout_value": "0.061 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-re-yanik-girl-painting-20160911t073141227z-20160911t073308",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: Girl Painting",
-    "updated": "2016-09-11T07:33:18",
-    "url": "/creative/@yanik/girl-painting#@cheetah/re-re-yanik-girl-painting-20160911t073141227z-20160911t073308"
   }
 ]

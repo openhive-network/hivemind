@@ -411,6 +411,429 @@
     "url": "/newsfeed/@newsfeed/rangers-record-in-one-run-games-nearing-truly-historic-level"
   },
   {
+    "active_votes": [],
+    "author": "test-safari",
+    "author_reputation": 999316,
+    "beneficiaries": [],
+    "body": "This post should not be reblogged because even though it reuses permlink of reblogged post, it is separate new post.",
+    "body_length": 116,
+    "cashout_time": "2016-09-22T18:01:42",
+    "category": "hive-117600",
+    "children": 0,
+    "created": "2016-09-15T18:01:42",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T18:01:42",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "",
+    "parent_permlink": "hive-117600",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "reblogged-and-recreated",
+    "replies": [],
+    "root_title": "The post was deleted and permlink reused",
+    "title": "The post was deleted and permlink reused",
+    "total_payout_value": "0.000 HBD",
+    "url": "/hive-117600/@test-safari/reblogged-and-recreated"
+  },
+  {
+    "active_votes": [],
+    "author": "test-safari",
+    "author_reputation": 999316,
+    "beneficiaries": [],
+    "body": "This post should not be muted because even though it reuses permlink of muted post, it is separate new post.",
+    "body_length": 108,
+    "cashout_time": "2016-09-22T18:01:39",
+    "category": "hive-117600",
+    "children": 0,
+    "created": "2016-09-15T18:01:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T18:01:39",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "",
+    "parent_permlink": "hive-117600",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "muted-and-recreated",
+    "replies": [],
+    "root_title": "The post was deleted and permlink reused",
+    "title": "The post was deleted and permlink reused",
+    "total_payout_value": "0.000 HBD",
+    "url": "/hive-117600/@test-safari/muted-and-recreated"
+  },
+  {
+    "active_votes": [],
+    "author": "merovinjian",
+    "author_reputation": 22975498,
+    "beneficiaries": [],
+    "body": "<html>\n<p>This is a mark I designed for a credit union.</p>\n<p><img src=\"https://d13yacurqjgara.cloudfront.net/users/103019/screenshots/1831635/beehive.png\" width=\"400\" height=\"300\"/></p>\n</html>",
+    "body_length": 195,
+    "cashout_time": "2016-09-22T17:06:42",
+    "category": "logo",
+    "children": 0,
+    "created": "2016-09-15T17:06:42",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"logo\",\"design\",\"hexagon\",\"bee\",\"beehive\"],\"image\":[\"https://d13yacurqjgara.cloudfront.net/users/103019/screenshots/1831635/beehive.png\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T17:06:42",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "",
+    "parent_permlink": "logo",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "beehive-federal-credit-union-logo",
+    "replies": [],
+    "root_title": "Beehive Federal Credit Union Logo",
+    "title": "Beehive Federal Credit Union Logo",
+    "total_payout_value": "0.000 HBD",
+    "url": "/logo/@merovinjian/beehive-federal-credit-union-logo"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1366085197760,
+        "rshares": 230959935602,
+        "voter": "steem-id"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3946129863300,
+        "rshares": 276070473357,
+        "voter": "pal"
+      },
+      {
+        "percent": "5555",
+        "reputation": 2902189818091,
+        "rshares": 1061230469,
+        "voter": "murh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2090799841362,
+        "rshares": 1708142121,
+        "voter": "dimon14"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 222073479,
+        "voter": "sjamayee"
+      },
+      {
+        "percent": "10000",
+        "reputation": 24449186,
+        "rshares": 159474270,
+        "voter": "linka"
+      },
+      {
+        "percent": "10000",
+        "reputation": 174395287082,
+        "rshares": 205658708,
+        "voter": "blend"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1643833267,
+        "rshares": 151744718,
+        "voter": "blendplayz"
+      }
+    ],
+    "author": "blend",
+    "author_reputation": 174395287082,
+    "beneficiaries": [],
+    "body": "<html>\n<p>&nbsp;</p>\n<p><strong>WE ALL have our favourite childhood lollies - a packet of something sweet that evokes a deep nostalgia whenever we pass it in the supermarket or milk bar.</strong></p>\n<p>But one of our country\u2019s most beloved and enduring confectionaries can only be found in an unlikely place: Your local chemist.Glucojels (or, as most of us know them, \u2018chemist jelly beans\u2019) have been a fixture in pharmacies since 1941. That makes them a remarkable 75 years old this year.Generations of Australians have memories of being bought a small bag during a trip to pick up a prescription, or on a sick day home from school, each colour a different delicious flavour, each packet a game of \u2018avoid the aniseed ones\u2019.These jelly beans owe their consistent position at chemist front counters to their legitimate medical function. Unlike other jelly beans, Glucojel are made from glucose, the form of sugar most easily absorbed into the blood stream.Since the glucose-filled beans are manufactured to a standard weight of 3.5g, they provide a simple way for diabetics to manage blood sugar levels. Similarly, runners and cyclists have used them for years as a glucose and energy boost during a workout.This might explain why so many of us have fond memories of finding an open packet in our mum\u2019s handbag or in the car\u2019s glovebox.To celebrate Glucojel\u2019s 75th birthday, we\u2019ve put together a few sweet recipes that capture the sweet perfection of these Australian made and owned treasures. Obviously, though, we wouldn\u2019t recommend using any of these finished recipes for medicinal purposes. <img src=\"http://cdn.newsapi.com.au/image/v1/17dde9c6e134407996ee5b1eca5b19f9\"/></p>\n<p>&nbsp;This incredibly simple recipe can be made with whichever chocolate you prefer, and dotted with any lollies you like. The mix of white chocolate and multi-coloured jelly beans is particularly joyous though, and perfect for a party.<strong>Ingredients</strong>500g white chocolate100g candy melts in one colour, or 50g each of candy melts in different coloursA packet of jelly beansApprox. 1 tablespoon hundreds and thousands (or other sprinkles)<strong>Method</strong>Line two flat baking trays with baking paper.Using either a double boiler (a heat-proof bowl placed over a pot of simmering water) or a microwave, slowly melt the white chocolate until it only just becomes a smooth paste.Be careful not to overheat it.Keep the melted chocolate warm.In a second bowl, melt the candy melts using the same method (or multiple bowls if using separate colours).Pour the white chocolate out onto the prepared baking trays.Smooth it out slightly with a rubber spatula.Flick spoonfuls of melted candy melts onto the white chocolate.Repeat with a second colour if you like.Using a skewer or knife, create swirls of colour in the surface of the white chocolate.Evenly dot the jelly beans into the bark, using as many as you like.Push down slightly to ensure they set in the chocolate.Finish with an even sprinkling of hundreds and thousands.Transfer the baking trays into the fridge for an hour, or until the chocolate sets.Remove the bark from the baking paper and break into evenly sized shards.&nbsp;</p>\n<p>source &gt;news.com.au/lifestyle</p>\n</html>",
+    "body_length": 3234,
+    "cashout_time": "2016-09-22T15:12:21",
+    "category": "food",
+    "children": 1,
+    "created": "2016-09-15T15:12:21",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"food\",\"life\"],\"image\":[\"http://cdn.newsapi.com.au/image/v1/17dde9c6e134407996ee5b1eca5b19f9\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T15:19:42",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 510538732724,
+    "parent_author": "",
+    "parent_permlink": "food",
+    "pending_payout_value": "0.128 HBD",
+    "percent_hbd": 10000,
+    "permlink": "everything-you-ve-ever-wanted-to-know-and-more-about-chemist-jellybeans",
+    "replies": [],
+    "root_title": "You\u2019ll never guess how old these jellybeans are  Everything you\u2019ve ever wanted to know, and more, about chemist jellybeans",
+    "title": "You\u2019ll never guess how old these jellybeans are  Everything you\u2019ve ever wanted to know, and more, about chemist jellybeans",
+    "total_payout_value": "0.000 HBD",
+    "url": "/food/@blend/everything-you-ve-ever-wanted-to-know-and-more-about-chemist-jellybeans"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 15854806148148,
+        "rshares": 9536766402,
+        "voter": "richman"
+      },
+      {
+        "percent": "2300",
+        "reputation": 15755437221598,
+        "rshares": 6537252828,
+        "voter": "acidyo"
+      },
+      {
+        "percent": "2900",
+        "reputation": 1663549830469,
+        "rshares": 313685235,
+        "voter": "coar"
+      },
+      {
+        "percent": "5555",
+        "reputation": 2902189818091,
+        "rshares": 1414858482,
+        "voter": "murh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 7255473848113,
+        "rshares": 83504049115,
+        "voter": "herzmeister"
+      },
+      {
+        "percent": "2300",
+        "reputation": 17405459234693,
+        "rshares": 12153647541,
+        "voter": "venuspcs"
+      },
+      {
+        "percent": "2300",
+        "reputation": 4066839697461,
+        "rshares": 2102801117,
+        "voter": "getssidetracked"
+      },
+      {
+        "percent": "2300",
+        "reputation": 744428437430,
+        "rshares": 404056893,
+        "voter": "trees"
+      },
+      {
+        "percent": "2300",
+        "reputation": 2906973892,
+        "rshares": 54224429,
+        "voter": "strawhat"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1510234773828,
+        "rshares": 5883949028,
+        "voter": "bitland"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1058072223123,
+        "rshares": 847366145,
+        "voter": "luisucv34"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1386339611284,
+        "rshares": 2869523405,
+        "voter": "fiona777"
+      },
+      {
+        "percent": "10000",
+        "reputation": 686738916191,
+        "rshares": 360603550,
+        "voter": "sergey44"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1984154587642,
+        "rshares": 7132430554,
+        "voter": "chloetaylor"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4964569405579,
+        "rshares": 10415814055,
+        "voter": "dumar022"
+      },
+      {
+        "percent": "10000",
+        "reputation": 475920141542,
+        "rshares": 369703928,
+        "voter": "riosparada"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3740136030964,
+        "rshares": 2225398886,
+        "voter": "future24"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 8643768582,
+        "voter": "thebotkiller"
+      },
+      {
+        "percent": "10000",
+        "reputation": 289024216569,
+        "rshares": 690177186,
+        "voter": "herbertmueller"
+      },
+      {
+        "percent": "10000",
+        "reputation": -9068872902,
+        "rshares": 62519310,
+        "voter": "chrismarketing"
+      },
+      {
+        "percent": "10000",
+        "reputation": 692505456,
+        "rshares": 62735564,
+        "voter": "gamingdiamond"
+      },
+      {
+        "percent": "10000",
+        "reputation": 140342009284,
+        "rshares": 167195209,
+        "voter": "nang1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1509612108450,
+        "rshares": 2202573342,
+        "voter": "jsantana"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3103554028241,
+        "rshares": 2864636894,
+        "voter": "levycore"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3485898605376,
+        "rshares": 3915794549,
+        "voter": "naquoya"
+      },
+      {
+        "percent": "2500",
+        "reputation": 6263695706748,
+        "rshares": 4580502005,
+        "voter": "steemitpatina"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3749012705250,
+        "rshares": 7818251774,
+        "voter": "alexandre"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4272392942041,
+        "rshares": 5081885632,
+        "voter": "ats-david"
+      },
+      {
+        "percent": "10000",
+        "reputation": 135018071312,
+        "rshares": 262039750,
+        "voter": "blackeyed"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1818363378287,
+        "rshares": 4990498694,
+        "voter": "mscleverclocks"
+      },
+      {
+        "percent": "10000",
+        "reputation": 415511458887,
+        "rshares": 271765825,
+        "voter": "ratidor"
+      },
+      {
+        "percent": "10000",
+        "reputation": 663128407009,
+        "rshares": 1494524391,
+        "voter": "ablie"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1502200909130,
+        "rshares": 147753980,
+        "voter": "ola1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 971319419022,
+        "rshares": 841787796,
+        "voter": "annesaya"
+      },
+      {
+        "percent": "10000",
+        "reputation": 29605154,
+        "rshares": 159753618,
+        "voter": "my-art"
+      },
+      {
+        "percent": "10000",
+        "reputation": 148427870711,
+        "rshares": 193900056,
+        "voter": "mexresorts"
+      },
+      {
+        "percent": "10000",
+        "reputation": 28661626,
+        "rshares": 159003735,
+        "voter": "inspiring"
+      },
+      {
+        "percent": "10000",
+        "reputation": 745770738333,
+        "rshares": 106612001,
+        "voter": "mikerano"
+      }
+    ],
+    "author": "future24",
+    "author_reputation": 3740136030964,
+    "beneficiaries": [],
+    "body": "And here is the next part of impressions of the \"Pyronale 2016\" Fireworks-Event in Berlin. [German] Und hier ist der n\u00e4chste Teil von Eindr\u00fccken des \"Pyronale 2016\" Feuerwerk-Events in Berlin.\n\n\n<a href=\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_19_zpsd4vjb2dj.jpg.html\" target=\"_blank\"><img src=\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_19_zpsd4vjb2dj.jpg\" border=\"0\" alt=\" photo pyronale_19_zpsd4vjb2dj.jpg\"/></a>\n\n<a href=\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_17_zpsob6pmlpx.jpg.html\" target=\"_blank\"><img src=\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_17_zpsob6pmlpx.jpg\" border=\"0\" alt=\" photo pyronale_17_zpsob6pmlpx.jpg\"/></a>\n\n<a href=\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_18_zpssbujcwsx.jpg.html\" target=\"_blank\"><img src=\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_18_zpssbujcwsx.jpg\" border=\"0\" alt=\" photo pyronale_18_zpssbujcwsx.jpg\"/></a>\n\nI hope I will find the time to cut my videos of the event, to show them to you too.\n\n[German] Ich hoffe ich finde am Wochenende die Zeit meine Videos von dem Event zu schneiden, um sie euch auch noch zu zeigen.\n\n<strong> Have a nice day and hear you in the next article! </strong>\n<strong> [DE] Habt einen tollen Tag und bis zum n\u00e4chsten Artikel! </strong>\n\nJonas Ahrens\n\n<hr>\n\n# Hey y\u2019all for more great content check out these blogs too:\n**(All robot images from steemd.com)**\n\n<center> <a href=\"https://steemit.com/@stellabelle\"><img src=\"https://robohash.org/stellabelle.png?size=48x48\"/></a>  <br> @stellabelle </center> |  <center> <a href=\"https://steemit.com/@ericvancewalton\"><img src=\"https://robohash.org/ericvancewalton.png?size=48x48\"/></a> <br>  @ericvancewalton </center> |  <center> <a href=\"https://steemit.com/@cristi\"><img src=\"https://robohash.org/cristi.png?size=48x48\"/></a> <br>  @cristi </center>  | <center> <a href=\"https://steemit.com/@micheletrainer\"><img src=\"https://robohash.org/micheletrainer.png?size=48x48\"/></a> <br> @micheletrainer </center>  | <center> <a href=\"https://steemit.com/@mctiller\"><img src=\"https://robohash.org/mctiller.png?size=48x48\"/></a> <br> @mctiller </center>\n------------ | ------------------------- | ------------------------- | ------------------------- | -------------\n<center> <a href=\"https://steemit.com/@lukeofkondor\"><img src=\"https://robohash.org/lukeofkondor.png?size=48x48\"/></a> <br> @lukeofkondor </center> | <center> <a href=\"https://steemit.com/@soulsistashakti\"><img src=\"https://robohash.org/soulsistashakti.png?size=48x48\"/></a> <br> @soulsistashakti </center> | <center> <a href=\"https://steemit.com/@mindover\"><img src=\"https://robohash.org/mindover.png?size=48x48\"/></a> <br> @mindover </center> | <center> <a href=\"https://steemit.com/@mars-eve\"><img src=\"https://robohash.org/mars-eve.png?size=48x48\"/></a> <br> @mars-eve </center> | <center> <a href=\"https://steemit.com/@patrick-g\"><img src=\"https://robohash.org/patrick-g.png?size=48x48\"/></a> <br> @patrick-g </center>\n<center> <a href=\"https://steemit.com/@kaylinart\"><img src=\"https://robohash.org/kaylinart.png?size=48x48\"/></a> <br> @kaylinart </center> | <center> <a href=\"https://steemit.com/@romanskv\"><img src=\"https://robohash.org/romanskv.png?size=48x48\"></a> <br> @romanskv </center> | <center> <a href=\"https://steemit.com/@the-alien\"><img src=\"https://robohash.org/the-alien.png?size=48x48\"/></a> <br> @the-alien </center> | <center> <a href=\"https://steemit.com/@razvanelulmarin\"><img src=\"https://robohash.org/razvanelulmarin.png?size=48x48\"/></a> <br> @razvanelulmarin </center> | <center> <a href=\"https://steemit.com/@strangerarray\"><img src=\"https://robohash.org/strangerarray.png?size=48x48\"/></a> <br> @strangerarray </center> \n<center> <a href=\"https://steemit.com/@lat-nayar\"><img src=\"https://robohash.org/lat-nayar.png?size=48x48\"/></a> <br> @lat-nayar </center> | <center> <a href=\"https://steemit.com/@ann-hoy\"><img src=\"https://robohash.org/ann-hoy.png?size=48x48\"/></a> <br> @ann-hoy </center>| <center> <a href=\"https://steemit.com/@future24\"><img src=\"https://robohash.org/future24.png?size=48x48\"/></a> <br> @future24 </center> | <center> <a href=\"https://steemit.com/@julia26\"><img src=\"https://robohash.org/EF1.png?size=48x48\"/></a> <br> @julia26 </center> | <center> <a href=\"https://steemit.com/@papa-pepper\"><img src=\"https://img1.steemit.com/0x0/https://robohash.org/rainman?size=48x48\"/></a> <br> @papa-pepper </center> <br>",
+    "body_length": 4605,
+    "cashout_time": "2016-09-22T13:14:24",
+    "category": "photography",
+    "children": 2,
+    "created": "2016-09-15T13:14:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"photography\",\"life\",\"deutsch\",\"fireworks\",\"art\"],\"users\":[\"stellabelle\",\"ericvancewalton\",\"cristi\",\"micheletrainer\",\"mctiller\",\"lukeofkondor\",\"soulsistashakti\",\"mindover\",\"mars-eve\",\"patrick-g\",\"kaylinart\",\"romanskv\",\"the-alien\",\"razvanelulmarin\",\"strangerarray\",\"lat-nayar\",\"ann-hoy\",\"future24\",\"julia26\",\"papa-pepper\"],\"image\":[\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_19_zpsd4vjb2dj.jpg\",\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_17_zpsob6pmlpx.jpg\",\"http://i1076.photobucket.com/albums/w454/allindex1uture24/Pyronale%202016/pyronale_18_zpssbujcwsx.jpg\",\"https://robohash.org/stellabelle.png?size=48x48\",\"https://robohash.org/ericvancewalton.png?size=48x48\",\"https://robohash.org/cristi.png?size=48x48\",\"https://robohash.org/micheletrainer.png?size=48x48\",\"https://robohash.org/mctiller.png?size=48x48\",\"https://robohash.org/lukeofkondor.png?size=48x48\",\"https://robohash.org/soulsistashakti.png?size=48x48\",\"https://robohash.org/mindover.png?size=48x48\",\"https://robohash.org/mars-eve.png?size=48x48\",\"https://robohash.org/patrick-g.png?size=48x48\",\"https://robohash.org/kaylinart.png?size=48x48\",\"https://robohash.org/romanskv.png?size=48x48\",\"https://robohash.org/the-alien.png?size=48x48\",\"https://robohash.org/razvanelulmarin.png?size=48x48\",\"https://robohash.org/strangerarray.png?size=48x48\",\"https://robohash.org/lat-nayar.png?size=48x48\",\"https://robohash.org/ann-hoy.png?size=48x48\",\"https://robohash.org/future24.png?size=48x48\",\"https://robohash.org/EF1.png?size=48x48\",\"https://img1.steemit.com/0x0/https://robohash.org/rainman?size=48x48\"],\"links\":[\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_19_zpsd4vjb2dj.jpg.html\",\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_17_zpsob6pmlpx.jpg.html\",\"http://s1076.photobucket.com/user/allindex1uture24/media/Pyronale%202016/pyronale_18_zpssbujcwsx.jpg.html\",\"https://steemit.com/@stellabelle\",\"https://steemit.com/@ericvancewalton\",\"https://steemit.com/@cristi\",\"https://steemit.com/@micheletrainer\",\"https://steemit.com/@mctiller\",\"https://steemit.com/@lukeofkondor\",\"https://steemit.com/@soulsistashakti\",\"https://steemit.com/@mindover\",\"https://steemit.com/@mars-eve\",\"https://steemit.com/@patrick-g\",\"https://steemit.com/@kaylinart\",\"https://steemit.com/@romanskv\",\"https://steemit.com/@the-alien\",\"https://steemit.com/@razvanelulmarin\",\"https://steemit.com/@strangerarray\",\"https://steemit.com/@lat-nayar\",\"https://steemit.com/@ann-hoy\",\"https://steemit.com/@future24\",\"https://steemit.com/@julia26\",\"https://steemit.com/@papa-pepper\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T13:15:30",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 190843811486,
+    "parent_author": "",
+    "parent_permlink": "photography",
+    "pending_payout_value": "0.044 HBD",
+    "percent_hbd": 10000,
+    "permlink": "pyronale-berlin-2016-amazing-fireworks-impressions-part-3-english-german",
+    "replies": [],
+    "root_title": "Pyronale Berlin 2016 amazing Fireworks Impressions: Part 3 (English/German)",
+    "title": "Pyronale Berlin 2016 amazing Fireworks Impressions: Part 3 (English/German)",
+    "total_payout_value": "0.000 HBD",
+    "url": "/photography/@future24/pyronale-berlin-2016-amazing-fireworks-impressions-part-3-english-german"
+  },
+  {
     "active_votes": [
       {
         "percent": "10000",
@@ -458,7 +881,7 @@
     "author": "varda",
     "author_reputation": 722830970922,
     "beneficiaries": [],
-    "body": "<html>\n<p>&nbsp;&nbsp;In the morning, at 5 am when the moon completes his round, the alarm rings, my deepest sleep I wake up painfully. Kéops my cat starts singing tour and stops only when he filled his mess tin. Sweety then, the cat of my son jumps on the furniture in the kitchen and also claimed his bowl. Kashmir him not to come after me, until I make him hugs.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/DSCN0477faad0.jpg\" width=\"2758\" height=\"2736\"/></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/keops0029612b.jpg\" width=\"1464\" height=\"1162\"/></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Au-sommet81f7b.jpg\" width=\"731\" height=\"645\"/></p>\n<p>&nbsp;A small cup of coffee and I'm up for the day. After my shower, I have to feed the fish pond and two hens, they are waiting for me impatiently for me to release them from their cages.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/16e3c4.jpg\" width=\"620\" height=\"464\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Photo0224b24a.jpg\" width=\"2048\" height=\"1536\"/></p>\n<p><br></p>\n<p>&nbsp;6:15, I start my bag on her arm, my water bottle and my biscuit for lunch. On the road I am alone, few vehicles I meet. Great to run your car on a deserted road. In the winter when it snowed, I am the first to make tracks in the whiteness of the snow grows like cotton wool, sometimes, crazy beyond me and skids, it is an adrenaline rush. In summer the sun rises gives the sky a color of red sweetness, yellow, orange. In autumn, the trees begin to change color, it is a season because I love the beauty of trees is unique.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/d85917d4a45b3d581b5f40d1d7a7504a3bb1e.jpg\" width=\"236\" height=\"234\"/></p>\n<p><br></p>\n<p>Here I come down the street or is my workplace, hospital, regional hospital, the CHR. Vehicles coming after one another because we start at 7am. The staff is found, speak, tells their evening then everyone goes to the same place: the time clock, control object of our hours worked.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/chr841bd.jpg\" width=\"916\" height=\"613\"/></p>\n<p><br></p>\n<p>&nbsp;In the ladies locker room, it gets held: white jacket with blue and green patterns representing the logo of the institution, blue pants with various pockets which we do not serve!&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/DSCN1513-Copiee7a4d.jpg\" width=\"410\" height=\"681\"/></p>\n<p><br></p>\n<p>We arrive in our service, mine is the neurological rehabilitation service: we give up (or so) of people who have a stroke, an accident with neurological trauma, people who have multiple sclerosis or Guillain barred and other chronic diseases whose name is almost unknown.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Capture2bb0b8.jpg\" width=\"539\" height=\"627\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/370086-1f7d83.jpg\" width=\"325\" height=\"300\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Capturec0ccc.jpg\" width=\"589\" height=\"598\"/></p>\n<p><br></p>\n<p>We start our day with a report on each patient last night, we have 20 in service. After beginning the nursing: we make the toilet of the patient who is totally dependent. We get up in the chair. For others, we must educate, continue the actions he has learned with the therapist in the individual care, the patient should regain maximum independence so they can go home and take care only . It's a job that can last from 3 months to 6 months beyond, we can not do anything for them.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/souleve-malade-foldyadb08.jpg\" width=\"480\" height=\"640\"/></p>\n<p><br></p>\n<p>Headline in this service is: you come to bed but you leave again walking.&nbsp;</p>\n<p><br></p>\n<p>Sometimes, we fail either because the patient does not want a return to autonomy, or because the patient is too ill. We give the same chance to everyone, rich, poor, alcoholic, drug addict, young or old.&nbsp;</p>\n<p><br></p>\n<p>The management of a patient goes from shaving the beard of a man to the presentation on the toilet, the room arrangement the carefully tended beds.&nbsp;</p>\n<p><br></p>\n<p>Lunch arrived around 8:30 am, few patient is in the dining hall for breakfast, other unfinished eat in bed Logistical assistance serves meals that are different if the patient is diabetic, diet, dieters, old, or in solid supply resumption. You should know that when the patient has had a stroke, a stroke, swallowing is absent, which means that if the patient eats a sandwich, but he swallows the bread goes in the bronchial tubes and not in the stomach, giving a false swallowing, bronchi become infected and it's a disaster. So this patient who made false swallowing should eat while cream consistency and drink thickened liquid. Which is not very good but I admit it must go through these stages in order to re-eat a day normally.&nbsp;</p>\n<p><br></p>\n<p>Physiotherapists arrive at 9am and leave a 17h, occupational therapists also. There is also a neuropsychologist, a speech therapist and all do work that allows the patient to regain maximum independence, which means that the patient all day is busy. Visitors can come between 14:30 and 19:30.&nbsp;</p>\n<p><br></p>\n<p>After lunch, we continue our work, when all is well, we finish around 10:30 or 11am but sometimes it is noon we are still in the rooms.&nbsp;</p>\n<p><br></p>\n<p>In terms of handling, the entry of the patient, it is usually in bed or in a wheelchair with a right hemiplegia or left, some have forgotten that they had half a disabled body, so it must withstand and no wear and show him how to do with one leg to go from wheelchair to bed and vice versa. Others are completely invalid, they know not move neither arms nor legs, and for those, or we wear them either we lift them with a forklift.&nbsp;</p>\n<p><br></p>\n<p>During dinner, we feed the disabled and we encode our care in the computer.</p>\n<p><br></p>\n<p>&nbsp;Around 13h, we are a few naps after going on the toilet. Sometimes we have a problem in the pants, oops! When everyone is changed to bed, we have a service change ratio and the time, the hour of the end of our service is lagging. At 14h is the start of the morning shift. For my part, I take a good shower and I take the way home or waiting for my cats and my dog makes me a big party.&nbsp;</p>\n<p><br></p>\n<p>We must not believe that the nursing profession is simple, each service is different and you can not compare the care of each other.&nbsp;</p>\n<p><br></p>\n<p>I hope I have not bothered you with this long text, I wish you a good day to you all. &nbsp;&nbsp;&nbsp;&nbsp;</p>\n</html>",
+    "body": "<html>\n<p>&nbsp;&nbsp;In the morning, at 5 am when the moon completes his round, the alarm rings, my deepest sleep I wake up painfully. K\u00e9ops my cat starts singing tour and stops only when he filled his mess tin. Sweety then, the cat of my son jumps on the furniture in the kitchen and also claimed his bowl. Kashmir him not to come after me, until I make him hugs.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/DSCN0477faad0.jpg\" width=\"2758\" height=\"2736\"/></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/keops0029612b.jpg\" width=\"1464\" height=\"1162\"/></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Au-sommet81f7b.jpg\" width=\"731\" height=\"645\"/></p>\n<p>&nbsp;A small cup of coffee and I'm up for the day. After my shower, I have to feed the fish pond and two hens, they are waiting for me impatiently for me to release them from their cages.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/16e3c4.jpg\" width=\"620\" height=\"464\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Photo0224b24a.jpg\" width=\"2048\" height=\"1536\"/></p>\n<p><br></p>\n<p>&nbsp;6:15, I start my bag on her arm, my water bottle and my biscuit for lunch. On the road I am alone, few vehicles I meet. Great to run your car on a deserted road. In the winter when it snowed, I am the first to make tracks in the whiteness of the snow grows like cotton wool, sometimes, crazy beyond me and skids, it is an adrenaline rush. In summer the sun rises gives the sky a color of red sweetness, yellow, orange. In autumn, the trees begin to change color, it is a season because I love the beauty of trees is unique.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/d85917d4a45b3d581b5f40d1d7a7504a3bb1e.jpg\" width=\"236\" height=\"234\"/></p>\n<p><br></p>\n<p>Here I come down the street or is my workplace, hospital, regional hospital, the CHR. Vehicles coming after one another because we start at 7am. The staff is found, speak, tells their evening then everyone goes to the same place: the time clock, control object of our hours worked.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/chr841bd.jpg\" width=\"916\" height=\"613\"/></p>\n<p><br></p>\n<p>&nbsp;In the ladies locker room, it gets held: white jacket with blue and green patterns representing the logo of the institution, blue pants with various pockets which we do not serve!&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/DSCN1513-Copiee7a4d.jpg\" width=\"410\" height=\"681\"/></p>\n<p><br></p>\n<p>We arrive in our service, mine is the neurological rehabilitation service: we give up (or so) of people who have a stroke, an accident with neurological trauma, people who have multiple sclerosis or Guillain barred and other chronic diseases whose name is almost unknown.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Capture2bb0b8.jpg\" width=\"539\" height=\"627\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/370086-1f7d83.jpg\" width=\"325\" height=\"300\"/></p>\n<p><br></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/Capturec0ccc.jpg\" width=\"589\" height=\"598\"/></p>\n<p><br></p>\n<p>We start our day with a report on each patient last night, we have 20 in service. After beginning the nursing: we make the toilet of the patient who is totally dependent. We get up in the chair. For others, we must educate, continue the actions he has learned with the therapist in the individual care, the patient should regain maximum independence so they can go home and take care only . It's a job that can last from 3 months to 6 months beyond, we can not do anything for them.&nbsp;</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/15/souleve-malade-foldyadb08.jpg\" width=\"480\" height=\"640\"/></p>\n<p><br></p>\n<p>Headline in this service is: you come to bed but you leave again walking.&nbsp;</p>\n<p><br></p>\n<p>Sometimes, we fail either because the patient does not want a return to autonomy, or because the patient is too ill. We give the same chance to everyone, rich, poor, alcoholic, drug addict, young or old.&nbsp;</p>\n<p><br></p>\n<p>The management of a patient goes from shaving the beard of a man to the presentation on the toilet, the room arrangement the carefully tended beds.&nbsp;</p>\n<p><br></p>\n<p>Lunch arrived around 8:30 am, few patient is in the dining hall for breakfast, other unfinished eat in bed Logistical assistance serves meals that are different if the patient is diabetic, diet, dieters, old, or in solid supply resumption. You should know that when the patient has had a stroke, a stroke, swallowing is absent, which means that if the patient eats a sandwich, but he swallows the bread goes in the bronchial tubes and not in the stomach, giving a false swallowing, bronchi become infected and it's a disaster. So this patient who made false swallowing should eat while cream consistency and drink thickened liquid. Which is not very good but I admit it must go through these stages in order to re-eat a day normally.&nbsp;</p>\n<p><br></p>\n<p>Physiotherapists arrive at 9am and leave a 17h, occupational therapists also. There is also a neuropsychologist, a speech therapist and all do work that allows the patient to regain maximum independence, which means that the patient all day is busy. Visitors can come between 14:30 and 19:30.&nbsp;</p>\n<p><br></p>\n<p>After lunch, we continue our work, when all is well, we finish around 10:30 or 11am but sometimes it is noon we are still in the rooms.&nbsp;</p>\n<p><br></p>\n<p>In terms of handling, the entry of the patient, it is usually in bed or in a wheelchair with a right hemiplegia or left, some have forgotten that they had half a disabled body, so it must withstand and no wear and show him how to do with one leg to go from wheelchair to bed and vice versa. Others are completely invalid, they know not move neither arms nor legs, and for those, or we wear them either we lift them with a forklift.&nbsp;</p>\n<p><br></p>\n<p>During dinner, we feed the disabled and we encode our care in the computer.</p>\n<p><br></p>\n<p>&nbsp;Around 13h, we are a few naps after going on the toilet. Sometimes we have a problem in the pants, oops! When everyone is changed to bed, we have a service change ratio and the time, the hour of the end of our service is lagging. At 14h is the start of the morning shift. For my part, I take a good shower and I take the way home or waiting for my cats and my dog makes me a big party.&nbsp;</p>\n<p><br></p>\n<p>We must not believe that the nursing profession is simple, each service is different and you can not compare the care of each other.&nbsp;</p>\n<p><br></p>\n<p>I hope I have not bothered you with this long text, I wish you a good day to you all. &nbsp;&nbsp;&nbsp;&nbsp;</p>\n</html>",
     "body_length": 6785,
     "cashout_time": "2016-09-22T19:43:54",
     "category": "story",
@@ -481,298 +904,5 @@
     "title": "My day hospital",
     "total_payout_value": "0.000 HBD",
     "url": "/story/@varda/my-day-hospital"
-  },
-  {
-    "active_votes": [
-      {
-        "percent": "10000",
-        "reputation": 5705459768,
-        "rshares": 54846770,
-        "voter": "ejaredallen"
-      }
-    ],
-    "author": "ejaredallen",
-    "author_reputation": 5705459768,
-    "beneficiaries": [],
-    "body": "<html>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/image-986x1024-289x300.jpeg\"/></p>\n<h1>Nature</h1>\n<p>I haven't stopped and taken a picture of the beauty around me in a long time. It's funny how we can get so caught up in work and the business of a crazy life and miss the simply beauty along the way. Sometime you've just got to stop and smell the roses; and while you're there, take a picture!</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/image-3-1024x768-300x225.jpeg\"/></p>\n<p>These aren't roses, I know: they're wild flowers. They don't get the nurture and care that roses do, and yet they are provided for and they bloom into beautiful blossoms in their own time. They have a harder life than others, and that's how we humans are as well. Some of us were well taken care of growing up and were treated like roses, while others were left in the field to grow up alone and without the love and care we should have had. But we are all beautiful in our own ways and if we survive long enough, we will blossom into something spectacular.</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_6440-1024x1024-300x300.jpg\"/></p>\n<h2>Colorado mountain rivers</h2>\n<p>When the snow on the tops of the mountains melt, it feed the rushing rivers that carve their way down the mountainside. The climbing is excellent, the whether and the views are truly gorgeous, but something about the rivers rushing through the mountains draws you in. There is a memorization about the brave rivers unafraid of the mountains and simply rushing on by recklessly.</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_6031-1024x1024-300x300.jpg\"/></p>\n<h2>Mississippi at sunset</h2>\n<p>Sometimes the world just slows down and magic happens. This was one of those times. On the night before my sister's wedding in Tupelo, Mississippi the sky exploded in color. What a calm reassurance before a monumental event: the approval stamp of God upon the sanction of their marriage.</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_5829-1024x1024-300x300.jpg\"/></p>\n<h2>Hundreds of years old Indian hieroglyphs in Arizona</h2>\n<p>This was an incredible hike in the Arizona mountain ranges to discover a place where the Apache Indians, or perhaps some other tribe had lived hundreds of years ago!</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/2015-07-13-06-37-59-1024x1024-300x300.jpg\"/></p>\n<h2>Uganda, Africa at twilight, from a moving bus</h2>\n<p>Africa is always an adventure, but in 2015 we took a safari on the northern rim and caught this shot on the way back to the lodge. I love how the beauty of the world is unique in its diversity from place to place, even across the Atlantic.</p>\n<p><img src=\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_7281-1024x1024-300x300.jpg\"/></p>\n<p>This is one of my favorite shots. I don't remember where I took it or when, but the colors, the bliss, the peacefulness of this field of flowers was stunning. I'm glad I was able to capture an image of its beauty to remember it by. And to think, all of this beauty was made by God in a second! His power to create a world is amazing and perfect in every way. We get to see His marvelous creation every day!&nbsp;</p>\n<h2>Follow me <a href=\"https://steemit.com/@ejaredallen\">@ejaredallen </a>for more pictures and great content!</h2>\n</html>",
-    "body_length": 3518,
-    "cashout_time": "2016-09-22T19:42:24",
-    "category": "photography",
-    "children": 0,
-    "created": "2016-09-15T19:42:24",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "json_metadata": "{\"tags\":[\"photography\",\"pictures\",\"art\",\"steemit\",\"travel\"],\"image\":[\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/image-986x1024-289x300.jpeg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/image-3-1024x768-300x225.jpeg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_6440-1024x1024-300x300.jpg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_6031-1024x1024-300x300.jpg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_5829-1024x1024-300x300.jpg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/2015-07-13-06-37-59-1024x1024-300x300.jpg\",\"http://www.theanonymousnovelist.com/wp-content/uploads/2016/09/img_7281-1024x1024-300x300.jpg\"],\"links\":[\"https://steemit.com/@ejaredallen\"]}",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T19:43:33",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 54846770,
-    "parent_author": "",
-    "parent_permlink": "photography",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "wanna-see-something-cool",
-    "replies": [],
-    "root_title": "Shot From Around The Block On An iPhone!",
-    "title": "Shot From Around The Block On An iPhone!",
-    "total_payout_value": "0.000 HBD",
-    "url": "/photography/@ejaredallen/wanna-see-something-cool"
-  },
-  {
-    "active_votes": [
-      {
-        "percent": "10000",
-        "reputation": 1289521305818,
-        "rshares": 1979857275,
-        "voter": "cwbrooch"
-      },
-      {
-        "percent": "10000",
-        "reputation": 2553181200335,
-        "rshares": 3911638805,
-        "voter": "zaitsevalesyaa"
-      }
-    ],
-    "author": "cwbrooch",
-    "author_reputation": 1289521305818,
-    "beneficiaries": [],
-    "body": "<html>\n<p>This is part 2 of my Memoir. &nbsp;Missed Part 1?<a href=\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-in-moscow-part-1-surviving-underground\"> Click here.</a><br>\nDon't know what's going on? <a href=\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-of-living-in-moscow-preamble\">Start from the beginning here.</a></p>\n<p>If you like what you're reading, follow me @cwbrooch for more craziness. if you love what you're reading recommend me to other peeps :) feedback is also very appreciated.</p>\n<p><img src=\"https://s14.postimg.org/bpiqdmgpt/Untitled.jpg\" width=\"1066\" height=\"800\"/></p>\n<h1>Russian Roulette - A Memoir of my Two Years in Moscow - Part 2 - Under the Table Tactics</h1>\n<p>In this part of my memoir I am going to attempt to describe the dark side of Moscow. All stories depicted here either happened directly to people I knew, or were described to me as &nbsp;a <em>it's-russia-get-used-to-it </em>anecdote.<br>\nYes, I will be talking about corruption and paying people under the table for things but bear in mind that even though it seems like a common practice definitely not all people do that and not all people experience the phenomenon.</p>\n<h3>A ROUTINE POLICE CHECK<strong>&nbsp;</strong></h3>\n<p>It is said that it is extremely wise to keep 2k-5k Rubles (about 28-68 Euro, 30-77 Dollars, 23-58 Pounds) in your registration papers at all times. They tend to disappear when you get your documents back from the officer... If one does not have such loose change, the guy tends to make one's life difficult. \"<em>You were speeding\", \"You didn't stop at the STOP sign\", \"You're light is out\" </em>etc. Driving is another interesting phenomenon in Moscow. You might think that since the metro is so packed, the streets will be empty. On the contrary, but I will not get into that right now as that makes a completely different post... &nbsp;However, what I will tell you is &nbsp;how one of my students passed her driving exam, which leads us to...</p>\n<h3>PAYING TO PASS AN EXAM</h3>\n<p>After her first failed attempt, my student looked at her instructor/examiner and asked: \"Could you please tell me what I did wrong, so I can work on it in the future?\" He stared back at her surprised and announced: \"Well, you didn't pay me extra, what do you expect?!\" At that point even I was shocked - \"So people openly tell you they want money?!\" \"Get used to it Kasia, It's Russia....\"<br>\nNeedless to say, she was forced to pay the second time around and surprise, surprise, she passed....<br>\n<br>\nI taught English in a company. I came one week, and saw that everyone was kind of in a rush and slightly agitated. I asked what the problem was and they said they were waiting for an audit. I remember wishing them good luck... One lady looked at me and smiled \"We paid the guys to look the other way, it will be fine!\" I didn't even bother to comment as I had aleady known there was no point...</p>\n<h3>GETTING INTO A PRIVATE EVENT</h3>\n<p>It was the three of us - my BF, his friend and I. We wanted to do some clubbing and the friend decided we should go to a very trendy bar in the heart of Moscow. He had a loyalty card there and was well known among the bouncers. We didn't really look the part, but a hefty fee paid for each of us (by the friend) was enough to let us in...</p>\n<p>That was a minor party. Let's talk about the big stuff, involving bigger money!<br>\nIf you know someone, who knows someone, who knows someone you might be able to (legally) attend the dress rehearsal of the famous Victory Parade in May (the 9th to be exact). It costs about 10k (137 Euro, 116 Pounds , 153 Dollars) Watch fragments of the video below to see the magnitude of what I am talking about.&nbsp;</p>\n<p>The whole thing is long, play with it a little bit. The good stuff starts at about 40 minutes. <a href=\"https://www.youtube.com/channel/UC4qBu3EvraPWezHbaC7npIQ\">Source</a></p>\n<p>https://www.youtube.com/watch?v=5EI3FYynz-Q</p>\n<p>To enter the actual parade however, you need to be a prominent member of the society (e.g. ex-military) or someone famous or filthy rich :)</p>\n<p>The event itself is quite impressive and for soldiers taking part in the march it is an honor among honors. &nbsp;<br>\nWe had the privilege of living 15 minutes on foot from the Red Square so we saw all the preparations and marches right outside our windows (till 11pm at night...)</p>\n<p><img src=\"https://lh3.googleusercontent.com/3OMfOqwX2pQ5BYeql8V1tg4J6VcMzG75pLD-nhsfHw0BYFLEQOQSeVl-sVdEkDwS6VfPco-FukpjwQONwimoOhzzT4GIPDt_VGbJfNDYaltTvEcyOFK5do7PZD1-tjDW0nxKYhUQdxG4yoxX6ZS590fMaveLKSI2Voz579yTME9U8D7UgN7R3ufBrAcq0KV8kA9VqMVxryabh2X_jBiMnP3Uwjj_hrWn3ARzHggZMRuo3G3ORSKDpoqcBA25bRDeWHe7nVT4X58NolQ4yY8HVjzyUr4zDneI8dy_eHnSf0F0FBZ8kn4NQQ3ueVR84tu-Ot64CZb9a1SetmKmupvAxBbuS8z3jBsvCECD8A5jz9qevTOkgHEbV0z2hVteH64gCLg3OI9mRVqw2GWAYwNSUlGGtwCxmwXq3p_j_igwncarIhIF2HX_bV0ACrucmewR6IiIdVfaKKAO9g2ycLbJRr_SBwE9TxBND9ar0R267Grzq5SHywG71h1nxZnXInW-HQ2l1cou8zqdiEUanqkeSbgIunZVNBcEnYYinmF-WZd5y0_Luc8rdDYy0GlKAtAJ4z0-woKDs6d_XKWhiWsYOAW3rWwCe3cJylK_6H7wNO2PlBKL=w1163-h775-no\" width=\"1162\" height=\"775\"/></p>\n<p>PS. I am aware that my portrayal of Moscow might seem bleak and depressing. Believe me, it was not. I;m simply trying to describe the juicy bits, the interesting stuff :) My next post will be more optimistic as I will be talking about sports, parks an recreations &nbsp;:)</p>\n<p>&nbsp;____________________________________________________________________________</p>\n<p>Thank you for reading Part 2 of my memoir.</p>\n<p>Want to find out more about living in Moscow? Follow me <a href=\"https://steemit.com/@cwbrooch\">@cwbrooch</a> :)</p>\n<p>My other work on Streemit:</p>\n<p>1) <a href=\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-of-living-in-moscow-preamble\">Russian Roulette - Preamble</a>&nbsp;</p>\n<p>2) <a href=\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-in-moscow-part-1-surviving-underground\">Russian Roulette - Part 1 - Surviving Underground</a></p>\n<p>3) <a href=\"https://steemit.com/languages/@cwbrooch/why-shouldn-t-you-use-google-translate-for-learning-english-and-which-dictionaries-are-faaaar-better\">Why shouldn't you use google translate for learning English and which dictionaries are far better</a>.&nbsp;</p>\n<p>4) &nbsp;<a href=\"https://steemit.com/languages/@cwbrooch/how-to-learn-vocabulary-effectively-in-any-language\">How to learn vocabulary effectively in any language!</a></p>\n<p>5) <a href=\"https://steemit.com/introduceyourself/@cwbrooch/teacher-story-teller-cat-lover-about-me\">About me: introduction</a> &nbsp;<br>\n&nbsp;</p>\n<p><br></p>\n</html>",
-    "body_length": 6713,
-    "cashout_time": "2016-09-22T19:41:09",
-    "category": "story",
-    "children": 0,
-    "created": "2016-09-15T19:41:09",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "json_metadata": "{\"tags\":[\"story\",\"writing\",\"travel\",\"life\",\"russia\"],\"users\":[\"cwbrooch\"],\"image\":[\"https://s14.postimg.org/bpiqdmgpt/Untitled.jpg\",\"https://img.youtube.com/vi/5EI3FYynz-Q/0.jpg\",\"https://lh3.googleusercontent.com/3OMfOqwX2pQ5BYeql8V1tg4J6VcMzG75pLD-nhsfHw0BYFLEQOQSeVl-sVdEkDwS6VfPco-FukpjwQONwimoOhzzT4GIPDt_VGbJfNDYaltTvEcyOFK5do7PZD1-tjDW0nxKYhUQdxG4yoxX6ZS590fMaveLKSI2Voz579yTME9U8D7UgN7R3ufBrAcq0KV8kA9VqMVxryabh2X_jBiMnP3Uwjj_hrWn3ARzHggZMRuo3G3ORSKDpoqcBA25bRDeWHe7nVT4X58NolQ4yY8HVjzyUr4zDneI8dy_eHnSf0F0FBZ8kn4NQQ3ueVR84tu-Ot64CZb9a1SetmKmupvAxBbuS8z3jBsvCECD8A5jz9qevTOkgHEbV0z2hVteH64gCLg3OI9mRVqw2GWAYwNSUlGGtwCxmwXq3p_j_igwncarIhIF2HX_bV0ACrucmewR6IiIdVfaKKAO9g2ycLbJRr_SBwE9TxBND9ar0R267Grzq5SHywG71h1nxZnXInW-HQ2l1cou8zqdiEUanqkeSbgIunZVNBcEnYYinmF-WZd5y0_Luc8rdDYy0GlKAtAJ4z0-woKDs6d_XKWhiWsYOAW3rWwCe3cJylK_6H7wNO2PlBKL=w1163-h775-no\"],\"links\":[\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-in-moscow-part-1-surviving-underground\",\"https://steemit.com/story/@cwbrooch/russian-roulette-a-memoir-of-my-two-years-of-living-in-moscow-preamble\",\"https://www.youtube.com/channel/UC4qBu3EvraPWezHbaC7npIQ\",\"https://www.youtube.com/watch?v=5EI3FYynz-Q\",\"https://steemit.com/@cwbrooch\",\"https://steemit.com/languages/@cwbrooch/why-shouldn-t-you-use-google-translate-for-learning-english-and-which-dictionaries-are-faaaar-better\",\"https://steemit.com/languages/@cwbrooch/how-to-learn-vocabulary-effectively-in-any-language\",\"https://steemit.com/introduceyourself/@cwbrooch/teacher-story-teller-cat-lover-about-me\"]}",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T19:42:57",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 5891496080,
-    "parent_author": "",
-    "parent_permlink": "story",
-    "pending_payout_value": "0.001 HBD",
-    "percent_hbd": 10000,
-    "permlink": "russian-roulette-a-memoir-part-2-under-the-table-tactics",
-    "replies": [],
-    "root_title": "Russian Roulette - a Memoir [Part 2] - Under-the-table Tactics",
-    "title": "Russian Roulette - a Memoir [Part 2] - Under-the-table Tactics",
-    "total_payout_value": "0.000 HBD",
-    "url": "/story/@cwbrooch/russian-roulette-a-memoir-part-2-under-the-table-tactics"
-  },
-  {
-    "active_votes": [
-      {
-        "percent": "10000",
-        "reputation": 0,
-        "rshares": 1856124515188,
-        "voter": "badassmother"
-      },
-      {
-        "percent": "500",
-        "reputation": 4931888829122,
-        "rshares": 1511911763,
-        "voter": "fkn"
-      },
-      {
-        "percent": "500",
-        "reputation": 5414208804644,
-        "rshares": 1987313581,
-        "voter": "elishagh1"
-      },
-      {
-        "percent": "5555",
-        "reputation": 2902189818091,
-        "rshares": 1061309796,
-        "voter": "murh"
-      },
-      {
-        "percent": "500",
-        "reputation": 598181152117,
-        "rshares": 10685732759,
-        "voter": "kimziv"
-      },
-      {
-        "percent": "500",
-        "reputation": 19111656178138,
-        "rshares": 7380892516,
-        "voter": "furion"
-      },
-      {
-        "percent": "10000",
-        "reputation": 431450051428,
-        "rshares": 13847065167,
-        "voter": "aaseb"
-      },
-      {
-        "percent": "500",
-        "reputation": 782596410473,
-        "rshares": 233089182,
-        "voter": "poseidon"
-      },
-      {
-        "percent": "500",
-        "reputation": 10519849768972,
-        "rshares": 1226120506,
-        "voter": "positive"
-      },
-      {
-        "percent": "500",
-        "reputation": 17698439393799,
-        "rshares": 1805841949,
-        "voter": "sisterholics"
-      },
-      {
-        "percent": "500",
-        "reputation": 10771708337101,
-        "rshares": 63861075353,
-        "voter": "laonie"
-      },
-      {
-        "percent": "500",
-        "reputation": 18027204457681,
-        "rshares": 2665078950,
-        "voter": "myfirst"
-      },
-      {
-        "percent": "500",
-        "reputation": 5776723480371,
-        "rshares": 12962686205,
-        "voter": "somebody"
-      },
-      {
-        "percent": "500",
-        "reputation": 206355094166,
-        "rshares": 484662341,
-        "voter": "flysaga"
-      },
-      {
-        "percent": "500",
-        "reputation": 97845484474,
-        "rshares": 2863548500,
-        "voter": "midnightoil"
-      },
-      {
-        "percent": "500",
-        "reputation": 3016325652890,
-        "rshares": 7162422615,
-        "voter": "xiaohui"
-      },
-      {
-        "percent": "500",
-        "reputation": 6111268639849,
-        "rshares": 485163523,
-        "voter": "elfkitchen"
-      },
-      {
-        "percent": "500",
-        "reputation": 1851205309677,
-        "rshares": 223914723,
-        "voter": "xiaokongcom"
-      },
-      {
-        "percent": "500",
-        "reputation": 4195733833721,
-        "rshares": 451374022,
-        "voter": "xianjun"
-      },
-      {
-        "percent": "10000",
-        "reputation": 38377870181305,
-        "rshares": 82361209107,
-        "voter": "markrmorrisjr"
-      }
-    ],
-    "author": "markrmorrisjr",
-    "author_reputation": 38377870181305,
-    "beneficiaries": [],
-    "body": "## In this episode, a hot Aedapt girl helps Jack escape Killer giant Cockroaches! ##\n\n**Jake was peering through cracks between the plaster laths back into the room where they guard stood.** \n\n![enter image description here](https://s22.postimg.org/d4vifrmo1/Madison.jpg)\n***Missed an episode? Great more great reading for you [on my blog](https://steemit.com/@markrmorrisjr)! Be sure to follow me for awesome daily updates in your feed and leave me comments. I love comments!***\n\n“No, we’re not that smart when we’re under. We can really only do what we hear them telling us to do.” Jake whispered, calmly as the big guard moved within inches of the wall, snorting. The guard turned, blasted a hole in the ceiling with his gun and charged back into the hall. \n\n*They heard him blasting the door of the next room open.*\n\n“We can’t stay here. I’m guessing you’ve got this one on a signal blocker and there’s not much time.” \n\nThe girl turned and ran to a corner, where an iron hand rail rose up out of the floor in a curve. She disappeared through the floor and as Jack followed, he found a narrow, spiraling stair that led below. \n\nHe lost his footing and slid down the stairs, narrowly missing the girl. She stood in the room below, with ear to the door that led into the hall.\n\n![enter image description here](https://s16.postimg.org/90derv079/spiral_stair.jpg)\n\n*Jake followed close behind. The girl with the violet eyes opened the door and stepped out into the hall with the awakened Nosher right behind her and Jack bringing up the rear. Jack had no idea what to do next, but the girl seemed to be in her element, and willing to help.*\n\n**Hopefully, she was not leading them into more danger.** \n\nHe followed her past one door, and into the darkened room where they had first started. It was empty, which could only mean one thing. The Noshers who had recently occupied it were upstairs right now with the ugly guard. They were looking for Jack and the others and would soon head back down.\n\n“Shouldn’t we just get out of here?” Jack said. He stood with his back to the wall and the door opened a crack so that one eye could see down the hall toward the upper stairs.\n\n“Not without these,” the girl walked to where the guard had been and pointed up at the weapons, suspended above. She ran a hand along the doorframe, “It ought to be along here somewhere.” She said.\n\n**“What is?” Jack hissed, shifting as her body pressed against his.** \n\nShe ran her hand along the top of the doorframe. He froze; she smelled good. It had been a long time since a girl had gotten this close to him, junior prom, in fact. He did not have a lot of time for dating with his work schedule. \n\n*To top it off, the smell of burnt fries that clung to him even after an hour in the shower was hardly an aphrodisiac.*\n\nThe girl put one hand on his chest and stood on tiptoe, pressing tight against him. “Oh, don’t kid yourself; you just happened to be in my way.” She laughed, scornfully, and pressed a hidden button at the top right corner of the door. Weapons rained down with a crash, and she quickly chose two handguns, handing one to Jack. \n\nShe pressed the button again, and the remaining weapons zipped back up into position. Jack had to grip the gun in his hand firmly to keep it from joining them.\n\n![enter image description here](https://s13.postimg.org/xp1l7jjyv/guns.jpg)\n\n**“Electro magnet,” she said and opened the door, moving out, weapon first.**\n\n“I knew that,” Jack said. He flattened himself against the hallway wall, like a TV detective. The magnet had occurred to him, but in his addled state, he had not really grasped the concept. Mostly he just did not like the idea of her being smarter than he was. \n\n“Keep up” he hissed to Jake, who had managed to grab a revolver.\nThe three moved quickly down the hall and turned toward the front door. The two roaches Jack had seen earlier, peered out from either side. \n\n**They had weapons leveled in his direction.**\n\n*The girl crouched and moved forward as if she were still a Nosher. It worked. Jack followed suit, and Jake did his best. His human consciousness was getting stronger by the minute.* \n\nHe had even started getting color back in his cheeks, and Jack was beginning to notice that the man seemed oddly familiar, the more human he became. “Could be a side effect of this Nosher thinking,\" he guessed.\n\n“They're right behind us,” the girl hissed to one of the roaches. “Blast the next thing that comes down those stairs, you got me?” \n\n**The bug clicked and hissed.** \n\n*Jack assumed it was a yes, because the two giant insects moved in and took up positions on either side of the hall.*\n\nJack bolted out the door and was relieved to see the Rabbit zip up just in time. Phineas sat behind the wheel, and the Things were nowhere in sight. Behind them, they heard the roaches open fire, and then a huge blast echoed down the hall. \n\n![enter image description here](https://s13.postimg.org/4klau8zdj/phin_rabbit.jpg)\n\nA gust of wind barreled out the door, raining cockroach guts over the three escaping figures. Jake stumbled, and Jack picked him up and shoved him into the back seat of the Rabbit.\n\nHe turned back to let the girl in, but she was gone. Phineas stood up on the running board, slapping the roof of the vehicle furiously. “Get in the car! Let’s go man!”\n\n*By the time Jack had slid into the passenger seat, Phineas had the Rabbit patching out. They were up to top speed in a matter of seconds.*\n\n**“Find a me a safe dime!” Phineas yelled, standing as he worked the pedals and tried to see over the steering wheel at the same time.**\n\n“What?” Jack yelled over the whine of the engine.\n\n“Dime, a dimension, get us out of here.” Phineas pleaded.\n\nJack opened the glove compartment and fiddled with the controls, but nothing happened.\n\n**“Damn, guess I have to do everything, Phineas grumbled, “here, take the wheel.”** \n\n*The Leprechaun ducked under Jack’s arms as he grabbed the steering wheel from his position in the passenger’s seat.* \n\nPhineas leaned across the stick shift, his feet working the pedals as he started manipulating the glovebox controls. Jack’s view through the windshield changed every few seconds. It was making steering from the passenger’s seat even more of a challenge.\n\n*Meanwhile, Jake hunkered down in the back seat. From where Jack sat, he was not looking so good. He wondered how much time they had left.*\n\nJack swerved to miss a slow-moving vehicle that had just appeared as they shifted dimensions. Finally, Phineas settled for one that put them on a narrow two-lane country road. \n\nThe town disappeared, replaced by rows of fences. Phineas braked and turned off onto the shoulder of the road, rolling to a stop.\n\nJack’s heartbeat slowly returned to normal. Meanwhile, Jake sounded like he was winding up in the back seat, his voice rolling into a high-pitched whine, perforated with short puffs of breath, like a woman in labor on a late-night sitcom.\n\n**“You okay, back there?” Jack asked, climbing out onto the shoulder.** \n\nJake launched himself out of the back seat, landed face down in a shallow ditch, and promptly lost the entire contents of his stomach in a single \n\n“ralph”.\n--------\n\nJack turned away, pulling his elbow up over his nose to avoid the horrendous smell of vomit. Meanwhile, Phineas dove around the hood of the car and into the ditch, pawing through the puke as if he was panning for gold. \n\n*A few seconds later, he came up for air, triumphantly holding the thumb drive.*\n\nHe stood, wiping his hands on Jake’s jacket, and then looked at his watch. “It’s past time,” He said, pulling the transmitter from the man’s neck. Jake lolled into the ditch; his eyes fluttered, and Phineas shoved Jack toward the driver’s seat.\n\n**“Let’s go. We don’t want to be here when they come to collect him.” He said, climbing into the passenger’s seat.**\n\n***Will Jake see the girl again? What about his Nosher friend, what becomes of him? Will they ever get the smell out of the ALICE? Stay tuned!***\n\n## Look for the upvote button below. If you liked the post, upvote and share! If you're not on Steemit yet, why not? You get free money for signing up! ##",
-    "body_length": 8159,
-    "cashout_time": "2016-09-22T19:40:48",
-    "category": "story",
-    "children": 0,
-    "created": "2016-09-15T19:40:48",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "json_metadata": "{\"tags\":[\"story\",\"life\",\"fiction\",\"anarchy\",\"minnowsunited\"],\"image\":[\"https://s22.postimg.org/d4vifrmo1/Madison.jpg\",\"https://s16.postimg.org/90derv079/spiral_stair.jpg\",\"https://s13.postimg.org/xp1l7jjyv/guns.jpg\",\"https://s13.postimg.org/4klau8zdj/phin_rabbit.jpg\"],\"links\":[\"https://steemit.com/@markrmorrisjr\"]}",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T19:40:48",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 2069384927746,
-    "parent_author": "",
-    "parent_permlink": "story",
-    "pending_payout_value": "0.691 HBD",
-    "percent_hbd": 10000,
-    "permlink": "original-fiction-jacked-book-one-the-origin-dime-chronicles-episode-10",
-    "replies": [],
-    "root_title": "Original Fiction: JACKED Book One, The Origin Dime Chronicles, Episode 10",
-    "title": "Original Fiction: JACKED Book One, The Origin Dime Chronicles, Episode 10",
-    "total_payout_value": "0.000 HBD",
-    "url": "/story/@markrmorrisjr/original-fiction-jacked-book-one-the-origin-dime-chronicles-episode-10"
-  },
-  {
-    "active_votes": [
-      {
-        "percent": "10000",
-        "reputation": 174395287082,
-        "rshares": 201736965,
-        "voter": "blend"
-      }
-    ],
-    "author": "blend",
-    "author_reputation": 174395287082,
-    "beneficiaries": [],
-    "body": "<html>\n<ul>\n  <li>&nbsp;I’m as surprised as anyone to be saying this but <em>holy shit</em>, these vape trick are really impressive.Yes, vaping still makes most people look like an extra who just stepped off the set of <em>Blade Runner.</em> But god dammit, King Titus is doing some stuff with smoke in this video that doesn’t seem physically possible.How is he moving smoke rings through the air without breaking them? Let’s just soak that in for a hot second. <img src=\"http://i.kinja-img.com/gawker-media/image/upload/t_original/p8yuecbnagacjm6khr6t.jpg\" width=\"800\" height=\"363\"/></li>\n</ul>\n</html>\nhttps://youtu.be/i3Nd_FK1zUg\nsource>http://www.gizmodo.com.au/2016/09/so-uh-vape-tricks-are-cool-now/",
-    "body_length": 705,
-    "cashout_time": "2016-09-22T19:40:36",
-    "category": "art",
-    "children": 0,
-    "created": "2016-09-15T19:40:36",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "json_metadata": "{\"tags\":[\"art\",\"story\",\"life\",\"\"],\"image\":[\"http://i.kinja-img.com/gawker-media/image/upload/t_original/p8yuecbnagacjm6khr6t.jpg\",\"https://img.youtube.com/vi/i3Nd_FK1zUg/0.jpg\"],\"links\":[\"https://youtu.be/i3Nd_FK1zUg\"]}",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T19:40:36",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 201736965,
-    "parent_author": "",
-    "parent_permlink": "art",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "so-uh-vape-tricks-are-cool-now",
-    "replies": [],
-    "root_title": "So, Uh... Vape Tricks Are Cool Now?",
-    "title": "So, Uh... Vape Tricks Are Cool Now?",
-    "total_payout_value": "0.000 HBD",
-    "url": "/art/@blend/so-uh-vape-tricks-are-cool-now"
-  },
-  {
-    "active_votes": [],
-    "author": "philanthropest",
-    "author_reputation": 3093571339,
-    "beneficiaries": [],
-    "body": "<html>\n<p>James Comey -the Director of the FBI - puts tape over his personal laptop camera and webcams. &nbsp;</p>\n<p>I'm not crazy for having masking tape over my camera...I'm not alone....</p>\n<p>https://www.youtube.com/watch?v=y02aBfNT8n4</p>\n<p>WHY AREN'T PEOPLE MORE CONCERNED ABOUT BEING LISTENED TO...YES, IT IS INVASIVE TO KNOW YOU ARE BEING WATCHED, BUT....</p>\n<ul>\n  <li>People SAY more revealing and interesting stuff than they DO....so, I would much rather be a blind fly on the wall than deaf. &nbsp;</li>\n</ul>\n<h1><strong>AS IF THEY AREN'T LISTENING</strong> TO YOU/ME....IF THEY ARE WATCHING...THEY ARE OBVIOUSLY LISTENING</h1>\n</html>",
-    "body_length": 652,
-    "cashout_time": "2016-09-22T19:40:21",
-    "category": "freedom",
-    "children": 0,
-    "created": "2016-09-15T19:40:21",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "json_metadata": "{\"tags\":[\"freedom\",\"anarchy\",\"steem\",\"life\",\"\"],\"image\":[\"https://img.youtube.com/vi/y02aBfNT8n4/0.jpg\"],\"links\":[\"https://www.youtube.com/watch?v=y02aBfNT8n4\"]}",
-    "last_payout": "1969-12-31T23:59:59",
-    "last_update": "2016-09-15T19:42:36",
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "parent_author": "",
-    "parent_permlink": "freedom",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "cover-your-laptop-and-phone-camera-comey-dir-of-the-fbi-does",
-    "replies": [],
-    "root_title": "COVER YOUR LAPTOP -and phone- CAMERA -   Comey;  DIR OF THE FBI DOES",
-    "title": "COVER YOUR LAPTOP -and phone- CAMERA -   Comey;  DIR OF THE FBI DOES",
-    "total_payout_value": "0.000 HBD",
-    "url": "/freedom/@philanthropest/cover-your-laptop-and-phone-camera-comey-dir-of-the-fbi-does"
   }
 ]

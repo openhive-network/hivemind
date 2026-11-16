@@ -64,6 +64,19 @@ at 3,588,541 and 3,590,190 get notifications from one-block processing and the 1
 from the 1000-block batch, which ends while the mute holds. Fixing it means recording each batch's mute
 history in the follow processing that live sync shares; #477 leaves it.
 
+## Tavern patterns
+
+The tavern patterns were generated from a CI sync at 1000 blocks per batch, so they carry its boundary
+effects. On a fixture synced by this change at 10000 blocks (template `cedc3f8b5608`), 72 pattern tests (and 25
+`rest_api_equivalence` tests derived from them) differed and were refreshed from that fixture's output. Spot
+checks against the raw operations confirm the new values are what one block at a time gives: nession's vote on
+xeroc's piston post has two vote blocks and no effective vote, `num_changes` 1 (the pattern's 0 folded both into
+one 1000-block batch); dantheman's reply to calaber24p keeps the `total_vote_weight` of its last effective vote
+(a comment reward in the same 1000-block batch had discarded it). The other differences are mention duplicates
+per edit block, unread counts that follow from them, payout totals, and lists ordered by post or notification
+id: inside a batch, root posts take ids before comments and re-created posts after both, so id order still
+follows batch boundaries (#470's base fixture differed from the patterns in those lists too).
+
 ## Cost
 
 Massive phase sums over 0–4.99M, runs sharing the host with each other (advisory):
