@@ -148,11 +148,15 @@ has no rule and blocks unless quarantined.
    recipe changed may disagree with CI's. **On a revision miss** (a schema or
    indexer change that bumped the patch level) it requests the seed the same way and
    skips with `no hivemind fixture for schema revision <rev>; seeding requested`.
+   Either request is sent only when HEAD's committed tree yields the same revision
+   and recipe as the working tree; with uncommitted edits to the schema or a recipe
+   file the step prints that no seed was requested, the miss line ends
+   `seeding not requested (the tree's schema or sync recipe is uncommitted)`, and the
+   fixture is seeded once the change is committed and its gate runs.
    A missing fixture never fails the gate. The next run after the seed finishes
    (about 15–20 minutes) has it. The seed fetches that commit from GitLab, so it
    succeeds only for a pushed commit whose patch level yields the revision and whose
-   recipe is the requested one (an uncommitted edit to a recipe file changes the
-   tree's recipe, not the commit's); otherwise the request is marked `failed` in
+   recipe is the requested one; otherwise the request is marked `failed` in
    `hivemind_shared.seed_requests`;
 3. clones it (`clone_run_database('tavern-<UTC time>-<random>', <revision>, <its recipe>)`) and
    reloads the tree's PostgREST SQL into the clone as `hivemind` with

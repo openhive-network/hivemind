@@ -170,16 +170,19 @@ def select_template(templates: Iterable[Template], revision: str, recipe: str) -
     return next((t for t in same_revision if t.recipe == recipe), same_revision[0] if same_revision else None)
 
 
-def miss_message(wanted: str, requested: bool) -> str:
-    """The skip reason when no template matches `wanted`."""
+def miss_message(wanted: str, requested: bool, why_not: str = "the checkout has no commit") -> str:
+    """The skip reason when no template matches `wanted`; `why_not` says why
+    seeding was not requested."""
     if requested:
         return f"no hivemind fixture for schema revision {wanted}; seeding requested"
-    return f"no hivemind fixture for schema revision {wanted}; seeding not requested (the checkout has no commit)"
+    return f"no hivemind fixture for schema revision {wanted}; seeding not requested ({why_not})"
 
 
-def fallback_message(template: Template, recipe: str, requested: bool) -> str:
+def fallback_message(
+    template: Template, recipe: str, requested: bool, why_not: str = "the checkout has no commit"
+) -> str:
     """The advisory when `template` stands in for the tree's `recipe`."""
-    seeding = "seeding requested" if requested else "seeding not requested (the checkout has no commit)"
+    seeding = "seeding requested" if requested else f"seeding not requested ({why_not})"
     return (
         f"advisory: no hivemind fixture for sync recipe {recipe[:12]} of schema revision {template.revision}; "
         f"using {template.database}, synced by recipe {template.recipe[:12]}; {seeding}"
