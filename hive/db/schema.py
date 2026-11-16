@@ -71,7 +71,8 @@ def insert_seed_data(db) -> None:
         f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '') ON CONFLICT DO NOTHING",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00') ON CONFLICT DO NOTHING",
+        # post_count 1: the sentinel post 0 below is its post
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at, post_count) VALUES (0, '', '1970-01-01T00:00:00', 1) ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",

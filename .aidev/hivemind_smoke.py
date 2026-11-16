@@ -255,6 +255,7 @@ SQL_TESTS = [
     "tests/sql/votes_partitioned_upsert.sql",
     "tests/sql/post_batches_staged_join.sql",
     "tests/sql/massive_sync_reply_parents.sql",
+    "tests/sql/post_count_maintained.sql",
     "tests/sql/recalculate_votes_children_rerun.sql",
     "tests/sql/autovacuum_insert_reloptions.sql",
 ]
