@@ -20,9 +20,44 @@ CREATE TABLE IF NOT EXISTS hivemind_app._batch_queue (
 -- rather than applying their ops a second time (Blocks.process_multi_sql).
 --   posts_applied:     the posts phase, its results in _batch_post_results
 --   post_data_applied: the post data flush (PostDataCache.flush)
+--   follows_applied:   the follows phase, its mute changes in _batch_mute_changes
 ALTER TABLE hivemind_app._batch_queue
     ADD COLUMN IF NOT EXISTS posts_applied BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS post_data_applied BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN IF NOT EXISTS post_data_applied BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS follows_applied BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- The last hive_posts id reserved for a comment op (reserve_post_ids). Changed in the
+-- transaction of the posts phase that reserves, so a replay of a batch whose posts phase
+-- rolled back reserves the same ids again (a sequence would have moved on).
+-- MUST remain LOGGED, like _batch_queue.
+CREATE TABLE IF NOT EXISTS hivemind_app._post_id_slots (
+    last_id INT NOT NULL
+);
+-- Starts after the ids hive_posts_id_seq handed out
+INSERT INTO hivemind_app._post_id_slots (last_id)
+SELECT CASE WHEN s.is_called THEN s.last_value ELSE s.last_value - 1 END
+FROM hivemind_app.hive_posts_id_seq s
+WHERE NOT EXISTS (SELECT 1 FROM hivemind_app._post_id_slots);
+
+-- The muted and follow_muted changes of the last follows phase (process_follows_for_blocks),
+-- for the notification writers to filter each notification by the lists as they stood at
+-- the end of its block: per pair, a row with block_num 0 holds its state before the
+-- phase, and one row per change its state after that change (op_seq orders a block's).
+-- A reset of a list is a change of every pair of the follower the phase knows of.
+-- MUST remain LOGGED, like _batch_queue: a replay whose follows phase committed keeps them
+-- (_batch_queue.follows_applied), as the lists no longer show the state before it.
+CREATE TABLE IF NOT EXISTS hivemind_app._batch_mute_changes (
+    list        SMALLINT NOT NULL,  -- 1: muted, 2: follow_muted
+    follower    INT NOT NULL,
+    following   INT NOT NULL,
+    block_num   INT NOT NULL,
+    op_seq      BIGINT NOT NULL,
+    is_set      BOOLEAN NOT NULL
+);
+CREATE INDEX IF NOT EXISTS _batch_mute_changes_follower_idx
+    ON hivemind_app._batch_mute_changes (follower, list, following, block_num, op_seq);
+CREATE INDEX IF NOT EXISTS _batch_mute_changes_following_idx
+    ON hivemind_app._batch_mute_changes (following, list);
 
 -- The _post_results rows of the in-flight batch's posts phase, committed with it
 -- (save_batch_post_results). The columns a replay cannot rebuild from _ops_staging.
@@ -582,8 +617,10 @@ BEGIN
         bv.ecv_count::INT AS ecv_count,
         bv.block_num,
         -- ord decides the order hive_votes ids are drawn in (step 2): one voter's
-        -- votes on one post share their first row's ord.
-        row_number() OVER (ORDER BY bv.voter, bv.author, bv.permlink, bv.block_num) AS ord
+        -- votes on one post share their first row's ord. Block first, as one-block
+        -- batches draw them: the ids of any two rows are then in the same order
+        -- whatever the batch size, and so are the vote notification counters.
+        row_number() OVER (ORDER BY bv.block_num, bv.voter, bv.author, bv.permlink) AS ord
     FROM block_votes bv
     JOIN account_ids ha_voter ON ha_voter.name = bv.voter
     JOIN account_ids ha_author ON ha_author.name = bv.author;
@@ -813,13 +850,22 @@ BEGIN
       -- account must match auth
       AND rd.data->>'account' = rd.auth_account;
 
-    -- Determine final action per (author, permlink, account): last op wins
-    -- This handles create→delete→create within the same batch correctly.
+    -- The op per (author, permlink, account) whose row the batch leaves, as the ops one
+    -- block at a time leave it: the batch's last delete when no create follows it, else
+    -- the first create after it (a later create finds that row and keeps it, its block
+    -- and its notification). This handles create→delete→create within the same batch.
     INSERT INTO hivemind_app._reblog_final
-    SELECT DISTINCT ON (author, permlink, account)
-        id, account, author, permlink, block_date, block_num, is_delete
-    FROM hivemind_app._reblog_ops
-    ORDER BY author, permlink, account, id DESC;
+    SELECT DISTINCT ON (o.author, o.permlink, o.account)
+        o.id, o.account, o.author, o.permlink, o.block_date, o.block_num, o.is_delete
+    FROM (
+        SELECT r.*,
+               COALESCE(max(r.id) FILTER (WHERE r.is_delete) OVER pair, 0) AS last_delete_id,
+               max(r.id) OVER pair AS last_id
+        FROM hivemind_app._reblog_ops r
+        WINDOW pair AS (PARTITION BY r.author, r.permlink, r.account)
+    ) o
+    WHERE o.id > o.last_delete_id OR o.id = o.last_id
+    ORDER BY o.author, o.permlink, o.account, o.id;
 
     -- Process deletes: delete entries where ANY delete exists in this batch
     -- (covers entries from previous batches that need cleanup)
@@ -1206,6 +1252,34 @@ $$ LANGUAGE sql IMMUTABLE;
 -- 9. process_posts_from_staging()
 -- ============================================================================
 
+-- Reserves the next _count hive_posts ids, one per comment op of a batch, and returns
+-- the id before the first: the op numbered seq_id (its rank among the batch's comment ops,
+-- in operation order) owns _base + seq_id, whether it inserts a post or not. A post's id
+-- is then its op's rank among all comment ops of the chain, whatever the batches were.
+-- Every call keeps the sequence past the ids reserved, for an insert that draws the
+-- column default.
+CREATE OR REPLACE FUNCTION hivemind_app.reserve_post_ids(_count INT)
+RETURNS INT AS $function$
+DECLARE
+    _base INT;
+    _sequence_last INT;
+BEGIN
+    UPDATE hivemind_app._post_id_slots SET last_id = last_id + _count
+    RETURNING last_id - _count INTO _base;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'hivemind_app._post_id_slots has no row: the runtime code (massive_sync.sql) was not loaded';
+    END IF;
+
+    SELECT CASE WHEN s.is_called THEN s.last_value ELSE s.last_value - 1 END
+    INTO _sequence_last
+    FROM hivemind_app.hive_posts_id_seq s;
+    IF _base + _count > _sequence_last THEN
+        PERFORM setval('hivemind_app.hive_posts_id_seq', _base + _count);
+    END IF;
+    RETURN _base;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
 -- Return type for post processing results (needed by Python for PostDataCache)
 DROP TYPE IF EXISTS hivemind_app.post_staging_result CASCADE;
 CREATE TYPE hivemind_app.post_staging_result AS (
@@ -1240,6 +1314,7 @@ DECLARE
     _changed INT;
     _comment_rows INT;
     _analyze_staging BOOLEAN;
+    _id_base INT;
 BEGIN
     -- Persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
     DELETE FROM hivemind_app._comment_staging;
@@ -1280,6 +1355,9 @@ BEGIN
     -- replanning it causes) would cost more than it saves.
     GET DIAGNOSTICS _comment_rows = ROW_COUNT;
     _analyze_staging := _comment_rows >= hivemind_app.staging_analyze_min_rows();
+    -- A post takes the id of the comment op that creates it: ids follow operation order
+    -- and do not depend on how the blocks were batched (reserve_post_ids).
+    _id_base := hivemind_app.reserve_post_ids(_comment_rows);
     IF _analyze_staging THEN
         ANALYZE hivemind_app._comment_staging (seq_id, staging_id, is_first, is_replayed, author, permlink, parent_author, parent_permlink);
     END IF;
@@ -1389,7 +1467,8 @@ BEGIN
             WHERE cs.is_first AND NOT cs.is_replayed
               AND (cs.parent_author IS NULL OR cs.parent_author = '')
             ORDER BY cs.seq_id
-        )
+        ),
+        _id_base
     ) br
     JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id;
 
@@ -1427,7 +1506,8 @@ BEGIN
                   AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
                   AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
                 ORDER BY cs.seq_id
-            )
+            ),
+            _id_base
         ) br
         JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id;
 
@@ -1692,7 +1772,8 @@ BEGIN
                     _rec.author, _rec.permlink,
                     COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
                     _rec.block_date, _community_support_start_block, _rec.block_num,
-                    '{}'::VARCHAR[]  -- tags handled separately in Step 7d
+                    '{}'::VARCHAR[],  -- tags handled separately in Step 7d
+                    _id_base + _rec.seq_id
                 ) op;
             END IF;
         END LOOP;
@@ -1862,12 +1943,13 @@ BEGIN
 
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'
-    -- notification (type 10) for the post author, explaining why it was muted.
+    -- notification (type 10) for the post author, explaining why it was muted. Its counter
+    -- is the op's rank among its block's comment ops, the seq_id a one-block batch gives it.
     INSERT INTO hivemind_app.hive_notification_cache
         (id, block_num, type_id, score, created_at, src, dst, post_id, dst_post_id,
          community, community_title, payload)
     SELECT
-        hivemind_app.notification_id(pr.block_date, 10, pr.seq_id % 4194303),
+        hivemind_app.notification_id(pr.block_date, 10, (pr.seq_id - bf.first_seq_id + 1) % 4194303),
         pr.block_num,
         10,  -- error
         35,  -- default score
@@ -1895,6 +1977,11 @@ BEGIN
         END
     FROM hivemind_app._post_results pr
     JOIN hivemind_app.hive_communities hc ON hc.id = pr.community_id
+    JOIN (
+        SELECT cs.block_num, min(cs.seq_id) AS first_seq_id
+        FROM hivemind_app._comment_staging cs
+        GROUP BY cs.block_num
+    ) bf ON bf.block_num = pr.block_num
     WHERE pr.is_new_post
       AND pr.muted_reasons IS NOT NULL
       AND pr.muted_reasons != 0
@@ -2835,6 +2922,46 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- 11. Notification Flush Functions (Phase 6)
 -- ============================================================================
 
+-- Whether _follower had _following on list _list (1: muted, 2: follow_muted) at the end
+-- of block _block of the last follows phase; NULL when that phase did not change the pair.
+CREATE OR REPLACE FUNCTION hivemind_app.batch_mute_state(
+    _list SMALLINT, _follower INT, _following INT, _block INT
+) RETURNS BOOLEAN AS $$
+    SELECT c.is_set
+    FROM hivemind_app._batch_mute_changes c
+    WHERE c.follower = _follower AND c.list = _list AND c.following = _following
+      AND c.block_num <= _block
+    ORDER BY c.block_num DESC, c.op_seq DESC
+    LIMIT 1;
+$$ LANGUAGE sql STABLE;
+
+-- The notification writers' mute filter at the end of block _block of the last follows
+-- phase: true when _dst muted _src, or follows muted lists and every one of them mutes
+-- _src (what their joins of muted, follow_muted and muted again keep out). A writer calls
+-- it only when that phase changed a list the filter reads (_dst's muted or follow_muted,
+-- or a mute of _src): otherwise the lists as they stand are those at the end of every
+-- block of the batch, and its joins apply.
+CREATE OR REPLACE FUNCTION hivemind_app.notification_muted_at(_dst INT, _src INT, _block INT)
+RETURNS BOOLEAN AS $$
+    WITH lists AS (
+        SELECT f.following,
+               COALESCE(hivemind_app.batch_mute_state(1::SMALLINT, f.following, _src, _block),
+                        EXISTS (SELECT 1 FROM hivemind_app.muted m
+                                WHERE m.follower = f.following AND m.following = _src)) AS mutes_src
+        FROM (
+            SELECT fm.following FROM hivemind_app.follow_muted fm WHERE fm.follower = _dst
+            UNION
+            SELECT c.following FROM hivemind_app._batch_mute_changes c WHERE c.follower = _dst AND c.list = 2
+        ) f
+        WHERE COALESCE(hivemind_app.batch_mute_state(2::SMALLINT, _dst, f.following, _block),
+                       EXISTS (SELECT 1 FROM hivemind_app.follow_muted fm
+                               WHERE fm.follower = _dst AND fm.following = f.following))
+    )
+    SELECT COALESCE(hivemind_app.batch_mute_state(1::SMALLINT, _dst, _src, _block),
+                    EXISTS (SELECT 1 FROM hivemind_app.muted m WHERE m.follower = _dst AND m.following = _src))
+        OR (EXISTS (SELECT 1 FROM lists) AND NOT EXISTS (SELECT 1 FROM lists l WHERE NOT l.mutes_src));
+$$ LANGUAGE sql STABLE;
+
 -- 11a. flush_vote_notifications_for_blocks
 CREATE OR REPLACE FUNCTION hivemind_app.flush_vote_notifications_for_blocks(
     _first_block INT, _last_block INT
@@ -2975,10 +3102,15 @@ BEGIN
     LEFT JOIN hivemind_app.muted m ON m.follower = nc.dst AND m.following = nc.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nc.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nc.src
+    -- mutes filter each notification as they stood at the end of its block (notification_muted_at)
+    LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nc.dst
+    LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nc.src
     WHERE nc.block_num > _min_block
       AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
       AND nc.src IS DISTINCT FROM nc.dst
-      AND m.follower IS NULL AND mi.following IS NULL
+      AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
+               THEN NOT hivemind_app.notification_muted_at(nc.dst, nc.src, nc.block_num)
+               ELSE m.follower IS NULL AND mi.following IS NULL END
     ORDER BY nc.block_num, nc.created_at, nc.src, nc.dst, nc.dst_post_id, nc.post_id
     ON CONFLICT DO NOTHING;
 
@@ -3035,10 +3167,15 @@ BEGIN
     LEFT JOIN hivemind_app.muted m ON m.follower = nf.following AND m.following = nf.follower
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nf.following
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nf.follower
+    -- mutes filter each notification as they stood at the end of its block (notification_muted_at)
+    LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nf.following
+    LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nf.follower
     WHERE nf.block_num > _min_block
       AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0)
       AND nf.follower IS DISTINCT FROM nf.following
-      AND m.follower IS NULL AND mi.following IS NULL
+      AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
+               THEN NOT hivemind_app.notification_muted_at(nf.following, nf.follower, nf.block_num)
+               ELSE m.follower IS NULL AND mi.following IS NULL END
     ORDER BY nf.block_num, nf.created_at, nf.follower, nf.following
     ON CONFLICT DO NOTHING;
 
@@ -3090,10 +3227,15 @@ BEGIN
     LEFT JOIN hivemind_app.muted m ON m.follower = nr.dst AND m.following = nr.src
     LEFT JOIN hivemind_app.follow_muted fm ON fm.follower = nr.dst
     LEFT JOIN hivemind_app.muted mi ON mi.follower = fm.following AND mi.following = nr.src
+    -- mutes filter each notification as they stood at the end of its block (notification_muted_at)
+    LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nr.dst
+    LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nr.src
     WHERE nr.block_num > _min_block
       AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
       AND nr.src IS DISTINCT FROM nr.dst
-      AND m.follower IS NULL AND mi.following IS NULL
+      AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
+               THEN NOT hivemind_app.notification_muted_at(nr.dst, nr.src, nr.block_num)
+               ELSE m.follower IS NULL AND mi.following IS NULL END
     ORDER BY nr.block_num, nr.created_at, nr.src, nr.dst, nr.dst_post_id, nr.post_id
     ON CONFLICT DO NOTHING;
 

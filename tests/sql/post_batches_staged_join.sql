@@ -2,7 +2,8 @@
 -- copies of their implementation before the resolved rows moved to _post_batch and
 -- deleted_tags stopped being joined (pg_temp.old_*), on the same seeded posts and ops:
 -- the result rows of every wave, the hive_posts rows written (ids included) and the
--- post tags must be identical. The old root batch wrote root_id = 0, which finalization
+-- post tags must be identical. The copies take ids as the batch functions now do
+-- (_id_base + seq_id, not the sequence), and a new post's id must be just that. The old root batch wrote root_id = 0, which finalization
 -- (update_hive_posts_root_id) turned into the post's id; root_id is compared as that
 -- leaves it, and the current root batch must write it at insert. Seeds its own accounts, communities, posts
 -- and ops in a transaction it rolls back, so it runs on any installed hivemind schema,
@@ -15,13 +16,14 @@
 -- waves), known comments again (the ON CONFLICT path), replies to a deleted or unknown
 -- post (never resolved), in topic, journal and council communities, before and after
 -- the community start block, under muted and unmuted parents. seq_id order differs
--- from permlink order, so ids follow the insert's ORDER BY seq_id.
+-- from permlink order, so ids follow seq_id, not the insert's row order.
 
 \set ON_ERROR_STOP 1
 BEGIN;
 
 CREATE OR REPLACE FUNCTION pg_temp.old_process_root_posts_batch(
-    _ops hivemind_app.hive_post_op_input[]
+    _ops hivemind_app.hive_post_op_input[],
+    _id_base INTEGER
 )
 RETURNS SETOF hivemind_app.hive_post_op_result
 LANGUAGE plpgsql
@@ -84,11 +86,12 @@ BEGIN
     ),
     inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
-            (parent_id, depth, community_id, category_id,
+            (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
              active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
         SELECT
+            _id_base + wm.seq_id,
             0, -- parent_id
             0, -- depth
             wm.community_id,
@@ -147,7 +150,8 @@ END
 $function$;
 
 CREATE OR REPLACE FUNCTION pg_temp.old_process_comments_batch(
-    _ops hivemind_app.hive_post_op_input[]
+    _ops hivemind_app.hive_post_op_input[],
+    _id_base INTEGER
 )
 RETURNS SETOF hivemind_app.hive_post_op_result
 LANGUAGE plpgsql
@@ -238,11 +242,12 @@ BEGIN
     ),
     inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
-            (parent_id, depth, community_id, category_id,
+            (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
              active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
         SELECT
+            _id_base + wm.seq_id,
             wm.parent_id,
             wm.depth::SMALLINT,
             wm.community_id,
@@ -460,7 +465,8 @@ ANALYZE hivemind_app.hive_accounts, hivemind_app.hive_communities, hivemind_app.
 SELECT set_config('pb.seq', last_value::TEXT, true) FROM hivemind_app.hive_posts_id_seq \gset ignored_
 
 -- Runs the root batch and the comment waves with the _impl functions, from the same
--- hive_posts id sequence position; returns every result row and the hive_posts rows.
+-- hive_posts id sequence position and with ids reserved after it; returns every result
+-- row and the hive_posts rows.
 CREATE FUNCTION pg_temp.pb_run(_impl TEXT) RETURNS JSONB LANGUAGE plpgsql AS $$
 DECLARE
   _results JSONB;
@@ -469,23 +475,24 @@ DECLARE
   _done INT[] := '{}';
 BEGIN
   PERFORM setval('hivemind_app.hive_posts_id_seq', current_setting('pb.seq')::BIGINT);
-  EXECUTE format('SELECT jsonb_agg(to_jsonb(r) || jsonb_build_object(''wave'', 0) ORDER BY r.seq_id) FROM %s($1) r',
+  EXECUTE format('SELECT jsonb_agg(to_jsonb(r) || jsonb_build_object(''wave'', 0) ORDER BY r.seq_id) FROM %s($1, $2) r',
                  _impl || 'process_root_posts_batch')
   INTO _results
   USING ARRAY(SELECT ROW(o.seq_id, o.author, o.permlink, '', o.parent_permlink,
                          '2016-07-01'::TIMESTAMP + o.block_num * INTERVAL '3 seconds', 150, o.block_num,
                          ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
-              FROM pb_ops o WHERE o.parent_author = '' ORDER BY o.seq_id);
+              FROM pb_ops o WHERE o.parent_author = '' ORDER BY o.seq_id),
+        current_setting('pb.seq')::INT;
   LOOP
     _waves := _waves + 1;
-    EXECUTE format('SELECT jsonb_agg(to_jsonb(r) || jsonb_build_object(''wave'', $2) ORDER BY r.seq_id) FROM %s($1) r',
+    EXECUTE format('SELECT jsonb_agg(to_jsonb(r) || jsonb_build_object(''wave'', $2) ORDER BY r.seq_id) FROM %s($1, $3) r',
                    _impl || 'process_comments_batch')
     INTO _wave
     USING ARRAY(SELECT ROW(o.seq_id, o.author, o.permlink, o.parent_author, o.parent_permlink,
                            '2016-07-01'::TIMESTAMP + o.block_num * INTERVAL '3 seconds', 150, o.block_num,
                            ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
                 FROM pb_ops o WHERE o.parent_author <> '' AND o.seq_id <> ALL(_done) ORDER BY o.seq_id),
-          _waves;
+          _waves, current_setting('pb.seq')::INT;
     EXIT WHEN _wave IS NULL;
     _results := _results || _wave;
     _done := _done || ARRAY(SELECT (w->>'seq_id')::INT FROM jsonb_array_elements(_wave) w);
@@ -576,6 +583,11 @@ BEGIN
   END IF;
   IF (_new->>'unrooted_new_roots')::INT <> 0 THEN
     RAISE EXCEPTION '% new root posts were inserted with root_id != id', _new->>'unrooted_new_roots';
+  END IF;
+  SELECT count(*) INTO _n FROM jsonb_array_elements(_new->'results') r
+  WHERE (r->>'is_new_post')::BOOLEAN AND (r->>'id')::INT <> current_setting('pb.seq')::INT + (r->>'seq_id')::INT;
+  IF _n <> 0 THEN
+    RAISE EXCEPTION '% new posts did not take the id reserved for their op (_id_base + seq_id)', _n;
   END IF;
 
   FOREACH _key IN ARRAY ARRAY['results', 'posts', 'tags'] LOOP

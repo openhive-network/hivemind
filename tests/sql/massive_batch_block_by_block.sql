@@ -1,5 +1,5 @@
--- The votes and payouts phases of one massive batch against the same blocks processed
--- one at a time, each after its own posts phase. Seeds its own accounts, posts, votes
+-- The votes, payouts and reblogs phases of one massive batch against the same blocks
+-- processed one at a time, each after its own posts phase. Seeds its own accounts, posts, votes
 -- and _ops_staging rows in a transaction it rolls back, so it runs on any installed
 -- hivemind schema, including an empty chain:
 --
@@ -8,7 +8,9 @@
 -- Blocks 301-308 hold votes on a post deleted at block 305 (one cast after the
 -- delete), on a post deleted at 303 and re-created at 304, repeated votes with and
 -- without effective_comment_vote ops, a vote whose first block has no effective vote,
--- and payout ops on the deleted post and on a post paid out twice.
+-- and payout ops on the deleted post and on a post paid out twice, a post reblogged
+-- twice and one reblogged, unreblogged and reblogged twice more. Vote ids differ
+-- between the runs, but must be in the same order (vote notification counters follow it).
 
 \set ON_ERROR_STOP 1
 BEGIN;
@@ -62,7 +64,8 @@ END
 $$ LANGUAGE plpgsql;
 
 -- (block, op type, voter, permlink, value): type 0 a vote (value its weight), 72 an
--- effective_comment_vote (value its weight and rshares), 51/53/61 payouts (value the amount).
+-- effective_comment_vote (value its weight and rshares), 51/53/61 payouts (value the amount),
+-- 18 a reblog by voter (value 1) or its delete (value 0).
 CREATE TEMP TABLE bb_ops (block_num INT, op_type_id SMALLINT, voter TEXT, permlink TEXT, v BIGINT);
 INSERT INTO bb_ops VALUES
   -- bb-p1, deleted at 305: votes before it stay with the deleted post, the one after is dropped
@@ -85,7 +88,10 @@ INSERT INTO bb_ops VALUES
   -- payouts (the effective votes above carry pending payouts): bb-p3 paid out at 304 and
   -- at 308, with an effective vote's pending payout between
   (304, 61, NULL, 'bb-p3', 0), (304, 51, NULL, 'bb-p3', 100), (304, 53, NULL, 'bb-p3', 1000),
-  (308, 61, NULL, 'bb-p3', 0), (308, 51, NULL, 'bb-p3', 200), (308, 53, NULL, 'bb-p3', 2000);
+  (308, 61, NULL, 'bb-p3', 0), (308, 51, NULL, 'bb-p3', 200), (308, 53, NULL, 'bb-p3', 2000),
+  -- reblogs: one block at a time keeps the first of two, and the first after a delete
+  (302, 18, 'v1', 'bb-p3', 1), (306, 18, 'v1', 'bb-p3', 1),
+  (301, 18, 'v2', 'bb-p4', 1), (303, 18, 'v2', 'bb-p4', 0), (304, 18, 'v2', 'bb-p4', 1), (307, 18, 'v2', 'bb-p4', 1);
 
 CREATE FUNCTION pg_temp.bb_stage(_first INT, _last INT) RETURNS VOID AS $$
     DELETE FROM hivemind_app._ops_staging;
@@ -103,17 +109,21 @@ CREATE FUNCTION pg_temp.bb_stage(_first INT, _last INT) RETURNS VOID AS $$
           'total_payout_value', jsonb_build_object('amount', o.v::TEXT, 'precision', 3, 'nai', '@@000000013'),
           'curator_payout_value', jsonb_build_object('amount', (o.v / 2)::TEXT, 'precision', 3, 'nai', '@@000000013'),
           'beneficiary_payout_value', jsonb_build_object('amount', '0', 'precision', 3, 'nai', '@@000000013'))
+        WHEN 18 THEN jsonb_build_object('id', 'reblog', 'required_auths', '[]'::jsonb,
+          'required_posting_auths', jsonb_build_array('bb-' || o.voter),
+          'json', jsonb_build_array('reblog', jsonb_build_object('account', 'bb-' || o.voter, 'author', 'bb-a',
+            'permlink', o.permlink) || CASE WHEN o.v = 0 THEN '{"delete": "delete"}'::jsonb ELSE '{}'::jsonb END)::TEXT)
         ELSE '{}'::jsonb END
     FROM bb_ops o
     WHERE o.block_num BETWEEN _first AND _last;
 $$ LANGUAGE sql;
 
--- The seeded votes and posts, ids replaced by natural keys
+-- The seeded votes and posts, ids replaced by natural keys and votes' by their order
 CREATE FUNCTION pg_temp.bb_state() RETURNS JSONB AS $$
     SELECT jsonb_build_object(
       'votes', (SELECT jsonb_agg(to_jsonb(hv) - 'id' - 'post_id' - 'voter_id'
                                  || jsonb_build_object('voter', ha.name, 'post', bp.permlink) ORDER BY ha.name, bp.permlink)
-                FROM hivemind_app.hive_votes hv
+                FROM (SELECT v.*, rank() OVER (ORDER BY v.id) AS id_order FROM hivemind_app.hive_votes v) hv
                 JOIN hivemind_app.hive_accounts ha ON ha.id = hv.voter_id
                 JOIN bb_post bp ON bp.id = hv.post_id),
       'posts', (SELECT jsonb_agg(jsonb_build_object('post', bp.permlink, 'counter_deleted', hp.counter_deleted,
@@ -123,7 +133,12 @@ CREATE FUNCTION pg_temp.bb_state() RETURNS JSONB AS $$
                   'author_rewards_vests', hp.author_rewards_vests, 'payout_at', hp.payout_at,
                   'last_payout_at', hp.last_payout_at, 'cashout_time', hp.cashout_time, 'is_paidout', hp.is_paidout,
                   'total_vote_weight', hp.total_vote_weight, 'last_payout_block', hp.last_payout_block) ORDER BY bp.permlink)
-                FROM hivemind_app.hive_posts hp JOIN bb_post bp ON bp.id = hp.id));
+                FROM hivemind_app.hive_posts hp JOIN bb_post bp ON bp.id = hp.id),
+      'reblogs', (SELECT jsonb_agg(jsonb_build_object('blogger', ha.name, 'post', bp.permlink,
+                    'block_num', hr.block_num, 'created_at', hr.created_at) ORDER BY ha.name, bp.permlink)
+                  FROM hivemind_app.hive_reblogs hr
+                  JOIN hivemind_app.hive_accounts ha ON ha.id = hr.blogger_id
+                  JOIN bb_post bp ON bp.id = hr.post_id));
 $$ LANGUAGE sql;
 
 CREATE FUNCTION pg_temp.bb_run(_first INT, _last INT, _blocks_per_batch INT) RETURNS JSONB AS $$
@@ -133,6 +148,7 @@ BEGIN
         PERFORM pg_temp.bb_stage(_batch_first, LEAST(_batch_first + _blocks_per_batch - 1, _last));
         PERFORM hivemind_app.process_votes_from_staging(0);
         PERFORM hivemind_app.process_payouts_from_staging(0);
+        PERFORM hivemind_app.process_reblogs_from_staging();
     END LOOP;
     RETURN pg_temp.bb_state();
 END
@@ -169,6 +185,10 @@ BEGIN
     IF NOT _blocks->'votes' @> '[{"voter": "bb-v4", "post": "bb-p4", "is_effective": false, "weight": 22, "num_changes": 1},
                                 {"voter": "bb-v2", "post": "bb-p4", "is_effective": true, "weight": 21, "num_changes": 4}]' THEN
         RAISE EXCEPTION 'bb-p4: unexpected votes %', _blocks->'votes';
+    END IF;
+    IF _blocks->'reblogs' IS DISTINCT FROM '[{"blogger": "bb-v1", "post": "bb-p3", "block_num": 302, "created_at": "2016-06-03T00:15:06"},
+                                           {"blogger": "bb-v2", "post": "bb-p4", "block_num": 304, "created_at": "2016-06-03T00:15:12"}]' THEN
+        RAISE EXCEPTION 'expected the reblogs of blocks 302 and 304 (the first, and the first after the delete), got %', _blocks->'reblogs';
     END IF;
     IF NOT _blocks->'posts' @> '[{"post": "bb-p1", "counter_deleted": 1, "pending_payout": 1.100},
                                 {"post": "bb-p3", "author_rewards": 3000, "is_paidout": true, "pending_payout": 0}]' THEN

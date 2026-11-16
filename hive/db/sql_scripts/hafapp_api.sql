@@ -44,6 +44,79 @@ $function$
 
 --- Process follow operations entirely in SQL for massive sync ---
 
+-- A reset of list _list (1: muted, 2: follow_muted) of _follower_id, about to delete its
+-- rows, into process_follows_for_blocks' _mute_actions: the rows as they are (the state
+-- before the phase, when this is the follower's first reset of the list), then the reset.
+CREATE OR REPLACE FUNCTION hivemind_app.record_mute_reset(
+    _list SMALLINT, _follower_name TEXT, _follower_id INT, _block_num INT, _op_seq BIGINT
+) RETURNS VOID AS $function$
+BEGIN
+    INSERT INTO _mute_actions (list, follower_name, following_id, block_num, op_seq, is_set)
+    SELECT _list, _follower_name, l.following, 0, 0, TRUE
+    FROM (
+        SELECT m.following FROM hivemind_app.muted m WHERE _list = 1 AND m.follower = _follower_id
+        UNION ALL
+        SELECT fm.following FROM hivemind_app.follow_muted fm WHERE _list = 2 AND fm.follower = _follower_id
+    ) l;
+
+    INSERT INTO _mute_actions (list, follower_name, block_num, op_seq, is_set)
+    VALUES (_list, _follower_name, _block_num, _op_seq, FALSE);
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- Replaces _batch_mute_changes with the changes of process_follows_for_blocks'
+-- _mute_actions; runs before that phase applies them, so a list row of a pair no reset
+-- captured is the state before the phase. Only pairs on a list at some point are kept:
+-- the others (a follow of an account never muted) are off the list throughout. Accounts
+-- that do not exist are skipped, as the phase skips their actions.
+CREATE OR REPLACE FUNCTION hivemind_app.record_batch_mute_changes()
+RETURNS VOID AS $function$
+BEGIN
+    DELETE FROM hivemind_app._batch_mute_changes;
+
+    INSERT INTO hivemind_app._batch_mute_changes (list, follower, following, block_num, op_seq, is_set)
+    WITH actions AS MATERIALIZED (
+        SELECT a.list, fr.id AS follower, COALESCE(a.following_id, fo.id) AS following,
+               a.block_num, a.op_seq, a.is_set
+        FROM _mute_actions a
+        JOIN hivemind_app.hive_accounts fr ON fr.name = a.follower_name
+        LEFT JOIN hivemind_app.hive_accounts fo ON fo.name = a.following_name
+        WHERE a.following_name IS NULL OR fo.id IS NOT NULL
+    ),
+    pairs AS MATERIALIZED (
+        SELECT p.list, p.follower, p.following, p.listed_now
+        FROM (
+            SELECT a.list, a.follower, a.following, bool_or(a.is_set) AS set_in_phase,
+                   CASE a.list
+                       WHEN 1 THEN EXISTS (SELECT 1 FROM hivemind_app.muted m
+                                           WHERE m.follower = a.follower AND m.following = a.following)
+                       ELSE EXISTS (SELECT 1 FROM hivemind_app.follow_muted fm
+                                    WHERE fm.follower = a.follower AND fm.following = a.following)
+                   END AS listed_now
+            FROM actions a
+            WHERE a.following IS NOT NULL
+            GROUP BY a.list, a.follower, a.following
+        ) p
+        WHERE p.set_in_phase OR p.listed_now
+    )
+    SELECT a.list, a.follower, a.following, a.block_num, a.op_seq, a.is_set
+    FROM actions a
+    JOIN pairs p ON p.list = a.list AND p.follower = a.follower AND p.following = a.following
+    UNION ALL
+    -- a reset clears every pair of the follower's list
+    SELECT p.list, p.follower, p.following, r.block_num, r.op_seq, FALSE
+    FROM actions r
+    JOIN pairs p ON p.list = r.list AND p.follower = r.follower
+    WHERE r.following IS NULL
+    UNION ALL
+    SELECT p.list, p.follower, p.following, 0, 0, p.listed_now
+    FROM pairs p
+    WHERE NOT EXISTS (SELECT 1 FROM actions c
+                      WHERE c.list = p.list AND c.follower = p.follower AND c.following = p.following
+                        AND c.block_num = 0);
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
 DROP TYPE IF EXISTS hivemind_app.follow_notification CASCADE;
 CREATE TYPE hivemind_app.follow_notification AS (
     follower_name TEXT,
@@ -70,6 +143,9 @@ DECLARE
     _following_arr TEXT[];
     _i INT;
     _op_seq BIGINT := 0;
+    -- A replay of a batch whose follows phase committed keeps the mute changes it
+    -- recorded: the lists now hold the state after them.
+    _record_mutes BOOLEAN := NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue WHERE follows_applied);
 BEGIN
     CREATE TEMP TABLE IF NOT EXISTS _follow_notifications (
         follower_name TEXT,
@@ -87,6 +163,19 @@ BEGIN
         op_seq BIGINT NOT NULL  -- global ordering to deduplicate within batch
     ) ON COMMIT DROP;
     TRUNCATE _follow_actions;
+
+    -- Every action on the muted (list 1) and follow_muted (list 2) lists, in order, for
+    -- record_batch_mute_changes; a reset is a row without a following.
+    CREATE TEMP TABLE IF NOT EXISTS _mute_actions (
+        list SMALLINT NOT NULL,
+        follower_name TEXT NOT NULL,
+        following_name TEXT,
+        following_id INT,
+        block_num INT NOT NULL,
+        op_seq BIGINT NOT NULL,
+        is_set BOOLEAN NOT NULL
+    ) ON COMMIT DROP;
+    TRUNCATE _mute_actions;
 
     -- ========== PHASE 1: Parse JSON and collect actions ==========
     FOR rec IN
@@ -189,6 +278,8 @@ BEGIN
                 AND action IN ('blog', 'follow');
             CONTINUE;
         ELSIF _what_action = 'reset_muted_list' THEN
+            _op_seq := _op_seq + 1;
+            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
             PERFORM hivemind_app.reset_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
             DELETE FROM _follow_actions WHERE follower_name = _follower_name
@@ -201,12 +292,17 @@ BEGIN
                 AND action IN ('follow_blacklist', 'unfollow_blacklist');
             CONTINUE;
         ELSIF _what_action = 'reset_follow_muted_list' THEN
+            _op_seq := _op_seq + 1;
+            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
             PERFORM hivemind_app.reset_follow_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
             DELETE FROM _follow_actions WHERE follower_name = _follower_name
                 AND action IN ('follow_muted', 'unfollow_muted');
             CONTINUE;
         ELSIF _what_action = 'reset_all_lists' THEN
+            _op_seq := _op_seq + 1;
+            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
+            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
             PERFORM hivemind_app.reset_follows(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
             PERFORM hivemind_app.reset_muted(
@@ -245,6 +341,13 @@ BEGIN
                 _op_seq := _op_seq + 1;
                 INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq)
                 VALUES (_follower_name, _following_name, _what_action, rec.block_num, _op_seq);
+                -- ignore mutes; follow, blog and '' unmute (Phase 2 deletes their muted row)
+                IF _what_action IN ('ignore', 'blog', 'follow', '', 'follow_muted', 'unfollow_muted') THEN
+                    INSERT INTO _mute_actions (list, follower_name, following_name, block_num, op_seq, is_set)
+                    VALUES (CASE WHEN _what_action LIKE '%follow_muted' THEN 2 ELSE 1 END,
+                            _follower_name, _following_name, rec.block_num, _op_seq,
+                            _what_action IN ('ignore', 'follow_muted'));
+                END IF;
                 -- Collect follow notifications inline (Phase 1) to match old Python path where
                 -- every follow/blog op generates a notification before dedup, preserving counter values
                 IF _what_action IN ('blog', 'follow') THEN
@@ -255,6 +358,13 @@ BEGIN
         END IF;
         -- Unknown action types are silently ignored (matching Python behavior)
     END LOOP;
+
+    -- Before Phase 2 applies the actions: the lists still hold the state before them,
+    -- but for the resets, which record_mute_reset captured.
+    IF _record_mutes THEN
+        PERFORM hivemind_app.record_batch_mute_changes();
+    END IF;
+    UPDATE hivemind_app._batch_queue SET follows_applied = TRUE;
 
     -- ========== PHASE 2: Bulk DML using set-based operations ==========
 

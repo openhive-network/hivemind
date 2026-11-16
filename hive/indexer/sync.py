@@ -552,6 +552,7 @@ class SyncHiveDb:
             '_reblog_ops',
             '_reblog_final',
             '_follow_notification_events',
+            '_batch_mute_changes',
         ]
 
         self._db.query_no_return("START TRANSACTION")
