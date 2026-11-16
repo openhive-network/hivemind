@@ -41,32 +41,32 @@
   },
   {
     "active_votes": [],
-    "author": "arcange",
+    "author": "woman-onthe-wing",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 55.76,
+    "author_reputation": 50.31,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "Lol. You're welcome!\nBut I suspect you're working hard to hit the top 20 chart with your two comments :p",
-    "category": "stats",
-    "children": 1,
-    "created": "2016-09-15T13:24:15",
+    "body": "Thanks very much!",
+    "category": "introducemyself",
+    "children": 0,
+    "created": "2016-09-15T15:04:09",
     "curator_payout_value": "0.000 HBD",
-    "depth": 4,
+    "depth": 2,
     "is_paidout": false,
     "json_metadata": {
       "tags": [
-        "stats"
+        "introducemyself"
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 0,
     "parent_author": "gtg",
-    "parent_permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
+    "parent_permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
     "payout": 0.0,
-    "payout_at": "2016-09-22T13:24:15",
+    "payout_at": "2016-09-22T15:04:09",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
-    "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
+    "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
     "reblogs": 0,
     "replies": [],
     "stats": {
@@ -75,9 +75,9 @@
       "hide": false,
       "total_votes": 0
     },
-    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
-    "updated": "2016-09-15T13:24:15",
-    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z"
+    "title": "RE: Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
+    "updated": "2016-09-15T15:04:09",
+    "url": "/introducemyself/@woman-onthe-wing/introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle#@woman-onthe-wing/re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z"
   },
   {
     "active_votes": [
@@ -131,6 +131,46 @@
     "author_reputation": 55.76,
     "beneficiaries": [],
     "blacklists": [],
+    "body": "Lol. You're welcome!\nBut I suspect you're working hard to hit the top 20 chart with your two comments :p",
+    "category": "stats",
+    "children": 1,
+    "created": "2016-09-15T13:24:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "stats"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T13:24:15",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
+    "updated": "2016-09-15T13:24:15",
+    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z"
+  },
+  {
+    "active_votes": [],
+    "author": "arcange",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 55.76,
+    "beneficiaries": [],
+    "blacklists": [],
     "body": "That's the purpose of using FREETEXT() instead of CONTAINS()",
     "category": "stats",
     "children": 3,
@@ -163,46 +203,6 @@
     "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
     "updated": "2016-09-15T13:06:18",
     "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@arcange/re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z"
-  },
-  {
-    "active_votes": [],
-    "author": "woman-onthe-wing",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 50.31,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Thanks very much!",
-    "category": "introducemyself",
-    "children": 0,
-    "created": "2016-09-15T15:04:09",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "introducemyself"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "parent_author": "gtg",
-    "parent_permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
-    "payout": 0.0,
-    "payout_at": "2016-09-22T15:04:09",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 0
-    },
-    "title": "RE: Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
-    "updated": "2016-09-15T15:04:09",
-    "url": "/introducemyself/@woman-onthe-wing/introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle#@woman-onthe-wing/re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z"
   },
   {
     "active_votes": [],

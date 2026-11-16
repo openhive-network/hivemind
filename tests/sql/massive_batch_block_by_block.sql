@@ -9,7 +9,9 @@
 -- delete), on a post deleted at 303 and re-created at 304, repeated votes with and
 -- without effective_comment_vote ops, a vote whose first block has no effective vote,
 -- and payout ops on the deleted post and on a post paid out twice, a post reblogged
--- twice and one reblogged, unreblogged and reblogged twice more. Vote ids differ
+-- twice and one reblogged, unreblogged and reblogged twice more, reblogs of the post
+-- deleted at 303 before its delete and before its re-creation, and of a post created at
+-- 304 before and after it exists. Vote ids differ
 -- between the runs, but must be in the same order (vote notification counters follow it).
 
 \set ON_ERROR_STOP 1
@@ -18,13 +20,13 @@ BEGIN;
 INSERT INTO hivemind_app.hive_accounts (name, created_at)
 SELECT 'bb-' || n, '2016-06-01' FROM unnest(ARRAY['v1', 'v2', 'v3', 'v4', 'a']) n ORDER BY n;
 INSERT INTO hivemind_app.hive_permlink_data (permlink)
-SELECT 'bb-p' || i FROM generate_series(1, 4) i ORDER BY i;
+SELECT 'bb-p' || i FROM generate_series(1, 5) i ORDER BY i;
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('bb-cat');
 
 CREATE TEMP TABLE bb_post (permlink TEXT, id INT);
 INSERT INTO bb_post
 SELECT p.permlink, nextval(pg_get_serial_sequence('hivemind_app.hive_posts', 'id'))
-FROM unnest(ARRAY['bb-p1', 'bb-p2', 'bb-p3', 'bb-p4', 'bb-p2-new']) WITH ORDINALITY p (permlink, i) ORDER BY i;
+FROM unnest(ARRAY['bb-p1', 'bb-p2', 'bb-p3', 'bb-p4', 'bb-p2-new', 'bb-p5']) WITH ORDINALITY p (permlink, i) ORDER BY i;
 
 CREATE FUNCTION pg_temp.bb_insert_post(_permlink TEXT, _block INT) RETURNS VOID AS $$
     INSERT INTO hivemind_app.hive_posts (id, root_id, parent_id, author_id, permlink_id, category_id, created_at, depth,
@@ -45,16 +47,19 @@ SELECT hp.id, (SELECT id FROM hivemind_app.hive_accounts WHERE name = 'bb-v2'), 
   7, 700, 1000, '2016-06-02', 2, 150, TRUE
 FROM hivemind_app.hive_posts hp WHERE hp.id = (SELECT id FROM bb_post WHERE permlink = 'bb-p4');
 
--- What the posts phase of a block does to these posts: delete bb-p2 at 303, re-create it
--- at 304, delete bb-p1 at 305 (as delete_hive_post does).
+-- What the posts phase of a block does to these posts: delete bb-p2 at 303 with its
+-- reblogs, re-create it at 304, create bb-p5 at 304, delete bb-p1 at 305 (as
+-- delete_hive_post does).
 CREATE FUNCTION pg_temp.bb_posts_phase(_first INT, _last INT) RETURNS VOID AS $$
 BEGIN
     IF 303 BETWEEN _first AND _last THEN
         UPDATE hivemind_app.hive_posts SET counter_deleted = 1, block_num = 303
         WHERE id = (SELECT id FROM bb_post WHERE permlink = 'bb-p2');
+        DELETE FROM hivemind_app.hive_reblogs WHERE post_id = (SELECT id FROM bb_post WHERE permlink = 'bb-p2');
     END IF;
     IF 304 BETWEEN _first AND _last THEN
         PERFORM pg_temp.bb_insert_post('bb-p2-new', 304);
+        PERFORM pg_temp.bb_insert_post('bb-p5', 304);
     END IF;
     IF 305 BETWEEN _first AND _last THEN
         UPDATE hivemind_app.hive_posts SET counter_deleted = 1, block_num = 305
@@ -91,7 +96,11 @@ INSERT INTO bb_ops VALUES
   (308, 61, NULL, 'bb-p3', 0), (308, 51, NULL, 'bb-p3', 200), (308, 53, NULL, 'bb-p3', 2000),
   -- reblogs: one block at a time keeps the first of two, and the first after a delete
   (302, 18, 'v1', 'bb-p3', 1), (306, 18, 'v1', 'bb-p3', 1),
-  (301, 18, 'v2', 'bb-p4', 1), (303, 18, 'v2', 'bb-p4', 0), (304, 18, 'v2', 'bb-p4', 1), (307, 18, 'v2', 'bb-p4', 1);
+  (301, 18, 'v2', 'bb-p4', 1), (303, 18, 'v2', 'bb-p4', 0), (304, 18, 'v2', 'bb-p4', 1), (307, 18, 'v2', 'bb-p4', 1),
+  -- reblogs that find no live post one block at a time (bb-p2 before its delete at 303 and
+  -- between it and the re-creation, bb-p5 before it is created) leave no row; bb-p5's
+  -- reblog after its creation does
+  (302, 18, 'v3', 'bb-p2', 1), (303, 18, 'v4', 'bb-p2', 1), (302, 18, 'v1', 'bb-p5', 1), (305, 18, 'v2', 'bb-p5', 1);
 
 CREATE FUNCTION pg_temp.bb_stage(_first INT, _last INT) RETURNS VOID AS $$
     DELETE FROM hivemind_app._ops_staging;
@@ -187,8 +196,9 @@ BEGIN
         RAISE EXCEPTION 'bb-p4: unexpected votes %', _blocks->'votes';
     END IF;
     IF _blocks->'reblogs' IS DISTINCT FROM '[{"blogger": "bb-v1", "post": "bb-p3", "block_num": 302, "created_at": "2016-06-03T00:15:06"},
-                                           {"blogger": "bb-v2", "post": "bb-p4", "block_num": 304, "created_at": "2016-06-03T00:15:12"}]' THEN
-        RAISE EXCEPTION 'expected the reblogs of blocks 302 and 304 (the first, and the first after the delete), got %', _blocks->'reblogs';
+                                           {"blogger": "bb-v2", "post": "bb-p4", "block_num": 304, "created_at": "2016-06-03T00:15:12"},
+                                           {"blogger": "bb-v2", "post": "bb-p5", "block_num": 305, "created_at": "2016-06-03T00:15:15"}]' THEN
+        RAISE EXCEPTION 'expected the reblogs of blocks 302 and 304 (the first, and the first after the delete) and bb-p5''s after its creation, got %', _blocks->'reblogs';
     END IF;
     IF NOT _blocks->'posts' @> '[{"post": "bb-p1", "counter_deleted": 1, "pending_payout": 1.100},
                                 {"post": "bb-p3", "author_rewards": 3000, "is_paidout": true, "pending_payout": 0}]' THEN
