@@ -4,8 +4,14 @@ The build reads every row version hive_post_data's heap still holds, so it can
 detoast a dead version whose toast is already gone. One such error is absorbed
 by a vacuum of hive_post_data and a second build; a second error still fails
 finalization before its completion marker.
+
+The build starts once the hive_posts recompute has committed, so its snapshot
+does not keep the row versions the recompute replaced (#485).
 """
 
+import time
+from collections.abc import Callable
+from concurrent.futures import Future
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -34,7 +40,24 @@ class _FakeBuildDb:
             raise psycopg2.errors.DataCorrupted(TOAST_ERROR)
 
 
-def _run(massive_sync_preconditions: bool, failures: int) -> tuple[Any, list[Call]]:
+def _recompute(calls: list[Call], delay: float = 0.0) -> Callable[..., None]:
+    """A hive_posts task that commits its recompute after `delay` seconds."""
+
+    def finish_hive_posts(*args: Any) -> None:
+        recomputed: Future[None] = args[-1]
+        time.sleep(delay)
+        calls.append(('_finish_hive_posts',))
+        recomputed.set_result(None)
+
+    return finish_hive_posts
+
+
+def _run(
+    massive_sync_preconditions: bool,
+    failures: int,
+    recompute_delay: float = 0.0,
+    hive_posts: Callable[..., None] | None = None,
+) -> tuple[Any, list[Call]]:
     """Run _finish_all_tables with the real Part 0 pool and BM25 task; every other task only records itself."""
     calls: list[Call] = []
     build_db = _FakeBuildDb(calls, failures)
@@ -57,7 +80,6 @@ def _run(massive_sync_preconditions: bool, failures: int) -> tuple[Any, list[Cal
         name: recorder(name)
         for name in (
             '_finish_hive_feed_cache',
-            '_finish_hive_posts',
             '_finish_payout_stats_view',
             '_finish_communities_posts_and_rank',
             '_finish_vote_notifications_ranged',
@@ -66,6 +88,7 @@ def _run(massive_sync_preconditions: bool, failures: int) -> tuple[Any, list[Cal
             '_finish_reputation_notification_scores',
         )
     }
+    stubs['_finish_hive_posts'] = staticmethod(hive_posts or _recompute(calls, recompute_delay))
     with (
         patch.multiple(DbState, db=MagicMock(return_value=MagicMock()), **stubs),
         patch.object(DbState, '_run_vacuum', staticmethod(fake_vacuum)),
@@ -76,7 +99,7 @@ def _run(massive_sync_preconditions: bool, failures: int) -> tuple[Any, list[Cal
     ):
         try:
             result = DbState._finish_all_tables(massive_sync_preconditions, 100, 200)
-        except psycopg2.errors.DataCorrupted as exc:
+        except (psycopg2.errors.DataCorrupted, psycopg2.errors.QueryCanceled) as exc:
             result = exc
     return result, calls
 
@@ -115,3 +138,22 @@ def test_build_without_error_runs_once_without_vacuum(massive_sync_preconditions
     )
     assert expected_part0 <= {c[0] for c in calls}
     assert [c for c in calls if c[0] == 'marker'] == [('marker', massive_sync_preconditions, 100, 200)]
+
+
+def test_build_starts_after_the_hive_posts_recompute_commits() -> None:
+    completed, calls = _run(massive_sync_preconditions=True, failures=0, recompute_delay=0.3)
+
+    assert completed is True
+    names = [c[0] for c in calls]
+    assert names.index('_finish_hive_posts') < names.index('create_bm25')
+
+
+def test_build_skipped_when_the_hive_posts_task_fails_before_its_recompute_commits() -> None:
+    def failing_recompute(db: Any, sql: str, **kwargs: Any) -> None:
+        raise psycopg2.errors.QueryCanceled("canceling statement due to user request")
+
+    with patch.object(DbState, '_execute_query_with_modified_work_mem', staticmethod(failing_recompute)):
+        result, calls = _run(massive_sync_preconditions=True, failures=0, hive_posts=DbState._finish_hive_posts)
+
+    assert isinstance(result, psycopg2.errors.QueryCanceled)
+    assert not any(c[0] in ('create_bm25', 'marker') for c in calls)
