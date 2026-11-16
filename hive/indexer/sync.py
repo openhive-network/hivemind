@@ -19,6 +19,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
+from hive.indexer.hive_db.haf_functions import set_massive_sync_batch_blocks
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
@@ -49,6 +50,7 @@ class SyncHiveDb:
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
         self._max_batch = conf.get('max_batch')
+        self._massive_batch_blocks = conf.get('massive_sync_batch_blocks')
 
         self._lbound: int | None = None
         self._ubound: int | None = None
@@ -95,6 +97,9 @@ class SyncHiveDb:
             sys.exit(1)
 
         Blocks.setup(conf=self._conf)
+
+        if self._enter_sync:
+            set_massive_sync_batch_blocks(self._db, self._massive_batch_blocks)
 
         self._show_info(self._db)
 
@@ -557,7 +562,7 @@ class SyncHiveDb:
         from hive.indexer.hive_db.haf_functions import prepare_app_context
 
         self._db.query_no_return(f"SELECT hive.app_remove_context('{SCHEMA_NAME}')")
-        prepare_app_context(self._db)
+        prepare_app_context(self._db, self._massive_batch_blocks)
 
         # Re-insert seed data
         from hive.db.schema import insert_seed_data

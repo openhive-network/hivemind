@@ -235,6 +235,7 @@ install_hivemind() {
     check_control_table_privileges || return 1
     check_app_registry || return 1
     check_table_schema_upgrade || return 1
+    check_massive_sync_stages || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
@@ -335,6 +336,33 @@ expect_fail() {  # LABEL PATTERN... -- COMMAND...: COMMAND exits non-zero and it
     done
     echo "$label: exited non-zero naming ${patterns[*]}"
     LAST_LOG="$log"
+}
+
+massive_stage() {  # the context's MASSIVE_WITHOUT_INDEXES and MASSIVE_WITH_INDEXES as distance:limit
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select string_agg(s.min_head_block_distance || ':' || s.blocks_limit_in_group,
+        ' ' order by s.min_head_block_distance desc) from hafd.contexts c, unnest(c.stages) s
+        where c.name = 'hivemind_app' and s.name <> 'live'"
+}
+
+# The stages a fresh install creates match the ones the runtime migration (run by check_table_schema_upgrade's
+# upgrade) gives an existing context, and sync's start applies --massive-sync-batch-blocks as the hivemind role.
+check_massive_sync_stages() {
+    local set_blocks='import sys
+from hive.db.adapter import Db
+from hive.indexer.hive_db.haf_functions import set_massive_sync_batch_blocks
+print(set_massive_sync_batch_blocks(Db(sys.argv[1], "stage_check"), int(sys.argv[2])))'
+    local default expected
+    default="$(PYTHONPATH="$root" python3 -c 'from hive.conf import MASSIVE_SYNC_BATCH_BLOCKS; print(MASSIVE_SYNC_BATCH_BLOCKS)')" || return 1
+    expected="2000000:$default 101:1000"
+    [ "$(massive_stage)" = "$expected" ] \
+        || { echo "the upgraded context's massive stages are '$(massive_stage)', not '$expected'"; return 1; }
+    [ "$(PYTHONPATH="$root" python3 -c "$set_blocks" "$HIVEMIND_TEST_USER_URL" "$default")" = False ] \
+        || { echo "the runtime migration's stages differ from a fresh install's"; return 1; }
+    [ "$(PYTHONPATH="$root" python3 -c "$set_blocks" "$HIVEMIND_TEST_USER_URL" 2500)" = True ] || return 1
+    [ "$(massive_stage)" = "2000000:2500 101:1000" ] \
+        || { echo "--massive-sync-batch-blocks 2500 left the massive stages at '$(massive_stage)'"; return 1; }
+    [ "$(PYTHONPATH="$root" python3 -c "$set_blocks" "$HIVEMIND_TEST_USER_URL" "$default")" = True ] || return 1
+    echo "massive stages: $expected; the hivemind role sets the MASSIVE_WITHOUT_INDEXES batch size"
 }
 
 # A database behind the code's table schema (the one before follows.follower_name, recording an older table

@@ -1097,6 +1097,14 @@ END
 $function$ LANGUAGE plpgsql IMMUTABLE;
 
 
+-- Rows from which the posts phase analyzes a staging table it has just refilled
+-- (process_posts_from_staging, process_root_posts_batch, process_comments_batch).
+CREATE OR REPLACE FUNCTION hivemind_app.staging_analyze_min_rows()
+RETURNS INT AS $$
+    SELECT 1000;
+$$ LANGUAGE sql IMMUTABLE;
+
+
 -- ============================================================================
 -- 9. process_posts_from_staging()
 -- ============================================================================
@@ -1133,6 +1141,8 @@ DECLARE
     _post_id INT;
     _delete_create_pairs TEXT[];
     _changed INT;
+    _comment_rows INT;
+    _analyze_staging BOOLEAN;
 BEGIN
     -- Persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
     DELETE FROM hivemind_app._comment_staging;
@@ -1164,6 +1174,18 @@ BEGIN
         s.val AS op_body
     FROM hivemind_app._ops_staging s
     WHERE s.op_type_id = 1;
+
+    -- The staging tables are refilled every call, so the statistics autovacuum last took
+    -- describe some earlier fill. Planned on a stale near-empty estimate, the joins on them
+    -- below run as nested loops that scan the inner table once per outer row: quadratic
+    -- in the comments of one call, which grow with the massive-sync batch size. Below
+    -- staging_analyze_min_rows() rows any plan is cheap, and the ANALYZE (and the
+    -- replanning it causes) would cost more than it saves.
+    GET DIAGNOSTICS _comment_rows = ROW_COUNT;
+    _analyze_staging := _comment_rows >= hivemind_app.staging_analyze_min_rows();
+    IF _analyze_staging THEN
+        ANALYZE hivemind_app._comment_staging (seq_id, staging_id, is_first, is_replayed, author, permlink, parent_author, parent_permlink);
+    END IF;
 
     -- Normalize parent_author/parent_permlink for edits (first occurrence determines parent)
     UPDATE hivemind_app._comment_staging cs
@@ -1278,6 +1300,11 @@ BEGIN
     -- Each wave resolves one level of parent-child dependency. Loop until all
     -- comments are resolved or no progress is made (truly missing parents).
     LOOP
+        -- Each wave adds to _post_results, which the anti-joins below read (see _comment_staging's ANALYZE).
+        IF _analyze_staging THEN
+            ANALYZE hivemind_app._post_results (seq_id);
+        END IF;
+
         -- Count unprocessed first-occurrence comments (not yet in results)
         SELECT count(*) INTO _remaining
         FROM hivemind_app._comment_staging cs

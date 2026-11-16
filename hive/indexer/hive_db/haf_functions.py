@@ -1,23 +1,36 @@
 import logging
 
-from hive.conf import APP_NAME, MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS, REPTRACKER_SCHEMA_NAME, SCHEMA_NAME
+from hive.conf import (
+    APP_NAME,
+    MASSIVE_SYNC_BATCH_BLOCKS,
+    MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS,
+    REPTRACKER_SCHEMA_NAME,
+    SCHEMA_NAME,
+)
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
+# MASSIVE_WITH_INDEXES runs within MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS of the
+# head, where a smaller batch keeps sync responsive.
+_MASSIVE_WITH_INDEXES_BATCH_BLOCKS = 1000
 
-def prepare_app_context(db: Db) -> None:
+
+def _synchronization_stages(massive_batch_blocks: int) -> str:
+    # Existing contexts get the default stages via the UPDATE in
+    # upgrade/upgrade_runtime_migration.sql — keep the two in sync.
+    return f"""ARRAY[
+          hive.stage( 'MASSIVE_WITHOUT_INDEXES', {MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS}, {int(massive_batch_blocks)}, '20 seconds' )
+        , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {_MASSIVE_WITH_INDEXES_BATCH_BLOCKS}, '20 seconds' )
+        , hive.live_stage()
+    ]::hive.application_stages"""
+
+
+def prepare_app_context(db: Db, massive_batch_blocks: int = MASSIVE_SYNC_BATCH_BLOCKS) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' and '{REPTRACKER_SCHEMA_NAME}' contexts.")
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
-        LIMIT_FOR_PROCESSED_BLOCKS = 1000
-        # Existing contexts get the same stages via the UPDATE in
-        # upgrade/upgrade_runtime_migration.sql — keep the two in sync.
-        synchronization_stages = f"""ARRAY[
-              hive.stage( 'MASSIVE_WITHOUT_INDEXES', {MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
-            , hive.stage( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS}, '20 seconds' )
-            , hive.live_stage()
-        ]::hive.application_stages"""
+        synchronization_stages = _synchronization_stages(massive_batch_blocks)
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
         db.query_no_return(
             f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', _is_forking => FALSE, _stages => {synchronization_stages} );"
@@ -35,6 +48,31 @@ def prepare_app_context(db: Db) -> None:
 
     # Registration in the HAF application registry (register_application) is
     # done by setup_runtime_code, after the runtime SQL it depends on exists.
+
+
+def set_massive_sync_batch_blocks(db: Db, massive_batch_blocks: int) -> bool:
+    """Make the context's MASSIVE_WITHOUT_INDEXES stage hand out batches of `massive_batch_blocks` blocks.
+
+    Rewrites the context's stages only when they differ, and returns whether it did.
+    The batch in flight keeps the range HAF already gave it; the next stage analysis
+    uses the new limit.
+    """
+    stages = _synchronization_stages(massive_batch_blocks)
+    changed = bool(
+        db.query_one(
+            f"""
+            WITH updated AS (
+                UPDATE hafd.contexts SET stages = {stages}
+                WHERE name = '{SCHEMA_NAME}' AND stages IS DISTINCT FROM {stages}
+                RETURNING 1
+            )
+            SELECT EXISTS(SELECT 1 FROM updated)
+            """
+        )
+    )
+    verb = "now take" if changed else "take"
+    log.info(f"'{SCHEMA_NAME}' context: MASSIVE_WITHOUT_INDEXES batches {verb} {massive_batch_blocks} blocks")
+    return changed
 
 
 def _enable_early_block_processing(db: Db) -> None:

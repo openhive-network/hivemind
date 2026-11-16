@@ -45,9 +45,12 @@ class Blocks:
     _vote_workers = 1
     # The staging functions clear their tables with DELETE; every this many calls the
     # dead rows are dropped by one TRUNCATE of all of them (see reset_staging_tables).
-    # Measured flat between 5 and 20 batches.
+    # Measured flat between 5 and 20 batches of 1000 blocks. The block bound keeps
+    # larger massive batches from piling up more dead rows than ten of those.
     _STAGING_RESET_INTERVAL = 10
+    _STAGING_RESET_BLOCKS = 10_000
     _calls_since_staging_reset = 0
+    _blocks_since_staging_reset = 0
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -358,7 +361,7 @@ class Blocks:
         phase_times['vacuum'] = perf_counter() - t0
 
         t0 = perf_counter()
-        cls._reset_staging_tables_if_due(db)
+        cls._reset_staging_tables_if_due(db, last_block - first_block + 1)
         phase_times['staging_reset'] = perf_counter() - t0
 
         total = sum(phase_times.values())
@@ -444,7 +447,7 @@ class Blocks:
         log.info("[PROCESS LIVE SQL] Tables updating in live synchronization")
         cls.on_live_blocks_processed(first_block, last_block)
         cls._periodic_actions_by_num(last_block)
-        cls._reset_staging_tables_if_due(db)
+        cls._reset_staging_tables_if_due(db, last_block - first_block + 1)
 
         # Commit the entire block atomically
         db.query_no_return("COMMIT")
@@ -457,13 +460,21 @@ class Blocks:
         )
 
     @classmethod
-    def _reset_staging_tables_if_due(cls, db) -> None:
-        """Truncate the staging tables once every _STAGING_RESET_INTERVAL calls (in the caller's transaction, if one is open)."""
+    def _reset_staging_tables_if_due(cls, db: Db, blocks: int) -> None:
+        """Truncate the staging tables after _STAGING_RESET_INTERVAL calls or _STAGING_RESET_BLOCKS blocks, whichever comes first.
+
+        Runs in the caller's transaction, if one is open.
+        """
         cls._calls_since_staging_reset += 1
-        if cls._calls_since_staging_reset < cls._STAGING_RESET_INTERVAL:
+        cls._blocks_since_staging_reset += blocks
+        if (
+            cls._calls_since_staging_reset < cls._STAGING_RESET_INTERVAL
+            and cls._blocks_since_staging_reset < cls._STAGING_RESET_BLOCKS
+        ):
             return
         db.query_no_return(f"SELECT {SCHEMA_NAME}.reset_staging_tables()")
         cls._calls_since_staging_reset = 0
+        cls._blocks_since_staging_reset = 0
 
     @classmethod
     def _process_post_results_for_cache(cls, post_results):
