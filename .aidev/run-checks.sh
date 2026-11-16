@@ -16,7 +16,9 @@
 #                submodules' install_app.sh, scripts/install_app.sh, then
 #                `hive build_schema` from this checkout, then checks hivemind's block
 #                processing during an emulated keep-monotonic replay, in a transaction
-#                rolled back: .aidev/early_block_processing_check.sql; that no function
+#                rolled back: .aidev/early_block_processing_check.sql; that the prefetch of the
+#                next massive batch stages what load_ops_staging stages, up to HAF's
+#                consistent block: .aidev/ops_prefetch_check.sql; that no function
 #                in hivemind_endpoints is VOLATILE: .aidev/endpoint_volatility_check.sql; and that the
 #                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
@@ -236,6 +238,7 @@ install_hivemind() {
     check_app_registry || return 1
     check_table_schema_upgrade || return 1
     check_massive_sync_stages || return 1
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/ops_prefetch_check.sql || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0

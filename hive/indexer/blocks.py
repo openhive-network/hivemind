@@ -23,6 +23,7 @@ from hive.indexer.notification_cache import (
     VoteNotificationCache,
 )
 from hive.indexer.notify import Notify
+from hive.indexer.ops_prefetch import OpsPrefetch
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
@@ -157,14 +158,24 @@ class Blocks:
             )
 
     @classmethod
-    def process_multi_sql(cls, first_block: int, last_block: int) -> None:
+    def process_multi_sql(
+        cls,
+        first_block: int,
+        last_block: int,
+        ops_prefetch: OpsPrefetch | None = None,
+        next_range: tuple[int, int] | None = None,
+    ) -> None:
         """Process a batch of blocks using pure SQL functions.
 
         Replaces the Python dispatch loop with SQL functions that read from
         a staging table. Only PostDataCache body merging remains in Python.
 
+        With `ops_prefetch`, the staging table is filled from what it loaded for
+        this batch when that covers it, and once it is filled `ops_prefetch`
+        starts loading `next_range` (when given) while the other phases run.
+
         Phases:
-          1.    Load staging table (single scan of operations_view)
+          1.    Load staging table (single scan of operations_view, or the prefetched rows)
           2.    Account registration + community state changes (single transaction)
           3.    Post/comment processing (must commit before votes/reblogs)
           3a.   Community post-targeting ops + mute propagation (skipped before community start)
@@ -177,12 +188,20 @@ class Blocks:
         phase_times = {}
         db = DbAdapterHolder.common_block_processing_db()
 
-        # Phase 1: Load staging table (single scan of operations_view)
+        # Phase 1: Load staging table (single scan of operations_view, or the
+        # prefetched rows). The prefetch of the next range starts only after this
+        # commit, as it overwrites the rows this load reads.
         t0 = perf_counter()
+        prefetched = ops_prefetch.take(first_block, last_block) if ops_prefetch is not None else None
         db.query_no_return("START TRANSACTION")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
+        if prefetched is None:
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
+        else:
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging_from_prefetch({first_block}, {last_block})")
         db.query_no_return("COMMIT")
         phase_times['load'] = perf_counter() - t0
+        if ops_prefetch is not None and next_range is not None:
+            ops_prefetch.start(*next_range)
 
         # Phase 2: Account registration + community state changes (single transaction)
         t0 = perf_counter()
@@ -363,12 +382,15 @@ class Blocks:
         phase_times['staging_reset'] = perf_counter() - t0
 
         total = sum(phase_times.values())
+        # prefetched: how long the background load of this batch's operations ran,
+        # overlapped with the previous batch; not part of total.
         log.info(
-            "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s",
+            "[PHASE-SUMMARY] blocks=%d-%d total=%.3fs %s%s",
             first_block,
             last_block,
             total,
             ' '.join(f'{k}={v:.3f}' for k, v in phase_times.items()),
+            '' if prefetched is None else f' prefetched={prefetched:.3f}',
         )
 
         OPSM.stop(time_start)

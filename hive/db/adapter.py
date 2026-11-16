@@ -97,7 +97,7 @@ class Db:
     _instance = None
 
     # maximum number of connections that is required so as to execute some tasks concurrently
-    necessary_connections = 15
+    necessary_connections = 16
     max_connections = 1
 
     @classmethod

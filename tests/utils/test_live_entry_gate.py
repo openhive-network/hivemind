@@ -46,6 +46,7 @@ def _run_live_iteration(instance_ready: bool) -> tuple[dict[str, MagicMock], lis
     sync._db = db
     sync._live_prepared = False
     sync._massive_consume_blocks_futures = None
+    sync._ops_prefetch = None
 
     dbstate = {name: MagicMock(return_value=False) for name in _DBSTATE_LIVE_ENTRY}
     with (

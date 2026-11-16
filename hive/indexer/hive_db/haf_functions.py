@@ -26,6 +26,13 @@ def _synchronization_stages(massive_batch_blocks: int) -> str:
     ]::hive.application_stages"""
 
 
+def stage_batch_blocks(stage: str, massive_batch_blocks: int) -> int:
+    """The blocks HAF hands one batch of a massive stage of the context, set up with `massive_batch_blocks`."""
+    if stage == 'MASSIVE_WITHOUT_INDEXES':
+        return int(massive_batch_blocks)
+    return _MASSIVE_WITH_INDEXES_BATCH_BLOCKS
+
+
 def prepare_app_context(db: Db, massive_batch_blocks: int = MASSIVE_SYNC_BATCH_BLOCKS) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' and '{REPTRACKER_SCHEMA_NAME}' contexts.")
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")

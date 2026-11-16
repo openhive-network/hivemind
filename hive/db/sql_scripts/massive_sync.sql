@@ -56,6 +56,10 @@ DROP INDEX IF EXISTS hivemind_app._ops_staging_block_num_id_idx;
 CREATE INDEX _ops_staging_op_type_id_idx ON hivemind_app._ops_staging (op_type_id);
 CREATE INDEX _ops_staging_block_num_id_idx ON hivemind_app._ops_staging (block_num, id);
 
+-- The next massive batch's operations, loaded by prefetch_ops_staging while the current
+-- batch runs, and moved to _ops_staging by load_ops_staging_from_prefetch.
+CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging_next (LIKE hivemind_app._ops_staging);
+
 -- Persistent unlogged tables for process_posts_from_staging (avoids PL/pgSQL stale OID with temp tables)
 DROP TABLE IF EXISTS hivemind_app._comment_staging;
 CREATE UNLOGGED TABLE hivemind_app._comment_staging (
@@ -308,6 +312,75 @@ BEGIN
         ));
 
     -- Partial ANALYZE: skip the expensive val JSONB column
+    ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- Loads into _ops_staging_next the rows load_ops_staging would load for the blocks of
+-- _first_block.._last_block that HAF has made irreversible and consistent, and returns
+-- the last block loaded (NULL when none is). Massive sync runs it for the range it
+-- expects hive.app_next_iteration to hand out next, before HAF has handed it out: the
+-- context's views do not show those blocks yet, so it reads the tables of HAF's
+-- non-forking views, bounded by hive_state's consistent block, which is the bound
+-- app_next_iteration itself puts on a range. A block at or below it is complete in
+-- hafd.blocks and hafd.operations and never changes.
+CREATE OR REPLACE FUNCTION hivemind_app.prefetch_ops_staging(
+    _first_block INT,
+    _last_block INT
+) RETURNS INT AS $function$
+DECLARE
+    _loaded_last INT := LEAST(_last_block, hive.app_get_irreversible_block());
+BEGIN
+    TRUNCATE hivemind_app._ops_staging_next;
+    IF _loaded_last < _first_block THEN
+        RETURN NULL;
+    END IF;
+
+    -- The query of load_ops_staging, on the tables behind blocks_view and operations_view.
+    INSERT INTO hivemind_app._ops_staging_next (id, block_num, block_date, op_type_id, val)
+    WITH block_dates AS (
+        SELECT hb.num, hb.created_at,
+               COALESCE(lag(hb.created_at) OVER (ORDER BY hb.num), hb.created_at) AS prev_date
+        FROM hafd.blocks hb
+        WHERE hb.num BETWEEN (_first_block - 1) AND _loaded_last
+    )
+    SELECT ho.id, hafd.operation_id_to_block_num(ho.id),
+           CASE WHEN ho.op_type_id >= 50
+               THEN bd.created_at
+               ELSE bd.prev_date
+           END AS block_date,
+           ho.op_type_id, ho.body_value
+    FROM hafd.operations ho
+    JOIN hafd.operation_types ot ON ot.id = ho.op_type_id
+    JOIN block_dates bd ON bd.num = hafd.operation_id_to_block_num(ho.id)
+    WHERE hafd.operation_id_to_block_num(ho.id) BETWEEN _first_block AND _loaded_last
+      AND ho.op_type_id IN (0,1,9,10,14,17,18,19,23,30,41,43,51,53,61,72,73)
+      AND (ho.op_type_id != 18
+        OR ho.custom_json_type_id IN (
+            SELECT cjt.id FROM hafd.custom_json_types cjt
+            WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
+        ));
+
+    RETURN _loaded_last;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- load_ops_staging(_first_block, _last_block) from the rows prefetch_ops_staging loaded,
+-- which must cover the range.
+CREATE OR REPLACE FUNCTION hivemind_app.load_ops_staging_from_prefetch(
+    _first_block INT,
+    _last_block INT
+) RETURNS VOID AS $function$
+BEGIN
+    DELETE FROM hivemind_app._ops_staging;
+    DELETE FROM hivemind_app._follow_notification_events;
+
+    INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
+    SELECT n.id, n.block_num, n.block_date, n.op_type_id, n.val
+    FROM hivemind_app._ops_staging_next n
+    WHERE n.block_num BETWEEN _first_block AND _last_block
+    ORDER BY n.id;
+
     ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
