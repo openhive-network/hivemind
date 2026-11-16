@@ -136,6 +136,13 @@ class DbState:
     # every new row version is inserted into each of them.
     _INDEX_RESTORE_DEFERRED_TABLES = ['hive_posts']
 
+    # The registered index an initial sync rewrites hive_votes in the order of, before
+    # restoring the table's other indexes. Massive sync appends votes in block order,
+    # which leaves a post's votes about a heap page apart each, and reading a post's
+    # votes was the API's largest source of heap reads. Votes older than about a week
+    # no longer change, so the order outlives the sync.
+    _VOTES_ORDER_INDEX = 'hive_votes_post_id_voter_id_idx'
+
     # Tables finalization (_finish_all_tables) writes; frozen by the vacuum after it.
     _FINALIZATION_WRITTEN_TABLES = [
         'hive_posts',
@@ -148,7 +155,7 @@ class DbState:
     ]
 
     @staticmethod
-    def _retry_ddl(fn, description, max_retries=None):
+    def _retry_ddl(fn: Callable[..., Any], description: str, max_retries: int | None = None) -> None:
         """Retry a DDL operation that may deadlock with other HAF apps.
 
         Other apps (proxy-whitelist, block explorer, etc.) may hold read locks
@@ -376,6 +383,69 @@ class DbState:
             log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
 
     @classmethod
+    def _order_hive_votes_by_post(cls, db: Db) -> None:
+        """Rewrite hive_votes in (post_id, voter_id) order and vacuum it; skipped when already done.
+
+        CLUSTER needs an index to name the order, so the registered
+        _VOTES_ORDER_INDEX is built first, from its registered command: being
+        CREATE INDEX IF NOT EXISTS, the restore that follows keeps the index
+        CLUSTER rebuilt instead of building it a third time. CLUSTER marks the
+        index clustered, which is how a rerun after a crash knows the rewrite is
+        done (an index drop of massive sync clears the mark). The vacuum sets the
+        visibility map the rewrite left empty; when other apps' snapshots keep it
+        from doing so, the VisibilityWatch of live sync finishes it.
+        """
+        table = f'{SCHEMA_NAME}.hive_votes'
+        with AutoDbDisposer(db, 'order_hive_votes') as db_mgr:
+            row = db_mgr.db.query_row(
+                f"""
+SELECT ic.command, COALESCE(i.indisclustered, FALSE) AS clustered
+FROM hafd.indexes_constraints ic
+LEFT JOIN pg_index i ON i.indexrelid = to_regclass('{SCHEMA_NAME}.{cls._VOTES_ORDER_INDEX}')
+WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDER_INDEX}'
+"""
+            )
+            if row is None:
+                log.warning("[MASSIVE] %s is not registered; %s left in insertion order", cls._VOTES_ORDER_INDEX, table)
+                return
+            if row._mapping['clustered']:
+                log.info("[MASSIVE] %s already ordered by %s", table, cls._VOTES_ORDER_INDEX)
+                return
+
+            log.info("[MASSIVE] Ordering %s by %s", table, cls._VOTES_ORDER_INDEX)
+            time_start = perf_counter()
+            cls._retry_ddl(
+                lambda: db_mgr.db.query_no_return(row._mapping['command']), f"build {cls._VOTES_ORDER_INDEX}"
+            )
+            index_time = perf_counter() - time_start
+            cls._retry_ddl(
+                lambda: db_mgr.db.query_no_return(f"CLUSTER {table} USING {cls._VOTES_ORDER_INDEX}"),
+                f"cluster {table}",
+            )
+            cluster_time = perf_counter() - time_start - index_time
+            cls._run_vacuum(db, "order_vacuum", f"VACUUM (FREEZE, ANALYZE) {table}")
+            vacuum_time = perf_counter() - time_start - index_time - cluster_time
+            visibility = db_mgr.db.query_row(
+                f"SELECT relpages, relallvisible FROM pg_class WHERE oid = '{table}'::regclass"
+            )._mapping
+            log.info(
+                "[MASSIVE] Ordered %s by post_id in %.4fs (index build %.4fs, CLUSTER %.4fs, VACUUM %.4fs); "
+                "%s of %s pages all-visible",
+                table,
+                perf_counter() - time_start,
+                index_time,
+                cluster_time,
+                vacuum_time,
+                visibility['relallvisible'],
+                visibility['relpages'],
+            )
+
+    @classmethod
+    def _order_and_restore_hive_votes(cls, db: Db, full_table_name: str) -> None:
+        cls._order_hive_votes_by_post(db)
+        cls._restore_indexes_per_table(db, full_table_name)
+
+    @classmethod
     def _restore_bm25_index(cls, db) -> None:
         """Create the BM25 index on hive_post_data directly.
 
@@ -431,11 +501,13 @@ class DbState:
         FOSM.clear()
 
     @classmethod
-    def _restore_indexes_in_threads(cls, deferred: Sequence[str] = ()) -> None:
+    def _restore_indexes_in_threads(cls, deferred: Sequence[str] = (), order_votes: bool = False) -> None:
         """Restore all registered indexes in parallel across tables, except those of `deferred`.
 
-        Excludes hive_post_data — the BM25 index is deferred to the fills phase
-        where it runs in parallel with other finalization work.
+        With `order_votes`, hive_votes is rewritten in post order first, on the
+        thread that then restores its indexes. Excludes hive_post_data — the BM25
+        index is deferred to the fills phase where it runs in parallel with other
+        finalization work.
         """
         cls._ensure_tables_exist(cls._TABLES_WITH_REGISTERED_INDEXES)
         start_time = FOSM.start()
@@ -446,7 +518,12 @@ class DbState:
                 log.info("[MASSIVE] Deferring index restore of %s.%s to finalization", SCHEMA_NAME, table)
                 continue
             full_name = f'{SCHEMA_NAME}.{table}'
-            methods.append((table, cls._restore_indexes_per_table, [cls.db(), full_name]))
+            restore = (
+                cls._order_and_restore_hive_votes
+                if order_votes and table == 'hive_votes'
+                else cls._restore_indexes_per_table
+            )
+            methods.append((table, restore, [cls.db(), full_name]))
         # Include reptracker index
         methods.append(
             (
@@ -628,10 +705,11 @@ class DbState:
     def ensure_indexes_are_enabled(cls, defer_to_finalization: bool = False) -> None:
         """Restore the registered indexes, after SET LOGGED on any table still UNLOGGED.
 
-        With `defer_to_finalization` on an initial sync, the indexes of
-        _INDEX_RESTORE_DEFERRED_TABLES are left for the finalization that follows
-        (ensure_finalize_massive_sync) to restore after its recompute. Without it,
-        indexes an earlier call deferred are restored too.
+        On an initial sync, hive_votes is first rewritten in post order
+        (_order_hive_votes_by_post). With `defer_to_finalization` on an initial
+        sync, the indexes of _INDEX_RESTORE_DEFERRED_TABLES are left for the
+        finalization that follows (ensure_finalize_massive_sync) to restore after
+        its recompute. Without it, indexes an earlier call deferred are restored too.
         """
         if cls.are_indexes_enabled():
             if not defer_to_finalization:
@@ -650,7 +728,7 @@ class DbState:
         log.info("Creating indexes: started")
         if defer_to_finalization and cls.is_initial_sync():
             cls._deferred_index_tables = list(cls._INDEX_RESTORE_DEFERRED_TABLES)
-        cls._restore_indexes_in_threads(deferred=cls._deferred_index_tables)
+        cls._restore_indexes_in_threads(deferred=cls._deferred_index_tables, order_votes=cls.is_initial_sync())
         if not defer_to_finalization:
             cls._restore_deferred_indexes()
         log.info("Creating indexes: finished")
