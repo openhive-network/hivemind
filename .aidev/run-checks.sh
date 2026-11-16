@@ -22,7 +22,9 @@
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
 #                registered in HAF's application registry as 'hivemind', refuses a row of its
 #                context under the old name 'hivemind_app' and keeps a paused registration
-#                over a re-install: .aidev/app_registry_check.sql; and, on the schema before
+#                over a re-install: .aidev/app_registry_check.sql; and, on a HAF with hive/haf#454,
+#                that a held hivemind lock skips the install while its registry row is there and
+#                not once the row is gone: check_unregistered_lock_reinstall; and, on the schema before
 #                follows.follower_name, that sync refuses to start, an install locked out by a
 #                lock holder fails naming it, and build_schema applies the table upgrade:
 #                check_table_schema_upgrade
@@ -234,6 +236,7 @@ install_hivemind() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/endpoint_volatility_check.sql || return 1
     check_control_table_privileges || return 1
     check_app_registry || return 1
+    check_unregistered_lock_reinstall || return 1
     check_table_schema_upgrade || return 1
     check_massive_sync_stages || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
@@ -305,9 +308,51 @@ check_app_registry() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/app_registry_check.sql
 }
 
-hold_hivemind_lock() {  # hold hivemind's HAF application lock shared, as a dependent app's block processing does
-    PGAPPNAME=lock_holder_check psql "$ADMIN_URL" -X -Atc \
-        "select pg_advisory_lock_shared(hashtext('hive_fork_manager_app_lock'), hashtext('hivemind')); select pg_sleep(600)" \
+# A held hivemind lock with no registry row (a partial uninstall's leftover, held by a dependent's block processor)
+# no longer keeps the install out (hive/haf#454): while the row is there build_schema skips as before, and with the
+# row gone it proceeds after HAF's ~10 s holder wait and registers hivemind again. Its log lines go to the step's log.
+# hive/haf#454 added hafd.applications.health_function in the same commit (dbb3ecbc): that column is the probe.
+check_unregistered_lock_reinstall() {
+    if [ "$(psql "$ADMIN_URL" -Atc "select not exists (select 1 from pg_attribute
+        where attrelid = to_regclass('hafd.applications') and attname = 'health_function' and not attisdropped)")" = t ]; then
+        echo "held-lock reinstall check skipped: this HAF predates hive/haf#454 (dbb3ecbc, no hafd.applications.health_function);" \
+            "run install with HIVEMIND_TEST_DB_HOST naming a throwaway hive/haf testnet database of 697e0eb2 or newer"
+        return 0
+    fi
+    local log rc=0 t0
+    log="$(mktemp)"
+    hold_hivemind_lock "select hive.acquire_app_block_processor_locks(ARRAY['hivemind'])" || return 1
+    if build_schema > "$log" 2>&1 && grep -F "Skipping hivemind schema install" "$log"; then
+        echo "held lock, hivemind registered: build_schema skipped and exited 0"
+    else
+        cat "$log"; echo "build_schema with hivemind's lock held and its row registered did not skip with exit 0"; rc=1
+    fi
+    if [ "$rc" -eq 0 ]; then
+        psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select hive.app_unregister('hivemind')" > /dev/null || rc=1
+    fi
+    if [ "$rc" -eq 0 ]; then
+        t0=$SECONDS
+        if ! build_schema > "$log" 2>&1; then
+            cat "$log"; echo "build_schema with hivemind's lock held and no row failed"; rc=1
+        elif grep -q "Skipping hivemind schema install" "$log"; then
+            cat "$log"; echo "build_schema with hivemind's lock held and no row skipped"; rc=1
+        elif [ -z "$(registry_row hivemind)" ]; then
+            cat "$log"; echo "build_schema with hivemind's lock held and no row left no hivemind row"; rc=1
+        elif ! grep -E "Waiting for lock on hivemind|Installing hivemind without its lock" "$log"; then
+            cat "$log"; echo "build_schema with hivemind's lock held and no row did not go through HAF's holder wait"; rc=1
+        else
+            echo "held lock, no hivemind row: build_schema proceeded after $((SECONDS - t0)) s and registered hivemind as $(registry_row hivemind)"
+        fi
+    fi
+    release_hivemind_lock
+    rm -f "$log"
+    return "$rc"
+}
+
+# hold hivemind's HAF application lock shared, as a dependent app's block processing does
+hold_hivemind_lock() {  # [SQL: the statement taking it; default the raw advisory lock]
+    local take="${1:-select pg_advisory_lock_shared(hashtext('hive_fork_manager_app_lock'), hashtext('hivemind'))}"
+    PGAPPNAME=lock_holder_check psql "$ADMIN_URL" -X -Atc "$take; select pg_sleep(600)" \
         > /dev/null 2>&1 &
     lock_holder=$!
     local i
