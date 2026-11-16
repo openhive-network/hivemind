@@ -828,59 +828,87 @@ END
 $function$;
 
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_mentions;
-CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(_post_ids INTEGER[])
+-- Brings hive_mentions and mention notifications (type 16) up to date for posts whose
+-- comment ops a batch applied. Element i of the arrays is one post at the end of one
+-- block it had an op in, with its body then: NULL for the post's last such block (its
+-- hive_post_data body). The result is what processing each block in turn leaves: each
+-- block whose body mentions an account yields a notification at that block, a block
+-- whose body no longer mentions it deletes the account's notifications and its
+-- hive_mentions row for the post, and a block that ends with the post deleted mentions
+-- nobody.
+CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_mentions(
+    _post_ids INTEGER[], _block_nums INTEGER[], _bodies TEXT[])
 RETURNS SETOF BIGINT
 LANGUAGE plpgsql
 AS
 $function$
 BEGIN
-  -- With clause is inlined, modified call to reptracker_endpoints.get_account_reputation.
-  -- Reputation is multiplied by 7.5 rather than 9 to bring the max value to 100 rather than 115.
-  -- In case of reputation being 0, the score is set to 25 rather than 0.
+  -- The score is the author's reputation_score, 25 without one. Looked up per row: a
+  -- CTE of the authors' reputations joined back to the rows is rescanned per row when
+  -- the planner estimates a handful of rows, quadratic in a batch's mentions.
   RETURN query
-      WITH mentions AS MATERIALIZED
+      WITH snapshots AS MATERIALIZED
           (
-          SELECT DISTINCT post_id AS post_id, T.author_id, ha.id AS account_id, T.block_num, T.block_num-1 as prev_block
-          FROM
-              hivemind_app.hive_accounts ha
-                  INNER JOIN
-              (
-                  SELECT T.id AS post_id, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
-                  FROM
-                      (
-                          SELECT
-                              hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
-                          FROM hivemind_app.hive_posts AS hp
-                          INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
-                          WHERE hp.id = ANY(_post_ids)
-                            AND hp.counter_deleted = 0
-                      ) AS T
-              ) AS T ON ha.name = T.mention
-          WHERE ha.id != T.author_id
-          ORDER BY T.block_num, ha.id
+          SELECT s.post_id, s.block_num, s.body,
+                 (ROW_NUMBER() OVER (PARTITION BY s.post_id ORDER BY s.block_num))::INT AS idx,
+                 (count(*) OVER (PARTITION BY s.post_id))::INT AS last_idx
+          FROM unnest(_post_ids, _block_nums, _bodies) AS s(post_id, block_num, body)
+          ),
+      -- A post's version is live at the end of a block when it is not deleted by then
+      -- (a deleted version's block_num is the block that deleted it), and an account
+      -- exists by then when created by that block's ops (an account's created_at and a
+      -- comment op's date are both the date of the block before theirs).
+      snapshot_mentions AS MATERIALIZED
+          (
+          SELECT DISTINCT sn.post_id, sn.idx, sn.last_idx, sn.block_num, hp.author_id, ha.id AS account_id
+          FROM snapshots sn
+          JOIN hivemind_app.hive_posts hp ON hp.id = sn.post_id
+          JOIN hivemind_app.blocks_view AS op_block ON op_block.num = sn.block_num - 1
+          LEFT JOIN hivemind_app.hive_post_data hpd ON hpd.id = sn.post_id AND sn.body IS NULL
+          CROSS JOIN LATERAL REGEXP_MATCHES( COALESCE(sn.body, hpd.body), '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS T(mention)
+          JOIN hivemind_app.hive_accounts ha ON ha.name = LOWER( ( SELECT trim( T.mention::text, '{""}') ) )
+          WHERE (hp.counter_deleted = 0 OR hp.block_num > sn.block_num)
+            AND ha.created_at <= op_block.created_at
+            AND ha.id != hp.author_id
+          ),
+      -- The snapshots of a mention's last unbroken run, up to the post's last snapshot:
+      -- their notifications and the run's hive_mentions row outlast the batch. A mention
+      -- in every snapshot (run_start = 1) also keeps what earlier batches left.
+      final_runs AS MATERIALIZED
+          (
+          SELECT r.post_id, r.author_id, r.account_id, r.block_num, r.block_num - 1 AS prev_block,
+                 min(r.idx) OVER (PARTITION BY r.post_id, r.account_id) AS run_start,
+                 min(r.block_num) OVER (PARTITION BY r.post_id, r.account_id) AS run_block
+          FROM (
+              SELECT sm.*,
+                     count(*) OVER (PARTITION BY sm.post_id, sm.account_id ORDER BY sm.idx DESC) - 1 AS present_after
+              FROM snapshot_mentions sm
+          ) r
+          WHERE r.last_idx - r.idx = r.present_after
           ),
           delete_old_mentions AS
               (
               DELETE FROM hivemind_app.hive_mentions hm
                   WHERE post_id = ANY(_post_ids)
                       AND NOT EXISTS (
-                          SELECT 1 FROM mentions AS m
-                          WHERE m.post_id = hm.post_id AND m.account_id = hm.account_id
+                          SELECT 1 FROM final_runs AS m
+                          WHERE m.post_id = hm.post_id AND m.account_id = hm.account_id AND m.run_start = 1
                       )
                   RETURNING id
               ),
           insert_mentions AS
               (
+              -- A row deleted above is still visible to this statement's NOT EXISTS.
               INSERT INTO hivemind_app.hive_mentions(post_id, account_id, block_num)
-                  SELECT DISTINCT m.post_id, m.account_id, m.block_num
-                  FROM mentions AS m
+                  SELECT DISTINCT m.post_id, m.account_id, m.run_block
+                  FROM final_runs AS m
                   WHERE (SELECT count(*) FROM delete_old_mentions) >= 0 -- force evaluation, once
-                    AND NOT EXISTS (
+                    AND (m.run_start > 1 OR NOT EXISTS (
                       SELECT 1 FROM
                       hivemind_app.hive_mentions AS hm
                       WHERE hm.post_id = m.post_id
                         AND hm.account_id = m.account_id
-                  )
+                  ))
                   RETURNING id
               ),
           delete_old_cache AS
@@ -890,10 +918,11 @@ BEGIN
                       AND type_id = 16
                       AND NOT EXISTS (
                           SELECT 1
-                          FROM mentions AS m
+                          FROM final_runs AS m
                           WHERE m.post_id = hnc.post_id
                             AND m.author_id = hnc.src
                             AND m.account_id = hnc.dst
+                            AND m.run_start = 1
                       )
                   RETURNING id
               ),
@@ -901,24 +930,9 @@ BEGIN
               SELECT
                   hm.*,
                   hb.created_at AS created_at,
-                  (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.block_num ASC))::INTEGER AS counter
-              FROM mentions hm
+                  (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.account_id, hm.post_id))::INTEGER AS counter
+              FROM final_runs hm
               JOIN hivemind_app.blocks_view AS hb ON hb.num = hm.prev_block
-              ),
-          author_data AS (
-              SELECT DISTINCT
-                  hm.author_id,
-                  a.haf_id
-              FROM mentions_data hm
-                       LEFT JOIN hivemind_app.hive_accounts a ON a.id = hm.author_id
-              ),
-          author_rep AS (
-              SELECT
-                  ad.author_id,
-                  (GREATEST(LOG(10, ABS(nullif(r.reputation, 0))) - 9, 0) *
-                   CASE WHEN r.reputation < 0 THEN -1 ELSE 1 END * 7.5 + 25)::INT AS rep
-              FROM author_data ad
-                       LEFT JOIN reptracker_app.account_reputations r ON r.account_id = ad.haf_id
               )
           INSERT INTO hivemind_app.hive_notification_cache
               (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -931,17 +945,17 @@ BEGIN
                   hm.account_id,
                   hm.post_id,
                   hm.post_id,
-                  COALESCE(rep.rep, 25),
+                  COALESCE(hivemind_app.reputation_score(a.haf_id), 25),
                   '', '', ''
               FROM mentions_data AS hm
-              LEFT JOIN author_rep AS rep ON rep.author_id = hm.author_id
+              JOIN hivemind_app.hive_accounts AS a ON a.id = hm.author_id
               LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
               LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
               LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
               WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
                 AND (SELECT count(*) FROM insert_mentions) >= 0 -- force evaluation, once
                 AND (SELECT count(*) FROM delete_old_cache) >= 0 -- force evaluation, once
-                AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(rep.rep, 25) > 0)
+                AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(hivemind_app.reputation_score(a.haf_id), 25) > 0)
                 AND hm.author_id IS DISTINCT FROM hm.account_id
                 AND m.follower IS NULL
                 AND mi.following IS NULL
