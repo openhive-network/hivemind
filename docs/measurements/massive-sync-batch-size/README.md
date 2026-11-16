@@ -147,6 +147,9 @@ batch's creates and deletes on top of a posts phase that had already committed: 
 inserts one, and the delete then deletes it again. Nothing in that depends on the batch size, but a larger batch
 holds more such posts. The 1000-block replay of batch 4,524,001–4,525,000 held none.
 
+#477 removes these effects: [fidelity.md](fidelity.md) has what one block at a time gives, how the batch SQL
+now matches it, and the comparisons (1000 against 10000, one block at a time, crash replays).
+
 ## Not measured
 
 - The issue's ranges themselves: 5–10M and 18–25M of mainnet, and steem-20's own timing. Mainnet-scale tables

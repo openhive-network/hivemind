@@ -1,12 +1,14 @@
 import logging
+from typing import Any
 
 from hive.conf import SCHEMA_NAME
+from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
 
 
-def _sanitize_nul(val):
+def _sanitize_nul(val: str | None) -> str | None:
     """Replace NUL chars with spaces — PostgreSQL text columns cannot store \\x00."""
     if val is None:
         return None
@@ -17,23 +19,48 @@ class PostDataCache(DbAdapterHolder):
     """Provides cache for DB operations on post data table in order to speed up massive sync"""
 
     _data: dict[int, dict] = {}
+    # The blocks each cached post had ops in, ascending, and its body at the end of each
+    # of them but the last: mentions are processed block by block (process_hive_post_mentions).
+    _blocks: dict[int, list[int]] = {}
+    _block_bodies: dict[tuple[int, int], str] = {}
 
     @classmethod
-    def is_cached(cls, pid):
+    def is_cached(cls, pid: int) -> bool:
         """Check if data is cached"""
         return pid in cls._data
 
     @classmethod
-    def add_data(cls, pid, post_data, is_new_post):
-        """Add data to cache"""
+    def add_data(cls, pid: int, post_data: dict[str, Any], is_new_post: bool, block_num: int) -> None:
+        """Add the data of the post's op in block block_num to the cache; ops come in chain order."""
         if not cls.is_cached(pid):
             cls._data[pid] = post_data
             cls._data[pid]['is_new_post'] = is_new_post
+            cls._blocks[pid] = [block_num]
         else:
             assert not is_new_post
+            blocks = cls._blocks[pid]
+            if block_num != blocks[-1]:
+                cls._block_bodies[(pid, blocks[-1])] = cls._current_body(pid)
+                blocks.append(block_num)
             for k, data in post_data.items():
                 if data is not None:
                     cls._data[pid][k] = data
+
+    @classmethod
+    def _current_body(cls, pid: int) -> str:
+        """The cached post's body as its ops so far leave it: the stored body while none has set it."""
+        body: str | None = cls._data[pid]['body']
+        if body is None:
+            sql = f"SELECT hpd.body FROM {SCHEMA_NAME}.hive_post_data hpd WHERE hpd.id = :post_id"
+            rows = cls._own_db().query_all(sql, post_id=pid)
+            body = rows[0]._mapping['body'] if rows else ''
+        return body or ''
+
+    @classmethod
+    def _own_db(cls) -> Db:
+        if cls.db is None:
+            raise RuntimeError("PostDataCache has no database connection (setup_own_db_access was not called)")
+        return cls.db
 
     @classmethod
     def get_post_body(cls, pid):
@@ -49,8 +76,12 @@ class PostDataCache(DbAdapterHolder):
         return post_data['body']
 
     @classmethod
-    def flush(cls, print_query=False, process_mentions=True):
-        """Flush data from cache to db"""
+    def flush(cls, print_query: bool = False, mentions_after_block: int = 0) -> int:
+        """Flush data from cache to db, and process the mentions of the blocks after mentions_after_block.
+
+        Commits the post data of an in-flight massive batch with its marker
+        (_batch_queue.post_data_applied), so that a replay of the batch does not apply it again.
+        """
         if not cls._data:
             return 0
 
@@ -82,15 +113,23 @@ class PostDataCache(DbAdapterHolder):
             else '(NULL::int,NULL::bool,NULL::text,NULL::text,NULL::text)'
         )
 
-        # Mentions parsing re-reads the just-written bodies; callers disable it for
-        # blocks outside the 90-day notification window (hive_mentions is windowed
-        # data whose only consumer is notification rendering). The count() form
-        # keeps the data-modifying CTEs referenced and the statement shape intact.
-        final_select = (
-            f"SELECT {SCHEMA_NAME}.process_hive_post_mentions(array_agg(id)) FROM combined"
-            if process_mentions
-            else "SELECT count(id) FROM combined"
-        )
+        # Mentions parsing re-reads the just-written bodies; callers skip the blocks
+        # outside the 90-day notification window (hive_mentions is windowed data whose
+        # only consumer is notification rendering). A post's last block reads its
+        # just-written body (NULL here), its earlier blocks the body they ended with.
+        # It runs as a statement of its own: a function called from the statement that
+        # writes the bodies does not see the rows that statement inserts.
+        mention_post_ids: list[int] = []
+        mention_blocks: list[int] = []
+        mention_bodies: list[str | None] = []
+        for pid, blocks in cls._blocks.items():
+            for block_num in blocks:
+                if block_num > mentions_after_block:
+                    mention_post_ids.append(pid)
+                    mention_blocks.append(block_num)
+                    mention_bodies.append(
+                        None if block_num == blocks[-1] else _sanitize_nul(cls._block_bodies[(pid, block_num)])
+                    )
 
         sql = f"""
             WITH insert_values(id, is_root, title, body, json) AS (
@@ -119,10 +158,10 @@ class PostDataCache(DbAdapterHolder):
                 UNION ALL
                 SELECT id FROM update_post_data
             )
-            {final_select}
+            SELECT count(id) FROM combined
         """
 
-        params = []
+        params: list[Any] = []
         for item in insert_items:
             params.extend(item)
         for item in update_items:
@@ -132,12 +171,20 @@ class PostDataCache(DbAdapterHolder):
             log.info(f"Executing query:\n{sql}")
 
         if params:
-            cls.db.query_all_raw(sql, tuple(params))
+            cls._own_db().query_all_raw(sql, tuple(params))
         else:
-            cls.db.query_all_raw(sql)
+            cls._own_db().query_all_raw(sql)
+        if mention_post_ids:
+            cls._own_db().query_all_raw(
+                f"SELECT {SCHEMA_NAME}.process_hive_post_mentions(%s::INT[], %s::INT[], %s::TEXT[])",
+                (mention_post_ids, mention_blocks, mention_bodies),
+            )
+        cls._own_db().query_no_return(f"UPDATE {SCHEMA_NAME}._batch_queue SET post_data_applied = TRUE")
 
         cls.commitTx()
 
         n = len(cls._data)
         cls._data.clear()
+        cls._blocks.clear()
+        cls._block_bodies.clear()
         return n

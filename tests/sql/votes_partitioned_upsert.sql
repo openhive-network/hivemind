@@ -8,8 +8,9 @@
 --
 -- The batch has votes and effective_comment_vote ops on six posts (all three
 -- partitions of three), repeated votes, a vote on an unknown post, a vote cast before
--- its post was recreated, a known vote from an earlier block (num_changes grows) and
--- one from a later block (a replayed batch: num_changes kept).
+-- its post was recreated, a known vote from an earlier block (num_changes grows by one
+-- per block it is voted in, as blocks processed one at a time count it) and one from a
+-- later block (a replayed batch: num_changes kept).
 
 \set ON_ERROR_STOP 1
 BEGIN;
@@ -129,8 +130,9 @@ BEGIN
      OR (SELECT count(*) FROM jsonb_array_elements(_rows) r WHERE r->>'id' LIKE 'new+%') <> _serial_count - 2 THEN
     RAISE EXCEPTION 'expected % ids drawn and % new rows, got % ids drawn: %', _serial_count, _serial_count - 2, _seq_used - 1, _rows;
   END IF;
-  IF NOT _rows @> '[{"num_changes": 3, "block_num": 207, "rshares": 700, "vote_percent": 101}]' THEN
-    RAISE EXCEPTION 'pv-v01/pv-p1 (known from block 150): expected num_changes 3 at block 207, got %', _rows;
+  -- votes in blocks 202 and 207, neither with an effective_comment_vote: two changes
+  IF NOT _rows @> '[{"num_changes": 4, "block_num": 207, "rshares": 700, "vote_percent": 101}]' THEN
+    RAISE EXCEPTION 'pv-v01/pv-p1 (known from block 150): expected num_changes 4 at block 207, got %', _rows;
   END IF;
   IF NOT _rows @> '[{"num_changes": 2, "block_num": 300, "vote_percent": 55}]' THEN
     RAISE EXCEPTION 'pv-v02/pv-p2 (known from block 300): expected num_changes 2 kept, got %', _rows;

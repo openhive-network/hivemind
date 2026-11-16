@@ -16,6 +16,30 @@ CREATE TABLE IF NOT EXISTS hivemind_app._batch_queue (
     first_block INT NOT NULL,
     last_block  INT NOT NULL
 );
+-- The batch phases that are not idempotent and have committed: a replay reuses them
+-- rather than applying their ops a second time (Blocks.process_multi_sql).
+--   posts_applied:     the posts phase, its results in _batch_post_results
+--   post_data_applied: the post data flush (PostDataCache.flush)
+ALTER TABLE hivemind_app._batch_queue
+    ADD COLUMN IF NOT EXISTS posts_applied BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS post_data_applied BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- The _post_results rows of the in-flight batch's posts phase, committed with it
+-- (save_batch_post_results). The columns a replay cannot rebuild from _ops_staging.
+-- MUST remain LOGGED, like _batch_queue.
+CREATE TABLE IF NOT EXISTS hivemind_app._batch_post_results (
+    seq_id      INT NOT NULL,
+    post_id     INT,
+    is_new_post BOOLEAN,
+    author_id   INT,
+    permlink_id INT,
+    depth       SMALLINT,
+    parent_id   INT,
+    parent_author_id INT,
+    community_id INT,
+    is_post_muted BOOLEAN,
+    muted_reasons INT
+);
 
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
     id          BIGINT NOT NULL,       -- HAF operation ID (ordering)
@@ -109,7 +133,8 @@ CREATE UNLOGGED TABLE hivemind_app._post_batch (
 CREATE INDEX _post_batch_author_permlink_idx ON hivemind_app._post_batch (author_id, permlink_id);
 
 
--- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead)
+-- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead):
+-- one row per (voter, author, permlink, block)
 DROP TABLE IF EXISTS hivemind_app._vote_batch;
 CREATE UNLOGGED TABLE hivemind_app._vote_batch (
     voter       TEXT,
@@ -122,9 +147,9 @@ CREATE UNLOGGED TABLE hivemind_app._vote_batch (
     weight      NUMERIC,
     rshares     BIGINT,
     is_effective BOOLEAN,
-    num_changes INT,
+    ecv_count   INT,
     block_num   INT,
-    ord         BIGINT NOT NULL   -- merged order: the order hive_votes ids are drawn in
+    ord         BIGINT NOT NULL   -- the order hive_votes ids are drawn in
 );
 
 -- hive_votes rows of a vote batch, ids already drawn (prepare_votes_from_staging),
@@ -142,7 +167,8 @@ CREATE UNLOGGED TABLE hivemind_app._vote_upsert (
     last_update TIMESTAMP,
     num_changes INT,
     block_num   INT,
-    is_effective BOOLEAN
+    is_effective BOOLEAN,          -- some block of the batch holds an effective vote
+    first_is_effective BOOLEAN     -- the batch's first block of this vote does
 );
 
 -- Persistent staging tables for reblog processing
@@ -404,141 +430,96 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- Builds the batch's hive_votes rows in _vote_upsert, each with its hive_votes id
 -- already drawn. upsert_votes_partition writes them; massive sync runs the
 -- partitions on separate connections once this has committed.
+--
+-- The rows are the ones processing the batch one block at a time would leave: each
+-- block's votes of one voter on one post are folded as a one-block batch folds them,
+-- each block resolves the post as it is at the end of that block (a post deleted in a
+-- later block still takes the vote; a vote cast before a delete and re-create stays
+-- with the deleted version), and the blocks are then folded as successive upserts
+-- would apply them.
 CREATE OR REPLACE FUNCTION hivemind_app.prepare_votes_from_staging()
 RETURNS VOID AS $function$
 BEGIN
-    -- Process vote ops (type 0) and effective_comment_vote ops (type 72)
-    -- from the staging table.
-    --
-    -- Within a batch, for the same (voter, author, permlink):
-    --   - type 0: keep last vote_percent and last_update
-    --   - type 72: keep last weight, rshares, is_effective
-    --
-    -- Deduplication: for the same voter/author/permlink, we aggregate:
-    --   - From type 0 (VOTE): vote_percent, last_update from the LAST occurrence
-    --   - From type 72 (ECV): weight, rshares from the LAST occurrence
-    --   - num_changes = count of effective_comment_vote ops
-
-    -- Step 1: Collect and deduplicate vote data
+    -- Step 1: One row per (voter, author, permlink, block) from vote ops (type 0) and
+    -- effective_comment_vote ops (type 72): the last vote's vote_percent/last_update,
+    -- the last effective vote's weight/rshares, and how many effective votes the block
+    -- holds. A block without a type 0 op writes vote_percent 0 and last_update
+    -- 1970-01-01, as a one-block batch did.
     DELETE FROM hivemind_app._vote_batch;
     INSERT INTO hivemind_app._vote_batch
     WITH vote_ops AS (
-        -- Regular votes (type 0)
         SELECT
             s.id,
             s.block_num,
+            s.op_type_id,
+            s.block_date,
             s.val->>'voter' AS voter,
             s.val->>'author' AS author,
             s.val->>'permlink' AS permlink,
-            (s.val->>'weight')::INT AS vote_percent,
-            s.block_date AS last_update,
-            0::NUMERIC AS weight,
-            0::BIGINT AS rshares,
-            FALSE AS is_effective
-        FROM hivemind_app._ops_staging s
-        WHERE s.op_type_id = 0
-    ),
-    ecv_ops AS (
-        -- Effective comment vote ops (type 72)
-        SELECT
-            s.id,
-            s.block_num,
-            s.val->>'voter' AS voter,
-            s.val->>'author' AS author,
-            s.val->>'permlink' AS permlink,
-            0 AS vote_percent,
-            '1970-01-01'::TIMESTAMP AS last_update,
-            (s.val->>'weight')::NUMERIC AS weight,
-            CASE WHEN s.block_num < 905693
-                THEN (s.val->>'rshares')::BIGINT * 1000000
+            CASE WHEN s.op_type_id = 0 THEN (s.val->>'weight')::INT END AS vote_percent,
+            CASE WHEN s.op_type_id = 72 THEN (s.val->>'weight')::NUMERIC END AS weight,
+            CASE WHEN s.op_type_id <> 72 THEN NULL
+                WHEN s.block_num < 905693 THEN (s.val->>'rshares')::BIGINT * 1000000
                 ELSE (s.val->>'rshares')::BIGINT
-            END AS rshares,
-            TRUE AS is_effective
+            END AS rshares
         FROM hivemind_app._ops_staging s
-        WHERE s.op_type_id = 72
+        WHERE s.op_type_id IN (0, 72)
     ),
-    all_vote_data AS (
-        SELECT * FROM vote_ops
-        UNION ALL
-        SELECT * FROM ecv_ops
-    ),
-    -- For each (voter, author, permlink), take the last vote_percent/last_update from type 0
-    -- and the last weight/rshares from type 72
-    last_vote AS (
-        SELECT DISTINCT ON (voter, author, permlink)
-            voter, author, permlink, vote_percent, last_update, block_num
-        FROM vote_ops
-        ORDER BY voter, author, permlink, id DESC
-    ),
-    last_ecv AS (
-        SELECT DISTINCT ON (voter, author, permlink)
-            voter, author, permlink, weight, rshares, block_num,
-            count(*) OVER (PARTITION BY voter, author, permlink) - 1 AS num_changes
-        FROM ecv_ops
-        ORDER BY voter, author, permlink, id DESC
-    ),
-    -- Merge: combine vote data with effective vote data
-    merged AS (
+    block_votes AS (
         SELECT
-            COALESCE(v.voter, e.voter) AS voter,
-            COALESCE(v.author, e.author) AS author,
-            COALESCE(v.permlink, e.permlink) AS permlink,
-            COALESCE(v.vote_percent, 0) AS vote_percent,
-            COALESCE(v.last_update, '1970-01-01'::TIMESTAMP) AS last_update,
-            COALESCE(e.weight, 0) AS weight,
-            COALESCE(e.rshares, 0) AS rshares,
-            (e.voter IS NOT NULL) AS is_effective,
-            COALESCE(e.num_changes, 0)::INT AS num_changes,
-            GREATEST(COALESCE(v.block_num, 0), COALESCE(e.block_num, 0)) AS block_num
-        FROM last_vote v
-        FULL OUTER JOIN last_ecv e
-            ON v.voter = e.voter AND v.author = e.author AND v.permlink = e.permlink
+            voter, author, permlink, block_num,
+            COALESCE((array_agg(vote_percent ORDER BY id DESC) FILTER (WHERE op_type_id = 0))[1], 0) AS vote_percent,
+            COALESCE((array_agg(block_date ORDER BY id DESC) FILTER (WHERE op_type_id = 0))[1], '1970-01-01'::TIMESTAMP) AS last_update,
+            COALESCE((array_agg(weight ORDER BY id DESC) FILTER (WHERE op_type_id = 72))[1], 0) AS weight,
+            COALESCE((array_agg(rshares ORDER BY id DESC) FILTER (WHERE op_type_id = 72))[1], 0) AS rshares,
+            count(*) FILTER (WHERE op_type_id = 72) AS ecv_count
+        FROM vote_ops
+        GROUP BY voter, author, permlink, block_num
     ),
     -- Each account name is looked up once, however many votes it casts or receives.
     account_ids AS (
         SELECT ha.name, ha.id
         FROM (
-            SELECT voter AS name FROM merged
+            SELECT voter AS name FROM block_votes
             UNION
-            SELECT author FROM merged
+            SELECT author FROM block_votes
         ) n
         JOIN hivemind_app.hive_accounts ha ON ha.name = n.name
-    ),
-    -- ord decides the order hive_votes ids are drawn in (step 2); numbered before
-    -- the joins below, so it is merged's order whichever side they hash.
-    merged_ord AS (
-        SELECT row_number() OVER () AS ord, merged.* FROM merged
     )
     SELECT
-        m.voter,
+        bv.voter,
         ha_voter.id AS voter_id,
-        m.author,
+        bv.author,
         ha_author.id AS author_id,
-        m.permlink,
-        m.vote_percent,
-        m.last_update,
-        m.weight,
-        m.rshares,
-        m.is_effective,
-        m.num_changes,
-        m.block_num,
-        m.ord
-    FROM merged_ord m
-    JOIN account_ids ha_voter ON ha_voter.name = m.voter
-    JOIN account_ids ha_author ON ha_author.name = m.author;
+        bv.permlink,
+        bv.vote_percent,
+        bv.last_update,
+        bv.weight,
+        bv.rshares,
+        bv.ecv_count > 0 AS is_effective,
+        bv.ecv_count::INT AS ecv_count,
+        bv.block_num,
+        -- ord decides the order hive_votes ids are drawn in (step 2): one voter's
+        -- votes on one post share their first row's ord.
+        row_number() OVER (ORDER BY bv.voter, bv.author, bv.permlink, bv.block_num) AS ord
+    FROM block_votes bv
+    JOIN account_ids ha_voter ON ha_voter.name = bv.voter
+    JOIN account_ids ha_author ON ha_author.name = bv.author;
 
-    -- Step 2: Resolve each vote's post and draw its hive_votes id
+    -- Step 2: Resolve each block's post, fold the blocks of each voter's vote on a
+    -- post, and draw its hive_votes id
     DELETE FROM hivemind_app._vote_upsert;
-    WITH vote_target AS MATERIALIZED (
-        -- Many votes in a batch hit the same post: resolve each target post once.
-        -- MATERIALIZED, or the planner joins it back to the votes first and
-        -- looks the post up per vote again.
+    WITH pair_version AS MATERIALIZED (
+        -- Every version of each voted post, resolved once however many votes hit it.
+        -- A deleted version's block_num is the block that deleted it. MATERIALIZED, or
+        -- the planner joins it back to the votes first and looks the post up per vote.
         SELECT
             t.author_id,
             t.permlink,
             hpd.id AS permlink_id,
             hp.id AS post_id,
-            hp.block_num_created
+            hp.block_num_created,
+            CASE WHEN hp.counter_deleted = 0 THEN NULL ELSE hp.block_num END AS deleted_block
         FROM (
             SELECT DISTINCT author_id, permlink FROM hivemind_app._vote_batch
         ) t
@@ -546,38 +527,51 @@ BEGIN
         JOIN hivemind_app.hive_posts hp
             ON hp.author_id = t.author_id
             AND hp.permlink_id = hpd.id
-            AND hp.counter_deleted = 0
     ),
-    vote_with_post AS (
-        SELECT
-            vb.*,
-            vt.post_id,
-            vt.permlink_id
+    resolved AS (
+        -- The version live at the end of the vote's block; a vote whose block ends
+        -- with no live version is dropped, as that block alone would drop it.
+        SELECT vb.*, pv.post_id, pv.permlink_id
         FROM hivemind_app._vote_batch vb
-        JOIN vote_target vt
-            ON vt.author_id = vb.author_id
-            AND vt.permlink = vb.permlink
-        -- Filter out votes cast before the post was recreated (delete/recreate cycle).
-        -- The old Python code removed in-memory votes on delete, preventing stale votes
-        -- from being flushed for recreated posts.
-        -- Use block_num_created (not block_num) because block_num is updated on edits,
-        -- which would incorrectly filter out votes cast between creation and edit.
-        WHERE vb.block_num >= vt.block_num_created
-        -- Draw ids in merged order: vote notification counters follow hive_votes.id.
-        -- Not physical order: rows refilled after a DELETE can land in any page.
-        ORDER BY vb.ord
+        JOIN pair_version pv
+            ON pv.author_id = vb.author_id
+            AND pv.permlink = vb.permlink
+            AND pv.block_num_created <= vb.block_num
+            AND (pv.deleted_block IS NULL OR pv.deleted_block > vb.block_num)
+    ),
+    -- Successive one-block upserts leave the last block's post_id, vote_percent and
+    -- last_update, the last effective block's weight and rshares, and count
+    -- GREATEST(effective votes, 1) changes per block after the first row's.
+    folded AS (
+        SELECT
+            r.voter_id,
+            r.author_id,
+            r.permlink_id,
+            (array_agg(r.post_id ORDER BY r.block_num DESC))[1] AS post_id,
+            (array_agg(r.vote_percent ORDER BY r.block_num DESC))[1] AS vote_percent,
+            (array_agg(r.last_update ORDER BY r.block_num DESC))[1] AS last_update,
+            COALESCE((array_agg(r.weight ORDER BY r.block_num DESC) FILTER (WHERE r.is_effective))[1], 0) AS weight,
+            COALESCE((array_agg(r.rshares ORDER BY r.block_num DESC) FILTER (WHERE r.is_effective))[1], 0) AS rshares,
+            bool_or(r.is_effective) AS is_effective,
+            (array_agg(r.is_effective ORDER BY r.block_num))[1] AS first_is_effective,
+            (sum(GREATEST(r.ecv_count, 1)) - 1)::INT AS num_changes,
+            max(r.block_num) AS block_num,
+            min(r.ord) AS ord
+        FROM resolved r
+        GROUP BY r.voter_id, r.author_id, r.permlink_id
     )
     -- One id per row, including the rows that will take the ON CONFLICT path:
     -- the sequence ends where an INSERT drawing the column default would leave it.
+    -- Draw ids in ord: vote notification counters follow hive_votes.id.
     INSERT INTO hivemind_app._vote_upsert
         (id, post_id, voter_id, author_id, permlink_id, weight, rshares,
-         vote_percent, last_update, num_changes, block_num, is_effective)
+         vote_percent, last_update, num_changes, block_num, is_effective, first_is_effective)
     SELECT
         nextval('hivemind_app.hive_votes_id_seq'),
-        vwp.post_id, vwp.voter_id, vwp.author_id, vwp.permlink_id,
-        vwp.weight, vwp.rshares, vwp.vote_percent, vwp.last_update,
-        vwp.num_changes, vwp.block_num, vwp.is_effective
-    FROM vote_with_post vwp;
+        f.post_id, f.voter_id, f.author_id, f.permlink_id,
+        f.weight, f.rshares, f.vote_percent, f.last_update,
+        f.num_changes, f.block_num, f.is_effective, f.first_is_effective
+    FROM (SELECT * FROM folded ORDER BY ord) f;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
@@ -623,6 +617,20 @@ BEGIN
         RETURNING 1
     )
     SELECT count(*) INTO _count FROM upserted;
+
+    -- EXCLUDED.is_effective says whether the batch brings a weight and rshares; a row
+    -- the batch inserts takes is_effective from its first block, as that block's own
+    -- insert would. hv.id = vu.id only for a row inserted here: the ON CONFLICT path
+    -- keeps the existing row's id.
+    UPDATE hivemind_app.hive_votes hv
+    SET is_effective = FALSE
+    FROM hivemind_app._vote_upsert vu
+    WHERE vu.permlink_id % _parts = _part
+      AND vu.is_effective AND NOT vu.first_is_effective
+      AND hv.voter_id = vu.voter_id
+      AND hv.author_id = vu.author_id
+      AND hv.permlink_id = vu.permlink_id
+      AND hv.id = vu.id;
 
     -- Rshares aggregates (sc_hot, sc_trend, etc.) are NOT updated per-batch during
     -- massive sync. The key index (hive_votes_post_id_block_num_rshares_vote_is_effective_idx)
@@ -910,60 +918,89 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_payouts_from_staging(
 DECLARE
     _count INT := 0;
 BEGIN
-    -- Collect payout virtual ops (types 51, 53, 61, 72) from staging.
-    -- Single-pass aggregation: GROUP BY (author, permlink) with FILTER extracts
-    -- per-type "last row" values using array_agg(...ORDER BY id DESC)[1].
-    -- Replaces 4 separate DISTINCT ON CTEs + 4-way UNION + 4-way LEFT JOIN.
+    -- Payout virtual ops (types 51, 53, 61, 72) are applied as processing the batch
+    -- one block at a time would apply them. block_payouts is one block's update of
+    -- one post ("last" = the block's last op of that type); each block updates the
+    -- version live at the end of that block, so a post deleted in a later block still
+    -- takes its payout; version_payouts folds a version's blocks as successive
+    -- updates would leave them.
     --
-    -- When COMMENT_REWARD (type 53) exists for a post, EFFECTIVE_COMMENT_VOTE
-    -- payout data is discarded (nullified via has_cr flag).
-
-    WITH payout_agg AS (
+    -- Within a block, COMMENT_REWARD (type 53) supersedes EFFECTIVE_COMMENT_VOTE
+    -- payout data, and COMMENT_PAYOUT_UPDATE (type 61) zeroes pending payout and
+    -- total vote weight.
+    WITH block_payouts AS (
         SELECT
             s.val->>'author' AS author,
             s.val->>'permlink' AS permlink,
-            -- COMMENT_PAYOUT_UPDATE (type 61) - last occurrence
+            s.block_num,
+            -- COMMENT_PAYOUT_UPDATE (type 61)
+            bool_or(s.op_type_id = 61) AS has_cpu,
             (array_agg(s.block_date ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 61))[1] AS cpu_payout_date,
             -- AUTHOR_REWARD (type 51) - last occurrence
             (array_agg((s.val->'hive_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_hive,
             (array_agg((s.val->'hbd_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_hbd,
             (array_agg((s.val->'vesting_payout'->>'amount')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 51))[1] AS author_rewards_vests,
             -- COMMENT_REWARD (type 53) - last occurrence
+            bool_or(s.op_type_id = 53) AS has_cr,
             (array_agg((s.val->>'author_rewards')::BIGINT ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS author_rewards,
             (array_agg(s.val->'total_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS total_payout_value,
             (array_agg(s.val->'curator_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS curator_payout_value,
             (array_agg(s.val->'beneficiary_payout_value' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS beneficiary_payout_value,
             (array_agg(s.block_date ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 53))[1] AS cr_payout_date,
             -- EFFECTIVE_COMMENT_VOTE (type 72) - last occurrence, only if beyond safe cashout
-            (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json_raw,
-            (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight_raw,
-            -- Flag: has COMMENT_REWARD? (used to nullify ECV data)
-            bool_or(s.op_type_id = 53) AS has_cr,
-            -- Max block_num across all payout ops for this post (for replay detection)
-            MAX(s.block_num) AS max_payout_block
+            (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json,
+            (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id IN (51, 53, 61, 72)
-        GROUP BY s.val->>'author', s.val->>'permlink'
+        GROUP BY s.val->>'author', s.val->>'permlink', s.block_num
     ),
-    merged AS (
+    pair_version AS MATERIALIZED (
+        -- Every version of each paid post; a deleted version's block_num is the block
+        -- that deleted it.
         SELECT
-            pa.author, pa.permlink,
-            ha.id AS author_id,
-            pa.cpu_payout_date,
-            pa.author_rewards_hive,
-            pa.author_rewards_hbd,
-            pa.author_rewards_vests,
-            pa.author_rewards,
-            pa.total_payout_value,
-            pa.curator_payout_value,
-            pa.beneficiary_payout_value,
-            pa.cr_payout_date,
-            -- Nullify ECV data when COMMENT_REWARD exists (it supersedes pending payout)
-            CASE WHEN pa.has_cr THEN NULL ELSE pa.pending_payout_json_raw END AS pending_payout_json,
-            CASE WHEN pa.has_cr THEN NULL ELSE pa.total_vote_weight_raw END AS total_vote_weight,
-            pa.max_payout_block
-        FROM payout_agg pa
-        JOIN hivemind_app.hive_accounts ha ON ha.name = pa.author
+            t.author,
+            t.permlink,
+            hp.id AS post_id,
+            hp.block_num_created,
+            CASE WHEN hp.counter_deleted = 0 THEN NULL ELSE hp.block_num END AS deleted_block
+        FROM (SELECT DISTINCT author, permlink FROM block_payouts) t
+        JOIN hivemind_app.hive_accounts ha ON ha.name = t.author
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = t.permlink
+        JOIN hivemind_app.hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+    ),
+    version_payouts AS (
+        -- A column one block leaves unchanged (NULL here) keeps the value of an earlier
+        -- block, so each column is the last block's non-NULL value.
+        SELECT
+            pv.post_id,
+            (array_agg(bp.cpu_payout_date ORDER BY bp.block_num DESC) FILTER (WHERE bp.has_cpu))[1] AS cpu_payout_date,
+            bool_or(bp.has_cpu) AS has_cpu,
+            (array_agg(bp.author_rewards_hive ORDER BY bp.block_num DESC) FILTER (WHERE bp.author_rewards_hive IS NOT NULL))[1] AS author_rewards_hive,
+            (array_agg(bp.author_rewards_hbd ORDER BY bp.block_num DESC) FILTER (WHERE bp.author_rewards_hbd IS NOT NULL))[1] AS author_rewards_hbd,
+            (array_agg(bp.author_rewards_vests ORDER BY bp.block_num DESC) FILTER (WHERE bp.author_rewards_vests IS NOT NULL))[1] AS author_rewards_vests,
+            -- each block's COMMENT_REWARD adds its author_rewards
+            sum(bp.author_rewards) AS author_rewards,
+            (array_agg(bp.total_payout_value ORDER BY bp.block_num DESC) FILTER (WHERE bp.has_cr))[1] AS total_payout_value,
+            (array_agg(bp.curator_payout_value ORDER BY bp.block_num DESC) FILTER (WHERE bp.has_cr))[1] AS curator_payout_value,
+            (array_agg(bp.beneficiary_payout_value ORDER BY bp.block_num DESC) FILTER (WHERE bp.has_cr))[1] AS beneficiary_payout_value,
+            (array_agg(COALESCE(bp.cr_payout_date, bp.cpu_payout_date) ORDER BY bp.block_num DESC)
+                FILTER (WHERE bp.has_cr OR bp.has_cpu))[1] AS last_payout_at,
+            (array_agg(
+                CASE WHEN bp.has_cr OR bp.has_cpu THEN 0
+                     ELSE hivemind_app.sbd_amount_from_json(bp.pending_payout_json)::DECIMAL(10,3) END
+                ORDER BY bp.block_num DESC)
+                FILTER (WHERE bp.has_cr OR bp.has_cpu OR bp.pending_payout_json IS NOT NULL))[1] AS pending_payout,
+            (array_agg(CASE WHEN bp.has_cpu THEN 0 ELSE bp.total_vote_weight END ORDER BY bp.block_num DESC)
+                FILTER (WHERE bp.has_cpu OR (NOT bp.has_cr AND bp.total_vote_weight IS NOT NULL)))[1] AS total_vote_weight,
+            -- Max block_num across the version's payout ops (for replay detection)
+            max(bp.block_num) AS max_payout_block
+        FROM block_payouts bp
+        JOIN pair_version pv
+            ON pv.author = bp.author
+            AND pv.permlink = bp.permlink
+            AND pv.block_num_created <= bp.block_num
+            AND (pv.deleted_block IS NULL OR pv.deleted_block > bp.block_num)
+        GROUP BY pv.post_id
     )
     UPDATE hivemind_app.hive_posts hp
     SET
@@ -993,42 +1030,20 @@ BEGIN
             ELSE NULL END,
             hp.payout
         ),
-        pending_payout = COALESCE(
-            CASE
-                WHEN m.total_payout_value IS NOT NULL THEN 0  -- COMMENT_REWARD zeroes pending
-                WHEN m.cpu_payout_date IS NOT NULL THEN 0     -- COMMENT_PAYOUT_UPDATE zeroes pending
-                WHEN m.pending_payout_json IS NOT NULL THEN
-                    hivemind_app.sbd_amount_from_json(m.pending_payout_json)::DECIMAL(10,3)
-                ELSE NULL
-            END,
-            hp.pending_payout
-        ),
+        pending_payout = COALESCE(m.pending_payout, hp.pending_payout),
         payout_at = COALESCE(m.cpu_payout_date, hp.payout_at),
-        last_payout_at = COALESCE(
-            m.cr_payout_date,
-            m.cpu_payout_date,
-            hp.last_payout_at
-        ),
+        last_payout_at = COALESCE(m.last_payout_at, hp.last_payout_at),
         cashout_time = CASE
-            WHEN m.cpu_payout_date IS NOT NULL THEN 'infinity'::TIMESTAMP
+            WHEN m.has_cpu THEN 'infinity'::TIMESTAMP
             ELSE hp.cashout_time
         END,
         is_paidout = CASE
-            WHEN m.cpu_payout_date IS NOT NULL THEN TRUE
+            WHEN m.has_cpu THEN TRUE
             ELSE hp.is_paidout
         END,
-        total_vote_weight = COALESCE(
-            CASE
-                WHEN m.cpu_payout_date IS NOT NULL THEN 0  -- COMMENT_PAYOUT_UPDATE zeroes it
-                ELSE m.total_vote_weight
-            END,
-            hp.total_vote_weight
-        )
-    FROM merged m
-    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = m.permlink
-    WHERE hp.author_id = m.author_id
-      AND hp.permlink_id = hpd.id
-      AND hp.counter_deleted = 0;
+        total_vote_weight = COALESCE(m.total_vote_weight, hp.total_vote_weight)
+    FROM version_payouts m
+    WHERE hp.id = m.post_id;
 
     GET DIAGNOSTICS _count = ROW_COUNT;
 
@@ -1351,13 +1366,15 @@ BEGIN
     JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
     WHERE NOT cs.is_first AND NOT cs.is_replayed;
 
-    -- Step 5c: Update updated_at and block_num for edit ops
-    -- Edits (is_first=false) don't go through the batch functions, so updated_at and
-    -- block_num are stuck at the creation values. Update them to the last edit's values.
+    -- Step 5c: Update updated_at, active and block_num for edit ops
+    -- Edits (is_first=false) don't go through the batch functions, so updated_at, active
+    -- and block_num are stuck at the creation values. Update them to the last edit's values,
+    -- as the batch functions' ON CONFLICT path does for the first op of each later block.
     -- block_num must be updated because notification timestamps use hp.block_num - 1
     -- (matching old Python behavior where edits updated block_num via ON CONFLICT).
     UPDATE hivemind_app.hive_posts hp
     SET updated_at = last_edit.block_date,
+        active = last_edit.block_date,
         block_num = last_edit.block_num
     FROM (
         SELECT DISTINCT ON (pr.post_id)
@@ -1803,6 +1820,46 @@ BEGIN
     RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
 
     -- Tables are cleared at start of next call, no drop needed
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- Keeps the results of a massive batch's posts phase for a replay of the batch, in the
+-- phase's transaction: replaying the comment ops on top of their own effects is not
+-- idempotent (a post created and deleted in the batch would be created and deleted
+-- again, and a created post would come back as an edit).
+CREATE OR REPLACE FUNCTION hivemind_app.save_batch_post_results()
+RETURNS VOID AS $function$
+BEGIN
+    DELETE FROM hivemind_app._batch_post_results;
+    INSERT INTO hivemind_app._batch_post_results
+    SELECT pr.seq_id, pr.post_id, pr.is_new_post, pr.author_id, pr.permlink_id, pr.depth,
+           pr.parent_id, pr.parent_author_id, pr.community_id, pr.is_post_muted, pr.muted_reasons
+    FROM hivemind_app._post_results pr;
+
+    UPDATE hivemind_app._batch_queue SET posts_applied = TRUE;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- process_posts_from_staging's results for the batch whose posts phase committed, from
+-- _batch_post_results and the reloaded _ops_staging (seq_id numbers the comment ops as
+-- process_posts_from_staging does); refills _post_results for the phases after it.
+CREATE OR REPLACE FUNCTION hivemind_app.restore_batch_post_results()
+RETURNS SETOF hivemind_app.post_staging_result AS $function$
+BEGIN
+    DELETE FROM hivemind_app._post_results;
+    INSERT INTO hivemind_app._post_results
+    SELECT bpr.seq_id, bpr.post_id, bpr.is_new_post, bpr.author_id, bpr.permlink_id, bpr.depth,
+           bpr.parent_id, bpr.parent_author_id, bpr.community_id, bpr.is_post_muted, bpr.muted_reasons,
+           op.block_num, op.block_date, op.val
+    FROM hivemind_app._batch_post_results bpr
+    JOIN (
+        SELECT ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id, s.block_num, s.block_date, s.val
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 1
+    ) op ON op.seq_id = bpr.seq_id;
+
+    RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 

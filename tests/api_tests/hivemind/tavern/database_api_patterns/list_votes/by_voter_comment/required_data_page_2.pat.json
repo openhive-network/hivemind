@@ -72,16 +72,6 @@
     },
     {
       "author": "dantheman",
-      "last_update": "2016-08-03T18:28:15",
-      "num_changes": 0,
-      "permlink": "bitfinex-blockchain-hacks-and-replay-attacks-oh-my-all-things-that-steem-s-technology-is-designed-to-prevent",
-      "rshares": 1295586491,
-      "vote_percent": 10000,
-      "voter": "bunny",
-      "weight": 64278543065659
-    },
-    {
-      "author": "dantheman",
       "last_update": "2016-08-03T20:16:51",
       "num_changes": 0,
       "permlink": "re-dana-edwards-re-mrweed-re-dana-edwards-the-bitfinex-hack-and-why-steem-power-may-be-the-safest-place-to-put-your-money-for-the-foreseeable-future-20160803t185156482z",
@@ -89,6 +79,16 @@
       "vote_percent": 10000,
       "voter": "bunny",
       "weight": 4707087298001899
+    },
+    {
+      "author": "dantheman",
+      "last_update": "2016-08-03T18:28:15",
+      "num_changes": 0,
+      "permlink": "bitfinex-blockchain-hacks-and-replay-attacks-oh-my-all-things-that-steem-s-technology-is-designed-to-prevent",
+      "rshares": 1295586491,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 64278543065659
     },
     {
       "author": "dantheman",

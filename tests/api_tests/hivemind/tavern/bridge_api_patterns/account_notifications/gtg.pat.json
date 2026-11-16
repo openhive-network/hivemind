@@ -114,6 +114,30 @@
     "url": "@someguy123/seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer"
   },
   {
+    "date": "2016-09-14T07:21:21",
+    "id": "4027197895475206",
+    "msg": "@someguy123 mentioned you and 6 others",
+    "score": 57,
+    "type": "mention",
+    "url": "@someguy123/seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer"
+  },
+  {
+    "date": "2016-09-14T07:19:51",
+    "id": "4027173736284166",
+    "msg": "@someguy123 mentioned you and 6 others",
+    "score": 57,
+    "type": "mention",
+    "url": "@someguy123/seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer"
+  },
+  {
+    "date": "2016-09-14T07:07:03",
+    "id": "4026967577853958",
+    "msg": "@someguy123 mentioned you and 6 others",
+    "score": 57,
+    "type": "mention",
+    "url": "@someguy123/seriously-what-is-a-witness-why-should-i-care-how-do-i-become-one-answer"
+  },
+  {
     "date": "2016-09-13T23:33:03",
     "id": "4019655391838209",
     "msg": "@allgoodthings followed you",
@@ -323,7 +347,7 @@
   },
   {
     "date": "2016-08-29T22:45:33",
-    "id": "3670997991424001",
+    "id": "3670997991424002",
     "msg": "@emsenn replied to your comment",
     "score": 44,
     "type": "reply_comment",
@@ -776,29 +800,5 @@
     "score": 45,
     "type": "follow",
     "url": "@jerome-colley"
-  },
-  {
-    "date": "2016-08-17T19:26:39",
-    "id": "3389480618688514",
-    "msg": "@asmolokalo voted on your post ($3.19)",
-    "score": 75,
-    "type": "vote",
-    "url": "@gtg/heavy-duty-witness-node-infrastructure"
-  },
-  {
-    "date": "2016-08-17T17:59:39",
-    "id": "3388079377219585",
-    "msg": "@ullikume followed you",
-    "score": 25,
-    "type": "follow",
-    "url": "@ullikume"
-  },
-  {
-    "date": "2016-08-17T16:59:42",
-    "id": "3387113814884354",
-    "msg": "@taoteh1221 followed you",
-    "score": 55,
-    "type": "follow",
-    "url": "@taoteh1221"
   }
 ]

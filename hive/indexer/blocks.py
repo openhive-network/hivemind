@@ -8,7 +8,7 @@ from time import perf_counter, sleep
 import psycopg2.extensions
 
 from hive.conf import SCHEMA_NAME, Conf
-from hive.db.adapter import Db
+from hive.db.adapter import Db, Row
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
 from hive.indexer.community import Community
@@ -194,9 +194,7 @@ class Blocks:
 
         # Phase 3: Post/comment processing (must commit before votes/reblogs)
         t0 = perf_counter()
-        db.query_no_return("START TRANSACTION")
-        post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})")
-        db.query_no_return("COMMIT")
+        post_results, post_data_applied = cls._process_batch_posts(db)
         phase_times['posts'] = perf_counter() - t0
 
         # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
@@ -265,7 +263,7 @@ class Blocks:
         MAX_DEADLOCK_RETRIES = 3
 
         # Phase 3b: Process post results on main thread (overlapped with first attempt)
-        cache_merged = False
+        cache_merged = post_data_applied
 
         for attempt in range(1, MAX_DEADLOCK_RETRIES + 1):
             pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
@@ -324,7 +322,7 @@ class Blocks:
         # Taken per batch: while hived replays, the window moves with HAF's irreversible block.
         t0 = perf_counter()
         notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
-        PostDataCache.flush(process_mentions=last_block > notification_min_block)
+        PostDataCache.flush(mentions_after_block=notification_min_block)
         phase_times['flush'] = perf_counter() - t0
 
         # Phase 6: Parallel notification flush
@@ -374,6 +372,31 @@ class Blocks:
         )
 
         OPSM.stop(time_start)
+
+    @classmethod
+    def _process_batch_posts(cls, db: Db) -> tuple[list[Row], bool]:
+        """Run a massive batch's posts phase in its own transaction.
+
+        Returns the phase's result rows and whether the batch's post data flush has
+        already committed. A replay of a batch whose posts phase committed reuses that
+        phase's results instead of applying its comment ops a second time; the markers
+        commit with the phase (save_batch_post_results) and with the flush
+        (PostDataCache.flush).
+        """
+        db.query_no_return("START TRANSACTION")
+        applied = db.query_all(f"SELECT posts_applied, post_data_applied FROM {SCHEMA_NAME}._batch_queue")
+        posts_applied = bool(applied) and bool(applied[0]._mapping['posts_applied'])
+        post_data_applied = bool(applied) and bool(applied[0]._mapping['post_data_applied'])
+        if posts_applied:
+            log.info("Replay: reusing the results of the batch's committed posts phase")
+            post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.restore_batch_post_results()")
+        else:
+            post_results = db.query_all(
+                f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})"
+            )
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.save_batch_post_results()")
+        db.query_no_return("COMMIT")
+        return post_results, post_data_applied
 
     @classmethod
     def process_live_block_sql(cls, first_block: int, last_block: int) -> None:
@@ -510,7 +533,7 @@ class Blocks:
                 new_json = op_body.get('json_metadata') if op_body.get('json_metadata') else None
                 post_data = {'title': new_title, 'body': new_body, 'json': new_json, 'is_root': 'false'}
 
-            PostDataCache.add_data(post_id, post_data, is_new)
+            PostDataCache.add_data(post_id, post_data, is_new, r['block_num'])
 
     @classmethod
     def _process_votes_massive(cls) -> int:

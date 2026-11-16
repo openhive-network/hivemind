@@ -55,6 +55,63 @@
   {
     "active_votes": [
       {
+        "rshares": 185277296967,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 67725032087,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 99685752,
+        "voter": "cheetah97"
+      },
+      {
+        "rshares": 99579845,
+        "voter": "cheetah95"
+      },
+      {
+        "rshares": 99393484,
+        "voter": "cheetah96"
+      }
+    ],
+    "author": "cheetah",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Okay, I have unbanned @eneismijmich.",
+    "category": "mindfulness",
+    "children": 0,
+    "created": "2016-09-15T18:20:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 253300988135,
+    "parent_author": "anyx",
+    "parent_permlink": "re-eneismijmich-journey-of-life-20160915t181935060z",
+    "payout": 0.059,
+    "payout_at": "2016-09-22T18:20:15",
+    "pending_payout_value": "0.059 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-eneismijmich-journey-of-life-20160915t181935060z-20160915t182017",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "RE: Test",
+    "updated": "2016-09-15T18:20:15",
+    "url": "/mindfulness/@eneismijmich/journey-of-life#@cheetah/re-re-eneismijmich-journey-of-life-20160915t181935060z-20160915t182017"
+  },
+  {
+    "active_votes": [
+      {
         "rshares": 66397090281,
         "voter": "cheetah"
       },
@@ -210,63 +267,6 @@
     "title": "RE: Do you trust government companies? Explaining the private sector benefits.",
     "updated": "2016-09-15T18:55:03",
     "url": "/life/@steembeast/do-you-trust-government-companies-explaining-the-private-sector-benefits#@cheetah/re-do-you-trust-government-companies-explaining-the-private-sector-benefits-20160915t185501"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 185277296967,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 67725032087,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 99685752,
-        "voter": "cheetah97"
-      },
-      {
-        "rshares": 99579845,
-        "voter": "cheetah95"
-      },
-      {
-        "rshares": 99393484,
-        "voter": "cheetah96"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay, I have unbanned @eneismijmich.",
-    "category": "mindfulness",
-    "children": 0,
-    "created": "2016-09-15T18:20:15",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 253300988135,
-    "parent_author": "anyx",
-    "parent_permlink": "re-eneismijmich-journey-of-life-20160915t181935060z",
-    "payout": 0.059,
-    "payout_at": "2016-09-22T18:20:15",
-    "pending_payout_value": "0.059 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-re-eneismijmich-journey-of-life-20160915t181935060z-20160915t182017",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 5
-    },
-    "title": "RE: Test",
-    "updated": "2016-09-15T18:20:15",
-    "url": "/mindfulness/@eneismijmich/journey-of-life#@cheetah/re-re-eneismijmich-journey-of-life-20160915t181935060z-20160915t182017"
   },
   {
     "active_votes": [

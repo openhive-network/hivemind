@@ -380,7 +380,8 @@ class SyncHiveDb:
         The _batch_queue table records the block range of an in-flight batch.
         If an entry exists, the prior process crashed mid-batch and we must
         replay it. The idempotent SQL (vote num_changes, author_rewards guards)
-        ensures replayed data does not double-count.
+        and the reuse of a committed posts phase and post data flush (the
+        _batch_queue markers) ensure replayed data does not double-count.
         """
         leftover = self._db.query_all(f"SELECT first_block, last_block FROM {SCHEMA_NAME}._batch_queue LIMIT 1")
         if not leftover:
@@ -539,6 +540,7 @@ class SyncHiveDb:
             'hive_tag_data',
             # Staging/internal tables
             '_batch_queue',
+            '_batch_post_results',
             '_ops_staging',
             '_comment_staging',
             '_post_results',
