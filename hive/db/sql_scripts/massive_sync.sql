@@ -1482,6 +1482,10 @@ BEGIN
                 JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
                 WHERE cs.is_first
                   AND (cs.parent_author IS NULL OR cs.parent_author = '')
+                -- OFFSET 0 keeps the planner from flattening base, which would run
+                -- safe_parse_jsonb_tolerant (a subtransaction) in each of parsed_md's
+                -- references below instead of once per post
+                OFFSET 0
             ) base,
             LATERAL (
                 SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
@@ -1524,6 +1528,7 @@ BEGIN
                 ) cs_last ON true
                 WHERE cs_first.is_first
                   AND (cs_first.parent_author IS NULL OR cs_first.parent_author = '')
+                OFFSET 0  -- parse once per post, as in Step 5d
             ) base,
             LATERAL (
                 SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
