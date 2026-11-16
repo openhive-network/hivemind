@@ -35,6 +35,13 @@ ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 # hive/db/sql_scripts/upgrade/upgrade_runtime_migration.sql.
 MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS = 2_000_000
 
+# Default block limit of a MASSIVE_WITHOUT_INDEXES batch (--massive-sync-batch-blocks).
+# Each batch pays a fixed cost regardless of its size; see
+# docs/measurements/massive-sync-batch-size/README.md for the measurements behind it.
+# Keep in sync with the context-stages update in
+# hive/db/sql_scripts/upgrade/upgrade_runtime_migration.sql.
+MASSIVE_SYNC_BATCH_BLOCKS = 10_000
+
 
 def _sanitized_conf(parser):
     """Formats parser config, redacting database url password."""
@@ -91,6 +98,14 @@ class Conf:
             help='connections that upsert a batch\'s votes into hive_votes concurrently during massive sync '
             '(1 = a single connection, as in live sync)',
             default=4,
+        )
+        add(
+            '--massive-sync-batch-blocks',
+            type=_positive_int,
+            env_var='MASSIVE_SYNC_BATCH_BLOCKS',
+            help='blocks HAF hands one batch of the MASSIVE_WITHOUT_INDEXES stage; applied to the context '
+            'when sync starts (MASSIVE_WITH_INDEXES, near the head, keeps 1000)',
+            default=MASSIVE_SYNC_BATCH_BLOCKS,
         )
         add(
             '--vacuum-workers',

@@ -39,20 +39,23 @@ $$
 ;
 
 --- #339: raise the MASSIVE_WITHOUT_INDEXES stage distance from one week (201600)
---- to 2M blocks on existing contexts. Stage definitions are baked into the
---- context at app_create_context time, so upgrades must rewrite them here.
---- Keep in sync with MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS in hive/conf.py
---- and the stage array in hive/indexer/hive_db/haf_functions.py.
+--- to 2M blocks on existing contexts. #470: give its batches 10000 blocks instead
+--- of 1000. Stage definitions are baked into the context at app_create_context
+--- time, so upgrades must rewrite them here (sync then applies
+--- --massive-sync-batch-blocks when it starts).
+--- Keep in sync with MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS and
+--- MASSIVE_SYNC_BATCH_BLOCKS in hive/conf.py and the stage array in
+--- hive/indexer/hive_db/haf_functions.py.
 --- Idempotent: only rewrites when the stored stages differ.
 UPDATE hafd.contexts
 SET stages = ARRAY[
-      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 1000, '20 seconds'),
+      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 10000, '20 seconds'),
       hive.stage('MASSIVE_WITH_INDEXES', 101, 1000, '20 seconds'),
       hive.live_stage()
     ]::hive.application_stages
 WHERE name = 'hivemind_app'
   AND stages IS DISTINCT FROM ARRAY[
-      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 1000, '20 seconds'),
+      hive.stage('MASSIVE_WITHOUT_INDEXES', 2000000, 10000, '20 seconds'),
       hive.stage('MASSIVE_WITH_INDEXES', 101, 1000, '20 seconds'),
       hive.live_stage()
     ]::hive.application_stages;

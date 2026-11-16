@@ -501,6 +501,11 @@ BEGIN
            wm.muted_reasons, wm.date, wm.block_num, wm.parent_permlink
     FROM with_muting wm;
 
+    -- See process_comments_batch.
+    IF cardinality(_ops) >= hivemind_app.staging_analyze_min_rows() THEN
+        ANALYZE hivemind_app._post_batch (author_id, permlink_id);
+    END IF;
+
     RETURN QUERY
     WITH new_posts AS MATERIALIZED (
         -- A root post is its own root: take its id from the sequence here, in
@@ -743,6 +748,12 @@ BEGIN
            wm.category_id, wm.root_id, wm.community_id, wm.is_valid, wm.is_muted, wm.muted_reasons,
            wm.date, wm.block_num, wm.parent_permlink
     FROM with_muting wm;
+
+    -- The result join below reads _post_batch by its index only when the planner knows
+    -- the rows just loaded (see the ANALYZE of _comment_staging in process_posts_from_staging).
+    IF cardinality(_ops) >= hivemind_app.staging_analyze_min_rows() THEN
+        ANALYZE hivemind_app._post_batch (author_id, permlink_id);
+    END IF;
 
     RETURN QUERY
     WITH inserted AS (

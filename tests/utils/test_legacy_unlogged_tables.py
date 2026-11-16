@@ -68,6 +68,7 @@ def _check_consistency(unlogged: list[str]) -> list[str]:
     db.query_no_return.side_effect = statements.append
     sync = SyncHiveDb.__new__(SyncHiveDb)
     sync._db = db
+    sync._massive_batch_blocks = 10000
     with (
         patch('hive.indexer.sync.Blocks.last_imported', return_value=4999990),
         patch('hive.indexer.sync.Blocks.last_completed', return_value=0),
