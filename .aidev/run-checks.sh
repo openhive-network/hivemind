@@ -23,9 +23,9 @@
 #                registered in HAF's application registry as 'hivemind', refuses a row of its
 #                context under the old name 'hivemind_app' and keeps a paused registration
 #                over a re-install: .aidev/app_registry_check.sql; and, on the schema before
-#                follows.follower_name, that sync refuses to start, an install locked out by a
-#                lock holder fails naming it, and build_schema applies the table upgrade:
-#                check_table_schema_upgrade
+#                follows.follower_name and hive_votes_post_id_voter_id_covering_idx, that sync
+#                refuses to start, an install locked out by a lock holder fails naming it, and
+#                build_schema applies the table upgrade: check_table_schema_upgrade
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -337,16 +337,46 @@ expect_fail() {  # LABEL PATTERN... -- COMMAND...: COMMAND exits non-zero and it
     LAST_LOG="$log"
 }
 
-# A database behind the code's table schema (the one before follows.follower_name, recording an older table
-# upgrade): sync refuses it before dropping anything, an install the HAF lock keeps out fails naming the holder,
-# build_schema applies the upgrade, and then a locked-out install has nothing to do and exits 0.
+VOTES_POST_INDEX_OLD="CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_idx ON hivemind_app.hive_votes (post_id, voter_id)"
+
+# hive_votes' post index: 'covering' when only hive_votes_post_id_voter_id_covering_idx is there, valid, with its
+# INCLUDE columns and registered with HAF as created, and hive_votes_post_id_voter_id_idx neither exists nor is.
+votes_post_index_state() {
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "select case when
+        (select i.indisvalid and pg_get_indexdef(i.indexrelid) like '%(post_id, voter_id) INCLUDE (rshares, vote_percent)'
+         from pg_index i where i.indexrelid = to_regclass('hivemind_app.hive_votes_post_id_voter_id_covering_idx'))
+        and to_regclass('hivemind_app.hive_votes_post_id_voter_id_idx') is null
+        and exists (select from hafd.indexes_constraints where index_constraint_name = 'hive_votes_post_id_voter_id_covering_idx'
+                    and status = 'created' and (select id from hafd.contexts where name = 'hivemind_app') = any(contexts))
+        and not exists (select from hafd.indexes_constraints where index_constraint_name = 'hive_votes_post_id_voter_id_idx')
+        then 'covering' else 'not covering' end"
+}
+
+# A database behind the code's table schema (the one before follows.follower_name and
+# hive_votes_post_id_voter_id_covering_idx, recording an older table upgrade): sync refuses it before dropping
+# anything, an install the HAF lock keeps out fails naming the holder, build_schema applies the upgrade, and then a
+# locked-out install has nothing to do and exits 0. hive_votes holds votes, so the upgrade builds the covering index
+# concurrently, after dropping the INVALID one an interrupted build would leave.
 check_table_schema_upgrade() {
     local digest
     digest="$(PYTHONPATH="$root" python3 -c 'from hive.db.schema import table_schema_digest; print(table_schema_digest())')" || return 1
     [ "$(psql "$ADMIN_URL" -Atc "select upgrade_digest from hivemind_app.hive_table_schema")" = "$digest" ] \
         || { echo "the install did not record table schema $digest"; return 1; }
+    [ "$(votes_post_index_state)" = covering ] || { echo "the install did not create the covering hive_votes post index"; return 1; }
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "alter table hivemind_app.follows drop column follower_name;
-        update hivemind_app.hive_table_schema set upgrade_digest = 'behind'" || return 1
+        drop index hivemind_app.hive_votes_post_id_voter_id_covering_idx;
+        delete from hafd.indexes_constraints where index_constraint_name = 'hive_votes_post_id_voter_id_covering_idx';
+        ${VOTES_POST_INDEX_OLD};
+        select hive.app_register_index_dependency('hivemind_app', '${VOTES_POST_INDEX_OLD}');
+        insert into hivemind_app.hive_votes (post_id, voter_id, author_id, permlink_id, block_num)
+        select 0, id, 0, 0, 0 from hivemind_app.hive_accounts where name in ('', 'null');
+        update hivemind_app.hive_table_schema set upgrade_digest = 'behind'" > /dev/null || return 1
+    # The two votes on post 0 fail this build, which leaves the index INVALID, as an interrupted build does.
+    ! psql "$ADMIN_URL" -X -Atc "create unique index concurrently hive_votes_post_id_voter_id_covering_idx
+        on hivemind_app.hive_votes (post_id)" > /dev/null 2>&1 \
+        && [ "$(psql "$ADMIN_URL" -Atc "select not indisvalid from pg_index
+            where indexrelid = to_regclass('hivemind_app.hive_votes_post_id_voter_id_covering_idx')")" = t ] \
+        || { echo "could not leave an INVALID hive_votes_post_id_voter_id_covering_idx"; return 1; }
 
     expect_fail "sync on a behind table schema" "Refusing to sync" "upgrade_schema" -- \
         env PYTHONPATH="$root" python3 -m hive.cli sync --database-url="$HIVEMIND_TEST_USER_URL" || return 1
@@ -366,6 +396,9 @@ check_table_schema_upgrade() {
     [ "$(psql "$ADMIN_URL" -Atc "select count(*) from information_schema.columns
         where table_schema = 'hivemind_app' and table_name = 'follows' and column_name = 'follower_name'")" = 1 ] \
         || { echo "build_schema did not apply the table upgrade (no follows.follower_name)"; return 1; }
+    [ "$(votes_post_index_state)" = covering ] \
+        || { echo "build_schema did not replace the hive_votes post index with the covering one"; return 1; }
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "delete from hivemind_app.hive_votes where post_id = 0" > /dev/null || return 1
     [ "$(psql "$ADMIN_URL" -Atc "select upgrade_digest from hivemind_app.hive_table_schema")" = "$digest" ] \
         || { echo "build_schema did not record table schema $digest"; return 1; }
     echo "build_schema applied the pending table upgrade and recorded it"

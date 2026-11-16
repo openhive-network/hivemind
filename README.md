@@ -351,6 +351,16 @@ include setting the database URL, defining the block after which synchronization
    without the column, 60 s from the doubled one). Until hivemind's sync next starts and vacuums
    the table, `get_followers` pages read the heap as well as the index.
 
+   An upgrade from a database with `hive_votes_post_id_voter_id_idx` replaces it with
+   `hive_votes_post_id_voter_id_covering_idx`, the same key with `rshares` and `vote_percent` included, so a post's
+   votes are read from the index alone. The new index is built with `CREATE INDEX CONCURRENTLY` and the old one is then
+   dropped concurrently, so `hive_votes` stays readable and writable throughout. The build took 21 minutes on a copy of
+   api.syncad.com's database. It also waits for every transaction that was already open when it started, including
+   those of other HAF applications. The new index is about 45 GB, against 25 GB for the old one: about +20 GB per
+   node, and both exist during the build, so have about 45 GB free. An install interrupted during the build leaves an
+   INVALID index; the next install drops it and builds it again. Until hivemind's sync next starts and vacuums
+   `hive_votes`, vote lookups still read the heap for pages not yet all-visible.
+
    The community moderation log (`bridge.get_community_moderation_log`, `bridge.get_account_moderation_stats`,
    `bridge.get_moderator_activity`) is filled only while blocks are synced. Upgrading creates the log empty, so an
    upgraded node reports only moderation actions from blocks processed after the upgrade. To get the full history,

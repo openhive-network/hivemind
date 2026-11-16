@@ -205,6 +205,20 @@ END
 $$;
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_replies_parent_author_id_post_id_idx ON hivemind_app.hive_replies (parent_author_id, post_id DESC)');
 
+-- hive_votes_post_id_voter_id_covering_idx replaces hive_votes_post_id_voter_id_idx, with the same key. On a table
+-- with rows, schema.py's perform_db_upgrade builds it with CREATE INDEX CONCURRENTLY after this script, which runs in
+-- one transaction and so cannot; here only an empty table (a shape) gets it, keeping its files and statistics.
+DO $$
+BEGIN
+  IF EXISTS (SELECT NULL FROM hivemind_app.hive_votes) THEN
+    RETURN;
+  END IF;
+  CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_covering_idx ON hivemind_app.hive_votes (post_id, voter_id) INCLUDE (rshares, vote_percent);
+  PERFORM hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_covering_idx ON hivemind_app.hive_votes (post_id, voter_id) INCLUDE (rshares, vote_percent)');
+  DROP INDEX IF EXISTS hivemind_app.hive_votes_post_id_voter_id_idx;
+END
+$$;
+
 -- Autovacuum the append-mostly tables every 100,000 inserts, keeping their visibility maps current for index-only
 -- scans. Same list as hive/db/schema.py's reset_autovac, which sets them on a fresh install.
 ALTER TABLE hivemind_app.hive_votes SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
@@ -230,3 +244,10 @@ SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name =
 WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx';
 DELETE FROM hafd.indexes_constraints
 WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx' AND cardinality(contexts) = 0;
+
+-- Superseded by hive_votes_post_id_voter_id_covering_idx, registered once built, which has the same key.
+UPDATE hafd.indexes_constraints
+SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name = 'hivemind_app'))
+WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_post_id_voter_id_idx';
+DELETE FROM hafd.indexes_constraints
+WHERE table_name = 'hivemind_app.hive_votes' AND index_constraint_name = 'hive_votes_post_id_voter_id_idx' AND cardinality(contexts) = 0;

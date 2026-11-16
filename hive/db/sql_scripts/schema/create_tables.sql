@@ -129,7 +129,8 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_votes (
     CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk UNIQUE (voter_id, author_id, permlink_id)
 );
 CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hivemind_app.hive_votes (voter_id, last_update);
-CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_idx ON hivemind_app.hive_votes (post_id, voter_id);
+-- INCLUDE lets a post's vote lookups read no heap page per vote.
+CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_covering_idx ON hivemind_app.hive_votes (post_id, voter_id) INCLUDE (rshares, vote_percent);
 CREATE INDEX IF NOT EXISTS hive_votes_block_num_idx ON hivemind_app.hive_votes (block_num);
 CREATE INDEX IF NOT EXISTS hive_votes_post_id_block_num_rshares_vote_is_effective_idx ON hivemind_app.hive_votes (post_id, block_num, rshares, is_effective);
 

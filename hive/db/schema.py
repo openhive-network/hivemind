@@ -316,6 +316,13 @@ def perform_db_upgrade(db, admin_db) -> None:
     # setup_runtime_code() runs as the schema owner and cannot reload these
     _setup_admin_runtime_code(admin_db)
 
+    _replace_index_concurrently(
+        db,
+        'hive_votes_post_id_voter_id_covering_idx',
+        f'CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_covering_idx ON {SCHEMA_NAME}.hive_votes (post_id, voter_id) INCLUDE (rshares, vote_percent)',
+        'hive_votes_post_id_voter_id_idx',
+    )
+
     log.info("Database schema upgrade completed.")
 
     needs_vacuum = admin_db.query_one(
@@ -329,6 +336,26 @@ def perform_db_upgrade(db, admin_db) -> None:
         log.info("Skipping VACUUM FULL on upgraded database (no vacuum request)")
 
     record_table_schema(db)
+
+
+def _replace_index_concurrently(db, index: str, create_command: str, superseded: str) -> None:
+    """Build `index` with `create_command` (a registered CREATE INDEX IF NOT EXISTS) online, then drop `superseded`.
+
+    The table's readers and writers are never blocked for longer than the moments each step takes its lock. Each
+    statement goes on its own, outside any transaction, as CONCURRENTLY requires. A build an earlier run left
+    INVALID (interrupted) is dropped and redone; `superseded` is dropped only once `index` is valid. The index is
+    registered with HAF after it is built, so HAF records it as created.
+    """
+    if db.query_one(f"SELECT NOT indisvalid FROM pg_index WHERE indexrelid = to_regclass('{SCHEMA_NAME}.{index}')"):
+        log.warning("Dropping %s.%s, left INVALID by an interrupted build", SCHEMA_NAME, index)
+        db.query_no_return(f"DROP INDEX CONCURRENTLY IF EXISTS {SCHEMA_NAME}.{index}")
+    # A concurrent build also waits for every transaction older than it, including other HAF applications'.
+    log.info("Building %s.%s concurrently, if missing", SCHEMA_NAME, index)
+    db.query_no_return(
+        create_command.replace('CREATE INDEX IF NOT EXISTS', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS', 1)
+    )
+    db.query_no_return(f"SELECT hive.app_register_index_dependency('{SCHEMA_NAME}', '{create_command}')")
+    db.query_no_return(f"DROP INDEX CONCURRENTLY IF EXISTS {SCHEMA_NAME}.{superseded}")
 
 
 # The scripts perform_db_upgrade runs that bring an installed database's tables and data to this code's.
