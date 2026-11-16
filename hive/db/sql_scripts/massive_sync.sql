@@ -135,6 +135,15 @@ CREATE UNLOGGED TABLE hivemind_app._post_batch (
     parent_permlink  VARCHAR
 );
 CREATE INDEX _post_batch_author_permlink_idx ON hivemind_app._post_batch (author_id, permlink_id);
+-- Out of autovacuum: a vacuum between calls finds one small wave's rows in the pages
+-- earlier waves left and records a near-zero density, so a later fill of thousands of
+-- rows is estimated at a few, and process_root_posts_batch/process_comments_batch join
+-- their hive_posts insert's RETURNING to it as a nested loop that reads the whole table
+-- per inserted row. Unvacuumed, its reltuples stays unknown (-1, the planner sizes it by
+-- its current pages) or holds the last ANALYZE of a call of staging_analyze_min_rows()
+-- rows or more, and since the table never shrinks between truncations either estimate is
+-- at least the rows a smaller wave loads. reset_staging_tables bounds its dead rows.
+ALTER TABLE hivemind_app._post_batch SET (autovacuum_enabled = false);
 
 
 -- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead):
