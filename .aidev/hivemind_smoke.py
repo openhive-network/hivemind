@@ -259,6 +259,7 @@ SQL_TESTS = [
     "tests/sql/post_count_maintained.sql",
     "tests/sql/recalculate_votes_children_rerun.sql",
     "tests/sql/autovacuum_insert_reloptions.sql",
+    "tests/sql/post_batch_autovacuum_off.sql",
 ]
 
 
