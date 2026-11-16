@@ -12,6 +12,7 @@ SELECT ha.id,
   ha.lastread_at,
   ha.posting_json_metadata,
   ha.json_metadata,
+  ha.post_count,
   (COALESCE(ar.reputation,0) <= -464800000000 ) AS is_grayed -- biggest number where rep_log10 gives < 1.0
   FROM hivemind_app.hive_accounts ha
   LEFT JOIN account_reputations ar ON ar.account_id = ha.haf_id --schema needs to be removed to support custom schema

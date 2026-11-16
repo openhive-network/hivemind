@@ -1129,7 +1129,8 @@ DECLARE
     _processed_count INT;
     _remaining INT;
     -- Step 7: delete handling
-    _delete_count INT;
+    _deleted_author_ids INT[];
+    _post_id INT;
     _delete_create_pairs TEXT[];
     _changed INT;
 BEGIN
@@ -1516,7 +1517,7 @@ BEGIN
         WHERE post_id IN (SELECT post_id FROM updated_posts)
         RETURNING post_id
     )
-    SELECT count(*) INTO _delete_count FROM updated_posts;
+    SELECT COALESCE(array_agg(author_id), '{}') INTO _deleted_author_ids FROM updated_posts;
 
     -- (b) Replayed ops in chain order, across pairs: each comment op resolves its
     -- parent as it is at that op. A create of a pair with no live row inserts a new
@@ -1541,6 +1542,11 @@ BEGIN
             ORDER BY 1
         LOOP
             IF _rec.op_type_id = 17 THEN
+                -- delete_hive_post deletes the pair's live row, when there is one
+                _post_id := hivemind_app.find_comment_id(_rec.author::VARCHAR, _rec.permlink::VARCHAR, False);
+                IF _post_id <> 0 THEN
+                    _deleted_author_ids := _deleted_author_ids || (SELECT hp.author_id FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id);
+                END IF;
                 PERFORM hivemind_app.delete_hive_post(
                     _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
                 );
@@ -1705,6 +1711,23 @@ BEGIN
     SET is_post_muted = FALSE, muted_reasons = 0
     FROM unmuted_posts u
     WHERE pr.post_id = u.id;
+
+    -- Step 7g: Keep hive_accounts.post_count (live rows per author) by this batch's net
+    -- change: +1 per row inserted (every insert is live), -1 per live row deleted. One
+    -- UPDATE per author per batch, never one per post.
+    UPDATE hivemind_app.hive_accounts ha
+    SET post_count = ha.post_count + d.delta
+    FROM (
+        SELECT c.author_id, SUM(c.delta)::INT AS delta
+        FROM (
+            SELECT pr.author_id, 1 AS delta FROM hivemind_app._post_results pr WHERE pr.is_new_post
+            UNION ALL
+            SELECT unnest(_deleted_author_ids), -1
+        ) c
+        GROUP BY c.author_id
+        HAVING SUM(c.delta) <> 0
+    ) d
+    WHERE ha.id = d.author_id;
 
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'

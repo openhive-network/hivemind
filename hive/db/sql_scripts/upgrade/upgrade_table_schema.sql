@@ -90,6 +90,39 @@ $$;
 CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name);
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS follows_following_follower_name_idx ON hivemind_app.follows (following, follower_name)');
 
+-- hive_accounts.post_count, the account's hive_posts rows with counter_deleted = 0, which block processing keeps from
+-- here on. The counts are taken first, under a SHARE lock on hive_posts that blocks only writes, so readers of
+-- hive_accounts wait only for the fill, from the ALTER TABLE to the end of this script. The column is filled by the
+-- rewrite a type change makes, not by an UPDATE: that would write a second version of the row of every account with
+-- posts, leaving the table and its indexes up to doubled. The rewritten pages are not all-visible until vacuumed.
+DO $$
+BEGIN
+  IF EXISTS (SELECT NULL FROM pg_attribute WHERE attrelid = 'hivemind_app.hive_accounts'::regclass AND attname = 'post_count' AND NOT attisdropped) THEN
+    RETURN;
+  END IF;
+  -- With no rows there is nothing to fill. This also keeps a shape's empty, full-size files and its statistics.
+  IF NOT EXISTS (SELECT NULL FROM hivemind_app.hive_accounts) THEN
+    ALTER TABLE hivemind_app.hive_accounts ADD COLUMN post_count INTEGER NOT NULL DEFAULT 0;
+    RETURN;
+  END IF;
+  RAISE NOTICE 'Adding hivemind_app.hive_accounts.post_count';
+  LOCK TABLE hivemind_app.hive_posts IN SHARE MODE;
+  PERFORM set_config('work_mem', '1GB', true);
+  CREATE TEMP TABLE account_post_counts ON COMMIT DROP AS
+  SELECT hp.author_id, COUNT(*)::INTEGER AS post_count
+  FROM hivemind_app.hive_posts hp
+  WHERE hp.counter_deleted = 0
+  GROUP BY hp.author_id;
+  ALTER TABLE account_post_counts ADD PRIMARY KEY (author_id);
+  CREATE FUNCTION pg_temp.account_post_count(_account_id INTEGER) RETURNS INTEGER LANGUAGE sql STABLE
+  AS 'SELECT COALESCE((SELECT apc.post_count FROM account_post_counts apc WHERE apc.author_id = _account_id), 0)';
+
+  ALTER TABLE hivemind_app.hive_accounts ADD COLUMN post_count BIGINT NOT NULL DEFAULT 0;
+  ALTER TABLE hivemind_app.hive_accounts ALTER COLUMN post_count TYPE INTEGER USING pg_temp.account_post_count(id);
+  ANALYZE hivemind_app.hive_accounts;
+END
+$$;
+
 DROP INDEX IF EXISTS hive_posts_tags_ids_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_post_cond_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_cond_idx;
