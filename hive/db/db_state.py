@@ -5,7 +5,7 @@
 import logging
 import time
 from collections.abc import Callable, Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from time import perf_counter, sleep
 from typing import Any
 
@@ -492,6 +492,21 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                 return
 
     @classmethod
+    def _restore_bm25_index_after_recompute(cls, db: Db, recomputed: Future[None]) -> None:
+        """Build the BM25 index once the hive_posts recompute has committed; skip it when that task failed first.
+
+        The build holds a snapshot for its whole length, often longer than the
+        recompute. Started beside the recompute, that snapshot keeps every row
+        version the recompute replaced (about 76 M at mainnet scale) visible to
+        it, so hive_posts' index restore indexes them all and the vacuums after
+        cannot remove them.
+        """
+        if recomputed.exception() is not None:
+            log.info("[MASSIVE] Skipping BM25 index creation: the hive_posts task failed")
+            return
+        cls._restore_bm25_index(db)
+
+    @classmethod
     def _drop_indexes_in_threads(cls) -> None:
         """Drop all registered indexes for the hivemind_app context in one call."""
         start_time = FOSM.start()
@@ -767,7 +782,14 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         cls._fk_were_enabled = True
 
     @classmethod
-    def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block) -> None:
+    def _finish_hive_posts(
+        cls,
+        db: Db,
+        massive_sync_preconditions: bool,
+        last_imported_block: int,
+        current_imported_block: int,
+        recomputed: Future[None],
+    ) -> None:
         """The hive_posts writes of finalization, on one connection, one after another.
 
         Two long UPDATEs of hive_posts in parallel would wait on each other's row
@@ -777,42 +799,50 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         The indexes an initial sync deferred are restored after the recompute and
         before the root_id repair and the muted-parent propagation, which find
         their rows through them.
+
+        `recomputed` is resolved once the recompute has committed (or skipped), or
+        with the exception that ended the task before that.
         """
-        with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
-            # UPDATE: vote aggregates and `children`, in one pass.
-            # Only the initial-massive full recompute runs here: it is idempotent,
-            # so it is safe to repeat if finalization is interrupted before the
-            # completion marker commits, and it writes only the rows whose values
-            # change, so a repeat that finds hive_posts' indexes already restored
-            # does not rewrite them for every row. Catch-ups keep the vote aggregates up to
-            # date per batch (update_posts_rshares), and their ranged children update
-            # applies *deltas*, so it must commit exactly once — it runs inside the
-            # completion-marker transaction instead (_finalize_completion_marker).
-            if massive_sync_preconditions:
+        try:
+            with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
+                # UPDATE: vote aggregates and `children`, in one pass.
+                # Only the initial-massive full recompute runs here: it is idempotent,
+                # so it is safe to repeat if finalization is interrupted before the
+                # completion marker commits, and it writes only the rows whose values
+                # change, so a repeat that finds hive_posts' indexes already restored
+                # does not rewrite them for every row. Catch-ups keep the vote aggregates up to
+                # date per batch (update_posts_rshares), and their ranged children update
+                # applies *deltas*, so it must commit exactly once — it runs inside the
+                # completion-marker transaction instead (_finalize_completion_marker).
+                if massive_sync_preconditions:
+                    time_start = perf_counter()
+                    cls._execute_query_with_modified_work_mem(
+                        db=db_mgr.db, sql=f"SELECT {SCHEMA_NAME}.recalculate_all_posts_votes_and_children()"
+                    )
+                    log.info(
+                        "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs",
+                        perf_counter() - time_start,
+                    )
+                recomputed.set_result(None)
+
+                cls._restore_deferred_indexes()
+
+                # UPDATE: `root_id`
+                # Root posts are inserted with root_id = id and comments take their
+                # parent's, so this only repairs root posts written with the former
+                # root_id = 0 placeholder (a sync resumed across that change). It finds
+                # them through hive_posts_root_id_id_idx, so it costs nothing otherwise.
                 time_start = perf_counter()
-                cls._execute_query_with_modified_work_mem(
-                    db=db_mgr.db, sql=f"SELECT {SCHEMA_NAME}.recalculate_all_posts_votes_and_children()"
-                )
-                log.info(
-                    "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs", perf_counter() - time_start
-                )
-
-            cls._restore_deferred_indexes()
-
-            # UPDATE: `root_id`
-            # Root posts are inserted with root_id = id and comments take their
-            # parent's, so this only repairs root posts written with the former
-            # root_id = 0 placeholder (a sync resumed across that change). It finds
-            # them through hive_posts_root_id_id_idx, so it costs nothing otherwise.
-            time_start = perf_counter()
-            if massive_sync_preconditions:
-                sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id(NULL, NULL);"
-            else:
-                sql = (
-                    f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
-                )
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+                if massive_sync_preconditions:
+                    sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id(NULL, NULL);"
+                else:
+                    sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
+                cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
+                log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+        except BaseException as exc:
+            if not recomputed.done():
+                recomputed.set_exception(exc)
+            raise
 
         if massive_sync_preconditions:
             cls._finish_muted_parents(db)
@@ -1090,17 +1120,20 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         #       (one thread, see _finish_hive_posts) <- vote_notifications of the
         #       initial path, which scores by vote_rshares/abs_rshares
         #   feed cache, payout_stats_view, communities rank, BM25 index: read no
-        #       column a finalization task writes, so they run beside hive_posts
+        #       column a finalization task writes, so they run beside hive_posts;
+        #       the BM25 build starts after the hive_posts recompute commits
+        #       (_restore_bm25_index_after_recompute)
         #   notification_cache, vote_notifications <- reputation scores
         #   every task <- completion marker
         # Part 0 is everything without a predecessor; its critical path is the
         # hive_posts thread.
+        recomputed: Future[None] = Future()
         methods: list[tuple[str, Callable[..., Any], Sequence[Any]]] = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             (
                 'hive_posts',
                 cls._finish_hive_posts,
-                [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block],
+                [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block, recomputed],
             ),
         ]
         if massive_sync_preconditions:
@@ -1118,9 +1151,10 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                     [cls.db(), last_imported_block, current_imported_block],
                 )
             )
-        # BM25 index creation is deferred from the index phase to here, running in
-        # parallel with the fills above, off their critical path.
-        methods.append(('bm25_index', cls._restore_bm25_index, [cls.db()]))
+        # BM25 index creation is deferred from the index phase to here. It runs in
+        # parallel with the fills above, off their critical path, from the moment the
+        # hive_posts recompute commits (_restore_bm25_index_after_recompute).
+        methods.append(('bm25_index', cls._restore_bm25_index_after_recompute, [cls.db(), recomputed]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
         if massive_sync_preconditions:
