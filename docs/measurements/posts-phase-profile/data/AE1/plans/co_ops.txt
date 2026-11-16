@@ -1,0 +1,108 @@
+## co_ops: median of 98 instances, 12.188 ms
+WITH co_ops AS (
+        SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+            s.id,
+            s.val->>'author' AS author,
+            s.val->>'permlink' AS permlink,
+            COALESCE(hivemind_app.legacy_amount(s.val->'max_accepted_payout'), '1000000.000 HBD') AS max_accepted_payout,
+            COALESCE((s.val->>'percent_hbd')::INT, 10000) AS percent_hbd,
+            COALESCE((s.val->>'allow_votes')::BOOLEAN, TRUE) AS allow_votes,
+            COALESCE((s.val->>'allow_curation_rewards')::BOOLEAN, TRUE) AS allow_curation_rewards,
+            COALESCE(
+                (SELECT elem->'value'->'beneficiaries'
+                 FROM jsonb_array_elements(s.val->'extensions') elem
+                 WHERE elem->>'type' = 'comment_payout_beneficiaries'
+                 LIMIT 1),
+                '[]'::jsonb
+            ) AS beneficiaries
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 19
+        ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+    )
+    UPDATE hivemind_app.hive_posts hp
+    SET
+        max_accepted_payout = co.max_accepted_payout,
+        percent_hbd = co.percent_hbd,
+        allow_votes = co.allow_votes,
+        allow_curation_rewards = co.allow_curation_rewards,
+        beneficiaries = co.beneficiaries
+    FROM co_ops co
+    JOIN hivemind_app.hive_accounts ha ON ha.name = co.author
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = co.permlink
+    WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+
+ModifyTable on hive_posts  (est rows=0) (actual time=12.188 rows=0.0 loops=1) hit=18358 read=0 dirtied=25 wal=291549B/2072rec
+  -> Nested Loop Inner  (est rows=1) (actual time=9.535 rows=758.0 loops=1) hit=12028 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=762) (actual time=7.393 rows=758.0 loops=1) hit=8234 read=0 dirtied=0
+      -> Nested Loop Inner  (est rows=762) (actual time=4.605 rows=758.0 loops=1) hit=4444 read=0 dirtied=0
+        -> Subquery Scan  (est rows=762) (actual time=3.007 rows=758.0 loops=1) hit=1412 read=0 dirtied=0
+          -> Unique  (est rows=762) (actual time=2.877 rows=758.0 loops=1) hit=1412 read=0 dirtied=0
+            -> Sort  (est rows=762) (actual time=2.802 rows=762.0 loops=1) hit=1412 read=0 dirtied=0
+                 Sort Method: quicksort
+              -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=762) (actual time=2.588 rows=762.0 loops=1) hit=1412 read=0 dirtied=0
+                   Index Cond: (op_type_id = 19)
+                -> Limit  (est rows=1) (actual time=0.000 rows=0.61 loops=762) hit=0 read=0 dirtied=0
+                  -> Function Scan on jsonb_array_elements  (est rows=1) (actual time=0.000 rows=0.61 loops=762) hit=0 read=0 dirtied=0
+                       Filter: ((value ->> 'type'::text) = 'comment_payout_beneficiaries'::text)
+                       Rows Removed by Filter: 0
+        -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=758) hit=3032 read=0 dirtied=0
+             Index Cond: ((name)::text = (co.author)::text)
+      -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.004 rows=1.0 loops=758) hit=3790 read=0 dirtied=0
+           Index Cond: ((permlink)::text = (co.permlink)::text)
+    -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=758) hit=3794 read=0 dirtied=0
+         Index Cond: ((author_id = ha.id) AND (permlink_id = hpd.id) AND (counter_deleted = 0))
+
+## co_ops: slowest of 98 instances, 19.094 ms
+WITH co_ops AS (
+        SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink')
+            s.id,
+            s.val->>'author' AS author,
+            s.val->>'permlink' AS permlink,
+            COALESCE(hivemind_app.legacy_amount(s.val->'max_accepted_payout'), '1000000.000 HBD') AS max_accepted_payout,
+            COALESCE((s.val->>'percent_hbd')::INT, 10000) AS percent_hbd,
+            COALESCE((s.val->>'allow_votes')::BOOLEAN, TRUE) AS allow_votes,
+            COALESCE((s.val->>'allow_curation_rewards')::BOOLEAN, TRUE) AS allow_curation_rewards,
+            COALESCE(
+                (SELECT elem->'value'->'beneficiaries'
+                 FROM jsonb_array_elements(s.val->'extensions') elem
+                 WHERE elem->>'type' = 'comment_payout_beneficiaries'
+                 LIMIT 1),
+                '[]'::jsonb
+            ) AS beneficiaries
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 19
+        ORDER BY s.val->>'author', s.val->>'permlink', s.id DESC
+    )
+    UPDATE hivemind_app.hive_posts hp
+    SET
+        max_accepted_payout = co.max_accepted_payout,
+        percent_hbd = co.percent_hbd,
+        allow_votes = co.allow_votes,
+        allow_curation_rewards = co.allow_curation_rewards,
+        beneficiaries = co.beneficiaries
+    FROM co_ops co
+    JOIN hivemind_app.hive_accounts ha ON ha.name = co.author
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = co.permlink
+    WHERE hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+
+ModifyTable on hive_posts  (est rows=0) (actual time=19.094 rows=0.0 loops=1) hit=30424 read=0 dirtied=45 wal=516415B/3661rec
+  -> Nested Loop Inner  (est rows=1) (actual time=14.812 rows=1196.0 loops=1) hit=18954 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1208) (actual time=11.430 rows=1196.0 loops=1) hit=12959 read=0 dirtied=0
+      -> Nested Loop Inner  (est rows=1208) (actual time=7.273 rows=1196.0 loops=1) hit=6979 read=0 dirtied=0
+        -> Subquery Scan  (est rows=1208) (actual time=4.753 rows=1196.0 loops=1) hit=2195 read=0 dirtied=0
+          -> Unique  (est rows=1208) (actual time=4.547 rows=1196.0 loops=1) hit=2195 read=0 dirtied=0
+            -> Sort  (est rows=1208) (actual time=4.445 rows=1208.0 loops=1) hit=2195 read=0 dirtied=0
+                 Sort Method: quicksort
+              -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=1208) (actual time=4.122 rows=1208.0 loops=1) hit=2195 read=0 dirtied=0
+                   Index Cond: (op_type_id = 19)
+                -> Limit  (est rows=1) (actual time=0.000 rows=0.75 loops=1208) hit=0 read=0 dirtied=0
+                  -> Function Scan on jsonb_array_elements  (est rows=1) (actual time=0.000 rows=0.75 loops=1208) hit=0 read=0 dirtied=0
+                       Filter: ((value ->> 'type'::text) = 'comment_payout_beneficiaries'::text)
+                       Rows Removed by Filter: 0
+        -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=1196) hit=4784 read=0 dirtied=0
+             Index Cond: ((name)::text = (co.author)::text)
+      -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.003 rows=1.0 loops=1196) hit=5980 read=0 dirtied=0
+           Index Cond: ((permlink)::text = (co.permlink)::text)
+    -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=1196) hit=5995 read=0 dirtied=0
+         Index Cond: ((author_id = ha.id) AND (permlink_id = hpd.id) AND (counter_deleted = 0))
+

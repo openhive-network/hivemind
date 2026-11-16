@@ -1,0 +1,32 @@
+## category_ins: median of 255 instances, 0.010 ms
+INSERT INTO hivemind_app.hive_category_data
+        (category)
+        VALUES (_parent_permlink)
+        ON CONFLICT (category) DO NOTHING
+
+ModifyTable on hive_category_data  (est rows=0) (actual time=0.010 rows=0.0 loops=1) hit=5 read=0 dirtied=0
+     Conflict Resolution: NOTHING
+     Conflict Arbiter Indexes: ['hive_category_data_category']
+     Tuples Inserted: 0
+     Conflicting Tuples: 1
+  -> Result  (est rows=1) (actual time=0.002 rows=1.0 loops=1) hit=1 read=0 dirtied=0
+
+## category_ins: slowest of 255 instances, 7.419 ms
+INSERT INTO hivemind_app.hive_category_data (category)
+    SELECT DISTINCT parent_permlink
+    FROM hivemind_app._comment_staging
+    WHERE parent_author IS NULL OR parent_author = ''
+    ON CONFLICT (category) DO NOTHING
+
+ModifyTable on hive_category_data  (est rows=0) (actual time=7.418 rows=0.0 loops=1) hit=3631 read=647 dirtied=55 wal=9082B/142rec
+     Conflict Resolution: NOTHING
+     Conflict Arbiter Indexes: ['hive_category_data_category']
+     Tuples Inserted: 23
+     Conflicting Tuples: 607
+  -> Subquery Scan  (est rows=169) (actual time=1.983 rows=630.0 loops=1) hit=1616 read=1 dirtied=1 wal=1980B/20rec
+    -> Aggregate  (est rows=169) (actual time=1.781 rows=630.0 loops=1) hit=973 read=0 dirtied=0
+         Peak Memory Usage: 89
+      -> Seq Scan on _comment_staging  (est rows=369) (actual time=1.454 rows=2954.0 loops=1) hit=973 read=0 dirtied=0
+           Filter: ((parent_author IS NULL) OR (parent_author = ''::text))
+           Rows Removed by Filter: 7312
+

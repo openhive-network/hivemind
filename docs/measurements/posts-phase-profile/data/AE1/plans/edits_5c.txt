@@ -1,0 +1,72 @@
+## edits_5c: median of 98 instances, 4.134 ms
+UPDATE hivemind_app.hive_posts hp
+    SET updated_at = last_edit.block_date,
+        block_num = last_edit.block_num
+    FROM (
+        SELECT DISTINCT ON (pr.post_id)
+            pr.post_id, cs.block_date, cs.block_num
+        FROM hivemind_app._comment_staging cs
+        JOIN hivemind_app._comment_staging cs_first
+            ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
+        WHERE NOT cs.is_first AND NOT cs.is_replayed
+        ORDER BY pr.post_id, cs.seq_id DESC
+    ) last_edit
+    WHERE hp.id = last_edit.post_id
+
+ModifyTable on hive_posts  (est rows=0) (actual time=4.134 rows=0.0 loops=1) hit=15877 read=0 dirtied=2 wal=106754B/493rec
+  -> Nested Loop Inner  (est rows=1) (actual time=3.484 rows=416.0 loops=1) hit=14783 read=0 dirtied=1 wal=544B/7rec
+    -> Subquery Scan  (est rows=1) (actual time=2.805 rows=416.0 loops=1) hit=12636 read=0 dirtied=0
+      -> Unique  (est rows=1) (actual time=2.755 rows=416.0 loops=1) hit=12636 read=0 dirtied=0
+        -> Sort  (est rows=1) (actual time=2.717 rows=644.0 loops=1) hit=12636 read=0 dirtied=0
+             Sort Method: quicksort
+          -> Nested Loop Inner  (est rows=1) (actual time=2.625 rows=644.0 loops=1) hit=12636 read=0 dirtied=0
+            -> Nested Loop Inner  (est rows=1) (actual time=1.992 rows=644.0 loops=1) hit=9787 read=0 dirtied=0
+              -> Seq Scan on _comment_staging  (est rows=565) (actual time=0.970 rows=644.0 loops=1) hit=4978 read=0 dirtied=0
+                   Filter: ((NOT is_first) AND (NOT is_replayed))
+                   Rows Removed by Filter: 7722
+              -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=1) (actual time=0.001 rows=1.0 loops=644) hit=4809 read=0 dirtied=0
+                   Index Cond: ((author = cs.author) AND (permlink = cs.permlink))
+                   Filter: is_first
+                   Rows Removed by Filter: 3
+            -> Index Scan on _post_results using _post_results_seq_id_idx  (est rows=1) (actual time=0.001 rows=1.0 loops=644) hit=2849 read=0 dirtied=0
+                 Index Cond: (seq_id = cs_first.seq_id)
+    -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.001 rows=1.0 loops=416) hit=2117 read=0 dirtied=0 wal=500B/6rec
+         Index Cond: (id = last_edit.post_id)
+
+## edits_5c: slowest of 98 instances, 13.898 ms
+UPDATE hivemind_app.hive_posts hp
+    SET updated_at = last_edit.block_date,
+        block_num = last_edit.block_num
+    FROM (
+        SELECT DISTINCT ON (pr.post_id)
+            pr.post_id, cs.block_date, cs.block_num
+        FROM hivemind_app._comment_staging cs
+        JOIN hivemind_app._comment_staging cs_first
+            ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs_first.seq_id
+        WHERE NOT cs.is_first AND NOT cs.is_replayed
+        ORDER BY pr.post_id, cs.seq_id DESC
+    ) last_edit
+    WHERE hp.id = last_edit.post_id
+
+ModifyTable on hive_posts  (est rows=0) (actual time=13.897 rows=0.0 loops=1) hit=20723 read=0 dirtied=0 wal=136490B/642rec
+  -> Nested Loop Inner  (est rows=1) (actual time=12.446 rows=529.0 loops=1) hit=19255 read=0 dirtied=0 wal=354B/5rec
+    -> Subquery Scan  (est rows=1) (actual time=11.153 rows=529.0 loops=1) hit=16551 read=0 dirtied=0
+      -> Unique  (est rows=1) (actual time=11.057 rows=529.0 loops=1) hit=16551 read=0 dirtied=0
+        -> Sort  (est rows=1) (actual time=10.991 rows=782.0 loops=1) hit=16551 read=0 dirtied=0
+             Sort Method: quicksort
+          -> Nested Loop Inner  (est rows=1) (actual time=10.821 rows=782.0 loops=1) hit=16551 read=0 dirtied=0
+            -> Nested Loop Inner  (est rows=1) (actual time=9.323 rows=782.0 loops=1) hit=13146 read=0 dirtied=0
+              -> Seq Scan on _comment_staging  (est rows=600) (actual time=7.256 rows=782.0 loops=1) hit=7982 read=0 dirtied=0
+                   Filter: ((NOT is_first) AND (NOT is_replayed))
+                   Rows Removed by Filter: 9458
+              -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=1) (actual time=0.002 rows=1.0 loops=782) hit=5164 read=0 dirtied=0
+                   Index Cond: ((author = cs.author) AND (permlink = cs.permlink))
+                   Filter: is_first
+                   Rows Removed by Filter: 2
+            -> Index Scan on _post_results using _post_results_seq_id_idx  (est rows=1) (actual time=0.002 rows=1.0 loops=782) hit=3405 read=0 dirtied=0
+                 Index Cond: (seq_id = cs_first.seq_id)
+    -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.002 rows=1.0 loops=529) hit=2676 read=0 dirtied=0 wal=354B/5rec
+         Index Cond: (id = last_edit.post_id)
+

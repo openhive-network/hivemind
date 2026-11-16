@@ -1,0 +1,54 @@
+## cs_ins: median of 98 instances, 37.719 ms
+INSERT INTO hivemind_app._comment_staging (seq_id, staging_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body)
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
+        s.id AS staging_id,
+        (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
+        s.block_num,
+        s.block_date,
+        s.val->>'author' AS author,
+        s.val->>'permlink' AS permlink,
+        s.val->>'parent_author' AS parent_author,
+        s.val->>'parent_permlink' AS parent_permlink,
+        s.val AS op_body
+    FROM hivemind_app._ops_staging s
+    WHERE s.op_type_id = 1
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=37.719 rows=0.0 loops=1) hit=54379 read=0 dirtied=722
+  -> Subquery Scan  (est rows=6977) (actual time=21.337 rows=6977.0 loops=1) hit=12530 read=0 dirtied=0
+    -> WindowAgg  (est rows=6977) (actual time=20.966 rows=6977.0 loops=1) hit=12530 read=0 dirtied=0
+      -> Sort  (est rows=6977) (actual time=16.599 rows=6977.0 loops=1) hit=9306 read=0 dirtied=0
+           Sort Method: quicksort
+        -> WindowAgg  (est rows=6977) (actual time=14.904 rows=6977.0 loops=1) hit=9306 read=0 dirtied=0
+          -> Sort  (est rows=6977) (actual time=13.721 rows=6977.0 loops=1) hit=9306 read=0 dirtied=0
+               Sort Method: quicksort
+            -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=6977) (actual time=11.596 rows=6977.0 loops=1) hit=9306 read=0 dirtied=0
+                 Index Cond: (op_type_id = 1)
+
+## cs_ins: slowest of 98 instances, 53.706 ms
+INSERT INTO hivemind_app._comment_staging (seq_id, staging_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body)
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id,
+        s.id AS staging_id,
+        (ROW_NUMBER() OVER (PARTITION BY s.val->>'author', s.val->>'permlink' ORDER BY s.id) = 1) AS is_first,
+        s.block_num,
+        s.block_date,
+        s.val->>'author' AS author,
+        s.val->>'permlink' AS permlink,
+        s.val->>'parent_author' AS parent_author,
+        s.val->>'parent_permlink' AS parent_permlink,
+        s.val AS op_body
+    FROM hivemind_app._ops_staging s
+    WHERE s.op_type_id = 1
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=53.705 rows=0.0 loops=1) hit=69059 read=0 dirtied=1238
+  -> Subquery Scan  (est rows=9427) (actual time=30.575 rows=9427.0 loops=1) hit=14185 read=0 dirtied=0
+    -> WindowAgg  (est rows=9427) (actual time=30.075 rows=9427.0 loops=1) hit=14185 read=0 dirtied=0
+      -> Sort  (est rows=9427) (actual time=24.153 rows=9427.0 loops=1) hit=10523 read=0 dirtied=0
+           Sort Method: quicksort
+        -> WindowAgg  (est rows=9427) (actual time=22.200 rows=9427.0 loops=1) hit=10523 read=0 dirtied=0
+          -> Sort  (est rows=9427) (actual time=20.252 rows=9427.0 loops=1) hit=10523 read=0 dirtied=0
+               Sort Method: quicksort
+            -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=9427) (actual time=16.085 rows=9427.0 loops=1) hit=10523 read=0 dirtied=0
+                 Index Cond: (op_type_id = 1)
+

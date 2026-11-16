@@ -1,0 +1,60 @@
+34613.2	SELECT hivemind_app.process_payouts_from_staging(110953830)
+34403.6	WITH payout_agg AS ( SELECT s.val->>'author' AS author, s.val->>'permlink' AS permlink, -- COMMENT_P
+25546.5	WITH upserted AS ( INSERT INTO hivemind_app.hive_votes (id, post_id, voter_id, author_id, permlink_i
+22380.9	SELECT hivemind_app.prepare_votes_from_staging()
+14563.2	INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val) WITH block_dates 
+11805.3	INSERT INTO hivemind_app._vote_batch WITH vote_ops AS ( -- Regular votes (type 0) SELECT s.id, s.blo
+10235.9	SELECT hivemind_app.process_reblogs_from_staging()
+9691.9	WITH vote_target AS MATERIALIZED ( -- Many votes in a batch hit the same post: resolve each target p
+8639.7	INSERT INTO hivemind_app._reblog_ops WITH raw_ops AS ( SELECT s.id, s.block_num, s.block_date, s.val
+6486.5	SELECT hivemind_app.upsert_votes_partition(2, 4)
+6449.1	SELECT hivemind_app.upsert_votes_partition(1, 4)
+6413.5	SELECT hivemind_app.upsert_votes_partition(3, 4)
+6348.1	SELECT hivemind_app.upsert_votes_partition(0, 4)
+5817.2	CREATE TEMP TABLE _new_follows AS WITH ins AS ( INSERT INTO hivemind_app.follows (follower, followin
+5605.7	--- Data-modifying CTEs must be at the top level (not inside a subquery), --- so we use LANGUAGE sql
+3807.4	SELECT c.relname, pg_prewarm(c.oid) FROM pg_class c WHERE c.relnamespace = 'hivemind_app'::regnamesp
+3780.0	SELECT ho.id AS op_id, ho.block_num, ho.body_value AS val FROM hivemind_app.operations_view ho WHERE
+3775.5	CREATE TEMP TABLE _final_actions AS WITH action_groups AS ( SELECT fa.*, CASE WHEN fa.action IN ('bl
+2687.0	REFRESH MATERIALIZED VIEW CONCURRENTLY hivemind_app.payout_stats_view;
+2161.9	WITH delta AS ( SELECT following AS account_id, count(*) AS cnt FROM _new_follows WHERE is_new GROUP
+2125.1	DROP MATERIALIZED VIEW IF EXISTS hivemind_app.payout_stats_view; CREATE MATERIALIZED VIEW hivemind_a
+1640.0	DELETE FROM hivemind_app._ops_staging
+1370.6	WITH deduped AS ( SELECT account, author, permlink, block_date, block_num FROM hivemind_app._reblog_
+1354.3	SELECT * FROM hivemind_app.process_follows_for_blocks(19066001, 19067000)
+1297.6	INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq) VALUES (_foll
+1285.1	CREATE TEMP TABLE _deleted_follows_unfollow AS WITH del AS ( DELETE FROM hivemind_app.follows f USIN
+1095.9	SELECT * FROM hivemind_app.process_follows_for_blocks(19065001, 19066000)
+1094.4	INSERT INTO _follow_notifications (follower_name, following_name, block_num, op_seq) VALUES (_follow
+879.1	SELECT * FROM hivemind_app.process_follows_for_blocks(19068001, 19069000)
+864.4	SELECT * FROM hivemind_app.process_follows_for_blocks(19067001, 19068000)
+862.8	SELECT * FROM hivemind_app.process_follows_for_blocks(19098001, 19099000)
+832.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19052001, 19053000)
+791.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19082001, 19083000)
+783.6	SELECT * FROM hivemind_app.process_follows_for_blocks(19069001, 19070000)
+774.9	SELECT * FROM hivemind_app.process_follows_for_blocks(19083001, 19084000)
+772.3	SELECT * FROM hivemind_app.process_follows_for_blocks(19086001, 19087000)
+769.5	SELECT * FROM hivemind_app.process_follows_for_blocks(19080001, 19081000)
+754.9	SELECT * FROM hivemind_app.process_follows_for_blocks(19085001, 19086000)
+744.9	SELECT * FROM hivemind_app.process_follows_for_blocks(19061001, 19062000)
+738.5	SELECT * FROM hivemind_app.process_follows_for_blocks(19049001, 19050000)
+737.4	SELECT * FROM hivemind_app.process_follows_for_blocks(19096001, 19097000)
+737.1	SELECT * FROM hivemind_app.process_follows_for_blocks(19081001, 19082000)
+736.1	SELECT * FROM hivemind_app.process_follows_for_blocks(19062001, 19063000)
+735.6	SELECT * FROM hivemind_app.process_follows_for_blocks(19014001, 19015000)
+733.8	SELECT * FROM hivemind_app.process_follows_for_blocks(19064001, 19065000)
+716.4	SELECT * FROM hivemind_app.process_follows_for_blocks(19011001, 19012000)
+714.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19017001, 19018000)
+713.2	SELECT * FROM hivemind_app.process_follows_for_blocks(19070001, 19071000)
+709.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19010001, 19011000)
+678.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19097001, 19098000)
+678.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19015001, 19016000)
+674.5	REPLACE(REPLACE(REPLACE(REPLACE(REPLACE( _text, E'\b', '\b'), E'\f', '\f'), E'\n', '\n'), E'\r', '\r
+673.0	SELECT * FROM hivemind_app.process_follows_for_blocks(19027001, 19028000)
+660.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19063001, 19064000)
+657.7	SELECT * FROM hivemind_app.process_follows_for_blocks(19073001, 19074000)
+655.2	SELECT * FROM hivemind_app.process_follows_for_blocks(19006001, 19007000)
+652.2	SELECT * FROM hivemind_app.process_follows_for_blocks(19029001, 19030000)
+648.0	SELECT * FROM hivemind_app.process_follows_for_blocks(19016001, 19017000)
+643.8	SELECT * FROM hivemind_app.process_follows_for_blocks(19059001, 19060000)
+642.8	SELECT * FROM hivemind_app.process_follows_for_blocks(19012001, 19013000)

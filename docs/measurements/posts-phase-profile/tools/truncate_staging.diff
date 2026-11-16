@@ -1,0 +1,33 @@
+--- a/hive/db/sql_scripts/hive_post_operations.sql
++++ b/hive/db/sql_scripts/hive_post_operations.sql
+@@ -436,7 +436,7 @@
+ BEGIN
+     --- Permlinks and categories are assumed to already be inserted by the caller.
+ 
+-    DELETE FROM hivemind_app._post_batch;
++    TRUNCATE hivemind_app._post_batch;
+ 
+     INSERT INTO hivemind_app._post_batch
+         (seq_id, author_id, permlink_id, category_id, community_id, is_muted, muted_reasons,
+@@ -650,7 +650,7 @@
+ BEGIN
+     --- Permlinks are assumed to already be inserted by the caller.
+ 
+-    DELETE FROM hivemind_app._post_batch;
++    TRUNCATE hivemind_app._post_batch;
+ 
+     INSERT INTO hivemind_app._post_batch
+         (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id,
+--- a/hive/db/sql_scripts/massive_sync.sql
++++ b/hive/db/sql_scripts/massive_sync.sql
+@@ -1134,9 +1134,7 @@
+     _changed INT;
+ BEGIN
+     -- Persistent unlogged staging tables (avoids PL/pgSQL stale OID with temp tables)
+-    DELETE FROM hivemind_app._comment_staging;
+-    DELETE FROM hivemind_app._replay_pairs;
+-    DELETE FROM hivemind_app._post_results;
++    TRUNCATE hivemind_app._comment_staging, hivemind_app._replay_pairs, hivemind_app._post_results;
+ 
+     -- Step 1: Collect ineffective delete keys (type 73)
+     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))

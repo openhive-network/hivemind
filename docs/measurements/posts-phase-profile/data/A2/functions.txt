@@ -1,0 +1,7 @@
+          proname           | truncates 
+----------------------------+-----------
+ process_comments_batch     | f
+ process_posts_from_staging | f
+ process_root_posts_batch   | f
+(3 rows)
+

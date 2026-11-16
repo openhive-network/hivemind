@@ -1,0 +1,34 @@
+## wave_count: median of 1094 instances, 2.488 ms
+SELECT count(*)                         FROM hivemind_app._comment_staging cs
+        WHERE cs.is_first AND NOT cs.is_replayed
+          AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
+          AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
+
+Aggregate  (est rows=1) (actual time=2.488 rows=1.0 loops=1) hit=10603 read=0 dirtied=0
+  -> Hash Join Anti  (est rows=4308) (actual time=2.486 rows=7.0 loops=1) hit=10603 read=0 dirtied=0
+       Hash Cond: (cs.seq_id = pr.seq_id)
+    -> Seq Scan on _comment_staging  (est rows=6375) (actual time=1.105 rows=4953.0 loops=1) hit=5704 read=0 dirtied=0
+         Filter: (is_first AND (NOT is_replayed) AND (parent_author IS NOT NULL) AND (parent_author <> ''::text))
+         Rows Removed by Filter: 2245
+    -> Hash  (est rows=3132) (actual time=1.115 rows=6560.0 loops=1) hit=4899 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 295
+      -> Seq Scan on _post_results  (est rows=3132) (actual time=0.808 rows=6560.0 loops=1) hit=4899 read=0 dirtied=0
+
+## wave_count: slowest of 1094 instances, 12.125 ms
+SELECT count(*)                         FROM hivemind_app._comment_staging cs
+        WHERE cs.is_first AND NOT cs.is_replayed
+          AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
+          AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
+
+Aggregate  (est rows=1) (actual time=12.123 rows=1.0 loops=1) hit=11370 read=0 dirtied=0
+  -> Hash Join Anti  (est rows=3149) (actual time=12.093 rows=58.0 loops=1) hit=11370 read=0 dirtied=0
+       Hash Cond: (cs.seq_id = pr.seq_id)
+    -> Seq Scan on _comment_staging  (est rows=4725) (actual time=7.423 rows=7194.0 loops=1) hit=6115 read=0 dirtied=0
+         Filter: (is_first AND (NOT is_replayed) AND (parent_author IS NOT NULL) AND (parent_author <> ''::text))
+         Rows Removed by Filter: 2946
+    -> Hash  (est rows=2388) (actual time=3.254 rows=9353.0 loops=1) hit=5255 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 457
+      -> Seq Scan on _post_results  (est rows=2388) (actual time=2.505 rows=9353.0 loops=1) hit=5255 read=0 dirtied=0
+

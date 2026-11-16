@@ -1,0 +1,58 @@
+## cs_norm: median of 98 instances, 10.547 ms
+UPDATE hivemind_app._comment_staging cs
+    SET parent_author = first_parent.parent_author,
+        parent_permlink = first_parent.parent_permlink
+    FROM (
+        SELECT DISTINCT ON (author, permlink)
+            author, permlink, parent_author, parent_permlink
+        FROM hivemind_app._comment_staging
+        ORDER BY author, permlink, seq_id
+    ) first_parent
+    WHERE cs.author = first_parent.author
+      AND cs.permlink = first_parent.permlink
+      AND (cs.parent_author IS DISTINCT FROM first_parent.parent_author
+           OR cs.parent_permlink IS DISTINCT FROM first_parent.parent_permlink)
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=10.546 rows=0.0 loops=1) hit=26076 read=0 dirtied=0
+  -> Hash Join Inner  (est rows=2) (actual time=10.533 rows=1.0 loops=1) hit=26070 read=0 dirtied=0
+       Hash Cond: ((cs.author = first_parent.author) AND (cs.permlink = first_parent.permlink))
+       Join Filter: ((cs.parent_author IS DISTINCT FROM first_parent.parent_author) OR (cs.parent_permlink IS DISTINCT FROM first_parent.parent_permlink))
+       Rows Removed by Join Filter: 7474
+    -> Seq Scan on _comment_staging  (est rows=7160) (actual time=0.736 rows=7475.0 loops=1) hit=2844 read=0 dirtied=0
+    -> Hash  (est rows=6537) (actual time=8.591 rows=6870.0 loops=1) hit=23226 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 2196
+      -> Subquery Scan  (est rows=6537) (actual time=7.676 rows=6870.0 loops=1) hit=23226 read=0 dirtied=0
+        -> Unique  (est rows=6537) (actual time=6.826 rows=6870.0 loops=1) hit=23226 read=0 dirtied=0
+          -> Incremental Sort  (est rows=7160) (actual time=6.318 rows=7475.0 loops=1) hit=23226 read=0 dirtied=0
+            -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=7160) (actual time=5.087 rows=7475.0 loops=1) hit=23226 read=0 dirtied=0
+
+## cs_norm: slowest of 98 instances, 23.777 ms
+UPDATE hivemind_app._comment_staging cs
+    SET parent_author = first_parent.parent_author,
+        parent_permlink = first_parent.parent_permlink
+    FROM (
+        SELECT DISTINCT ON (author, permlink)
+            author, permlink, parent_author, parent_permlink
+        FROM hivemind_app._comment_staging
+        ORDER BY author, permlink, seq_id
+    ) first_parent
+    WHERE cs.author = first_parent.author
+      AND cs.permlink = first_parent.permlink
+      AND (cs.parent_author IS DISTINCT FROM first_parent.parent_author
+           OR cs.parent_permlink IS DISTINCT FROM first_parent.parent_permlink)
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=23.776 rows=0.0 loops=1) hit=21228 read=0 dirtied=0
+  -> Hash Join Inner  (est rows=3) (actual time=23.726 rows=2.0 loops=1) hit=21216 read=0 dirtied=0
+       Hash Cond: ((cs.author = first_parent.author) AND (cs.permlink = first_parent.permlink))
+       Join Filter: ((cs.parent_author IS DISTINCT FROM first_parent.parent_author) OR (cs.parent_permlink IS DISTINCT FROM first_parent.parent_permlink))
+       Rows Removed by Join Filter: 9430
+    -> Seq Scan on _comment_staging  (est rows=9400) (actual time=1.666 rows=9432.0 loops=1) hit=1870 read=0 dirtied=0
+    -> Hash  (est rows=8569) (actual time=19.328 rows=8701.0 loops=1) hit=19346 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 2842
+      -> Subquery Scan  (est rows=8569) (actual time=17.556 rows=8701.0 loops=1) hit=19346 read=0 dirtied=0
+        -> Unique  (est rows=8569) (actual time=15.689 rows=8701.0 loops=1) hit=19346 read=0 dirtied=0
+          -> Incremental Sort  (est rows=9400) (actual time=14.705 rows=9432.0 loops=1) hit=19346 read=0 dirtied=0
+            -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=9400) (actual time=12.080 rows=9432.0 loops=1) hit=19346 read=0 dirtied=0
+

@@ -1,0 +1,12 @@
+      relname       | relpersistence 
+--------------------+----------------
+ hive_accounts      | p
+ hive_mentions      | p
+ hive_permlink_data | p
+ hive_post_data     | p
+ hive_post_tags     | p
+ hive_posts         | p
+ hive_reblogs       | p
+ hive_votes         | p
+(8 rows)
+

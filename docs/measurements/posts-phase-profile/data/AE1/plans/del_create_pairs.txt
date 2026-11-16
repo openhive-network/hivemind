@@ -1,0 +1,62 @@
+## del_create_pairs: median of 98 instances, 6.771 ms
+_delete_create_pairs := COALESCE(ARRAY(
+        SELECT DISTINCT (s_del.val->>'author') || '/' || (s_del.val->>'permlink')
+        FROM hivemind_app._ops_staging s_del
+        WHERE s_del.op_type_id = 17
+          AND NOT ((s_del.val->>'author') || '/' || (s_del.val->>'permlink') = ANY(_ineffective_keys))
+          AND EXISTS (
+              SELECT 1 FROM hivemind_app._ops_staging s_cr
+              WHERE s_cr.op_type_id = 1
+                AND s_cr.val->>'author' = s_del.val->>'author'
+                AND s_cr.val->>'permlink' = s_del.val->>'permlink'
+                AND s_cr.id > s_del.id
+          )
+    ), '{}')
+
+Result  (est rows=1) (actual time=6.770 rows=1.0 loops=1) hit=7652 read=0 dirtied=0
+  -> Unique  (est rows=3) (actual time=6.766 rows=2.0 loops=1) hit=7652 read=0 dirtied=0
+    -> Sort  (est rows=3) (actual time=6.765 rows=3.0 loops=1) hit=7652 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Hash Join Semi  (est rows=3) (actual time=6.763 rows=3.0 loops=1) hit=7652 read=0 dirtied=0
+           Hash Cond: (((s_del.val ->> 'author'::text) = (s_cr.val ->> 'author'::text)) AND ((s_del.val ->> 'permlink'::text) = (s_cr.val ->> 'permlink'::text)))
+           Join Filter: (s_cr.id > s_del.id)
+           Rows Removed by Join Filter: 24
+        -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=41) (actual time=0.042 rows=41.0 loops=1) hit=91 read=0 dirtied=0
+             Index Cond: (op_type_id = 17)
+        -> Hash  (est rows=6977) (actual time=6.702 rows=6977.0 loops=1) hit=7561 read=0 dirtied=0
+             Hash Batches: 1
+             Peak Memory Usage: 4585
+          -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=6977) (actual time=2.402 rows=6977.0 loops=1) hit=4337 read=0 dirtied=0
+               Index Cond: (op_type_id = 1)
+
+## del_create_pairs: slowest of 98 instances, 15.701 ms
+_delete_create_pairs := COALESCE(ARRAY(
+        SELECT DISTINCT (s_del.val->>'author') || '/' || (s_del.val->>'permlink')
+        FROM hivemind_app._ops_staging s_del
+        WHERE s_del.op_type_id = 17
+          AND NOT ((s_del.val->>'author') || '/' || (s_del.val->>'permlink') = ANY(_ineffective_keys))
+          AND EXISTS (
+              SELECT 1 FROM hivemind_app._ops_staging s_cr
+              WHERE s_cr.op_type_id = 1
+                AND s_cr.val->>'author' = s_del.val->>'author'
+                AND s_cr.val->>'permlink' = s_del.val->>'permlink'
+                AND s_cr.id > s_del.id
+          )
+    ), '{}')
+
+Result  (est rows=1) (actual time=15.698 rows=1.0 loops=1) hit=6824 read=0 dirtied=0
+  -> Unique  (est rows=6) (actual time=15.692 rows=3.0 loops=1) hit=6824 read=0 dirtied=0
+    -> Sort  (est rows=6) (actual time=15.690 rows=3.0 loops=1) hit=6824 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Hash Join Semi  (est rows=6) (actual time=15.685 rows=3.0 loops=1) hit=6824 read=0 dirtied=0
+           Hash Cond: (((s_del.val ->> 'author'::text) = (s_cr.val ->> 'author'::text)) AND ((s_del.val ->> 'permlink'::text) = (s_cr.val ->> 'permlink'::text)))
+           Join Filter: (s_cr.id > s_del.id)
+           Rows Removed by Join Filter: 39
+        -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=69) (actual time=0.112 rows=69.0 loops=1) hit=137 read=0 dirtied=0
+             Index Cond: (op_type_id = 17)
+        -> Hash  (est rows=9432) (actual time=15.516 rows=9432.0 loops=1) hit=6667 read=0 dirtied=0
+             Hash Batches: 1
+             Peak Memory Usage: 6107
+          -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=9432) (actual time=6.316 rows=9432.0 loops=1) hit=3449 read=0 dirtied=0
+               Index Cond: (op_type_id = 1)
+

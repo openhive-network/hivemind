@@ -1,0 +1,39 @@
+## permlink_ins: median of 289 instances, 0.008 ms
+INSERT INTO hivemind_app.hive_permlink_data
+    (permlink)
+    values
+        (
+            _permlink
+        )
+    ON CONFLICT DO NOTHING
+
+ModifyTable on hive_permlink_data  (est rows=0) (actual time=0.008 rows=0.0 loops=1) hit=9 read=0 dirtied=0
+     Conflict Resolution: NOTHING
+     Tuples Inserted: 0
+     Conflicting Tuples: 1
+  -> Result  (est rows=1) (actual time=0.001 rows=1.0 loops=1) hit=1 read=0 dirtied=0
+
+## permlink_ins: slowest of 289 instances, 173.576 ms
+INSERT INTO hivemind_app.hive_permlink_data (permlink)
+    SELECT DISTINCT p FROM (
+        SELECT permlink AS p FROM hivemind_app._comment_staging
+        UNION
+        SELECT parent_permlink AS p FROM hivemind_app._comment_staging WHERE parent_author != ''
+    ) sub
+    ON CONFLICT DO NOTHING
+
+ModifyTable on hive_permlink_data  (est rows=0) (actual time=173.575 rows=0.0 loops=1) hit=171690 read=4088 dirtied=9568 wal=3974820B/37680rec
+     Conflict Resolution: NOTHING
+     Tuples Inserted: 8655
+     Conflicting Tuples: 4801
+  -> Subquery Scan  (est rows=200) (actual time=10.488 rows=13456.0 loops=1) hit=15415 read=1 dirtied=1 wal=40392B/408rec
+    -> Aggregate  (est rows=200) (actual time=7.310 rows=13456.0 loops=1) hit=1946 read=0 dirtied=0
+         Peak Memory Usage: 2601
+      -> Aggregate  (est rows=73763) (actual time=4.418 rows=13456.0 loops=1) hit=1946 read=0 dirtied=0
+           Peak Memory Usage: 4121
+        -> Append  (est rows=73763) (actual time=1.971 rows=17578.0 loops=1) hit=1946 read=0 dirtied=0
+          -> Seq Scan on _comment_staging  (est rows=36974) (actual time=0.531 rows=10266.0 loops=1) hit=973 read=0 dirtied=0
+          -> Seq Scan on _comment_staging  (est rows=36789) (actual time=0.724 rows=7312.0 loops=1) hit=973 read=0 dirtied=0
+               Filter: (parent_author <> ''::text)
+               Rows Removed by Filter: 2954
+

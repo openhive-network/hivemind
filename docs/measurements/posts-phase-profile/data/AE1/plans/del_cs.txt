@@ -1,0 +1,12 @@
+## del_cs: median of 98 instances, 4.008 ms
+DELETE FROM hivemind_app._comment_staging
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=4.008 rows=0.0 loops=1) hit=13217 read=0 dirtied=0
+  -> Seq Scan on _comment_staging  (est rows=8391) (actual time=2.598 rows=7584.0 loops=1) hit=3242 read=0 dirtied=0
+
+## del_cs: slowest of 98 instances, 6.159 ms
+DELETE FROM hivemind_app._comment_staging
+
+ModifyTable on _comment_staging  (est rows=0) (actual time=6.159 rows=0.0 loops=1) hit=15113 read=0 dirtied=0
+  -> Seq Scan on _comment_staging  (est rows=100) (actual time=4.091 rows=8568.0 loops=1) hit=3525 read=0 dirtied=0
+

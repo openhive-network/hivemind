@@ -1,0 +1,12 @@
+## del_pb: median of 1094 instances, 0.145 ms
+DELETE FROM hivemind_app._post_batch
+
+ModifyTable on _post_batch  (est rows=0) (actual time=0.144 rows=0.0 loops=1) hit=804 read=0 dirtied=0
+  -> Seq Scan on _post_batch  (est rows=552) (actual time=0.142 rows=8.0 loops=1) hit=796 read=0 dirtied=0
+
+## del_pb: slowest of 1094 instances, 1.320 ms
+DELETE FROM hivemind_app._post_batch
+
+ModifyTable on _post_batch  (est rows=0) (actual time=1.320 rows=0.0 loops=1) hit=6910 read=0 dirtied=0
+  -> Seq Scan on _post_batch  (est rows=414) (actual time=0.796 rows=5734.0 loops=1) hit=1176 read=0 dirtied=0
+
