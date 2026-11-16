@@ -44,6 +44,18 @@ SELECT pk.k, md5(coalesce(d.title, '')), md5(coalesce(d.body, '')), md5(coalesce
 FROM hivemind_app.hive_post_data d LEFT JOIN pk ON pk.id = d.id
 ORDER BY 1;
 
+-- Ids as drawn (#482): posts with their parent and root, notifications whole
+\o post_ids.txt
+SELECT hp.id, pk.k, hp.parent_id, hp.root_id
+FROM hivemind_app.hive_posts hp
+JOIN pk ON pk.id = hp.id
+ORDER BY 1;
+
+\o notif_ids.txt
+SELECT n.id, n.type_id, n.block_num, n.src, n.dst, n.post_id, n.dst_post_id, n.score, n.payload
+FROM hivemind_app.hive_notification_cache n
+ORDER BY 1;
+
 \o counts.txt
 SELECT 'posts', count(*) FROM hivemind_app.hive_posts
 UNION ALL SELECT 'deleted_posts', count(*) FROM hivemind_app.hive_posts WHERE counter_deleted > 0

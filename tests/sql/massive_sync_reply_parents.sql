@@ -1,7 +1,8 @@
 -- process_posts_from_staging over one batch in which replies and their parents are
 -- deleted and re-created, against the same ops applied one block at a time (as live
 -- sync does) and against the rows the chain creates: every reply exists, and every
--- reply row's parent (and root, depth) is the parent row live at the reply's own op.
+-- reply row's parent (and root, depth) is the parent row live at the reply's own op,
+-- and every row has the same id in both runs, ids following the ops' order.
 -- Seeds its own accounts and _ops_staging rows in a transaction it rolls back, so it
 -- runs on any installed hivemind schema, including an empty chain:
 --
@@ -104,6 +105,13 @@ JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
 LEFT JOIN hivemind_app.hive_category_data hcd ON hcd.id = hp.category_id
 WHERE ha.name LIKE 'rp-_';
 
+-- Each row's id: identical in both runs (the batch's reservation is rolled back with it).
+CREATE TEMP VIEW rp_ids AS
+SELECT pg_temp.rp_post(hp.id) AS post, hp.id, hp.block_num_created
+FROM hivemind_app.hive_posts hp
+JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+WHERE ha.name LIKE 'rp-_';
+
 CREATE TEMP TABLE rp_results (block_num INT, post_id INT, is_new_post BOOLEAN, parent_id INT, depth SMALLINT);
 -- Named in a later statement than the one inserting them: rp_post would not see the rows yet.
 CREATE TEMP VIEW rp_named_results AS
@@ -120,14 +128,16 @@ SELECT r.block_num, r.post_id, r.is_new_post, r.parent_id, r.depth
 FROM hivemind_app.process_posts_from_staging(2147483647) r;
 
 SELECT (SELECT jsonb_agg(to_jsonb(s) ORDER BY s.post) FROM rp_state s) AS massive_state,
-  (SELECT jsonb_agg(to_jsonb(r) ORDER BY r.block_num, r.post) FROM rp_named_results r) AS massive_results
+  (SELECT jsonb_agg(to_jsonb(r) ORDER BY r.block_num, r.post) FROM rp_named_results r) AS massive_results,
+  (SELECT jsonb_agg(to_jsonb(i) ORDER BY i.id) FROM rp_ids i) AS massive_ids
 \gset
 
 ROLLBACK TO SAVEPOINT massive;
 
 -- psql does not substitute variables inside the DO body
 SELECT set_config('rp.massive_state', :'massive_state', true),
-  set_config('rp.massive_results', :'massive_results', true) \gset ignored_
+  set_config('rp.massive_results', :'massive_results', true),
+  set_config('rp.massive_ids', :'massive_ids', true) \gset ignored_
 
 DO $$
 DECLARE
@@ -136,6 +146,8 @@ DECLARE
   _live_results JSONB;
   _massive_state JSONB := current_setting('rp.massive_state')::JSONB;
   _massive_results JSONB := current_setting('rp.massive_results')::JSONB;
+  _massive_ids JSONB := current_setting('rp.massive_ids')::JSONB;
+  _live_ids JSONB;
   _expected JSONB;
   _orphans TEXT;
 BEGIN
@@ -149,6 +161,7 @@ BEGIN
   END LOOP;
   SELECT jsonb_agg(to_jsonb(s) ORDER BY s.post) INTO _live_state FROM rp_state s;
   SELECT jsonb_agg(to_jsonb(r) ORDER BY r.block_num, r.post) INTO _live_results FROM rp_named_results r;
+  SELECT jsonb_agg(to_jsonb(i) ORDER BY i.id) INTO _live_ids FROM rp_ids i;
 
   -- post, counter_deleted, depth, parent, root, block_num (the delete's for a deleted row)
   SELECT jsonb_agg(jsonb_build_object('post', e.post, 'counter_deleted', e.counter_deleted,
@@ -195,6 +208,20 @@ BEGIN
        WHERE NOT r.is_new_post OR r.post NOT LIKE '%@' || r.block_num
      ) THEN
     RAISE EXCEPTION 'expected one new-post result per comment op, for the row it created: %', _live_results;
+  END IF;
+
+  IF _massive_ids IS DISTINCT FROM _live_ids THEN
+    RAISE EXCEPTION E'one-batch post ids differ from block-by-block ones:\n%', pg_temp.rp_diff(_massive_ids, _live_ids);
+  END IF;
+  -- one comment op per block: id order is block order
+  IF EXISTS (
+    SELECT 1 FROM (
+      SELECT i.block_num_created, lag(i.block_num_created) OVER (ORDER BY i.id) AS prev_block
+      FROM jsonb_to_recordset(_live_ids) i (id INT, block_num_created INT)
+    ) o
+    WHERE o.block_num_created <= o.prev_block
+  ) THEN
+    RAISE EXCEPTION 'post ids are not in the order of the ops that created them: %', _live_ids;
   END IF;
 
   -- The issue's detection query, on this batch's rows.

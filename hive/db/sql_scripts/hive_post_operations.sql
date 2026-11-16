@@ -119,7 +119,9 @@ CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
     in _date hivemind_app.hive_posts.created_at%TYPE,
     in _community_support_start_block hivemind_app.hive_posts.block_num%TYPE,
     in _block_num hivemind_app.hive_posts.block_num%TYPE,
-    in _metadata_tags VARCHAR[])
+    in _metadata_tags VARCHAR[],
+    -- the id of a post the op inserts; NULL: the next one of hive_posts_id_seq
+    in _id hivemind_app.hive_posts.id%TYPE DEFAULT NULL)
     RETURNS TABLE (is_new_post boolean, id hivemind_app.hive_posts.id%TYPE, author_id hivemind_app.hive_posts.author_id%TYPE, permlink_id hivemind_app.hive_posts.permlink_id%TYPE,
                    post_category hivemind_app.hive_category_data.category%TYPE, parent_id hivemind_app.hive_posts.parent_id%TYPE, parent_author_id hivemind_app.hive_posts.author_id%TYPE, community_id hivemind_app.hive_posts.community_id%TYPE,
                    is_valid hivemind_app.hive_posts.is_valid%TYPE, is_post_muted hivemind_app.hive_posts.is_muted%TYPE, depth hivemind_app.hive_posts.depth%TYPE, muted_reasons hivemind_app.hive_posts.muted_reasons%TYPE)
@@ -191,10 +193,11 @@ BEGIN
         ),
         inserted AS (
         INSERT INTO hivemind_app.hive_posts as hp
-            (parent_id, depth, community_id, category_id,
+            (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
           SELECT
+            COALESCE(_id, nextval('hivemind_app.hive_posts_id_seq')::INTEGER),
             s.parent_id,
             s.depth,
             s.community_id,
@@ -282,11 +285,11 @@ BEGIN
                          WHERE ha.name = _author and hpd.permlink = _permlink
                      ) s
             ), -- posts_data_to_insert
-                -- A root post is its own root: take its id from the sequence here, as
-                -- the column default would (once per row, edits included), so root_id
-                -- can be set in the same INSERT.
+                -- A root post is its own root: take its id here (_id, else from the
+                -- sequence as the column default would, once per row, edits included),
+                -- so root_id can be set in the same INSERT.
                 new_post_id AS MATERIALIZED (
-                    SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id
+                    SELECT COALESCE(_id, nextval('hivemind_app.hive_posts_id_seq')::INTEGER) AS id
                     FROM posts_data_to_insert
                 ),
                 inserted_post AS MATERIALIZED (
@@ -429,10 +432,13 @@ $function$;
 --- Set-based batch functions for root posts, comments, and tags.
 --- These replace the FOREACH loop in process_hive_post_operations_batch
 --- with true set operations for better performance during massive sync.
+--- A post an op inserts takes the id _id_base + the op's seq_id (reserve_post_ids);
+--- an op that edits a post draws none.
 
 DROP FUNCTION IF EXISTS hivemind_app.process_root_posts_batch;
 CREATE OR REPLACE FUNCTION hivemind_app.process_root_posts_batch(
-    _ops hivemind_app.hive_post_op_input[]
+    _ops hivemind_app.hive_post_op_input[],
+    _id_base INTEGER
 )
 RETURNS SETOF hivemind_app.hive_post_op_result
 LANGUAGE plpgsql
@@ -507,26 +513,19 @@ BEGIN
     END IF;
 
     RETURN QUERY
-    WITH new_posts AS MATERIALIZED (
-        -- A root post is its own root: take its id from the sequence here, in
-        -- seq_id order and once per row (edits included) as the column default
-        -- would, so root_id can be set in the same INSERT.
-        SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id, pb.*
-        FROM (SELECT * FROM hivemind_app._post_batch ORDER BY seq_id) pb
-    ),
-    inserted AS (
+    WITH inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
             (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
              active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
         SELECT
-            wm.id,
+            _id_base + wm.seq_id,
             0, -- parent_id
             0, -- depth
             wm.community_id,
             wm.category_id,
-            wm.id, -- root_id
+            _id_base + wm.seq_id, -- root_id: a root post is its own root
             wm.is_muted,
             TRUE, -- is_valid
             wm.author_id,
@@ -542,7 +541,7 @@ BEGIN
             wm.block_num,
             wm.block_num, -- block_num_created
             wm.muted_reasons
-        FROM new_posts wm
+        FROM hivemind_app._post_batch wm
         ORDER BY wm.seq_id
         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
             updated_at = EXCLUDED.updated_at,
@@ -651,7 +650,8 @@ $function$;
 --- filters them out), allowing wave-based resolution from the Python caller.
 DROP FUNCTION IF EXISTS hivemind_app.process_comments_batch;
 CREATE OR REPLACE FUNCTION hivemind_app.process_comments_batch(
-    _ops hivemind_app.hive_post_op_input[]
+    _ops hivemind_app.hive_post_op_input[],
+    _id_base INTEGER
 )
 RETURNS SETOF hivemind_app.hive_post_op_result
 LANGUAGE plpgsql
@@ -758,11 +758,12 @@ BEGIN
     RETURN QUERY
     WITH inserted AS (
         INSERT INTO hivemind_app.hive_posts AS hp
-            (parent_id, depth, community_id, category_id,
+            (id, parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
              active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
         SELECT
+            _id_base + wm.seq_id,
             wm.parent_id,
             wm.depth::SMALLINT,
             wm.community_id,
@@ -858,7 +859,7 @@ BEGIN
       -- (a deleted version's block_num is the block that deleted it), and an account
       -- exists by then when created by that block's ops (an account's created_at and a
       -- comment op's date are both the date of the block before theirs).
-      snapshot_mentions AS MATERIALIZED
+      snapshot_mentions_all AS MATERIALIZED
           (
           SELECT DISTINCT sn.post_id, sn.idx, sn.last_idx, sn.block_num, hp.author_id, ha.id AS account_id
           FROM snapshots sn
@@ -871,12 +872,20 @@ BEGIN
             AND ha.created_at <= op_block.created_at
             AND ha.id != hp.author_id
           ),
+      -- A notification's counter numbers it among all mentions of its block, as the
+      -- block's own call numbers them, also those a later block of the batch drops.
+      snapshot_mentions AS MATERIALIZED
+          (
+          SELECT sm.*,
+                 (ROW_NUMBER() OVER (PARTITION BY sm.block_num ORDER BY sm.account_id, sm.post_id))::INTEGER AS counter
+          FROM snapshot_mentions_all sm
+          ),
       -- The snapshots of a mention's last unbroken run, up to the post's last snapshot:
       -- their notifications and the run's hive_mentions row outlast the batch. A mention
       -- in every snapshot (run_start = 1) also keeps what earlier batches left.
       final_runs AS MATERIALIZED
           (
-          SELECT r.post_id, r.author_id, r.account_id, r.block_num, r.block_num - 1 AS prev_block,
+          SELECT r.post_id, r.author_id, r.account_id, r.block_num, r.block_num - 1 AS prev_block, r.counter,
                  min(r.idx) OVER (PARTITION BY r.post_id, r.account_id) AS run_start,
                  min(r.block_num) OVER (PARTITION BY r.post_id, r.account_id) AS run_block
           FROM (
@@ -929,8 +938,7 @@ BEGIN
           mentions_data AS (
               SELECT
                   hm.*,
-                  hb.created_at AS created_at,
-                  (ROW_NUMBER() OVER(PARTITION BY hm.block_num ORDER BY hm.account_id, hm.post_id))::INTEGER AS counter
+                  hb.created_at AS created_at
               FROM final_runs hm
               JOIN hivemind_app.blocks_view AS hb ON hb.num = hm.prev_block
               )
@@ -952,13 +960,17 @@ BEGIN
               LEFT JOIN hivemind_app.muted AS m ON m.follower = hm.account_id AND m.following = hm.author_id
               LEFT JOIN hivemind_app.follow_muted AS fm ON fm.follower = hm.account_id
               LEFT JOIN hivemind_app.muted AS mi ON mi.follower = fm.following AND mi.following = hm.author_id
+              -- mutes filter each notification as they stood at the end of its block (notification_muted_at)
+              LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) AS mcd ON mcd.follower = hm.account_id
+              LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) AS mcs ON mcs.following = hm.author_id
               WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
                 AND (SELECT count(*) FROM insert_mentions) >= 0 -- force evaluation, once
                 AND (SELECT count(*) FROM delete_old_cache) >= 0 -- force evaluation, once
                 AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(hivemind_app.reputation_score(a.haf_id), 25) > 0)
                 AND hm.author_id IS DISTINCT FROM hm.account_id
-                AND m.follower IS NULL
-                AND mi.following IS NULL
+                AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
+                         THEN NOT hivemind_app.notification_muted_at(hm.account_id, hm.author_id, hm.block_num)
+                         ELSE m.follower IS NULL AND mi.following IS NULL END
               ORDER BY hm.block_num, created_at, hm.author_id, hm.account_id
               ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
               RETURNING id;

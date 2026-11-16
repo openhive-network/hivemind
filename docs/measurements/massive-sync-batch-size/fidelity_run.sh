@@ -51,7 +51,7 @@ t1=$(date +%s)
 echo "label=$label src=$src limit=$limit max=$max kill_at=$kill_at rc=$rc wall_s=$((t1-t0))" > $out/result
 docker cp fidelity_dump.sql $pg:/tmp/dump.sql
 docker exec -w /tmp $pg bash -c "psql -h 127.0.0.1 -U haf_admin -d haf_block_log -XAtq -F '	' -f /tmp/dump.sql" >> $out/result 2>&1
-for f in posts votes notifs mentions postdata counts; do docker cp $pg:/tmp/$f.txt $out/$f.txt; done
+for f in posts votes notifs mentions postdata post_ids notif_ids counts; do docker cp $pg:/tmp/$f.txt $out/$f.txt; done
 bash pg.sh stop $pg
 sudo zfs destroy -r $ds
 echo "RUN_DONE $label rc=$rc"

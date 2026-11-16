@@ -62,7 +62,8 @@ where one block at a time sees them at the end of the notification's block. For 
 msjennifer at block 3,588,549, unmuted at 3,589,010, muted at 3,590,194 and unmuted at 3,599,455: the replies
 at 3,588,541 and 3,590,190 get notifications from one-block processing and the 10000-block batch, and none
 from the 1000-block batch, which ends while the mute holds. Fixing it means recording each batch's mute
-history in the follow processing that live sync shares; #477 leaves it.
+history in the follow processing that live sync shares; #477 leaves it ([#482](#mutes-ids-and-reblogs-482)
+fixes it; one of the rows is a reblog fold, not a mute).
 
 ## Tavern patterns
 
@@ -75,7 +76,7 @@ one 1000-block batch); dantheman's reply to calaber24p keeps the `total_vote_wei
 (a comment reward in the same 1000-block batch had discarded it). The other differences are mention duplicates
 per edit block, unread counts that follow from them, payout totals, and lists ordered by post or notification
 id: inside a batch, root posts take ids before comments and re-created posts after both, so id order still
-follows batch boundaries (#470's base fixture differed from the patterns in those lists too).
+follows batch boundaries (#470's base fixture differed from the patterns in those lists too; #482 removes it).
 
 ## Cost
 
@@ -95,3 +96,67 @@ follows: at 10000 blocks the parallel phase's sum did not change, at 1000 it gre
 of the authors' reputations back to the rows; on a 1-row estimate it was rescanned per row (12.6 s for 3,386
 mentions in one batch, flush 701 s in all). The reputation is now looked up per row, as
 `flush_post_notifications_for_blocks` does.
+
+## Mutes, ids and reblogs (#482)
+
+#477 left two dependences on the batch size, and the 52/65 notification rows it attributed to mutes held a third.
+
+| | one block at a time | the batch SQL now |
+|---|---|---|
+| post ids | (a one-block batch drew them roots first, then comment waves, then re-creates, and an edit drew an id through `ON CONFLICT`) | each comment op of a batch owns one id, reserved in operation order (`reserve_post_ids`): the op ranked k among the batch's comment ops owns base + k, whether it inserts a post or not. A post's id is its op's rank among the chain's comment ops at any batch size; live sync runs the same function per block. The base is `_post_id_slots` (LOGGED), updated in the posts phase's transaction, so a replay of a batch whose posts phase rolled back reserves the same ids |
+| reply (12/13) notification ids | counter: the post's rank among the block's new comments by id | the same; it follows the ids |
+| muted-post error (10) ids | counter: the op's `seq_id`, its rank among the block's comment ops | the op's rank among its block's comment ops (was its `seq_id` in the batch) |
+| mention (16) ids | counter: rank among the block's mentions by (account, post) | ranked among all the block's mention snapshots, also those a later block of the batch drops (was: among the final runs only) |
+| vote (17) ids | counter: rank by `hive_votes.id` in the vote's last block | `hive_votes` ids are drawn in (first block, voter, author, permlink) order, so any two rows' ids are in the same order at any batch size (their gaps still differ) |
+| mute filter | `muted`/`follow_muted` at the end of the notification's block | `process_follows_for_blocks` records the batch's changes of both lists in `_batch_mute_changes` (LOGGED): per pair on a list at some point, its state before the phase and after each change, a reset as a change of every pair the phase knows of. The reply, reblog, follow and mention writers keep their joins unless the batch changed a list their filter reads for that pair; then `notification_muted_at` applies the same filter to the lists at the end of the notification's block. `_batch_queue.follows_applied` commits with the follows phase, and a replay after it keeps the recorded changes |
+| repeated reblog | the first reblog inserts the row (and its notification); a later one finds it | the row comes from the first reblog after the batch's last unreblog (was: the batch's last reblog). jamesc reblogged dantheman's why-do-we-fight-to-change-the-world at 4,594,648 and again at 4,596,441: the 10000-block batch dated the row and its notification at 4,596,441 |
+
+Same fixture and scripts as above, in `/scratch/hm482` on steem-4 (`fidelity_run.sh` and
+`fidelity_one_block.sh` with `hm477` paths renamed, every run a clone of `scratch/hm477-base@installed`).
+`fidelity_dump.sql` now also dumps the ids as drawn (`post_ids.txt`: id, natural key, parent and root ids;
+`notif_ids.txt`: every notification row with its id and post ids).
+
+| compared | posts, votes, mentions, post data | notifications | post ids | notification ids |
+|---|---|---|---|---|
+| base 1000 / base 10000 | identical | 52 / 65 rows (types 12–16) | 956,949 of 957,031 differ | 1,693,534 / 1,693,547 rows |
+| base 10000 / #482 10000 | identical | 65 / 87 rows: the mute filter (types 12, 13, 15, 16) and the reblog row (14) | 957,017 differ | (follow the post ids) |
+| #482 1000 / #482 10000 | identical | identical | identical | identical |
+| #482: 4,500,001–4,510,000 one block at a time / one batch | identical | identical | identical | identical |
+| #482 10000 / killed after batch 4,590,001–4,600,000's follows and posts phases committed, replayed | identical | identical | identical | identical |
+
+The one-block run is `fidelity_one_block.sh`: a 10000-block sync killed in batch 4,490,001–4,500,000 and
+restarted to 4,510,000 with `--max-batch=1` (10,450 batches), against the same restart at 10000. The crash run
+waited for `_batch_queue.follows_applied` and killed the sync with the post data flush and the notifications of
+that batch still to run. An earlier revision of this change (the same id and mute rules, the reblog fold not
+yet fixed) also gave identical data and ids after a kill before a batch's posts phase committed (4,710,001–4,720,000),
+and identical 1000/10000 runs but for the reblog row above.
+
+**Spot checks.** sokoloffa muted msjennifer at 3,588,549 and unmuted at 3,589,010: msjennifer's reply at
+3,588,994 has a notification in the base 10000 run (the batch ends unmuted) and in none of #482's runs. HAF's
+operations up to 4,990,000 hold the two jamesc reblogs of that post and no unreblog between them.
+
+**Not covered.** A reblog, unreblog and reblog of one post by one account inside a batch still gives one row
+and one notification (one block at a time: a notification for each reblog), and a reblog of a post deleted
+later in the batch resolves the post at the end of the batch; neither occurs in the 5M fixture. Vote
+notifications are written at finalization at any batch size, from the lists as they stand then.
+
+**Tavern** has not run on a fixture synced by this change: the shared fixture is seeded from a pushed commit,
+and the runs above have no mocks. The patterns that can move are those holding post or notification ids (few
+patterns show a post id; 29 notification patterns show notification ids), lists ordered or paged by them, and
+reblog dates; each is to be checked against one block at a time, as #477's refresh was.
+
+**Existing nodes** keep the ids their sync gave; the first batch after the upgrade reserves ids after the
+sequence's last value, so later posts sort after them. A rebuild gives every post its op's id.
+
+**Cost.** Massive phase sums over 0–4.99M, the runs sharing the host (advisory):
+
+| | base 1000 | #482 1000 | base 10000 | #482 10000 |
+|---|---|---|---|---|
+| all phases | 848 s | 855 s | 584 s | 581 s |
+| posts (reserving the ids) | 209 s | 210 s | 183 s | 180 s |
+| parallel (follows recording the mute changes) | 220 s | 224 s | 126 s | 125 s |
+| notify (the per-block mute filter) | 41 s | 46 s | 31 s | 34 s |
+
+A first version filtered each candidate notification through a SQL function holding
+subqueries, which PostgreSQL does not inline: about 10 µs a row, notify 39.5 s. The writers now join the
+accounts the batch's mute changes touch, and call `notification_muted_at` only for those rows.
