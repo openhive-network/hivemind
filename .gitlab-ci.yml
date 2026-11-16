@@ -833,6 +833,10 @@ sync:
 
     echo "Hivemind sync completed successfully"
 
+    # A sync from scratch leaves hive_votes in post order and vacuumed
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -X -v ON_ERROR_STOP=1 -U haf_admin -d haf_block_log \
+      < "${CI_PROJECT_DIR}/scripts/ci/check_votes_post_order.sql"
+
     # Extract version info from hivemind container
     docker compose -f "${COMPOSE_FILE}" run --rm --entrypoint /bin/bash hivemind-sync -c \
       "cat /home/hivemind/.hivemind-venv/lib/python*/site-packages/hive/_version.py" > version.log || true

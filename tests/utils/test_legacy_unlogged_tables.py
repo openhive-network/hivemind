@@ -45,7 +45,13 @@ def test_only_unlogged_tables_are_set_logged_referenced_ones_first() -> None:
 def test_index_restore_sets_legacy_unlogged_tables_logged() -> None:
     db, converted = _db(['hive_votes'])
     with (
-        patch.multiple(DbState, _indexes_were_enabled=False, _indexes_were_disabled=True, _deferred_index_tables=[]),
+        patch.multiple(
+            DbState,
+            _indexes_were_enabled=False,
+            _indexes_were_disabled=True,
+            _deferred_index_tables=[],
+            _initial_sync=False,
+        ),
         patch.object(DbState, 'db', staticmethod(lambda: db)),
         patch.object(DbState, '_restore_indexes_in_threads', staticmethod(lambda **kwargs: None)),
     ):
