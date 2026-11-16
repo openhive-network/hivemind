@@ -1,0 +1,10 @@
+--- a/hive/db/sql_scripts/massive_sync.sql
++++ b/hive/db/sql_scripts/massive_sync.sql
+@@ -107,6 +107,7 @@
+     parent_permlink  VARCHAR
+ );
+ CREATE INDEX _post_batch_author_permlink_idx ON hivemind_app._post_batch (author_id, permlink_id);
++ALTER TABLE hivemind_app._post_batch SET (autovacuum_enabled = false);
+ 
+ 
+ -- Persistent staging table for vote batch processing (avoids per-call CREATE TEMP TABLE overhead)

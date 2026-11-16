@@ -1,0 +1,30 @@
+## process_hive_post_op: median of 191 instances, 0.428 ms
+INSERT INTO hivemind_app._post_results
+                SELECT _rec.seq_id, op.id, op.is_new_post, op.author_id, op.permlink_id,
+                       op.depth, op.parent_id, op.parent_author_id, op.community_id,
+                       op.is_post_muted, op.muted_reasons, _rec.block_num, _rec.block_date, _rec.op_body
+                FROM hivemind_app.process_hive_post_operation(
+                    _rec.author, _rec.permlink,
+                    COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
+                    _rec.block_date, _community_support_start_block, _rec.block_num,
+                    '{}'::VARCHAR[]  -- tags handled separately in Step 7d
+                ) op
+
+ModifyTable on _post_results  (est rows=0) (actual time=0.428 rows=0.0 loops=1) hit=63 read=0 dirtied=0 wal=955B/11rec
+  -> Function Scan on process_hive_post_operation  (est rows=1000) (actual time=0.424 rows=1.0 loops=1) hit=60 read=0 dirtied=0 wal=955B/11rec
+
+## process_hive_post_op: slowest of 191 instances, 1.713 ms
+INSERT INTO hivemind_app._post_results
+                SELECT _rec.seq_id, op.id, op.is_new_post, op.author_id, op.permlink_id,
+                       op.depth, op.parent_id, op.parent_author_id, op.community_id,
+                       op.is_post_muted, op.muted_reasons, _rec.block_num, _rec.block_date, _rec.op_body
+                FROM hivemind_app.process_hive_post_operation(
+                    _rec.author, _rec.permlink,
+                    COALESCE(_rec.parent_author, ''), COALESCE(_rec.parent_permlink, ''),
+                    _rec.block_date, _community_support_start_block, _rec.block_num,
+                    '{}'::VARCHAR[]  -- tags handled separately in Step 7d
+                ) op
+
+ModifyTable on _post_results  (est rows=0) (actual time=1.713 rows=0.0 loops=1) hit=155 read=1 dirtied=1 wal=856B/10rec
+  -> Function Scan on process_hive_post_operation  (est rows=1000) (actual time=1.708 rows=1.0 loops=1) hit=152 read=1 dirtied=1 wal=856B/10rec
+

@@ -1,0 +1,83 @@
+## tags_5d: median of 98 instances, 117.121 ms
+SELECT hivemind_app.process_tags_batch(
+        ARRAY(
+            SELECT ROW(
+                base.post_id,
+                tags.tag_val::VARCHAR,
+                base.is_new_post
+            )::hivemind_app.post_tag_input
+            FROM (
+                SELECT pr.post_id, pr.is_new_post, cs.parent_permlink,
+                       hivemind_app.safe_parse_jsonb_tolerant(cs.op_body->>'json_metadata') AS parsed_md
+                FROM hivemind_app._comment_staging cs
+                JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+                WHERE cs.is_first
+                  AND (cs.parent_author IS NULL OR cs.parent_author = '')
+            ) base,
+            LATERAL (
+                SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
+                WHERE base.parsed_md IS NOT NULL
+                  AND base.parsed_md->'tags' IS NOT NULL
+                  AND jsonb_typeof(base.parsed_md->'tags') = 'array'
+                UNION ALL
+                SELECT base.parent_permlink
+            ) tags
+        )
+    )
+
+Result  (est rows=1) (actual time=117.120 rows=1.0 loops=1) hit=164570 read=8 dirtied=1734 wal=2909718B/44199rec
+  -> Nested Loop Inner  (est rows=37471) (actual time=37.571 rows=14896.0 loops=1) hit=27358 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=371) (actual time=4.660 rows=2805.0 loops=1) hit=19918 read=0 dirtied=0
+      -> Seq Scan on _comment_staging  (est rows=371) (actual time=1.140 rows=2805.0 loops=1) hit=3958 read=0 dirtied=0
+           Filter: (is_first AND ((parent_author IS NULL) OR (parent_author = ''::text)))
+           Rows Removed by Filter: 7538
+      -> Index Scan on _post_results using _post_results_seq_id_idx  (est rows=1) (actual time=0.001 rows=1.0 loops=2805) hit=15960 read=0 dirtied=0
+           Index Cond: (seq_id = cs.seq_id)
+    -> Append  (est rows=101) (actual time=0.011 rows=5.31 loops=2805) hit=7440 read=0 dirtied=0
+      -> ProjectSet  (est rows=100) (actual time=0.011 rows=4.31 loops=2805) hit=7440 read=0 dirtied=0
+        -> Result  (est rows=1) (actual time=0.008 rows=1.0 loops=2805) hit=5580 read=0 dirtied=0
+      -> Result  (est rows=1) (actual time=0.000 rows=1.0 loops=2805) hit=0 read=0 dirtied=0
+
+## tags_5d: slowest of 98 instances, 222.616 ms
+SELECT hivemind_app.process_tags_batch(
+        ARRAY(
+            SELECT ROW(
+                base.post_id,
+                tags.tag_val::VARCHAR,
+                base.is_new_post
+            )::hivemind_app.post_tag_input
+            FROM (
+                SELECT pr.post_id, pr.is_new_post, cs.parent_permlink,
+                       hivemind_app.safe_parse_jsonb_tolerant(cs.op_body->>'json_metadata') AS parsed_md
+                FROM hivemind_app._comment_staging cs
+                JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+                WHERE cs.is_first
+                  AND (cs.parent_author IS NULL OR cs.parent_author = '')
+            ) base,
+            LATERAL (
+                SELECT jsonb_array_elements_text(base.parsed_md->'tags') AS tag_val
+                WHERE base.parsed_md IS NOT NULL
+                  AND base.parsed_md->'tags' IS NOT NULL
+                  AND jsonb_typeof(base.parsed_md->'tags') = 'array'
+                UNION ALL
+                SELECT base.parent_permlink
+            ) tags
+        )
+    )
+
+Result  (est rows=1) (actual time=222.615 rows=1.0 loops=1) hit=137076 read=25 dirtied=141 wal=2594568B/38859rec
+  -> Nested Loop Inner  (est rows=166751) (actual time=153.911 rows=13321.0 loops=1) hit=15283 read=0 dirtied=0
+    -> Hash Join Inner  (est rows=1651) (actual time=3.286 rows=2582.0 loops=1) hit=8649 read=0 dirtied=0
+         Hash Cond: (pr.seq_id = cs.seq_id)
+      -> Seq Scan on _post_results  (est rows=7020) (actual time=1.206 rows=9425.0 loops=1) hit=4044 read=0 dirtied=0
+      -> Hash  (est rows=1651) (actual time=1.293 rows=2582.0 loops=1) hit=4605 read=0 dirtied=0
+           Hash Batches: 1
+           Peak Memory Usage: 2172
+        -> Seq Scan on _comment_staging  (est rows=1651) (actual time=1.028 rows=2582.0 loops=1) hit=4605 read=0 dirtied=0
+             Filter: (is_first AND ((parent_author IS NULL) OR (parent_author = ''::text)))
+             Rows Removed by Filter: 6845
+    -> Append  (est rows=101) (actual time=0.058 rows=5.16 loops=2582) hit=6634 read=0 dirtied=0
+      -> ProjectSet  (est rows=100) (actual time=0.057 rows=4.16 loops=2582) hit=6634 read=0 dirtied=0
+        -> Result  (est rows=1) (actual time=0.039 rows=0.99 loops=2582) hit=4977 read=0 dirtied=0
+      -> Result  (est rows=1) (actual time=0.000 rows=1.0 loops=2582) hit=0 read=0 dirtied=0
+

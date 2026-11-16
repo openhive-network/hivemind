@@ -1,0 +1,14 @@
+## delete_hive_post: median of 149 instances, 0.282 ms
+SELECT hivemind_app.delete_hive_post(
+                    _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
+                )
+
+Result  (est rows=1) (actual time=0.281 rows=1.0 loops=1) hit=65 read=0 dirtied=0 wal=790B/9rec
+
+## delete_hive_post: slowest of 149 instances, 1.029 ms
+SELECT hivemind_app.delete_hive_post(
+                    _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
+                )
+
+Result  (est rows=1) (actual time=1.028 rows=1.0 loops=1) hit=112 read=0 dirtied=0 wal=470B/4rec
+

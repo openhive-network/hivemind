@@ -1,0 +1,18 @@
+## ineff_keys: median of 98 instances, 0.004 ms
+SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
+                               FROM hivemind_app._ops_staging s
+    WHERE s.op_type_id = 73
+
+Aggregate  (est rows=1) (actual time=0.003 rows=1.0 loops=1) hit=2 read=0 dirtied=0
+  -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=1) (actual time=0.002 rows=0.0 loops=1) hit=2 read=0 dirtied=0
+       Index Cond: (op_type_id = 73)
+
+## ineff_keys: slowest of 98 instances, 0.012 ms
+SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
+                               FROM hivemind_app._ops_staging s
+    WHERE s.op_type_id = 73
+
+Aggregate  (est rows=1) (actual time=0.010 rows=1.0 loops=1) hit=3 read=0 dirtied=0
+  -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=1) (actual time=0.007 rows=0.0 loops=1) hit=3 read=0 dirtied=0
+       Index Cond: (op_type_id = 73)
+

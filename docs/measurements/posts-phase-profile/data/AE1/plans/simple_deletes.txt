@@ -1,0 +1,190 @@
+## simple_deletes: median of 98 instances, 1.113 ms
+WITH simple_delete_posts AS (
+        SELECT
+            hp.id AS post_id,
+            hp.author_id,
+            hp.permlink_id,
+            s.block_num,
+            s.block_date
+        FROM hivemind_app._ops_staging s
+        JOIN hivemind_app.hive_accounts ha ON ha.name = s.val->>'author'
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = s.val->>'permlink'
+        JOIN hivemind_app.hive_posts hp
+            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+        WHERE s.op_type_id = 17
+          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+          AND NOT EXISTS (
+              SELECT 1 FROM hivemind_app._replay_pairs rp
+              WHERE rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+          )
+    ),
+    updated_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET counter_deleted = (
+                SELECT MAX(hps.counter_deleted) + 1
+                FROM hivemind_app.hive_posts hps
+                WHERE hps.author_id = hp.author_id AND hps.permlink_id = hp.permlink_id
+            ),
+            block_num = sd.block_num,
+            active = sd.block_date
+        FROM simple_delete_posts sd
+        WHERE hp.id = sd.post_id
+        RETURNING sd.post_id, sd.author_id
+    ),
+    del_reblogs AS (
+        DELETE FROM hivemind_app.hive_reblogs
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    ),
+    del_feed_cache AS (
+        DELETE FROM hivemind_app.hive_feed_cache hfc
+        USING updated_posts u
+        WHERE hfc.post_id = u.post_id AND hfc.account_id = u.author_id
+        RETURNING hfc.post_id
+    ),
+    del_tags AS (
+        DELETE FROM hivemind_app.hive_post_tags
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    )
+    SELECT count(*)                    FROM updated_posts
+
+Aggregate  (est rows=1) (actual time=0.927 rows=1.0 loops=1) hit=1725 read=0 dirtied=2 wal=19049B/139rec
+  -> ModifyTable on hive_posts  (est rows=1) (actual time=0.919 rows=41.0 loops=1) hit=1725 read=0 dirtied=2 wal=19049B/139rec
+    -> Nested Loop Inner  (est rows=1) (actual time=0.707 rows=41.0 loops=1) hit=1247 read=0 dirtied=0 wal=390B/6rec
+      -> Nested Loop Inner  (est rows=1) (actual time=0.567 rows=41.0 loops=1) hit=816 read=0 dirtied=0 wal=390B/6rec
+        -> Nested Loop Inner  (est rows=31) (actual time=0.425 rows=41.0 loops=1) hit=601 read=0 dirtied=0 wal=148B/2rec
+          -> Nested Loop Inner  (est rows=31) (actual time=0.267 rows=41.0 loops=1) hit=396 read=0 dirtied=0 wal=148B/2rec
+            -> Nested Loop Anti  (est rows=31) (actual time=0.159 rows=41.0 loops=1) hit=232 read=0 dirtied=0
+              -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=41) (actual time=0.132 rows=41.0 loops=1) hit=191 read=0 dirtied=0
+                   Index Cond: (op_type_id = 17)
+              -> Index Scan on _replay_pairs using _replay_pairs_pkey  (est rows=1) (actual time=0.000 rows=0.0 loops=41) hit=41 read=0 dirtied=0
+                   Index Cond: ((author = (s.val ->> 'author'::text)) AND (permlink = (s.val ->> 'permlink'::text)))
+            -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=41) hit=164 read=0 dirtied=0 wal=148B/2rec
+                 Index Cond: ((name)::text = ((s.val ->> 'author'::text))::text)
+          -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.004 rows=1.0 loops=41) hit=205 read=0 dirtied=0
+               Index Cond: ((permlink)::text = ((s.val ->> 'permlink'::text))::text)
+        -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.003 rows=1.0 loops=41) hit=212 read=0 dirtied=0 wal=242B/4rec
+             Index Cond: ((author_id = ha.id) AND (permlink_id = hpd.id) AND (counter_deleted = 0))
+      -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.002 rows=1.0 loops=41) hit=212 read=0 dirtied=0
+           Index Cond: (id = hp_1.id)
+      -> Result  (est rows=1) (actual time=0.001 rows=1.0 loops=41) hit=216 read=0 dirtied=0
+        -> Limit  (est rows=1) (actual time=0.001 rows=1.0 loops=41) hit=216 read=0 dirtied=0
+          -> Index Only Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.001 rows=1.0 loops=41) hit=216 read=0 dirtied=0
+               Index Cond: ((author_id = hp.author_id) AND (permlink_id = hp.permlink_id))
+  -> ModifyTable on hive_reblogs  (est rows=7) (actual time=0.047 rows=0.0 loops=1) hit=123 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=7) (actual time=0.047 rows=0.0 loops=1) hit=123 read=0 dirtied=0
+      -> Aggregate  (est rows=1) (actual time=0.009 rows=41.0 loops=1) hit=0 read=0 dirtied=0
+           Peak Memory Usage: 32
+        -> CTE Scan on updated_posts  (est rows=1) (actual time=0.003 rows=41.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_reblogs using hive_reblogs_post_id  (est rows=7) (actual time=0.001 rows=0.0 loops=41) hit=123 read=0 dirtied=0
+           Index Cond: (post_id = updated_posts_1.post_id)
+  -> ModifyTable on hive_feed_cache  (est rows=1) (actual time=0.016 rows=0.0 loops=1) hit=82 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1) (actual time=0.015 rows=0.0 loops=1) hit=82 read=0 dirtied=0
+      -> CTE Scan on updated_posts  (est rows=1) (actual time=0.004 rows=41.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_feed_cache using hive_feed_cache_pk  (est rows=1) (actual time=0.000 rows=0.0 loops=41) hit=82 read=0 dirtied=0
+           Index Cond: ((account_id = u.author_id) AND (post_id = u.post_id))
+  -> ModifyTable on hive_post_tags  (est rows=5) (actual time=0.121 rows=69.0 loops=1) hit=333 read=0 dirtied=0 wal=3798B/70rec
+    -> Nested Loop Inner  (est rows=5) (actual time=0.099 rows=69.0 loops=1) hit=193 read=0 dirtied=0 wal=56B/1rec
+      -> Aggregate  (est rows=1) (actual time=0.012 rows=41.0 loops=1) hit=0 read=0 dirtied=0
+           Peak Memory Usage: 32
+        -> CTE Scan on updated_posts  (est rows=1) (actual time=0.004 rows=41.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_post_tags using hive_post_tags_idx  (est rows=5) (actual time=0.002 rows=1.68 loops=41) hit=193 read=0 dirtied=0 wal=56B/1rec
+           Index Cond: (post_id = updated_posts_2.post_id)
+  -> CTE Scan on updated_posts  (est rows=1) (actual time=0.923 rows=41.0 loops=1) hit=1725 read=0 dirtied=2 wal=19049B/139rec
+
+## simple_deletes: slowest of 98 instances, 2.519 ms
+WITH simple_delete_posts AS (
+        SELECT
+            hp.id AS post_id,
+            hp.author_id,
+            hp.permlink_id,
+            s.block_num,
+            s.block_date
+        FROM hivemind_app._ops_staging s
+        JOIN hivemind_app.hive_accounts ha ON ha.name = s.val->>'author'
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = s.val->>'permlink'
+        JOIN hivemind_app.hive_posts hp
+            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+        WHERE s.op_type_id = 17
+          AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+          AND NOT EXISTS (
+              SELECT 1 FROM hivemind_app._replay_pairs rp
+              WHERE rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+          )
+    ),
+    updated_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET counter_deleted = (
+                SELECT MAX(hps.counter_deleted) + 1
+                FROM hivemind_app.hive_posts hps
+                WHERE hps.author_id = hp.author_id AND hps.permlink_id = hp.permlink_id
+            ),
+            block_num = sd.block_num,
+            active = sd.block_date
+        FROM simple_delete_posts sd
+        WHERE hp.id = sd.post_id
+        RETURNING sd.post_id, sd.author_id
+    ),
+    del_reblogs AS (
+        DELETE FROM hivemind_app.hive_reblogs
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    ),
+    del_feed_cache AS (
+        DELETE FROM hivemind_app.hive_feed_cache hfc
+        USING updated_posts u
+        WHERE hfc.post_id = u.post_id AND hfc.account_id = u.author_id
+        RETURNING hfc.post_id
+    ),
+    del_tags AS (
+        DELETE FROM hivemind_app.hive_post_tags
+        WHERE post_id IN (SELECT post_id FROM updated_posts)
+        RETURNING post_id
+    )
+    SELECT count(*)                    FROM updated_posts
+
+Aggregate  (est rows=1) (actual time=2.104 rows=1.0 loops=1) hit=4637 read=2 dirtied=2 wal=53526B/402rec
+  -> ModifyTable on hive_posts  (est rows=1) (actual time=2.084 rows=120.0 loops=1) hit=4637 read=2 dirtied=2 wal=53526B/402rec
+    -> Nested Loop Inner  (est rows=1) (actual time=1.667 rows=120.0 loops=1) hit=3261 read=2 dirtied=0 wal=1680B/28rec
+      -> Nested Loop Inner  (est rows=1) (actual time=1.262 rows=120.0 loops=1) hit=2005 read=2 dirtied=0 wal=1680B/28rec
+        -> Nested Loop Inner  (est rows=91) (actual time=0.933 rows=120.0 loops=1) hit=1398 read=2 dirtied=0
+          -> Nested Loop Inner  (est rows=91) (actual time=0.446 rows=120.0 loops=1) hit=800 read=0 dirtied=0
+            -> Nested Loop Anti  (est rows=91) (actual time=0.219 rows=120.0 loops=1) hit=320 read=0 dirtied=0
+              -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=121) (actual time=0.138 rows=121.0 loops=1) hit=198 read=0 dirtied=0
+                   Index Cond: (op_type_id = 17)
+              -> Index Scan on _replay_pairs using _replay_pairs_pkey  (est rows=1) (actual time=0.000 rows=0.01 loops=121) hit=122 read=0 dirtied=0
+                   Index Cond: ((author = (s.val ->> 'author'::text)) AND (permlink = (s.val ->> 'permlink'::text)))
+            -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=120) hit=480 read=0 dirtied=0
+                 Index Cond: ((name)::text = ((s.val ->> 'author'::text))::text)
+          -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.004 rows=1.0 loops=120) hit=598 read=2 dirtied=0
+               Index Cond: ((permlink)::text = ((s.val ->> 'permlink'::text))::text)
+        -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.003 rows=1.0 loops=120) hit=606 read=0 dirtied=0 wal=1680B/28rec
+             Index Cond: ((author_id = ha.id) AND (permlink_id = hpd.id) AND (counter_deleted = 0))
+      -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.002 rows=1.0 loops=120) hit=606 read=0 dirtied=0
+           Index Cond: (id = hp_1.id)
+      -> Result  (est rows=1) (actual time=0.001 rows=1.0 loops=120) hit=649 read=0 dirtied=0
+        -> Limit  (est rows=1) (actual time=0.001 rows=1.0 loops=120) hit=649 read=0 dirtied=0
+          -> Index Only Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.001 rows=1.0 loops=120) hit=649 read=0 dirtied=0
+               Index Cond: ((author_id = hp.author_id) AND (permlink_id = hp.permlink_id))
+  -> ModifyTable on hive_reblogs  (est rows=7) (actual time=0.159 rows=0.0 loops=1) hit=360 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=7) (actual time=0.159 rows=0.0 loops=1) hit=360 read=0 dirtied=0
+      -> Aggregate  (est rows=1) (actual time=0.025 rows=120.0 loops=1) hit=0 read=0 dirtied=0
+           Peak Memory Usage: 40
+        -> CTE Scan on updated_posts  (est rows=1) (actual time=0.008 rows=120.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_reblogs using hive_reblogs_post_id  (est rows=7) (actual time=0.001 rows=0.0 loops=120) hit=360 read=0 dirtied=0
+           Index Cond: (post_id = updated_posts_1.post_id)
+  -> ModifyTable on hive_feed_cache  (est rows=1) (actual time=0.042 rows=0.0 loops=1) hit=240 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1) (actual time=0.042 rows=0.0 loops=1) hit=240 read=0 dirtied=0
+      -> CTE Scan on updated_posts  (est rows=1) (actual time=0.009 rows=120.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_feed_cache using hive_feed_cache_pk  (est rows=1) (actual time=0.000 rows=0.0 loops=120) hit=240 read=0 dirtied=0
+           Index Cond: ((account_id = u.author_id) AND (post_id = u.post_id))
+  -> ModifyTable on hive_post_tags  (est rows=5) (actual time=0.212 rows=66.0 loops=1) hit=554 read=0 dirtied=0 wal=3564B/66rec
+    -> Nested Loop Inner  (est rows=5) (actual time=0.192 rows=66.0 loops=1) hit=422 read=0 dirtied=0
+      -> Aggregate  (est rows=1) (actual time=0.029 rows=120.0 loops=1) hit=0 read=0 dirtied=0
+           Peak Memory Usage: 40
+        -> CTE Scan on updated_posts  (est rows=1) (actual time=0.010 rows=120.0 loops=1) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_post_tags using hive_post_tags_idx  (est rows=5) (actual time=0.001 rows=0.55 loops=120) hit=422 read=0 dirtied=0
+           Index Cond: (post_id = updated_posts_2.post_id)
+  -> CTE Scan on updated_posts  (est rows=1) (actual time=2.097 rows=120.0 loops=1) hit=4637 read=2 dirtied=2 wal=53526B/402rec
+

@@ -1,0 +1,130 @@
+## step7e: median of 98 instances, 1.805 ms
+WITH updateprops_type_changes AS (
+        SELECT s.block_num, s.id AS staging_id,
+               hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->>'community' AS community_name
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 18
+          AND s.val->>'id' = 'community'
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->>0 = 'updateProps'
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->'props'->>'type_id' IS NOT NULL
+    ),
+    posts_before_updateprops AS (
+        SELECT pr.post_id
+        FROM updateprops_type_changes utc
+        JOIN hivemind_app.hive_communities hc ON hc.name = utc.community_name
+        JOIN hivemind_app._comment_staging cs ON cs.block_num = utc.block_num
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+        WHERE cs.staging_id < utc.staging_id
+          AND pr.is_new_post
+          AND pr.community_id = hc.id
+          AND pr.muted_reasons != 0
+    ),
+    unmuted_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET is_muted = FALSE, muted_reasons = 0
+        FROM posts_before_updateprops pbu
+        WHERE hp.id = pbu.post_id
+        RETURNING hp.id
+    )
+    UPDATE hivemind_app._post_results pr
+    SET is_post_muted = FALSE, muted_reasons = 0
+    FROM unmuted_posts u
+    WHERE pr.post_id = u.id
+
+ModifyTable on _post_results  (est rows=0) (actual time=1.804 rows=0.0 loops=1) hit=3020 read=0 dirtied=0
+  -> ModifyTable on hive_posts  (est rows=1) (actual time=1.767 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1) (actual time=1.767 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+         Join Filter: ((hc.name)::text = (((hivemind_app.safe_parse_jsonb_tolerant((s.val ->> 'json'::text)) -> 1) ->> 'community'::text))::text)
+         Rows Removed by Join Filter: 0
+      -> Nested Loop Inner  (est rows=1) (actual time=1.767 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+        -> Nested Loop Inner  (est rows=1) (actual time=1.766 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+          -> Hash Join Inner  (est rows=1) (actual time=1.766 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+               Hash Cond: (cs.seq_id = pr_1.seq_id)
+            -> Seq Scan on _comment_staging  (est rows=33550) (actual time=0.004 rows=1.0 loops=1) hit=17 read=0 dirtied=0
+            -> Hash  (est rows=1) (actual time=1.762 rows=0.0 loops=1) hit=2928 read=0 dirtied=0
+                 Hash Batches: 1
+                 Peak Memory Usage: 8
+              -> Seq Scan on _post_results  (est rows=1) (actual time=1.762 rows=0.0 loops=1) hit=2928 read=0 dirtied=0
+                   Filter: (is_new_post AND (muted_reasons <> 0))
+                   Rows Removed by Filter: 7529
+          -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+               Index Cond: (id = pr_1.post_id)
+        -> Index Scan on _ops_staging using _ops_staging_block_num_id_idx  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+             Index Cond: ((block_num = cs.block_num) AND (id > cs.staging_id))
+             Filter: ((op_type_id = 18) AND ((val ->> 'id'::text) = 'community'::text) AND ((hivemind_app.safe_parse_jsonb_tolerant((val ->> 'json'::text)) ->> 0) = 'updateProps'::text) AND ((((hivemind_app.safe_parse_jsonb_tolerant((val ->> 'json'::text)) -> 1) -> 'props'::text) ->> 'type_id'::text) IS NOT NULL))
+             Rows Removed by Filter: 0
+      -> Index Scan on hive_communities using hive_communities_pkey  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+           Index Cond: (id = pr_1.community_id)
+  -> Hash Join Inner  (est rows=1) (actual time=1.803 rows=0.0 loops=1) hit=3020 read=0 dirtied=0
+       Hash Cond: (pr.post_id = u.id)
+    -> Seq Scan on _post_results  (est rows=35136) (actual time=0.036 rows=1.0 loops=1) hit=75 read=0 dirtied=0
+    -> Hash  (est rows=1) (actual time=1.767 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 8
+      -> CTE Scan on unmuted_posts  (est rows=1) (actual time=1.767 rows=0.0 loops=1) hit=2945 read=0 dirtied=0
+
+## step7e: slowest of 98 instances, 4.524 ms
+WITH updateprops_type_changes AS (
+        SELECT s.block_num, s.id AS staging_id,
+               hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->>'community' AS community_name
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id = 18
+          AND s.val->>'id' = 'community'
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->>0 = 'updateProps'
+          AND hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json')->1->'props'->>'type_id' IS NOT NULL
+    ),
+    posts_before_updateprops AS (
+        SELECT pr.post_id
+        FROM updateprops_type_changes utc
+        JOIN hivemind_app.hive_communities hc ON hc.name = utc.community_name
+        JOIN hivemind_app._comment_staging cs ON cs.block_num = utc.block_num
+        JOIN hivemind_app._post_results pr ON pr.seq_id = cs.seq_id
+        WHERE cs.staging_id < utc.staging_id
+          AND pr.is_new_post
+          AND pr.community_id = hc.id
+          AND pr.muted_reasons != 0
+    ),
+    unmuted_posts AS (
+        UPDATE hivemind_app.hive_posts hp
+        SET is_muted = FALSE, muted_reasons = 0
+        FROM posts_before_updateprops pbu
+        WHERE hp.id = pbu.post_id
+        RETURNING hp.id
+    )
+    UPDATE hivemind_app._post_results pr
+    SET is_post_muted = FALSE, muted_reasons = 0
+    FROM unmuted_posts u
+    WHERE pr.post_id = u.id
+
+ModifyTable on _post_results  (est rows=0) (actual time=4.523 rows=0.0 loops=1) hit=15159 read=0 dirtied=0
+  -> ModifyTable on hive_posts  (est rows=1) (actual time=3.327 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+         Join Filter: ((hc.name)::text = (((hivemind_app.safe_parse_jsonb_tolerant((s.val ->> 'json'::text)) -> 1) ->> 'community'::text))::text)
+         Rows Removed by Join Filter: 0
+      -> Nested Loop Inner  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+        -> Nested Loop Inner  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+          -> Hash Join Inner  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+               Hash Cond: (cs.seq_id = pr_1.seq_id)
+            -> Seq Scan on _comment_staging  (est rows=79820) (actual time=1.202 rows=1.0 loops=1) hit=4088 read=0 dirtied=0
+            -> Hash  (est rows=1) (actual time=2.122 rows=0.0 loops=1) hit=6994 read=0 dirtied=0
+                 Hash Batches: 1
+                 Peak Memory Usage: 8
+              -> Seq Scan on _post_results  (est rows=1) (actual time=2.122 rows=0.0 loops=1) hit=6994 read=0 dirtied=0
+                   Filter: (is_new_post AND (muted_reasons <> 0))
+                   Rows Removed by Filter: 10240
+          -> Index Scan on hive_posts using hive_posts_pkey  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+               Index Cond: (id = pr_1.post_id)
+        -> Index Scan on _ops_staging using _ops_staging_block_num_id_idx  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+             Index Cond: ((block_num = cs.block_num) AND (id > cs.staging_id))
+             Filter: ((op_type_id = 18) AND ((val ->> 'id'::text) = 'community'::text) AND ((hivemind_app.safe_parse_jsonb_tolerant((val ->> 'json'::text)) ->> 0) = 'updateProps'::text) AND ((((hivemind_app.safe_parse_jsonb_tolerant((val ->> 'json'::text)) -> 1) -> 'props'::text) ->> 'type_id'::text) IS NOT NULL))
+             Rows Removed by Filter: 0
+      -> Index Scan on hive_communities using hive_communities_pkey  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+           Index Cond: (id = pr_1.community_id)
+  -> Hash Join Inner  (est rows=1) (actual time=4.522 rows=0.0 loops=1) hit=15159 read=0 dirtied=0
+       Hash Cond: (pr.post_id = u.id)
+    -> Seq Scan on _post_results  (est rows=83928) (actual time=1.194 rows=1.0 loops=1) hit=4077 read=0 dirtied=0
+    -> Hash  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 8
+      -> CTE Scan on unmuted_posts  (est rows=1) (actual time=3.326 rows=0.0 loops=1) hit=11082 read=0 dirtied=0
+

@@ -1,0 +1,50 @@
+## replay_pairs: median of 232 instances, 0.985 ms
+INSERT INTO hivemind_app._replay_pairs (author, permlink)
+        SELECT DISTINCT cs.op_body->>'parent_author', cs.op_body->>'parent_permlink'
+        FROM hivemind_app._comment_staging cs
+        WHERE cs.is_replayed AND cs.op_body->>'parent_author' != ''
+        ON CONFLICT (author, permlink) DO NOTHING
+
+ModifyTable on _replay_pairs  (est rows=0) (actual time=0.984 rows=0.0 loops=1) hit=5795 read=0 dirtied=0
+     Conflict Resolution: NOTHING
+     Conflict Arbiter Indexes: ['_replay_pairs_pkey']
+     Tuples Inserted: 0
+     Conflicting Tuples: 2
+  -> Subquery Scan  (est rows=4) (actual time=0.980 rows=2.0 loops=1) hit=5791 read=0 dirtied=0
+    -> Unique  (est rows=4) (actual time=0.980 rows=2.0 loops=1) hit=5791 read=0 dirtied=0
+      -> Sort  (est rows=4) (actual time=0.979 rows=2.0 loops=1) hit=5791 read=0 dirtied=0
+           Sort Method: quicksort
+        -> Seq Scan on _comment_staging  (est rows=4) (actual time=0.977 rows=2.0 loops=1) hit=5791 read=0 dirtied=0
+             Filter: (is_replayed AND ((op_body ->> 'parent_author'::text) <> ''::text))
+             Rows Removed by Filter: 8534
+
+## replay_pairs: slowest of 232 instances, 7.310 ms
+INSERT INTO hivemind_app._replay_pairs AS rp (author, permlink, replay_from)
+            SELECT cs.author, cs.permlink, min(cs.staging_id)
+            FROM hivemind_app._comment_staging cs
+            JOIN hivemind_app._replay_pairs parent
+                ON parent.author = cs.op_body->>'parent_author'
+               AND parent.permlink = cs.op_body->>'parent_permlink'
+            WHERE cs.staging_id > parent.replay_from
+            GROUP BY cs.author, cs.permlink
+            ON CONFLICT (author, permlink) DO UPDATE SET replay_from = EXCLUDED.replay_from
+            WHERE EXCLUDED.replay_from < rp.replay_from
+
+ModifyTable on _replay_pairs  (est rows=0) (actual time=7.310 rows=0.0 loops=1) hit=12211 read=0 dirtied=0
+     Conflict Resolution: UPDATE
+     Conflict Arbiter Indexes: ['_replay_pairs_pkey']
+     Tuples Inserted: 0
+     Conflicting Tuples: 0
+  -> Aggregate  (est rows=46) (actual time=7.309 rows=0.0 loops=1) hit=12211 read=0 dirtied=0
+    -> Sort  (est rows=46) (actual time=7.309 rows=0.0 loops=1) hit=12211 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Hash Join Inner  (est rows=46) (actual time=7.308 rows=0.0 loops=1) hit=12211 read=0 dirtied=0
+           Hash Cond: (((cs.op_body ->> 'parent_author'::text) = parent.author) AND ((cs.op_body ->> 'parent_permlink'::text) = parent.permlink))
+           Join Filter: (cs.staging_id > parent.replay_from)
+           Rows Removed by Join Filter: 0
+        -> Seq Scan on _comment_staging  (est rows=6830) (actual time=1.731 rows=10323.0 loops=1) hit=7774 read=0 dirtied=0
+        -> Hash  (est rows=810) (actual time=0.005 rows=1.0 loops=1) hit=1 read=0 dirtied=0
+             Hash Batches: 1
+             Peak Memory Usage: 9
+          -> Seq Scan on _replay_pairs  (est rows=810) (actual time=0.003 rows=1.0 loops=1) hit=1 read=0 dirtied=0
+

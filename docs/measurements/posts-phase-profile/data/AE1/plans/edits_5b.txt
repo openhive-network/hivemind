@@ -1,0 +1,53 @@
+## edits_5b: median of 98 instances, 4.269 ms
+INSERT INTO hivemind_app._post_results
+    SELECT cs.seq_id, pr_first.post_id, false, pr_first.author_id, pr_first.permlink_id,
+           pr_first.depth, pr_first.parent_id, pr_first.parent_author_id,
+           pr_first.community_id, pr_first.is_post_muted, pr_first.muted_reasons,
+           cs.block_num, cs.block_date, cs.op_body
+    FROM hivemind_app._comment_staging cs
+    JOIN hivemind_app._comment_staging cs_first
+        ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+    JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
+    WHERE NOT cs.is_first AND NOT cs.is_replayed
+
+ModifyTable on _post_results  (est rows=0) (actual time=4.268 rows=0.0 loops=1) hit=16608 read=0 dirtied=0
+  -> Nested Loop Inner  (est rows=1) (actual time=3.224 rows=691.0 loops=1) hit=13397 read=0 dirtied=0
+    -> Nested Loop Inner  (est rows=1) (actual time=2.555 rows=691.0 loops=1) hit=10633 read=0 dirtied=0
+      -> Seq Scan on _comment_staging  (est rows=764) (actual time=1.048 rows=691.0 loops=1) hit=5784 read=0 dirtied=0
+           Filter: ((NOT is_first) AND (NOT is_replayed))
+           Rows Removed by Filter: 7845
+      -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=1) (actual time=0.002 rows=1.0 loops=691) hit=4849 read=0 dirtied=0
+           Index Cond: ((author = cs.author) AND (permlink = cs.permlink))
+           Filter: is_first
+           Rows Removed by Filter: 2
+    -> Index Scan on _post_results using _post_results_seq_id_idx  (est rows=1) (actual time=0.001 rows=1.0 loops=691) hit=2764 read=0 dirtied=0
+         Index Cond: (seq_id = cs_first.seq_id)
+
+## edits_5b: slowest of 98 instances, 11.757 ms
+INSERT INTO hivemind_app._post_results
+    SELECT cs.seq_id, pr_first.post_id, false, pr_first.author_id, pr_first.permlink_id,
+           pr_first.depth, pr_first.parent_id, pr_first.parent_author_id,
+           pr_first.community_id, pr_first.is_post_muted, pr_first.muted_reasons,
+           cs.block_num, cs.block_date, cs.op_body
+    FROM hivemind_app._comment_staging cs
+    JOIN hivemind_app._comment_staging cs_first
+        ON cs_first.author = cs.author AND cs_first.permlink = cs.permlink AND cs_first.is_first
+    JOIN hivemind_app._post_results pr_first ON pr_first.seq_id = cs_first.seq_id
+    WHERE NOT cs.is_first AND NOT cs.is_replayed
+
+ModifyTable on _post_results  (est rows=0) (actual time=11.757 rows=0.0 loops=1) hit=53466 read=0 dirtied=151
+  -> Hash Join Inner  (est rows=17265) (actual time=9.580 rows=1016.0 loops=1) hit=48875 read=0 dirtied=0
+       Hash Cond: (cs_first.seq_id = pr_first.seq_id)
+    -> Merge Join Inner  (est rows=17265) (actual time=7.839 rows=1016.0 loops=1) hit=45493 read=0 dirtied=0
+         Merge Cond: ((cs.author = cs_first.author) AND (cs.permlink = cs_first.permlink))
+      -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=18582) (actual time=4.154 rows=1016.0 loops=1) hit=21514 read=0 dirtied=0
+           Filter: ((NOT is_first) AND (NOT is_replayed))
+           Rows Removed by Filter: 9327
+      -> Index Scan on _comment_staging using _comment_staging_author_permlink_idx  (est rows=37164) (actual time=3.039 rows=9694.0 loops=1) hit=23979 read=0 dirtied=0
+           Filter: is_first
+           Rows Removed by Filter: 2535
+    -> Hash  (est rows=19512) (actual time=1.591 rows=9327.0 loops=1) hit=3382 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 949
+      -> Seq Scan on _post_results  (est rows=19512) (actual time=0.921 rows=9327.0 loops=1) hit=3382 read=0 dirtied=0
+

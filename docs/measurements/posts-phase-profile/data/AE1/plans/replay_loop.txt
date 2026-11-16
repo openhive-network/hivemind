@@ -1,0 +1,62 @@
+## replay_loop: median of 69 instances, 1.840 ms
+SELECT cs.staging_id, cs.seq_id, 1 AS op_type_id, cs.author, cs.permlink,
+                   cs.op_body->>'parent_author' AS parent_author,
+                   cs.op_body->>'parent_permlink' AS parent_permlink,
+                   cs.block_num, cs.block_date, cs.op_body
+            FROM hivemind_app._comment_staging cs
+            WHERE cs.is_replayed
+            UNION ALL
+            SELECT s.id, NULL, 17, s.val->>'author', s.val->>'permlink', NULL, NULL,
+                   s.block_num, s.block_date, NULL
+            FROM hivemind_app._ops_staging s
+            JOIN hivemind_app._replay_pairs rp
+                ON rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+            WHERE s.op_type_id = 17
+              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            ORDER BY 1
+
+Sort  (est rows=13) (actual time=1.838 rows=9.0 loops=1) hit=4512 read=0 dirtied=0
+     Sort Method: quicksort
+  -> Append  (est rows=13) (actual time=1.833 rows=9.0 loops=1) hit=4512 read=0 dirtied=0
+    -> Seq Scan on _comment_staging  (est rows=12) (actual time=1.777 rows=6.0 loops=1) hit=4312 read=0 dirtied=0
+         Filter: is_replayed
+         Rows Removed by Filter: 8008
+    -> Nested Loop Inner  (est rows=1) (actual time=0.055 rows=3.0 loops=1) hit=200 read=0 dirtied=0
+      -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=40) (actual time=0.035 rows=42.0 loops=1) hit=155 read=0 dirtied=0
+           Index Cond: (op_type_id = 17)
+           Filter: ((((val ->> 'author'::text) || '/'::text) || (val ->> 'permlink'::text)) <> ALL ($4))
+           Rows Removed by Filter: 0
+      -> Index Only Scan on _replay_pairs using _replay_pairs_pkey  (est rows=1) (actual time=0.000 rows=0.07 loops=42) hit=45 read=0 dirtied=0
+           Index Cond: ((author = (s.val ->> 'author'::text)) AND (permlink = (s.val ->> 'permlink'::text)))
+
+## replay_loop: slowest of 69 instances, 4.376 ms
+SELECT cs.staging_id, cs.seq_id, 1 AS op_type_id, cs.author, cs.permlink,
+                   cs.op_body->>'parent_author' AS parent_author,
+                   cs.op_body->>'parent_permlink' AS parent_permlink,
+                   cs.block_num, cs.block_date, cs.op_body
+            FROM hivemind_app._comment_staging cs
+            WHERE cs.is_replayed
+            UNION ALL
+            SELECT s.id, NULL, 17, s.val->>'author', s.val->>'permlink', NULL, NULL,
+                   s.block_num, s.block_date, NULL
+            FROM hivemind_app._ops_staging s
+            JOIN hivemind_app._replay_pairs rp
+                ON rp.author = s.val->>'author' AND rp.permlink = s.val->>'permlink'
+            WHERE s.op_type_id = 17
+              AND NOT ((s.val->>'author') || '/' || (s.val->>'permlink') = ANY(_ineffective_keys))
+            ORDER BY 1
+
+Sort  (est rows=35) (actual time=4.375 rows=6.0 loops=1) hit=8061 read=0 dirtied=0
+     Sort Method: quicksort
+  -> Append  (est rows=35) (actual time=4.369 rows=6.0 loops=1) hit=8061 read=0 dirtied=0
+    -> Seq Scan on _comment_staging  (est rows=34) (actual time=4.288 rows=3.0 loops=1) hit=7786 read=0 dirtied=0
+         Filter: is_replayed
+         Rows Removed by Filter: 10320
+    -> Nested Loop Inner  (est rows=1) (actual time=0.081 rows=3.0 loops=1) hit=275 read=0 dirtied=0
+      -> Index Scan on _ops_staging using _ops_staging_op_type_id_idx  (est rows=67) (actual time=0.050 rows=70.0 loops=1) hit=202 read=0 dirtied=0
+           Index Cond: (op_type_id = 17)
+           Filter: ((((val ->> 'author'::text) || '/'::text) || (val ->> 'permlink'::text)) <> ALL ($4))
+           Rows Removed by Filter: 0
+      -> Index Only Scan on _replay_pairs using _replay_pairs_pkey  (est rows=1) (actual time=0.000 rows=0.04 loops=70) hit=73 read=0 dirtied=0
+           Index Cond: ((author = (s.val ->> 'author'::text)) AND (permlink = (s.val ->> 'permlink'::text)))
+

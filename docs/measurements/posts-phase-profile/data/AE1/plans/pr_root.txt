@@ -1,0 +1,66 @@
+## pr_root: median of 98 instances, 46.053 ms
+INSERT INTO hivemind_app._post_results
+    SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
+           br.depth, br.parent_id, br.parent_author_id, br.community_id,
+           br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
+    FROM hivemind_app.process_root_posts_batch(
+        ARRAY(
+            SELECT ROW(cs.seq_id, cs.author, cs.permlink,
+                       ''::VARCHAR, cs.parent_permlink,
+                       cs.block_date, _community_support_start_block,
+                       cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
+            FROM hivemind_app._comment_staging cs
+            WHERE cs.is_first AND NOT cs.is_replayed
+              AND (cs.parent_author IS NULL OR cs.parent_author = '')
+            ORDER BY cs.seq_id
+        )
+    ) br
+    JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id
+
+ModifyTable on _post_results  (est rows=0) (actual time=46.053 rows=0.0 loops=1) hit=95743 read=0 dirtied=321 wal=968527B/7690rec
+  -> Sort  (est rows=2583) (actual time=1.777 rows=2001.0 loops=1) hit=5784 read=0 dirtied=0
+       Sort Method: quicksort
+    -> Seq Scan on _comment_staging  (est rows=2583) (actual time=1.618 rows=2001.0 loops=1) hit=5784 read=0 dirtied=0
+         Filter: (is_first AND (NOT is_replayed) AND ((parent_author IS NULL) OR (parent_author = ''::text)))
+         Rows Removed by Filter: 6535
+  -> Hash Join Inner  (est rows=1000) (actual time=42.179 rows=2001.0 loops=1) hit=82794 read=0 dirtied=318 wal=968527B/7690rec
+       Hash Cond: (br.seq_id = cs.seq_id)
+    -> Function Scan on process_root_posts_batch  (est rows=1000) (actual time=38.999 rows=2001.0 loops=1) hit=77010 read=0 dirtied=318 wal=968527B/7690rec
+    -> Hash  (est rows=9233) (actual time=2.715 rows=8536.0 loops=1) hit=5784 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 5452
+      -> Seq Scan on _comment_staging  (est rows=9233) (actual time=1.212 rows=8536.0 loops=1) hit=5784 read=0 dirtied=0
+
+## pr_root: slowest of 98 instances, 592.359 ms
+INSERT INTO hivemind_app._post_results
+    SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
+           br.depth, br.parent_id, br.parent_author_id, br.community_id,
+           br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
+    FROM hivemind_app.process_root_posts_batch(
+        ARRAY(
+            SELECT ROW(cs.seq_id, cs.author, cs.permlink,
+                       ''::VARCHAR, cs.parent_permlink,
+                       cs.block_date, _community_support_start_block,
+                       cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
+            FROM hivemind_app._comment_staging cs
+            WHERE cs.is_first AND NOT cs.is_replayed
+              AND (cs.parent_author IS NULL OR cs.parent_author = '')
+            ORDER BY cs.seq_id
+        )
+    ) br
+    JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id
+
+ModifyTable on _post_results  (est rows=0) (actual time=592.359 rows=0.0 loops=1) hit=3932158 read=0 dirtied=33 wal=950964B/7682rec
+  -> Sort  (est rows=2304) (actual time=1.582 rows=1978.0 loops=1) hit=3122 read=0 dirtied=0
+       Sort Method: quicksort
+    -> Seq Scan on _comment_staging  (est rows=2304) (actual time=1.400 rows=1978.0 loops=1) hit=3122 read=0 dirtied=0
+         Filter: (is_first AND (NOT is_replayed) AND ((parent_author IS NULL) OR (parent_author = ''::text)))
+         Rows Removed by Filter: 6226
+  -> Hash Join Inner  (est rows=1000) (actual time=588.462 rows=1978.0 loops=1) hit=3919615 read=0 dirtied=30 wal=950964B/7682rec
+       Hash Cond: (br.seq_id = cs.seq_id)
+    -> Function Scan on process_root_posts_batch  (est rows=1000) (actual time=583.828 rows=1978.0 loops=1) hit=3916493 read=0 dirtied=30 wal=950964B/7682rec
+    -> Hash  (est rows=8391) (actual time=4.137 rows=8204.0 loops=1) hit=3122 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 5393
+      -> Seq Scan on _comment_staging  (est rows=8391) (actual time=2.673 rows=8204.0 loops=1) hit=3122 read=0 dirtied=0
+

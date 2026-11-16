@@ -1,0 +1,75 @@
+stats_reset
+2026-11-15 13:33:19.933754+00
+(1 row)
+rolname|count|round
+haf_admin|164|575343
+hafbe_owner|262|271106
+haf_stats_owner|211|247793
+reptracker_owner|102|241356
+l2_framework_owner|108|135146
+hivemind|3678|119015
+hivesense_owner|47|1685
+nfttracker_owner|110|160
+(8 rows)
+queryid|toplevel|calls|tot_s|ms_call|rows|shared_blks_hit|shared_blks_read|shared_blks_dirtied|shared_blks_written|wal_gb|read_s|q
+-2672549103217751920|t|33270|19937|599.25|85554389|85841288153|14476882|65758533|29395711|103.30|2841|SELECT * FROM hivemind_app.process_posts_from_staging($1)
+4199777024734733876|f|212520|9401|44.24|59472889|57973141543|1703822|11126725|7314720|31.50|356|INSERT INTO hivemind_app._post_results SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id, br.depth, br.parent_id, br.
+-4824059061888013806|t|133080|7902|59.38|133080|5625023108|20933312|82297111|9920300|144.74|4047|SELECT hivemind_app.upsert_votes_partition($1, $2)
+2773465427562801599|f|133080|7874|59.17|133080|5624018795|20933311|82296999|9920300|144.74|4047|WITH upserted AS ( INSERT INTO hivemind_app.hive_votes (id, post_id, voter_id, author_id, permlink_id, weight, rshares, vote_pe
+-9109756208343554394|f|212520|6777|31.89|59472889|54241899857|299669|4241560|1538651|30.94|102|WITH inserted AS ( INSERT INTO hivemind_app.hive_posts AS hp (parent_id, depth, community_id, category_id, root_id, is_muted, i
+-7000568356868084577|t|33270|6667|200.39|33270|4451573288|10175055|17505478|1856964|59.49|1779|SELECT hivemind_app.process_payouts_from_staging($1)
+-2865037525470201683|f|33270|6631|199.30|174146021|4447121387|10175055|17505162|1856964|59.49|1779|WITH payout_agg AS ( SELECT s.val->>$1 AS author, s.val->>$2 AS permlink, -- COMMENT_PAYOUT_UPDATE (type 61) - last 
+7867234873304801398|t|33270|6313|189.75|33270|4842349174|4638288|16639173|13877331|2.53|919|SELECT hivemind_app.prepare_votes_from_staging()
+2958098384286978276|t|33271|5002|150.34|33271|8202123380|64645401|54608538|54602306|0.18|1068|SELECT hivemind_app.load_ops_staging($1, $2)
+7670447586666107847|t|33270|4918|147.83|133285417|5133332711|13002586|21967901|2154429|48.55|1207|SELECT * FROM hivemind_app.process_follows_for_blocks($1, $2)
+4112868333043485164|f|33271|3621|108.82|1244780870|6463730379|64637767|54597400|54602059|0.00|1068|INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val) WITH block_dates AS ( -- Single scan of blocks_view; lag() gives 
+1854641522012005097|f|33270|3187|95.80|436091540|1836382925|6344|9435585|8543222|0.52|3|INSERT INTO hivemind_app._vote_batch WITH vote_ops AS ( -- Regular votes (type 0) SELECT s.id, s.block_num, 
+-498079077317533164|f|33270|2881|86.59|436053576|2154336266|4631935|7202895|5334109|2.01|916|WITH vote_target AS MATERIALIZED ( -- Many votes in a batch hit the same post: resolve each target post once. -- MATERIALIZED, or the planner jo
+-2764050830231949762|f|33270|2861|86.01|73754766|1687289225|10349496|26280683|2359448|32.81|1884|INSERT INTO hivemind_app.hive_permlink_data (permlink) SELECT DISTINCT p FROM ( SELECT permlink AS p FROM hivemind_app._comment_staging UNIO
+-2031556779011947151|f|33270|2842|85.42|19568119|19522071269|523034|8144993|5324374|9.85|116|INSERT INTO hivemind_app._post_results SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id, br.depth, br.parent_id, br.parent_a
+1073012052144380926|f|33270|2403|72.22|19568119|18889329557|514206|3144971|432376|9.76|115|WITH new_posts AS MATERIALIZED ( -- A root post is its own root: take its id from the sequence here, in -- seq_id order and once per row (edits 
+-3992624086261153813|t|33270|1698|51.04|33270|434425657|390853|1428114|399869|3.16|112|SELECT hivemind_app.process_reblogs_from_staging()
+6277690398199822094|f|212520|1642|7.73|59472889|1983304718|1403552|2356444|1247276|0.56|254|INSERT INTO hivemind_app._post_batch (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id, root_id, community_id, i
+2998746751961506262|f|33270|1522|45.74|33270|1590968649|1786280|6233288|870459|23.27|453|SELECT hivemind_app.process_tags_batch( ARRAY( SELECT ROW( base.post_id, tags.tag_val::VARCHAR, 
+6750278012876403170|f|33270|1354|40.69|7485240|159306838|0|125895|131534|0.00|0|INSERT INTO hivemind_app._reblog_ops WITH raw_ops AS ( SELECT s.id, s.block_num, s.block_date, s.val
+1859028643619916773|f|30768|1319|42.88|128105786|1227484519|4593780|10337444|1087002|25.94|781|CREATE TEMP TABLE _new_follows AS WITH ins AS ( INSERT INTO hivemind_app.follows (follower, following, block_num, follower_name) SELECT foll
+2586690555015883992|f|30768|1315|42.73|128105786|1226526738|4593780|10337408|1087002|25.94|781|CREATE TEMP TABLE _new_follows AS WITH ins AS ( INSERT INTO hivemind_app.follows (follower, following, block_num, follower_name) SELECT foll
+-5526559852507728726|f|73987|1306|17.65|69553085|1617212382|1815069|6357641|883777|24.61|465|WITH inputs AS ( SELECT t.post_id, t.is_new_post, CAST(LEFT(LOWER(REGEXP_REPLACE(t.raw_tag, $2, $3, $4)), $5) AS VARCHAR) AS tag FROM unnest(
+-3124689106828059249|f|30768|786|25.54|149100381|1857878087|30100|1138149|228|0.73|7|CREATE TEMP TABLE _final_actions AS WITH action_groups AS ( SELECT fa.*, CASE WHEN fa.action IN ($1 /*, ... */) TH
+8997043517372764169|f|30768|779|25.32|149100381|1857745405|30100|1138124|228|0.73|7|CREATE TEMP TABLE _final_actions AS WITH action_groups AS ( SELECT fa.*, CASE WHEN fa.action IN ($1 /*, ... */) TH
+-1699769229039655876|f|33271|611|18.37|85556796|656022824|3235|12340831|12347697|0.00|0|INSERT INTO hivemind_app._comment_staging (seq_id, staging_id, is_first, block_num, block_date, author, permlink, parent_author, parent_permlink, op_body) S
+-3651645246375998337|f|245790|574|2.33|245790|1215356999|0|0|0|0.00|0|SELECT count(*) FROM hivemind_app._comment_staging cs WHERE cs.is_first AND NOT cs.is_replayed AND cs.parent_author IS
+6118509141777271785|f|33271|513|15.41|1119924440|1356013894|0|4|0|0.00|0|DELETE FROM hivemind_app._ops_staging
+5317096506982572066|f|33270|507|15.24|163238840|196272620|5899337|0|67|0.00|36|SELECT ho.id AS op_id, ho.block_num, ho.body_value AS val FROM hivemind_app.operations_view ho WHERE ho.bloc
+-8620988700715083148|f|30768|476|15.46|83102253|758988889|23639|4804953|27038|13.62|3|WITH delta AS ( SELECT following AS account_id, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY following ), locked AS ( SELECT 
+-3317961923589224110|f|61536|452|7.35|20071602|148035235|2396965|2583888|158|1.53|370|CREATE TEMP TABLE _deleted_follows_ignore AS WITH del AS ( DELETE FROM hivemind_app.follows f USING _final_actions fa WHERE fa.actio
+907184751748435020|f|30768|427|13.87|19961308|141587463|2339446|2535076|68|1.39|352|CREATE TEMP TABLE _deleted_follows_unfollow AS WITH del AS ( DELETE FROM hivemind_app.follows f USING _final_actions fa WHERE fa.act
+-8261560828811542970|f|33270|324|9.75|33270|414733103|28767|124357|13309|1.34|12|SELECT hivemind_app.process_tags_batch( ARRAY( SELECT ROW( base.post_id, tags.tag_val::VARCHAR, 
+7901482557956814954|f|33271|312|9.38|5722|729962445|0|757|757|0.00|0|UPDATE hivemind_app._comment_staging cs SET parent_author = first_parent.parent_author, parent_permlink = first_parent.parent_permlink FROM ( 
+-7073598042804771106|f|33270|305|9.16|7462005|247350284|390851|1186605|147539|3.16|112|WITH deduped AS ( SELECT account, author, permlink, block_date, block_num FROM hivemind_app._reblog_final WHERE NOT is_delete ), 
+6927628978522079762|t|71|256|3606.52|0|27398294|29579906|11421645|9569103|1.39|142|VACUUM hivemind_app.hive_post_data
+-2698095971612175340|f|33271|242|7.27|33271|196214615|0|0|0|0.00|0|_delete_create_pairs := COALESCE(ARRAY( SELECT DISTINCT (s_del.val->>$5) || $6 || (s_del.val->>$7) FROM hivemind_app._ops_staging s_del 
+-2333841360104956053|t|33270|240|7.22|33270|143191949|0|0|0|0.00|0|SELECT hivemind_app.process_lastread_from_staging()
+-2749465197921197250|f|33270|230|6.92|0|143166437|0|0|0|0.00|0|WITH notify_ops AS ( SELECT s.id, s.block_num, s.block_date, s.val->$1->>$2 AS account, hive
+675313388758174151|f|33270|227|6.82|19568119|405449760|2274|385228|271177|0.09|1|INSERT INTO hivemind_app._post_batch (seq_id, author_id, permlink_id, category_id, community_id, is_muted, muted_reasons, date, block_num, pare
+1830772206144073503|f|33270|204|6.14|8968949|230815774|10412|240710|143990|3.01|2|WITH co_ops AS ( SELECT DISTINCT ON (s.val->>'author', s.val->>'permlink') s.id, s.val->>$1 AS author, s.val->>$2 AS
+-5259240130191564748|f|33270|127|3.82|392355117|431197965|0|0|0|0.00|0|DELETE FROM hivemind_app._vote_batch
+5762375613476230783|f|30768|115|3.75|19225029|171453196|8971|1169750|5637|3.20|1|WITH delta AS ( SELECT following AS account_id, count(*) AS cnt FROM _deleted_follows_unfollow GROUP BY following ), locked AS ( SELECT 
+-8184884618342052381|f|33270|94|2.83|359934|82402472|27897|149378|4876|0.12|6|INSERT INTO hivemind_app.hive_category_data (category) SELECT DISTINCT parent_permlink FROM hivemind_app._comment_staging WHERE parent_author IS NUL
+2130839072986867507|f|30768|93|3.01|10654651|125888802|5327|725839|4816|2.10|1|WITH delta AS ( SELECT follower AS account_id, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY follower ), locked AS ( SELECT ha
+-9150540826163744487|t|1684042|91|0.05|1684042|11756338|183187|176471|5|0.03|68|SELECT hpd.body FROM hivemind_app.hive_post_data hpd WHERE hpd.id = $1
+-9017286530543635146|f|155724618|80|0.00|155724618|0|0|0|0|0.00|0|INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq) VALUES (_follower_name, _following_name, _what_action, re
+5029234610581517234|f|33270|78|2.33|392321060|416559191|0|0|0|0.00|0|DELETE FROM hivemind_app._vote_upsert
+3434738800696084466|f|245790|77|0.31|79033696|142125933|0|0|0|0.00|0|DELETE FROM hivemind_app._post_batch
+-8128691597162512923|f|30768|76|2.47|48722|349466602|15229|14302|0|0.00|3|DELETE FROM hivemind_app.muted m USING _final_actions fa WHERE fa.action IN ($1 /*, ... */) AND m.follower = fa.follower_id AND m.following = fa.f
+-4210584832286568560|f|33270|74|2.23|4336349|229531899|14590|27882|10139|1.14|7|UPDATE hivemind_app.hive_posts hp SET updated_at = last_edit.block_date, block_num = last_edit.block_num FROM ( SELECT DISTINCT ON (pr.p
+-7966286181831187737|f|33270|71|2.12|85554389|449026304|0|0|0|0.00|0|SELECT * FROM hivemind_app._post_results ORDER BY seq_id
+3661168120051902644|f|33270|70|2.12|6491185|226595682|3|988110|988191|0.00|0|INSERT INTO hivemind_app._post_results SELECT cs.seq_id, pr_first.post_id, $1, pr_first.author_id, pr_first.permlink_id, pr_first.depth, pr_first
+-2593023199178863838|f|33271|67|2.02|76972572|143328405|0|1|0|0.00|0|DELETE FROM hivemind_app._comment_staging
+1926896801035244214|f|33270|67|2.01|0|84623553|0|0|0|0.00|0|WITH updateprops_type_changes AS ( SELECT s.block_num, s.id AS staging_id, hivemind_app.safe_parse_jsonb_tolerant(s.val->>$1)->$2->>$3 AS
+4606092208643798893|f|33271|61|1.82|76972572|138103401|0|1|0|0.00|0|DELETE FROM hivemind_app._post_results
+1294883233346382972|t|33271|59|1.79|33271|34026417|628|121061|7574|0.39|0|SELECT hivemind_app.process_accounts_from_staging($1)
+3267349952076378676|f|133285417|58|0.00|133285417|0|0|0|0|0.00|0|INSERT INTO _follow_notifications (follower_name, following_name, block_num, op_seq) VALUES (_follower_name, _following_name, rec.block_num,
+8953416996820964474|f|10185|56|5.47|4551|55604014|0|0|0|0.00|0|INSERT INTO hivemind_app._replay_pairs AS rp (author, permlink, replay_from) SELECT cs.author, cs.permlink, min(cs.staging_id) FROM hive
+7864434008575352345|f|26592289|55|0.00|26592289|0|0|0|0|0.00|0|REPLACE(REPLACE(REPLACE(REPLACE(REPLACE( _text, E'\b', '\b'), E'\f', '\f'), E'\n', '\n'), E'\r', '\r'), E'\t', '\t')::jsonb
+(60 rows)

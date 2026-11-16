@@ -1,0 +1,222 @@
+## pb_ins_comments: median of 996 instances, 0.089 ms
+INSERT INTO hivemind_app._post_batch
+        (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id,
+         root_id, community_id, is_valid, is_muted, muted_reasons, date, block_num, parent_permlink)
+    WITH ops AS (
+        SELECT t.seq_id, t.author, t.permlink, t.parent_author, t.parent_permlink,
+               t.date, t.community_support_start_block, t.block_num
+        FROM unnest(_ops) AS t
+    ),
+    resolved AS (
+        SELECT o.seq_id, o.date, o.block_num, o.community_support_start_block,
+               ha.id AS author_id,
+               hpd.id AS permlink_id,
+               php.id AS parent_id,
+               php.author_id AS parent_author_id,
+               php.depth + 1 AS depth,
+               COALESCE(php.category_id,
+                   (SELECT hcg.id FROM hivemind_app.hive_category_data hcg
+                    WHERE hcg.category = o.parent_permlink)) AS category_id,
+               CASE php.root_id WHEN 0 THEN php.id ELSE php.root_id END AS root_id,
+               php.is_valid AS is_valid,
+               php.community_id AS parent_community_id,
+               php.is_muted AS parent_is_muted,
+               o.parent_permlink
+        FROM ops o
+        INNER JOIN hivemind_app.hive_accounts ha ON ha.name = o.author
+        INNER JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = o.permlink
+        INNER JOIN hivemind_app.hive_accounts pha ON pha.name = o.parent_author
+        INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.permlink = o.parent_permlink
+        INNER JOIN hivemind_app.hive_posts php
+            ON php.author_id = pha.id AND php.permlink_id = phpd.id AND php.counter_deleted = 0
+    ),
+    with_community AS (
+        SELECT r.*,
+            CASE
+                WHEN r.block_num < r.community_support_start_block THEN NULL
+                ELSE r.parent_community_id
+            END AS community_id,
+            hc.type_id AS community_type_id,
+            hr.role_id AS role_id
+        FROM resolved r
+        LEFT JOIN hivemind_app.hive_communities hc
+            ON hc.id = r.parent_community_id AND r.block_num >= r.community_support_start_block
+        LEFT JOIN hivemind_app.hive_roles hr
+            ON hr.community_id = r.parent_community_id AND hr.account_id = r.author_id
+               AND r.block_num >= r.community_support_start_block
+    ),
+    with_muting AS (
+        SELECT wc.*,
+            CASE
+                --- If parent is muted, child is always muted
+                WHEN wc.parent_is_muted THEN TRUE
+                --- No community: not muted
+                WHEN wc.community_id IS NULL THEN FALSE
+                --- Topic communities: never muted
+                WHEN wc.community_type_id = __community_type_topic THEN FALSE
+                --- Journal communities: comments are never muted by community type
+                WHEN wc.community_type_id = __community_type_journal THEN FALSE
+                --- Council communities: members are not muted
+                WHEN wc.community_type_id = __community_type_council
+                     AND wc.role_id IS NOT NULL AND wc.role_id >= __member_role THEN FALSE
+                --- Council: non-members are muted
+                WHEN wc.community_type_id = __community_type_council THEN TRUE
+                ELSE FALSE
+            END AS is_muted,
+            hivemind_app.encode_bitwise_mask(
+                ARRAY_REMOVE(ARRAY[
+                    CASE
+                        WHEN wc.community_id IS NOT NULL
+                             AND wc.community_type_id = __community_type_council
+                             AND (wc.role_id IS NULL OR wc.role_id < __member_role)
+                        THEN 1 ELSE NULL
+                    END,
+                    CASE WHEN wc.parent_is_muted THEN 2 ELSE NULL END
+                ], NULL)
+            ) AS muted_reasons
+        FROM with_community wc
+    )
+    SELECT wm.seq_id, wm.author_id, wm.permlink_id, wm.parent_id, wm.parent_author_id, wm.depth,
+           wm.categor
+
+ModifyTable on _post_batch  (est rows=0) (actual time=0.089 rows=0.0 loops=1) hit=221 read=0 dirtied=0
+  -> CTE Scan on with_muting  (est rows=1) (actual time=0.082 rows=2.0 loops=1) hit=215 read=0 dirtied=0
+    -> Nested Loop Left  (est rows=1) (actual time=0.079 rows=2.0 loops=1) hit=215 read=0 dirtied=0
+         Join Filter: ((t.block_num >= t.community_support_start_block) AND (hr.account_id = ha.id))
+         Rows Removed by Join Filter: 0
+      -> Nested Loop Left  (est rows=1) (actual time=0.072 rows=2.0 loops=1) hit=215 read=0 dirtied=0
+           Join Filter: (t.block_num >= t.community_support_start_block)
+           Rows Removed by Join Filter: 0
+        -> Nested Loop Inner  (est rows=1) (actual time=0.071 rows=2.0 loops=1) hit=215 read=0 dirtied=0
+          -> Nested Loop Inner  (est rows=1) (actual time=0.066 rows=2.0 loops=1) hit=205 read=0 dirtied=0
+            -> Nested Loop Inner  (est rows=1) (actual time=0.063 rows=2.0 loops=1) hit=197 read=0 dirtied=0
+              -> Nested Loop Inner  (est rows=10) (actual time=0.044 rows=15.0 loops=1) hit=135 read=0 dirtied=0
+                -> Nested Loop Inner  (est rows=10) (actual time=0.023 rows=15.0 loops=1) hit=60 read=0 dirtied=0
+                  -> Function Scan on unnest  (est rows=10) (actual time=0.003 rows=15.0 loops=1) hit=0 read=0 dirtied=0
+                  -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.001 rows=1.0 loops=15) hit=60 read=0 dirtied=0
+                       Index Cond: ((name)::text = (t.parent_author)::text)
+                -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.001 rows=1.0 loops=15) hit=75 read=0 dirtied=0
+                     Index Cond: ((permlink)::text = (t.parent_permlink)::text)
+              -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.001 rows=0.13 loops=15) hit=62 read=0 dirtied=0
+                   Index Cond: ((author_id = pha.id) AND (permlink_id = phpd.id) AND (counter_deleted = 0))
+            -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.001 rows=1.0 loops=2) hit=8 read=0 dirtied=0
+                 Index Cond: ((name)::text = (t.author)::text)
+          -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.002 rows=1.0 loops=2) hit=10 read=0 dirtied=0
+               Index Cond: ((permlink)::text = (t.permlink)::text)
+        -> Index Scan on hive_communities using hive_communities_pkey  (est rows=1) (actual time=0.000 rows=0.0 loops=2) hit=0 read=0 dirtied=0
+             Index Cond: (id = php.community_id)
+      -> Index Only Scan on hive_roles using hive_roles_ix1  (est rows=1) (actual time=0.000 rows=0.0 loops=2) hit=0 read=0 dirtied=0
+           Index Cond: (community_id = php.community_id)
+      -> Index Scan on hive_category_data using hive_category_data_category  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+           Index Cond: ((category)::text = (t.parent_permlink)::text)
+
+## pb_ins_comments: slowest of 996 instances, 107.387 ms
+INSERT INTO hivemind_app._post_batch
+        (seq_id, author_id, permlink_id, parent_id, parent_author_id, depth, category_id,
+         root_id, community_id, is_valid, is_muted, muted_reasons, date, block_num, parent_permlink)
+    WITH ops AS (
+        SELECT t.seq_id, t.author, t.permlink, t.parent_author, t.parent_permlink,
+               t.date, t.community_support_start_block, t.block_num
+        FROM unnest(_ops) AS t
+    ),
+    resolved AS (
+        SELECT o.seq_id, o.date, o.block_num, o.community_support_start_block,
+               ha.id AS author_id,
+               hpd.id AS permlink_id,
+               php.id AS parent_id,
+               php.author_id AS parent_author_id,
+               php.depth + 1 AS depth,
+               COALESCE(php.category_id,
+                   (SELECT hcg.id FROM hivemind_app.hive_category_data hcg
+                    WHERE hcg.category = o.parent_permlink)) AS category_id,
+               CASE php.root_id WHEN 0 THEN php.id ELSE php.root_id END AS root_id,
+               php.is_valid AS is_valid,
+               php.community_id AS parent_community_id,
+               php.is_muted AS parent_is_muted,
+               o.parent_permlink
+        FROM ops o
+        INNER JOIN hivemind_app.hive_accounts ha ON ha.name = o.author
+        INNER JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = o.permlink
+        INNER JOIN hivemind_app.hive_accounts pha ON pha.name = o.parent_author
+        INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.permlink = o.parent_permlink
+        INNER JOIN hivemind_app.hive_posts php
+            ON php.author_id = pha.id AND php.permlink_id = phpd.id AND php.counter_deleted = 0
+    ),
+    with_community AS (
+        SELECT r.*,
+            CASE
+                WHEN r.block_num < r.community_support_start_block THEN NULL
+                ELSE r.parent_community_id
+            END AS community_id,
+            hc.type_id AS community_type_id,
+            hr.role_id AS role_id
+        FROM resolved r
+        LEFT JOIN hivemind_app.hive_communities hc
+            ON hc.id = r.parent_community_id AND r.block_num >= r.community_support_start_block
+        LEFT JOIN hivemind_app.hive_roles hr
+            ON hr.community_id = r.parent_community_id AND hr.account_id = r.author_id
+               AND r.block_num >= r.community_support_start_block
+    ),
+    with_muting AS (
+        SELECT wc.*,
+            CASE
+                --- If parent is muted, child is always muted
+                WHEN wc.parent_is_muted THEN TRUE
+                --- No community: not muted
+                WHEN wc.community_id IS NULL THEN FALSE
+                --- Topic communities: never muted
+                WHEN wc.community_type_id = __community_type_topic THEN FALSE
+                --- Journal communities: comments are never muted by community type
+                WHEN wc.community_type_id = __community_type_journal THEN FALSE
+                --- Council communities: members are not muted
+                WHEN wc.community_type_id = __community_type_council
+                     AND wc.role_id IS NOT NULL AND wc.role_id >= __member_role THEN FALSE
+                --- Council: non-members are muted
+                WHEN wc.community_type_id = __community_type_council THEN TRUE
+                ELSE FALSE
+            END AS is_muted,
+            hivemind_app.encode_bitwise_mask(
+                ARRAY_REMOVE(ARRAY[
+                    CASE
+                        WHEN wc.community_id IS NOT NULL
+                             AND wc.community_type_id = __community_type_council
+                             AND (wc.role_id IS NULL OR wc.role_id < __member_role)
+                        THEN 1 ELSE NULL
+                    END,
+                    CASE WHEN wc.parent_is_muted THEN 2 ELSE NULL END
+                ], NULL)
+            ) AS muted_reasons
+        FROM with_community wc
+    )
+    SELECT wm.seq_id, wm.author_id, wm.permlink_id, wm.parent_id, wm.parent_author_id, wm.depth,
+           wm.categor
+
+ModifyTable on _post_batch  (est rows=0) (actual time=107.386 rows=0.0 loops=1) hit=173492 read=1038 dirtied=3167 wal=133408B/3032rec
+  -> CTE Scan on with_muting  (est rows=1) (actual time=101.265 rows=6226.0 loops=1) hit=154503 read=1038 dirtied=3032 wal=133408B/3032rec
+    -> Nested Loop Left  (est rows=1) (actual time=99.089 rows=6226.0 loops=1) hit=154503 read=1038 dirtied=3032 wal=133408B/3032rec
+         Join Filter: ((t.block_num >= t.community_support_start_block) AND (hr.community_id = php.community_id) AND (hr.account_id = ha.id))
+         Rows Removed by Join Filter: 0
+      -> Nested Loop Left  (est rows=1) (actual time=95.073 rows=6226.0 loops=1) hit=154503 read=1038 dirtied=3032 wal=133408B/3032rec
+           Join Filter: ((t.block_num >= t.community_support_start_block) AND (hc.id = php.community_id))
+           Rows Removed by Join Filter: 0
+        -> Nested Loop Inner  (est rows=1) (actual time=93.507 rows=6226.0 loops=1) hit=154503 read=1038 dirtied=3032 wal=133408B/3032rec
+          -> Nested Loop Inner  (est rows=1) (actual time=74.646 rows=6226.0 loops=1) hit=123373 read=1038 dirtied=3032 wal=133408B/3032rec
+            -> Nested Loop Inner  (est rows=1) (actual time=62.800 rows=6226.0 loops=1) hit=98690 read=609 dirtied=2979 wal=131076B/2979rec
+              -> Nested Loop Inner  (est rows=7018) (actual time=35.449 rows=7018.0 loops=1) hit=63078 read=609 dirtied=124 wal=5456B/124rec
+                -> Nested Loop Inner  (est rows=7018) (actual time=16.084 rows=7018.0 loops=1) hit=27988 read=609 dirtied=124 wal=5456B/124rec
+                  -> Function Scan on unnest  (est rows=7018) (actual time=0.475 rows=7018.0 loops=1) hit=0 read=0 dirtied=0
+                  -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=7018) hit=27849 read=609 dirtied=0
+                       Index Cond: ((name)::text = (t.parent_author)::text)
+                -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.003 rows=1.0 loops=7018) hit=35090 read=0 dirtied=0
+                     Index Cond: ((permlink)::text = (t.parent_permlink)::text)
+              -> Index Scan on hive_posts using hive_posts_ux1  (est rows=1) (actual time=0.004 rows=0.89 loops=7018) hit=35024 read=0 dirtied=2355 wal=103620B/2355rec
+                   Index Cond: ((author_id = pha.id) AND (permlink_id = phpd.id) AND (counter_deleted = 0))
+            -> Index Scan on hive_accounts using hive_accounts_ux1  (est rows=1) (actual time=0.002 rows=1.0 loops=6226) hit=24623 read=429 dirtied=0
+                 Index Cond: ((name)::text = (t.author)::text)
+          -> Index Scan on hive_permlink_data using hive_permlink_data_permlink  (est rows=1) (actual time=0.003 rows=1.0 loops=6226) hit=31130 read=0 dirtied=0
+               Index Cond: ((permlink)::text = (t.permlink)::text)
+        -> Seq Scan on hive_communities  (est rows=40) (actual time=0.000 rows=0.0 loops=6226) hit=0 read=0 dirtied=0
+      -> Seq Scan on hive_roles  (est rows=230) (actual time=0.000 rows=0.0 loops=6226) hit=0 read=0 dirtied=0
+      -> Index Scan on hive_category_data using hive_category_data_category  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+           Index Cond: ((category)::text = (t.parent_permlink)::text)
+

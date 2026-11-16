@@ -1,0 +1,110 @@
+## step8_notif: median of 98 instances, 0.795 ms
+INSERT INTO hivemind_app.hive_notification_cache
+        (id, block_num, type_id, score, created_at, src, dst, post_id, dst_post_id,
+         community, community_title, payload)
+    SELECT
+        hivemind_app.notification_id(pr.block_date, 10, pr.seq_id % 4194303),
+        pr.block_num,
+        10,  -- error
+        35,  -- default score
+        pr.block_date,
+        pr.community_id,  -- src = community
+        pr.author_id,     -- dst = post author
+        pr.post_id,
+        pr.post_id,
+        hc.name,
+        hc.title,
+        CASE
+            WHEN pr.muted_reasons & 3 = 3 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment and parent post/comment is muted'
+                    ELSE 'Post is muted because community type does not allow non members to post and parent post/comment is muted'
+                END
+            WHEN pr.muted_reasons & 1 = 1 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment'
+                    ELSE 'Post is muted because community type does not allow non members to post'
+                END
+            WHEN pr.muted_reasons & 2 = 2 THEN
+                'Post is muted because parent post/comment is muted'
+            ELSE ''
+        END
+    FROM hivemind_app._post_results pr
+    JOIN hivemind_app.hive_communities hc ON hc.id = pr.community_id
+    WHERE pr.is_new_post
+      AND pr.muted_reasons IS NOT NULL
+      AND pr.muted_reasons != 0
+      AND pr.community_id IS NOT NULL
+      AND pr.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
+      AND pr.community_id IS DISTINCT FROM pr.author_id
+    ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+
+ModifyTable on hive_notification_cache  (est rows=0) (actual time=0.795 rows=0.0 loops=1) hit=4207 read=0 dirtied=0
+     Conflict Resolution: NOTHING
+     Conflict Arbiter Indexes: ['hive_notification_cache_src_dst_post_id']
+     Tuples Inserted: 0
+     Conflicting Tuples: 0
+  -> Result  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+  -> Nested Loop Inner  (est rows=1) (actual time=0.795 rows=0.0 loops=1) hit=4207 read=0 dirtied=0
+       Join Filter: (hc.id = pr.community_id)
+       Rows Removed by Join Filter: 0
+    -> Seq Scan on _post_results  (est rows=1) (actual time=0.794 rows=0.0 loops=1) hit=4207 read=0 dirtied=0
+         Filter: (is_new_post AND (muted_reasons IS NOT NULL) AND (community_id IS NOT NULL) AND (muted_reasons <> 0) AND (block_num > (InitPlan 1).col1) AND (community_id IS DISTINCT FROM author_id))
+         Rows Removed by Filter: 7227
+    -> Seq Scan on hive_communities  (est rows=40) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+
+## step8_notif: slowest of 98 instances, 2.176 ms
+INSERT INTO hivemind_app.hive_notification_cache
+        (id, block_num, type_id, score, created_at, src, dst, post_id, dst_post_id,
+         community, community_title, payload)
+    SELECT
+        hivemind_app.notification_id(pr.block_date, 10, pr.seq_id % 4194303),
+        pr.block_num,
+        10,  -- error
+        35,  -- default score
+        pr.block_date,
+        pr.community_id,  -- src = community
+        pr.author_id,     -- dst = post author
+        pr.post_id,
+        pr.post_id,
+        hc.name,
+        hc.title,
+        CASE
+            WHEN pr.muted_reasons & 3 = 3 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment and parent post/comment is muted'
+                    ELSE 'Post is muted because community type does not allow non members to post and parent post/comment is muted'
+                END
+            WHEN pr.muted_reasons & 1 = 1 THEN
+                CASE WHEN pr.depth > 0
+                    THEN 'Post is muted because community type does not allow non members to post or comment'
+                    ELSE 'Post is muted because community type does not allow non members to post'
+                END
+            WHEN pr.muted_reasons & 2 = 2 THEN
+                'Post is muted because parent post/comment is muted'
+            ELSE ''
+        END
+    FROM hivemind_app._post_results pr
+    JOIN hivemind_app.hive_communities hc ON hc.id = pr.community_id
+    WHERE pr.is_new_post
+      AND pr.muted_reasons IS NOT NULL
+      AND pr.muted_reasons != 0
+      AND pr.community_id IS NOT NULL
+      AND pr.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
+      AND pr.community_id IS DISTINCT FROM pr.author_id
+    ON CONFLICT (src, dst, type_id, post_id, block_num) DO NOTHING
+
+ModifyTable on hive_notification_cache  (est rows=0) (actual time=2.176 rows=0.0 loops=1) hit=6644 read=0 dirtied=0
+     Conflict Resolution: NOTHING
+     Conflict Arbiter Indexes: ['hive_notification_cache_src_dst_post_id']
+     Tuples Inserted: 0
+     Conflicting Tuples: 0
+  -> Result  (est rows=1) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+  -> Nested Loop Inner  (est rows=1) (actual time=2.175 rows=0.0 loops=1) hit=6644 read=0 dirtied=0
+       Join Filter: (hc.id = pr.community_id)
+       Rows Removed by Join Filter: 0
+    -> Seq Scan on _post_results  (est rows=1) (actual time=2.175 rows=0.0 loops=1) hit=6644 read=0 dirtied=0
+         Filter: (is_new_post AND (muted_reasons IS NOT NULL) AND (community_id IS NOT NULL) AND (muted_reasons <> 0) AND (block_num > (InitPlan 1).col1) AND (community_id IS DISTINCT FROM author_id))
+         Rows Removed by Filter: 6990
+    -> Seq Scan on hive_communities  (est rows=40) (actual time=0.000 rows=0 loops=0) hit=0 read=0 dirtied=0
+
