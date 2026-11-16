@@ -2,7 +2,6 @@
 """sampler.py OUT PG_CONTAINER HIVE_CONTAINER: every second, per-process RssAnon/VmRSS of both containers; peaks to OUT."""
 
 import json
-import os
 import signal
 import subprocess
 import sys
