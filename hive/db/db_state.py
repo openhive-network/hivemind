@@ -74,6 +74,7 @@ class DbState:
     _TABLES_WITH_REGISTERED_INDEXES = [
         'hive_feed_cache',
         'hive_posts',
+        'hive_replies',
         'hive_votes',
         'hive_subscriptions',
         'hive_communities',

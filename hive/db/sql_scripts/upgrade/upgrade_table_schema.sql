@@ -174,6 +174,37 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_target_account_id_idx ON hivemind_app.hive_moderation_log (target_account_id) WHERE target_account_id IS NOT NULL');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_moderation_log_block_num_idx ON hivemind_app.hive_moderation_log (block_num)');
 
+-- bridge.get_account_posts sort=payout pages an author's unpaid posts in this order. CREATE INDEX blocks writes to
+-- hive_posts while it scans the heap; the index itself holds only the ~60k unpaid posts.
+CREATE INDEX IF NOT EXISTS hive_posts_author_id_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts (author_id, (payout+pending_payout) DESC, id DESC) WHERE NOT is_paidout AND counter_deleted = 0;
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_author_id_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts (author_id, (payout+pending_payout) DESC, id DESC) WHERE NOT is_paidout AND counter_deleted = 0');
+
+-- bridge.get_account_posts sort=replies walks this table newest first. Filled once from hive_posts, every reply
+-- under its parent's author, as the indexer adds them; hive_posts is only read, so its writers are not blocked.
+-- Only an empty table is filled: the indexer fills it from then on, and massive sync drops its index, so the index
+-- cannot tell a filled table. The index is built after the fill.
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_replies (
+    parent_author_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL
+);
+DO $$
+BEGIN
+  IF EXISTS (SELECT NULL FROM hivemind_app.hive_replies) THEN
+    RETURN;
+  END IF;
+  PERFORM set_config('work_mem', '1GB', true);
+  PERFORM set_config('synchronize_seqscans', 'off', true);
+  INSERT INTO hivemind_app.hive_replies (parent_author_id, post_id)
+  SELECT hp.author_id, hpr.id
+  FROM hivemind_app.hive_posts hpr
+  JOIN hivemind_app.hive_posts hp ON hp.id = hpr.parent_id
+  WHERE hpr.depth > 0;
+  CREATE INDEX IF NOT EXISTS hive_replies_parent_author_id_post_id_idx ON hivemind_app.hive_replies (parent_author_id, post_id DESC);
+  ANALYZE hivemind_app.hive_replies;
+END
+$$;
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_replies_parent_author_id_post_id_idx ON hivemind_app.hive_replies (parent_author_id, post_id DESC)');
+
 -- Autovacuum the append-mostly tables every 100,000 inserts, keeping their visibility maps current for index-only
 -- scans. Same list as hive/db/schema.py's reset_autovac, which sets them on a fresh install.
 ALTER TABLE hivemind_app.hive_votes SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
@@ -181,6 +212,7 @@ ALTER TABLE hivemind_app.hive_post_data SET (autovacuum_vacuum_insert_scale_fact
 ALTER TABLE hivemind_app.hive_permlink_data SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
 ALTER TABLE hivemind_app.hive_post_tags SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
 ALTER TABLE hivemind_app.hive_feed_cache SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
+ALTER TABLE hivemind_app.hive_replies SET (autovacuum_vacuum_insert_scale_factor = 0, autovacuum_vacuum_insert_threshold = 100000);
 
 RESET ROLE;
 
