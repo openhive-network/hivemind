@@ -86,6 +86,7 @@ CREATE INDEX IF NOT EXISTS hive_posts_block_num_idx ON hivemind_app.hive_posts (
 CREATE INDEX IF NOT EXISTS hive_posts_block_num_created_idx ON hivemind_app.hive_posts (block_num_created);
 CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts ((payout+pending_payout), id) WHERE NOT is_paidout AND counter_deleted = 0;
 CREATE INDEX IF NOT EXISTS hive_posts_category_id_payout_plus_pending_payout_depth_idx ON hivemind_app.hive_posts (category_id, (payout+pending_payout), depth) WHERE NOT is_paidout AND counter_deleted = 0;
+CREATE INDEX IF NOT EXISTS hive_posts_author_id_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts (author_id, (payout+pending_payout) DESC, id DESC) WHERE NOT is_paidout AND counter_deleted = 0;
 
 -- hive_post_data
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_data (
@@ -137,6 +138,14 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_tags (
     tag_id INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS hive_post_tags_idx ON hivemind_app.hive_post_tags USING btree (post_id, tag_id);
+
+-- hive_replies: every reply (deleted ones too) under the author of the post it replies to, so the replies to an
+-- author's posts can be read newest first without reading all those posts.
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_replies (
+    parent_author_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS hive_replies_parent_author_id_post_id_idx ON hivemind_app.hive_replies (parent_author_id, post_id DESC);
 
 -- hive_tag_data
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_tag_data (

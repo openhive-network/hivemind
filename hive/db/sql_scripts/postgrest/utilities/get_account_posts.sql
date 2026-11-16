@@ -413,26 +413,19 @@ BEGIN
     )
     ) FROM (      -- get_account_posts_by_replies
       WITH 
-      posts_comment_by_author AS MATERIALIZED
-      (
-        SELECT id
-        FROM hivemind_app.live_posts_comments_view
-        WHERE author_id = _account_id       --hive_posts_author_id_id_idx will be used because hp1.counter_deleted = 0 INDEX ONLY
-      ) ,
-      all_replies AS MATERIALIZED
-      (
-        SELECT hpr.id, hpr.author_id
-        FROM posts_comment_by_author hp1
-        JOIN hivemind_app.live_posts_comments_view hpr ON hp1.id = hpr.parent_id   --hive_posts_parent_id_id_idx INDEX ONLY
-      ),
       all_unmuted_replies AS
       (
+        -- Newest first down hive_replies_parent_author_id_post_id_idx, stopping after _limit live, unmuted replies
+        -- to live posts. The bound is one expression of the arguments, so a generic plan keeps it an index condition.
         SELECT hpr.id
-        FROM all_replies hpr
+        FROM hivemind_app.hive_replies hr
+        JOIN hivemind_app.live_posts_comments_view hpr ON hpr.id = hr.post_id
+        JOIN hivemind_app.live_posts_comments_view hp ON hp.id = hpr.parent_id
         WHERE
-          (_post_id = 0 OR hpr.id < _post_id )
+          hr.parent_author_id = _account_id
+          AND hr.post_id < COALESCE(NULLIF(_post_id, 0), 2147483647)
           AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
-        ORDER BY hpr.id DESC
+        ORDER BY hr.post_id DESC
         LIMIT _limit
       )      
       SELECT

@@ -359,7 +359,14 @@ def record_table_schema(db: Db) -> None:
     )
 
 
-_AUTOVAC_INSERT_TABLES = ('hive_votes', 'hive_post_data', 'hive_permlink_data', 'hive_post_tags', 'hive_feed_cache')
+_AUTOVAC_INSERT_TABLES = (
+    'hive_votes',
+    'hive_post_data',
+    'hive_permlink_data',
+    'hive_post_tags',
+    'hive_feed_cache',
+    'hive_replies',
+)
 _AUTOVAC_INSERT_THRESHOLD = 100000
 
 

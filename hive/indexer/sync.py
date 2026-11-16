@@ -516,6 +516,7 @@ class SyncHiveDb:
             'hive_reblogs',
             'hive_mentions',
             'hive_post_tags',
+            'hive_replies',
             'hive_votes',
             'hive_post_data',
             'hive_roles',

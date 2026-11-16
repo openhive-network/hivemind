@@ -22,10 +22,14 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_block_num_created_idx ON hivemind_app.hive_posts (block_num_created)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts ((payout+pending_payout), id) WHERE NOT is_paidout AND counter_deleted = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_category_id_payout_plus_pending_payout_depth_idx ON hivemind_app.hive_posts (category_id, (payout+pending_payout), depth) WHERE NOT is_paidout AND counter_deleted = 0');
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_author_id_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts (author_id, (payout+pending_payout) DESC, id DESC) WHERE NOT is_paidout AND counter_deleted = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_id_idx ON hivemind_app.hive_posts (author_id DESC, created_at DESC, id)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_idx ON hivemind_app.hive_posts (author_id, id DESC) WHERE counter_deleted = 0');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_block_num_idx ON hivemind_app.hive_posts (block_num)');
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_depth0_idx ON hivemind_app.hive_posts (author_id, id DESC) WHERE depth = 0 AND counter_deleted = 0');
+
+-- hive_replies indexes
+SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_replies_parent_author_id_post_id_idx ON hivemind_app.hive_replies (parent_author_id, post_id DESC)');
 
 -- hive_votes indexes
 SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hivemind_app.hive_votes (voter_id, last_update)');

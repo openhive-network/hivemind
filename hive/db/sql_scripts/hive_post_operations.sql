@@ -188,7 +188,8 @@ BEGIN
             WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
                 ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
           ) AS s
-        )
+        ),
+        inserted AS (
         INSERT INTO hivemind_app.hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
@@ -223,6 +224,15 @@ BEGIN
                 active = _date,
                 block_num = _block_num
           RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hivemind_app.hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, (SELECT s.parent_author_id FROM selected_posts AS s) AS parent_author_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, hp.muted_reasons
+        ),
+        inserted_reply AS (
+          INSERT INTO hivemind_app.hive_replies (parent_author_id, post_id)
+          SELECT ins.parent_author_id, ins.id
+          FROM inserted ins
+          WHERE ins.is_new_post
+        )
+        SELECT ins.is_new_post, ins.id, ins.author_id, ins.permlink_id, ins.post_category, ins.parent_id, ins.parent_author_id, ins.community_id, ins.is_valid, ins.is_muted, ins.depth, ins.muted_reasons
+        FROM inserted ins
         ;
     ELSE
         INSERT INTO hivemind_app.hive_category_data
@@ -779,6 +789,13 @@ BEGIN
             hp.is_muted,
             hp.depth,
             hp.muted_reasons
+    ),
+    inserted_reply AS (
+        INSERT INTO hivemind_app.hive_replies (parent_author_id, post_id)
+        SELECT wm.parent_author_id, ins.id
+        FROM inserted ins
+        INNER JOIN hivemind_app._post_batch wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id
+        WHERE ins.is_new_post
     )
     SELECT
         wm.seq_id,
