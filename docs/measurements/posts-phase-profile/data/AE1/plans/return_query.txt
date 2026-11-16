@@ -1,0 +1,10 @@
+## return_query: median of 98 instances, 4.084 ms
+SELECT * FROM hivemind_app._post_results ORDER BY seq_id
+
+Index Scan on _post_results using _post_results_seq_id_idx  (est rows=6960) (actual time=3.168 rows=6555.0 loops=1) hit=24566 read=0 dirtied=0
+
+## return_query: slowest of 98 instances, 7.236 ms
+SELECT * FROM hivemind_app._post_results ORDER BY seq_id
+
+Index Scan on _post_results using _post_results_seq_id_idx  (est rows=10524) (actual time=5.102 rows=9133.0 loops=1) hit=35080 read=0 dirtied=0
+

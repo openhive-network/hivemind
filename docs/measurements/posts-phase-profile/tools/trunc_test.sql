@@ -1,0 +1,25 @@
+\pset format unaligned
+DROP TABLE IF EXISTS public.aidev472_t;
+CREATE UNLOGGED TABLE public.aidev472_t (LIKE hivemind_app._post_batch);
+INSERT INTO public.aidev472_t (seq_id, author_id, permlink_id) SELECT g, g, g FROM generate_series(1,20000) g;
+DELETE FROM public.aidev472_t WHERE seq_id > 3;
+VACUUM public.aidev472_t;
+SELECT 'after delete+vacuum (3 rows left)', relpages, reltuples FROM pg_class WHERE relname = 'aidev472_t';
+INSERT INTO public.aidev472_t (seq_id, author_id, permlink_id) SELECT g, g, g FROM generate_series(1,5000) g;
+EXPLAIN SELECT * FROM public.aidev472_t;
+BEGIN;
+TRUNCATE public.aidev472_t;
+SELECT 'after truncate', relpages, reltuples FROM pg_class WHERE relname = 'aidev472_t';
+INSERT INTO public.aidev472_t (seq_id, author_id, permlink_id) SELECT g, g, g FROM generate_series(1,5000) g;
+EXPLAIN SELECT * FROM public.aidev472_t;
+COMMIT;
+DELETE FROM public.aidev472_t;
+VACUUM public.aidev472_t;
+SELECT 'after delete-all+vacuum', relpages, reltuples FROM pg_class WHERE relname = 'aidev472_t';
+BEGIN;
+TRUNCATE public.aidev472_t;
+SELECT 'after truncate (vacuumed empty before)', relpages, reltuples FROM pg_class WHERE relname = 'aidev472_t';
+INSERT INTO public.aidev472_t (seq_id, author_id, permlink_id) SELECT g, g, g FROM generate_series(1,5000) g;
+EXPLAIN SELECT * FROM public.aidev472_t;
+COMMIT;
+DROP TABLE public.aidev472_t;

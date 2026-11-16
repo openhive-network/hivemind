@@ -1,0 +1,10 @@
+## posts_fn: median of 98 instances, 632.751 ms
+SELECT * FROM hivemind_app.process_posts_from_staging(37500000)
+
+Function Scan on process_posts_from_staging  (est rows=1000) (actual time=617.062 rows=9618.0 loops=1) hit=911126 read=599 dirtied=4526 wal=11703095B/115199rec
+
+## posts_fn: slowest of 98 instances, 6187.219 ms
+SELECT * FROM hivemind_app.process_posts_from_staging(37500000)
+
+Function Scan on process_posts_from_staging  (est rows=1000) (actual time=6173.296 rows=8155.0 loops=1) hit=43893890 read=489 dirtied=1266 wal=9557532B/95727rec
+

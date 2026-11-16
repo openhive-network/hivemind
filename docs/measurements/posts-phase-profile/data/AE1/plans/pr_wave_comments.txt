@@ -1,0 +1,81 @@
+## pr_wave_comments: median of 996 instances, 5.592 ms
+INSERT INTO hivemind_app._post_results
+        SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
+               br.depth, br.parent_id, br.parent_author_id, br.community_id,
+               br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
+        FROM hivemind_app.process_comments_batch(
+            ARRAY(
+                SELECT ROW(cs.seq_id, cs.author, cs.permlink,
+                           cs.parent_author, cs.parent_permlink,
+                           cs.block_date, _community_support_start_block,
+                           cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
+                FROM hivemind_app._comment_staging cs
+                WHERE cs.is_first AND NOT cs.is_replayed
+                  AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
+                  AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
+                ORDER BY cs.seq_id
+            )
+        ) br
+        JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id
+
+ModifyTable on _post_results  (est rows=0) (actual time=5.592 rows=0.0 loops=1) hit=6525 read=0 dirtied=0 wal=990B/8rec
+  -> Sort  (est rows=9198) (actual time=2.290 rows=5.0 loops=1) hit=3582 read=0 dirtied=0
+       Sort Method: quicksort
+    -> Hash Join Anti  (est rows=9198) (actual time=2.289 rows=5.0 loops=1) hit=3582 read=0 dirtied=0
+         Hash Cond: (cs_1.seq_id = pr.seq_id)
+      -> Seq Scan on _comment_staging  (est rows=18397) (actual time=0.911 rows=6702.0 loops=1) hit=1956 read=0 dirtied=0
+           Filter: (is_first AND (NOT is_replayed) AND (parent_author IS NOT NULL) AND (parent_author <> ''::text))
+           Rows Removed by Filter: 3565
+      -> Hash  (est rows=19512) (actual time=1.042 rows=9394.0 loops=1) hit=1626 read=0 dirtied=0
+           Hash Batches: 1
+           Peak Memory Usage: 587
+        -> Seq Scan on _post_results  (est rows=19512) (actual time=0.589 rows=9394.0 loops=1) hit=1626 read=0 dirtied=0
+  -> Merge Join Inner  (est rows=371640) (actual time=5.582 rows=2.0 loops=1) hit=6519 read=0 dirtied=0 wal=990B/8rec
+       Merge Cond: (br.seq_id = cs.seq_id)
+    -> Sort  (est rows=1000) (actual time=3.173 rows=2.0 loops=1) hit=4563 read=0 dirtied=0 wal=990B/8rec
+         Sort Method: quicksort
+      -> Function Scan on process_comments_batch  (est rows=1000) (actual time=3.171 rows=2.0 loops=1) hit=4563 read=0 dirtied=0 wal=990B/8rec
+    -> Sort  (est rows=74328) (actual time=2.101 rows=7675.0 loops=1) hit=1956 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Seq Scan on _comment_staging  (est rows=74328) (actual time=0.939 rows=10267.0 loops=1) hit=1956 read=0 dirtied=0
+
+## pr_wave_comments: slowest of 996 instances, 4787.620 ms
+INSERT INTO hivemind_app._post_results
+        SELECT br.seq_id, br.id, br.is_new_post, br.author_id, br.permlink_id,
+               br.depth, br.parent_id, br.parent_author_id, br.community_id,
+               br.is_post_muted, br.muted_reasons, cs.block_num, cs.block_date, cs.op_body
+        FROM hivemind_app.process_comments_batch(
+            ARRAY(
+                SELECT ROW(cs.seq_id, cs.author, cs.permlink,
+                           cs.parent_author, cs.parent_permlink,
+                           cs.block_date, _community_support_start_block,
+                           cs.block_num, ARRAY[]::VARCHAR[])::hivemind_app.hive_post_op_input
+                FROM hivemind_app._comment_staging cs
+                WHERE cs.is_first AND NOT cs.is_replayed
+                  AND cs.parent_author IS NOT NULL AND cs.parent_author != ''
+                  AND NOT EXISTS (SELECT 1 FROM hivemind_app._post_results pr WHERE pr.seq_id = cs.seq_id)
+                ORDER BY cs.seq_id
+            )
+        ) br
+        JOIN hivemind_app._comment_staging cs ON cs.seq_id = br.seq_id
+
+ModifyTable on _post_results  (est rows=0) (actual time=4787.619 rows=0.0 loops=1) hit=35371903 read=18 dirtied=37 wal=2663190B/21861rec
+  -> Sort  (est rows=1) (actual time=3.081 rows=5586.0 loops=1) hit=10889 read=0 dirtied=0
+       Sort Method: quicksort
+    -> Hash Join Anti  (est rows=1) (actual time=2.666 rows=5586.0 loops=1) hit=10889 read=0 dirtied=0
+         Hash Cond: (cs_1.seq_id = pr.seq_id)
+      -> Seq Scan on _comment_staging  (est rows=5405) (actual time=0.924 rows=5586.0 loops=1) hit=3122 read=0 dirtied=0
+           Filter: (is_first AND (NOT is_replayed) AND (parent_author IS NOT NULL) AND (parent_author <> ''::text))
+           Rows Removed by Filter: 2569
+      -> Hash  (est rows=8391) (actual time=0.991 rows=1945.0 loops=1) hit=7767 read=0 dirtied=0
+           Hash Batches: 1
+           Peak Memory Usage: 197
+        -> Index Only Scan on _post_results using _post_results_seq_id_idx  (est rows=8391) (actual time=0.897 rows=1945.0 loops=1) hit=7767 read=0 dirtied=0
+  -> Hash Join Inner  (est rows=1000) (actual time=4783.262 rows=5049.0 loops=1) hit=35355146 read=18 dirtied=37 wal=2663190B/21861rec
+       Hash Cond: (br.seq_id = cs.seq_id)
+    -> Function Scan on process_comments_batch  (est rows=1000) (actual time=4778.309 rows=5049.0 loops=1) hit=35352024 read=18 dirtied=37 wal=2663190B/21861rec
+    -> Hash  (est rows=8391) (actual time=4.118 rows=8155.0 loops=1) hit=3122 read=0 dirtied=0
+         Hash Batches: 1
+         Peak Memory Usage: 5440
+      -> Seq Scan on _comment_staging  (est rows=8391) (actual time=2.639 rows=8155.0 loops=1) hit=3122 read=0 dirtied=0
+

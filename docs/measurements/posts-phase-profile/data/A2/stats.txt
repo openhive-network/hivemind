@@ -1,0 +1,15 @@
+wal_records|wal_fpi|wal_bytes|wal_buffers_full|stats_reset
+166727409|825|17520491926|0|2026-11-16 04:56:41.206099+00
+(1 row)
+num_timed|num_requested|num_done|restartpoints_timed|restartpoints_req|restartpoints_done|write_time|sync_time|buffers_written|slru_written|stats_reset
+0|1|0|0|0|0|0|0|329465|4|2026-11-16 04:56:41.206132+00
+(1 row)
+backend_type|object|context|reads|read_bytes|writes|write_bytes|extends|hits|evictions|fsyncs
+client backend|relation|normal|3596885|29533184000|398|3260416|4383606|4359614320|4704145|0
+client backend|temp relation|normal|6893|66748416|1038|8503296|115762|13552260|1968|
+client backend|relation|vacuum|124583|7587495936|144572|1184333824|0|9633068|512|
+autovacuum worker|relation|vacuum|2459818|63672983552|136852|1121091584|0|9610249|3551|
+autovacuum worker|relation|normal|1745|14311424|0|0|210|4982703|1697|0
+background worker|relation|normal|750|87449600|0|0|0|19841|10674|0
+client backend|relation|bulkwrite|0|0|0|0|13|385|448|
+(7 rows)

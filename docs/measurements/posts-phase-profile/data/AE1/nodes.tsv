@@ -1,0 +1,301 @@
+node_path	excl_ms	excl_shared_hit	excl_shared_read	excl_wal_bytes	rows	loops
+posts_fn/Function Scan(process_posts_from_staging)	98434.1	400355865	98817	935332696	792399.0	98
+pr_wave_comments/ModifyTable(_post_results)/Hash Join/Function Scan(process_comments_batch)	49725.3	301158701	618	269407939	499254.0	936
+hp_ins_comments/Nested Loop/Index Scan(_post_batch)	29022.2	269020174	0	0	177026776.0	44390
+permlink_ins/ModifyTable(hive_permlink_data)	7191.7	12293698	88509	296109788	0.0	289
+pr_root/ModifyTable(_post_results)/Hash Join/Function Scan(process_root_posts_batch)	6653.2	29114427	9	85558628	173796.0	92
+tags_5d/Result	5462.3	9392894	4897	201824881	98.0	98
+hp_ins_comments/Nested Loop	5307.4	-913092	0	-34736474	67383.0	112
+tags_5d/Result/Nested Loop/Append/ProjectSet/Result	4365.2	420063	0	0	188165.87999999998	189629
+hp_ins_comments/Hash Join/CTE Scan(inserted)	3182.9	5744183	0	224413047	431871.0	824
+hp_ins_root/Nested Loop/Index Scan(_post_batch)	2590.9	23121510	0	0	23844060.0	14538
+hp_ins_comments/Hash Join/ModifyTable(hive_posts)	1888.4	5274818	0	243180530	470836.0	884
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_posts)	1734.9	3017856	542	7353750	538013.6700000002	615566
+tags_5d/Result/Nested Loop/Append/ProjectSet	1715.6	139719	0	0	798458.5399999999	189629
+cs_ins/ModifyTable(_comment_staging)	1706.5	4307107	10	180	0.0	98
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	1451.7	2691095	0	0	538219.0	538219
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	1419.4	3077830	0	0	615566.0	615566
+hp_ins_root/Hash Join/CTE Scan(inserted)	1336.9	1767637	0	72886336	151418.0	79
+hp_ins_comments/Hash Join/ModifyTable(hive_posts)/Subquery Scan/Sort/Seq Scan(_post_batch)	1235.2	505958	0	0	470836.0	884
+wave_count/Aggregate/Hash Join/Seq Scan(_comment_staging)	1175.4	4524535	0	0	6004447.0	1094
+pr_wave_comments/ModifyTable(_post_results)/Merge Join/Sort/Function Scan(process_comments_batch)	1163.6	2210553	1630	20924973	38965.0	60
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	1137.5	2463461	610	2163846	615566.0	615566
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan/WindowAgg/Sort/WindowAgg/Sort/Index Scan(_ops_staging)	1053.8	866999	0	0	792399.0	98
+pr_wave_comments/ModifyTable(_post_results)/Hash Join/Hash/Seq Scan(_comment_staging)	1050.8	3925856	0	0	7427456.0	936
+pr_wave_comments/ModifyTable(_post_results)/Sort/Hash Join/Seq Scan(_comment_staging)	1008.9	4134618	0	0	5466228.0	996
+hp_ins_root/Hash Join/ModifyTable(hive_posts)	889.6	1748033	12	79938336	167251.0	85
+wave_count/Aggregate/Hash Join/Hash/Seq Scan(_post_results)	825.1	3271674	0	0	6718905.0	969
+pr_wave_comments/ModifyTable(_post_results)/Hash Join/Hash	782.8	0	0	0	7427456.0	936
+tags_5e/Result/Nested Loop/Append/ProjectSet/Result	682.4	36632	0	0	24983.330000000005	25011
+tags_5e/Result	650.6	1039522	373	8425906	98.0	98
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	638.7	2153423	434	1437186	538219.0	538219
+hp_ins_root/Nested Loop	617.7	-300154	0	-10769750	22378.0	13
+hp_ins_comments/Nested Loop/CTE Scan(inserted)	617.2	913092	0	34736474	67383.0	112
+pr_wave_comments/ModifyTable(_post_results)/Sort/Hash Join/Hash/Seq Scan(_post_results)	610.7	2993234	0	0	6080818.0	884
+pb_ins_comments/ModifyTable(_post_batch)	593.6	1651613	0	0	0.0	996
+hp_ins_root/Hash Join/ModifyTable(hive_posts)/Subquery Scan/Sort/CTE Scan(new_posts)	504.4	205708	2	502128	167251.0	85
+hp_ins_comments/Hash Join/Index Scan(hive_category_data)	472.1	1411879	629	2420	470836.0	470836
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan/WindowAgg	459.2	312980	0	0	792399.0	98
+del_create_pairs/Result/Unique/Sort/Hash Join/Hash	447.6	309964	0	0	785796.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	424.3	705349	0	1990184	176121.0	176121
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan/Unique/Incremental Sort/Index Scan(_comment_staging)	418.9	1871625	0	0	694124.0	85
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	394.5	880605	0	0	176121.0	176121
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Hash Join	376.0	327112	0	0	72.0	94
+hp_ins_comments/Nested Loop/ModifyTable(hive_posts)	374.4	764579	0	34534316	67383.0	112
+wave_count/Aggregate/Hash Join/Hash	359.2	0	0	0	7491817.0	1094
+pr_root/ModifyTable(_post_results)	359.1	834445	10	180	0.0	98
+pr_wave_comments/ModifyTable(_post_results)/Sort/Hash Join	343.0	0	0	0	615566.0	996
+wave_count/Aggregate/Hash Join	326.4	0	0	0	615566.0	1094
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop	322.1	0	0	0	538219.0	996
+pr_wave_comments/ModifyTable(_post_results)/Sort/Hash Join/Hash	321.3	0	0	0	6763969.0	996
+pr_root/ModifyTable(_post_results)/Merge Join/Sort/Function Scan(process_root_posts_batch)	308.7	473113	1372	7667418	15833.0	6
+hp_ins_comments/Hash Join/Hash/CTE Scan(inserted)	295.4	507429	0	20179817	38965.0	60
+return_query/Index Scan(_post_results)	270.2	2193609	0	0	792399.0	98
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Subquery Scan/Unique/Sort/Index Scan(_ops_staging)	268.5	142218	1	0	79241.0	98
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	264.4	393730	0	0	78746.0	78746
+pr_wave_comments/ModifyTable(_post_results)	253.3	-6822152	0	0	0.0	996
+co_ops/ModifyTable(hive_posts)	249.4	585345	4	27083440	0.0	98
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop	246.9	700	0	4048	538219.0	996
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan/WindowAgg/Sort/WindowAgg/Sort	244.1	0	0	0	792399.0	98
+del_create_pairs/Result/Unique/Sort/Hash Join/Hash/Index Scan(_ops_staging)	237.6	309596	0	0	785796.0	98
+wave_count/Aggregate/Hash Join/Hash/Index Only Scan(_post_results)	235.0	1767106	0	0	772912.0	125
+tags_5e/Result/Nested Loop/Append/ProjectSet	232.0	12160	0	0	112892.55999999997	25011
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan	224.4	1040962	1	3122460	1040949.0	98
+del_cs/ModifyTable(_comment_staging)/Seq Scan(_comment_staging)	221.2	322549	0	0	713825.0	98
+category_ins/ModifyTable(hive_category_data)/Subquery Scan/Aggregate/Seq Scan(_comment_staging)	212.5	389917	0	0	230242.0	98
+hp_ins_root/Nested Loop/CTE Scan(inserted)	208.2	269187	0	10702628	22378.0	13
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Seq Scan(_comment_staging)	205.4	303916	0	0	151453.0	79
+del_pr/ModifyTable(_post_results)/Seq Scan(_post_results)	204.0	281509	0	0	713825.0	98
+pb_ins_root/ModifyTable(_post_batch)	200.0	572745	0	0	0.0	98
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Memoize/Subquery Scan/Limit/Sort/Index Scan(_comment_staging)	198.6	629468	0	0	31865.740000000005	151453
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan/Aggregate/Aggregate	186.1	0	0	0	1040949.0	98
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan/Aggregate	184.0	0	0	0	1040949.0	98
+del_pb/ModifyTable(_post_batch)/Seq Scan(_post_batch)	182.4	624441	0	0	727831.0	1094
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)	179.8	0	0	0	538219.0	996
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop	178.7	0	0	0	615566.0	996
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan/WindowAgg/Sort	178.6	0	0	0	792399.0	98
+hp_ins_comments/Nested Loop/ModifyTable(hive_posts)/Subquery Scan/Sort/Seq Scan(_post_batch)	178.0	81130	0	0	67383.0	112
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_category_data)	176.1	704484	0	0	176121.0	176121
+co_ops/ModifyTable(hive_posts)/Nested Loop/Index Scan(hive_posts)	173.9	394502	0	60834	78746.0	78746
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan/Aggregate/Aggregate/Append/Seq Scan(_comment_staging)	162.3	714349	0	0	1256281.0	183
+hp_ins_comments/Hash Join/ModifyTable(hive_posts)/Subquery Scan	161.2	470836	0	1412334	470836.0	884
+pr_wave_comments/ModifyTable(_post_results)/Sort/Hash Join/Hash/Index Only Scan(_post_results)	159.6	1485700	0	0	683151.0	112
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	157.5	315004	0	0	78746.0	78746
+step7e/ModifyTable(_post_results)/Hash Join/Hash/CTE Scan(unmuted_posts)	153.8	484692	0	0	0.0	97
+hp_ins_root/Hash Join/Hash/CTE Scan(inserted)	149.8	186104	14	7554128	15833.0	6
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan/WindowAgg/Sort/WindowAgg	144.1	0	0	0	792399.0	98
+pr_root/ModifyTable(_post_results)/Hash Join/Hash/Seq Scan(_comment_staging)	143.8	369401	0	0	732283.0	92
+category_ins/ModifyTable(hive_category_data)	141.4	239613	1171	805191	0.0	255
+del_cs/ModifyTable(_comment_staging)	138.9	971747	0	0	0.0	98
+tags_5e/Result/Nested Loop/Hash Join/Hash/Seq Scan(_post_results)	137.3	266191	0	0	633854.0	79
+pr_root/ModifyTable(_post_results)/Sort/Seq Scan(_comment_staging)	136.0	389917	0	0	189629.0	98
+del_pr/ModifyTable(_post_results)	133.9	966490	0	0	0.0	98
+replay_loop/Sort/Append/Seq Scan(_comment_staging)	129.3	270696	0	0	191.0	69
+pr_root/ModifyTable(_post_results)/Hash Join/Hash	128.7	0	0	0	732283.0	92
+hp_ins_root/Nested Loop/ModifyTable(hive_posts)	128.1	238220	0	10635506	22378.0	13
+edits_5b/ModifyTable(_post_results)	127.3	298894	0	30	0.0	98
+edits_5b/ModifyTable(_post_results)/Nested Loop/Nested Loop/Index Scan(_comment_staging)	123.7	458763	0	0	61377.0	59054
+cs_norm/ModifyTable(_comment_staging)/Hash Join	121.6	0	0	0	71.0	90
+step7e/ModifyTable(_post_results)/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Hash Join/Hash/Seq Scan(_post_results)	119.6	298694	0	0	0.0	90
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan/Unique/Incremental Sort	113.7	0	0	0	694124.0	85
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop	112.9	0	0	0	538219.0	996
+hp_ins_comments/Hash Join/Hash/Seq Scan(_post_batch)	107.9	476926	0	0	431871.0	824
+hp_ins_comments/Hash Join/ModifyTable(hive_posts)/Subquery Scan/Sort	103.1	0	0	0	470836.0	884
+tags_5d/Result/Nested Loop	100.3	0	0	0	988131.0	98
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Seq Scan(_comment_staging)	99.2	342048	0	0	731670.0	90
+pr_wave_comments/ModifyTable(_post_results)/Hash Join	95.9	0	0	0	499254.0	936
+simple_deletes/Aggregate/CTE Scan(updated_posts)	95.3	185998	85	2229335	4700.0	98
+process_hive_post_op/ModifyTable(_post_results)/Function Scan(process_hive_post_operation)	93.0	11918	3	145119	191.0	191
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash	92.3	0	0	0	672414.0	90
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop	89.9	0	0	0	538219.0	996
+pr_wave_comments/ModifyTable(_post_results)/Merge Join/Sort	88.7	0	0	0	558311.0	120
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan	83.2	0	0	0	672414.0	90
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Nested Loop/Nested Loop/Seq Scan(_comment_staging)	81.8	344694	0	0	56723.0	88
+step8_notif/ModifyTable(hive_notification_cache)/Nested Loop/Seq Scan(_post_results)	78.5	340525	0	0	0.0	98
+tags_5d/Result/Nested Loop/Hash Join/Seq Scan(_post_results)	76.2	266191	0	0	633854.0	79
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Nested Loop/Nested Loop/Index Scan(_comment_staging)	76.0	458763	0	0	61377.0	59054
+edits_5b/ModifyTable(_post_results)/Nested Loop/Nested Loop/Seq Scan(_comment_staging)	75.9	344694	0	0	56723.0	88
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Memoize/Subquery Scan/Limit/Sort	74.4	0	0	0	19712.089999999993	151453
+edits_5c/ModifyTable(hive_posts)	73.9	124600	0	11355761	0.0	98
+tags_5d/Result/Nested Loop/Hash Join/Hash/Seq Scan(_comment_staging)	73.2	303916	0	0	151453.0	79
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Hash Join/Seq Scan(_comment_staging)	72.0	332864	0	0	749529.0	90
+del_pb/ModifyTable(_post_batch)	71.4	727834	0	0	0.0	1094
+pr_wave_comments/ModifyTable(_post_results)/Merge Join/Sort/Seq Scan(_comment_staging)	71.0	208762	0	0	606689.0	60
+tags_5d/Result/Nested Loop/Append	69.3	0	0	0	988087.5399999999	189629
+hp_ins_comments/Nested Loop/Index Scan(hive_category_data)	67.4	202120	29	44	67383.0	67383
+hp_ins_root/Nested Loop/ModifyTable(hive_posts)/Subquery Scan/Sort/CTE Scan(new_posts)	66.7	30967	0	67122	22378.0	13
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop	66.0	749	0	660	176121.0	93
+edits_5b/ModifyTable(_post_results)/Nested Loop/Index Scan(_post_results)	59.8	274872	0	0	59050.0	59050
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Nested Loop/Index Scan(_post_results)	59.8	253188	0	0	59050.0	59050
+pr_wave_comments/ModifyTable(_post_results)/Sort	59.1	0	0	0	615566.0	996
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop	56.0	1245	0	7788	615566.0	996
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop	55.6	16908	0	33616	538219.0	996
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan/Aggregate/Aggregate/Append	55.2	0	0	0	1354556.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop	55.0	0	0	0	176121.0	93
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Index Scan(hive_posts)	55.0	221183	0	27904	43713.0	43713
+replay_pairs/ModifyTable(_replay_pairs)/Subquery Scan/Unique/Sort/Seq Scan(_comment_staging)	54.9	256954	0	0	34.0	66
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop	51.7	0	0	0	176121.0	93
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)	51.4	0	0	0	189629.0	98
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan/Unique	51.4	0	0	0	672414.0	90
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop	48.2	0	0	0	176121.0	93
+tags_5d/Result/Nested Loop/Hash Join	48.0	0	0	0	151418.0	79
+tags_5e/Result/Nested Loop/Nested Loop/Nested Loop/Seq Scan(_comment_staging)	46.7	86001	0	0	38220.0	19
+hp_ins_root/Hash Join/Subquery Scan	46.0	167264	1	502128	167251.0	85
+co_ops/ModifyTable(hive_posts)/Nested Loop	45.5	3	0	0	78744.0	98
+delete_hive_post/Result	44.9	9761	0	97013	149.0	149
+cs_ins/ModifyTable(_comment_staging)/Subquery Scan	41.9	0	0	0	792399.0	98
+pr_root/ModifyTable(_post_results)/Hash Join	40.0	0	0	0	173796.0	92
+tags_5d/Result/Nested Loop/Nested Loop/Index Scan(_post_results)	38.2	165988	0	0	38220.0	38220
+tags_5e/Result/Nested Loop/Nested Loop/Nested Loop/Index Scan(_post_results)	38.2	159065	0	0	38220.0	38220
+cs_norm/ModifyTable(_comment_staging)/Merge Join/Subquery Scan/Unique/Incremental Sort/Index Scan(_comment_staging)	38.1	169500	0	0	60729.0	8
+edits_5b/ModifyTable(_post_results)/Hash Join/Merge Join/Index Scan(_comment_staging)	37.8	242004	0	0	61805.0	12
+pb_ins_comments/ModifyTable(_post_batch)/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Function Scan(unnest)	37.7	0	0	0	615566.0	996
+permlink_ins/ModifyTable(hive_permlink_data)/Subquery Scan/Aggregate/Aggregate/Append/Index Only Scan(_comment_staging)	36.7	240549	0	0	98275.0	13
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	36.6	52967	1348	86774	13508.0	13508
+hp_ins_root/Hash Join/ModifyTable(hive_posts)/Subquery Scan/Sort	35.4	0	0	0	167251.0	85
+hp_ins_comments/Nested Loop/ModifyTable(hive_posts)/Subquery Scan	33.5	67383	0	202158	67383.0	112
+tags_5e/Result/Nested Loop/Nested Loop/Memoize/Subquery Scan/Limit/Sort/Index Scan(_comment_staging)	33.0	96814	0	0	5173.06	22378
+step7e/ModifyTable(_post_results)/Hash Join/Seq Scan(_post_results)	32.8	111543	0	0	97.0	97
+tags_5e/Result/Nested Loop/Hash Join/Hash	32.4	0	0	0	633854.0	79
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Merge Join/Index Scan(_comment_staging)	31.4	220518	0	0	53086.0	11
+hp_ins_comments/Hash Join/Hash	30.8	0	0	0	470836.0	884
+pr_wave_comments/ModifyTable(_post_results)/Merge Join	30.7	0	0	0	38965.0	60
+tags_5d/Result/Nested Loop/Nested Loop/Seq Scan(_comment_staging)	29.5	86001	0	0	38220.0	19
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	29.4	67540	0	0	13508.0	13508
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Nested Loop/Nested Loop	25.0	0	0	0	59050.0	92
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop	24.6	0	0	0	78746.0	98
+hp_ins_root/Hash Join/ModifyTable(hive_posts)/Subquery Scan	24.4	0	0	0	167251.0	85
+category_ins/ModifyTable(hive_category_data)/Subquery Scan/Aggregate	23.6	0	0	0	55566.0	98
+hp_ins_comments/Nested Loop/Bitmap Heap Scan(_post_batch)/Bitmap Index Scan(_post_batch_author_permlink_idx)	23.0	45986	0	0	23093.41	22993
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Subquery Scan/Unique/Sort	21.5	0	0	0	79241.0	98
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop	21.1	0	0	0	19711.0	79
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	19.6	22532	83	968	4523.0	4523
+cs_norm/ModifyTable(_comment_staging)/Merge Join/Index Scan(_comment_staging)	19.4	146485	0	0	60729.0	8
+simple_deletes/Aggregate/ModifyTable(hive_posts)	19.2	54046	0	2184975	4700.0	98
+step7e/ModifyTable(_post_results)/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Hash Join/Seq Scan(_comment_staging)	18.5	124898	0	0	90.0	90
+pr_root/ModifyTable(_post_results)/Sort	18.0	0	0	0	189629.0	98
+wave_count/Aggregate	16.9	0	0	0	1094.0	1094
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Memoize/Subquery Scan/Limit	16.9	0	0	0	19712.089999999993	151453
+edits_5c/ModifyTable(hive_posts)/Nested Loop	16.4	2116	0	3168	43713.0	98
+tags_5d/Result/Nested Loop/Hash Join/Hash	15.9	0	0	0	151453.0	79
+tags_5e/Result/Nested Loop/Nested Loop/Limit/Sort/Index Scan(_comment_staging)	15.8	65992	0	0	3566.57	15833
+hp_ins_root/Hash Join/Subquery Scan/Sort/Seq Scan(_post_batch)	15.6	38242	0	0	167251.0	85
+hp_ins_comments/Nested Loop/ModifyTable(hive_posts)/Subquery Scan/Sort	15.4	0	0	0	67383.0	112
+pr_root/ModifyTable(_post_results)/Merge Join/Sort	15.0	0	0	0	75942.0	12
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Index Scan(hive_posts)	14.1	23899	0	36336	4705.0	4705
+tags_5e/Result/Nested Loop	13.9	0	0	0	137911.0	98
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Subquery Scan	13.5	0	0	0	78746.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Index Scan(hive_category_data)	13.5	54032	0	0	13508.0	13508
+hp_ins_root/Hash Join/Hash/Seq Scan(_post_batch)	13.1	36086	0	0	151418.0	79
+del_create_pairs/Result/Unique/Sort/Hash Join/Index Scan(_ops_staging)	12.4	21585	0	0	11452.0	98
+hp_ins_root/Hash Join/Subquery Scan/Sort	12.2	0	0	0	167251.0	85
+category_ins/ModifyTable(hive_category_data)/Subquery Scan	12.1	55579	1	166617	55566.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan	12.0	0	0	0	189629.0	98
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Memoize	12.0	0	0	0	19712.089999999993	151453
+hp_ins_root/Hash Join/Hash	11.8	0	0	0	167251.0	85
+step7e/ModifyTable(_post_results)/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(_post_results)	11.4	54996	0	0	0.0	4
+edits_5b/ModifyTable(_post_results)/Nested Loop	11.4	0	0	0	59050.0	92
+cs_norm/ModifyTable(_comment_staging)/Merge Join	10.5	0	0	0	3.0	8
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Function Scan(unnest)	10.4	0	0	0	176121.0	93
+edits_5b/ModifyTable(_post_results)/Nested Loop/Nested Loop	10.4	0	0	0	59050.0	92
+tags_5e/Result/Nested Loop/Append	10.2	0	0	0	137903.56	25011
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	9.9	18091	1	4888	4523.0	4523
+cs_norm/ModifyTable(_comment_staging)/Merge Join/Subquery Scan/Unique/Incremental Sort	9.7	0	0	0	60729.0	8
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort	9.3	0	0	0	64360.0	98
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Hash Join/Index Scan(_comment_staging)	9.3	56060	0	0	26315.0	4
+hp_ins_comments/Hash Join/Seq Scan(_post_batch)	9.2	29032	0	0	38965.0	60
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan/Unique/Sort	9.0	0	0	0	37546.0	5
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(_ops_staging)	8.8	11614	0	0	4849.0	98
+tags_5e/Result/Nested Loop/Hash Join/Nested Loop/Memoize/Subquery Scan	8.7	0	0	0	19712.089999999993	151453
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Index Scan(hive_posts)	8.6	23007	0	192	4523.0	4523
+pr_root/ModifyTable(_post_results)/Merge Join/Sort/Seq Scan(_comment_staging)	8.0	20516	0	0	60116.0	6
+tags_5e/Result/Nested Loop/Nested Loop/Limit/Sort	7.9	0	0	0	2220.4500000000003	15833
+tags_5e/Result/Nested Loop/Nested Loop/Nested Loop	7.8	0	0	0	38211.0	19
+simple_deletes/Aggregate/ModifyTable(hive_post_tags)/Nested Loop/Index Scan(hive_post_tags)	7.7	19383	41	6012	5358.300000000001	4700
+pr_root/ModifyTable(_post_results)/Merge Join	7.7	0	0	0	15833.0	6
+cs_norm/ModifyTable(_comment_staging)/Merge Join/Subquery Scan	7.6	0	0	0	55508.0	8
+step7e/ModifyTable(_post_results)/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Seq Scan(_post_results)	7.5	20304	0	0	0.0	4
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Subquery Scan/Unique	6.8	0	0	0	78746.0	98
+cs_norm/ModifyTable(_comment_staging)/Hash Join/Hash/Subquery Scan/Unique/Sort/Seq Scan(_comment_staging)	6.6	17641	0	0	37546.0	5
+del_create_pairs/Result/Unique/Sort/Hash Join	6.6	3886	0	0	130.0	98
+tags_5e/Result/Nested Loop/Nested Loop/Memoize/Subquery Scan/Limit	6.2	0	0	0	3116.79	22378
+hp_ins_root/Nested Loop/Subquery Scan	6.0	22378	0	67122	22378.0	13
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Nested Loop/Nested Loop	5.7	145	0	4796	13508.0	5
+hp_ins_root/Nested Loop/Bitmap Heap Scan(_post_batch)/Bitmap Index Scan(_post_batch_author_permlink_idx)	5.6	15680	0	0	8340.41	7840
+tags_5e/Result/Nested Loop/Nested Loop/Memoize/Subquery Scan/Limit/Sort	5.6	0	0	0	3116.79	22378
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Nested Loop	5.5	0	0	0	13508.0	5
+tags_5e/Result/Nested Loop/Nested Loop/Limit	5.5	0	0	0	2220.4500000000003	15833
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan	5.3	0	0	0	43713.0	98
+simple_deletes/Aggregate/ModifyTable(hive_reblogs)/Nested Loop/Index Scan(hive_reblogs)	5.3	14093	9	0	2.1	4700
+tags_5e/Result/Nested Loop/Nested Loop	5.2	0	0	0	5306.0	19
+co_ops/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop	5.1	1	0	0	78746.0	98
+edits_5b/ModifyTable(_post_results)/Hash Join/Hash/Seq Scan(_post_results)	5.1	17482	0	0	54798.0	6
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Hash/Seq Scan(_post_results)	4.8	18040	0	0	60108.0	6
+hp_ins_root/Nested Loop/ModifyTable(hive_posts)/Subquery Scan/Sort	4.8	0	0	0	22378.0	13
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Result/Limit/Index Only Scan(hive_posts)	4.7	24777	0	256	4700.0	4700
+tags_5d/Result/Nested Loop/Nested Loop	4.5	0	0	0	38211.0	19
+cs_norm/ModifyTable(_comment_staging)/Merge Join/Subquery Scan/Unique	4.3	0	0	0	55508.0	8
+hp_ins_root/Nested Loop/ModifyTable(hive_posts)/Subquery Scan	4.0	0	0	0	22378.0	13
+edits_5b/ModifyTable(_post_results)/Hash Join/Hash	3.9	0	0	0	54798.0	6
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique	3.8	0	0	0	43713.0	98
+tags_5e/Result/Nested Loop/Hash Join	3.7	0	0	0	19705.0	79
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Merge Join	3.6	0	0	0	5310.0	6
+edits_5b/ModifyTable(_post_results)/Hash Join/Merge Join	3.6	0	0	0	5310.0	6
+step7e/ModifyTable(_post_results)/Nested Loop/CTE Scan(unmuted_posts)	3.3	14200	0	0	0.0	1
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Nested Loop/Nested Loop/Nested Loop	3.2	0	0	0	176121.0	93
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop	3.1	0	0	0	4705.0	98
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Hash	3.0	0	0	0	60108.0	6
+replay_pairs/ModifyTable(_replay_pairs)/Subquery Scan/Aggregate/Seq Scan(_comment_staging)	2.9	13633	0	0	0.0	3
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Nested Loop	2.8	0	0	0	59050.0	92
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Index Scan(_ops_staging)	2.5	8602	0	0	148.0	69
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Merge Join/Materialize/Index Scan(_comment_staging)	2.5	19504	0	0	8469.0	1
+replay_loop/Sort/Append/Nested Loop/Index Scan(_ops_staging)	2.3	8279	0	0	3396.0	66
+hp_ins_root/Nested Loop/Bitmap Heap Scan(_post_batch)	2.2	8328	0	0	7840.0	7840
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop	2.1	167	0	0	4700.0	98
+hp_ins_root/Nested Loop/Subquery Scan/Sort/Seq Scan(_post_batch)	2.0	8589	0	0	22378.0	13
+process_hive_post_op/ModifyTable(_post_results)	1.8	1084	0	0	0.0	191
+simple_deletes/Aggregate/ModifyTable(hive_post_tags)	1.7	10939	0	291154	5359.0	98
+replay_pairs/ModifyTable(_replay_pairs)	1.7	549	0	0	0.0	232
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop	1.5	0	0	0	4705.0	98
+replay_loop/Sort/Append/Nested Loop	1.5	0	0	0	144.0	66
+hp_ins_root/Nested Loop/Subquery Scan/Sort	1.4	0	0	0	22378.0	13
+simple_deletes/Aggregate/ModifyTable(hive_feed_cache)/Nested Loop	1.3	0	0	0	0.0	98
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop	1.3	154	0	0	4705.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join	1.3	0	0	0	13508.0	5
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join	1.2	0	0	0	13508.0	5
+simple_deletes/Aggregate/ModifyTable(hive_post_tags)/Nested Loop	1.2	0	0	0	5359.0	98
+hp_ins_root/Hash Join/Seq Scan(_post_batch)	1.0	2156	0	0	15833.0	6
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop	0.9	3	0	0	4705.0	98
+simple_deletes/Aggregate/ModifyTable(hive_post_tags)/Nested Loop/Aggregate	0.9	0	0	0	4700.0	98
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop/Nested Loop/Nested Loop/Function Scan(unnest)	0.8	0	0	0	13508.0	5
+edits_5b/ModifyTable(_post_results)/Hash Join	0.8	0	0	0	5310.0	6
+cs_norm/ModifyTable(_comment_staging)	0.7	430	0	0	0.0	98
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_permlink_data)	0.7	909	1	0	182.0	182
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join/Merge Join/Materialize	0.7	0	0	0	8719.0	1
+simple_deletes/Aggregate/ModifyTable(hive_reblogs)/Nested Loop/Aggregate	0.7	0	0	0	4700.0	98
+edits_5c/ModifyTable(hive_posts)/Nested Loop/Subquery Scan/Unique/Sort/Hash Join	0.6	0	0	0	5310.0	6
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_posts)	0.5	917	0	1570	182.0	182
+simple_deletes/Aggregate/ModifyTable(hive_post_tags)/Nested Loop/Aggregate/CTE Scan(updated_posts)	0.5	0	0	0	4700.0	98
+simple_deletes/Aggregate/ModifyTable(hive_feed_cache)/Nested Loop/CTE Scan(updated_posts)	0.4	0	0	0	4700.0	98
+simple_deletes/Aggregate/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Nested Loop/Index Scan(hive_accounts)	0.4	728	0	150	182.0	182
+simple_deletes/Aggregate/ModifyTable(hive_reblogs)/Nested Loop/Aggregate/CTE Scan(updated_posts)	0.4	0	0	0	4700.0	98
+replay_loop/Sort/Append/Nested Loop/Index Only Scan(_replay_pairs)	0.3	3544	0	0	143.87999999999997	3396
+del_create_pairs/Result	0.3	0	0	0	98.0	98
+del_rp/ModifyTable(_replay_pairs)/Seq Scan(_replay_pairs)	0.3	85	0	0	148.0	98
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate	0.3	0	0	0	191.0	163
+permlink_ins/ModifyTable(hive_permlink_data)/Result	0.3	191	0	990	191.0	191
+replay_loop/Sort	0.3	0	0	0	340.0	69
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort	0.3	0	0	0	220.0	163
+ineff_keys/Aggregate/Index Scan(_ops_staging)	0.3	252	0	0	0.0	98
+simple_deletes/Aggregate/ModifyTable(hive_reblogs)/Nested Loop	0.2	0	0	0	2.0	98
+del_create_pairs/Result/Unique/Sort	0.2	0	0	0	130.0	98
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Hash Join/Hash/Seq Scan(_replay_pairs)	0.2	94	0	0	211.0	94
+category_ins/ModifyTable(hive_category_data)/Result	0.2	157	0	594	157.0	157
+pb_ins_root/ModifyTable(_post_batch)/Subquery Scan/CTE Scan(with_muting)/Hash Join/Hash Join/Nested Loop	0.1	0	0	0	13508.0	5
+replay_pairs/ModifyTable(_replay_pairs)/Aggregate/Sort/Hash Join/Hash	0.1	0	0	0	211.0	94
+ineff_keys/Aggregate	0.1	0	0	0	98.0	98
+replay_pairs/ModifyTable(_replay_pairs)/Subquery Scan/Unique/Sort	0.1	0	0	0	34.0	66
+step7e/ModifyTable(_post_results)/Hash Join	0.1	0	0	0	0.0	97
+step7e/ModifyTable(_post_results)/ModifyTable(hive_posts)/Nested Loop/Nested Loop/Nested Loop/Hash Join	0.1	0	0	0	0.0	90
+replay_loop/Sort/Append	0.1	0	0	0	340.0	69
+del_rp/ModifyTable(_replay_pairs)	0.1	148	0	0	0.0	98

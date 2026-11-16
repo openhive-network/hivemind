@@ -1,0 +1,182 @@
+## hp_ins_root: median of 98 instances, 18.377 ms
+WITH new_posts AS MATERIALIZED (
+        -- A root post is its own root: take its id from the sequence here, in
+        -- seq_id order and once per row (edits included) as the column default
+        -- would, so root_id can be set in the same INSERT.
+        SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id, pb.*
+        FROM (SELECT * FROM hivemind_app._post_batch ORDER BY seq_id) pb
+    ),
+    inserted AS (
+        INSERT INTO hivemind_app.hive_posts AS hp
+            (id, parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+             active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
+        SELECT
+            wm.id,
+            0, -- parent_id
+            0, -- depth
+            wm.community_id,
+            wm.category_id,
+            wm.id, -- root_id
+            wm.is_muted,
+            TRUE, -- is_valid
+            wm.author_id,
+            wm.permlink_id,
+            wm.date,
+            wm.date,
+            hivemind_app.calculate_time_part_of_hot(wm.date),
+            hivemind_app.calculate_time_part_of_trending(wm.date),
+            wm.date, -- active
+            wm.date + INTERVAL '7 days', -- payout_at
+            wm.date + INTERVAL '7 days', -- cashout_time
+            0, -- counter_deleted
+            wm.block_num,
+            wm.block_num, -- block_num_created
+            wm.muted_reasons
+        FROM new_posts wm
+        ORDER BY wm.seq_id
+        ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+            updated_at = EXCLUDED.updated_at,
+            active = EXCLUDED.active,
+            block_num = EXCLUDED.block_num
+        RETURNING
+            (xmax = 0) AS is_new_post,
+            hp.id,
+            hp.author_id,
+            hp.permlink_id,
+            hp.parent_id,
+            hp.community_id,
+            hp.is_valid,
+            hp.is_muted,
+            hp.depth,
+            hp.muted_reasons
+    )
+    SELECT
+        wm.seq_id,
+        ins.is_new_post,
+        ins.id,
+        ins.author_id,
+        ins.permlink_id,
+        wm.parent_permlink::VARCHAR AS post_category,
+        ins.parent_id,
+        0, -- parent_author_id (root posts have no parent author)
+        ins.community_id,
+        ins.is_valid,
+        ins.is_muted,
+        ins.depth,
+        ins.muted_reasons
+    FROM inserted ins
+    INNER JOIN hivemind_app._post_batch wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id
+
+Hash Join Inner  (est rows=1) (actual time=18.112 rows=1874.0 loops=1) hit=22838 read=0 dirtied=144 wal=906205B/7012rec
+     Hash Cond: ((ins.author_id = wm.author_id) AND (ins.permlink_id = wm.permlink_id))
+  -> Subquery Scan  (est rows=1134) (actual time=0.940 rows=1874.0 loops=1) hit=2649 read=0 dirtied=0 wal=5643B/57rec
+    -> Sort  (est rows=1134) (actual time=0.435 rows=1874.0 loops=1) hit=775 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Seq Scan on _post_batch  (est rows=1134) (actual time=0.295 rows=1874.0 loops=1) hit=775 read=0 dirtied=0
+  -> ModifyTable on hive_posts  (est rows=1134) (actual time=17.017 rows=1874.0 loops=1) hit=22063 read=0 dirtied=144 wal=906205B/7012rec
+       Conflict Resolution: UPDATE
+       Conflict Arbiter Indexes: ['hive_posts_ux1']
+       Tuples Inserted: 1500
+       Conflicting Tuples: 374
+    -> Subquery Scan  (est rows=1134) (actual time=6.439 rows=1874.0 loops=1) hit=2649 read=0 dirtied=0 wal=5643B/57rec
+      -> Sort  (est rows=1134) (actual time=6.165 rows=1874.0 loops=1) hit=2649 read=0 dirtied=0 wal=5643B/57rec
+           Sort Method: quicksort
+        -> CTE Scan on new_posts  (est rows=1134) (actual time=5.757 rows=1874.0 loops=1) hit=2649 read=0 dirtied=0 wal=5643B/57rec
+  -> CTE Scan on inserted  (est rows=1134) (actual time=17.409 rows=1874.0 loops=1) hit=22063 read=0 dirtied=144 wal=906205B/7012rec
+  -> Hash  (est rows=1134) (actual time=0.343 rows=1874.0 loops=1) hit=775 read=0 dirtied=0
+       Hash Batches: 1
+       Peak Memory Usage: 115
+    -> Seq Scan on _post_batch  (est rows=1134) (actual time=0.225 rows=1874.0 loops=1) hit=775 read=0 dirtied=0
+
+## hp_ins_root: slowest of 98 instances, 564.844 ms
+WITH new_posts AS MATERIALIZED (
+        -- A root post is its own root: take its id from the sequence here, in
+        -- seq_id order and once per row (edits included) as the column default
+        -- would, so root_id can be set in the same INSERT.
+        SELECT nextval('hivemind_app.hive_posts_id_seq')::INTEGER AS id, pb.*
+        FROM (SELECT * FROM hivemind_app._post_batch ORDER BY seq_id) pb
+    ),
+    inserted AS (
+        INSERT INTO hivemind_app.hive_posts AS hp
+            (id, parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+             active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
+        SELECT
+            wm.id,
+            0, -- parent_id
+            0, -- depth
+            wm.community_id,
+            wm.category_id,
+            wm.id, -- root_id
+            wm.is_muted,
+            TRUE, -- is_valid
+            wm.author_id,
+            wm.permlink_id,
+            wm.date,
+            wm.date,
+            hivemind_app.calculate_time_part_of_hot(wm.date),
+            hivemind_app.calculate_time_part_of_trending(wm.date),
+            wm.date, -- active
+            wm.date + INTERVAL '7 days', -- payout_at
+            wm.date + INTERVAL '7 days', -- cashout_time
+            0, -- counter_deleted
+            wm.block_num,
+            wm.block_num, -- block_num_created
+            wm.muted_reasons
+        FROM new_posts wm
+        ORDER BY wm.seq_id
+        ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+            updated_at = EXCLUDED.updated_at,
+            active = EXCLUDED.active,
+            block_num = EXCLUDED.block_num
+        RETURNING
+            (xmax = 0) AS is_new_post,
+            hp.id,
+            hp.author_id,
+            hp.permlink_id,
+            hp.parent_id,
+            hp.community_id,
+            hp.is_valid,
+            hp.is_muted,
+            hp.depth,
+            hp.muted_reasons
+    )
+    SELECT
+        wm.seq_id,
+        ins.is_new_post,
+        ins.id,
+        ins.author_id,
+        ins.permlink_id,
+        wm.parent_permlink::VARCHAR AS post_category,
+        ins.parent_id,
+        0, -- parent_author_id (root posts have no parent author)
+        ins.community_id,
+        ins.is_valid,
+        ins.is_muted,
+        ins.depth,
+        ins.muted_reasons
+    FROM inserted ins
+    INNER JOIN hivemind_app._post_batch wm ON wm.author_id = ins.author_id AND wm.permlink_id = ins.permlink_id
+
+Nested Loop Inner  (est rows=1) (actual time=564.511 rows=1978.0 loops=1) hit=3873131 read=0 dirtied=24 wal=928932B/7355rec
+     Join Filter: ((wm.author_id = ins.author_id) AND (wm.permlink_id = ins.permlink_id))
+     Rows Removed by Join Filter: 3910506
+  -> Subquery Scan  (est rows=1) (actual time=0.787 rows=1978.0 loops=1) hit=2364 read=0 dirtied=0 wal=5940B/60rec
+    -> Sort  (est rows=1) (actual time=0.249 rows=1978.0 loops=1) hit=386 read=0 dirtied=0
+         Sort Method: quicksort
+      -> Seq Scan on _post_batch  (est rows=1) (actual time=0.102 rows=1978.0 loops=1) hit=386 read=0 dirtied=0
+  -> ModifyTable on hive_posts  (est rows=1) (actual time=18.775 rows=1978.0 loops=1) hit=23943 read=0 dirtied=24 wal=928932B/7355rec
+       Conflict Resolution: UPDATE
+       Conflict Arbiter Indexes: ['hive_posts_ux1']
+       Tuples Inserted: 1592
+       Conflicting Tuples: 386
+    -> Subquery Scan  (est rows=1) (actual time=6.629 rows=1978.0 loops=1) hit=2364 read=0 dirtied=0 wal=5940B/60rec
+      -> Sort  (est rows=1) (actual time=6.243 rows=1978.0 loops=1) hit=2364 read=0 dirtied=0 wal=5940B/60rec
+           Sort Method: quicksort
+        -> CTE Scan on new_posts  (est rows=1) (actual time=5.827 rows=1978.0 loops=1) hit=2364 read=0 dirtied=0 wal=5940B/60rec
+  -> CTE Scan on inserted  (est rows=1) (actual time=19.201 rows=1978.0 loops=1) hit=23943 read=0 dirtied=24 wal=928932B/7355rec
+  -> Index Scan on _post_batch using _post_batch_author_permlink_idx  (est rows=1) (actual time=0.212 rows=1978.0 loops=1978) hit=3849188 read=0 dirtied=0
+

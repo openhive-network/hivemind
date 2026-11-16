@@ -1,0 +1,12 @@
+## del_rp: median of 98 instances, 0.004 ms
+DELETE FROM hivemind_app._replay_pairs
+
+ModifyTable on _replay_pairs  (est rows=0) (actual time=0.004 rows=0.0 loops=1) hit=4 read=0 dirtied=0
+  -> Seq Scan on _replay_pairs  (est rows=890) (actual time=0.003 rows=3.0 loops=1) hit=1 read=0 dirtied=0
+
+## del_rp: slowest of 98 instances, 0.008 ms
+DELETE FROM hivemind_app._replay_pairs
+
+ModifyTable on _replay_pairs  (est rows=0) (actual time=0.008 rows=0.0 loops=1) hit=3 read=0 dirtied=0
+  -> Seq Scan on _replay_pairs  (est rows=810) (actual time=0.007 rows=2.0 loops=1) hit=1 read=0 dirtied=0
+
