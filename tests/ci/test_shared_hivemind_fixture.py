@@ -390,6 +390,89 @@ def test_revision_miss_requests_a_seed_and_skips(tree: Path, tmp_path: Path, mon
     assert not any('clone_run_database' in call['sql'] for call in calls)
 
 
+@pytest.mark.parametrize(
+    ('committed', 'requested'),
+    [((REV_B, RECIPE_A), True), ((REV_A, RECIPE_A), False), ((REV_B, RECIPE_B), False), ((None, RECIPE_A), False)],
+)
+def test_a_seed_is_requested_only_when_heads_committed_tree_yields_the_trees_revision_and_recipe(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], committed: tuple[Any, str], requested: bool
+) -> None:
+    tavern = _load_tavern()
+    head = 'c' * 40
+    keys: list[tuple[str, str]] = []
+    seeds: list[dict[str, str]] = []
+
+    def committed_fixture_key(commit: str, haf: str) -> tuple[Any, str]:
+        keys.append((commit, haf))
+        return committed
+
+    def psql(url: str, sql: str, **variables: str) -> str:
+        seeds.append(variables)
+        return 'pending'
+
+    monkeypatch.setattr(tavern, '_head_commit', lambda: head)
+    monkeypatch.setattr(tavern, '_committed_fixture_key', committed_fixture_key)
+    monkeypatch.setattr(tavern, '_psql', psql)
+
+    unrequested = tavern._request_seed('postgresql://provider', REV_B, RECIPE_A, HAF)
+
+    out = capsys.readouterr().out
+    assert keys == [(head, HAF)]
+    if requested:
+        assert unrequested is None
+        assert seeds == [{'rev': REV_B, 'recipe': RECIPE_A, 'commit': head}]
+        assert 'uncommitted' not in out
+    else:
+        assert unrequested == "the tree's schema or sync recipe is uncommitted"
+        assert seeds == []
+        assert 'the tree has uncommitted changes to the schema or sync recipe' in out
+        assert 'seeded when the change is committed and its gate runs' in out
+
+
+def test_an_uncommitted_revision_change_skips_without_a_seed_request_and_requests_it_once_committed(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    rev_c = 'c' * 40
+    (tree / PATCHLEVEL).write_text(_patchlevel(REV_A, REV_B, rev_c))
+    recipe = fixture.recipe_of_tree(str(tree), HAF)
+    monkeypatch.setenv('FAKE_TEMPLATES', f'{REV_B}:{recipe}')
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    assert rc == SKIP
+    assert any(line.startswith('the tree has uncommitted changes to the schema or sync recipe') for line in lines)
+    assert lines[-1] == (
+        f"no hivemind fixture for schema revision {rev_c}; seeding not requested "
+        "(the tree's schema or sync recipe is uncommitted)"
+    )
+    assert not any('request_seed(:' in call['sql'] for call in calls)
+
+    _commit(tree, PATCHLEVEL)
+    Path(os.environ['FAKE_PSQL_LOG']).unlink()
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    assert rc == SKIP
+    assert lines[-1] == f'no hivemind fixture for schema revision {rev_c}; seeding requested'
+    seeds = [call['vars'] for call in calls if 'request_seed(:' in call['sql']]
+    assert seeds == [{'rev': rev_c, 'recipe': recipe, 'commit': _git(tree, 'rev-parse', 'HEAD')}]
+
+
+def test_an_uncommitted_recipe_change_falls_back_without_a_seed_request(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tree / PATCHLEVEL).write_text(_patchlevel(REV_A, REV_B) + '-- an edit\n')
+    recipe = fixture.recipe_of_tree(str(tree), HAF)
+    monkeypatch.setenv('FAKE_TEMPLATES', f'{REV_B}:{RECIPE_B}')
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out')
+
+    unrequested = "the tree's schema or sync recipe is uncommitted"
+    assert fixture.fallback_message(_template(REV_B, RECIPE_B), recipe, requested=False, why_not=unrequested) in lines
+    assert not any('request_seed(:' in call['sql'] for call in calls)
+    assert rc == 2
+
+
 def test_a_recipe_miss_clones_the_newest_of_the_revision_with_an_advisory_and_requests_the_exact_seed(
     tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

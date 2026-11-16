@@ -10,7 +10,8 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
 1. reads this tree's schema revision (update_db_patchlevel.sql) and sync recipe
    (shared_fixture.py, on project.yaml's HAF_FIXTURE_COMMIT) and picks the
    template seeded for both. Without one it asks the provider to seed it
-   (request_seed) and takes the newest template of the revision instead, with
+   (request_seed) from HEAD, when HEAD's committed tree yields the same revision
+   and recipe (uncommitted schema or recipe edits get no request), and takes the newest template of the revision instead, with
    an advisory: its data is schema-compatible but synced by another recipe.
    With no template of the revision it exits SKIP: a missing fixture is the
    host environment's, not the change's;
@@ -190,10 +191,40 @@ def _head_commit() -> str | None:
     return commit if proc.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", commit) else None
 
 
-def _request_seed(api_url: str, revision: str, recipe: str) -> bool:
+def _committed_fixture_key(commit: str, haf_commit: str) -> tuple[str | None, str]:
+    """The schema revision (None when it names none) and sync recipe on
+    `haf_commit` of `commit`'s committed tree. Raises RecipeError when git
+    cannot read the tree."""
+    patchlevel = subprocess.run(
+        ["git", "-C", ROOT, "show", f"{commit}:{shared_fixture.PATCHLEVEL_SQL}"], capture_output=True, text=True
+    )
+    git_dir = subprocess.run(["git", "-C", ROOT, "rev-parse", "--absolute-git-dir"], capture_output=True, text=True)
+    if git_dir.returncode != 0:
+        raise shared_fixture.RecipeError(f"git rev-parse --absolute-git-dir: {git_dir.stderr.strip()}")
+    recipe = shared_fixture.recipe_of_commit(git_dir.stdout.strip(), commit, haf_commit)
+    revision = shared_fixture.revision(patchlevel.stdout) if patchlevel.returncode == 0 else None
+    return revision, recipe
+
+
+def _request_seed(api_url: str, revision: str, recipe: str, haf_commit: str) -> str | None:
+    """Asks the provider to seed (`revision`, `recipe`) from HEAD, only when
+    HEAD's committed tree yields both: the seeder syncs the commit, not this
+    working tree. Returns None when it asked, else why it did not."""
     commit = _head_commit()
     if commit is None:
-        return False
+        return "the checkout has no commit"
+    try:
+        committed = _committed_fixture_key(commit, haf_commit)
+    except shared_fixture.RecipeError as err:
+        print(f"no sync recipe of HEAD {commit}, so no seed was requested: {err}")
+        return "HEAD has no sync recipe"
+    if committed != (revision, recipe):
+        print(
+            f"the tree has uncommitted changes to the schema or sync recipe (HEAD {commit[:12]} yields "
+            f"{committed[0]}/{committed[1][:12]}), so no seed was requested; the fixture is seeded "
+            "when the change is committed and its gate runs"
+        )
+        return "the tree's schema or sync recipe is uncommitted"
     state = _psql(
         api_url,
         "select hivemind_shared.request_seed(:'rev', :'recipe', :'commit');",
@@ -202,7 +233,7 @@ def _request_seed(api_url: str, revision: str, recipe: str) -> bool:
         commit=commit,
     )
     print(f"seed request for {commit}: {state}")
-    return True
+    return None
 
 
 def _reload_sql(run_url: str, log_path: str) -> None:
@@ -379,11 +410,13 @@ def main(out: str, selectors: list[str]) -> int:
     print(f"schema revision {revision}, sync recipe {recipe}; templates: {listed}")
     template = shared_fixture.select_template(templates, revision, recipe)
     if template is None or template.recipe != recipe:
-        requested = _request_seed(api_url, revision, recipe)
+        unrequested = _request_seed(api_url, revision, recipe, haf_commit)
+        requested = unrequested is None
+        why_not = unrequested or ""
         if template is None:
-            print(shared_fixture.miss_message(revision, requested=requested))
+            print(shared_fixture.miss_message(revision, requested=requested, why_not=why_not))
             return SKIP
-        print(shared_fixture.fallback_message(template, recipe, requested=requested))
+        print(shared_fixture.fallback_message(template, recipe, requested=requested, why_not=why_not))
 
     run_id = shared_fixture.new_run_id("tavern")
     database = _psql(
