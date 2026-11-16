@@ -1264,51 +1264,6 @@
     "blacklists": [
       "my blacklist"
     ],
-    "body": "True, as well as encouraging others to try to do the same :-)",
-    "category": "stats",
-    "children": 0,
-    "created": "2016-09-15T14:11:09",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 5,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "stats"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 0,
-    "parent_author": "arcange",
-    "parent_permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
-    "payout": 0.0,
-    "payout_at": "2016-09-22T14:11:09",
-    "pending_payout_value": "0.000 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": true,
-      "hide": false,
-      "muted_reasons": [
-        3
-      ],
-      "total_votes": 0
-    },
-    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
-    "updated": "2016-09-15T14:11:09",
-    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@gtg/re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z"
-  },
-  {
-    "active_votes": [],
-    "author": "gtg",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 57.34,
-    "beneficiaries": [],
-    "blacklists": [
-      "my blacklist"
-    ],
     "body": "Steem platform is currently very, very small. Witnesses plays very important role and it would get a lot harder when Steem would grow. Every minute they are in \"if\" condition.\nI like current scheme. I think it would make more sense over time.\nOf course, you are right, difference between potential earnings of top19 and backup witnesses is huge but so it is with their responsibilities.\nPlease take a look how many witnesses are really capable of running their nodes effectively.\nI'm not saying that backup witnesses have to set their feed price or take care about keeping their nodes up to date or online at all. They don't have to. That's why they shouldn't be overpaid.\n\nTaking a look at current top 100.\n47 of them (more than a half of backup witnesses) never set their feed price (some of them might not even know how to do that) or have it heavily outdated. 28 are not even able to generate blocks.\n\nYes, running a backup witness is not profitable and shouldn't be.\nYes, I'm a backup witness :-) (to those who do not know that)\n\n[Gandalf](https://steemit.com/@gtg) (\"gtg\")",
     "category": "steemit",
     "children": 1,
@@ -1347,6 +1302,51 @@
     "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
     "updated": "2016-09-15T18:43:51",
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@gtg/re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z"
+  },
+  {
+    "active_votes": [],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [
+      "my blacklist"
+    ],
+    "body": "True, as well as encouraging others to try to do the same :-)",
+    "category": "stats",
+    "children": 0,
+    "created": "2016-09-15T14:11:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 5,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "stats"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "arcange",
+    "parent_permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T14:11:09",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        3
+      ],
+      "total_votes": 0
+    },
+    "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
+    "updated": "2016-09-15T14:11:09",
+    "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@gtg/re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z"
   },
   {
     "active_votes": [],

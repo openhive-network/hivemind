@@ -850,6 +850,17 @@ BEGIN
       -- account must match auth
       AND rd.data->>'account' = rd.auth_account;
 
+    -- One block at a time an op resolves the post version live at the end of its block.
+    -- An op of a block before the live version was created targets an earlier version,
+    -- whose rows the posts phase has removed, or no post at all: it leaves the live
+    -- version's row alone.
+    DELETE FROM hivemind_app._reblog_ops r
+    USING hivemind_app.hive_accounts ha, hivemind_app.hive_permlink_data hpd, hivemind_app.hive_posts hp
+    WHERE ha.name = r.author
+      AND hpd.permlink = r.permlink
+      AND hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+      AND r.block_num < hp.block_num_created;
+
     -- The op per (author, permlink, account) whose row the batch leaves, as the ops one
     -- block at a time leave it: the batch's last delete when no create follows it, else
     -- the first create after it (a later create finds that row and keeps it, its block

@@ -1,15 +1,5 @@
 [
   {
-    "author": "test-safari",
-    "permlink": "reblogged-and-recreated",
-    "reblogged": true
-  },
-  {
-    "author": "test-safari",
-    "permlink": "muted-and-recreated",
-    "reblogged": false
-  },
-  {
     "author": "good-karma",
     "permlink": "spider02",
     "reblogged": false
@@ -27,6 +17,16 @@
   {
     "author": "abit",
     "permlink": "anaconda01",
+    "reblogged": false
+  },
+  {
+    "author": "test-safari",
+    "permlink": "reblogged-and-recreated",
+    "reblogged": true
+  },
+  {
+    "author": "test-safari",
+    "permlink": "muted-and-recreated",
     "reblogged": false
   },
   {

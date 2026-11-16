@@ -160,3 +160,51 @@ sequence's last value, so later posts sort after them. A rebuild gives every pos
 A first version filtered each candidate notification through a SQL function holding
 subqueries, which PostgreSQL does not inline: about 10 µs a row, notify 39.5 s. The writers now join the
 accounts the batch's mute changes touch, and call `notification_muted_at` only for those rows.
+
+## Tavern on #482's data, checked one block at a time (#484)
+
+The tavern fixture (HAF 5M, CI's mocks, a sync to 5,000,024 with `--community-start-block 4998000`) synced
+by #482's code (shared template `f8835692220e`) failed 21 condenser, 34 bridge, 4 REST and 30 REST-equivalence
+tests. Runs on steem-18, each a database cloned from one install as `.aidev/shared-hivemind/seed.sh` makes it:
+the default sync (10000 blocks a batch; the 45 blocks past HAF's irreversible head, 4,999,980–5,000,024, run
+live, one at a time, in every run) and the same sync killed in batch 4,950,001–4,960,000 and restarted with
+`--max-batch=1` (39,979 one-block batches to 4,999,979). `fidelity_dump.sql` dumps both.
+
+**Mock order.** The mocker loaded `mock_data/**/*.json` in directory order, and 22 blocks
+(4,998,001–4,998,014, 4,999,999, 5,000,010–5,000,021) take ops from several files, so the account, post and
+notification ids of the mocks depended on the filesystem: a checkout on steem-18's tmpfs put the reblog mocks
+before the community ones and gave other ids than the shared template. It now loads them in path order. On
+every multi-file block that is the order the seeder's checkout had: with it the default sync gives the
+template's data exactly (every `hivemind_app` table but the install timestamps and `hive_mentions.id`).
+
+**Checks of the refreshed values.**
+- Post ids: on the template, for all 961,423 posts the comment op ranked `id` among HAF's 1,258,142 comment
+  ops up to 5,000,024 is a comment by the post's author and permlink in its creation block.
+- Lists ordered by post id (`created`, comments, replies and their paging) hold posts in chain order: no
+  refreshed one has a `created` inversion, the old patterns 1–2 each. Apart from the reblog counts below, no
+  post common to an old and a new pattern changed a value; posts left or entered pages and pages reordered.
+- Reply notification ids: the 18 changed ids (gtg, dantheman, test-safari, steve-walschot, venuspcs) carry the
+  reply's rank among its block's new replies in HAF operation order (the old ids, roots first, did not).
+  `post_notifications/account_permlink_last_it_votes` pages from `last_id` 3267314820579330, which is now the
+  mafia reply's own id, so the page starts after it.
+- One block at a time: the restarted run gives the default run's posts, votes, mentions, post data and post
+  ids, and serves every refreshed value; the one refreshed pattern failing on it,
+  `account_notifications/test-safari`, differs only in community notifications the refresh left as they were.
+
+**Reblogs of a post before it exists.** One block at a time a reblog resolves the post version live at the end
+of its block, and finds nothing before the post is created. The batch resolved every reblog at the end of the
+batch: funny's reblog of dollarvigilante's post (4,998,001, the post is created at 4,998,413) and
+test-reblog-03's of test-creator/reblogged-post (4,998,003, created at 4,998,008) became rows, notifications
+and feed entries. `process_reblogs_from_staging` now drops the ops of blocks before the live version was
+created; 36 reblogs became 34, as one block at a time, and 26 tavern patterns (and 2 search-api ones) take the
+one-block values: `reblogs` counts, funny's blog and the feeds that showed the reblog, and the counter of
+funny's reblog notification of steemit/firstpost in the same block.
+
+**Still different one block at a time** (values this refresh leaves as they were; 17 bridge tests and 3
+REST twins fail on the one-block run):
+- reblog notifications of rows the batch never keeps: a reblog undone later in the batch (test-116, 4 rows)
+  and reblogs of a version deleted later in the batch (monkey-02, monkey-04, parrot-04, 4 rows), which one block
+  at a time notifies; `unread_notifications` abit and min_score count them;
+- community ops: moderation log and moderator activity entries (ids and rows), test-safari's community
+  notifications (score 35 in the batch, 15 one block at a time), two muted-post errors and
+  blocktrades/elephant01#1's `is_muted`.

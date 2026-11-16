@@ -6,12 +6,6 @@
     "voted": false
   },
   {
-    "author": "future24",
-    "permlink": "pyronale-berlin-2016-amazing-fireworks-impressions-part-3-english-german",
-    "vote_percent": 2900,
-    "voted": true
-  },
-  {
     "author": "ejaredallen",
     "permlink": "wanna-see-something-cool",
     "vote_percent": 0,
@@ -56,6 +50,12 @@
   {
     "author": "gidlark",
     "permlink": "environment-10-cloud-okruzhayushaya-sreda-10-oblaka",
+    "vote_percent": 0,
+    "voted": false
+  },
+  {
+    "author": "zaitsevalesyaa",
+    "permlink": "the-art-of-origami-bird-swan",
     "vote_percent": 0,
     "voted": false
   }
