@@ -19,7 +19,8 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
-from hive.indexer.hive_db.haf_functions import set_massive_sync_batch_blocks
+from hive.indexer.hive_db.haf_functions import set_massive_sync_batch_blocks, stage_batch_blocks
+from hive.indexer.ops_prefetch import OpsPrefetch
 from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
@@ -59,6 +60,7 @@ class SyncHiveDb:
 
         self._massive_consume_blocks_futures: Future[int] | None = None
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
+        self._ops_prefetch: OpsPrefetch | None = None
         self.rate: dict[str, Any] = {}
 
     def __enter__(self):
@@ -132,6 +134,7 @@ class SyncHiveDb:
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
             log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
 
+            self._close_ops_prefetch()
             Blocks.close_own_db_access()
 
         if self._databases:
@@ -246,7 +249,7 @@ class SyncHiveDb:
             if self._break_requested(last_imported_block, active_connections_before):
                 return
 
-            if self._lbound is None:
+            if self._lbound is None or self._ubound is None:
                 if application_stage == 'wait_for_haf':
                     report_enter_to_stage(application_stage)
                 self._idle_until_new_block(application_stage)
@@ -286,7 +289,7 @@ class SyncHiveDb:
                 DbState.ensure_fk_are_disabled()
                 DbState.ensure_indexes_are_disabled()
 
-                self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+                self._process_massive_blocks(self._lbound, self._ubound, application_stage)
             elif application_stage == "MASSIVE_WITH_INDEXES":
                 DbState.set_massive_sync(True)
                 if report_enter_to_stage(application_stage):
@@ -302,9 +305,10 @@ class SyncHiveDb:
                     # for finalization's recompute.
                     DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
 
-                self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+                self._process_massive_blocks(self._lbound, self._ubound, application_stage)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
+                self._close_ops_prefetch()
                 if not self._live_prepared and self._wait_while_haf_restores_indexes():
                     report_enter_to_stage("live: waiting for HAF to restore its indexes")
                     continue
@@ -699,18 +703,41 @@ class SyncHiveDb:
         active_connections_after_live = self._get_active_db_connections()
         self._assert_connections_closed(active_connections_before, active_connections_after_live)
 
-    def _process_massive_blocks(self, lbound, ubound, active_connections_before) -> None:
+    def _process_massive_blocks(self, lbound: int, ubound: int, application_stage: str) -> None:
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
+        if self._ops_prefetch is None:
+            self._ops_prefetch = OpsPrefetch(self._db.clone("OpsPrefetch"))
+
         # _batch_queue is already populated (committed atomically with the
-        # context advancement in the main loop, before we reach here).
+        # context advancement in the main loop, before we reach here). The
+        # prefetch of the next range writes no marker: that range enters
+        # _batch_queue only when app_next_iteration hands it out.
 
         # SQL path: no data fetching needed, SQL functions read directly from operations_view
         self._massive_consume_blocks_futures = self._massive_consume_blocks_thread_pool.submit(
-            self._consume_massive_blocks_sql, lbound, ubound
+            self._consume_massive_blocks_sql, lbound, ubound, self._expected_next_range(ubound, application_stage)
         )
+
+    def _expected_next_range(self, ubound: int, application_stage: str) -> tuple[int, int] | None:
+        """The range app_next_iteration is expected to hand out after `ubound`, as far as the sync may go.
+
+        HAF may hand out a shorter one (a stage change, the irreversible head);
+        OpsPrefetch.take then serves it from the prefetched rows still.
+        """
+        last = ubound + (self._max_batch or stage_batch_blocks(application_stage, self._massive_batch_blocks))
+        if self._last_block_to_process:
+            last = min(last, self._last_block_to_process)
+        if last <= ubound:
+            return None
+        return ubound + 1, last
+
+    def _close_ops_prefetch(self) -> None:
+        if self._ops_prefetch is not None:
+            self._ops_prefetch.close()
+            self._ops_prefetch = None
 
     def _on_stop_synchronization(self, active_connections_before, sigint_during_massive=False) -> None:
         # Restore WAL safety settings (fsync, full_page_writes) that were disabled
@@ -802,7 +829,7 @@ class SyncHiveDb:
 
         self.rate = {}
 
-    def _consume_massive_blocks_sql(self, lbound, ubound) -> int:
+    def _consume_massive_blocks_sql(self, lbound: int, ubound: int, next_range: tuple[int, int] | None) -> int:
         """Consume a block range using pure SQL processing (no Python dispatch loop)."""
         from hive.utils.stats import minmax
 
@@ -819,7 +846,7 @@ class SyncHiveDb:
             timer.batch_start()
 
             block_start = perf()
-            Blocks.process_multi_sql(lbound, ubound)
+            Blocks.process_multi_sql(lbound, ubound, self._ops_prefetch, next_range)
             block_end = perf()
 
             timer.batch_lap()
