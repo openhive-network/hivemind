@@ -5,7 +5,7 @@
       - blog_api
     summary: Search posts
     description: |
-      Returns the posts and comments matching the full-text query `q`, the same list as
+      Returns the root posts (top-level posts, not comments) matching the full-text query `q`, the same list as
       `search-api.find_text`. Needs the `pg_search` extension.
 
       To fetch the next page pass the `author` and `permlink` of the last post of the previous page

@@ -2827,7 +2827,7 @@ declare
           "blog_api"
         ],
         "summary": "Search posts",
-        "description": "Returns the posts and comments matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20&truncate-body=200&votes=none''`\n",
+        "description": "Returns the root posts (top-level posts, not comments) matching the full-text query `q`, the same list as\n`search-api.find_text`. Needs the `pg_search` extension.\n\nTo fetch the next page pass the `author` and `permlink` of the last post of the previous page\nas `start-author` and `start-permlink`.\n\nSQL example\n* `SELECT hivemind_endpoints.search_posts(''beekeeping'', ''relevance'');`\n\nREST call example\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20''`\n* `GET ''https://%1$s/hivemind-api/search/posts?q=beekeeping&sort=relevance&page-size=20&truncate-body=200&votes=none''`\n",
         "operationId": "hivemind_endpoints.search_posts",
         "parameters": [
           {
