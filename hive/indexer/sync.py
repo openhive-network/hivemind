@@ -118,6 +118,7 @@ class SyncHiveDb:
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
 
+            DbState.stop_bm25_build()
             DbState.stop_visibility_watch()
 
             try:
@@ -280,6 +281,8 @@ class SyncHiveDb:
                     f"VALUES ({self._lbound}, {self._ubound})"
                 )
                 self._db.query_no_return("COMMIT")
+                # its lock on hive_post_data would hold up the massive stage's DDL and vacuums
+                DbState.stop_bm25_build()
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync(True)
                 report_enter_to_stage(application_stage)
@@ -334,6 +337,7 @@ class SyncHiveDb:
 
                     DbState.ensure_fk_are_enabled()
                     DbState.start_visibility_watch()
+                    DbState.start_bm25_build_if_needed()
                     self._live_prepared = True
                     continue
 
@@ -897,7 +901,9 @@ class SyncHiveDb:
         return self._db.query_col(sql)
 
     def _get_active_db_connections(self):
-        return self._query_hivemind_connections()
+        # The background BM25 build outlives single blocks on purpose (DbState.start_bm25_build_if_needed)
+        build = f'hivemind_{DbState.BM25_BUILD_CONNECTION}'
+        return [name for name in self._query_hivemind_connections() if name != build]
 
     def _terminate_stale_connections(self) -> None:
         """Terminate lingering hivemind connections from previous crashed instances.

@@ -3,6 +3,7 @@
 # pylint: disable=too-many-lines
 
 import logging
+import threading
 import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
@@ -22,9 +23,13 @@ from hive.conf import (
 )
 from hive.db.adapter import Db
 from hive.db.schema import (
+    BM25_INDEX,
     SEED_LAST_COMPLETED_BLOCK,
+    SearchStatus,
+    bm25_index_sql,
     perform_db_upgrade,
     recorded_table_schema,
+    search_status,
     setup,
     setup_runtime_code,
     table_schema_digest,
@@ -223,12 +228,10 @@ class DbState:
             db_setup_admin.close()
             log.info("Database schema upgrade finished")
 
-        # Detect pg_search availability for existing DBs (setup() sets this for fresh installs)
-        if not schema_module.pg_search_available:
-            result = cls.db().query_all("SELECT COUNT(*) FROM pg_extension WHERE extname = 'pg_search'")
-            if result and result[0][0] > 0:
-                schema_module.pg_search_available = True
-                log.info("pg_search extension detected in existing database")
+        # Every start, whoever installed the database: what full-text search still lacks (#488)
+        status = search_status(cls.db())
+        schema_module.pg_search_available = status.installed and status.has_function
+        cls._log_search_status(status)
 
         db_setup_owner.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}")
         db_setup_owner.query_no_return(f"SET custom.swagger_url = '{SWAGGER_URL}'")
@@ -461,16 +464,27 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         created here during the fills phase, dropped explicitly in
         ensure_indexes_are_disabled.
 
-        Skipped when pg_search extension is not available.
+        Skipped when pg_search extension is not available, and outside the initial sync:
+        a catch-up's finalization waits for this task, and a plain build blocks writes to
+        hive_post_data for over an hour at mainnet scale. A database that lacks the index
+        after its initial sync gets it built CONCURRENTLY once live
+        (start_bm25_build_if_needed).
         """
-        from hive.db.schema import pg_search_available
-
-        if not pg_search_available:
-            log.info("[MASSIVE] Skipping BM25 index creation (pg_search not available)")
+        if not schema_module.pg_search_available:
+            log.info("[MASSIVE] Skipping BM25 index creation (pg_search not available, see the start-up warning)")
+            return
+        if not cls.is_initial_sync():
+            log.info(
+                "[MASSIVE] Skipping BM25 index creation: not the initial sync (built CONCURRENTLY once live if missing)"
+            )
             return
 
         table = f"{SCHEMA_NAME}.hive_post_data"
         with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
+            if search_status(db_mgr.db).index_valid is False:
+                # CREATE INDEX IF NOT EXISTS would skip the INVALID leftover of a failed CONCURRENTLY build
+                log.warning("[MASSIVE] Dropping an INVALID BM25 index before building it")
+                db_mgr.db.query_no_return(f"DROP INDEX {BM25_INDEX}")
             # Taking the toast table's ShareUpdateExclusiveLock cancels a toast
             # autovacuum already running; none starts again until the RESET.
             # A crash in between leaves the option set, and the next start's
@@ -487,12 +501,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
             time_start = perf_counter()
             try:
-                build_db.query_no_return(
-                    f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {table} "
-                    "USING bm25 (id, title, body) WITH (key_field = 'id', "
-                    "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
-                    f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
-                )
+                build_db.query_no_return(bm25_index_sql())
             except psycopg2.errors.DataCorrupted as exc:
                 if attempt == cls._BM25_BUILD_ATTEMPTS:
                     log.error("[MASSIVE] BM25 index build failed again after a vacuum of %s: %s", table, exc)
@@ -510,6 +519,112 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                 continue
             log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
             return
+
+    @classmethod
+    def _log_search_status(cls, status: SearchStatus) -> None:
+        """Say at every start why full-text search (find_text) is off, or that it is on."""
+        if not status.available:
+            log.warning("Full-text search is off: this PostgreSQL server has no pg_search extension")
+        elif not status.installed and not status.preloaded:
+            log.warning(
+                "Full-text search is off: pg_search is not in shared_preload_libraries, so it cannot be "
+                "created; preload it, then run the hivemind installer (upgrade_schema)"
+            )
+        elif not status.installed:
+            log.warning(
+                "Full-text search is off: pg_search is not installed in this database; "
+                "run the hivemind installer (upgrade_schema), which creates it"
+            )
+        elif not status.has_function:
+            log.warning(
+                "Full-text search is off: %s.is_top_level_post is missing; run the hivemind installer (upgrade_schema)",
+                SCHEMA_NAME,
+            )
+        elif status.index_valid is None and cls.is_initial_sync():
+            log.info("Full-text search: the BM25 index is built at the end of the initial sync")
+        elif status.index_valid is None:
+            log.warning("Full-text search is off until the BM25 index is built; it is built CONCURRENTLY once live")
+        elif not status.index_valid:
+            log.warning(
+                "Full-text search is off: the BM25 index is INVALID (an interrupted CONCURRENTLY build); "
+                "it is dropped and rebuilt once live"
+            )
+        else:
+            log.info("Full-text search: pg_search and the BM25 index are in place")
+
+    # application_name hivemind_<this>: SyncHiveDb's connection-leak check skips it, and the
+    # stale-connection sweep of the next start terminates it
+    BM25_BUILD_CONNECTION = 'bm25_build'
+    _bm25_build_thread: threading.Thread | None = None
+    _bm25_build_pid: int | None = None
+
+    @classmethod
+    def start_bm25_build_if_needed(cls) -> None:
+        """Build a missing or INVALID BM25 index CONCURRENTLY in a background thread (#488).
+
+        For a database that lacks the index after its initial sync: one first installed
+        without pg_search, or one whose build failed. Called once live, so the build
+        does not hold up going live, and stopped (stop_bm25_build) before any massive
+        stage, whose ALTER TABLE ... SET/RESET and VACUUM of hive_post_data would wait
+        for it. A build stopped part way leaves an INVALID index, which the next one drops.
+        """
+        if not schema_module.pg_search_available:
+            return
+        if cls._bm25_build_thread is not None and cls._bm25_build_thread.is_alive():
+            return
+        if search_status(cls.db()).index_valid:
+            return
+        cls._bm25_build_thread = threading.Thread(target=cls._build_bm25_concurrently, name='bm25_build', daemon=True)
+        cls._bm25_build_thread.start()
+
+    @classmethod
+    def _build_bm25_concurrently(cls) -> None:
+        db = None
+        try:
+            db = cls.db().clone(cls.BM25_BUILD_CONNECTION)
+            cls._bm25_build_pid = db.query_one("SELECT pg_backend_pid()")
+            db.query_no_return("SET statement_timeout = 0")
+            # Without it the backend keeps building (and holding its lock on hive_post_data)
+            # after this process dies, until the build ends
+            db.query_no_return("SET client_connection_check_interval = '10s'")
+            if search_status(db).index_valid is False:
+                log.warning("Dropping the INVALID BM25 index left by an interrupted build")
+                db.query_no_return(f"DROP INDEX CONCURRENTLY IF EXISTS {BM25_INDEX}")
+            log.info("Building the BM25 index CONCURRENTLY; block processing goes on, find_text works once it is done")
+            time_start = perf_counter()
+            db.query_no_return(bm25_index_sql(concurrently=True))
+            if search_status(db).index_valid:
+                log.info("BM25 index built in %.0fs; full-text search is on", perf_counter() - time_start)
+            else:
+                log.warning("BM25 index build ended without a valid index; the next start retries it")
+        except Exception as exc:  # pylint: disable=broad-except
+            log.warning("BM25 index build stopped: %s; it is retried once live again", str(exc).strip())
+        finally:
+            cls._bm25_build_pid = None
+            if db is not None:
+                db.close()
+
+    @classmethod
+    def stop_bm25_build(cls, timeout: float = 60.0) -> None:
+        """Cancel a running background BM25 build and wait for its thread to end."""
+        thread = cls._bm25_build_thread
+        if thread is None or not thread.is_alive():
+            return
+        log.info("Stopping the background BM25 index build")
+        deadline = perf_counter() + timeout
+        while thread.is_alive() and perf_counter() < deadline:
+            pid = cls._bm25_build_pid
+            if pid is not None:
+                try:
+                    cls.db().query_one(f"SELECT pg_cancel_backend({pid})")
+                except Exception as exc:  # pylint: disable=broad-except
+                    # e.g. at shutdown after the connection broke; client_connection_check_interval
+                    # ends the build once this process is gone
+                    log.warning("Could not cancel the background BM25 index build: %s", str(exc).strip())
+                    return
+            thread.join(0.5)
+        if thread.is_alive():
+            log.warning("The background BM25 index build did not stop within %.0fs", timeout)
 
     @classmethod
     def _restore_bm25_index_after_recompute(cls, db: Db, recomputed: Future[None]) -> None:

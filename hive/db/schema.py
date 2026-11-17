@@ -4,7 +4,7 @@ import hashlib
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from hive.conf import SCHEMA_NAME, SCHEMA_OWNER_NAME
 from hive.indexer.hive_db.haf_functions import prepare_app_context
@@ -15,8 +15,64 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-# Set during setup() — indicates whether pg_search (ParadeDB) extension is available
+# Set during setup(), perform_db_upgrade() and DbState.initialize(): pg_search (ParadeDB)
+# and is_top_level_post, which the BM25 index needs, are both in the database
 pg_search_available = False
+
+BM25_INDEX = f'{SCHEMA_NAME}.hive_post_data_bm25_idx'
+
+
+def bm25_index_sql(concurrently: bool = False) -> str:
+    """The CREATE INDEX of the BM25 index on hive_post_data (needs pg_search and is_top_level_post)."""
+    return (
+        f"CREATE INDEX {'CONCURRENTLY ' if concurrently else ''}IF NOT EXISTS hive_post_data_bm25_idx "
+        f"ON {SCHEMA_NAME}.hive_post_data USING bm25 (id, title, body) WITH (key_field = 'id', "
+        "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
+        f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
+    )
+
+
+def create_is_top_level_post(db) -> None:
+    """Create is_top_level_post, which the BM25 index's WHERE clause calls; hive_posts must exist."""
+    db.query_no_return(
+        f"""
+        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+        RETURNS BOOLEAN
+        LANGUAGE sql
+        IMMUTABLE PARALLEL SAFE
+        AS $$
+          SELECT EXISTS (
+            SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
+            WHERE hp.id = post_id AND hp.depth = 0
+          );
+        $$;
+        """
+    )
+
+
+class SearchStatus(NamedTuple):
+    """What full-text search needs, as found in the database."""
+
+    available: bool  # the server ships pg_search
+    preloaded: bool  # pg_search is in shared_preload_libraries (required by pg_search >= 0.25)
+    installed: bool  # CREATE EXTENSION pg_search was run in this database
+    has_function: bool  # is_top_level_post exists
+    index_valid: bool | None  # None: no BM25 index; False: an INVALID leftover of a failed CONCURRENTLY build
+
+
+def search_status(db) -> SearchStatus:
+    row = db.query_all(
+        f"""
+        SELECT
+          EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'pg_search') AS available,
+          -- shared_preload_libraries itself is superuser-only; a loaded pg_search registers paradedb.* settings
+          EXISTS (SELECT 1 FROM pg_settings WHERE name LIKE 'paradedb.%') AS preloaded,
+          EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_search') AS installed,
+          to_regprocedure('{SCHEMA_NAME}.is_top_level_post(integer)') IS NOT NULL AS has_function,
+          (SELECT i.indisvalid FROM pg_index i WHERE i.indexrelid = to_regclass('{BM25_INDEX}')) AS index_valid
+        """
+    )[0]
+    return SearchStatus(*row)
 
 
 def teardown(db) -> None:
@@ -46,9 +102,25 @@ def _try_create_extension(db, ext_name) -> bool:
         # CASCADE: pg_search >= 0.25 depends on the vector extension
         db.query(f'CREATE EXTENSION IF NOT EXISTS {ext_name} CASCADE;')
         return True
-    except Exception:
+    except Exception as exc:
         # With autocommit=True the failed statement is already rolled back
+        log.warning("CREATE EXTENSION %s failed: %s", ext_name, str(exc).strip().splitlines()[0])
         return False
+
+
+def ensure_search_prerequisites(db, admin_db) -> None:
+    """Create pg_search and is_top_level_post in an existing database, as setup() does in a new one.
+
+    setup() runs only on an empty database, so one first installed where pg_search could
+    not be created would otherwise keep full-text search off after every upgrade (#488).
+    The BM25 index itself is not built here: on a large database that takes over an hour,
+    and block processing waits for the installer. Once live, the block processor builds
+    it CONCURRENTLY (DbState.start_bm25_build_if_needed).
+    """
+    global pg_search_available
+    pg_search_available = _try_create_extension(admin_db, 'pg_search')
+    if pg_search_available:
+        create_is_top_level_post(db)
 
 
 # last_completed_block_num of a database no finalization has completed yet.
@@ -134,29 +206,11 @@ def setup(db, admin_db) -> None:
 
     if pg_search_available:
         # Create BM25 index (requires pg_search extension)
-        sql = f"""
-        CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data
-            USING bm25 (id, title, body)
-            WITH (key_field = 'id', text_fields = '{{"title": {{"record": "position"}}, "body": {{"record": "position"}}}}')
-            WHERE {SCHEMA_NAME}.is_top_level_post(id);
-        """
-        db.query_no_return(sql)
+        db.query_no_return(bm25_index_sql())
 
         # Now that tables exist, replace the function with its real implementation that
         # references the hive_posts table
-        sql = f"""
-        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
-        RETURNS BOOLEAN
-        LANGUAGE sql
-        IMMUTABLE PARALLEL SAFE
-        AS $$
-          SELECT EXISTS (
-            SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
-            WHERE hp.id = post_id AND hp.depth = 0
-          );
-        $$;
-        """
-        db.query_no_return(sql)
+        create_is_top_level_post(db)
 
     # Register indexes with HAF for managed lifecycle (drop/restore during massive sync)
     # Uses hive.app_register_index_dependency() which is SECURITY DEFINER — app role is sufficient
@@ -318,6 +372,8 @@ def perform_db_upgrade(db, admin_db) -> None:
 
     # setup_runtime_code() runs as the schema owner and cannot reload these
     _setup_admin_runtime_code(admin_db)
+
+    ensure_search_prerequisites(db, admin_db)
 
     log.info("Database schema upgrade completed.")
 
