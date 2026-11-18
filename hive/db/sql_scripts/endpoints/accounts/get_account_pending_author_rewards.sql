@@ -79,7 +79,9 @@ LANGUAGE 'plpgsql' STABLE
 AS
 $$
 DECLARE
-  _account_id INT := hafah_backend.get_account_id("account-name", TRUE);
+  -- hive_posts.author_id and hive_votes.voter_id hold hivemind's hive_accounts.id, not the HAF
+  -- account id hafah_backend.get_account_id returns: on mainnet the two differ, and no row matched
+  _account_id INT := hivemind_postgrest_utilities.find_account_id("account-name", FALSE);
   _result hivemind_endpoints.pending_author_rewards;
   _pending_post_count INT;
   _gross NUMERIC;
@@ -87,6 +89,11 @@ DECLARE
   _beneficiaries_basis hivemind_postgrest_utilities.pending_reward_basis;
   _curators_basis hivemind_postgrest_utilities.pending_reward_basis;
 BEGIN
+  IF _account_id = 0 THEN
+    -- the same error as hafah_backend.get_account_id gives, which clients and the negative tests expect
+    PERFORM hafah_backend.rest_raise_missing_account("account-name");
+  END IF;
+
   PERFORM set_config('response.headers', '[{"Cache-Control": "public, max-age=2"}]', true);
 
   -- Consensus payout split (HF21+): 50% curators, 50% (author + beneficiaries).

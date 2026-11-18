@@ -260,6 +260,7 @@ SQL_TESTS = [
     "tests/sql/recalculate_votes_children_rerun.sql",
     "tests/sql/autovacuum_insert_reloptions.sql",
     "tests/sql/post_batch_autovacuum_off.sql",
+    "tests/sql/pending_rewards_account_id.sql",
 ]
 
 
