@@ -100,7 +100,7 @@ BEGIN
   _start_voter_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account("start-voter", True),
     False);
-  IF _start_voter_id = 0 AND COALESCE("start-voter", '') <> '' THEN
+  IF _start_voter_id = -1 AND COALESCE("start-voter", '') <> '' THEN
     RAISE EXCEPTION 'Account ''%'' does not exist', "start-voter";
   END IF;
 
@@ -111,7 +111,7 @@ BEGIN
     FROM jsonb_populate_recordset(
       NULL::hivemind_endpoints.post_vote,
       hivemind_postgrest_utilities.list_votes(
-        0, _post_id, _limit,
+        -1, _post_id, _limit,
         'bridge_list_by_comment_voter_after'::hivemind_postgrest_utilities.list_votes_case,
         'database_api'::hivemind_postgrest_utilities.vote_presentation,
         _start_voter_id));

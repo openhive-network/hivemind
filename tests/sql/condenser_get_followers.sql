@@ -12,11 +12,11 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT name, '2016-06-01'
-FROM unnest(ARRAY['cfw-account', 'cfw.abc', 'cfw-b', 'cfw-a1', 'cfw-a-1', 'cfw-start', 'cfw-late', 'cfw-muter']) AS name;
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'cfw-start-' || lpad(i::TEXT, 2, '0'), '2016-06-01' FROM generate_series(1, 12) i;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['cfw-account', 'cfw.abc', 'cfw-b', 'cfw-a1', 'cfw-a-1', 'cfw-start', 'cfw-late', 'cfw-muter']) WITH ORDINALITY AS a(name, n);
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + i, 'cfw-start-' || lpad(i::TEXT, 2, '0'), '2016-06-01' FROM generate_series(1, 12) i ORDER BY i;
 
 SELECT hivemind_app.insert_follows(ARRAY(
   SELECT ROW(ha.id, (SELECT id FROM hivemind_app.hive_accounts WHERE name = 'cfw-account'), 1)::hivemind_app.follow_ids

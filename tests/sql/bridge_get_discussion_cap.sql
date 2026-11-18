@@ -13,7 +13,9 @@ BEGIN;
 
 SELECT hivemind_postgrest_utilities.get_max_discussion_posts_limit() AS cap \gset
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('dc-author', '2016-06-01'), ('dc-replier', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['dc-author', 'dc-replier']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink) VALUES ('dc-root'), ('dc-deep');
 INSERT INTO hivemind_app.hive_permlink_data (permlink)
 SELECT 'dc-r-' || lpad(i::TEXT, 4, '0') FROM generate_series(1, :cap - 1) i ORDER BY i;

@@ -158,6 +158,17 @@ def test_upgrade_records_the_code_table_schema() -> None:
     admin_db.query_no_return.assert_not_called()
 
 
+def test_upgrade_refuses_the_old_account_keyspace_before_any_other_statement() -> None:
+    ran: list[str] = []
+    with patch('hive.db.schema.execute_sql_script', lambda _executor, path: ran.append(str(path))):
+        perform_db_upgrade(db=MagicMock(), admin_db=MagicMock())
+
+    assert ran and ran[0].endswith('upgrade/upgrade_table_schema.sql'), ran
+    with open(ran[0]) as script:
+        first_statement = script.read().split('\n$$;', 1)[0]
+    assert "attname = 'haf_id'" in first_statement and 'a full resync is required' in first_statement, first_statement
+
+
 @pytest.mark.parametrize(
     ('database', 'expected'),
     [

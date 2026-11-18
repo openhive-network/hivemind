@@ -20,8 +20,9 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-VALUES ('rp-a', '2016-06-01'), ('rp-m', '2016-06-01'), ('rp-n', '2016-06-01'), ('rp-z', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['rp-a', 'rp-m', 'rp-n', 'rp-z']) WITH ORDINALITY AS a(name, n);
 
 -- C: comment, D: delete_comment, O: comment_options (percent_hbd 0)
 CREATE TEMP TABLE rp_ops (block_num INT, op CHAR, author TEXT, permlink TEXT, parent_author TEXT, parent_permlink TEXT);

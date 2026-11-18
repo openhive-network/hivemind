@@ -49,11 +49,11 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  __account_id INT = 0;
+  __account_id INT = -1;
 BEGIN
   IF (_account <> '') THEN
-    SELECT INTO __account_id COALESCE( ( SELECT id FROM hivemind_app.hive_accounts WHERE name=_account ), 0 );
-    IF _check AND __account_id = 0 THEN
+    SELECT INTO __account_id COALESCE( ( SELECT id FROM hivemind_app.hive_accounts WHERE name=_account ), -1 );
+    IF _check AND __account_id = -1 THEN
       RAISE EXCEPTION 'Account % does not exist', _account USING ERRCODE = 'CEHM4';
     END IF;
   END IF;

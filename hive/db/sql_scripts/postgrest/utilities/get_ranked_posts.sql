@@ -32,7 +32,7 @@ BEGIN
             hp.is_pinned
             AND hp.community_id = (SELECT id FROM hivemind_app.hive_communities WHERE name = _tag LIMIT 1) --use hive_posts_community_id_is_pinned_idx
             AND (_post_id = 0 OR hp.id < _post_id)
-            AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+            AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
             AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -146,7 +146,7 @@ BEGIN
           AND NOT hp.is_paidout --use index hive_posts_community_id_is_paidout_idx
           AND NOT(_called_from_bridge_api AND hp.is_pinned)
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR ( hp.sc_trend = _trending_limit AND hp.id < _post_id ))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -245,7 +245,7 @@ BEGIN
         WHERE
           hc.name = _tag AND NOT hp.is_paidout AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
           AND (_post_id = 0 OR hp.payout + hp.pending_payout < _payout_limit OR (hp.payout + hp.pending_payout = _payout_limit AND hp.id < _post_id ))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -341,7 +341,7 @@ BEGIN
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ( (hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id ))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -436,7 +436,7 @@ BEGIN
         WHERE
           hc.name = _tag AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -541,7 +541,7 @@ BEGIN
         FROM live_community_posts hp
         WHERE
           (_post_id = 0 OR hp.id < _post_id)
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -722,7 +722,7 @@ BEGIN
     WHERE
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
       AND (_post_id = 0 OR hp.sc_trend < __trending_limit OR (hp.sc_trend = __trending_limit AND hp.id < _post_id))
-      AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+      AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -819,7 +819,7 @@ BEGIN
     WHERE
       hpt.tag_id = _tag_id AND NOT hp.is_paidout
       AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-      AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+      AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -921,7 +921,7 @@ BEGIN
           hpt.tag_id = _tag_id
           AND (_post_id = 0 OR hp.id < _post_id)
           AND NOT ha.is_grayed
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
         ORDER BY hp.id DESC
@@ -1018,7 +1018,7 @@ BEGIN
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1116,7 +1116,7 @@ BEGIN
         WHERE
           hp.category_id = _category_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1300,7 +1300,7 @@ BEGIN
         WHERE hs.account_id = _observer_id 
           AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1390,7 +1390,7 @@ BEGIN
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1579,7 +1579,7 @@ BEGIN
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1670,7 +1670,7 @@ BEGIN
         WHERE
           hs.account_id = _observer_id AND NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1855,7 +1855,7 @@ BEGIN
         WHERE
           NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_trend < _trending_limit OR (hp.sc_trend = _trending_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -1948,7 +1948,7 @@ BEGIN
         WHERE
           NOT hp.is_paidout
           AND (_post_id = 0 OR hp.sc_hot < _hot_limit OR (hp.sc_hot = _hot_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -2038,7 +2038,7 @@ BEGIN
         WHERE
           NOT ha.is_grayed
           AND (_post_id = 0 OR hp.id < _post_id)
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -2137,7 +2137,7 @@ BEGIN
           NOT hp.is_paidout
           AND NOT (NOT(NOT _called_from_bridge_api AND hp.depth = 0) AND NOT ( _called_from_bridge_api AND hp.payout_at BETWEEN _head_block_time + interval '12 hours' AND _head_block_time + interval '36 hours'))
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))
@@ -2232,7 +2232,7 @@ BEGIN
         WHERE
           NOT hp.is_paidout
           AND (_post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id))
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
           AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
               OR ((hp.muted_reasons & _muted_reasons_filter_mask) = 0
                   AND NOT ((_muted_reasons_filter_mask & 8) != 0 AND (SELECT is_grayed FROM hivemind_app.hive_accounts_view WHERE id = hp.author_id))

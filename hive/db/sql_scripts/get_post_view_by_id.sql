@@ -255,7 +255,7 @@ RETURNS TABLE (
     source TEXT
 ) AS $$
 BEGIN
-    IF _observer_id = 0 THEN
+    IF _observer_id = -1 THEN
         RETURN QUERY SELECT NULL::INTEGER AS blacklisted_id, NULL::TEXT AS source WHERE FALSE;
     ELSE
         RETURN QUERY

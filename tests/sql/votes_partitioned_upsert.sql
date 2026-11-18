@@ -15,9 +15,11 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'pv-v' || lpad(i::TEXT, 2, '0'), '2016-06-01' FROM generate_series(1, 12) i ORDER BY i;
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('pv-a1', '2016-06-01'), ('pv-a2', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + i, 'pv-v' || lpad(i::TEXT, 2, '0'), '2016-06-01' FROM generate_series(1, 12) i ORDER BY i;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['pv-a1', 'pv-a2']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink)
 SELECT 'pv-p' || i FROM generate_series(1, 7) i ORDER BY i;
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('pv-cat');

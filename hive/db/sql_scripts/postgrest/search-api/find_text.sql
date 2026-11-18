@@ -115,7 +115,7 @@ BEGIN
     -- Parameters of every candidate statement: $1 search query, $2 author id, $3 start post
     -- id, $4 start post score, $5 candidate limit.
     _candidate_limit = _limit * 2;
-    IF _author_id > 0 THEN
+    IF _author_id <> -1 THEN
         _author_filter = 'AND hpd.id = ANY(ARRAY(
                       SELECT hp.id FROM hivemind_app.hive_posts hp
                       WHERE hp.author_id = $2 AND hp.depth = 0))';
@@ -251,7 +251,7 @@ BEGIN
                                SELECT bp.id, bp.score
                                FROM   bm25_posts bp
                                           JOIN hivemind_app.hive_posts hp ON hp.id = bp.id
-                               WHERE  (_observer_id = 0 OR NOT EXISTS (
+                               WHERE  (_observer_id = -1 OR NOT EXISTS (
                                    SELECT 1
                                    FROM   hivemind_app.muted_accounts_by_id_view
                                    WHERE  observer_id = _observer_id AND muted_id = hp.author_id))

@@ -953,7 +953,7 @@ BEGIN
                   hm.account_id,
                   hm.post_id,
                   hm.post_id,
-                  COALESCE(hivemind_app.reputation_score(a.haf_id), 25),
+                  COALESCE(hivemind_app.reputation_score(a.id), 25),
                   '', '', ''
               FROM mentions_data AS hm
               JOIN hivemind_app.hive_accounts AS a ON a.id = hm.author_id
@@ -966,7 +966,7 @@ BEGIN
               WHERE hm.block_num > (SELECT hivemind_app.block_before_irreversible('90 days'))
                 AND (SELECT count(*) FROM insert_mentions) >= 0 -- force evaluation, once
                 AND (SELECT count(*) FROM delete_old_cache) >= 0 -- force evaluation, once
-                AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(hivemind_app.reputation_score(a.haf_id), 25) > 0)
+                AND ((SELECT hivemind_app.reputation_notification_cut_deferred()) OR COALESCE(hivemind_app.reputation_score(a.id), 25) > 0)
                 AND hm.author_id IS DISTINCT FROM hm.account_id
                 AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
                          THEN NOT hivemind_app.notification_muted_at(hm.account_id, hm.author_id, hm.block_num)

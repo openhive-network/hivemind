@@ -69,7 +69,3 @@ SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT E
 -- NOTE: hive_post_data BM25 index is NOT registered here. pg_search leaves internal
 -- metadata (MetaPage) that prevents UNLOGGED conversion even after the index is dropped.
 -- The BM25 index is created directly during the fills phase after massive sync completes.
-
--- hive_accounts indexes
-SELECT hive.app_register_index_dependency('hivemind_app', 'CREATE INDEX IF NOT EXISTS hive_accounts_haf_id_idx ON hivemind_app.hive_accounts (haf_id)');
-

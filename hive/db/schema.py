@@ -26,7 +26,7 @@ def teardown(db) -> None:
 
 def create_statistics(db) -> None:
     """Create extended statistics dependencies for various tables."""
-    sql = f"CREATE STATISTICS IF NOT EXISTS {SCHEMA_NAME}.hive_accounts_stats (dependencies) ON id, haf_id, name, created_at FROM {SCHEMA_NAME}.hive_accounts;"
+    sql = f"CREATE STATISTICS IF NOT EXISTS {SCHEMA_NAME}.hive_accounts_stats (dependencies) ON id, name, created_at FROM {SCHEMA_NAME}.hive_accounts;"
     db.query_no_return(sql)
     sql = f"CREATE STATISTICS IF NOT EXISTS {SCHEMA_NAME}.hive_tag_data_stats (dependencies) ON id, tag FROM {SCHEMA_NAME}.hive_tag_data;"
     db.query_no_return(sql)
@@ -61,7 +61,9 @@ def insert_seed_data(db) -> None:
     These rows must exist before any block processing starts:
     - hive_state: tracks sync progress (last_completed_block_num = 1)
     - permlink/category/tag ID 0: sentinel empty-string rows
-    - accounts 0-4: system accounts (empty, miners, null, temp, initminer)
+    - account -1: the '' sentinel, author of post 0 and the id of "no account"
+    - accounts 0-3: HAF's genesis accounts (miners, null, temp, initminer) at their HAF ids;
+      every other account takes its HAF id when its creating op is processed
     - post ID 0: sentinel root post
     """
     sqls = [
@@ -72,18 +74,18 @@ def insert_seed_data(db) -> None:
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '') ON CONFLICT DO NOTHING",
         f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '') ON CONFLICT DO NOTHING",
         # post_count 1: the sentinel post 0 below is its post
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at, post_count) VALUES (0, '', '1970-01-01T00:00:00', 1) ON CONFLICT DO NOTHING",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
-        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at, post_count) VALUES (-1, '', '1970-01-01T00:00:00', 1) ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (0, 'miners',    '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (1, 'null',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (2, 'temp',      '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (3, 'initminer', '2016-03-24 16:05:00') ON CONFLICT DO NOTHING",
         f"""
         INSERT INTO
             {SCHEMA_NAME}.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
                 community_id, created_at, depth, block_num, block_num_created
             )
         VALUES
-            (0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0)
+            (0, 0, 0, -1, 0, 0, 0, now(), 0, 0, 0)
         ON CONFLICT DO NOTHING;
         """,
     ]
@@ -303,10 +305,11 @@ def setup_runtime_code(db) -> None:
 def perform_db_upgrade(db, admin_db) -> None:
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
 
+    # upgrade_table_schema.sql first: it refuses a database it cannot upgrade before anything is changed
     sql_scripts = [
-        "postgres_handle_view_changes.sql",
         "upgrade/upgrade_table_schema.sql",
         "upgrade/upgrade_runtime_migration.sql",
+        "postgres_handle_view_changes.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

@@ -70,7 +70,7 @@ BEGIN
         SELECT jsonb_agg(row.name ORDER BY row.id) FROM ( -- bridge_api_query_json_metadata
           SELECT ha.id, ha.name
           FROM hivemind_app.hive_accounts ha
-          WHERE ha.id > COALESCE(_last_id, 0)
+          WHERE ha.id > _last_id
             AND (
               (_posting AND hivemind_postgrest_utilities.json_metadata_matches(ha.posting_json_metadata, _path, _values, _literal))
               OR (_active AND hivemind_postgrest_utilities.json_metadata_matches(ha.json_metadata, _path, _values, _literal))

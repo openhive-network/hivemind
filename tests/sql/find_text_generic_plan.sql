@@ -14,7 +14,9 @@ SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_search')
 \if :has_bm25
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('gp-author', '2016-06-01'), ('gp-other', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['gp-author', 'gp-other']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink) VALUES ('gp-post-1'), ('gp-post-2'), ('gp-post-3');
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('gp-cat');
 

@@ -22,7 +22,7 @@ BEGIN
       False),
     True);
 
-  -- 0 when no start is given: no account votes with id 0, so the first page starts at the lowest voter id
+  -- -1 when no start is given: no account has id -1, so the first page starts at the lowest voter id
   _start_voter_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account(
       hivemind_postgrest_utilities.parse_argument_from_json(_params, 'start', False), True),

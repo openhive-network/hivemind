@@ -116,7 +116,7 @@ BEGIN
           WHEN $4 = 'list_by_voter_last_update_before' THEN (v.voter_id = $6 AND v.last_update <= $10 AND (v.last_update < $10 OR v.id < $11))
         END
       )
-      AND ($1 = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = $1 AND muted_id = v.voter_id))
+      AND ($1 = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = $1 AND muted_id = v.voter_id))
       ORDER BY
       ( CASE
           WHEN $4 = 'get_votes_for_posts' THEN v.voter_id
