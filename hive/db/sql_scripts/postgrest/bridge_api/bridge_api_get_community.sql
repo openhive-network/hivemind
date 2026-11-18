@@ -45,7 +45,7 @@ BEGIN
         hc.settings,
         (
           CASE
-            WHEN _observer_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_observer_id, _community_id)
+            WHEN _observer_id <> -1 THEN hivemind_postgrest_utilities.get_community_context(_observer_id, _community_id)
             ELSE '{}'::JSONB
           END
         ) AS context,

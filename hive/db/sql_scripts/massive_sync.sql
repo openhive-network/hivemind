@@ -481,11 +481,11 @@ BEGIN
         )
     ),
     inserted AS (
-        INSERT INTO hivemind_app.hive_accounts (name, created_at, posting_json_metadata, json_metadata, haf_id)
-        SELECT ti.acct_name, ti.first_block_date, ti.posting_json_metadata, ti.json_metadata,
-               (SELECT av.id FROM hivemind_app.accounts_view av WHERE av.name = ti.acct_name)
+        -- An account takes HAF's id; a created account HAF lacks fails the insert on the NOT NULL id
+        INSERT INTO hivemind_app.hive_accounts (id, name, created_at, posting_json_metadata, json_metadata)
+        SELECT (SELECT av.id FROM hivemind_app.accounts_view av WHERE av.name = ti.acct_name),
+               ti.acct_name, ti.first_block_date, ti.posting_json_metadata, ti.json_metadata
         FROM to_insert ti
-        ORDER BY ti.first_op_id  -- Match old Python registration order (by HAF op id)
         ON CONFLICT (name) DO NOTHING
         RETURNING id, name
     )
@@ -3115,7 +3115,7 @@ BEGIN
         nc.dst,
         nc.dst_post_id,
         nc.post_id,
-        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
+        COALESCE(hivemind_app.reputation_score(ha.id), 25),
         '', '', ''
     FROM new_comments nc
     JOIN hivemind_app.hive_accounts ha ON nc.src = ha.id
@@ -3126,7 +3126,7 @@ BEGIN
     LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nc.dst
     LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nc.src
     WHERE nc.block_num > _min_block
-      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.id), 25) > 0)
       AND nc.src IS DISTINCT FROM nc.dst
       AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
                THEN NOT hivemind_app.notification_muted_at(nc.dst, nc.src, nc.block_num)
@@ -3163,7 +3163,6 @@ BEGIN
     WITH new_follows AS (
         SELECT
             ha_f.id AS follower,
-            ha_f.haf_id AS follower_haf_id,
             ha_g.id AS following,
             fe.block_num,
             hb.created_at,
@@ -3181,7 +3180,7 @@ BEGIN
         nf.block_num, 15, nf.created_at,
         nf.follower, nf.following,
         NULL::INTEGER, NULL::INTEGER,
-        COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25),
+        COALESCE(hivemind_app.reputation_score(nf.follower), 25),
         '', '', ''
     FROM new_follows nf
     LEFT JOIN hivemind_app.muted m ON m.follower = nf.following AND m.following = nf.follower
@@ -3191,7 +3190,7 @@ BEGIN
     LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nf.following
     LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nf.follower
     WHERE nf.block_num > _min_block
-      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(nf.follower_haf_id), 25) > 0)
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(nf.follower), 25) > 0)
       AND nf.follower IS DISTINCT FROM nf.following
       AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
                THEN NOT hivemind_app.notification_muted_at(nf.following, nf.follower, nf.block_num)
@@ -3240,7 +3239,7 @@ BEGIN
         hivemind_app.notification_id(nr.created_at, 14, nr.counter::INT),
         nr.block_num, 14, nr.created_at,
         nr.src, nr.dst, nr.dst_post_id, nr.post_id,
-        COALESCE(hivemind_app.reputation_score(ha.haf_id), 25),
+        COALESCE(hivemind_app.reputation_score(ha.id), 25),
         '', '', ''
     FROM new_reblogs nr
     JOIN hivemind_app.hive_accounts ha ON nr.src = ha.id
@@ -3251,7 +3250,7 @@ BEGIN
     LEFT JOIN (SELECT DISTINCT c.follower FROM hivemind_app._batch_mute_changes c) mcd ON mcd.follower = nr.dst
     LEFT JOIN (SELECT DISTINCT c.following FROM hivemind_app._batch_mute_changes c WHERE c.list = 1) mcs ON mcs.following = nr.src
     WHERE nr.block_num > _min_block
-      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.haf_id), 25) > 0)
+      AND (_cut_deferred OR COALESCE(hivemind_app.reputation_score(ha.id), 25) > 0)
       AND nr.src IS DISTINCT FROM nr.dst
       AND CASE WHEN mcd.follower IS NOT NULL OR mcs.following IS NOT NULL
                THEN NOT hivemind_app.notification_muted_at(nr.dst, nr.src, nr.block_num)

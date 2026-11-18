@@ -26,7 +26,7 @@ BEGIN
       ) FROM (
         SELECT ha.name AS account, ha.reputation AS reputation
         FROM hivemind_app.hive_accounts_view ha
-        WHERE ha.name >= _account_lower_bound AND ha.id != 0
+        WHERE ha.name >= _account_lower_bound AND ha.id != -1
         ORDER BY ha.name
         LIMIT _limit
       ) row
@@ -38,7 +38,7 @@ BEGIN
       ) FROM (
         SELECT ha.name AS name, ha.reputation AS reputation
         FROM hivemind_app.hive_accounts_view ha
-        WHERE ha.name >= _account_lower_bound AND ha.id != 0
+        WHERE ha.name >= _account_lower_bound AND ha.id != -1
         ORDER BY ha.name
         LIMIT _limit
       ) row

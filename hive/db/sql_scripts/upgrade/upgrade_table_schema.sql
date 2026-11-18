@@ -1,3 +1,15 @@
+-- hive_accounts.id is HAF's account id. A database that numbered accounts itself (it has hive_accounts.haf_id) holds
+-- those ids in every account column of its largest tables, so one with accounts is not migrated: it must be synced
+-- again from scratch. This comes first, so a refused upgrade changes nothing.
+DO $$
+BEGIN
+  IF EXISTS (SELECT NULL FROM pg_attribute WHERE attrelid = 'hivemind_app.hive_accounts'::regclass AND attname = 'haf_id' AND NOT attisdropped)
+     AND EXISTS (SELECT NULL FROM hivemind_app.hive_accounts) THEN
+    RAISE EXCEPTION 'hivemind_app.hive_accounts numbers accounts apart from HAF (it has a haf_id column), and this hivemind keys accounts on HAF''s account ids: a full resync is required (uninstall hivemind and sync it again)';
+  END IF;
+END
+$$;
+
 do $$
 BEGIN
   ASSERT (SELECT setting FROM pg_settings where name='join_collapse_limit' and source='database')::int = 16, 'Bad optimizer settings, use install_app.sh script to setup target database correctly';
@@ -25,6 +37,22 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_db_vacuum_needed
 TRUNCATE TABLE hivemind_app.hive_db_vacuum_needed;
 
 --- Put schema upgrade code here.
+
+-- An old-keyspace hive_accounts the refusal above lets through has no rows, so it takes HAF's ids by losing its own
+-- numbering. Dropping haf_id drops hive_accounts_haf_id_idx. The views reading haf_id go with hive_accounts_view, which
+-- the runtime code recreates with its dependents (hive_accounts_view.sql drops it the same way). This also keeps a
+-- shape's empty, full-size files.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT NULL FROM pg_attribute WHERE attrelid = 'hivemind_app.hive_accounts'::regclass AND attname = 'haf_id' AND NOT attisdropped) THEN
+    RETURN;
+  END IF;
+  DROP VIEW IF EXISTS hivemind_app.hive_accounts_view CASCADE;
+  ALTER TABLE hivemind_app.hive_accounts DROP COLUMN haf_id;
+  ALTER TABLE hivemind_app.hive_accounts ALTER COLUMN id DROP DEFAULT;
+  DROP SEQUENCE IF EXISTS hivemind_app.hive_accounts_id_seq;
+END
+$$;
 
 -- condenser_api.get_followers pages on (following, follower_name). Account names never change, so the copy
 -- filled here never goes stale. follows is rebuilt rather than UPDATEd: an UPDATE writes a second version of every
@@ -230,3 +258,10 @@ SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name =
 WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx';
 DELETE FROM hafd.indexes_constraints
 WHERE table_name = 'hivemind_app.follows' AND index_constraint_name = 'follows_following_idx' AND cardinality(contexts) = 0;
+
+-- Dropped with hive_accounts.haf_id: hive_accounts.id is HAF's account id.
+UPDATE hafd.indexes_constraints
+SET contexts = array_remove(contexts, (SELECT id FROM hafd.contexts WHERE name = 'hivemind_app'))
+WHERE table_name = 'hivemind_app.hive_accounts' AND index_constraint_name = 'hive_accounts_haf_id_idx';
+DELETE FROM hafd.indexes_constraints
+WHERE table_name = 'hivemind_app.hive_accounts' AND index_constraint_name = 'hive_accounts_haf_id_idx' AND cardinality(contexts) = 0;

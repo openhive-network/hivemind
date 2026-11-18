@@ -107,7 +107,7 @@ BEGIN
   _voter_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account("account-name", False),
     False);
-  IF _voter_id = 0 THEN
+  IF _voter_id = -1 THEN
     RAISE EXCEPTION 'Account ''%'' does not exist', "account-name";
   END IF;
 
@@ -142,7 +142,7 @@ BEGIN
     FROM jsonb_populate_recordset(
       NULL::hivemind_endpoints.account_vote,
       hivemind_postgrest_utilities.list_votes(
-        0, 0, _limit,
+        -1, 0, _limit,
         'list_by_voter_last_update_before'::hivemind_postgrest_utilities.list_votes_case,
         'database_api'::hivemind_postgrest_utilities.vote_presentation,
         _voter_id, NULL, NULL, _before_last_update, _before_vote_id));

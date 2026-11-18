@@ -11,8 +11,9 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-VALUES ('pc-a', '2016-06-01'), ('pc-b', '2016-06-01'), ('pc-c', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['pc-a', 'pc-b', 'pc-c']) WITH ORDINALITY AS a(name, n);
 
 -- C: comment (a create, or an edit of the live row), D: delete_comment
 CREATE TEMP TABLE pc_ops (block_num INT, op CHAR, author TEXT, permlink TEXT, parent_author TEXT, parent_permlink TEXT);

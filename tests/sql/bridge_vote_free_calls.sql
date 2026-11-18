@@ -12,10 +12,14 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'vt-' || lpad(i::TEXT, 4, '0'), '2016-06-01' FROM generate_series(1, 1100) i ORDER BY i;
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('vt-late', '2016-06-01');
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('vt-author', '2016-06-01'), ('vt-novote', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + i, 'vt-' || lpad(i::TEXT, 4, '0'), '2016-06-01' FROM generate_series(1, 1100) i ORDER BY i;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['vt-late']) WITH ORDINALITY AS a(name, n);
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['vt-author', 'vt-novote']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink) VALUES ('vt-post');
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('vt-cat');
 

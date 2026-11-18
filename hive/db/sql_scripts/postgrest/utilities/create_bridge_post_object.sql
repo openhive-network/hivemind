@@ -79,7 +79,7 @@ BEGIN
     _result = jsonb_set(_result, '{observer_vote}', COALESCE(
       (SELECT jsonb_build_object('rshares', hivemind_app.json_stringify_numeric(hv.rshares), 'percent', hv.vote_percent)
        FROM hivemind_app.hive_votes hv
-       WHERE _observer_id <> 0 AND hv.post_id = _row.id AND hv.voter_id = _observer_id),
+       WHERE _observer_id <> -1 AND hv.post_id = _row.id AND hv.voter_id = _observer_id),
       'null'::JSONB));
 
     IF _top_votes > 0 THEN
@@ -91,7 +91,7 @@ BEGIN
            FROM hivemind_app.hive_votes hv
            JOIN hivemind_app.hive_accounts ha ON ha.id = hv.voter_id
            WHERE hv.post_id = _row.id
-             AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hv.voter_id))
+             AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hv.voter_id))
            ORDER BY abs(hv.rshares) DESC, hv.voter_id
            LIMIT _top_votes
          ) tv),

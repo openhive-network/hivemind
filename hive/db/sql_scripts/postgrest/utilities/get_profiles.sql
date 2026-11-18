@@ -63,7 +63,7 @@ BEGIN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(_missing_accounts::text);
     END IF;
 
-    IF _observer_id IS NOT NULL AND _observer_id <> 0 THEN
+    IF _observer_id IS NOT NULL AND _observer_id <> -1 THEN
         SELECT jsonb_agg(
                        jsonb_set(
                                account_row,

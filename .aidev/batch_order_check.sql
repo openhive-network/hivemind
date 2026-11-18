@@ -89,8 +89,9 @@ WHERE name = 'hivemind_app';
 
 SET LOCAL ROLE hivemind;
 
-INSERT INTO hivemind_app.hive_accounts ( name, created_at )
-VALUES ( 'bo-a', '2016-06-01' ), ( 'bo-b', '2016-06-01' ), ( 'bo-c', '2016-06-01' );
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['bo-a', 'bo-b', 'bo-c']) WITH ORDINALITY AS a(name, n);
 
 -- Processes the 12 blocks in batches of _size as massive sync's phases do, with
 -- _replay_follows a follows phase run again over its own committed result; returns the

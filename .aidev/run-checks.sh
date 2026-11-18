@@ -21,7 +21,9 @@
 #                consistent block: .aidev/ops_prefetch_check.sql; that 12 blocks as one
 #                massive batch, as 3-block batches and one at a time give the same post ids
 #                and notifications, mutes changing inside the batch:
-#                .aidev/batch_order_check.sql; that no function
+#                .aidev/batch_order_check.sql; that registered accounts take HAF's account ids
+#                and the pending-rewards endpoints read each account's own posts and votes:
+#                .aidev/account_keyspace_check.sql; that no function
 #                in hivemind_endpoints is VOLATILE: .aidev/endpoint_volatility_check.sql; and that the
 #                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
@@ -32,7 +34,9 @@
 #                not once the row is gone: check_unregistered_lock_reinstall; and, on the schema before
 #                follows.follower_name, that sync refuses to start, an install locked out by a
 #                lock holder fails naming it, and build_schema applies the table upgrade:
-#                check_table_schema_upgrade
+#                check_table_schema_upgrade; and that it refuses to upgrade a database of the
+#                old account keyspace (hive_accounts.haf_id) and changes nothing:
+#                check_account_keyspace_upgrade
 #   - reinstall  scripts/uninstall_app.sh, then the hivemind half of install again
 #   - mock-wrapper  scripts/ci/wrapper_for_app_next_block.sql applied twice to the
 #                stack's HAF and checked, in a transaction rolled back:
@@ -243,9 +247,11 @@ install_hivemind() {
     check_app_registry || return 1
     check_unregistered_lock_reinstall || return 1
     check_table_schema_upgrade || return 1
+    check_account_keyspace_upgrade || return 1
     check_massive_sync_stages || return 1
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/ops_prefetch_check.sql || return 1
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/batch_order_check.sql || return 1
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/account_keyspace_check.sql || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
@@ -457,6 +463,30 @@ check_table_schema_upgrade() {
     done
     release_hivemind_lock
     [ "$rc" -eq 0 ] && echo "locked-out build_schema and upgrade_schema with nothing pending exited 0"
+}
+
+# A database of the old account keyspace (hive_accounts numbering accounts itself, with a haf_id column) behind the
+# code's table schema: build_schema refuses the upgrade, saying a full resync is required, and changes nothing.
+check_account_keyspace_upgrade() {
+    local state="select (select string_agg(column_name, ',' order by ordinal_position) from information_schema.columns
+            where table_schema = 'hivemind_app' and table_name = 'hive_accounts'),
+        (select md5(string_agg(a::text, ',' order by a.id)) from hivemind_app.hive_accounts a),
+        (select upgrade_digest from hivemind_app.hive_table_schema),
+        (select count(*) from hivemind_app.hive_db_patch_level),
+        to_regclass('hivemind_app.hive_db_vacuum_needed')::oid, to_regclass('hivemind_app.deps_saved_ddl')::oid"
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "alter table hivemind_app.hive_accounts add column haf_id integer;
+        update hivemind_app.hive_table_schema set upgrade_digest = 'behind'" || return 1
+    local before after
+    before="$(psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "$state")" || return 1
+
+    expect_fail "build_schema on the old account keyspace" "haf_id" "a full resync is required" -- \
+        env PYTHONPATH="$root" python3 -m hive.cli build_schema --database-url="$ADMIN_URL" || return 1
+    after="$(psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "$state")" || return 1
+    [ "$after" = "$before" ] || { echo "the refused upgrade changed the database: $before became $after"; return 1; }
+    echo "build_schema refused the old account keyspace and changed nothing"
+
+    psql "$ADMIN_URL" -X -v ON_ERROR_STOP=on -Atc "alter table hivemind_app.hive_accounts drop column haf_id" || return 1
+    build_schema || { echo "build_schema after the old keyspace was removed failed"; return 1; }
 }
 
 install() {

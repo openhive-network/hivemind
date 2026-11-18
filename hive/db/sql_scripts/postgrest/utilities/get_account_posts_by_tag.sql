@@ -14,7 +14,7 @@ _result JSONB;
 BEGIN
   -- Check if author should be grayed
   --DLN this should probably be changed to a straight mute instead of graying
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
+  IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
   ELSE
     _posts_should_be_grayed = False;

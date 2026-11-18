@@ -9,7 +9,7 @@ DECLARE
   _subscribed BOOLEAN;
   _result JSONB;
 BEGIN
-  ASSERT _account_id <> 0;
+  ASSERT _account_id <> -1;
 
   _subscribed = EXISTS(SELECT 1 FROM hivemind_app.hive_subscriptions WHERE account_id = _account_id AND community_id = _community_id);
 
@@ -68,7 +68,7 @@ BEGIN
           hc.created_at::VARCHAR(19),
           (
             CASE
-              WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
+              WHEN _account_id <> -1 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
               ELSE '{}'::JSONB
             END
           ) AS context,
@@ -122,7 +122,7 @@ BEGIN
           hc.created_at::VARCHAR(19),
           (
             CASE
-              WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
+              WHEN _account_id <> -1 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
               ELSE '{}'::JSONB
             END
           ) AS context,
@@ -182,7 +182,7 @@ BEGIN
           hc.created_at::VARCHAR(19),
           (
             CASE
-              WHEN _account_id <> 0 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
+              WHEN _account_id <> -1 THEN hivemind_postgrest_utilities.get_community_context(_account_id, hivemind_postgrest_utilities.find_community_id(hc.name, True))
               ELSE '{}'::JSONB
             END
           ) AS context,

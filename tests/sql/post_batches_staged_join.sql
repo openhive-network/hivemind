@@ -358,10 +358,10 @@ inserted_post_tags AS (
 SELECT post_id FROM inserted_post_tags;
 $function$;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'pb-a' || lpad(i::TEXT, 3, '0'), '2016-06-01' FROM generate_series(1, 200) i ORDER BY i;
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'hive-41000' || t, '2016-06-01' FROM generate_series(1, 3) t ORDER BY t;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + i, 'pb-a' || lpad(i::TEXT, 3, '0'), '2016-06-01' FROM generate_series(1, 200) i ORDER BY i;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + t, 'hive-41000' || t, '2016-06-01' FROM generate_series(1, 3) t ORDER BY t;
 
 -- hive-410001 topic, hive-410002 journal, hive-410003 council
 INSERT INTO hivemind_app.hive_communities (id, type_id, name, created_at, block_num)

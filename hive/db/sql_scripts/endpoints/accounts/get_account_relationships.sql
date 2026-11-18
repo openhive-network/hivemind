@@ -72,7 +72,7 @@ BEGIN
   _account_id = hivemind_postgrest_utilities.find_account_id(
     hivemind_postgrest_utilities.valid_account("account-name", False),
     False);
-  IF _account_id = 0 THEN
+  IF _account_id = -1 THEN
     RAISE EXCEPTION 'Account ''%'' does not exist', "account-name";
   END IF;
 

@@ -3,8 +3,7 @@
 
 -- hive_accounts
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_accounts (
-    id SERIAL PRIMARY KEY,
-    haf_id INTEGER,
+    id INTEGER PRIMARY KEY, -- HAF's account id (hafd.accounts.id); -1 is the '' sentinel account
     name VARCHAR(16) COLLATE "C" NOT NULL,
     created_at TIMESTAMP NOT NULL,
     followers INTEGER NOT NULL DEFAULT 0,
@@ -16,7 +15,6 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_accounts (
     post_count INTEGER NOT NULL DEFAULT 0, -- the account's hive_posts rows with counter_deleted = 0, kept by process_posts_from_staging
     CONSTRAINT hive_accounts_ux1 UNIQUE (name)
 );
-CREATE INDEX IF NOT EXISTS hive_accounts_haf_id_idx ON hivemind_app.hive_accounts (haf_id);
 
 -- hive_posts
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_posts (

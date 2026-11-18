@@ -108,7 +108,7 @@ BEGIN
                                       ROW_NUMBER() OVER (ORDER BY sp.score DESC, sp.id DESC)::int AS rank_order
                                FROM   similar_posts sp
                                           JOIN hivemind_app.hive_posts hp ON hp.id = sp.id
-                               WHERE  (_observer_id = 0 OR NOT EXISTS (
+                               WHERE  (_observer_id = -1 OR NOT EXISTS (
                                    SELECT 1
                                    FROM   hivemind_app.muted_accounts_by_id_view
                                    WHERE  observer_id = _observer_id AND muted_id = hp.author_id))

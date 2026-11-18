@@ -25,7 +25,7 @@ BEGIN
       True),
     True);
   
-  IF _account_id = 0 THEN
+  IF _account_id = -1 THEN
     RETURN '{}'::JSONB;
   END IF;
 

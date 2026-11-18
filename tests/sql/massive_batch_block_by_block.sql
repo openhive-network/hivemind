@@ -17,8 +17,9 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at)
-SELECT 'bb-' || n, '2016-06-01' FROM unnest(ARRAY['v1', 'v2', 'v3', 'v4', 'a']) n ORDER BY n;
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['bb-a', 'bb-v1', 'bb-v2', 'bb-v3', 'bb-v4']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink)
 SELECT 'bb-p' || i FROM generate_series(1, 5) i ORDER BY i;
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('bb-cat');

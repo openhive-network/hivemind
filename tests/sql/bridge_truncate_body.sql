@@ -9,7 +9,9 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('tb-author', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['tb-author']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink) VALUES ('tb-post');
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('tb-cat');
 INSERT INTO hivemind_app.hive_tag_data (tag) VALUES ('tb-cat');

@@ -1022,7 +1022,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                 UPDATE {SCHEMA_NAME}.hive_notification_cache hnc
                 SET score = COALESCE(fr.rep, 25)
                 FROM {SCHEMA_NAME}.hive_accounts ha
-                JOIN final_rep fr ON ha.haf_id = fr.account_id
+                JOIN final_rep fr ON ha.id = fr.account_id
                 WHERE hnc.src = ha.id
                     AND hnc.type_id IN (11, 12, 13, 14, 15, 16)
                     AND hnc.score != COALESCE(fr.rep, 25)

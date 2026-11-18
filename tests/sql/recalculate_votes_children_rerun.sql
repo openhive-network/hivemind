@@ -15,7 +15,9 @@
 \set ON_ERROR_STOP 1
 BEGIN;
 
-INSERT INTO hivemind_app.hive_accounts (name, created_at) VALUES ('rc-author', '2016-06-01'), ('rc-voter', '2016-06-01');
+INSERT INTO hivemind_app.hive_accounts (id, name, created_at)
+SELECT (SELECT max(id) FROM hivemind_app.hive_accounts) + a.n, a.name, '2016-06-01'
+FROM unnest(ARRAY['rc-author', 'rc-voter']) WITH ORDINALITY AS a(name, n);
 INSERT INTO hivemind_app.hive_permlink_data (permlink) VALUES ('rc-p1'), ('rc-p2'), ('rc-p3'), ('rc-r1'), ('rc-r2');
 INSERT INTO hivemind_app.hive_category_data (category) VALUES ('rc-cat');
 

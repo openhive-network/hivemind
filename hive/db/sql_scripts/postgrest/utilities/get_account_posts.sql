@@ -16,7 +16,7 @@ BEGIN
     WHERE hfc.account_id = _account_id AND hfc.post_id = _post_id;
   END IF;
   -- DLN maybe this should  be changed to a straight mute instead of graying
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
+  IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
   ELSE
     _posts_should_be_grayed = False;
@@ -113,7 +113,7 @@ DECLARE
 _posts_should_be_grayed BOOLEAN;
 _result JSONB;
 BEGIN
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
+  IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
   ELSE
     _posts_should_be_grayed = False;
@@ -240,7 +240,7 @@ BEGIN
           ) f ON hfc.account_id = f.following
           JOIN hivemind_app.hive_accounts ha ON ha.id = f.following
           WHERE hfc.block_num > _cutoff
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
           GROUP BY hfc.post_id
           HAVING (_post_id = 0 OR MIN(hfc.created_at) < _min_date OR ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
           ORDER BY min_created DESC, hfc.post_id DESC
@@ -310,7 +310,7 @@ _posts_should_be_grayed BOOLEAN;
 _result JSONB;
 BEGIN
   --DLN this should probably be changed to a straight mute instead of graying
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
+  IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
   ELSE
     _posts_should_be_grayed = False;
@@ -399,7 +399,7 @@ BEGIN
     FROM hivemind_app.hive_posts hp
     JOIN hivemind_app.hive_posts pp ON hp.parent_id = pp.id
     WHERE hp.id = _post_id;
-    IF _account_id = 0 THEN _account_id = NULL; END IF;
+    IF _account_id = -1 THEN _account_id = NULL; END IF;
   END IF;
 
   _result = (
@@ -424,7 +424,7 @@ BEGIN
         WHERE
           hr.parent_author_id = _account_id
           AND hr.post_id < COALESCE(NULLIF(_post_id, 0), 2147483647)
-          AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
+          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
         ORDER BY hr.post_id DESC
         LIMIT _limit
       )      
@@ -494,7 +494,7 @@ _posts_should_be_grayed BOOLEAN;
 _payout_limit hivemind_app.hive_posts.payout%TYPE;
 _result JSONB;
 BEGIN
-  IF _observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
+  IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
   ELSE
     _posts_should_be_grayed = False;
