@@ -181,7 +181,7 @@ BEGIN
     WHEN __method_type = 'get_moderator_activity' THEN
       result := hivemind_endpoints.bridge_api_get_moderator_activity(__params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('bridge_api' || __method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('bridge.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -222,7 +222,7 @@ BEGIN
     WHEN __method_type = 'get_account_votes' THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change');
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('tags_api' || __method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('tags_api.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -247,7 +247,7 @@ BEGIN
     WHEN __method_type = 'find_comments' THEN
       result := hivemind_endpoints.database_api_find_comments(__params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('database_api' || __method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('database_api.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -270,7 +270,7 @@ BEGIN
     WHEN __method_type = 'db_head_state' THEN
       result := hivemind_endpoints.hive_api_db_head_state(__params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('hive_api' || __method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('hive.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -297,7 +297,7 @@ BEGIN
         WHEN __method_type = 'find_similar_v2' THEN
             result := hivemind_endpoints.search_api_find_similar(__params, /* _votes_mode */ 1::SMALLINT);
         ELSE
-            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search-api' || __method_type);
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('search-api.' || __method_type);
         END CASE;
     RETURN result;
 END;
