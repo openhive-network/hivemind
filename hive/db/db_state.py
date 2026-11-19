@@ -109,12 +109,19 @@ class DbState:
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
     _DDL_MAX_RETRIES = 5
 
-    # pg_search's non-concurrent build scans hive_post_data with SnapshotAny and
-    # detoasts every row version the heap still holds, recently dead ones
-    # included, so it can reach a dead version whose toast an earlier vacuum
-    # already removed (a VACUUM's heap and toast passes compute their horizons
-    # separately) and fail with DataCorrupted (#450). A plain VACUUM prunes such
-    # a version; the build is retried once after it.
+    # A non-concurrent index build (PostgreSQL's own scan, which pg_search's
+    # uses) reads hive_post_data with SnapshotAny and indexes, so detoasts, every
+    # row version recently dead as of the xmin horizon at its start. Its own
+    # snapshot is newer than that horizon whenever another transaction holds the
+    # horizon back (HAF's CREATE INDEX CONCURRENTLY on hafd.operations), so once
+    # that transaction ends, the build alone no longer keeps those versions'
+    # toast. Its ShareLock keeps VACUUM off the heap but not autovacuum off the
+    # toast table, which is vacuumed as a relation of its own: that is what
+    # removed the chunks a build then failed on with DataCorrupted (#492), so
+    # toast autovacuum is off for the build. A dead version whose toast an
+    # earlier vacuum removed (its heap and toast passes compute their horizons
+    # separately, #450) fails the same way; a plain VACUUM prunes it, and the
+    # build is retried once after it.
     _BM25_BUILD_ATTEMPTS = 2
 
     # During massive sync, autovacuum on hive_post_data races the flush
@@ -463,33 +470,47 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             log.info("[MASSIVE] Skipping BM25 index creation (pg_search not available)")
             return
 
+        table = f"{SCHEMA_NAME}.hive_post_data"
         with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
-            for attempt in range(1, cls._BM25_BUILD_ATTEMPTS + 1):
-                log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
-                time_start = perf_counter()
-                try:
-                    db_mgr.db.query_no_return(
-                        f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data "
-                        "USING bm25 (id, title, body) WITH (key_field = 'id', "
-                        "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
-                        f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
-                    )
-                except psycopg2.errors.DataCorrupted as exc:
-                    if attempt == cls._BM25_BUILD_ATTEMPTS:
-                        log.error("[MASSIVE] BM25 index build failed again after a vacuum of hive_post_data: %s", exc)
-                        raise
-                    log.warning(
-                        "[MASSIVE] BM25 index build hit a toast-chunk error after %.4fs (attempt %d/%d): %s; "
-                        "vacuuming hive_post_data and retrying",
-                        perf_counter() - time_start,
-                        attempt,
-                        cls._BM25_BUILD_ATTEMPTS,
-                        str(exc).strip(),
-                    )
-                    cls._run_vacuum(db, "bm25_retry_vacuum", f"VACUUM {SCHEMA_NAME}.hive_post_data")
-                    continue
-                log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
-                return
+            # Taking the toast table's ShareUpdateExclusiveLock cancels a toast
+            # autovacuum already running; none starts again until the RESET.
+            # A crash in between leaves the option set, and the next start's
+            # finalization RESETs it (restore_autovacuum_after_massive_sync).
+            db_mgr.db.query_no_return(f"ALTER TABLE {table} SET (toast.autovacuum_enabled = off)")
+            try:
+                cls._build_bm25_index(db, db_mgr.db, table)
+            finally:
+                db_mgr.db.query_no_return(f"ALTER TABLE {table} RESET (toast.autovacuum_enabled)")
+
+    @classmethod
+    def _build_bm25_index(cls, db: Db, build_db: Db, table: str) -> None:
+        for attempt in range(1, cls._BM25_BUILD_ATTEMPTS + 1):
+            log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
+            time_start = perf_counter()
+            try:
+                build_db.query_no_return(
+                    f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {table} "
+                    "USING bm25 (id, title, body) WITH (key_field = 'id', "
+                    "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
+                    f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
+                )
+            except psycopg2.errors.DataCorrupted as exc:
+                if attempt == cls._BM25_BUILD_ATTEMPTS:
+                    log.error("[MASSIVE] BM25 index build failed again after a vacuum of %s: %s", table, exc)
+                    raise
+                log.warning(
+                    "[MASSIVE] BM25 index build hit a toast-chunk error after %.4fs (attempt %d/%d): %s; "
+                    "falling back to vacuuming %s and retrying",
+                    perf_counter() - time_start,
+                    attempt,
+                    cls._BM25_BUILD_ATTEMPTS,
+                    str(exc).strip(),
+                    table,
+                )
+                cls._run_vacuum(db, "bm25_retry_vacuum", f"VACUUM {table}")
+                continue
+            log.info("[MASSIVE] BM25 index created in %.4fs", perf_counter() - time_start)
+            return
 
     @classmethod
     def _restore_bm25_index_after_recompute(cls, db: Db, recomputed: Future[None]) -> None:
