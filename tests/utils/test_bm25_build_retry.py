@@ -1,9 +1,11 @@
-"""A toast-chunk error in finalization's BM25 index build (#450).
+"""A toast-chunk error in finalization's BM25 index build (#450, #492).
 
 The build reads every row version hive_post_data's heap still holds, so it can
-detoast a dead version whose toast is already gone. One such error is absorbed
-by a vacuum of hive_post_data and a second build; a second error still fails
-finalization before its completion marker.
+detoast a dead version whose toast is already gone. Toast autovacuum, which
+removed those chunks once a co-tenant's transaction stopped holding the horizon
+back, is off for every build attempt and back on after the last. One such error
+is still absorbed by a vacuum of hive_post_data and a second build; a second
+error still fails finalization before its completion marker.
 
 The build starts once the hive_posts recompute has committed, so its snapshot
 does not keep the row versions the recompute replaced (#485).
@@ -23,6 +25,8 @@ from hive.db.db_state import DbState
 Call = tuple[Any, ...]
 
 TOAST_ERROR = "missing chunk number 0 for toast value 126192046 in pg_toast_40738"
+TOAST_AUTOVACUUM_OFF = ('alter', 'ALTER TABLE hivemind_app.hive_post_data SET (toast.autovacuum_enabled = off)')
+TOAST_AUTOVACUUM_RESET = ('alter', 'ALTER TABLE hivemind_app.hive_post_data RESET (toast.autovacuum_enabled)')
 
 
 class _FakeBuildDb:
@@ -33,6 +37,9 @@ class _FakeBuildDb:
         self._failures = failures
 
     def query_no_return(self, sql: str, **kwargs: Any) -> None:
+        if sql.startswith('ALTER TABLE'):
+            self._calls.append(('alter', sql))
+            return
         assert sql.startswith('CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx'), sql
         self._calls.append(('create_bm25',))
         if self._failures > 0:
@@ -109,8 +116,14 @@ def test_one_toast_error_is_absorbed_and_marker_commits_once(massive_sync_precon
     completed, calls = _run(massive_sync_preconditions, failures=1)
 
     assert completed is True
-    bm25 = [c for c in calls if c[0] in ('create_bm25', 'vacuum')]
-    assert bm25 == [('create_bm25',), ('vacuum', 'VACUUM hivemind_app.hive_post_data'), ('create_bm25',)]
+    bm25 = [c for c in calls if c[0] in ('alter', 'create_bm25', 'vacuum')]
+    assert bm25 == [
+        TOAST_AUTOVACUUM_OFF,
+        ('create_bm25',),
+        ('vacuum', 'VACUUM hivemind_app.hive_post_data'),
+        ('create_bm25',),
+        TOAST_AUTOVACUUM_RESET,
+    ]
     assert [c for c in calls if c[0] == 'marker'] == [('marker', massive_sync_preconditions, 100, 200)]
     assert calls[-1][0] == 'marker'
 
@@ -121,6 +134,8 @@ def test_second_toast_error_fails_finalization_before_marker() -> None:
     assert isinstance(result, psycopg2.errors.DataCorrupted)
     assert TOAST_ERROR in str(result)
     assert [c[0] for c in calls].count('create_bm25') == 2
+    assert [c for c in calls if c[0] == 'alter'] == [TOAST_AUTOVACUUM_OFF, TOAST_AUTOVACUUM_RESET]
+    assert calls.index(TOAST_AUTOVACUUM_RESET) > max(i for i, c in enumerate(calls) if c[0] == 'create_bm25')
     assert not any(c[0] == 'marker' for c in calls)
 
 
@@ -129,7 +144,11 @@ def test_build_without_error_runs_once_without_vacuum(massive_sync_preconditions
     completed, calls = _run(massive_sync_preconditions, failures=0)
 
     assert completed is True
-    assert [c for c in calls if c[0] in ('create_bm25', 'vacuum')] == [('create_bm25',)]
+    assert [c for c in calls if c[0] in ('alter', 'create_bm25', 'vacuum')] == [
+        TOAST_AUTOVACUUM_OFF,
+        ('create_bm25',),
+        TOAST_AUTOVACUUM_RESET,
+    ]
     expected_part0 = {'_finish_hive_feed_cache', '_finish_hive_posts', 'create_bm25'}
     expected_part0 |= (
         {'_finish_payout_stats_view', '_finish_communities_posts_and_rank'}
@@ -156,4 +175,4 @@ def test_build_skipped_when_the_hive_posts_task_fails_before_its_recompute_commi
         result, calls = _run(massive_sync_preconditions=True, failures=0, hive_posts=DbState._finish_hive_posts)
 
     assert isinstance(result, psycopg2.errors.QueryCanceled)
-    assert not any(c[0] in ('create_bm25', 'marker') for c in calls)
+    assert not any(c[0] in ('alter', 'create_bm25', 'marker') for c in calls)
