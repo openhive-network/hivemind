@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -46,9 +47,78 @@ def _try_create_extension(db, ext_name) -> bool:
         # CASCADE: pg_search >= 0.25 depends on the vector extension
         db.query(f'CREATE EXTENSION IF NOT EXISTS {ext_name} CASCADE;')
         return True
-    except Exception:
+    except Exception as exc:
         # With autocommit=True the failed statement is already rolled back
+        message = str(exc).strip()
+        log.warning("Could not create extension %s: %s", ext_name, message.splitlines()[0] if message else repr(exc))
         return False
+
+
+@dataclass(frozen=True)
+class SearchStatus:
+    """What full-text search needs, as this database's server reports it."""
+
+    package_available: bool
+    preloaded: bool
+    extension_installed: bool
+    function_present: bool
+    index_present: bool
+    index_valid: bool
+
+    @property
+    def usable(self) -> bool:
+        """Whether the BM25 index can be built: the extension is installed and is_top_level_post exists."""
+        return self.extension_installed and self.function_present
+
+
+def search_status(db: Db) -> SearchStatus:
+    """Read what full-text search needs in one query any role can run.
+
+    shared_preload_libraries is superuser-only, so a preloaded pg_search is
+    recognised by the paradedb.* settings its _PG_init defines.
+    """
+    (row,) = db.query_all(
+        f"""
+        SELECT
+          EXISTS (SELECT 1 FROM pg_catalog.pg_available_extensions WHERE name = 'pg_search'),
+          EXISTS (SELECT 1 FROM pg_catalog.pg_settings WHERE name LIKE 'paradedb.%'),
+          EXISTS (SELECT 1 FROM pg_catalog.pg_extension WHERE extname = 'pg_search'),
+          to_regprocedure('{SCHEMA_NAME}.is_top_level_post(integer)') IS NOT NULL,
+          i.indexrelid IS NOT NULL,
+          COALESCE(i.indisvalid, FALSE)
+        FROM (SELECT 1) AS one
+        LEFT JOIN pg_catalog.pg_index i ON i.indexrelid = to_regclass('{SCHEMA_NAME}.hive_post_data_bm25_idx')
+        """
+    )
+    return SearchStatus(*(bool(value) for value in row))
+
+
+def bm25_index_sql() -> str:
+    """The CREATE INDEX statement of hive_post_data's BM25 index."""
+    return (
+        f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data "
+        "USING bm25 (id, title, body) WITH (key_field = 'id', "
+        "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
+        f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
+    )
+
+
+def create_is_top_level_post(db: Db) -> None:
+    """Create is_top_level_post, the BM25 index's predicate; hive_posts must exist."""
+    db.query_no_return(
+        f"""
+        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
+        RETURNS BOOLEAN
+        LANGUAGE sql
+        IMMUTABLE PARALLEL SAFE
+        AS $$
+          SELECT EXISTS (
+            SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
+            WHERE hp.id = post_id AND hp.depth = 0
+          );
+        $$;
+        """
+    )
 
 
 # last_completed_block_num of a database no finalization has completed yet.
@@ -133,30 +203,10 @@ def setup(db, admin_db) -> None:
     execute_sql_script(db.query_no_return, sql_scripts_dir_path / 'schema' / 'create_tables.sql')
 
     if pg_search_available:
-        # Create BM25 index (requires pg_search extension)
-        sql = f"""
-        CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {SCHEMA_NAME}.hive_post_data
-            USING bm25 (id, title, body)
-            WITH (key_field = 'id', text_fields = '{{"title": {{"record": "position"}}, "body": {{"record": "position"}}}}')
-            WHERE {SCHEMA_NAME}.is_top_level_post(id);
-        """
-        db.query_no_return(sql)
-
+        db.query_no_return(bm25_index_sql())
         # Now that tables exist, replace the function with its real implementation that
         # references the hive_posts table
-        sql = f"""
-        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.is_top_level_post(post_id INTEGER)
-        RETURNS BOOLEAN
-        LANGUAGE sql
-        IMMUTABLE PARALLEL SAFE
-        AS $$
-          SELECT EXISTS (
-            SELECT 1 FROM {SCHEMA_NAME}.hive_posts hp
-            WHERE hp.id = post_id AND hp.depth = 0
-          );
-        $$;
-        """
-        db.query_no_return(sql)
+        create_is_top_level_post(db)
 
     # Register indexes with HAF for managed lifecycle (drop/restore during massive sync)
     # Uses hive.app_register_index_dependency() which is SECURITY DEFINER — app role is sufficient

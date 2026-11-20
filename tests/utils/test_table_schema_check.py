@@ -55,13 +55,12 @@ class _Database:
             return self.runtime_revision
         if 'pg_locks' in sql:
             return self.lock_holders
-        if 'pg_extension' in sql:
-            return 0
         raise AssertionError(f'unexpected query: {sql}')
 
-    def query_all(self, sql: str, **kwargs: Any) -> list[Any]:
+    def query_all(self, sql: str, **kwargs: Any) -> list[tuple[bool, ...]]:
+        assert 'pg_available_extensions' in sql, sql
         self.statements.append(sql)
-        return [(0,)]
+        return [(False,) * 6]
 
     def query_col(self, sql: str, tables: list[str], schema: str) -> list[str]:
         self.statements.append(sql)
