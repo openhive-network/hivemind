@@ -37,19 +37,34 @@ BEGIN
   _result = (
     SELECT jsonb_build_object(
       'comments', ( SELECT jsonb_agg (
-                      hivemind_postgrest_utilities.create_database_post_object(row, 0)
+                      hivemind_postgrest_utilities.create_database_post_object(row, 0) ORDER BY row.ord
                     ) FROM (
-                      WITH posts AS -- database_api_find_comments
+                      -- Resolving the pairs first keeps the (generic) plan from walking each
+                      -- author's whole post history to find a permlink: every pair costs a probe
+                      -- of hive_accounts_ux1, hive_permlink_data_permlink and hive_posts_ux1.
+                      WITH pairs AS MATERIALIZED -- database_api_find_comments
                       (
                         SELECT
-                          hp.id
+                          ap.ord,
+                          ha_a.id AS author_id,
+                          hpd_p.id AS permlink_id
                         FROM
-                          hivemind_app.live_posts_comments_view hp
-                        JOIN hivemind_app.hive_accounts ha_a ON ha_a.id = hp.author_id
-                        JOIN hivemind_app.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                        JOIN unnest(_authors_and_permlinks) AS ap ON ha_a.name = ap.author AND hpd_p.permlink = ap.permlink
+                          unnest(_authors_and_permlinks) WITH ORDINALITY AS ap(author, permlink, ord)
+                        JOIN hivemind_app.hive_accounts ha_a ON ha_a.name = ap.author
+                        JOIN hivemind_app.hive_permlink_data hpd_p ON hpd_p.permlink = ap.permlink
+                      ),
+                      posts AS
+                      (
+                        SELECT
+                          hp.id,
+                          pairs.ord
+                        FROM
+                          pairs
+                        JOIN hivemind_app.live_posts_comments_view hp ON hp.author_id = pairs.author_id AND hp.permlink_id = pairs.permlink_id
                         WHERE
                           NOT hp.is_muted
+                        ORDER BY
+                          pairs.ord
                         LIMIT
                           _comments_amount
                       )
@@ -92,9 +107,11 @@ BEGIN
                         pv.abs_rshares,
                         pv.active,
                         pv.author_rewards,
-                        pv.parent_author
+                        pv.parent_author,
+                        posts.ord
                       FROM posts,
                       LATERAL hivemind_app.get_post_view_by_id (posts.id) pv
+                      ORDER BY posts.ord
                       LIMIT _comments_amount
                     ) row
                   )
