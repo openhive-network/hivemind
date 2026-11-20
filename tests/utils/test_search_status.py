@@ -9,12 +9,11 @@ import dataclasses
 import logging
 from unittest.mock import MagicMock, patch
 
-import psycopg2.errors
 import pytest
 
 import hive.db.schema as schema_module
 from hive.db.db_state import DbState
-from hive.db.schema import SearchStatus, _try_create_extension, bm25_index_sql, search_status
+from hive.db.schema import SearchStatus, bm25_index_sql, search_status
 
 _READY = SearchStatus(
     package_available=True,
@@ -103,19 +102,6 @@ def test_search_status_maps_the_query_result(row: tuple[bool, ...], usable: bool
     assert 'shared_preload_libraries' not in sql
     assert "LIKE 'paradedb.%'" in sql
     assert 'indisvalid' in sql
-
-
-def test_failed_create_extension_logs_the_first_line_of_the_error(caplog: pytest.LogCaptureFixture) -> None:
-    db = MagicMock()
-    db.query.side_effect = psycopg2.errors.FeatureNotSupported(
-        'pg_search must be loaded via shared_preload_libraries\nCONTEXT:  SQL statement "LOAD"'
-    )
-
-    with caplog.at_level(logging.WARNING, logger='hive.db.schema'):
-        assert _try_create_extension(db, 'pg_search') is False
-
-    messages = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert messages == ['Could not create extension pg_search: pg_search must be loaded via shared_preload_libraries']
 
 
 def test_setup_and_finalization_build_the_same_index() -> None:

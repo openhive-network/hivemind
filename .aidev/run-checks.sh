@@ -172,7 +172,7 @@ ensure_version() {
 # The tests write scratch files (e.g. .tmp.test-prof) relative to the working
 # directory: run them from a scratch one so the checkout stays clean. A directory
 # of UNIT_DIRS that doesn't exist is skipped, so removing one doesn't break the step.
-UNIT_DIRS=(tests/utils tests/steem tests/ci)
+UNIT_DIRS=(tests/utils tests/private tests/steem tests/ci)
 unit() {  # [NODE_ID...]  (repository-relative; default: every test under UNIT_DIRS)
     ensure_version
     local scratch dir id rc=0
