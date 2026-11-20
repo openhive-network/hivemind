@@ -434,30 +434,31 @@ BEGIN
       AND m.follower = fa.follower_id AND m.following = fa.following_id;
 
     -- Update following counters for genuinely new follows
-    -- CTE pre-locks hive_accounts rows in id order to prevent deadlocks when
-    -- concurrent transactions (e.g. process_account_updates) lock the same rows.
+    -- The locked CTE pre-locks hive_accounts rows in id order to prevent deadlocks
+    -- when concurrent transactions (e.g. process_account_updates) lock the same rows.
+    -- The UPDATE reads its counts from locked: PostgreSQL never runs an unreferenced SELECT CTE.
     WITH delta AS (
         SELECT follower AS account_id, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY follower
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET following = following + delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET following = following + locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     -- Update followers counters for genuinely new follows
     WITH delta AS (
         SELECT following AS account_id, count(*) AS cnt FROM _new_follows WHERE is_new GROUP BY following
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET followers = followers + delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET followers = followers + locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     -- Follow notifications were already collected in Phase 1 (inline with _follow_actions)
     -- to match old Python path's per-operation notification generation before dedup.
@@ -487,24 +488,24 @@ BEGIN
         SELECT follower AS account_id, count(*) AS cnt FROM _deleted_follows_ignore GROUP BY follower
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET following = following - delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET following = following - locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     -- Decrement followers counters (deterministic lock order to prevent deadlocks)
     WITH delta AS (
         SELECT following AS account_id, count(*) AS cnt FROM _deleted_follows_ignore GROUP BY following
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET followers = followers - delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET followers = followers - locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     DROP TABLE _deleted_follows_ignore;
 
@@ -525,24 +526,24 @@ BEGIN
         SELECT follower AS account_id, count(*) AS cnt FROM _deleted_follows_unfollow GROUP BY follower
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET following = following - delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET following = following - locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     -- Decrement followers counters (deterministic lock order to prevent deadlocks)
     WITH delta AS (
         SELECT following AS account_id, count(*) AS cnt FROM _deleted_follows_unfollow GROUP BY following
     ),
     locked AS (
-        SELECT ha.id FROM hivemind_app.hive_accounts ha
-        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE
+        SELECT ha.id, d.cnt FROM hivemind_app.hive_accounts ha
+        JOIN delta d ON ha.id = d.account_id ORDER BY ha.id FOR UPDATE OF ha
     )
     UPDATE hivemind_app.hive_accounts ha
-    SET followers = followers - delta.cnt
-    FROM delta WHERE ha.id = delta.account_id;
+    SET followers = followers - locked.cnt
+    FROM locked WHERE ha.id = locked.id;
 
     DROP TABLE _deleted_follows_unfollow;
 
