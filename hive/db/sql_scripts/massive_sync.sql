@@ -90,6 +90,10 @@ DROP INDEX IF EXISTS hivemind_app._ops_staging_block_num_id_idx;
 
 CREATE INDEX _ops_staging_op_type_id_idx ON hivemind_app._ops_staging (op_type_id);
 CREATE INDEX _ops_staging_block_num_id_idx ON hivemind_app._ops_staging (block_num, id);
+-- Out of autovacuum, like _post_batch: every load analyzes it (op_type_id and block_num),
+-- so an automatic analyze adds nothing but a pass over the val JSONB column the loads
+-- leave out. reset_staging_tables bounds its dead rows.
+ALTER TABLE hivemind_app._ops_staging SET (autovacuum_enabled = false);
 
 -- The next massive batch's operations, loaded by prefetch_ops_staging while the current
 -- batch runs, and moved to _ops_staging by load_ops_staging_from_prefetch.
@@ -199,6 +203,12 @@ CREATE UNLOGGED TABLE hivemind_app._vote_batch (
     block_num   INT,
     ord         BIGINT NOT NULL   -- the order hive_votes ids are drawn in
 );
+-- Out of autovacuum, like _post_batch: an analyze between calls records some earlier
+-- fill (or none), and prepare_votes_from_staging joins the refilled table to the
+-- versions of its voted posts, a CTE with no index, as a nested loop that rescans the
+-- CTE per vote. Its estimates come from its current pages (reltuples -1, after creation
+-- or reset_staging_tables' TRUNCATE) or from prepare_votes_from_staging's own ANALYZE.
+ALTER TABLE hivemind_app._vote_batch SET (autovacuum_enabled = false);
 
 -- hive_votes rows of a vote batch, ids already drawn (prepare_votes_from_staging),
 -- read by the upsert workers (upsert_votes_partition)
@@ -218,6 +228,9 @@ CREATE UNLOGGED TABLE hivemind_app._vote_upsert (
     is_effective BOOLEAN,          -- some block of the batch holds an effective vote
     first_is_effective BOOLEAN     -- the batch's first block of this vote does
 );
+-- Out of autovacuum with _vote_batch, filled with it every call: sized by its current
+-- pages, never by an analyze of an earlier batch's rows.
+ALTER TABLE hivemind_app._vote_upsert SET (autovacuum_enabled = false);
 
 -- Persistent staging tables for reblog processing
 DROP TABLE IF EXISTS hivemind_app._reblog_final;
@@ -556,6 +569,8 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- would apply them.
 CREATE OR REPLACE FUNCTION hivemind_app.prepare_votes_from_staging()
 RETURNS VOID AS $function$
+DECLARE
+    _vote_rows INT;
 BEGIN
     -- Step 1: One row per (voter, author, permlink, block) from vote ops (type 0) and
     -- effective_comment_vote ops (type 72): the last vote's vote_percent/last_update,
@@ -624,6 +639,13 @@ BEGIN
     FROM block_votes bv
     JOIN account_ids ha_voter ON ha_voter.name = bv.voter
     JOIN account_ids ha_author ON ha_author.name = bv.author;
+
+    -- Step 2 is planned from _vote_batch's statistics, which describe the last fill
+    -- analyzed; below staging_analyze_min_rows() rows any plan is cheap.
+    GET DIAGNOSTICS _vote_rows = ROW_COUNT;
+    IF _vote_rows >= hivemind_app.staging_analyze_min_rows() THEN
+        ANALYZE hivemind_app._vote_batch (voter_id, author_id, permlink, block_num);
+    END IF;
 
     -- Step 2: Resolve each block's post, fold the blocks of each voter's vote on a
     -- post, and draw its hive_votes id
@@ -1251,8 +1273,9 @@ END
 $function$ LANGUAGE plpgsql IMMUTABLE;
 
 
--- Rows from which the posts phase analyzes a staging table it has just refilled
--- (process_posts_from_staging, process_root_posts_batch, process_comments_batch).
+-- Rows from which the posts and votes phases analyze a staging table they have just
+-- refilled (process_posts_from_staging, process_root_posts_batch, process_comments_batch,
+-- prepare_votes_from_staging).
 CREATE OR REPLACE FUNCTION hivemind_app.staging_analyze_min_rows()
 RETURNS INT AS $$
     SELECT 1000;
