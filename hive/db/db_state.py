@@ -23,8 +23,10 @@ from hive.conf import (
 from hive.db.adapter import Db
 from hive.db.schema import (
     SEED_LAST_COMPLETED_BLOCK,
+    bm25_index_sql,
     perform_db_upgrade,
     recorded_table_schema,
+    search_status,
     setup,
     setup_runtime_code,
     table_schema_digest,
@@ -43,6 +45,12 @@ log = logging.getLogger(__name__)
 _RUN_UPGRADE = (
     "run `hive upgrade_schema` (the docker image's `setup --upgrade-schema`), or `hive build_schema` (`setup`), "
     "which applies a pending table upgrade, before starting sync"
+)
+
+
+_SEARCH_REMEDY = (
+    "replay hivemind on a HAF image that preloads pg_search, or apply the manual remedy "
+    "in hivemind issue #488 (its 2026-11-16 description revision)"
 )
 
 
@@ -223,18 +231,37 @@ class DbState:
             db_setup_admin.close()
             log.info("Database schema upgrade finished")
 
-        # Detect pg_search availability for existing DBs (setup() sets this for fresh installs)
-        if not schema_module.pg_search_available:
-            result = cls.db().query_all("SELECT COUNT(*) FROM pg_extension WHERE extname = 'pg_search'")
-            if result and result[0][0] > 0:
-                schema_module.pg_search_available = True
-                log.info("pg_search extension detected in existing database")
+        cls._log_search_status()
 
         db_setup_owner.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}")
         db_setup_owner.query_no_return(f"SET custom.swagger_url = '{SWAGGER_URL}'")
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()
+
+    @classmethod
+    def _log_search_status(cls) -> None:
+        """Log, in one line, whether full-text search works and, when it does not, why and what to do."""
+        status = search_status(cls.db())
+        schema_module.pg_search_available = status.usable
+        off = "full-text search (find_text, find_similar) is off"
+        if not status.package_available:
+            log.warning("%s: this PostgreSQL server has no pg_search package; %s", off, _SEARCH_REMEDY)
+        elif not status.preloaded:
+            log.warning("%s: pg_search is not in shared_preload_libraries; %s", off, _SEARCH_REMEDY)
+        elif not status.extension_installed:
+            log.warning("%s: the pg_search extension is not installed in this database; %s", off, _SEARCH_REMEDY)
+        elif not status.function_present:
+            log.warning("%s: %s.is_top_level_post is missing; %s", off, SCHEMA_NAME, _SEARCH_REMEDY)
+        elif not status.index_present:
+            if cls.is_initial_sync():
+                log.info("Full-text search index hive_post_data_bm25_idx will be built at the end of the initial sync")
+            else:
+                log.warning("%s: the index hive_post_data_bm25_idx is missing; %s", off, _SEARCH_REMEDY)
+        elif not status.index_valid:
+            log.warning("%s: the index hive_post_data_bm25_idx is INVALID; %s", off, _SEARCH_REMEDY)
+        else:
+            log.info("Full-text search is ready (pg_search with a valid hive_post_data_bm25_idx)")
 
     @classmethod
     def _is_table_schema_current(cls) -> bool:
@@ -487,12 +514,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
             time_start = perf_counter()
             try:
-                build_db.query_no_return(
-                    f"CREATE INDEX IF NOT EXISTS hive_post_data_bm25_idx ON {table} "
-                    "USING bm25 (id, title, body) WITH (key_field = 'id', "
-                    "text_fields = '{\"title\": {\"record\": \"position\"}, \"body\": {\"record\": \"position\"}}') "
-                    f"WHERE {SCHEMA_NAME}.is_top_level_post(id)"
-                )
+                build_db.query_no_return(bm25_index_sql())
             except psycopg2.errors.DataCorrupted as exc:
                 if attempt == cls._BM25_BUILD_ATTEMPTS:
                     log.error("[MASSIVE] BM25 index build failed again after a vacuum of %s: %s", table, exc)
