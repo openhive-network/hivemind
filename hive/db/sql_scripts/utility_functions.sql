@@ -153,23 +153,16 @@ END;
 $$;
 
 -- Converts given NUMERIC value to number or string according to official JSON specification defining them as Double-precision floating-point format standard (range [-(2**53)+1, (2**53)-1])
+-- Built from immutable pieces only (to_jsonb is STABLE) and as a single expression, so the planner inlines it into its callers
 CREATE OR REPLACE FUNCTION hivemind_app.json_stringify_numeric(in n NUMERIC)
 RETURNS JSONB
 IMMUTABLE
-LANGUAGE 'plpgsql'
+LANGUAGE 'sql'
 AS $$
-DECLARE
-  __json_min_safe_integer NUMERIC := -9007199254740991;
-  __json_max_safe_integer NUMERIC := 9007199254740991;
-BEGIN
-  RETURN (
-    SELECT CASE
-      WHEN n BETWEEN __json_min_safe_integer AND __json_max_safe_integer
-        THEN
-          to_jsonb(n::BIGINT)
-      ELSE
-          to_jsonb(n::TEXT)
-    END
-  );
-END;
+  SELECT CASE
+    WHEN n BETWEEN -9007199254740991::NUMERIC AND 9007199254740991::NUMERIC
+      THEN n::BIGINT::TEXT::JSONB
+    -- numeric's text form holds no character JSON needs escaped
+    ELSE ('"' || n::TEXT || '"')::JSONB
+  END
 $$;
