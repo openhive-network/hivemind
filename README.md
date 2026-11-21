@@ -504,8 +504,10 @@ JSON-RPC to SQL queries.
        sudo apt install -y openresty
        sudo cp docker/hivemind_nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf.template
        sudo cp rewrite_rules.conf /usr/local/openresty/nginx/conf/rewrite_rules.conf
-       sudo bash -c 'sed -e "s|\${REWRITE_LOG}|$REWRITE_LOG|g" -e "s|hivemind-postgrest-server|localhost|g" /usr/local/openresty/nginx/conf/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf'
+       sudo bash -c 'sed -e "s|\${REWRITE_LOG}|$REWRITE_LOG|g" -e "s|\${RESOLVER}|127.0.0.53|g" -e "s|hivemind-postgrest-server|127.0.0.1|g" /usr/local/openresty/nginx/conf/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf'
    ```
+   nginx resolves the PostgREST host through the `resolver` directive, not `/etc/hosts`, so give it an IP address
+   (`127.0.0.1`), or a name your DNS server (`127.0.0.53` is systemd-resolved) knows.
 
 ### Installing Hivemind in HAF
 

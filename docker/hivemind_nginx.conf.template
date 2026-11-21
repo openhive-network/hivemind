@@ -11,6 +11,14 @@ http {
             listen 0.0.0.0:80 default_server;
             server_name _;
 
+            # proxy_pass with a variable resolves the name at request time through this
+            # resolver (re-asked after `valid`), so a PostgREST recreated alone with a new
+            # address is reached again without restarting nginx. A literal name would be
+            # resolved once at startup. The docker entrypoint script fills in the resolver:
+            # Docker's embedded DNS unless RESOLVER is set in the environment.
+            resolver ${RESOLVER} valid=10s;
+            set $postgrest_upstream http://hivemind-postgrest-server:8080;
+
             location / {
                     include rewrite_rules.conf;
                     # ${REWRITE_LOG} will be replaced by the docker entrypoint script.
@@ -52,7 +60,9 @@ http {
                         end
                     }
 
-                    proxy_pass  http://hivemind-postgrest-server:8080;  # my PostREST is  here!
+                    # No URI part: the request goes upstream with the URI, arguments, method and
+                    # body as the rewrite rules and the rewrite_by_lua_block leave them.
+                    proxy_pass $postgrest_upstream;
 
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
