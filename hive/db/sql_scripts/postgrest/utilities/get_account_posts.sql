@@ -420,6 +420,34 @@ END
 $$
 ;
 
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_replies_page;
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_replies_page(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
+RETURNS TABLE(post_id INT)
+LANGUAGE plpgsql
+STABLE
+-- The generic plan is the plan its custom plans pick, so it is planned once per connection.
+-- The setting covers this statement alone: it calls no function.
+SET plan_cache_mode = force_generic_plan
+AS
+$$
+BEGIN
+  -- Newest first down hive_replies_parent_author_id_post_id_idx, stopping after _limit live, unmuted replies
+  -- to live posts. The bound is one expression of the arguments, so a generic plan keeps it an index condition.
+  RETURN QUERY
+    SELECT hpr.id
+    FROM hivemind_app.hive_replies hr
+    JOIN hivemind_app.live_posts_comments_view hpr ON hpr.id = hr.post_id
+    JOIN hivemind_app.live_posts_comments_view hp ON hp.id = hpr.parent_id
+    WHERE
+      hr.parent_author_id = _account_id
+      AND hr.post_id < COALESCE(NULLIF(_post_id, 0), 2147483647)
+      AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
+    ORDER BY hr.post_id DESC
+    LIMIT _limit;
+END
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_replies;
 CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _permlink_was_not_empty BOOLEAN, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
@@ -448,23 +476,7 @@ BEGIN
         ELSE hivemind_postgrest_utilities.create_condenser_post_object(_observer_id, row, _truncate_body, False)
       END
     )
-    ) FROM (      -- get_account_posts_by_replies
-      WITH 
-      all_unmuted_replies AS
-      (
-        -- Newest first down hive_replies_parent_author_id_post_id_idx, stopping after _limit live, unmuted replies
-        -- to live posts. The bound is one expression of the arguments, so a generic plan keeps it an index condition.
-        SELECT hpr.id
-        FROM hivemind_app.hive_replies hr
-        JOIN hivemind_app.live_posts_comments_view hpr ON hpr.id = hr.post_id
-        JOIN hivemind_app.live_posts_comments_view hp ON hp.id = hpr.parent_id
-        WHERE
-          hr.parent_author_id = _account_id
-          AND hr.post_id < COALESCE(NULLIF(_post_id, 0), 2147483647)
-          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
-        ORDER BY hr.post_id DESC
-        LIMIT _limit
-      )      
+    ) FROM (
       SELECT
         hp.id,
         hp.author,
@@ -504,9 +516,10 @@ BEGIN
         hp.is_muted,
         hp.source AS blacklists,
         hp.muted_reasons
-      FROM all_unmuted_replies,
-      LATERAL hivemind_app.get_full_post_view_by_id(all_unmuted_replies.id, _observer_id) hp
-      ORDER BY all_unmuted_replies.id DESC
+      -- sorted before the lateral join, so LIMIT stops building post views past the cut
+      FROM (SELECT * FROM hivemind_postgrest_utilities.get_account_replies_page(_account_id, _post_id, _observer_id, _limit) ORDER BY post_id DESC) replies,
+      LATERAL hivemind_app.get_full_post_view_by_id(replies.post_id, _observer_id) hp
+      ORDER BY replies.post_id DESC
       LIMIT _limit
     ) row
   );
@@ -515,9 +528,6 @@ BEGIN
 END
 $$
 ;
-
-ALTER FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies SET enable_mergejoin = off;
-ALTER FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies SET enable_hashjoin = off;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_payout;
 CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_payout(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
