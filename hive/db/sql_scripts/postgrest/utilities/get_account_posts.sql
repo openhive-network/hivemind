@@ -1,3 +1,64 @@
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_blog_page;
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_blog_page(IN _account_id INT, IN _post_id INT, IN _limit INT, IN _called_from_bridge_api BOOLEAN)
+RETURNS TABLE(post_id INT, created_at TIMESTAMP)
+LANGUAGE plpgsql
+STABLE
+-- Each case's generic plan is the plan its custom plans pick, so it is planned once per connection.
+-- The setting covers these statements alone: they call no function.
+SET plan_cache_mode = force_generic_plan
+AS
+$$
+DECLARE
+_created_at TIMESTAMP;
+BEGIN
+  IF _post_id <> 0 THEN
+    SELECT hfc.created_at INTO _created_at
+    FROM hivemind_app.hive_feed_cache hfc
+    WHERE hfc.account_id = _account_id AND hfc.post_id = _post_id;
+  END IF;
+
+  -- hive_feed_cache_account_id_created_at_post_id_idx; the bridge leaves out community posts the account did not reblog
+  IF _called_from_bridge_api AND _post_id = 0 THEN
+    RETURN QUERY
+      SELECT hfc.post_id, hfc.created_at
+      FROM hivemind_app.hive_feed_cache hfc
+      WHERE hfc.account_id = _account_id
+        AND NOT EXISTS (SELECT NULL FROM hivemind_app.live_posts_view hp1
+                        WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
+                        AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id))
+      ORDER BY hfc.created_at DESC, hfc.post_id DESC
+      LIMIT _limit;
+  ELSIF _called_from_bridge_api THEN
+    RETURN QUERY
+      SELECT hfc.post_id, hfc.created_at
+      FROM hivemind_app.hive_feed_cache hfc
+      WHERE hfc.account_id = _account_id
+        AND (hfc.created_at, hfc.post_id) < (_created_at, _post_id)
+        AND NOT EXISTS (SELECT NULL FROM hivemind_app.live_posts_view hp1
+                        WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
+                        AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id))
+      ORDER BY hfc.created_at DESC, hfc.post_id DESC
+      LIMIT _limit;
+  ELSIF _post_id = 0 THEN
+    RETURN QUERY
+      SELECT hfc.post_id, hfc.created_at
+      FROM hivemind_app.hive_feed_cache hfc
+      WHERE hfc.account_id = _account_id
+      ORDER BY hfc.created_at DESC, hfc.post_id DESC
+      LIMIT _limit;
+  ELSE
+    RETURN QUERY
+      SELECT hfc.post_id, hfc.created_at
+      FROM hivemind_app.hive_feed_cache hfc
+      WHERE hfc.account_id = _account_id
+        AND (hfc.created_at, hfc.post_id) < (_created_at, _post_id)
+      ORDER BY hfc.created_at DESC, hfc.post_id DESC
+      LIMIT _limit;
+  END IF;
+END
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_blog;
 CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_blog(IN _account TEXT, IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
@@ -6,15 +67,9 @@ STABLE
 AS
 $$
 DECLARE
-_created_at TIMESTAMP;
 _posts_should_be_grayed BOOLEAN;
 _result JSONB;
 BEGIN
-  IF _post_id <> 0 THEN
-    SELECT hfc.created_at INTO _created_at
-    FROM hivemind_app.hive_feed_cache hfc
-    WHERE hfc.account_id = _account_id AND hfc.post_id = _post_id;
-  END IF;
   -- DLN maybe this should  be changed to a straight mute instead of graying
   IF _observer_id <> -1 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = _account_id) THEN
     _posts_should_be_grayed = True;
@@ -31,25 +86,6 @@ BEGIN
       END
     ) 
     ) FROM (
-      WITH blog AS MATERIALIZED -- get_account_posts_by_blog
-      (
-        SELECT 
-          hfc.post_id,
-          hfc.created_at,
-          hfc.account_id
-        FROM hivemind_app.hive_feed_cache hfc
-        WHERE hfc.account_id = _account_id         -- use hive_feed_cache_account_id_created_at_post_id_idx
-          AND ( _post_id = 0 OR hfc.created_at < _created_at 
-                             OR (hfc.created_at = _created_at AND hfc.post_id < _post_id) )
-          AND ( NOT _called_from_bridge_api OR
-            NOT EXISTS (SELECT NULL FROM hivemind_app.live_posts_view hp1
-                        WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
-                        AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id)
-                       )
-          )
-        ORDER BY hfc.created_at DESC, hfc.post_id DESC
-        LIMIT _limit
-      )
       SELECT
         hp.id,
         hp.author,
@@ -90,7 +126,8 @@ BEGIN
         hp.is_muted,
         hp.source AS blacklists,
         hp.muted_reasons
-      FROM blog,
+      -- sorted before the lateral join, so LIMIT stops building post views past the cut
+      FROM (SELECT * FROM hivemind_postgrest_utilities.get_account_blog_page(_account_id, _post_id, _limit, _called_from_bridge_api) ORDER BY created_at DESC, post_id DESC) blog,
       LATERAL hivemind_app.get_full_post_view_by_id(blog.post_id, _observer_id) hp
       ORDER BY blog.created_at DESC, blog.post_id DESC
       LIMIT _limit
