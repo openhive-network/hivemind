@@ -263,6 +263,7 @@ SQL_TESTS = [
     "tests/sql/staging_autovacuum_off.sql",
     "tests/sql/account_sentinel_ids.sql",
     "tests/sql/list_votes_inline.sql",
+    "tests/sql/list_votes_generic_plans.sql",
 ]
 
 
