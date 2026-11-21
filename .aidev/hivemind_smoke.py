@@ -265,6 +265,10 @@ SQL_TESTS = [
     "tests/sql/list_votes_inline.sql",
     "tests/sql/list_votes_generic_plans.sql",
     "tests/sql/get_profiles_generic_plan.sql",
+    "tests/sql/get_account_posts_blog_generic_plan.sql",
+    "tests/sql/get_trending_ranked_posts_for_tag_generic_plan.sql",
+    "tests/sql/get_hot_ranked_posts_for_tag_generic_plan.sql",
+    "tests/sql/get_ranked_posts_pinned_generic_plan.sql",
 ]
 
 
