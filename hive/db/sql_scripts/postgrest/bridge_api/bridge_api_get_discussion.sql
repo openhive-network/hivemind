@@ -1,3 +1,54 @@
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_discussion_thread;
+CREATE FUNCTION hivemind_postgrest_utilities.get_discussion_thread(IN _post_id INT, IN _observer_id INT)
+RETURNS TABLE(post_id INT, replies JSONB)
+LANGUAGE plpgsql
+STABLE
+-- The generic plan of this walk is the plan its custom plans pick, so it is planned once per connection.
+-- The setting covers this statement alone: it calls no function.
+SET plan_cache_mode = force_generic_plan
+AS
+$$
+BEGIN
+  RETURN QUERY
+    WITH RECURSIVE child_posts (id, parent_id) AS
+    (
+      SELECT
+        hp.id,
+        hp.parent_id,
+        NULL::TEXT COLLATE "C" AS reply
+      FROM hivemind_app.live_posts_comments_view hp 
+      WHERE 
+        hp.id = _post_id
+        AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+
+      UNION ALL
+
+      SELECT
+        children.id,
+        children.parent_id,
+        ha.name || '/' || hp.permlink  AS reply
+      FROM hivemind_app.live_posts_comments_view children
+      JOIN child_posts ON children.parent_id = child_posts.id
+      JOIN hivemind_app.hive_accounts ha ON children.author_id = ha.id AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = children.author_id))
+      JOIN hivemind_app.hive_permlink_data hp ON hp.id = children.permlink_id
+    ),
+    post_replies AS
+    (
+      SELECT
+        parent_id,
+        jsonb_agg(reply ORDER BY id) AS replies
+      FROM child_posts
+      GROUP BY parent_id
+    )
+    SELECT
+      cp.id,
+      r.replies
+    FROM child_posts cp
+    LEFT JOIN post_replies r ON r.parent_id = cp.id;
+END
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_discussion;
 CREATE FUNCTION hivemind_endpoints.bridge_api_get_discussion(IN _params JSONB, IN _votes_mode SMALLINT DEFAULT 0)
 RETURNS JSONB
@@ -86,54 +137,17 @@ BEGIN
           hpv.source AS blacklists,
           hpv.muted_reasons,
           ds.replies,
-          ROW_NUMBER() OVER (ORDER BY ds.id) AS rn
-        FROM
-        (
-          WITH RECURSIVE child_posts (id, parent_id) AS
-          (
-            SELECT
-              hp.id,
-              hp.parent_id,
-              NULL::TEXT COLLATE "C" AS reply
-            FROM hivemind_app.live_posts_comments_view hp 
-            WHERE 
-              hp.id = _post_id
-              AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
-
-            UNION ALL
-
-            SELECT
-              children.id,
-              children.parent_id,
-              ha.name || '/' || hp.permlink  AS reply
-            FROM hivemind_app.live_posts_comments_view children
-            JOIN child_posts ON children.parent_id = child_posts.id
-            JOIN hivemind_app.hive_accounts ha ON children.author_id = ha.id AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = children.author_id))
-            JOIN hivemind_app.hive_permlink_data hp ON hp.id = children.permlink_id
-          ),
-          post_replies AS
-          (
-            SELECT
-              parent_id,
-              jsonb_agg(reply ORDER BY id) AS replies
-            FROM child_posts
-            GROUP BY parent_id
-          )
-          SELECT
-            cp.id,
-            r.replies
-          FROM child_posts cp
-          LEFT JOIN post_replies r ON r.parent_id = cp.id
-          ORDER BY cp.id
-        ) ds,
-          LATERAL hivemind_app.get_full_post_view_by_id(ds.id, _observer_id) hpv
+          ROW_NUMBER() OVER (ORDER BY ds.post_id) AS rn
+        -- sorted before the lateral join, so LIMIT stops building post views past the cut
+        FROM (SELECT * FROM hivemind_postgrest_utilities.get_discussion_thread(_post_id, _observer_id) ORDER BY post_id) ds,
+          LATERAL hivemind_app.get_full_post_view_by_id(ds.post_id, _observer_id) hpv
         WHERE
           (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0 OR (
             (hpv.muted_reasons & _muted_reasons_filter_mask) = 0
             AND NOT (hpv.is_grayed AND (_muted_reasons_filter_mask & 8) != 0)
             AND NOT (hpv.role_id = -2 AND (_muted_reasons_filter_mask & 16) != 0)
           ))
-        ORDER BY ds.id
+        ORDER BY ds.post_id
         LIMIT _max_posts + 1
     ) row;
 
