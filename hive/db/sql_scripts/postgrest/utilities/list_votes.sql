@@ -32,18 +32,19 @@ BEGIN
   END IF;
 
   -- One static statement per case, so each cached generic plan still bounds its hive_votes scan by that case's index.
-  -- The chosen rows, in order, then go through the one projection of their presentation mode.
+  -- Each subquery outputs its ORDER BY keys, so the aggregate's own ORDER BY, which is what fixes the array's order,
+  -- reads them presorted. The chosen rows, in order, then go through the one projection of their presentation mode.
   IF _case = 'get_votes_for_posts' THEN
-    SELECT array_agg(s.v) INTO _votes FROM (
-      SELECT v FROM hivemind_app.hive_votes v
+    SELECT array_agg(s.v ORDER BY s.voter_id) INTO _votes FROM (
+      SELECT v, v.voter_id FROM hivemind_app.hive_votes v
       WHERE v.post_id = _post_id
         AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY v.voter_id
       LIMIT _limit
     ) s;
   ELSIF _case = 'database_list_by_comment_voter' THEN
-    SELECT array_agg(s.v) INTO _votes FROM (
-      SELECT v FROM hivemind_app.hive_votes v
+    SELECT array_agg(s.v ORDER BY s.voter_id) INTO _votes FROM (
+      SELECT v, v.voter_id FROM hivemind_app.hive_votes v
       WHERE v.post_id = _post_id AND v.voter_id >= _voter_id
         AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY v.voter_id
@@ -51,16 +52,16 @@ BEGIN
     ) s;
   ELSIF _case = 'database_list_by_voter_comment' THEN
     -- (author_id, permlink_id) order lets hive_votes_voter_id_author_id_permlink_id_uk bound the scan
-    SELECT array_agg(s.v) INTO _votes FROM (
-      SELECT v FROM hivemind_app.hive_votes v
+    SELECT array_agg(s.v ORDER BY s.author_id, s.permlink_id) INTO _votes FROM (
+      SELECT v, v.author_id, v.permlink_id FROM hivemind_app.hive_votes v
       WHERE v.voter_id = _voter_id AND (v.author_id, v.permlink_id) >= (_start_author_id, _start_permlink_id)
         AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY v.author_id, v.permlink_id
       LIMIT _limit
     ) s;
   ELSIF _case = 'bridge_list_by_comment_voter_after' THEN
-    SELECT array_agg(s.v) INTO _votes FROM (
-      SELECT v FROM hivemind_app.hive_votes v
+    SELECT array_agg(s.v ORDER BY s.voter_id) INTO _votes FROM (
+      SELECT v, v.voter_id FROM hivemind_app.hive_votes v
       WHERE v.post_id = _post_id AND v.voter_id > _voter_id
         AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY v.voter_id
@@ -68,8 +69,8 @@ BEGIN
     ) s;
   ELSIF _case = 'list_by_voter_last_update_before' THEN
     -- newest first by (last_update, id); the last_update bound lets hive_votes_voter_id_last_update_idx bound the scan
-    SELECT array_agg(s.v) INTO _votes FROM (
-      SELECT v FROM hivemind_app.hive_votes v
+    SELECT array_agg(s.v ORDER BY s.last_update DESC, s.id DESC) INTO _votes FROM (
+      SELECT v, v.last_update, v.id FROM hivemind_app.hive_votes v
       WHERE v.voter_id = _voter_id AND v.last_update <= _before_last_update AND (v.last_update < _before_last_update OR v.id < _before_vote_id)
         AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = v.voter_id))
       ORDER BY v.last_update DESC, v.id DESC
