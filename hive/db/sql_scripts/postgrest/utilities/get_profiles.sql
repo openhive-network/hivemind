@@ -1,3 +1,37 @@
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_accounts_info;
+CREATE FUNCTION hivemind_postgrest_utilities.get_accounts_info(IN _account_names TEXT[])
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+-- Every custom plan of this lookup is the generic plan, which is costed higher only because it
+-- assumes ten names for = ANY(_account_names), so it is planned once per connection.
+-- The setting covers this statement alone: json_date and rep_log10 are inlined SQL functions,
+-- and it calls no other function.
+SET plan_cache_mode = force_generic_plan
+AS
+$function$
+DECLARE
+  _result JSONB;
+BEGIN
+    SELECT jsonb_agg(jsonb_build_object(
+            'id', row.id,
+            'name', row.name,
+            'created', hivemind_postgrest_utilities.json_date(row.created_at),
+            'active', hivemind_postgrest_utilities.json_date(row.active_at),
+            'post_count', row.post_count,
+            'reputation', hivemind_postgrest_utilities.rep_log10(row.reputation),
+            'blacklists', to_jsonb('{}'::INT[]),
+            'stats', jsonb_build_object('rank', row.rank, 'following', row.following, 'followers', row.followers),
+            'json_metadata', row.json_metadata,
+            'posting_json_metadata', row.posting_json_metadata
+        ) ORDER BY row.name ASC)
+      FROM (SELECT * FROM hivemind_app.hive_accounts_info_view WHERE name = ANY(_account_names)) AS row
+      INTO _result;
+    RETURN _result;
+END
+$function$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_profiles;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_profiles(IN   _accounts JSONB, IN  _observer TEXT)
 RETURNS JSONB
@@ -30,20 +64,7 @@ BEGIN
     SELECT array_agg(value) INTO _account_names FROM jsonb_array_elements_text(_accounts);
     _account_names = hivemind_postgrest_utilities.valid_accounts(_account_names, false);
 
-    SELECT jsonb_agg(jsonb_build_object(
-            'id', row.id,
-            'name', row.name,
-            'created', hivemind_postgrest_utilities.json_date(row.created_at),
-            'active', hivemind_postgrest_utilities.json_date(row.active_at),
-            'post_count', row.post_count,
-            'reputation', hivemind_postgrest_utilities.rep_log10(row.reputation),
-            'blacklists', to_jsonb('{}'::INT[]),
-            'stats', jsonb_build_object('rank', row.rank, 'following', row.following, 'followers', row.followers),
-            'json_metadata', row.json_metadata,
-            'posting_json_metadata', row.posting_json_metadata
-        ) ORDER BY row.name ASC)
-      FROM (SELECT * FROM hivemind_app.hive_accounts_info_view WHERE name = ANY(_account_names)) AS row
-      INTO _result;
+    _result = hivemind_postgrest_utilities.get_accounts_info(_account_names);
 
 
     SELECT array_agg(value#>>'{name}') INTO _found_accounts FROM jsonb_array_elements(_result);

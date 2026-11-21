@@ -264,6 +264,7 @@ SQL_TESTS = [
     "tests/sql/account_sentinel_ids.sql",
     "tests/sql/list_votes_inline.sql",
     "tests/sql/list_votes_generic_plans.sql",
+    "tests/sql/get_profiles_generic_plan.sql",
 ]
 
 
