@@ -571,6 +571,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.prepare_votes_from_staging()
 RETURNS VOID AS $function$
 DECLARE
     _vote_rows INT;
+    _analyzed_rows INT;
 BEGIN
     -- Step 1: One row per (voter, author, permlink, block) from vote ops (type 0) and
     -- effective_comment_vote ops (type 72): the last vote's vote_percent/last_update,
@@ -641,10 +642,19 @@ BEGIN
     JOIN account_ids ha_author ON ha_author.name = bv.author;
 
     -- Step 2 is planned from _vote_batch's statistics, which describe the last fill
-    -- analyzed; below staging_analyze_min_rows() rows any plan is cheap.
+    -- analyzed; below staging_analyze_min_rows() rows any plan is cheap. A fill within
+    -- a factor of 2 of that one is not analyzed again: the planner sizes the table by
+    -- its current pages (TRUNCATE leaves reltuples -1, and never clears pg_statistic),
+    -- the distinct counts it stores as fractions scale with it, and step 2 keeps the
+    -- freshly analyzed plan up to about 8x apart. The count analyzed lives in a session
+    -- setting, as a local resets every call: a new connection analyzes its first fill.
     GET DIAGNOSTICS _vote_rows = ROW_COUNT;
     IF _vote_rows >= hivemind_app.staging_analyze_min_rows() THEN
-        ANALYZE hivemind_app._vote_batch (voter_id, author_id, permlink, block_num);
+        _analyzed_rows := NULLIF(current_setting('hivemind.vote_batch_analyzed_rows', true), '')::INT;
+        IF _analyzed_rows IS NULL OR _vote_rows > 2 * _analyzed_rows OR 2 * _vote_rows < _analyzed_rows THEN
+            ANALYZE hivemind_app._vote_batch (voter_id, author_id, permlink, block_num);
+            PERFORM set_config('hivemind.vote_batch_analyzed_rows', _vote_rows::TEXT, false);
+        END IF;
     END IF;
 
     -- Step 2: Resolve each block's post, fold the blocks of each voter's vote on a

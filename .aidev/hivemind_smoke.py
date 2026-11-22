@@ -261,6 +261,7 @@ SQL_TESTS = [
     "tests/sql/recalculate_votes_children_rerun.sql",
     "tests/sql/autovacuum_insert_reloptions.sql",
     "tests/sql/staging_autovacuum_off.sql",
+    "tests/sql/vote_batch_analyze_gate.sql",
     "tests/sql/account_sentinel_ids.sql",
     "tests/sql/list_votes_inline.sql",
     "tests/sql/list_votes_generic_plans.sql",
