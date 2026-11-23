@@ -4,9 +4,14 @@ pg_stat_activity of DB counted by application (or role), state and wait event; o
 
 activity_sampler.py --summary FILE...: per file (one run), mean CPU busy, user, system and iowait, and the top
 wait events of non-idle backends by sample count.
+
+psql runs in PG_CONTAINER over its local socket, which a haf_api_node stack's pg_hba.conf allows and TCP to
+127.0.0.1 it does not. PGHOST, when set in the sampler's environment, is passed to psql as -h instead, for a
+container that admits the user only over TCP.
 """
 
 import json
+import os
 import signal
 import subprocess
 import sys
@@ -46,7 +51,8 @@ def cpu_pct(before: list[int], after: list[int]) -> dict[str, float]:
 
 
 def activity(pg: str, db: str, user: str) -> tuple[list[dict[str, object]], str | None]:
-    cmd = ['docker', 'exec', pg, 'psql', '-h', '127.0.0.1', '-U', user, '-d', db, '-AtqX', '-F', '\t', '-c', QUERY]
+    host = ['-h', os.environ['PGHOST']] if os.environ.get('PGHOST') else []
+    cmd = ['docker', 'exec', pg, 'psql', *host, '-U', user, '-d', db, '-AtqX', '-F', '\t', '-c', QUERY]
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=0.9)
     except subprocess.TimeoutExpired:
