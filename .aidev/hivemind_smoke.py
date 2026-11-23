@@ -271,6 +271,7 @@ SQL_TESTS = [
     "tests/sql/get_account_posts_replies_generic_plan.sql",
     "tests/sql/get_trending_ranked_posts_for_tag_generic_plan.sql",
     "tests/sql/get_hot_ranked_posts_for_tag_generic_plan.sql",
+    "tests/sql/get_created_ranked_posts_for_tag_generic_plan.sql",
     "tests/sql/get_ranked_posts_pinned_generic_plan.sql",
 ]
 
