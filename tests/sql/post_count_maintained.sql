@@ -1,5 +1,6 @@
--- hive_accounts.post_count, which process_posts_from_staging keeps, against the count of
--- the author's live hive_posts rows, after one batch of all the ops (as massive sync
+-- hive_accounts.post_count, which process_post_counts_from_staging keeps from what
+-- process_posts_from_staging hands Stage B, against the count of the author's live
+-- hive_posts rows, after one batch of all the ops (as massive sync
 -- runs them) and after each block on its own (as live sync does), and through
 -- hive_accounts_info_view, which bridge.get_profile(s) read. The ops create, edit,
 -- delete, and delete and re-create posts. Seeds its own accounts and _ops_staging rows
@@ -71,6 +72,7 @@ TRUNCATE hivemind_app._ops_staging;
 INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
 SELECT id, block_num, block_date, op_type_id, val FROM pc_staged;
 SELECT count(*) FROM hivemind_app.process_posts_from_staging(2147483647) \gset ignored_
+SELECT hivemind_app.process_post_counts_from_staging(200) \gset ignored_
 SELECT pg_temp.pc_check('one batch') \gset ignored_
 
 ROLLBACK TO SAVEPOINT massive;
@@ -84,6 +86,7 @@ BEGIN
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
     SELECT id, block_num, block_date, op_type_id, val FROM pc_staged WHERE block_num = _block;
     PERFORM count(*) FROM hivemind_app.process_posts_from_staging(2147483647);
+    PERFORM hivemind_app.process_post_counts_from_staging(_block);
     IF EXISTS (SELECT 1 FROM pc_counts c WHERE c.post_count <> c.live_posts) THEN
       RAISE EXCEPTION 'block %: post_count differs from the live posts: %', _block,
         (SELECT jsonb_agg(to_jsonb(c)) FROM pc_counts c);

@@ -20,6 +20,7 @@ class DbLiveContextHolder:
 class DbAdapterHolder:
     db: Db | None = None
     _block_processing_thread_sync_db = None
+    _stage_b_processing_db: Db | None = None
 
     _inside_sync_tx = False
 
@@ -53,7 +54,7 @@ class DbAdapterHolder:
             cls._inside_sync_tx = False
 
     @staticmethod
-    def common_block_processing_db():
+    def common_block_processing_db() -> Db:
         """Get the shared instance."""
         if DbAdapterHolder._block_processing_thread_sync_db is not None:
             return DbAdapterHolder._block_processing_thread_sync_db
@@ -71,3 +72,21 @@ class DbAdapterHolder:
         if DbAdapterHolder._block_processing_thread_sync_db is not None:
             DbAdapterHolder._block_processing_thread_sync_db.close()
             DbAdapterHolder._block_processing_thread_sync_db = None
+
+    @staticmethod
+    def stage_b_processing_db() -> Db:
+        """The connection of pipelined massive sync's Stage B, the shared block processing one when it has none."""
+        if DbAdapterHolder._stage_b_processing_db is not None:
+            return DbAdapterHolder._stage_b_processing_db
+        return DbAdapterHolder.common_block_processing_db()
+
+    @staticmethod
+    def open_stage_b_processing_db() -> None:
+        assert DbAdapterHolder._stage_b_processing_db is None, 'stage B instance already opened'
+        DbAdapterHolder._stage_b_processing_db = Db.instance().clone("stage_b_instance")
+
+    @staticmethod
+    def close_stage_b_processing_db() -> None:
+        if DbAdapterHolder._stage_b_processing_db is not None:
+            DbAdapterHolder._stage_b_processing_db.close()
+            DbAdapterHolder._stage_b_processing_db = None

@@ -21,10 +21,27 @@ CREATE TABLE IF NOT EXISTS hivemind_app._batch_queue (
 --   posts_applied:     the posts phase, its results in _batch_post_results
 --   post_data_applied: the post data flush (PostDataCache.flush)
 --   follows_applied:   the follows phase, its mute changes in _batch_mute_changes
+--   stage_a_applied:   the batch's Stage A (load, accounts and communities, posts, community
+--                      post ops), so a replay runs its Stage B only: with pipelined massive
+--                      sync the next batch's Stage A may have committed on top of it
+--   post_counts_applied: hive_accounts.post_count of the batch's posts (process_post_counts_from_staging)
+-- A row per in-flight batch: two while pipelined massive sync runs a batch's Stage B beside
+-- the next one's Stage A. The markers are read and set by the batch's first_block.
 ALTER TABLE hivemind_app._batch_queue
     ADD COLUMN IF NOT EXISTS posts_applied BOOLEAN NOT NULL DEFAULT FALSE,
     ADD COLUMN IF NOT EXISTS post_data_applied BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS follows_applied BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN IF NOT EXISTS follows_applied BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS stage_a_applied BOOLEAN NOT NULL DEFAULT FALSE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_attribute
+                   WHERE attrelid = 'hivemind_app._batch_queue'::regclass AND attname = 'post_counts_applied') THEN
+        ALTER TABLE hivemind_app._batch_queue ADD COLUMN post_counts_applied BOOLEAN NOT NULL DEFAULT FALSE;
+        -- the posts phase kept post_count before
+        UPDATE hivemind_app._batch_queue SET post_counts_applied = posts_applied;
+    END IF;
+END
+$$;
 
 -- The last hive_posts id reserved for a comment op (reserve_post_ids). Changed in the
 -- transaction of the posts phase that reserves, so a replay of a batch whose posts phase
@@ -74,6 +91,20 @@ CREATE TABLE IF NOT EXISTS hivemind_app._batch_post_results (
     community_id INT,
     is_post_muted BOOLEAN,
     muted_reasons INT
+);
+-- the batch the rows belong to; rows of a batch no longer in _batch_queue are stale
+ALTER TABLE hivemind_app._batch_post_results ADD COLUMN IF NOT EXISTS first_block INT;
+UPDATE hivemind_app._batch_post_results
+SET first_block = (SELECT min(bq.first_block) FROM hivemind_app._batch_queue bq)
+WHERE first_block IS NULL;
+
+-- The post versions the in-flight batch's posts phase deleted (_deleted_posts), committed
+-- with it like _batch_post_results.
+-- MUST remain LOGGED, like _batch_queue.
+CREATE TABLE IF NOT EXISTS hivemind_app._batch_deleted_posts (
+    first_block INT NOT NULL,
+    post_id     INT NOT NULL,
+    author_id   INT NOT NULL
 );
 
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
@@ -142,6 +173,13 @@ CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._post_results (
     block_num   INT,
     block_date  TIMESTAMP,
     op_body     JSONB
+);
+
+-- The post versions process_posts_from_staging deleted: Stage B removes their reblogs and
+-- feed cache rows and takes them off their authors' post_count.
+CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._deleted_posts (
+    post_id     INT NOT NULL,
+    author_id   INT NOT NULL
 );
 
 -- Indexes on persistent staging tables for wave loop performance
@@ -280,11 +318,123 @@ BEGIN
              hivemind_app._comment_staging,
              hivemind_app._replay_pairs,
              hivemind_app._post_results,
+             hivemind_app._deleted_posts,
              hivemind_app._post_batch,
              hivemind_app._vote_batch,
              hivemind_app._vote_upsert,
              hivemind_app._reblog_ops,
              hivemind_app._reblog_final;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- reset_staging_tables split per stage, for pipelined massive sync: each stage truncates
+-- its own tables between two of its batches, never waiting on or blocking the other
+-- stage's statements. Stage B's include the handoff tables (set_stage_b_handoff).
+CREATE OR REPLACE FUNCTION hivemind_app.reset_stage_a_staging_tables()
+RETURNS VOID AS $function$
+BEGIN
+    TRUNCATE hivemind_app._ops_staging,
+             hivemind_app._comment_staging,
+             hivemind_app._replay_pairs,
+             hivemind_app._post_results,
+             hivemind_app._deleted_posts,
+             hivemind_app._post_batch;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION hivemind_app.reset_stage_b_staging_tables()
+RETURNS VOID AS $function$
+BEGIN
+    TRUNCATE hivemind_app._ops_staging_b,
+             hivemind_app._post_results_b,
+             hivemind_app._deleted_posts_b,
+             hivemind_app._follow_notification_events,
+             hivemind_app._vote_batch,
+             hivemind_app._vote_upsert,
+             hivemind_app._reblog_ops,
+             hivemind_app._reblog_final;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- What Stage B reads of a batch that Stage A wrote: its operations (_ops_staging_b), its
+-- posts phase's results (_post_results_b) and the post versions that phase deleted
+-- (_deleted_posts_b). With _tables false they are views of Stage A's tables, for a sync
+-- that runs the stages of a batch one after the other (live sync, massive sync by
+-- default): Stage B reads the tables Stage A has just filled, planned as those tables.
+-- With _tables true they are tables of their own, which hand_off_to_stage_b fills, so
+-- that pipelined massive sync runs Stage B of a batch while Stage A of the next one
+-- refills Stage A's tables. Out of autovacuum, like _ops_staging: reset_stage_b_staging_tables
+-- bounds their dead rows.
+CREATE OR REPLACE FUNCTION hivemind_app.set_stage_b_handoff(_tables BOOLEAN)
+RETURNS VOID AS $function$
+DECLARE
+    _name TEXT;
+    _kind "char" := (SELECT c.relkind FROM pg_class c WHERE c.oid = to_regclass('hivemind_app._ops_staging_b'));
+    _wanted "char" := CASE WHEN _tables THEN 'r' ELSE 'v' END;
+BEGIN
+    IF _kind = _wanted THEN
+        RETURN;
+    END IF;
+
+    FOREACH _name IN ARRAY ARRAY['_ops_staging_b', '_post_results_b', '_deleted_posts_b'] LOOP
+        CASE (SELECT c.relkind FROM pg_class c WHERE c.oid = to_regclass(format('hivemind_app.%I', _name)))
+            WHEN 'v' THEN EXECUTE format('DROP VIEW hivemind_app.%I', _name);
+            WHEN 'r' THEN EXECUTE format('DROP TABLE hivemind_app.%I', _name);
+            ELSE NULL;
+        END CASE;
+    END LOOP;
+
+    IF _tables THEN
+        -- hand_off_to_stage_b trades the names of this table and _ops_staging, indexes included
+        CREATE UNLOGGED TABLE hivemind_app._ops_staging_b (LIKE hivemind_app._ops_staging);
+        CREATE INDEX _ops_staging_b_op_type_id_idx ON hivemind_app._ops_staging_b (op_type_id);
+        CREATE INDEX _ops_staging_b_block_num_id_idx ON hivemind_app._ops_staging_b (block_num, id);
+        ALTER TABLE hivemind_app._ops_staging_b SET (autovacuum_enabled = false);
+        CREATE UNLOGGED TABLE hivemind_app._post_results_b (LIKE hivemind_app._post_results)
+            WITH (autovacuum_enabled = false);
+        CREATE UNLOGGED TABLE hivemind_app._deleted_posts_b (LIKE hivemind_app._deleted_posts)
+            WITH (autovacuum_enabled = false);
+    ELSE
+        CREATE VIEW hivemind_app._ops_staging_b AS SELECT * FROM hivemind_app._ops_staging;
+        CREATE VIEW hivemind_app._post_results_b AS SELECT * FROM hivemind_app._post_results;
+        CREATE VIEW hivemind_app._deleted_posts_b AS SELECT * FROM hivemind_app._deleted_posts;
+    END IF;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- A fresh install starts with the views; a reinstall keeps what the last sync left.
+SELECT hivemind_app.set_stage_b_handoff(FALSE)
+WHERE to_regclass('hivemind_app._ops_staging_b') IS NULL;
+
+-- Hands the batch Stage A has just staged to Stage B (set_stage_b_handoff(TRUE)), while
+-- neither stage runs a statement. _ops_staging trades names with _ops_staging_b: a copy
+-- would cost Stage A another load of the batch's operations, and Stage B then reads the
+-- statistics the load analyzed. The posts phase's results are copied without the op bodies,
+-- which only Python's body merge reads (it has them from the phase).
+CREATE OR REPLACE FUNCTION hivemind_app.hand_off_to_stage_b()
+RETURNS VOID AS $function$
+BEGIN
+    ALTER TABLE hivemind_app._ops_staging RENAME TO _ops_staging_swap;
+    ALTER INDEX hivemind_app._ops_staging_op_type_id_idx RENAME TO _ops_staging_swap_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_block_num_id_idx RENAME TO _ops_staging_swap_block_num_id_idx;
+    ALTER TABLE hivemind_app._ops_staging_b RENAME TO _ops_staging;
+    ALTER INDEX hivemind_app._ops_staging_b_op_type_id_idx RENAME TO _ops_staging_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_b_block_num_id_idx RENAME TO _ops_staging_block_num_id_idx;
+    ALTER TABLE hivemind_app._ops_staging_swap RENAME TO _ops_staging_b;
+    ALTER INDEX hivemind_app._ops_staging_swap_op_type_id_idx RENAME TO _ops_staging_b_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_swap_block_num_id_idx RENAME TO _ops_staging_b_block_num_id_idx;
+
+    DELETE FROM hivemind_app._post_results_b;
+    INSERT INTO hivemind_app._post_results_b
+        (seq_id, post_id, is_new_post, author_id, permlink_id, depth, parent_id, parent_author_id,
+         community_id, is_post_muted, muted_reasons, block_num, block_date)
+    SELECT pr.seq_id, pr.post_id, pr.is_new_post, pr.author_id, pr.permlink_id, pr.depth, pr.parent_id,
+           pr.parent_author_id, pr.community_id, pr.is_post_muted, pr.muted_reasons, pr.block_num, pr.block_date
+    FROM hivemind_app._post_results pr;
+
+    DELETE FROM hivemind_app._deleted_posts_b;
+    INSERT INTO hivemind_app._deleted_posts_b (post_id, author_id)
+    SELECT dp.post_id, dp.author_id FROM hivemind_app._deleted_posts dp;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
@@ -337,7 +487,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.load_ops_staging(
 ) RETURNS VOID AS $function$
 BEGIN
     DELETE FROM hivemind_app._ops_staging;
-    DELETE FROM hivemind_app._follow_notification_events;
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
     WITH block_dates AS (
@@ -430,7 +579,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.load_ops_staging_from_prefetch(
 ) RETURNS VOID AS $function$
 BEGIN
     DELETE FROM hivemind_app._ops_staging;
-    DELETE FROM hivemind_app._follow_notification_events;
 
     INSERT INTO hivemind_app._ops_staging (id, block_num, block_date, op_type_id, val)
     SELECT n.id, n.block_num, n.block_date, n.op_type_id, n.val
@@ -595,7 +743,7 @@ BEGIN
                 WHEN s.block_num < 905693 THEN (s.val->>'rshares')::BIGINT * 1000000
                 ELSE (s.val->>'rshares')::BIGINT
             END AS rshares
-        FROM hivemind_app._ops_staging s
+        FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id IN (0, 72)
     ),
     block_votes AS (
@@ -809,11 +957,25 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- 5. process_reblogs_from_staging()
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION hivemind_app.process_reblogs_from_staging()
+-- A post version is resolved as live at the end of the batch, block _last_block: created by
+-- then, and not deleted by then (a deleted version's block_num is the block that deleted
+-- it). Pipelined massive sync runs this beside the next batch's posts phase, whose deletes
+-- and re-creates this must not see.
+DROP FUNCTION IF EXISTS hivemind_app.process_reblogs_from_staging();
+CREATE OR REPLACE FUNCTION hivemind_app.process_reblogs_from_staging(_last_block INT)
 RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
 BEGIN
+    -- The cascade of the batch's post deletes, before its reblogs as when the posts phase
+    -- ran it: the next batch's posts phase, which may run beside this, leaves hive_reblogs
+    -- and hive_feed_cache to it.
+    DELETE FROM hivemind_app.hive_reblogs
+    WHERE post_id IN (SELECT dp.post_id FROM hivemind_app._deleted_posts_b dp);
+    DELETE FROM hivemind_app.hive_feed_cache hfc
+    USING hivemind_app._deleted_posts_b dp
+    WHERE hfc.post_id = dp.post_id AND hfc.account_id = dp.author_id;
+
     -- Extract reblog custom_json ops from staging (type 18, custom_json_id = 'reblog' or 'follow')
     -- Reblogs come as custom_json with id='follow' or id='reblog' containing ["reblog", {...}]
 
@@ -827,7 +989,7 @@ BEGIN
             s.block_num,
             s.block_date,
             s.val AS val
-        FROM hivemind_app._ops_staging s
+        FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id = 18
     ),
     parsed AS (
@@ -890,7 +1052,8 @@ BEGIN
     USING hivemind_app.hive_accounts ha, hivemind_app.hive_permlink_data hpd, hivemind_app.hive_posts hp
     WHERE ha.name = r.author
       AND hpd.permlink = r.permlink
-      AND hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+      AND hp.author_id = ha.id AND hp.permlink_id = hpd.id
+      AND hp.block_num_created <= _last_block AND (hp.counter_deleted = 0 OR hp.block_num > _last_block)
       AND r.block_num < hp.block_num_created;
 
     -- The op per (author, permlink, account) whose row the batch leaves, as the ops one
@@ -913,7 +1076,7 @@ BEGIN
     -- Process deletes: delete entries where ANY delete exists in this batch
     -- (covers entries from previous batches that need cleanup)
     PERFORM hivemind_app.delete_reblog_feed_cache(
-        ro.author::VARCHAR, ro.permlink::VARCHAR, ro.account::VARCHAR
+        ro.author::VARCHAR, ro.permlink::VARCHAR, ro.account::VARCHAR, _last_block
     )
     FROM (SELECT DISTINCT author, permlink, account FROM hivemind_app._reblog_ops WHERE is_delete) ro;
 
@@ -934,7 +1097,8 @@ BEGIN
         JOIN hivemind_app.hive_accounts ha ON ha.name = d.author
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = d.permlink
         JOIN hivemind_app.hive_posts hp
-            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+            ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+            AND hp.block_num_created <= _last_block AND (hp.counter_deleted = 0 OR hp.block_num > _last_block)
         -- hive_reblogs ids (and the reblog notification counters that follow them) are
         -- drawn in _reblog_final's write order; its physical order need not keep it.
         ORDER BY d.author, d.permlink, d.account
@@ -985,7 +1149,7 @@ BEGIN
             (array_agg(s.val->>'posting_json_metadata' ORDER BY s.id DESC)
                 FILTER (WHERE s.op_type_id = 43
                     AND NULLIF(s.val->>'posting_json_metadata', '') IS NOT NULL))[1] AS posting_json_metadata
-        FROM hivemind_app._ops_staging s
+        FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id IN (10, 43)
         GROUP BY s.val->>'account'
     ),
@@ -1026,7 +1190,7 @@ BEGIN
             s.block_date,
             s.val->'required_posting_auths'->>0 AS account,
             hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json') AS inner_json
-        FROM hivemind_app._ops_staging s
+        FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id = 18
           AND (s.val->>'id') = 'notify'
           AND jsonb_array_length(COALESCE(s.val->'required_auths', '[]'::jsonb)) = 0
@@ -1121,7 +1285,7 @@ BEGIN
             -- EFFECTIVE_COMMENT_VOTE (type 72) - last occurrence, only if beyond safe cashout
             (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json,
             (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight
-        FROM hivemind_app._ops_staging s
+        FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id IN (51, 53, 61, 72)
         GROUP BY s.val->>'author', s.val->>'permlink', s.block_num
     ),
@@ -1352,7 +1516,6 @@ DECLARE
     _processed_count INT;
     _remaining INT;
     -- Step 7: delete handling
-    _deleted_author_ids INT[];
     _post_id INT;
     _delete_create_pairs TEXT[];
     _changed INT;
@@ -1364,6 +1527,7 @@ BEGIN
     DELETE FROM hivemind_app._comment_staging;
     DELETE FROM hivemind_app._replay_pairs;
     DELETE FROM hivemind_app._post_results;
+    DELETE FROM hivemind_app._deleted_posts;
 
     -- Step 1: Collect ineffective delete keys (type 73)
     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
@@ -1719,11 +1883,17 @@ BEGIN
     --   (b) replayed ops (Step 2b): iterate them in chain order, alternating
     --       delete_hive_post and INSERT of new rows
 
+    -- Every deleted version goes to _deleted_posts: Stage B removes its reblogs and feed
+    -- cache rows (process_reblogs_from_staging) and takes it off its author's post_count
+    -- (process_post_counts_from_staging), so that the next batch's posts phase, which
+    -- pipelined massive sync runs beside that stage, writes neither hive_reblogs nor
+    -- hive_accounts rows.
+    --
     -- (a) Simple deletes: set-based bulk operation instead of per-row loop.
     -- Resolves all author/permlink pairs to post IDs in one join, then does
-    -- bulk UPDATE + 3 bulk DELETEs in a single data-modifying CTE.
+    -- bulk UPDATE + DELETE in a single data-modifying CTE.
     -- At full chain scale (783K delete ops), this replaces ~4.7M individual
-    -- queries with 4 set-based operations.
+    -- queries with set-based operations.
     WITH simple_delete_posts AS (
         SELECT
             hp.id AS post_id,
@@ -1756,23 +1926,13 @@ BEGIN
         WHERE hp.id = sd.post_id
         RETURNING sd.post_id, sd.author_id
     ),
-    del_reblogs AS (
-        DELETE FROM hivemind_app.hive_reblogs
-        WHERE post_id IN (SELECT post_id FROM updated_posts)
-        RETURNING post_id
-    ),
-    del_feed_cache AS (
-        DELETE FROM hivemind_app.hive_feed_cache hfc
-        USING updated_posts u
-        WHERE hfc.post_id = u.post_id AND hfc.account_id = u.author_id
-        RETURNING hfc.post_id
-    ),
     del_tags AS (
         DELETE FROM hivemind_app.hive_post_tags
         WHERE post_id IN (SELECT post_id FROM updated_posts)
         RETURNING post_id
     )
-    SELECT COALESCE(array_agg(author_id), '{}') INTO _deleted_author_ids FROM updated_posts;
+    INSERT INTO hivemind_app._deleted_posts (post_id, author_id)
+    SELECT post_id, author_id FROM updated_posts;
 
     -- (b) Replayed ops in chain order, across pairs: each comment op resolves its
     -- parent as it is at that op. A create of a pair with no live row inserts a new
@@ -1800,7 +1960,8 @@ BEGIN
                 -- delete_hive_post deletes the pair's live row, when there is one
                 _post_id := hivemind_app.find_comment_id(_rec.author::VARCHAR, _rec.permlink::VARCHAR, False);
                 IF _post_id <> 0 THEN
-                    _deleted_author_ids := _deleted_author_ids || (SELECT hp.author_id FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id);
+                    INSERT INTO hivemind_app._deleted_posts (post_id, author_id)
+                    SELECT hp.id, hp.author_id FROM hivemind_app.hive_posts hp WHERE hp.id = _post_id;
                 END IF;
                 PERFORM hivemind_app.delete_hive_post(
                     _rec.author::VARCHAR, _rec.permlink::VARCHAR, _rec.block_num, _rec.block_date
@@ -1968,22 +2129,7 @@ BEGIN
     FROM unmuted_posts u
     WHERE pr.post_id = u.id;
 
-    -- Step 7g: Keep hive_accounts.post_count (live rows per author) by this batch's net
-    -- change: +1 per row inserted (every insert is live), -1 per live row deleted. One
-    -- UPDATE per author per batch, never one per post.
-    UPDATE hivemind_app.hive_accounts ha
-    SET post_count = ha.post_count + d.delta
-    FROM (
-        SELECT c.author_id, SUM(c.delta)::INT AS delta
-        FROM (
-            SELECT pr.author_id, 1 AS delta FROM hivemind_app._post_results pr WHERE pr.is_new_post
-            UNION ALL
-            SELECT unnest(_deleted_author_ids), -1
-        ) c
-        GROUP BY c.author_id
-        HAVING SUM(c.delta) <> 0
-    ) d
-    WHERE ha.id = d.author_id;
+    -- (hive_accounts.post_count: process_post_counts_from_staging, in Stage B)
 
     -- Step 8: Generate muted post error notifications
     -- When a new post in a community is muted (muted_reasons != 0), generate an 'error'
@@ -2046,23 +2192,38 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- phase's transaction: replaying the comment ops on top of their own effects is not
 -- idempotent (a post created and deleted in the batch would be created and deleted
 -- again, and a created post would come back as an edit).
-CREATE OR REPLACE FUNCTION hivemind_app.save_batch_post_results()
+-- Saved for the batch starting at _first_block, with the post versions the phase deleted;
+-- the rows of batches no longer in flight go.
+DROP FUNCTION IF EXISTS hivemind_app.save_batch_post_results();
+CREATE OR REPLACE FUNCTION hivemind_app.save_batch_post_results(_first_block INT)
 RETURNS VOID AS $function$
 BEGIN
-    DELETE FROM hivemind_app._batch_post_results;
+    DELETE FROM hivemind_app._batch_post_results bpr
+    WHERE bpr.first_block = _first_block
+       OR NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue bq WHERE bq.first_block = bpr.first_block);
     INSERT INTO hivemind_app._batch_post_results
-    SELECT pr.seq_id, pr.post_id, pr.is_new_post, pr.author_id, pr.permlink_id, pr.depth,
+        (first_block, seq_id, post_id, is_new_post, author_id, permlink_id, depth,
+         parent_id, parent_author_id, community_id, is_post_muted, muted_reasons)
+    SELECT _first_block, pr.seq_id, pr.post_id, pr.is_new_post, pr.author_id, pr.permlink_id, pr.depth,
            pr.parent_id, pr.parent_author_id, pr.community_id, pr.is_post_muted, pr.muted_reasons
     FROM hivemind_app._post_results pr;
 
-    UPDATE hivemind_app._batch_queue SET posts_applied = TRUE;
+    DELETE FROM hivemind_app._batch_deleted_posts bdp
+    WHERE bdp.first_block = _first_block
+       OR NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue bq WHERE bq.first_block = bdp.first_block);
+    INSERT INTO hivemind_app._batch_deleted_posts (first_block, post_id, author_id)
+    SELECT _first_block, dp.post_id, dp.author_id FROM hivemind_app._deleted_posts dp;
+
+    UPDATE hivemind_app._batch_queue SET posts_applied = TRUE WHERE first_block = _first_block;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
--- process_posts_from_staging's results for the batch whose posts phase committed, from
--- _batch_post_results and the reloaded _ops_staging (seq_id numbers the comment ops as
--- process_posts_from_staging does); refills _post_results for the phases after it.
-CREATE OR REPLACE FUNCTION hivemind_app.restore_batch_post_results()
+-- process_posts_from_staging's results for the batch starting at _first_block, whose posts
+-- phase committed, from _batch_post_results and the reloaded _ops_staging (seq_id numbers
+-- the comment ops as process_posts_from_staging does); refills _post_results and
+-- _deleted_posts for the phases after it.
+DROP FUNCTION IF EXISTS hivemind_app.restore_batch_post_results();
+CREATE OR REPLACE FUNCTION hivemind_app.restore_batch_post_results(_first_block INT)
 RETURNS SETOF hivemind_app.post_staging_result AS $function$
 BEGIN
     DELETE FROM hivemind_app._post_results;
@@ -2075,9 +2236,46 @@ BEGIN
         SELECT ROW_NUMBER() OVER (ORDER BY s.id)::INT AS seq_id, s.block_num, s.block_date, s.val
         FROM hivemind_app._ops_staging s
         WHERE s.op_type_id = 1
-    ) op ON op.seq_id = bpr.seq_id;
+    ) op ON op.seq_id = bpr.seq_id
+    WHERE bpr.first_block = _first_block;
+
+    DELETE FROM hivemind_app._deleted_posts;
+    INSERT INTO hivemind_app._deleted_posts (post_id, author_id)
+    SELECT bdp.post_id, bdp.author_id
+    FROM hivemind_app._batch_deleted_posts bdp
+    WHERE bdp.first_block = _first_block;
 
     RETURN QUERY SELECT * FROM hivemind_app._post_results ORDER BY seq_id;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- Step 7g of the posts phase, run in Stage B: keeps hive_accounts.post_count (live rows per
+-- author) by the batch's net change, +1 per row inserted (every insert is live), -1 per
+-- live row deleted. One UPDATE per author per batch, never one per post. Applied once per
+-- in-flight batch (_batch_queue.post_counts_applied), as the counts are deltas.
+CREATE OR REPLACE FUNCTION hivemind_app.process_post_counts_from_staging(_first_block INT)
+RETURNS VOID AS $function$
+BEGIN
+    IF EXISTS (SELECT 1 FROM hivemind_app._batch_queue bq
+               WHERE bq.first_block = _first_block AND bq.post_counts_applied) THEN
+        RETURN;
+    END IF;
+
+    UPDATE hivemind_app.hive_accounts ha
+    SET post_count = ha.post_count + d.delta
+    FROM (
+        SELECT c.author_id, SUM(c.delta)::INT AS delta
+        FROM (
+            SELECT pr.author_id, 1 AS delta FROM hivemind_app._post_results_b pr WHERE pr.is_new_post
+            UNION ALL
+            SELECT dp.author_id, -1 FROM hivemind_app._deleted_posts_b dp
+        ) c
+        GROUP BY c.author_id
+        HAVING SUM(c.delta) <> 0
+    ) d
+    WHERE ha.id = d.author_id;
+
+    UPDATE hivemind_app._batch_queue SET post_counts_applied = TRUE WHERE first_block = _first_block;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
@@ -3119,9 +3317,10 @@ BEGIN
         RETURN 0;
     END IF;
 
-    -- Find new comments in this batch from _post_results (populated by Phase 3).
-    -- Uses the staging table instead of scanning hive_posts by block_num_created
-    -- (which has no index during MASSIVE_WITHOUT_INDEXES).
+    -- Find new comments in this batch from _post_results_b (Phase 3's results, handed to
+    -- Stage B). Uses the staging table instead of scanning hive_posts by block_num_created
+    -- (which has no index during MASSIVE_WITHOUT_INDEXES). Block dates come from HAF's
+    -- table, not the context's blocks_view, which the next batch's iteration recreates.
     WITH new_comments AS (
         SELECT
             pr.post_id,
@@ -3132,8 +3331,8 @@ BEGIN
             pr.block_num,
             hb.created_at,
             ROW_NUMBER() OVER (PARTITION BY pr.block_num ORDER BY pr.post_id) AS counter
-        FROM hivemind_app._post_results pr
-        JOIN hivemind_app.blocks_view hb ON hb.num = pr.block_num - 1
+        FROM hivemind_app._post_results_b pr
+        JOIN hafd.blocks hb ON hb.num = pr.block_num - 1
         WHERE pr.is_new_post = true
           AND pr.depth > 0
     )
@@ -3203,7 +3402,7 @@ BEGIN
         FROM hivemind_app._follow_notification_events fe
         JOIN hivemind_app.hive_accounts ha_f ON ha_f.name = fe.follower_name
         JOIN hivemind_app.hive_accounts ha_g ON ha_g.name = fe.following_name
-        JOIN hivemind_app.blocks_view hb ON hb.num = fe.block_num - 1
+        JOIN hafd.blocks hb ON hb.num = fe.block_num - 1
         WHERE fe.block_num BETWEEN _first_block AND _last_block
     )
     INSERT INTO hivemind_app.hive_notification_cache

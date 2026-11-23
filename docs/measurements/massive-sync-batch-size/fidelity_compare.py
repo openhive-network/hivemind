@@ -4,7 +4,7 @@
 Surrogate ids drawn in processing order (permlink_id, category_id) are dropped first:
 the dumps already replace post ids with natural keys, and account ids are drawn in
 operation order, the same in every run. post_ids and notif_ids hold the post and
-notification ids as drawn.
+notification ids as drawn, reblogs the hive_reblogs ids as drawn.
 """
 
 import collections
@@ -31,7 +31,24 @@ for k in ca:
     mark = '' if ca[k] == cb.get(k) else '   <-- differs'
     print(f'  {k:18} {ca[k]:>12} {cb.get(k, "-"):>12}{mark}')
 
-for f in ('posts', 'votes', 'notifs', 'mentions', 'postdata', 'post_ids', 'notif_ids'):
+FILES = (
+    'posts',
+    'votes',
+    'notifs',
+    'mentions',
+    'postdata',
+    'post_ids',
+    'notif_ids',
+    'accounts',
+    'follows',
+    'muted',
+    'blacklisted',
+    'follow_muted',
+    'follow_blacklisted',
+    'reblogs',
+    'feed_cache',
+)
+for f in FILES:
     out = subprocess.run(['diff', normalized(a, f), normalized(b, f)], capture_output=True, text=True).stdout
     lines = out.splitlines()
     only_a = [line[2:] for line in lines if line.startswith('< ')]

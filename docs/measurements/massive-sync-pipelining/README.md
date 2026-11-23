@@ -233,3 +233,153 @@ clones of one installed snapshot, steem-20's `50-perf.conf`):
 
 Proceed to the implementation if the pipelined run is at least 25 % faster over 10–30 M (base about 805
 blocks/s here, stalls removed) and every dump is identical.
+
+## The prototype: `--massive-sync-pipelined` (#512)
+
+The design above is implemented behind a sync option that defaults to off. #500 runs it on blocks 10–30 M and
+decides whether it becomes the default.
+
+### Switching it on
+
+`hive sync --massive-sync-pipelined=true` (or `MASSIVE_SYNC_PIPELINED=true`). It applies to the two massive
+stages only. A crash replay runs its batches one after the other, and live sync is unchanged: at the first live
+iteration the handoff tables are dropped (`set_stage_b_handoff(FALSE)`).
+
+With the option off, a batch runs its phases in today's order and on today's connections, with the order-neutral
+fixes below. Stage B then reads views of Stage A's tables, so its statements plan as they did on those tables.
+
+### What runs where
+
+- **Stage A:** load, accounts and communities, posts, community post ops. It runs on the massive sync thread and
+  its connection (`hivemind_massive_instance`). Its last transaction sets `_batch_queue.stage_a_applied`.
+- **Stage B:** votes, rshares (`MASSIVE_WITH_INDEXES`), Phase 4 and 4b, flush, notifications, boundary vacuum. It
+  runs on its own thread (`Blocks._stage_b_task`) and connection (`hivemind_stage_b_instance`), with the votes,
+  Phase 4, flush and notification connections it already had. When Stage B ends, it deletes its batch's
+  `_batch_queue` row.
+- **The order of a batch.** Stage A of batch N ends, then waits for Stage B of N−1. The handoff
+  (`hand_off_to_stage_b`) runs while neither stage is in a statement, and Stage B of N starts. The main loop then
+  calls `hive.app_next_iteration` for N+1, which therefore follows Stage A of N, not the whole batch. Stage A of N+1
+  runs beside Stage B of N. This is the two-handoff-set flow shop that `simulate.py` replays.
+
+### The fixes, as implemented
+
+- **Reblogs.** `process_reblogs_from_staging(_last_block)` resolves the post version live at the end of the batch
+  (`block_num_created <= _last_block AND (counter_deleted = 0 OR block_num > _last_block)`). It does so in the
+  "op before the live version" delete, in `validated`, and in `delete_reblog_feed_cache(…, _last_block)`.
+- **Post-delete cascade.** The posts phase records every version it deletes in `_deleted_posts`, both the
+  set-based deletes and the replayed ones; `delete_hive_post` no longer cascades. The first statements of
+  `process_reblogs_from_staging` remove the reblogs and feed cache rows of those versions, before the batch's
+  reblogs.
+- **`post_count`.** Step 7g is `process_post_counts_from_staging(_first_block)`, run in 4b. It reads the handoff's
+  `_post_results_b` and `_deleted_posts_b`, and applies once per batch (`_batch_queue.post_counts_applied`), since
+  it adds deltas.
+- **Body merge.** cache_merge stays in Stage B (Phase 3b, beside Phase 4). Only Stage B uses `PostDataCache`.
+- **Follow notifications.** `process_follows_for_blocks` clears `_follow_notification_events` before it collects
+  them; the loads no longer clear it.
+- **Context views.** `process_follows_for_blocks` reads the batch's follow ops from `_ops_staging_b`
+  (`op_type_id = 18 AND val->>'id' = 'follow'`). On the 5 M fixture that selects exactly the ops HAF types as
+  `follow` custom_json: all 477,697 follow-typed ops carry `id` `follow`, and every reblog-typed op carries
+  `reblog`. The post and follow notification flushes and `process_hive_post_mentions` take block dates from
+  `hafd.blocks`.
+- **Batch queue.** `_batch_queue` holds a row per in-flight batch. Every marker is read and set by the batch's
+  `first_block`. `_batch_post_results` and `_batch_deleted_posts` keep the posts phase's results and deletes per
+  batch, keyed by `first_block`.
+- **Sequences.** `hive_posts` ids are still drawn in the posts phase (Stage A). `hive_votes` and `hive_reblogs` ids
+  are still drawn in Stage B, and the reblogs draw them in today's order, since they resolve as of the end of the
+  batch.
+- **Deadlocks.** The accounts and communities, posts and community post ops transactions retry on 40P01, as do
+  Stage B's rshares update and 4b; Phase 4, the votes partitions and the notification flushes already did. Each
+  retry is counted per stage.
+- **The shared connection.** In pipelined mode Stage B's boundary vacuum reads its thresholds on Stage B's
+  connection, because the shared connection is the main loop's, busy with the next iteration. Payouts take the
+  cashout bound `set_end_of_sync_lib` set for their own batch, not the one the next batch's start set.
+
+### The handoff: `_b` tables, not a slot column
+
+Stage B reads `_ops_staging_b`, `_post_results_b` and `_deleted_posts_b`.
+- **Why not a slot column.** A slot column would put a predicate into every Stage A and Stage B reader, about 20
+  functions, and the per-load `ANALYZE` would describe two batches at once.
+- **What the `_b` names cost.** They change only Stage B's readers, and Stage A's statements stay as they are.
+- **Default mode.** The three objects are views of Stage A's tables (`set_stage_b_handoff(FALSE)`).
+- **Pipelined mode.** They are tables out of autovacuum, and `reset_stage_b_staging_tables` truncates them with
+  Stage B's other tables. `reset_stage_a_staging_tables` covers Stage A's, so each stage truncates its own tables
+  between two of its batches.
+- **How the handoff fills them.** `_ops_staging` trades names with `_ops_staging_b`, indexes included. A copy would
+  cost Stage A, on the critical path, another load of the batch's operations, and with the swap Stage B reads the
+  statistics the load analyzed. The posts phase's results and deletes are small, so they are copied, without the op
+  bodies, which only Python's body merge reads.
+
+### Restart and resume
+
+`_replay_crashed_batch` replays the rows in block order, one at a time:
+- **A row with `stage_a_applied`** runs Stage B only (`Blocks.process_stage_b_of_batch`). Its operations are
+  reloaded from HAF's tables (`prefetch_ops_staging`), as the context's views may already show the next range, and
+  its posts phase's results and deletes come from `restore_batch_post_results(first_block)`.
+- **Any other row** runs the whole batch, with the guards as before.
+
+### What #500 reads
+
+With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PHASE-SUMMARY]` (none with it off):
+
+```
+[STAGE-TIMING] blocks=F-L stage=A start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> wait_for_b=<s> handoff=<s>
+[STAGE-TIMING] blocks=F-L stage=B start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n>
+```
+
+- **Overlap.** Stage A of N+1 overlaps Stage B of N from `max(start)` to `min(end)` of the two lines.
+- **Waiting.** `wait_for_b` is how long Stage A of N waited for Stage B of N−1 before its handoff.
+- **Slowdown.** Each stage's `elapsed`, set against the base run's sum of that stage's `[PHASE-SUMMARY]` phases,
+  gives the slowdown factor for `simulate.py`.
+- **`[PHASE-SUMMARY]`** is written when the batch's Stage B ends. It holds both stages' phases and `handoff`.
+- **Deadlocks.** `deadlocks` counts the 40P01 retries per stage. PostgreSQL's log has the matching `deadlock
+  detected` lines.
+
+### Kill tests
+
+`--test-pipeline-kill=POINT:F` exits the process at once, as a crash would, in the batch starting at block F:
+- **`stage_a_committed`** holds Stage B of F before its first statement, and exits when the next batch's Stage A
+  has committed (pipelined only).
+- **`flush_committed`** exits right after the batch's post data flush has committed.
+
+`../massive-sync-batch-size/fidelity_run.sh` runs one with `PIPELINE_KILL=POINT:F` (and the option with
+`SYNC_ARGS=--massive-sync-pipelined=true`), restarts, and dumps. `fidelity_dump.sql` now also dumps `hive_accounts`
+(every column), the follow, mute and blacklist lists on natural keys, `hive_reblogs` with their ids, and the feed
+cache. `fidelity_compare.py` diffs them too.
+
+### Results on the 5 M fixture
+
+Setup: HAF 5 M fixture on steem-4 in `/scratch/hm512`, set up like `../massive-sync-batch-size/fidelity.md`. Every run
+is a ZFS clone of one install made at the base commit (5d1b7a5a8), with reptracker synced to 4,990,000, and syncs
+in 10,000-block batches to 4,990,000. Each run is compared with the base commit's run by `fidelity_compare.py`,
+over posts, votes, notifications and their ids, mentions, post data, post ids, accounts, the five follow and mute
+lists, reblogs with ids and the feed cache.
+
+| run | result |
+|---|---|
+| option off | 15 of 15 dumps identical |
+| option on | 15 of 15 identical |
+| on, killed at `stage_a_committed:4500001`, restarted | 15 of 15 identical. At the kill, `_batch_queue` held 4,500,001 (`stage_a_applied`, no flush) and 4,510,001 (`stage_a_applied`) |
+| on, killed at `flush_committed:4730001`, restarted | 15 of 15 identical. At the kill, 4,730,001 had `post_data_applied`, and 4,740,001 its Stage A |
+| on, killed by `docker kill` once the context reached 4,500,000, then one block at a time to 4,510,000 (`fidelity_one_block.sh`), against base's 10,000-block run | 15 of 15 identical. At the kill, `_batch_queue` held 4,480,001 and 4,490,001 |
+
+**No crafted test needed for most cases; one is.** The fixture holds 12 reblog ops (blocks 4.59–4.97 M), and none
+of the reblogged posts is deleted later. `tests/sql/pipelined_stage_order.sql` therefore checks the case of a
+reblogged post the next batch deletes and re-creates. It runs two batches in the sequential order, in the
+pipelined order and one block at a time, and expects the same posts, reblogs, `hive_reblogs` ids drawn, reblog
+notifications and `post_count`.
+
+**Two bugs the first runs found.**
+- **Stage A's reset.** It ran after Stage A's own load, and with 10,000-block batches it is due every batch, so
+  it truncated each batch before its handoff. Stage B saw no votes or follows. The reset now runs before the
+  load.
+- **Phase 4's retry.** It reran all three tasks, so a reblogs task that had committed would draw `hive_reblogs`
+  ids again. The fixture's reblogs did not show it. Now only the rolled-back tasks run again.
+
+**Indicative timing, not #500's measurement.** These runs shared the host with up to five other syncs. The option
+on took 477.6 s from the first Stage A to the last Stage B, against 583.4 s for base's first-to-last batch, which
+ran beside two other syncs. Summed per batch:
+- Stage A elapsed 256.6 s, Stage B elapsed 452.2 s, overlapping for 234.8 s;
+- Stage A waited 216.0 s for Stage B, since Stage B dominates at 5 M, where votes are most of a batch.
+
+Deadlocks were all resolved on their first retry: 13 in the posts phase (Stage A against the payouts) and 10 in
+Phase 4.

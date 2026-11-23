@@ -864,7 +864,7 @@ BEGIN
           SELECT DISTINCT sn.post_id, sn.idx, sn.last_idx, sn.block_num, hp.author_id, ha.id AS account_id
           FROM snapshots sn
           JOIN hivemind_app.hive_posts hp ON hp.id = sn.post_id
-          JOIN hivemind_app.blocks_view AS op_block ON op_block.num = sn.block_num - 1
+          JOIN hafd.blocks AS op_block ON op_block.num = sn.block_num - 1
           LEFT JOIN hivemind_app.hive_post_data hpd ON hpd.id = sn.post_id AND sn.body IS NULL
           CROSS JOIN LATERAL REGEXP_MATCHES( COALESCE(sn.body, hpd.body), '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS T(mention)
           JOIN hivemind_app.hive_accounts ha ON ha.name = LOWER( ( SELECT trim( T.mention::text, '{""}') ) )
@@ -940,7 +940,7 @@ BEGIN
                   hm.*,
                   hb.created_at AS created_at
               FROM final_runs hm
-              JOIN hivemind_app.blocks_view AS hb ON hb.num = hm.prev_block
+              JOIN hafd.blocks AS hb ON hb.num = hm.prev_block
               )
           INSERT INTO hivemind_app.hive_notification_cache
               (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
@@ -1012,12 +1012,8 @@ BEGIN
   ,active = _date
   WHERE id = __post_id;
 
-  DELETE FROM hivemind_app.hive_reblogs
-  WHERE post_id = __post_id;
-
-  DELETE FROM hivemind_app.hive_feed_cache
-  WHERE post_id = __post_id AND account_id = __account_id;
-
+  -- its reblogs and feed cache rows go in Stage B (process_reblogs_from_staging), from the
+  -- post versions process_posts_from_staging records as deleted
   DELETE FROM hivemind_app.hive_post_tags
   WHERE post_id = __post_id;
 

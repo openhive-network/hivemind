@@ -223,9 +223,12 @@ class SyncHiveDb:
         while True:
             # Wait for previous massive consumption BEFORE modifying context state.
             # This prevents race condition where flush threads access context while
-            # app_next_iteration is modifying it.
+            # app_next_iteration is modifying it. Pipelined, that is the previous
+            # batch's Stage A: its Stage B, which reads no context view, runs on
+            # beside the next iteration and the next batch's Stage A.
             try:
                 self._wait_for_massive_consume()
+                Blocks.raise_stage_b_error()
             except Exception:
                 # Exception from massive sync thread (deadlock, FK violation, etc).
                 # Clear the future so _break_requested's _wait_for_massive_consume()
@@ -300,6 +303,8 @@ class SyncHiveDb:
                 DbState.ensure_fk_are_disabled()
                 if not DbState.are_indexes_enabled():
                     self._wait_for_massive_consume()
+                    if not self._drain_massive_pipeline():
+                        continue
                     # Batches run the SQL of the stage without indexes, plus an rshares
                     # update by primary key, so hive_posts' registered indexes can wait
                     # for finalization's recompute.
@@ -308,6 +313,9 @@ class SyncHiveDb:
                 self._process_massive_blocks(self._lbound, self._ubound, application_stage)
             elif application_stage == "live":
                 self._wait_for_massive_consume()  # wait for flushing massive data in thread
+                if not self._drain_massive_pipeline():
+                    self._db.query_no_return("ROLLBACK")
+                    continue
                 self._close_ops_prefetch()
                 if not self._live_prepared and self._wait_while_haf_restores_indexes():
                     report_enter_to_stage("live: waiting for HAF to restore its indexes")
@@ -325,6 +333,7 @@ class SyncHiveDb:
                     self._db.query_no_return("ROLLBACK")
 
                     DbState.ensure_on_synchronous_commit()
+                    Blocks.set_stage_b_handoff(self._db, False)
                     DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
                     DbState.restore_wal_safety_after_massive_sync()
                     DbState.close_admin_db()  # No longer needed after massive sync
@@ -381,28 +390,40 @@ class SyncHiveDb:
     def _replay_crashed_batch(self) -> None:
         """Check for and replay any unfinished batch from a prior crash.
 
-        The _batch_queue table records the block range of an in-flight batch.
-        If an entry exists, the prior process crashed mid-batch and we must
-        replay it. The idempotent SQL (vote num_changes, author_rewards guards)
-        and the reuse of a committed posts phase and post data flush (the
-        _batch_queue markers) ensure replayed data does not double-count.
+        The _batch_queue table records the block range of each in-flight batch
+        (two while pipelined massive sync runs a batch's Stage B beside the next
+        one's Stage A). If an entry exists, the prior process crashed mid-batch
+        and we must replay it. The batches are replayed in block order, one after
+        the other: a batch whose Stage A committed (stage_a_applied) runs its
+        Stage B only, as the next batch's Stage A may have run on top of it; any
+        other runs whole. The idempotent SQL (vote num_changes, author_rewards
+        guards) and the reuse of a committed posts phase, post data flush and
+        follows phase (the _batch_queue markers) ensure replayed data does not
+        double-count.
         """
-        leftover = self._db.query_all(f"SELECT first_block, last_block FROM {SCHEMA_NAME}._batch_queue LIMIT 1")
+        leftover = self._db.query_all(
+            f"SELECT first_block, last_block, stage_a_applied FROM {SCHEMA_NAME}._batch_queue ORDER BY first_block"
+        )
         if not leftover:
             return
-
-        first_block, last_block = leftover[0][0], leftover[0][1]
-        log.info(f"Crash recovery: replaying unfinished batch {first_block}..{last_block}")
 
         DbLiveContextHolder.set_live_context(False)
         Blocks.setup_own_db_access(shared_db_adapter=self._db)
         Blocks.set_end_of_sync_lib()
-        Blocks.process_multi_sql(first_block, last_block)
+        Blocks.set_stage_b_handoff(self._db, Blocks.is_pipelined())
 
-        self._db.query_no_return("START TRANSACTION")
-        self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
-        self._db.query_no_return("COMMIT")
-        log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
+        for first_block, last_block, stage_a_applied in leftover:
+            if stage_a_applied:
+                log.info(f"Crash recovery: replaying Stage B of unfinished batch {first_block}..{last_block}")
+                Blocks.process_stage_b_of_batch(first_block, last_block)
+            else:
+                log.info(f"Crash recovery: replaying unfinished batch {first_block}..{last_block}")
+                Blocks.process_multi_sql(first_block, last_block)
+
+            self._db.query_no_return("START TRANSACTION")
+            self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue WHERE first_block = {first_block:d}")
+            self._db.query_no_return("COMMIT")
+            log.info(f"Crash recovery: batch {first_block}..{last_block} replayed successfully")
 
     def _recover_skipped_live_blocks(self) -> None:
         """Detect a live block whose work was lost while the context advanced past it.
@@ -545,9 +566,11 @@ class SyncHiveDb:
             # Staging/internal tables
             '_batch_queue',
             '_batch_post_results',
+            '_batch_deleted_posts',
             '_ops_staging',
             '_comment_staging',
             '_post_results',
+            '_deleted_posts',
             '_vote_batch',
             '_reblog_ops',
             '_reblog_final',
@@ -582,21 +605,39 @@ class SyncHiveDb:
         )
 
     def _wait_for_massive_consume(self) -> None:
+        """Wait for the batch the massive sync thread runs; pipelined, for its Stage A only (see _drain_massive_pipeline)."""
         if self._massive_consume_blocks_futures is None:
             return
 
         self._massive_consume_blocks_futures.result()
         self._massive_consume_blocks_futures = None
 
+        if Blocks.is_pipelined():
+            return  # the batch's Stage B deletes its row when it has committed
         # Batch completed successfully — remove crash recovery marker
         self._db.query_no_return("START TRANSACTION")
         self._db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._batch_queue")
         self._db.query_no_return("COMMIT")
 
+    @staticmethod
+    def _drain_massive_pipeline() -> bool:
+        """Wait for pipelined massive sync's running Stage B; False when it failed.
+
+        On failure its batch stays in _batch_queue for the replay, and as the Stage B
+        thread flagged the exception, the next _break_requested stops the sync.
+        """
+        try:
+            Blocks.wait_for_stage_b()
+        except Exception:
+            log.warning("Exception from Stage B of massive sync — deferring to shutdown handler")
+            return False
+        return True
+
     def _break_requested(self, last_imported_block, active_connections_before) -> bool:
         if not can_continue_thread():
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            self._drain_massive_pipeline()
             restore_default_signal_handlers()
             self._on_stop_synchronization(
                 active_connections_before,
@@ -607,6 +648,10 @@ class SyncHiveDb:
         if self._last_block_to_process and (last_imported_block >= self._last_block_to_process):
             self._db.query_no_return("ROLLBACK")
             self._wait_for_massive_consume()
+            if not self._drain_massive_pipeline():
+                restore_default_signal_handlers()
+                self._on_stop_synchronization(active_connections_before, sigint_during_massive=True)
+                return True
             DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
@@ -711,6 +756,7 @@ class SyncHiveDb:
 
         if self._ops_prefetch is None:
             self._ops_prefetch = OpsPrefetch(self._db.clone("OpsPrefetch"))
+        Blocks.set_stage_b_handoff(self._db, Blocks.is_pipelined())
 
         # _batch_queue is already populated (committed atomically with the
         # context advancement in the main loop, before we reach here). The
@@ -847,7 +893,10 @@ class SyncHiveDb:
             timer.batch_start()
 
             block_start = perf()
-            Blocks.process_multi_sql(lbound, ubound, self._ops_prefetch, next_range)
+            if Blocks.is_pipelined():
+                Blocks.process_multi_sql_pipelined(lbound, ubound, self._ops_prefetch, next_range)
+            else:
+                Blocks.process_multi_sql(lbound, ubound, self._ops_prefetch, next_range)
             block_end = perf()
 
             timer.batch_lap()

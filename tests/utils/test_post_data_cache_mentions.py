@@ -9,7 +9,7 @@ import pytest
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.post_data_cache import PostDataCache
 
-_MARKER = 'UPDATE hivemind_app._batch_queue SET post_data_applied = TRUE'
+_MARKER = 'UPDATE hivemind_app._batch_queue SET post_data_applied = TRUE WHERE first_block = 100'
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def _mention_call(db: MagicMock, mentions_after_block: int = 0) -> tuple[tuple[A
     statements: list[tuple[str, tuple[Any, ...]]] = []
     db.query_all_raw.side_effect = lambda sql, params=(): statements.append((sql, params))
     db.query_no_return.reset_mock()
-    PostDataCache.flush(mentions_after_block=mentions_after_block)
+    PostDataCache.flush(mentions_after_block=mentions_after_block, batch_first_block=100)
 
     write, *mentions = statements
     assert 'INSERT INTO hivemind_app.hive_post_data' in write[0]

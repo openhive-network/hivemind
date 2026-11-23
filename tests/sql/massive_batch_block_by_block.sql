@@ -158,7 +158,7 @@ BEGIN
         PERFORM pg_temp.bb_stage(_batch_first, LEAST(_batch_first + _blocks_per_batch - 1, _last));
         PERFORM hivemind_app.process_votes_from_staging(0);
         PERFORM hivemind_app.process_payouts_from_staging(0);
-        PERFORM hivemind_app.process_reblogs_from_staging();
+        PERFORM hivemind_app.process_reblogs_from_staging(LEAST(_batch_first + _blocks_per_batch - 1, _last));
     END LOOP;
     RETURN pg_temp.bb_state();
 END

@@ -145,8 +145,13 @@ DECLARE
     _op_seq BIGINT := 0;
     -- A replay of a batch whose follows phase committed keeps the mute changes it
     -- recorded: the lists now hold the state after them.
-    _record_mutes BOOLEAN := NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue WHERE follows_applied);
+    _record_mutes BOOLEAN := NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue
+                                         WHERE first_block = _first_block AND follows_applied);
 BEGIN
+    -- The events of the last follows phase are read by its notification flush, which runs
+    -- before the next follows phase.
+    DELETE FROM hivemind_app._follow_notification_events;
+
     CREATE TEMP TABLE IF NOT EXISTS _follow_notifications (
         follower_name TEXT,
         following_name TEXT,
@@ -178,19 +183,19 @@ BEGIN
     TRUNCATE _mute_actions;
 
     -- ========== PHASE 1: Parse JSON and collect actions ==========
+    -- The batch's operations as Stage B reads them (_ops_staging_b), not the context's
+    -- operations_view, which the next batch's iteration recreates while pipelined massive
+    -- sync runs this.
     FOR rec IN
         SELECT
-            ho.id AS op_id,
-            ho.block_num,
-            ho.body_value AS val
-        FROM hivemind_app.operations_view ho
-        WHERE ho.block_num BETWEEN _first_block AND _last_block
-          AND ho.op_type_id = 18
-          AND ho.custom_json_type_id IN (
-              SELECT id FROM hafd.custom_json_types
-              WHERE custom_json_id = 'follow'
-          )
-        ORDER BY ho.id
+            s.id AS op_id,
+            s.block_num,
+            s.val
+        FROM hivemind_app._ops_staging_b s
+        WHERE s.block_num BETWEEN _first_block AND _last_block
+          AND s.op_type_id = 18
+          AND s.val->>'id' = 'follow'
+        ORDER BY s.id
     LOOP
         _val := rec.val;
 
@@ -364,7 +369,7 @@ BEGIN
     IF _record_mutes THEN
         PERFORM hivemind_app.record_batch_mute_changes();
     END IF;
-    UPDATE hivemind_app._batch_queue SET follows_applied = TRUE;
+    UPDATE hivemind_app._batch_queue SET follows_applied = TRUE WHERE first_block = _first_block;
 
     -- ========== PHASE 2: Bulk DML using set-based operations ==========
 
