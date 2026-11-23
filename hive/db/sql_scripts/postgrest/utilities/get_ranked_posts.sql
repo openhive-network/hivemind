@@ -1025,6 +1025,68 @@ END
 $$
 ;
 
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_tag_page;
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_tag_page(IN _tag_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _muted_reasons_filter_mask INT)
+RETURNS TABLE(post_id INT)
+LANGUAGE plpgsql
+STABLE
+-- Each case's generic plan is the plan its custom plans pick, so it is planned once per connection;
+-- the observer and muted-reasons filters keep a statement of their own, so the unfiltered walk stays index-only.
+-- The setting covers these statements alone: they call no function.
+SET plan_cache_mode = force_generic_plan
+AS
+$$
+BEGIN
+  -- the continuation bounds hpt.post_id, not hp.id: only a bound on the walked index's column is an index condition
+  IF _observer_id = -1 AND COALESCE(_muted_reasons_filter_mask, 0) = 0 THEN
+    IF _post_id = 0 THEN
+      RETURN QUERY
+        SELECT hp.id
+        FROM hivemind_app.live_posts_view hp
+        JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+        JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
+        WHERE hpt.tag_id = _tag_id AND NOT ha.is_grayed
+        ORDER BY hp.id DESC
+        LIMIT _limit;
+    ELSE
+      RETURN QUERY
+        SELECT hp.id
+        FROM hivemind_app.live_posts_view hp
+        JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+        JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
+        WHERE hpt.tag_id = _tag_id AND hpt.post_id < _post_id AND NOT ha.is_grayed
+        ORDER BY hp.id DESC
+        LIMIT _limit;
+    END IF;
+  ELSIF _post_id = 0 THEN
+    RETURN QUERY
+      SELECT hp.id
+      FROM hivemind_app.live_posts_view hp
+      JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+      JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
+      WHERE hpt.tag_id = _tag_id AND NOT ha.is_grayed
+        AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+        AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+            OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
+      ORDER BY hp.id DESC
+      LIMIT _limit;
+  ELSE
+    RETURN QUERY
+      SELECT hp.id
+      FROM hivemind_app.live_posts_view hp
+      JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
+      JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
+      WHERE hpt.tag_id = _tag_id AND hpt.post_id < _post_id AND NOT ha.is_grayed
+        AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
+        AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
+            OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
+      ORDER BY hp.id DESC
+      LIMIT _limit;
+  END IF;
+END
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_tag;
 CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _muted_reasons_filter_mask INT DEFAULT NULL, IN _votes_mode SMALLINT DEFAULT 0, IN _top_votes INT DEFAULT 0)
 RETURNS JSONB
@@ -1047,24 +1109,6 @@ BEGIN
       END
     )
     ) FROM (
-      WITH -- get_created_ranked_posts_for_tag
-      tag_posts as
-      (
-        SELECT
-          hp.id
-        FROM hivemind_app.live_posts_view hp
-        JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp.id
-        JOIN hivemind_app.hive_accounts_view ha ON hp.author_id = ha.id
-        WHERE
-          hpt.tag_id = _tag_id
-          AND (_post_id = 0 OR hp.id < _post_id)
-          AND NOT ha.is_grayed
-          AND (_observer_id = -1 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hp.author_id))
-          AND (_muted_reasons_filter_mask IS NULL OR _muted_reasons_filter_mask = 0
-              OR (hp.muted_reasons & _muted_reasons_filter_mask) = 0)
-        ORDER BY hp.id DESC
-        LIMIT _limit
-      )
       SELECT
         hp.id,
         hp.author,
@@ -1104,10 +1148,10 @@ BEGIN
         hp.is_muted,
         hp.source AS blacklists,
         hp.muted_reasons
-      FROM tag_posts,
-      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.id, _observer_id) hp
-      ORDER BY
-        hp.id DESC
+      -- sorted before the lateral join, so LIMIT stops building post views past the cut
+      FROM (SELECT * FROM hivemind_postgrest_utilities.get_created_tag_page(_tag_id, _post_id, _observer_id, _limit, _muted_reasons_filter_mask) ORDER BY post_id DESC) tag_posts,
+      LATERAL hivemind_app.get_full_post_view_by_id(tag_posts.post_id, _observer_id) hp
+      ORDER BY tag_posts.post_id DESC
       LIMIT _limit
     ) row
   );
