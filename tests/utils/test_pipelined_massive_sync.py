@@ -11,7 +11,7 @@ import psycopg2
 import pytest
 
 from hive.db.db_state import DbState
-from hive.indexer.blocks import Blocks, _parse_kill_point
+from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.follow import Follow
@@ -238,20 +238,6 @@ def test_a_deadlocked_phase_4_task_runs_again_alone(monkeypatch: pytest.MonkeyPa
     assert tasks['payouts'].query_all_raw.call_args.args == (
         'SELECT hivemind_app.process_payouts_from_staging(4000000)',
     )
-
-
-@pytest.mark.parametrize(
-    ('value', 'expected'),
-    [(None, None), ('', None), ('flush_committed:4500001', ('flush_committed', 4500001))],
-)
-def test_the_kill_point_is_a_point_and_a_batch(value: str | None, expected: tuple[str, int] | None) -> None:
-    assert _parse_kill_point(value) == expected
-
-
-@pytest.mark.parametrize('value', ['flush_committed', 'nowhere:1', 'flush_committed:x', 'flush_committed:-1'])
-def test_any_other_kill_point_is_refused(value: str) -> None:
-    with pytest.raises(ValueError, match='POINT:BLOCK'):
-        _parse_kill_point(value)
 
 
 def test_the_stage_a_committed_kill_point_needs_pipelining(monkeypatch: pytest.MonkeyPatch) -> None:
