@@ -13,6 +13,7 @@ q() { docker exec $pg psql -h 127.0.0.1 -U haf_admin -d haf_block_log -XAtc "$1"
 q "select pg_stat_reset()" >/dev/null
 temp0=$(q "select temp_files||' '||temp_bytes from pg_stat_database where datname='haf_block_log'")
 python3 sampler.py logs/$label.mem.json $pg $hv & sp=$!
+python3 activity_sampler.py logs/$label.activity.jsonl $pg & ap=$!
 sync_once() {
   docker run --rm --name $hv --network hm470 -e PYTHONPATH=/src -v /scratch/hm470/src:/src -w /src --entrypoint python3 $RT \
     -m hive.cli sync --database-url=postgresql://hivemind@$pg:5432/haf_block_log --reptracker-schema-name=reptracker_app \
@@ -40,7 +41,8 @@ else
 fi
 rc=$?
 t1=$(date +%s)
-kill $sp
+kill $sp $ap; wait $sp $ap
+python3 activity_sampler.py --summary logs/$label.activity.jsonl > logs/$label.activity.txt
 temp1=$(q "select temp_files||' '||temp_bytes from pg_stat_database where datname='haf_block_log'")
 docker exec $pg sudo -n grep -h "temporary file" /var/log/postgresql/postgresql-18-main.log > logs/$label.temp.log 2>/dev/null
 maxtemp=$(grep -o 'size [0-9]*' logs/$label.temp.log | awk '{print $NF}' | sort -n | tail -1)

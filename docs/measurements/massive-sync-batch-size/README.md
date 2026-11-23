@@ -25,8 +25,9 @@ batch. `MASSIVE_WITH_INDEXES` (the last 2M blocks) keeps 1000. The limit is `--m
 - **Run:** `hive sync --test-max-block=4990000 --massive-sync-batch-blocks=N`, one run at a time. Massive time is
   from the first batch to the last `[PHASE-SUMMARY]`, timestamped per log line; finalization (index restore and
   the rest, about 150–160 s in every run) is left out. `sampler.py` reads every postgres process's and the hive
-  process's `RssAnon`/`VmRSS` once a second; temporary files come from PostgreSQL's log. `digest.sql` hashes the
-  synced tables at the end. `analyze.py` turns a log into the per-window numbers below.
+  process's `RssAnon`/`VmRSS` once a second, and `activity_sampler.py` host CPU, IO wait and the
+  `pg_stat_activity` wait events (added after the results below); temporary files come from PostgreSQL's log.
+  `digest.sql` hashes the synced tables at the end. `analyze.py` turns a log into the per-window numbers below.
 
 ## Results
 
