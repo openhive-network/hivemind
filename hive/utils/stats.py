@@ -122,7 +122,7 @@ class StatusManager:
         raise AssertionError()
 
     @staticmethod
-    def start():
+    def start() -> float:
         return perf()
 
     @staticmethod

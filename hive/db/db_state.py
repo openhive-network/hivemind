@@ -1255,15 +1255,17 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         log.info("[MASSIVE] Autovacuum reloptions restored on %s", list(cls.MASSIVE_VACUUM_THRESHOLDS))
 
     @classmethod
-    def run_boundary_vacuums(cls):
+    def run_boundary_vacuums(cls, db: Db | None = None) -> list[str]:
         """Vacuum any watched table whose dead tuples exceed its threshold.
 
         Called between chunks with no flush statement in flight; plain VACUUM
         (visibility map limits it to recently-churned pages, and the heavy
-        indexes are dropped during massive sync anyway).
+        indexes are dropped during massive sync anyway). The thresholds are read,
+        and the vacuum connections cloned, on `db` (default: the shared connection).
         """
+        db = db or cls.db()
         names = ','.join(f"'{t}'" for t in cls.MASSIVE_VACUUM_THRESHOLDS)
-        rows = cls.db().query_all(
+        rows = db.query_all(
             f"SELECT relname, n_dead_tup FROM pg_stat_user_tables WHERE schemaname = '{SCHEMA_NAME}' AND relname IN ({names})"
         )
         due = [
@@ -1277,7 +1279,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         def vacuum_table(table, db) -> None:
             cls._run_vacuum(db, "boundary_vacuum", f"VACUUM {SCHEMA_NAME}.{table}")
 
-        methods = [('VACUUM ' + table, vacuum_table, [table, cls.db()]) for table in due]
+        methods = [('VACUUM ' + table, vacuum_table, [table, db]) for table in due]
         cls.process_tasks_in_threads("Boundary vacuum on hivemind tables", methods, max_workers=cls.vacuum_workers)
         return due
 

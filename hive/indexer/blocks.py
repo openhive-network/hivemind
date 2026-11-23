@@ -2,8 +2,12 @@
 
 import contextlib
 import logging
-from concurrent.futures import ThreadPoolExecutor
-from time import perf_counter, sleep
+import os
+import threading
+from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
+from time import perf_counter, sleep, time
+from typing import TypeVar
 
 import psycopg2.extensions
 
@@ -28,12 +32,27 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.votes import Votes
+from hive.signals import set_exception_thrown
 from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.payout_stats import PayoutStats
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
 
 log = logging.getLogger(__name__)
+
+_T = TypeVar('_T')
+
+_KILL_POINTS = ('stage_a_committed', 'flush_committed')
+
+
+def _parse_kill_point(value: str | None) -> tuple[str, int] | None:
+    """--test-pipeline-kill's POINT:BLOCK as (POINT, BLOCK); raises ValueError for any other value."""
+    if not value:
+        return None
+    point, sep, block = value.partition(':')
+    if not sep or point not in _KILL_POINTS or not block.isdigit():
+        raise ValueError(f"--test-pipeline-kill takes POINT:BLOCK, POINT one of {', '.join(_KILL_POINTS)}: {value!r}")
+    return point, int(block)
 
 
 class Blocks:
@@ -52,11 +71,40 @@ class Blocks:
     _STAGING_RESET_BLOCKS = 10_000
     _calls_since_staging_reset = 0
     _blocks_since_staging_reset = 0
+    # The same per stage, for pipelined massive sync's per-stage resets: [calls, blocks].
+    _since_stage_reset = {'A': [0, 0], 'B': [0, 0]}
+
+    # Pipelined massive sync: Stage A of a batch (load, accounts and communities, posts,
+    # community post ops) runs while Stage B of the previous one (votes, payouts, reblogs,
+    # follows, account updates, post data flush, notifications, vacuum) runs on its own thread
+    # and connections. Each stage stays serial.
+    _pipelined = False
+    # Whether Stage B reads tables of its own, filled by each batch's handoff
+    # (set_stage_b_handoff); None until set.
+    _handoff_tables: bool | None = None
+    _stage_b_pool: ThreadPoolExecutor | None = None
+    _stage_b_future: Future[None] | None = None
+    _stage_b_first_block: int | None = None
+    _kill_point: tuple[str, int] | None = None
+    # What Stage B waits on at the stage_a_committed kill point: never set, the process exits.
+    _kill_hold = threading.Event()
+    # Deadlocks (40P01) retried, per stage: running the stages side by side adds the
+    # posts phase against the payouts' hive_posts updates.
+    _deadlocks = {'A': 0, 'B': 0}
+    _MAX_DEADLOCK_RETRIES = 3
 
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
         cls._vote_workers = conf.get('massive_vote_workers')
+        cls._pipelined = bool(conf.get('massive_sync_pipelined'))
+        cls._kill_point = _parse_kill_point(conf.get('test_pipeline_kill'))
+        if cls._kill_point is not None and cls._kill_point[0] == 'stage_a_committed' and not cls._pipelined:
+            raise ValueError('--test-pipeline-kill=stage_a_committed:BLOCK needs --massive-sync-pipelined')
+
+    @classmethod
+    def is_pipelined(cls) -> bool:
+        return cls._pipelined
 
     @classmethod
     def set_head_date(cls):
@@ -72,6 +120,8 @@ class Blocks:
     def setup_own_db_access(cls, shared_db_adapter: Db) -> None:
         if DbState.is_massive_sync():
             DbAdapterHolder.open_common_blocks_in_background_processing_db()
+            if cls._pipelined:
+                DbAdapterHolder.open_stage_b_processing_db()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
@@ -88,9 +138,11 @@ class Blocks:
         FollowNotificationCache.setup_own_db_access(shared_db_adapter, "FollowNotificationCache")
         ReblogNotificationCache.setup_own_db_access(shared_db_adapter, "ReblogNotificationCache")
 
-    @staticmethod
-    def close_own_db_access() -> None:
+    @classmethod
+    def close_own_db_access(cls) -> None:
+        cls._shut_down_stage_b()
         DbAdapterHolder.close_common_blocks_in_background_processing_db()
+        DbAdapterHolder.close_stage_b_processing_db()
 
         PostDataCache.close_own_db_access()
         Votes.close_own_db_access()
@@ -165,7 +217,7 @@ class Blocks:
         ops_prefetch: OpsPrefetch | None = None,
         next_range: tuple[int, int] | None = None,
     ) -> None:
-        """Process a batch of blocks using pure SQL functions.
+        """Process a batch of blocks using pure SQL functions, its Stage B after its Stage A.
 
         Replaces the Python dispatch loop with SQL functions that read from
         a staging table. Only PostDataCache body merging remains in Python.
@@ -174,19 +226,248 @@ class Blocks:
         this batch when that covers it, and once it is filled `ops_prefetch`
         starts loading `next_range` (when given) while the other phases run.
 
-        Phases:
+        Phases (Stage A: 1-3a, _run_stage_a; Stage B: 3.5-7, _run_stage_b):
           1.    Load staging table (single scan of operations_view, or the prefetched rows)
           2.    Account registration + community state changes (single transaction)
           3.    Post/comment processing (must commit before votes/reblogs)
           3a.   Community post-targeting ops + mute propagation (skipped before community start)
           3.5.  Votes (rshares deferred to finalization)
           4+3b. Parallel: SQL entity processing + Python body merging (overlapped)
+          4b.   Account metadata, lastread and post counts
           5.    PostDataCache flush
           6.    Parallel notification flush (skipped for blocks before 90-day window)
+          7.    Boundary vacuum
         """
         time_start = OPSM.start()
-        phase_times = {}
+        phase_times: dict[str, float] = {}
         db = DbAdapterHolder.common_block_processing_db()
+
+        post_results, post_data_applied, prefetched = cls._run_stage_a(
+            db, first_block, last_block, ops_prefetch, next_range, phase_times
+        )
+        if cls._handoff_tables:
+            t0 = perf_counter()
+            cls._hand_off_to_stage_b(db)
+            phase_times['handoff'] = perf_counter() - t0
+        cls._run_stage_b(
+            db, first_block, last_block, post_results, post_data_applied, phase_times, cls._last_safe_cashout_block
+        )
+        cls._log_phase_summary(first_block, last_block, phase_times, prefetched)
+
+        OPSM.stop(time_start)
+
+    @classmethod
+    def process_multi_sql_pipelined(
+        cls,
+        first_block: int,
+        last_block: int,
+        ops_prefetch: OpsPrefetch | None = None,
+        next_range: tuple[int, int] | None = None,
+    ) -> None:
+        """Process a batch's Stage A, then hand the batch to Stage B, which runs it on its own thread.
+
+        Returns once Stage B of the previous batch has ended (raising its exception when it
+        failed) and this batch's has started: the caller may then start the next batch's
+        Stage A, which runs beside it. Stage B deletes the batch's _batch_queue row once it
+        has committed everything. Needs the handoff tables (set_stage_b_handoff(db, True)).
+        """
+        time_start = OPSM.start()
+        phase_times: dict[str, float] = {}
+        db = DbAdapterHolder.common_block_processing_db()
+        if DbAdapterHolder._stage_b_processing_db is None:
+            DbAdapterHolder.open_stage_b_processing_db()
+        # set for this batch (set_end_of_sync_lib); the next batch's start sets it again while this Stage B runs
+        last_safe_cashout_block = cls._last_safe_cashout_block
+
+        started = time()
+        deadlocks = cls._deadlocks['A']
+        post_results, post_data_applied, prefetched = cls._run_stage_a(
+            db, first_block, last_block, ops_prefetch, next_range, phase_times
+        )
+        ended = time()
+        cls._kill_if_at('stage_a_committed', cls._stage_b_first_block)
+
+        cls.wait_for_stage_b()
+        waited = time() - ended
+        t0 = perf_counter()
+        cls._hand_off_to_stage_b(db)
+        phase_times['handoff'] = perf_counter() - t0
+        log.info(
+            "[STAGE-TIMING] blocks=%d-%d stage=A start=%.3f end=%.3f elapsed=%.3f deadlocks=%d "
+            "wait_for_b=%.3f handoff=%.3f",
+            first_block,
+            last_block,
+            started,
+            ended,
+            ended - started,
+            cls._deadlocks['A'] - deadlocks,
+            waited,
+            phase_times['handoff'],
+        )
+
+        if cls._stage_b_pool is None:
+            cls._stage_b_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='stage_b')
+        cls._stage_b_first_block = first_block
+        cls._stage_b_future = cls._stage_b_pool.submit(
+            cls._stage_b_task,
+            first_block,
+            last_block,
+            post_results,
+            post_data_applied,
+            phase_times,
+            prefetched,
+            last_safe_cashout_block,
+        )
+        OPSM.stop(time_start)
+
+    @classmethod
+    def _stage_b_task(
+        cls,
+        first_block: int,
+        last_block: int,
+        post_results: list[Row],
+        post_data_applied: bool,
+        phase_times: dict[str, float],
+        prefetched: float | None,
+        last_safe_cashout_block: int,
+    ) -> None:
+        """Stage B of a pipelined batch, on the Stage B thread and connection; deletes the batch's _batch_queue row."""
+        try:
+            if cls._kill_point == ('stage_a_committed', first_block):
+                log.warning(
+                    "[PIPELINE-KILL] holding Stage B of blocks %d-%d until the next batch's Stage A commits",
+                    first_block,
+                    last_block,
+                )
+                cls._kill_hold.wait()
+
+            started = time()
+            deadlocks = cls._deadlocks['B']
+            db = DbAdapterHolder.stage_b_processing_db()
+            cls._run_stage_b(
+                db, first_block, last_block, post_results, post_data_applied, phase_times, last_safe_cashout_block
+            )
+            cls._in_transaction(db, f"DELETE FROM {SCHEMA_NAME}._batch_queue WHERE first_block = {first_block:d}")
+            ended = time()
+            log.info(
+                "[STAGE-TIMING] blocks=%d-%d stage=B start=%.3f end=%.3f elapsed=%.3f deadlocks=%d",
+                first_block,
+                last_block,
+                started,
+                ended,
+                ended - started,
+                cls._deadlocks['B'] - deadlocks,
+            )
+            cls._log_phase_summary(first_block, last_block, phase_times, prefetched)
+        except Exception:
+            log.exception("Exception caught in Stage B of blocks %d-%d", first_block, last_block)
+            set_exception_thrown()
+            raise
+
+    @classmethod
+    def wait_for_stage_b(cls) -> None:
+        """Wait for the running Stage B, if any, to end; raises its exception (once) when it failed."""
+        future, cls._stage_b_future = cls._stage_b_future, None
+        if future is not None:
+            future.result()
+
+    @classmethod
+    def raise_stage_b_error(cls) -> None:
+        """Raise the exception of a Stage B that has ended with one, without waiting for a running one."""
+        if cls._stage_b_future is not None and cls._stage_b_future.done():
+            cls.wait_for_stage_b()
+
+    @classmethod
+    def _shut_down_stage_b(cls) -> None:
+        try:
+            cls.wait_for_stage_b()
+        except Exception:
+            log.warning("Stage B failed before shutdown; its batch stays in _batch_queue for the replay", exc_info=True)
+        if cls._stage_b_pool is not None:
+            cls._stage_b_pool.shutdown(wait=True)
+            cls._stage_b_pool = None
+
+    @classmethod
+    def set_stage_b_handoff(cls, db: Db, tables: bool) -> None:
+        """Make Stage B read tables of its own, filled by each batch's handoff (pipelined massive sync), or views of
+        Stage A's tables (set_stage_b_handoff in massive_sync.sql)."""
+        if cls._handoff_tables is tables:
+            return
+        cls._in_transaction(db, f"SELECT {SCHEMA_NAME}.set_stage_b_handoff({'TRUE' if tables else 'FALSE'})")
+        cls._handoff_tables = tables
+
+    @classmethod
+    def _hand_off_to_stage_b(cls, db: Db) -> None:
+        cls._in_transaction(db, f"SELECT {SCHEMA_NAME}.hand_off_to_stage_b()")
+
+    @classmethod
+    def process_stage_b_of_batch(cls, first_block: int, last_block: int) -> None:
+        """Replay Stage B of a batch whose Stage A committed, from its operations and posts phase results, reloaded.
+
+        The operations are read from HAF's tables (prefetch_ops_staging), as the context's
+        views may already show the next batch's range. Its Stage A, which the next batch's
+        may have run on top of, is not run again.
+        """
+        time_start = OPSM.start()
+        phase_times: dict[str, float] = {}
+        db = DbAdapterHolder.common_block_processing_db()
+
+        t0 = perf_counter()
+        db.query_no_return("START TRANSACTION")
+        try:
+            loaded = db.query_one(f"SELECT {SCHEMA_NAME}.prefetch_ops_staging({first_block:d}, {last_block:d})")
+            if loaded != last_block:
+                raise RuntimeError(
+                    f"Cannot replay Stage B of blocks {first_block}-{last_block}: "
+                    f"HAF's tables hold them up to block {loaded} only"
+                )
+            db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging_from_prefetch({first_block:d}, {last_block:d})")
+            post_data_applied = bool(
+                db.query_one(
+                    f"SELECT post_data_applied FROM {SCHEMA_NAME}._batch_queue WHERE first_block = {first_block:d}"
+                )
+            )
+            post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.restore_batch_post_results({first_block:d})")
+            db.query_no_return("COMMIT")
+        except Exception:
+            with contextlib.suppress(Exception):
+                db.query_no_return("ROLLBACK")
+            raise
+        phase_times['load'] = perf_counter() - t0
+
+        if cls._handoff_tables:
+            t0 = perf_counter()
+            cls._hand_off_to_stage_b(db)
+            phase_times['handoff'] = perf_counter() - t0
+        cls._run_stage_b(
+            db, first_block, last_block, post_results, post_data_applied, phase_times, cls._last_safe_cashout_block
+        )
+        cls._log_phase_summary(first_block, last_block, phase_times, None)
+
+        OPSM.stop(time_start)
+
+    @classmethod
+    def _run_stage_a(
+        cls,
+        db: Db,
+        first_block: int,
+        last_block: int,
+        ops_prefetch: OpsPrefetch | None,
+        next_range: tuple[int, int] | None,
+        phase_times: dict[str, float],
+    ) -> tuple[list[Row], bool, float | None]:
+        """Run a batch's Stage A (phases 1-3a) on `db`.
+
+        Returns the posts phase's rows, whether the batch's post data flush has committed,
+        and how long the prefetch of the batch's operations ran (None when they were loaded
+        here). Its last transaction marks the batch's Stage A applied (_batch_queue.stage_a_applied).
+        """
+        if cls._handoff_tables:
+            # Before the load: what Stage A staged last is in Stage B's tables by now, and
+            # this batch's rows must stay until its own handoff.
+            t0 = perf_counter()
+            cls._reset_stage_staging_tables_if_due(db, 'A', last_block - first_block + 1)
+            phase_times['staging_reset_a'] = perf_counter() - t0
 
         # Phase 1: Load staging table (single scan of operations_view, or the
         # prefetched rows). The prefetch of the next range starts only after this
@@ -205,15 +486,23 @@ class Blocks:
 
         # Phase 2: Account registration + community state changes (single transaction)
         t0 = perf_counter()
-        db.query_no_return("START TRANSACTION")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1)")
-        db.query_no_return("COMMIT")
+        cls._retry_deadlocks(
+            'A',
+            "Accounts and communities",
+            lambda: cls._in_transaction(
+                db,
+                f"SELECT {SCHEMA_NAME}.process_accounts_from_staging({Community.start_block})",
+                f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 1)",
+            ),
+        )
         phase_times['accounts_community'] = perf_counter() - t0
 
-        # Phase 3: Post/comment processing (must commit before votes/reblogs)
+        # Phase 3: Post/comment processing (must commit before votes/reblogs). The phase is
+        # one transaction, its post id reservation included, so a deadlock retry is safe.
         t0 = perf_counter()
-        post_results, post_data_applied = cls._process_batch_posts(db)
+        post_results, post_data_applied = cls._retry_deadlocks(
+            'A', "Posts phase", lambda: cls._process_batch_posts(db, first_block)
+        )
         phase_times['posts'] = perf_counter() - t0
 
         # Phase 3a: Community post-targeting ops (mutePost, unmutePost, pinPost, etc.)
@@ -224,12 +513,39 @@ class Blocks:
         # CTE do a full sequential scan (~15s per call at 40M+ rows). A single pass at
         # finalization (with indexes) handles all accumulated mutes instantly.
         t0 = perf_counter()
-        if last_block >= Community.start_block:
-            db.query_no_return("START TRANSACTION")
-            db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
-            db.query_no_return("COMMIT")
+        community_post = (
+            [f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)"]
+            if last_block >= Community.start_block
+            else []
+        )
+        cls._retry_deadlocks(
+            'A',
+            "Community post ops",
+            lambda: cls._in_transaction(
+                db,
+                *community_post,
+                f"UPDATE {SCHEMA_NAME}._batch_queue SET stage_a_applied = TRUE WHERE first_block = {first_block:d}",
+            ),
+        )
         phase_times['community_post'] = perf_counter() - t0
 
+        return post_results, post_data_applied, prefetched
+
+    @classmethod
+    def _run_stage_b(
+        cls,
+        db: Db,
+        first_block: int,
+        last_block: int,
+        post_results: list[Row],
+        post_data_applied: bool,
+        phase_times: dict[str, float],
+        last_safe_cashout_block: int,
+    ) -> None:
+        """Run a batch's Stage B (phases 3.5-7) on `db` and its phases' own connections, from what Stage A handed off.
+
+        Payouts take `last_safe_cashout_block` as set_end_of_sync_lib set it for the batch.
+        """
         # Phase 3.5: Votes (rshares deferred to finalization during initial massive sync;
         # must run BEFORE payouts).
         t0 = perf_counter()
@@ -250,15 +566,19 @@ class Blocks:
                 f"WHERE block_num BETWEEN {first_block} AND {last_block}"
             )
             if affected_posts:
-                db.query_no_return(
-                    f"SELECT * FROM {SCHEMA_NAME}.update_posts_rshares(:post_ids)",
-                    post_ids=affected_posts,
+                # Its hive_posts updates can deadlock with the next batch's posts phase.
+                cls._retry_deadlocks(
+                    'B',
+                    "Rshares update",
+                    lambda: cls._in_transaction(
+                        db, (f"SELECT * FROM {SCHEMA_NAME}.update_posts_rshares(:post_ids)", affected_posts)
+                    ),
                 )
             phase_times['rshares_incr'] = perf_counter() - t0
 
         # Phase 4+3b: Overlap Python body merging with parallel SQL entity processing.
-        # PostDataCache._data is only accessed by the main thread; Phase 4 tasks use
-        # separate DB connections and don't touch hive_post_data, so no conflict.
+        # PostDataCache._data is only accessed by the thread running Stage B; Phase 4
+        # tasks use separate DB connections and don't touch hive_post_data, so no conflict.
         #
         # IMPORTANT: process_follows_for_blocks, process_account_updates_from_staging,
         # and process_lastread_from_staging all UPDATE hive_accounts. Running them on
@@ -268,38 +588,39 @@ class Blocks:
         # Both are trivially fast (<1ms).
         t0 = perf_counter()
         phase4_tasks = [
-            (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()"),
+            (Reblog.db, f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging({last_block:d})"),
             (Follow.db, f"SELECT * FROM {SCHEMA_NAME}.process_follows_for_blocks({first_block}, {last_block})"),
-            (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})"),
+            (Posts.db, f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({last_safe_cashout_block:d})"),
         ]
 
         # Launch Phase 4 SQL tasks in background threads with deadlock retry.
         # PostgreSQL detects deadlocks and aborts one transaction with error 40P01
-        # (psycopg2.extensions.TransactionRollbackError). We retry the entire
-        # parallel set because the rolled-back transaction's temp tables / state
-        # are gone and other transactions may have committed partial results that
-        # the retried batch will skip via idempotency guards.
+        # (psycopg2.extensions.TransactionRollbackError). Each task runs in a
+        # transaction of its own, so only the tasks rolled back run again: a task
+        # that committed must not (its reblog inserts would draw hive_reblogs ids
+        # again). Pipelined, the payouts' hive_posts updates can deadlock with the
+        # next batch's posts phase.
         MAX_DEADLOCK_RETRIES = 3
 
         # Phase 3b: Process post results on main thread (overlapped with first attempt)
         cache_merged = post_data_applied
 
+        def run_one_task(db_conn: Db | None, sql: str) -> None:
+            if db_conn is None:
+                raise RuntimeError(f"no connection to run {sql} on (setup_own_db_access was not called)")
+            db_conn.query_no_return("START TRANSACTION")
+            try:
+                db_conn.query_all_raw(sql)
+                db_conn.query_no_return("COMMIT")
+            except Exception:
+                with contextlib.suppress(Exception):
+                    db_conn.query_no_return("ROLLBACK")
+                raise
+
+        pending = phase4_tasks
         for attempt in range(1, MAX_DEADLOCK_RETRIES + 1):
-            pool = ThreadPoolExecutor(max_workers=len(phase4_tasks))
-            futures = []
-
-            def run_one_task(db_conn, sql):
-                db_conn.query_no_return("START TRANSACTION")
-                try:
-                    db_conn.query_all_raw(sql)
-                    db_conn.query_no_return("COMMIT")
-                except Exception:
-                    with contextlib.suppress(Exception):
-                        db_conn.query_no_return("ROLLBACK")
-                    raise
-
-            for db_conn, sql in phase4_tasks:
-                futures.append(pool.submit(run_one_task, db_conn, sql))
+            pool = ThreadPoolExecutor(max_workers=len(pending))
+            futures = [(task, pool.submit(run_one_task, *task)) for task in pending]
 
             if not cache_merged:
                 t0_cache = perf_counter()
@@ -307,29 +628,42 @@ class Blocks:
                 phase_times['cache_merge'] = perf_counter() - t0_cache
                 cache_merged = True
 
-            try:
-                for f in futures:
+            rolled_back = []
+            for task, f in futures:
+                try:
                     f.result()
-                pool.shutdown(wait=False)
+                except psycopg2.extensions.TransactionRollbackError as exc:
+                    rolled_back.append((task, exc))
+            pool.shutdown(wait=False)
+            if not rolled_back:
                 break
-            except psycopg2.extensions.TransactionRollbackError:
-                pool.shutdown(wait=False)
-                if attempt == MAX_DEADLOCK_RETRIES:
-                    log.error("Phase 4 deadlock persisted after %d attempts", MAX_DEADLOCK_RETRIES)
-                    raise
-                log.warning(
-                    "Phase 4 deadlock detected (attempt %d/%d), retrying after brief pause",
-                    attempt,
-                    MAX_DEADLOCK_RETRIES,
-                )
-                sleep(0.1 * attempt)
+            cls._deadlocks['B'] += 1
+            if attempt == MAX_DEADLOCK_RETRIES:
+                log.error("Phase 4 deadlock persisted after %d attempts", MAX_DEADLOCK_RETRIES)
+                raise rolled_back[-1][1]
+            log.warning(
+                "Phase 4 deadlock detected (attempt %d/%d), retrying %d of its tasks after brief pause",
+                attempt,
+                MAX_DEADLOCK_RETRIES,
+                len(rolled_back),
+            )
+            sleep(0.1 * attempt)
+            pending = [task for task, _ in rolled_back]
 
-        # Phase 4b: Account metadata + lastread (must run AFTER follows to avoid
-        # deadlocks on hive_accounts — all three UPDATE the same table).
-        db.query_no_return("START TRANSACTION")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()")
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()")
-        db.query_no_return("COMMIT")
+        # Phase 4b: Account metadata, lastread and post counts (must run AFTER follows to
+        # avoid deadlocks on hive_accounts — all of them UPDATE the same table). The post
+        # counts are the posts phase's Step 7g, run here so that Stage A writes no existing
+        # hive_accounts row.
+        cls._retry_deadlocks(
+            'B',
+            "Account updates",
+            lambda: cls._in_transaction(
+                db,
+                f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()",
+                f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()",
+                f"SELECT {SCHEMA_NAME}.process_post_counts_from_staging({first_block:d})",
+            ),
+        )
         phase_times['parallel'] = perf_counter() - t0
 
         # Phase 5: PostDataCache flush (on its own connection; flush() manages its own tx)
@@ -341,8 +675,9 @@ class Blocks:
         # Taken per batch: while hived replays, the window moves with HAF's irreversible block.
         t0 = perf_counter()
         notification_min_block = db.query_one(f"SELECT {SCHEMA_NAME}.block_before_irreversible('90 days')")
-        PostDataCache.flush(mentions_after_block=notification_min_block)
+        PostDataCache.flush(mentions_after_block=notification_min_block, batch_first_block=first_block)
         phase_times['flush'] = perf_counter() - t0
+        cls._kill_if_at('flush_committed', first_block)
 
         # Phase 6: Parallel notification flush
         # Vote notifications are deferred to finalization (_finish_vote_notifications)
@@ -370,17 +705,29 @@ class Blocks:
 
         # Phase 7: Boundary vacuum. Autovacuum is disabled on hive_post_data for
         # the duration of massive sync (its toast vacuums race the flush
-        # statement's body reads); vacuums run here instead, when no statement
-        # is in flight, triggered by a dead-tuple threshold. Rarely fires -- the
-        # table accrues dead toast slowly -- so the phase is ~free.
+        # statement's body reads); vacuums run here instead, between two of
+        # Stage B's flushes (Stage A does not read hive_post_data), triggered by a
+        # dead-tuple threshold. Rarely fires -- the table accrues dead toast
+        # slowly -- so the phase is ~free. Pipelined, the shared connection is the
+        # main loop's, busy with the next batch's iteration.
         t0 = perf_counter()
-        DbState.run_boundary_vacuums()
+        if cls._pipelined:
+            DbState.run_boundary_vacuums(db)
+        else:
+            DbState.run_boundary_vacuums()
         phase_times['vacuum'] = perf_counter() - t0
 
         t0 = perf_counter()
-        cls._reset_staging_tables_if_due(db, last_block - first_block + 1)
+        if cls._handoff_tables:
+            cls._reset_stage_staging_tables_if_due(db, 'B', last_block - first_block + 1)
+        else:
+            cls._reset_staging_tables_if_due(db, last_block - first_block + 1)
         phase_times['staging_reset'] = perf_counter() - t0
 
+    @staticmethod
+    def _log_phase_summary(
+        first_block: int, last_block: int, phase_times: dict[str, float], prefetched: float | None
+    ) -> None:
         total = sum(phase_times.values())
         # prefetched: how long the background load of this batch's operations ran,
         # overlapped with the previous batch; not part of total.
@@ -393,31 +740,80 @@ class Blocks:
             '' if prefetched is None else f' prefetched={prefetched:.3f}',
         )
 
-        OPSM.stop(time_start)
+    @staticmethod
+    def _in_transaction(db: Db, *statements: str | tuple[str, list[int]]) -> None:
+        """Run the statements in one transaction on `db`, rolled back when one fails.
+
+        A tuple is a statement and the list it takes as :post_ids.
+        """
+        db.query_no_return("START TRANSACTION")
+        try:
+            for statement in statements:
+                if isinstance(statement, tuple):
+                    db.query_no_return(statement[0], post_ids=statement[1])
+                else:
+                    db.query_no_return(statement)
+            db.query_no_return("COMMIT")
+        except Exception:
+            with contextlib.suppress(Exception):
+                db.query_no_return("ROLLBACK")
+            raise
 
     @classmethod
-    def _process_batch_posts(cls, db: Db) -> tuple[list[Row], bool]:
-        """Run a massive batch's posts phase in its own transaction.
+    def _retry_deadlocks(cls, stage: str, what: str, run: Callable[[], _T]) -> _T:
+        """Return run(), which runs its own transactions, run again when PostgreSQL aborts one as a deadlock (40P01)."""
+        attempt = 1
+        while True:
+            try:
+                return run()
+            except psycopg2.extensions.TransactionRollbackError:
+                cls._deadlocks[stage] += 1
+                if attempt == cls._MAX_DEADLOCK_RETRIES:
+                    log.error("%s deadlock persisted after %d attempts", what, attempt)
+                    raise
+                log.warning("%s deadlock detected (attempt %d/%d), retrying", what, attempt, cls._MAX_DEADLOCK_RETRIES)
+                sleep(0.1 * attempt)
+                attempt += 1
+
+    @classmethod
+    def _kill_if_at(cls, point: str, first_block: int | None) -> None:
+        """Exit the process at once, as a crash would, at --test-pipeline-kill's point of the batch starting at first_block."""
+        if first_block is not None and cls._kill_point == (point, first_block):
+            log.warning("[PIPELINE-KILL] point=%s batch=%d: exiting", point, first_block)
+            logging.shutdown()
+            os._exit(1)
+
+    @classmethod
+    def _process_batch_posts(cls, db: Db, first_block: int) -> tuple[list[Row], bool]:
+        """Run the posts phase of the massive batch starting at first_block in its own transaction.
 
         Returns the phase's result rows and whether the batch's post data flush has
         already committed. A replay of a batch whose posts phase committed reuses that
         phase's results instead of applying its comment ops a second time; the markers
         commit with the phase (save_batch_post_results) and with the flush
-        (PostDataCache.flush).
+        (PostDataCache.flush), on the batch's _batch_queue row.
         """
         db.query_no_return("START TRANSACTION")
-        applied = db.query_all(f"SELECT posts_applied, post_data_applied FROM {SCHEMA_NAME}._batch_queue")
-        posts_applied = bool(applied) and bool(applied[0]._mapping['posts_applied'])
-        post_data_applied = bool(applied) and bool(applied[0]._mapping['post_data_applied'])
-        if posts_applied:
-            log.info("Replay: reusing the results of the batch's committed posts phase")
-            post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.restore_batch_post_results()")
-        else:
-            post_results = db.query_all(
-                f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})"
+        try:
+            applied = db.query_all(
+                f"SELECT posts_applied, post_data_applied FROM {SCHEMA_NAME}._batch_queue "
+                f"WHERE first_block = {first_block:d}"
             )
-            db.query_no_return(f"SELECT {SCHEMA_NAME}.save_batch_post_results()")
-        db.query_no_return("COMMIT")
+            posts_applied = bool(applied) and bool(applied[0]._mapping['posts_applied'])
+            post_data_applied = bool(applied) and bool(applied[0]._mapping['post_data_applied'])
+            if posts_applied:
+                log.info("Replay: reusing the results of the batch's committed posts phase")
+                post_results = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.restore_batch_post_results({first_block:d})")
+            else:
+                post_results = db.query_all(
+                    f"SELECT * FROM {SCHEMA_NAME}.process_posts_from_staging({Community.start_block})"
+                )
+                db.query_no_return(f"SELECT {SCHEMA_NAME}.save_batch_post_results({first_block:d})")
+            db.query_no_return("COMMIT")
+        except Exception:
+            with contextlib.suppress(Exception):
+                db.query_no_return("ROLLBACK")
+            raise
         return post_results, post_data_applied
 
     @classmethod
@@ -471,10 +867,11 @@ class Blocks:
                 post_ids=affected_posts,
             )
 
-        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging()")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging({last_block:d})")
         db.query_no_return(f"SELECT * FROM {SCHEMA_NAME}.process_follows_for_blocks({first_block}, {last_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_account_updates_from_staging()")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_lastread_from_staging()")
+        db.query_no_return(f"SELECT {SCHEMA_NAME}.process_post_counts_from_staging({first_block:d})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({cls._last_safe_cashout_block})")
         db.query_no_return(f"SELECT {SCHEMA_NAME}.process_community_from_staging({Community.start_block}, 2)")
 
@@ -520,6 +917,17 @@ class Blocks:
         db.query_no_return(f"SELECT {SCHEMA_NAME}.reset_staging_tables()")
         cls._calls_since_staging_reset = 0
         cls._blocks_since_staging_reset = 0
+
+    @classmethod
+    def _reset_stage_staging_tables_if_due(cls, db: Db, stage: str, blocks: int) -> None:
+        """_reset_staging_tables_if_due for the tables of one stage (reset_stage_a/b_staging_tables), in its own transaction."""
+        due = cls._since_stage_reset[stage]
+        due[0] += 1
+        due[1] += blocks
+        if due[0] < cls._STAGING_RESET_INTERVAL and due[1] < cls._STAGING_RESET_BLOCKS:
+            return
+        cls._in_transaction(db, f"SELECT {SCHEMA_NAME}.reset_stage_{stage.lower()}_staging_tables()")
+        due[0] = due[1] = 0
 
     @classmethod
     def _process_post_results_for_cache(cls, post_results):
@@ -616,6 +1024,7 @@ class Blocks:
                     futures = [pool.submit(run_one, db_conn, sql) for db_conn, sql in tasks]
                     return [f.result() for f in futures]
             except psycopg2.extensions.TransactionRollbackError:
+                Blocks._deadlocks['B'] += 1
                 if attempt == max_retries:
                     log.error("Parallel SQL deadlock persisted after %d attempts", max_retries)
                     raise

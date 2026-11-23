@@ -76,11 +76,14 @@ class PostDataCache(DbAdapterHolder):
         return post_data['body']
 
     @classmethod
-    def flush(cls, print_query: bool = False, mentions_after_block: int = 0) -> int:
+    def flush(
+        cls, print_query: bool = False, mentions_after_block: int = 0, batch_first_block: int | None = None
+    ) -> int:
         """Flush data from cache to db, and process the mentions of the blocks after mentions_after_block.
 
-        Commits the post data of an in-flight massive batch with its marker
-        (_batch_queue.post_data_applied), so that a replay of the batch does not apply it again.
+        Commits the post data of the in-flight massive batch starting at batch_first_block with
+        its marker (_batch_queue.post_data_applied), so that a replay of the batch does not apply
+        it again.
         """
         if not cls._data:
             return 0
@@ -179,7 +182,10 @@ class PostDataCache(DbAdapterHolder):
                 f"SELECT {SCHEMA_NAME}.process_hive_post_mentions(%s::INT[], %s::INT[], %s::TEXT[])",
                 (mention_post_ids, mention_blocks, mention_bodies),
             )
-        cls._own_db().query_no_return(f"UPDATE {SCHEMA_NAME}._batch_queue SET post_data_applied = TRUE")
+        if batch_first_block is not None:
+            cls._own_db().query_no_return(
+                f"UPDATE {SCHEMA_NAME}._batch_queue SET post_data_applied = TRUE WHERE first_block = {batch_first_block:d}"
+            )
 
         cls.commitTx()
 

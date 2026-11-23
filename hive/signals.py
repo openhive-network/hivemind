@@ -45,7 +45,7 @@ def set_custom_signal_handlers():
     default_sigterm_handler = signal(SIGTERM, custom_signals_handler)
 
 
-def restore_default_signal_handlers():
+def restore_default_signal_handlers() -> None:
     signal(SIGINT, default_sigint_handler)
     signal(SIGTERM, default_sigterm_handler)
 
@@ -62,7 +62,7 @@ def custom_signals_handler(signal, frame):
     )
 
 
-def set_exception_thrown():
+def set_exception_thrown() -> None:
     global EXCEPTION_THROWN
     EXCEPTION_THROWN += 1
 

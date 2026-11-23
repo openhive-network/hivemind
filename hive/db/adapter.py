@@ -94,14 +94,14 @@ class Row:
 class Db:
     """RDBMS adapter for hive. Handles connecting and querying."""
 
-    _instance = None
+    _instance: Db | None = None
 
     # maximum number of connections that is required so as to execute some tasks concurrently
-    necessary_connections = 16
+    necessary_connections = 17
     max_connections = 1
 
     @classmethod
-    def instance(cls):
+    def instance(cls) -> Db:
         """Get the shared instance."""
         assert cls._instance, 'set_shared_instance was never called'
         return cls._instance

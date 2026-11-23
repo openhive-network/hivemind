@@ -108,6 +108,15 @@ class Conf:
             default=MASSIVE_SYNC_BATCH_BLOCKS,
         )
         add(
+            '--massive-sync-pipelined',
+            type=strtobool,
+            env_var='MASSIVE_SYNC_PIPELINED',
+            help='(experimental) during massive sync, run the votes, payouts, follows, post data flush and '
+            'notifications of a batch (Stage B) beside the load, accounts, posts and community phases of the '
+            'next one (Stage A)',
+            default=False,
+        )
+        add(
             '--vacuum-workers',
             type=_positive_int,
             env_var='VACUUM_WORKERS',
@@ -131,6 +140,16 @@ class Conf:
             type=int,
             env_var='TEST_MAX_BLOCK',
             help='(debug) only sync to given block, for running sync test',
+            default=None,
+        )
+        add(
+            '--test-pipeline-kill',
+            type=str,
+            env_var='TEST_PIPELINE_KILL',
+            help='(debug) POINT:BLOCK exits the sync at once at POINT of the massive batch starting at BLOCK, '
+            'for crash replay tests: stage_a_committed (the next batch\'s Stage A has committed and this '
+            'batch\'s Stage B has not started; needs --massive-sync-pipelined) or flush_committed (this '
+            'batch\'s post data flush has committed)',
             default=None,
         )
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)

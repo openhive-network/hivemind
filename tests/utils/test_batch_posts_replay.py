@@ -7,9 +7,10 @@ import pytest
 
 from hive.indexer.blocks import Blocks
 
+_FIRST_BLOCK = 4500001
 _PROCESS = 'process_posts_from_staging('
-_SAVE = 'SELECT hivemind_app.save_batch_post_results()'
-_RESTORE = 'SELECT * FROM hivemind_app.restore_batch_post_results()'
+_SAVE = f'SELECT hivemind_app.save_batch_post_results({_FIRST_BLOCK})'
+_RESTORE = f'SELECT * FROM hivemind_app.restore_batch_post_results({_FIRST_BLOCK})'
 
 
 def _run(markers: dict[str, bool] | None) -> tuple[list[str], tuple[list[Any], bool]]:
@@ -22,11 +23,12 @@ def _run(markers: dict[str, bool] | None) -> tuple[list[str], tuple[list[Any], b
     def query_all(sql: str) -> list[Any]:
         statements.append(sql)
         if '_batch_queue' in sql:
+            assert sql.endswith(f'WHERE first_block = {_FIRST_BLOCK}'), 'the markers are read from the batch\'s own row'
             return [] if markers is None else [MagicMock(_mapping=markers)]
         return rows
 
     db.query_all.side_effect = query_all
-    result = Blocks._process_batch_posts(db)
+    result = Blocks._process_batch_posts(db, _FIRST_BLOCK)
     assert result[0] is rows
     return statements, result
 

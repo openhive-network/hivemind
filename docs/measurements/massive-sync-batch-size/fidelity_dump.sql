@@ -56,6 +56,63 @@ SELECT n.id, n.type_id, n.block_num, n.src, n.dst, n.post_id, n.dst_post_id, n.s
 FROM hivemind_app.hive_notification_cache n
 ORDER BY 1;
 
+-- Accounts by name, every column (ids are HAF's account ids, the same in every run)
+\o accounts.txt
+SELECT ha.name, to_jsonb(ha)::text
+FROM hivemind_app.hive_accounts ha
+ORDER BY 1;
+
+-- The follow and mute lists on natural keys
+\o follows.txt
+SELECT fr.name, fo.name, l.block_num, l.follower_name
+FROM hivemind_app.follows l
+JOIN hivemind_app.hive_accounts fr ON fr.id = l.follower
+JOIN hivemind_app.hive_accounts fo ON fo.id = l.following
+ORDER BY 1, 2;
+
+\o muted.txt
+SELECT fr.name, fo.name, l.block_num
+FROM hivemind_app.muted l
+JOIN hivemind_app.hive_accounts fr ON fr.id = l.follower
+JOIN hivemind_app.hive_accounts fo ON fo.id = l.following
+ORDER BY 1, 2;
+
+\o blacklisted.txt
+SELECT fr.name, fo.name, l.block_num
+FROM hivemind_app.blacklisted l
+JOIN hivemind_app.hive_accounts fr ON fr.id = l.follower
+JOIN hivemind_app.hive_accounts fo ON fo.id = l.following
+ORDER BY 1, 2;
+
+\o follow_muted.txt
+SELECT fr.name, fo.name, l.block_num
+FROM hivemind_app.follow_muted l
+JOIN hivemind_app.hive_accounts fr ON fr.id = l.follower
+JOIN hivemind_app.hive_accounts fo ON fo.id = l.following
+ORDER BY 1, 2;
+
+\o follow_blacklisted.txt
+SELECT fr.name, fo.name, l.block_num
+FROM hivemind_app.follow_blacklisted l
+JOIN hivemind_app.hive_accounts fr ON fr.id = l.follower
+JOIN hivemind_app.hive_accounts fo ON fo.id = l.following
+ORDER BY 1, 2;
+
+-- Reblogs with their ids as drawn, and the feed cache
+\o reblogs.txt
+SELECT hr.id, ha.name, pk.k, hr.block_num, hr.created_at
+FROM hivemind_app.hive_reblogs hr
+JOIN hivemind_app.hive_accounts ha ON ha.id = hr.blogger_id
+LEFT JOIN pk ON pk.id = hr.post_id
+ORDER BY 1;
+
+\o feed_cache.txt
+SELECT ha.name, pk.k, f.block_num, f.created_at
+FROM hivemind_app.hive_feed_cache f
+JOIN hivemind_app.hive_accounts ha ON ha.id = f.account_id
+LEFT JOIN pk ON pk.id = f.post_id
+ORDER BY 1, 2;
+
 \o counts.txt
 SELECT 'posts', count(*) FROM hivemind_app.hive_posts
 UNION ALL SELECT 'deleted_posts', count(*) FROM hivemind_app.hive_posts WHERE counter_deleted > 0
@@ -66,5 +123,12 @@ UNION ALL SELECT 'notifs', count(*) FROM hivemind_app.hive_notification_cache
 UNION ALL SELECT 'mention_notifs', count(*) FROM hivemind_app.hive_notification_cache WHERE type_id = 16
 UNION ALL SELECT 'mentions', count(*) FROM hivemind_app.hive_mentions
 UNION ALL SELECT 'post_data', count(*) FROM hivemind_app.hive_post_data
+UNION ALL SELECT 'accounts', count(*) FROM hivemind_app.hive_accounts
+UNION ALL SELECT 'sum_post_count', sum(post_count) FROM hivemind_app.hive_accounts
+UNION ALL SELECT 'follows', count(*) FROM hivemind_app.follows
+UNION ALL SELECT 'muted', count(*) FROM hivemind_app.muted
+UNION ALL SELECT 'reblogs', count(*) FROM hivemind_app.hive_reblogs
+UNION ALL SELECT 'max_reblog_id', max(id) FROM hivemind_app.hive_reblogs
+UNION ALL SELECT 'feed_cache', count(*) FROM hivemind_app.hive_feed_cache
 UNION ALL SELECT 'last_completed', last_completed_block_num FROM hivemind_app.hive_state;
 \o
