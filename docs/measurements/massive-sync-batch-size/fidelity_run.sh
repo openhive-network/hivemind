@@ -27,6 +27,8 @@ sync_once() {  # [more hive sync options]
 for l in sys.stdin: sys.stdout.write(f"{time.time():.3f} {l}"); sys.stdout.flush()'
   return ${PIPESTATUS[0]}
 }
+python3 sampler.py $out/mem.json $pg $hv & sp=$!
+python3 activity_sampler.py $out/activity.jsonl $pg & ap=$!
 t0=$(date +%s)
 if [ -n "${PIPELINE_KILL:-}" ]; then
   sync_once --test-pipeline-kill="$PIPELINE_KILL" > $out/sync.log 2>&1
@@ -58,6 +60,8 @@ else
 fi
 rc=$?
 t1=$(date +%s)
+kill $sp $ap; wait $sp $ap
+python3 activity_sampler.py --summary $out/activity.jsonl > $out/activity.txt
 echo "label=$label src=$src limit=$limit max=$max kill_at=$kill_at rc=$rc wall_s=$((t1-t0))" > $out/result
 docker cp fidelity_dump.sql $pg:/tmp/dump.sql
 docker exec -w /tmp $pg bash -c "psql -h 127.0.0.1 -U haf_admin -d haf_block_log -XAtq -F '	' -f /tmp/dump.sql" >> $out/result 2>&1

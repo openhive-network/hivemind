@@ -217,8 +217,11 @@ To measure it, on a non-production HAF copy at or past 30 M, set up like `../mas
 clones of one installed snapshot, steem-20's `50-perf.conf`):
 1. **Base run.** Hivemind at the base commit, `hive sync --test-max-block=30000000` from a snapshot taken
    after syncing to 10,000,000. Keep every `[PHASE-SUMMARY]` line with a timestamp (`fidelity_run.sh` does
-   this). Sample CPU, IO wait and `pg_stat_activity` wait events once a second (`sampler.py`). Count
-   `deadlock detected` lines in PostgreSQL's log.
+   this). Once a second, `activity_sampler.py` records host CPU (busy, user, system) and IO wait from
+   `/proc/stat`, and `pg_stat_activity` rows counted by application, state and wait event, one JSON line per
+   sample (`activity_sampler.py --summary` prints each run's mean CPU and IO wait and its top wait events);
+   `sampler.py` records the peak `RssAnon`/`VmRSS` of the postgres and hive processes. `fidelity_run.sh` and
+   `run.sh` start both. Count `deadlock detected` lines in PostgreSQL's log.
 2. **Pipelined run.** The same with the prototype. Log each stage's start and end per batch, so the measured
    overlap and the slowdown of each stage against its sequential time can be read off and put into
    `simulate.py`.
