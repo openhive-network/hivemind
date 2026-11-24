@@ -12,15 +12,11 @@ BEGIN
 SET LOCAL work_mem='512MB';
 SET LOCAL enable_seqscan = off;
 
-  UPDATE hivemind_app.hive_posts hp
-  SET
-      abs_rshares = votes_rshares.abs_rshares
-     ,vote_rshares = votes_rshares.rshares
-     ,sc_hot = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
-     ,sc_trend = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
-     ,total_votes = votes_rshares.total_votes
-     ,net_votes = votes_rshares.net_votes
-  FROM
+  -- The changed rows are locked in id order before any is updated (changed is the
+  -- UPDATE's only source of rows, so each row is locked there first), as the posts phase
+  -- locks its rows (process_posts_from_staging, Step 0), which pipelined massive sync runs
+  -- beside this.
+  WITH votes_rshares AS MATERIALIZED
     (
       SELECT
           hv.post_id
@@ -35,15 +31,32 @@ SET LOCAL enable_seqscan = off;
       FROM hivemind_app.hive_votes hv
       WHERE hv.post_id = ANY(_post_ids)
       GROUP BY hv.post_id
-    ) as votes_rshares
-  WHERE hp.id = votes_rshares.post_id
-  AND hp.counter_deleted = 0
-  AND (
-    hp.abs_rshares != votes_rshares.abs_rshares
-    OR hp.vote_rshares != votes_rshares.rshares
-    OR hp.total_votes != votes_rshares.total_votes
-    OR hp.net_votes != votes_rshares.net_votes
-  );
+    ),
+  changed AS MATERIALIZED
+    (
+      SELECT vr.*
+      FROM votes_rshares vr
+      JOIN hivemind_app.hive_posts hp ON hp.id = vr.post_id
+      WHERE hp.counter_deleted = 0
+      AND (
+        hp.abs_rshares != vr.abs_rshares
+        OR hp.vote_rshares != vr.rshares
+        OR hp.total_votes != vr.total_votes
+        OR hp.net_votes != vr.net_votes
+      )
+      ORDER BY hp.id
+      FOR NO KEY UPDATE OF hp
+    )
+  UPDATE hivemind_app.hive_posts hp
+  SET
+      abs_rshares = votes_rshares.abs_rshares
+     ,vote_rshares = votes_rshares.rshares
+     ,sc_hot = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
+     ,sc_trend = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
+     ,total_votes = votes_rshares.total_votes
+     ,net_votes = votes_rshares.net_votes
+  FROM changed votes_rshares
+  WHERE hp.id = votes_rshares.post_id;
 
 RESET enable_seqscan;
 RESET work_mem;

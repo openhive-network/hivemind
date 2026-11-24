@@ -566,7 +566,8 @@ class Blocks:
                 f"WHERE block_num BETWEEN {first_block} AND {last_block}"
             )
             if affected_posts:
-                # Its hive_posts updates can deadlock with the next batch's posts phase.
+                # Its hive_posts rows are shared with the next batch's posts phase; both lock
+                # them in id order, so the retry is only a safety net.
                 cls._retry_deadlocks(
                     'B',
                     "Rshares update",
@@ -598,8 +599,8 @@ class Blocks:
         # (psycopg2.extensions.TransactionRollbackError). Each task runs in a
         # transaction of its own, so only the tasks rolled back run again: a task
         # that committed must not (its reblog inserts would draw hive_reblogs ids
-        # again). Pipelined, the payouts' hive_posts updates can deadlock with the
-        # next batch's posts phase.
+        # again). Pipelined, the payouts share hive_posts rows with the next batch's
+        # posts phase; both lock them in id order, so they should not deadlock.
         MAX_DEADLOCK_RETRIES = 3
 
         # Phase 3b: Process post results on main thread (overlapped with first attempt)

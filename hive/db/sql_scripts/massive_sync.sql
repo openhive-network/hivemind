@@ -1336,6 +1336,16 @@ BEGIN
             AND pv.block_num_created <= bp.block_num
             AND (pv.deleted_block IS NULL OR pv.deleted_block > bp.block_num)
         GROUP BY pv.post_id
+    ),
+    locked AS MATERIALIZED (
+        -- The rows in id order, as the posts phase locks them (process_posts_from_staging,
+        -- Step 0), which pipelined massive sync runs beside this. The UPDATE reads them from
+        -- here, so each row is locked here before it is updated.
+        SELECT m.*
+        FROM version_payouts m
+        JOIN hivemind_app.hive_posts hp ON hp.id = m.post_id
+        ORDER BY hp.id
+        FOR NO KEY UPDATE OF hp
     )
     UPDATE hivemind_app.hive_posts hp
     SET
@@ -1377,7 +1387,7 @@ BEGIN
             ELSE hp.is_paidout
         END,
         total_vote_weight = COALESCE(m.total_vote_weight, hp.total_vote_weight)
-    FROM version_payouts m
+    FROM locked m
     WHERE hp.id = m.post_id;
 
     GET DIAGNOSTICS _count = ROW_COUNT;
@@ -1528,6 +1538,27 @@ BEGIN
     DELETE FROM hivemind_app._replay_pairs;
     DELETE FROM hivemind_app._post_results;
     DELETE FROM hivemind_app._deleted_posts;
+
+    -- Step 0: Lock, in id order and before any statement below updates one, every existing
+    -- row this transaction updates: the live version of each post a comment (edit), delete
+    -- or comment_options op of the batch names. The steps below update them in several
+    -- statements, each in its own order; the rows they insert are new and nobody else can
+    -- lock them. Pipelined massive sync runs this phase beside the previous batch's Stage B,
+    -- whose hive_posts updates also lock in id order (process_payouts_from_staging,
+    -- update_posts_rshares), so the two cannot deadlock. FOR UPDATE, not NO KEY: a delete
+    -- changes counter_deleted, a key column.
+    PERFORM hp.id
+    FROM (
+        SELECT DISTINCT s.val->>'author' AS author, s.val->>'permlink' AS permlink
+        FROM hivemind_app._ops_staging s
+        WHERE s.op_type_id IN (1, 17, 19)
+    ) t
+    JOIN hivemind_app.hive_accounts ha ON ha.name = t.author
+    JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = t.permlink
+    JOIN hivemind_app.hive_posts hp
+        ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+    ORDER BY hp.id
+    FOR UPDATE OF hp;
 
     -- Step 1: Collect ineffective delete keys (type 73)
     SELECT array_agg((s.val->>'author') || '/' || (s.val->>'permlink'))
@@ -2962,6 +2993,32 @@ BEGIN
     --   1 = ALL state ops (subscribe, unsubscribe, setRole, updateProps, setUserTitle)
     --       Must be committed before posts so role/metadata lookups are correct
     --   2 = post-targeting ops only (mutePost, unmutePost, pinPost, unpinPost, flagPost)
+
+    -- The ops below update their posts one at a time, in op order. Lock every version of
+    -- each post they name first, in id order, as the hive_posts updates of the previous
+    -- batch's Stage B do, which pipelined massive sync runs beside this phase
+    -- (process_posts_from_staging, Step 0). Every version: a post deleted later in the
+    -- batch is updated on its deleted row (process_community_op).
+    IF _phase = 2 THEN
+        PERFORM hp.id
+        FROM (
+            SELECT DISTINCT p.op->1->>'account' AS author, p.op->1->>'permlink' AS permlink
+            FROM hivemind_app._ops_staging s
+            CROSS JOIN LATERAL (
+                -- OFFSET 0: parse once per op, not once per reference to op
+                SELECT hivemind_app.safe_parse_jsonb_tolerant(s.val->>'json') AS op OFFSET 0
+            ) p
+            WHERE s.op_type_id = 18
+              AND (s.val->>'id') = 'community'
+              AND s.block_num > _community_support_start_block
+              AND p.op->>0 IN ('mutePost', 'unmutePost', 'pinPost', 'unpinPost')
+        ) t
+        JOIN hivemind_app.hive_accounts ha ON ha.name = t.author
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.permlink = t.permlink
+        JOIN hivemind_app.hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+        ORDER BY hp.id
+        FOR NO KEY UPDATE OF hp;
+    END IF;
 
     FOR _rec IN
         SELECT
