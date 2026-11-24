@@ -293,6 +293,20 @@ fixes below. Stage B then reads views of Stage A's tables, so its statements pla
 - **Deadlocks.** The accounts and communities, posts and community post ops transactions retry on 40P01, as do
   Stage B's rshares update and 4b; Phase 4, the votes partitions and the notification flushes already did. Each
   retry is counted per stage.
+- **`hive_posts` lock order (#517).** The retries above were hit: 16 posts-phase/payouts deadlocks over 10–30 M. Each
+  stage's transaction that updates existing `hive_posts` rows now locks them in ascending `id` order before it
+  updates any:
+  - the posts phase, in one `SELECT … ORDER BY hp.id FOR UPDATE` at its start (Step 0), over the live version of
+    every post a comment, delete or comment_options op of the batch names. Its later statements, each in its own
+    order, then touch only rows it holds or inserts;
+  - the community post ops (`process_community_from_staging(…, 2)`), over every version of each post a mute or pin
+    op names, before the per-op updates;
+  - the payouts and `update_posts_rshares`, in a `FOR NO KEY UPDATE` CTE ordered by id that the UPDATE reads its
+    rows from (an unreferenced CTE locks nothing, #501).
+
+  `hive_accounts` needs no ordering across the stages: Stage A only inserts accounts. The 40P01 retries stay as a
+  safety net. `.aidev/stage_lock_order_check.py` checks the order and a posts phase beside payouts and rshares on
+  the same posts.
 - **The shared connection.** In pipelined mode Stage B's boundary vacuum reads its thresholds on Stage B's
   connection, because the shared connection is the main loop's, busy with the next iteration. Payouts take the
   cashout bound `set_end_of_sync_lib` set for their own batch, not the one the next batch's start set.
@@ -386,3 +400,12 @@ ran beside two other syncs. Summed per batch:
 
 Deadlocks were all resolved on their first retry: 13 in the posts phase (Stage A against the payouts) and 10 in
 Phase 4.
+
+**With the `hive_posts` lock order (#517).** Same fixture, setup and batches, the tree at #517, run as `on517`
+(option on) and `off517` (option off), at the same time on steem-4 on 2026-11-24:
+- `on517` retried no deadlock: no `deadlock detected` in its log, and all 998 `[STAGE-TIMING]` lines have
+  `deadlocks=0` (the run above: 23 retries);
+- `on517` and `off517` are each identical to base's `b10k` run in all 15 dumps;
+- indicative timing, the two runs sharing the host: `on517` took 428.3 s from the first Stage A to the last Stage B
+  (Stage A 245.9 s, Stage B 384.7 s, overlapping for 205.6 s). Summed `[PHASE-SUMMARY]` totals of the option-off
+  runs: `off517` 628.9 s (posts 189.4 s), `b10k` 600.7 s (posts 175.4 s), `off10k` 643.0 s (posts 178.1 s).

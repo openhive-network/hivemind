@@ -23,7 +23,10 @@
 #                and notifications, mutes changing inside the batch:
 #                .aidev/batch_order_check.sql; that registered accounts take HAF's account ids
 #                and the pending-rewards endpoints read each account's own posts and votes:
-#                .aidev/account_keyspace_check.sql; that no function
+#                .aidev/account_keyspace_check.sql; that pipelined massive sync's Stage A
+#                (posts, community post ops) and Stage B (payouts, rshares) lock hive_posts
+#                rows in id order and do not deadlock on shared posts:
+#                .aidev/stage_lock_order_check.py; that no function
 #                in hivemind_endpoints is VOLATILE: .aidev/endpoint_volatility_check.sql; and that the
 #                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is
@@ -252,6 +255,7 @@ install_hivemind() {
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/ops_prefetch_check.sql || return 1
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/batch_order_check.sql || return 1
     psql "$ADMIN_URL" -X -v ON_ERROR_STOP=1 -f .aidev/account_keyspace_check.sql || return 1
+    python3 .aidev/stage_lock_order_check.py "$HIVEMIND_TEST_USER_URL" || return 1
     if [ "$(psql "$ADMIN_URL" -Atc "select to_regprocedure('hive.app_context_set_early_block_processing(hive.contexts_group, boolean)') is null")" = t ]; then
         echo "early block processing check skipped: this HAF predates hive/haf#379"
         return 0
