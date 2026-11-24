@@ -208,3 +208,38 @@ REST twins fail on the one-block run):
 - community ops: moderation log and moderator activity entries (ids and rows), test-safari's community
   notifications (score 35 in the batch, 15 one block at a time), two muted-post errors and
   blocktrades/elephant01#1's `is_muted`.
+
+## Ids are internal: compare natural keys (#519)
+
+Hivemind's surrogate ids (post, permlink, category, vote, reblog, mention and notification ids) are internal.
+A resumed sync or a pipelined one (`--massive-sync-pipelined`) may draw them in another order than a sequential
+sync of the same blocks, and that is not a difference: two runs have the same data when their rows match on
+natural keys. On steem-19, the #500 kill-a and kill-f runs differed only in `votes.txt` (`permlink_id`, in
+110,392,000 rows), `reblogs.txt` (the reblog id, in 1,082,962 rows) and `counts.txt` (`max_reblog_id`,
+7,052,744 against 7,056,265).
+
+`fidelity_dump.sql` now keys and prints every row by account names, permlinks, categories, community names,
+the post key (`author/permlink#counter_deleted`) and block numbers, and no id column survives in any file:
+
+| file | ids replaced or dropped |
+|---|---|
+| `posts.txt` | `parent_id`, `root_id` by their post keys; `category_id` by the category, `community_id` by the community name; `author_id` and `permlink_id` are in the key |
+| `votes.txt` | `voter_id`, `author_id` and `permlink_id` dropped (the key is voter>permlink@author), `post_id` by its post key |
+| `notifs.txt` | `src` and `dst` by account names, `post_id` and `dst_post_id` by post keys, the notification id dropped |
+| `mentions.txt` | `account_id` by the account name |
+| `accounts.txt` | the id dropped from the row JSON |
+| `reblogs.txt` | the reblog id dropped; ordered by blogger, post key and block number |
+| `counts.txt` | `max_reblog_id` dropped; the `reblogs` count stays |
+
+`post_ids.txt` and `notif_ids.txt` still show the post and notification ids as drawn, for checking the id rules
+of #482. They are informational: `fidelity_compare.py` reports them after the compared files and leaves them out
+of its verdict. It no longer strips `permlink_id` and `category_id` from the lines (the dumps carry none), prints
+`IDENTICAL` or `DIFFERENT:` with the counts and files that differ, and exits 1 on a difference. Dumps written
+by an earlier `fidelity_dump.sql` are to be dumped again before comparing.
+
+**Check.** Two scratch databases with the same posts, votes, reblogs, mentions, notifications and follows, one
+drawing every id in reverse order: the earlier dump differs in `posts`, `votes` and `reblogs` (the steem-19
+differences in miniature), this one is identical in every compared file, with `post_ids` and `notif_ids`
+reported as differing. A vote weight changed from 100 to 101 in one copy, and a reblog moved to another post,
+show as one line each in `votes` and `reblogs`, and the verdict is `DIFFERENT: votes, reblogs`. This check has
+not been run on two fixture syncs.
