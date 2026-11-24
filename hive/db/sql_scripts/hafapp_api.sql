@@ -68,8 +68,10 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- _mute_actions; runs before that phase applies them, so a list row of a pair no reset
 -- captured is the state before the phase. Only pairs on a list at some point are kept:
 -- the others (a follow of an account never muted) are off the list throughout. Accounts
--- that do not exist are skipped, as the phase skips their actions.
-CREATE OR REPLACE FUNCTION hivemind_app.record_batch_mute_changes()
+-- that do not exist are skipped, as the phase skips their actions: those created after
+-- _accounts_until too (hivemind_app.accounts_created_by).
+DROP FUNCTION IF EXISTS hivemind_app.record_batch_mute_changes();
+CREATE OR REPLACE FUNCTION hivemind_app.record_batch_mute_changes(_accounts_until TIMESTAMP)
 RETURNS VOID AS $function$
 BEGIN
     DELETE FROM hivemind_app._batch_mute_changes;
@@ -79,8 +81,8 @@ BEGIN
         SELECT a.list, fr.id AS follower, COALESCE(a.following_id, fo.id) AS following,
                a.block_num, a.op_seq, a.is_set
         FROM _mute_actions a
-        JOIN hivemind_app.hive_accounts fr ON fr.name = a.follower_name
-        LEFT JOIN hivemind_app.hive_accounts fo ON fo.name = a.following_name
+        JOIN hivemind_app.hive_accounts fr ON fr.name = a.follower_name AND fr.created_at <= _accounts_until
+        LEFT JOIN hivemind_app.hive_accounts fo ON fo.name = a.following_name AND fo.created_at <= _accounts_until
         WHERE a.following_name IS NULL OR fo.id IS NOT NULL
     ),
     pairs AS MATERIALIZED (
@@ -147,6 +149,10 @@ DECLARE
     -- recorded: the lists now hold the state after them.
     _record_mutes BOOLEAN := NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue
                                          WHERE first_block = _first_block AND follows_applied);
+    -- Names resolve to the accounts that exist at the end of the batch, as when the batch's
+    -- Stage A has just registered its accounts: pipelined massive sync runs this after the
+    -- next batch's has registered that batch's ones.
+    _accounts_until TIMESTAMP := hivemind_app.accounts_created_by(_last_block);
 BEGIN
     -- The events of the last follows phase are read by its notification flush, which runs
     -- before the next follows phase.
@@ -264,7 +270,8 @@ BEGIN
         -- Handle reset actions immediately (they're rare and affect all rows for a follower)
         -- These need follower_id resolved upfront; non-reset actions defer to Phase 2 bulk JOIN
         IF _what_action LIKE 'reset_%' THEN
-            SELECT id INTO _follower_id FROM hivemind_app.hive_accounts WHERE name = _follower_name;
+            SELECT id INTO _follower_id FROM hivemind_app.hive_accounts
+            WHERE name = _follower_name AND created_at <= _accounts_until;
             IF _follower_id IS NULL THEN
                 CONTINUE;
             END IF;
@@ -367,7 +374,7 @@ BEGIN
     -- Before Phase 2 applies the actions: the lists still hold the state before them,
     -- but for the resets, which record_mute_reset captured.
     IF _record_mutes THEN
-        PERFORM hivemind_app.record_batch_mute_changes();
+        PERFORM hivemind_app.record_batch_mute_changes(_accounts_until);
     END IF;
     UPDATE hivemind_app._batch_queue SET follows_applied = TRUE WHERE first_block = _first_block;
 
@@ -411,8 +418,8 @@ BEGIN
            fo.id AS following_id, d.following_name,
            d.action, d.block_num, d.op_seq
     FROM deduped d
-    JOIN hivemind_app.hive_accounts fr ON fr.name = d.follower_name
-    JOIN hivemind_app.hive_accounts fo ON fo.name = d.following_name;
+    JOIN hivemind_app.hive_accounts fr ON fr.name = d.follower_name AND fr.created_at <= _accounts_until
+    JOIN hivemind_app.hive_accounts fo ON fo.name = d.following_name AND fo.created_at <= _accounts_until;
 
     -- Add index for efficient lookups in subsequent operations
     CREATE INDEX ON _final_actions (action);
