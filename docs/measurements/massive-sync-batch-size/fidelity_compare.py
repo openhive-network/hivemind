@@ -38,7 +38,9 @@ print(f'== {a} vs {b}')
 ca = dict(line.rstrip('\n').split('\t') for line in open(f'logs/{a}/counts.txt'))
 cb = dict(line.rstrip('\n').split('\t') for line in open(f'logs/{b}/counts.txt'))
 if ca.get('dump_format') != cb.get('dump_format'):
-    print(f'  dump_format {ca.get("dump_format", "-")} against {cb.get("dump_format", "-")}: dump both runs with one fidelity_dump.sql')
+    print(
+        f'  dump_format {ca.get("dump_format", "-")} against {cb.get("dump_format", "-")}: dump both runs with one fidelity_dump.sql'
+    )
     sys.exit(2)
 differing = []
 for k in ca | cb:
