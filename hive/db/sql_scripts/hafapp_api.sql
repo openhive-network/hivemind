@@ -47,20 +47,22 @@ $function$
 -- A reset of list _list (1: muted, 2: follow_muted) of _follower_id, about to delete its
 -- rows, into process_follows_for_blocks' _mute_actions: the rows as they are (the state
 -- before the phase, when this is the follower's first reset of the list), then the reset.
+DROP FUNCTION IF EXISTS hivemind_app.record_mute_reset(SMALLINT, TEXT, INT, INT, BIGINT);
 CREATE OR REPLACE FUNCTION hivemind_app.record_mute_reset(
-    _list SMALLINT, _follower_name TEXT, _follower_id INT, _block_num INT, _op_seq BIGINT
+    _list SMALLINT, _follower_name TEXT, _follower_id INT, _block_num INT, _op_seq BIGINT,
+    _accounts_until TIMESTAMP
 ) RETURNS VOID AS $function$
 BEGIN
-    INSERT INTO _mute_actions (list, follower_name, following_id, block_num, op_seq, is_set)
-    SELECT _list, _follower_name, l.following, 0, 0, TRUE
+    INSERT INTO _mute_actions (list, follower_name, following_id, block_num, op_seq, is_set, accounts_until)
+    SELECT _list, _follower_name, l.following, 0, 0, TRUE, _accounts_until
     FROM (
         SELECT m.following FROM hivemind_app.muted m WHERE _list = 1 AND m.follower = _follower_id
         UNION ALL
         SELECT fm.following FROM hivemind_app.follow_muted fm WHERE _list = 2 AND fm.follower = _follower_id
     ) l;
 
-    INSERT INTO _mute_actions (list, follower_name, block_num, op_seq, is_set)
-    VALUES (_list, _follower_name, _block_num, _op_seq, FALSE);
+    INSERT INTO _mute_actions (list, follower_name, block_num, op_seq, is_set, accounts_until)
+    VALUES (_list, _follower_name, _block_num, _op_seq, FALSE, _accounts_until);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
@@ -68,10 +70,9 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- _mute_actions; runs before that phase applies them, so a list row of a pair no reset
 -- captured is the state before the phase. Only pairs on a list at some point are kept:
 -- the others (a follow of an account never muted) are off the list throughout. Accounts
--- that do not exist are skipped, as the phase skips their actions: those created after
--- _accounts_until too (hivemind_app.accounts_created_by).
-DROP FUNCTION IF EXISTS hivemind_app.record_batch_mute_changes();
-CREATE OR REPLACE FUNCTION hivemind_app.record_batch_mute_changes(_accounts_until TIMESTAMP)
+-- that do not exist by the action's block are skipped, as the phase skips their actions.
+DROP FUNCTION IF EXISTS hivemind_app.record_batch_mute_changes(TIMESTAMP);
+CREATE OR REPLACE FUNCTION hivemind_app.record_batch_mute_changes()
 RETURNS VOID AS $function$
 BEGIN
     DELETE FROM hivemind_app._batch_mute_changes;
@@ -81,8 +82,8 @@ BEGIN
         SELECT a.list, fr.id AS follower, COALESCE(a.following_id, fo.id) AS following,
                a.block_num, a.op_seq, a.is_set
         FROM _mute_actions a
-        JOIN hivemind_app.hive_accounts fr ON fr.name = a.follower_name AND fr.created_at <= _accounts_until
-        LEFT JOIN hivemind_app.hive_accounts fo ON fo.name = a.following_name AND fo.created_at <= _accounts_until
+        JOIN hivemind_app.hive_accounts fr ON fr.name = a.follower_name AND fr.created_at <= a.accounts_until
+        LEFT JOIN hivemind_app.hive_accounts fo ON fo.name = a.following_name AND fo.created_at <= a.accounts_until
         WHERE a.following_name IS NULL OR fo.id IS NOT NULL
     ),
     pairs AS MATERIALIZED (
@@ -149,10 +150,6 @@ DECLARE
     -- recorded: the lists now hold the state after them.
     _record_mutes BOOLEAN := NOT EXISTS (SELECT 1 FROM hivemind_app._batch_queue
                                          WHERE first_block = _first_block AND follows_applied);
-    -- Names resolve to the accounts that exist at the end of the batch, as when the batch's
-    -- Stage A has just registered its accounts: pipelined massive sync runs this after the
-    -- next batch's has registered that batch's ones.
-    _accounts_until TIMESTAMP := hivemind_app.accounts_created_by(_last_block);
 BEGIN
     -- The events of the last follows phase are read by its notification flush, which runs
     -- before the next follows phase.
@@ -171,7 +168,8 @@ BEGIN
         following_name TEXT NOT NULL,
         action TEXT NOT NULL,  -- 'follow','ignore','','blacklist','unblacklist','follow_blacklist','unfollow_blacklist','follow_muted','unfollow_muted'
         block_num INT NOT NULL,
-        op_seq BIGINT NOT NULL  -- global ordering to deduplicate within batch
+        op_seq BIGINT NOT NULL,  -- global ordering to deduplicate within batch
+        accounts_until TIMESTAMP NOT NULL
     ) ON COMMIT DROP;
     TRUNCATE _follow_actions;
 
@@ -184,7 +182,8 @@ BEGIN
         following_id INT,
         block_num INT NOT NULL,
         op_seq BIGINT NOT NULL,
-        is_set BOOLEAN NOT NULL
+        is_set BOOLEAN NOT NULL,
+        accounts_until TIMESTAMP NOT NULL
     ) ON COMMIT DROP;
     TRUNCATE _mute_actions;
 
@@ -192,10 +191,16 @@ BEGIN
     -- The batch's operations as Stage B reads them (_ops_staging_b), not the context's
     -- operations_view, which the next batch's iteration recreates while pipelined massive
     -- sync runs this.
+    -- An action sees the accounts that exist at the end of its own block, as live sync does
+    -- whatever the batch: the ops of block b, account creations included, carry the date of
+    -- block b - 1 (load_ops_staging), which is hive_accounts.created_at of an account created
+    -- in b, and blocks are dated strictly in order. Pipelined massive sync runs this after
+    -- the next batch's Stage A has registered that batch's accounts.
     FOR rec IN
         SELECT
             s.id AS op_id,
             s.block_num,
+            s.block_date AS accounts_until,
             s.val
         FROM hivemind_app._ops_staging_b s
         WHERE s.block_num BETWEEN _first_block AND _last_block
@@ -271,7 +276,7 @@ BEGIN
         -- These need follower_id resolved upfront; non-reset actions defer to Phase 2 bulk JOIN
         IF _what_action LIKE 'reset_%' THEN
             SELECT id INTO _follower_id FROM hivemind_app.hive_accounts
-            WHERE name = _follower_name AND created_at <= _accounts_until;
+            WHERE name = _follower_name AND created_at <= rec.accounts_until;
             IF _follower_id IS NULL THEN
                 CONTINUE;
             END IF;
@@ -291,7 +296,7 @@ BEGIN
             CONTINUE;
         ELSIF _what_action = 'reset_muted_list' THEN
             _op_seq := _op_seq + 1;
-            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
+            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq, rec.accounts_until);
             PERFORM hivemind_app.reset_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.mute_ids]);
             DELETE FROM _follow_actions WHERE follower_name = _follower_name
@@ -305,7 +310,7 @@ BEGIN
             CONTINUE;
         ELSIF _what_action = 'reset_follow_muted_list' THEN
             _op_seq := _op_seq + 1;
-            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
+            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq, rec.accounts_until);
             PERFORM hivemind_app.reset_follow_muted(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_mute_ids]);
             DELETE FROM _follow_actions WHERE follower_name = _follower_name
@@ -313,8 +318,8 @@ BEGIN
             CONTINUE;
         ELSIF _what_action = 'reset_all_lists' THEN
             _op_seq := _op_seq + 1;
-            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
-            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq);
+            PERFORM hivemind_app.record_mute_reset(1::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq, rec.accounts_until);
+            PERFORM hivemind_app.record_mute_reset(2::SMALLINT, _follower_name, _follower_id, rec.block_num, _op_seq, rec.accounts_until);
             PERFORM hivemind_app.reset_follows(
                 ARRAY[ROW(_follower_id, NULL, rec.block_num)::hivemind_app.follow_ids]);
             PERFORM hivemind_app.reset_muted(
@@ -351,14 +356,14 @@ BEGIN
                             'follow_blacklist', 'unfollow_blacklist', 'follow_muted', 'unfollow_muted') THEN
             FOREACH _following_name IN ARRAY COALESCE(_following_arr, '{}') LOOP
                 _op_seq := _op_seq + 1;
-                INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq)
-                VALUES (_follower_name, _following_name, _what_action, rec.block_num, _op_seq);
+                INSERT INTO _follow_actions (follower_name, following_name, action, block_num, op_seq, accounts_until)
+                VALUES (_follower_name, _following_name, _what_action, rec.block_num, _op_seq, rec.accounts_until);
                 -- ignore mutes; follow, blog and '' unmute (Phase 2 deletes their muted row)
                 IF _what_action IN ('ignore', 'blog', 'follow', '', 'follow_muted', 'unfollow_muted') THEN
-                    INSERT INTO _mute_actions (list, follower_name, following_name, block_num, op_seq, is_set)
+                    INSERT INTO _mute_actions (list, follower_name, following_name, block_num, op_seq, is_set, accounts_until)
                     VALUES (CASE WHEN _what_action LIKE '%follow_muted' THEN 2 ELSE 1 END,
                             _follower_name, _following_name, rec.block_num, _op_seq,
-                            _what_action IN ('ignore', 'follow_muted'));
+                            _what_action IN ('ignore', 'follow_muted'), rec.accounts_until);
                 END IF;
                 -- Collect follow notifications inline (Phase 1) to match old Python path where
                 -- every follow/blog op generates a notification before dedup, preserving counter values
@@ -374,7 +379,7 @@ BEGIN
     -- Before Phase 2 applies the actions: the lists still hold the state before them,
     -- but for the resets, which record_mute_reset captured.
     IF _record_mutes THEN
-        PERFORM hivemind_app.record_batch_mute_changes(_accounts_until);
+        PERFORM hivemind_app.record_batch_mute_changes();
     END IF;
     UPDATE hivemind_app._batch_queue SET follows_applied = TRUE WHERE first_block = _first_block;
 
@@ -395,11 +400,14 @@ BEGIN
     --       - blacklist group: blacklist, unblacklist
     --       - follow_blacklist group: follow_blacklist, unfollow_blacklist
     --       - follow_muted group: follow_muted, unfollow_muted
-    --     Within each group, for each (follower, following) pair keep only the LAST action.
+    --     Within each group, for each (follower, following) pair keep only the LAST action
+    --     of those whose accounts exist by the action's block: one of an account that does
+    --     not exist yet never takes effect, nor hides an earlier one.
     DROP TABLE IF EXISTS _final_actions;
     CREATE TEMP TABLE _final_actions AS
     WITH action_groups AS (
-        SELECT fa.*,
+        SELECT fa.follower_name, fa.following_name, fa.action, fa.block_num, fa.op_seq,
+               fr.id AS follower_id, fo.id AS following_id,
                CASE
                    WHEN fa.action IN ('blog', 'follow', 'ignore', '') THEN 'follow_group'
                    WHEN fa.action IN ('blacklist', 'unblacklist') THEN 'blacklist_group'
@@ -407,19 +415,15 @@ BEGIN
                    WHEN fa.action IN ('follow_muted', 'unfollow_muted') THEN 'follow_muted_group'
                END AS action_group
         FROM _follow_actions fa
-    ),
-    deduped AS (
-        SELECT DISTINCT ON (ag.follower_name, ag.following_name, ag.action_group)
-               ag.follower_name, ag.following_name, ag.action, ag.block_num, ag.action_group, ag.op_seq
-        FROM action_groups ag
-        ORDER BY ag.follower_name, ag.following_name, ag.action_group, ag.op_seq DESC
+        JOIN hivemind_app.hive_accounts fr ON fr.name = fa.follower_name AND fr.created_at <= fa.accounts_until
+        JOIN hivemind_app.hive_accounts fo ON fo.name = fa.following_name AND fo.created_at <= fa.accounts_until
     )
-    SELECT fr.id AS follower_id, d.follower_name,
-           fo.id AS following_id, d.following_name,
-           d.action, d.block_num, d.op_seq
-    FROM deduped d
-    JOIN hivemind_app.hive_accounts fr ON fr.name = d.follower_name AND fr.created_at <= _accounts_until
-    JOIN hivemind_app.hive_accounts fo ON fo.name = d.following_name AND fo.created_at <= _accounts_until;
+    SELECT DISTINCT ON (ag.follower_name, ag.following_name, ag.action_group)
+           ag.follower_id, ag.follower_name,
+           ag.following_id, ag.following_name,
+           ag.action, ag.block_num, ag.op_seq
+    FROM action_groups ag
+    ORDER BY ag.follower_name, ag.following_name, ag.action_group, ag.op_seq DESC;
 
     -- Add index for efficient lookups in subsequent operations
     CREATE INDEX ON _final_actions (action);

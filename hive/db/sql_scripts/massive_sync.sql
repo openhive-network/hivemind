@@ -3437,7 +3437,6 @@ DECLARE
     _count INT := 0;
     _min_block INT;
     _cut_deferred BOOLEAN;
-    _accounts_until TIMESTAMP;
 BEGIN
     _min_block := hivemind_app.block_before_irreversible('90 days');
     _cut_deferred := hivemind_app.reputation_notification_cut_deferred();
@@ -3445,8 +3444,6 @@ BEGIN
     IF _last_block <= _min_block THEN
         RETURN 0;
     END IF;
-    -- the accounts process_follows_for_blocks resolved the events' names to
-    _accounts_until := hivemind_app.accounts_created_by(_last_block);
 
     -- Follow notifications use the events staging table populated by process_follows_for_blocks().
     -- This tracks every follow event (including re-follows after unfollows) rather than just
@@ -3460,9 +3457,11 @@ BEGIN
             hb.created_at,
             ROW_NUMBER() OVER (PARTITION BY fe.block_num ORDER BY fe.op_seq) AS counter
         FROM hivemind_app._follow_notification_events fe
-        JOIN hivemind_app.hive_accounts ha_f ON ha_f.name = fe.follower_name AND ha_f.created_at <= _accounts_until
-        JOIN hivemind_app.hive_accounts ha_g ON ha_g.name = fe.following_name AND ha_g.created_at <= _accounts_until
         JOIN hafd.blocks hb ON hb.num = fe.block_num - 1
+        -- the accounts that exist at the end of the event's block, as process_follows_for_blocks
+        -- resolves its action's names: the date of the block before it
+        JOIN hivemind_app.hive_accounts ha_f ON ha_f.name = fe.follower_name AND ha_f.created_at <= hb.created_at
+        JOIN hivemind_app.hive_accounts ha_g ON ha_g.name = fe.following_name AND ha_g.created_at <= hb.created_at
         WHERE fe.block_num BETWEEN _first_block AND _last_block
     )
     INSERT INTO hivemind_app.hive_notification_cache

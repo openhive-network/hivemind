@@ -64,28 +64,6 @@ $function$
 
 DROP FUNCTION IF EXISTS hivemind_app.accounts_created_by(integer)
 ;
--- The latest hive_accounts.created_at of an account that exists at the end of block _block:
--- the ops of block b, account creations included, carry the date of block b - 1
--- (load_ops_staging), and blocks are dated strictly in order. A batch's Stage B bounds the
--- accounts it looks up by name with it, for its last block: pipelined massive sync runs it
--- after the next batch's Stage A has registered that batch's accounts.
-CREATE OR REPLACE FUNCTION hivemind_app.accounts_created_by(in _block INTEGER)
-RETURNS TIMESTAMP
-LANGUAGE 'plpgsql'
-STABLE
-AS
-$function$
-DECLARE
-  __created_at TIMESTAMP;
-BEGIN
-  SELECT hb.created_at INTO __created_at FROM hafd.blocks hb WHERE hb.num = GREATEST(_block - 1, 1);
-  IF __created_at IS NULL THEN
-    RAISE EXCEPTION 'block % is not in hafd.blocks', GREATEST(_block - 1, 1);
-  END IF;
-  RETURN __created_at;
-END
-$function$
-;
 
 DROP TYPE IF EXISTS hivemind_app.head_state CASCADE;
 CREATE TYPE hivemind_app.head_state AS
