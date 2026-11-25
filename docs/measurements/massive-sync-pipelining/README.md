@@ -100,7 +100,7 @@ block, or as of the end of batch N, as votes and payouts already do.
 | `_process_post_results_for_cache` → `Posts._merge_post_body` → `PostDataCache.get_post_body` | an edit in N+1 of a post created or edited in N reads the body from `hive_post_data` before N's flush has written it | N+1's patch applies to a stale body | keep cache_merge (1.5 %) in Stage B, after N's flush; `PostDataCache` stays Stage B's alone |
 | `process_follows_for_blocks` reads `hivemind_app.operations_view` (hafapp_api.sql:186); notifications and mentions read `blocks_view` | `hive.app_next_iteration` for N+1 recreates the context's views (sync.py:258), and today runs only after the whole batch (sync.py:224) | AccessExclusive waits on the views, or N's reads see the next range | read N's ops from the handoff `_ops_staging`, and block dates from `hafd` tables as `prefetch_ops_staging` does |
 | `process_hive_post_mentions` (hive_post_operations.sql:840) | an account created or a post deleted in N+1 | none: it checks `ha.created_at <= op_block.created_at` and `counter_deleted = 0 OR hp.block_num > sn.block_num` | — |
-| `process_follows_for_blocks`, `record_batch_mute_changes` and `flush_follow_notifications_for_blocks` look up `hive_accounts` by the names a follow op gives (#520) | N+1's `process_accounts_from_staging` registers the accounts it creates | N keeps a follow, mute, blacklist or follow notification of an account created in N+1 that the sequential sync drops: 5 extra `follows` rows over 1–30 M | resolve names to the accounts that exist at the end of N: `created_at <= accounts_created_by(_last_block)` |
+| `process_follows_for_blocks`, `record_batch_mute_changes` and `flush_follow_notifications_for_blocks` look up `hive_accounts` by the names a follow op gives (#520) | N+1's `process_accounts_from_staging` registers the accounts it creates | N keeps a follow, mute, blacklist or follow notification of an account created in N+1 that the sequential sync drops: 5 extra `follows` rows over 1–30 M | resolve each action's names to the accounts that exist at the end of its own block (#521): `created_at <=` the date the action's op carries |
 
 Stage A of N+1 reads nothing Stage B of N writes:
 - The posts phase reads `hive_accounts` ids, `hive_permlink_data`, `hive_posts`' own columns and the
@@ -308,16 +308,18 @@ fixes below. Stage B then reads views of Stage A's tables, so its statements pla
   `hive_accounts` needs no ordering across the stages: Stage A only inserts accounts. The 40P01 retries stay as a
   safety net. `.aidev/stage_lock_order_check.py` checks the order and a posts phase beside payouts and rshares on
   the same posts.
-- **Accounts as of the batch (#520).** `process_follows_for_blocks` (the reset actions' follower, the bulk
-  resolution of follower and following), `record_batch_mute_changes` and `flush_follow_notifications_for_blocks`
-  see only accounts with `created_at <= accounts_created_by(_last_block)`, the date the ops of the batch's last
-  block carry. That is the set the sequential sync sees, so a follow of an account created later in the same batch
-  is still kept. The other Stage B readers cannot name an account the next batch creates: a vote's voter, a
-  reblog's account, an account update's account and a `setLastRead`'s account sign the op; a vote's author and a
-  reblogged post's author own a post that exists by the batch's end (reblogs bound the post by `_last_block`); the
+- **Accounts as of the action's block (#520, #521).** `process_follows_for_blocks` (the reset actions' follower,
+  the bulk resolution of follower and following, before the batch's dedup keeps the last action per pair),
+  `record_batch_mute_changes` and `flush_follow_notifications_for_blocks` see only accounts with `created_at <=` the
+  date the action's op carries (`_ops_staging.block_date`, the date of the block before it; the notification flush
+  reads it from `hafd.blocks`). An account created in the action's own block exists for it; one created later,
+  even in the same batch, does not, as in live sync, so the result no longer depends on where batches start
+  (#520 bounded by the batch's last block, which kept a follow of an account created later in the same batch).
+  The other Stage B readers cannot name an account the next batch creates: a vote's voter, a reblog's account, an
+  account update's account and a `setLastRead`'s account sign the op; a vote's author and a reblogged post's author own a post that exists by the batch's end (reblogs bound the post by `_last_block`); the
   payouts, post counts, `update_posts_rshares` and the post and reblog notification flushes go by post or account
-  id; and mentions already bound each account by its block. `.aidev/pipelined_follow_accounts_check.sql` runs two
-  batches both ways.
+  id; and mentions already bound each account by its block. `.aidev/pipelined_follow_accounts_check.sql` runs the
+  same blocks in three batch layouts, sequential and pipelined.
 - **The shared connection.** In pipelined mode Stage B's boundary vacuum reads its thresholds on Stage B's
   connection, because the shared connection is the main loop's, busy with the next iteration. Payouts take the
   cashout bound `set_end_of_sync_lib` set for their own batch, not the one the next batch's start set.

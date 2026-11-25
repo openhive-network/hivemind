@@ -1,13 +1,15 @@
--- On the installed hivemind, checks inside one transaction that is rolled back that two
+-- On the installed hivemind, checks inside one transaction that is rolled back that
 -- massive batches leave the same follows, mutes, follow counters and follow notifications
 -- whether each batch's Stage B runs right after its own Stage A (sequential) or after the
--- next batch's Stage A (pipelined), where Stage B of the first batch finds the accounts
--- the second batch's Stage A registered:
---   - in the first batch (blocks 1-3) pf-a follows pf-t and mutes pf-m, accounts created
---     in the second batch (blocks 4, 5): both actions are dropped, as accounts that do not
---     exist yet, and pf-a's follow notification of pf-t is not built;
---   - in the second batch pf-a follows pf-n at block 4, created at block 5 of the same
---     batch: kept, as a batch resolves names as of its last block.
+-- next batch's Stage A (pipelined), where Stage B of a batch finds the accounts the next
+-- batch's Stage A registered, and wherever the batches start (blocks 1-3 and 4-5, 1-4 and
+-- 5, or one block per batch as live sync). An action sees the accounts that exist at the
+-- end of its own block:
+--   - pf-a follows pf-t at block 2 and mutes pf-m at block 3, accounts created at blocks 4
+--     and 5: both actions are dropped, and pf-a's follow notification of pf-t is not built;
+--   - pf-a follows pf-n at block 4, created at block 5, and again at block 5: the first
+--     follow is dropped, with its notification, and the second kept;
+--   - pf-a follows pf-s at block 4, before pf-s's creation in that block: kept.
 -- The ops start at block 2: a notification takes the date of the block before its own.
 -- Seeds blocks, operations and HAF accounts after HAF's last block and account (an empty
 -- HAF, as .aidev/test-stack.compose.yml starts it, has none).
@@ -47,8 +49,11 @@ INSERT INTO pf_ops VALUES
     ( 3, 0, 'F', 'pf-m', 'ignore' ),
     ( 4, 0, 'A', 'pf-t', NULL ),
     ( 4, 1, 'F', 'pf-n', 'blog' ),
+    ( 4, 2, 'F', 'pf-s', 'blog' ),
+    ( 4, 3, 'A', 'pf-s', NULL ),
     ( 5, 0, 'A', 'pf-m', NULL ),
-    ( 5, 1, 'A', 'pf-n', NULL );
+    ( 5, 1, 'A', 'pf-n', NULL ),
+    ( 5, 2, 'F', 'pf-n', 'blog' );
 
 INSERT INTO hafd.accounts ( id, name, block_num )
 SELECT pf.a0 + o.pos * 10 + o.block, o.account, pf.b0 + o.block FROM pf_ops o, pf_base pf WHERE o.kind = 'A';
@@ -91,26 +96,34 @@ BEGIN
 END
 $$;
 
--- Runs blocks 1-3 and 4-5 as two batches, pipelined or not; returns pf-a's follows and
+-- Runs blocks 1-5 as batches ending at _ends, pipelined or not; returns pf-a's follows and
 -- mutes, the follow counters and the follow notifications, accounts by name.
-CREATE FUNCTION pg_temp.pf_run( _pipelined BOOLEAN ) RETURNS JSONB LANGUAGE plpgsql AS $$
+CREATE FUNCTION pg_temp.pf_run( _pipelined BOOLEAN, _ends INT[] ) RETURNS JSONB LANGUAGE plpgsql AS $$
 DECLARE
     _b0 INT := ( SELECT b0 FROM pf_base );
+    _first INT := 1;
+    _last INT;
+    _prev_first INT;
+    _prev_last INT;
 BEGIN
     DELETE FROM hivemind_app._batch_queue;
     PERFORM hivemind_app.set_stage_b_handoff( _pipelined );
+    FOREACH _last IN ARRAY _ends LOOP
+        PERFORM pg_temp.pf_stage_a( _b0 + _first, _b0 + _last );
+        IF NOT _pipelined THEN
+            PERFORM pg_temp.pf_stage_b( _b0 + _first, _b0 + _last );
+        ELSE
+            IF _prev_first IS NOT NULL THEN
+                PERFORM pg_temp.pf_stage_b( _b0 + _prev_first, _b0 + _prev_last );
+            END IF;
+            PERFORM hivemind_app.hand_off_to_stage_b();
+        END IF;
+        _prev_first := _first;
+        _prev_last := _last;
+        _first := _last + 1;
+    END LOOP;
     IF _pipelined THEN
-        PERFORM pg_temp.pf_stage_a( _b0 + 1, _b0 + 3 );
-        PERFORM hivemind_app.hand_off_to_stage_b();
-        PERFORM pg_temp.pf_stage_a( _b0 + 4, _b0 + 5 );
-        PERFORM pg_temp.pf_stage_b( _b0 + 1, _b0 + 3 );
-        PERFORM hivemind_app.hand_off_to_stage_b();
-        PERFORM pg_temp.pf_stage_b( _b0 + 4, _b0 + 5 );
-    ELSE
-        PERFORM pg_temp.pf_stage_a( _b0 + 1, _b0 + 3 );
-        PERFORM pg_temp.pf_stage_b( _b0 + 1, _b0 + 3 );
-        PERFORM pg_temp.pf_stage_a( _b0 + 4, _b0 + 5 );
-        PERFORM pg_temp.pf_stage_b( _b0 + 4, _b0 + 5 );
+        PERFORM pg_temp.pf_stage_b( _b0 + _prev_first, _b0 + _prev_last );
     END IF;
     RETURN jsonb_build_object(
         'follows', ( SELECT jsonb_agg( format( '%s>%s@%s', fr.name, fo.name, f.block_num - _b0 ) ORDER BY fo.name )
@@ -133,39 +146,40 @@ BEGIN
 END
 $$;
 
--- The sequential run is in a subtransaction its own exception rolls back; its result
+-- Each run but the last is in a subtransaction its own exception rolls back; its result
 -- survives in a PL/pgSQL variable.
 DO $$
 DECLARE
-    __sequential JSONB;
-    __pipelined JSONB;
+    __runs CONSTANT TEXT[] := ARRAY[ 'sequential 1-3,4-5', 'sequential 1-4,5', 'sequential per block',
+                                     'pipelined 1-4,5', 'pipelined 1-3,4-5' ];
+    __pipelined CONSTANT BOOLEAN[] := ARRAY[ FALSE, FALSE, FALSE, TRUE, TRUE ];
+    __ends CONSTANT TEXT[] := ARRAY[ '{3,5}', '{4,5}', '{1,2,3,4,5}', '{4,5}', '{3,5}' ];
+    __result JSONB;
     __expected JSONB := jsonb_build_object(
-        'follows', '["pf-a>pf-n@4"]'::JSONB,
+        'follows', '["pf-a>pf-n@5", "pf-a>pf-s@4"]'::JSONB,
         'muted', NULL,
-        'counters', '{"pf-a": "0/1", "pf-m": "0/0", "pf-n": "1/0", "pf-t": "0/0"}'::JSONB,
-        'notifications', '["pf-a>pf-n@4"]'::JSONB );
+        'counters', '{"pf-a": "0/2", "pf-m": "0/0", "pf-n": "1/0", "pf-s": "1/0", "pf-t": "0/0"}'::JSONB,
+        'notifications', '["pf-a>pf-s@4", "pf-a>pf-n@5"]'::JSONB );
 BEGIN
-    IF ( SELECT count(*) FROM hivemind_app.accounts_view av WHERE av.name IN ( 'pf-t', 'pf-m', 'pf-n' ) ) <> 3 THEN
-        RAISE EXCEPTION 'setup: hivemind_app.accounts_view does not show the 3 seeded HAF accounts';
+    IF ( SELECT count(*) FROM hivemind_app.accounts_view av WHERE av.name IN ( 'pf-t', 'pf-m', 'pf-n', 'pf-s' ) ) <> 4 THEN
+        RAISE EXCEPTION 'setup: hivemind_app.accounts_view does not show the 4 seeded HAF accounts';
     END IF;
 
-    BEGIN
-        __sequential := pg_temp.pf_run( FALSE );
-        RAISE SQLSTATE 'PFRUN';
-    EXCEPTION WHEN SQLSTATE 'PFRUN' THEN NULL;
-    END;
-    __pipelined := pg_temp.pf_run( TRUE );
-
-    IF __sequential IS DISTINCT FROM __expected THEN
-        RAISE EXCEPTION E'sequential batches: expected the follow of pf-n only (pf-t and pf-m do not exist in the first batch)\nexpected: %\ngot:      %',
-            __expected, __sequential;
-    END IF;
-    IF __pipelined IS DISTINCT FROM __sequential THEN
-        RAISE EXCEPTION E'pipelined batches differ from sequential ones (Stage B saw accounts of the next batch):\npipelined:  %\nsequential: %',
-            __pipelined, __sequential;
-    END IF;
+    FOR __i IN 1 .. cardinality( __runs ) LOOP
+        BEGIN
+            __result := pg_temp.pf_run( __pipelined[__i], __ends[__i]::INT[] );
+            IF __i < cardinality( __runs ) THEN
+                RAISE SQLSTATE 'PFRUN';
+            END IF;
+        EXCEPTION WHEN SQLSTATE 'PFRUN' THEN NULL;
+        END;
+        IF __result IS DISTINCT FROM __expected THEN
+            RAISE EXCEPTION E'% batches: expected only the follows of pf-s and of pf-n after its creation (an action sees the accounts that exist at the end of its block)\nexpected: %\ngot:      %',
+                __runs[__i], __expected, __result;
+        END IF;
+    END LOOP;
 END
 $$;
 
 ROLLBACK;
-\echo pipelined follow accounts: a follow and a mute of accounts the next batch creates are dropped in both modes
+\echo pipelined follow accounts: follows and mutes of accounts not created by their block are dropped in every batch layout and mode

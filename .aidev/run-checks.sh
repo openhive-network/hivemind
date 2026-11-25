@@ -21,9 +21,9 @@
 #                consistent block: .aidev/ops_prefetch_check.sql; that 12 blocks as one
 #                massive batch, as 3-block batches and one at a time give the same post ids
 #                and notifications, mutes changing inside the batch:
-#                .aidev/batch_order_check.sql; that pipelined massive sync's Stage B resolves
-#                follows to the accounts that exist at the end of its batch, not those the
-#                next batch's Stage A registered: .aidev/pipelined_follow_accounts_check.sql;
+#                .aidev/batch_order_check.sql; that massive sync, sequential or pipelined
+#                and however its batches start, resolves follows to the accounts that exist
+#                at the end of each action's block: .aidev/pipelined_follow_accounts_check.sql;
 #                that registered accounts take HAF's account ids
 #                and the pending-rewards endpoints read each account's own posts and votes:
 #                .aidev/account_keyspace_check.sql; that pipelined massive sync's Stage A
