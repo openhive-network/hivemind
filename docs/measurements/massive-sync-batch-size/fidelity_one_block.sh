@@ -4,7 +4,7 @@
 # then restart at LIMIT blocks per batch (--max-batch=LIMIT) up to MAXBLOCK: the restart replays
 # that batch, then processes SPLIT_BLOCK+1..MAXBLOCK in batches of LIMIT (1: one block at a time).
 # Natural-key and id dumps into logs/LABEL/, as fidelity_run.sh, which also documents NAME and
-# SYNC_ARGS (passed to both syncs).
+# SYNC_ARGS (passed to both syncs; --massive-sync-pipelined=false for a sequential run, #523).
 set -uo pipefail
 label=$1; src=$2; limit=$3; split=$4; max=$5
 name=${NAME:-hm477}

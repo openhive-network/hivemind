@@ -1,6 +1,7 @@
 """Pipelined massive sync: a batch's Stage B runs on its own thread beside the next batch's Stage A."""
 
 import logging
+import sys
 import threading
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
@@ -10,6 +11,8 @@ from unittest.mock import MagicMock, patch
 import psycopg2
 import pytest
 
+import hive.conf
+from hive.conf import Conf
 from hive.db.db_state import DbState
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
@@ -247,9 +250,66 @@ def test_the_stage_a_committed_kill_point_needs_pipelining(monkeypatch: pytest.M
         'massive_sync_pipelined': False,
         'test_pipeline_kill': 'stage_a_committed:1',
     }.get
-    with pytest.raises(ValueError, match='needs --massive-sync-pipelined'):
+    with pytest.raises(ValueError, match='needs pipelined massive sync'):
         Blocks.setup(conf)
     monkeypatch.setattr(Blocks, '_kill_point', None)
+
+
+def _parsed_conf(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest, *argv: str) -> Conf:
+    monkeypatch.setattr(sys, 'argv', ['hive', 'sync', *argv])
+    for name in ('_conf', '_vote_workers', '_pipelined', '_kill_point'):
+        monkeypatch.setattr(Blocks, name, getattr(Blocks, name))
+    monkeypatch.setattr(hive.conf, 'REPTRACKER_SCHEMA_NAME', hive.conf.REPTRACKER_SCHEMA_NAME)
+    root = logging.getLogger()
+    level = root.level
+    request.addfinalizer(lambda: root.setLevel(level))
+    conf = Conf()
+    # configargparse keeps one parser per name; a fresh name gets a parser with no arguments added yet.
+    conf.init_argparse(name=request.node.nodeid)
+    return conf
+
+
+@pytest.mark.parametrize(
+    ('argv', 'env', 'pipelined'),
+    [
+        ((), None, True),
+        (('--massive-sync-pipelined=false',), None, False),
+        ((), 'false', False),
+        (('--massive-sync-pipelined=true',), 'false', True),
+    ],
+    ids=['default', 'option-off', 'env-off', 'option-over-env'],
+)
+def test_massive_sync_is_pipelined_unless_turned_off(
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+    argv: tuple[str, ...],
+    env: str | None,
+    pipelined: bool,
+) -> None:
+    if env is None:
+        monkeypatch.delenv('MASSIVE_SYNC_PIPELINED', raising=False)
+    else:
+        monkeypatch.setenv('MASSIVE_SYNC_PIPELINED', env)
+    monkeypatch.delenv('TEST_PIPELINE_KILL', raising=False)
+    conf = _parsed_conf(monkeypatch, request, *argv)
+    monkeypatch.setattr(Blocks, '_pipelined', not pipelined)
+
+    Blocks.setup(conf)
+
+    assert Blocks.is_pipelined() is pipelined
+
+
+def test_the_stage_a_committed_kill_point_runs_on_the_default(
+    monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest
+) -> None:
+    monkeypatch.delenv('MASSIVE_SYNC_PIPELINED', raising=False)
+    conf = _parsed_conf(monkeypatch, request, '--test-pipeline-kill=stage_a_committed:1')
+    monkeypatch.setattr(Blocks, '_pipelined', False)
+
+    Blocks.setup(conf)
+
+    assert Blocks.is_pipelined() is True
+    assert Blocks._kill_point == ('stage_a_committed', 1)
 
 
 def test_a_replay_runs_stage_b_only_for_a_batch_whose_stage_a_committed_then_the_next_whole() -> None:

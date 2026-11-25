@@ -247,6 +247,8 @@ The indexer operates in three modes for efficiency:
 
 Indexes are created when transitioning from massive to live sync (or when hitting `--test-max-block`).
 
+In both massive stages a batch's votes, payouts, follows, post data flush and notifications (Stage B) run beside the next batch's load, accounts, posts and community phases (Stage A) by default; `--massive-sync-pipelined=false` (or `MASSIVE_SYNC_PIPELINED=false`) runs each batch sequentially. See `docs/measurements/massive-sync-pipelining/README.md`.
+
 **HAF Context:**
 - Hivemind uses the `hivemind_app` context/schema
 - Only processes irreversible blocks (no micro-fork handling needed)
