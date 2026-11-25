@@ -59,13 +59,13 @@ def _positive_int(value: str) -> int:
 class Conf:
     """Manages sync configuration via args, ENVs, and hive.conf."""
 
-    def __init__(self):
-        self._args = None
-        self._env = None
-        self._db = None
-        self.arguments = None
+    def __init__(self) -> None:
+        self._args: Any = None
+        self._env: Any = None
+        self._db: Db | None = None
+        self.arguments: Any = None
 
-    def init_argparse(self, strict=True, **kwargs):
+    def init_argparse(self, strict: bool = True, **kwargs: Any) -> None:
         """Read hive config (CLI arg > ENV var > config)"""
 
         # pylint: disable=line-too-long
@@ -111,10 +111,10 @@ class Conf:
             '--massive-sync-pipelined',
             type=strtobool,
             env_var='MASSIVE_SYNC_PIPELINED',
-            help='(experimental) during massive sync, run the votes, payouts, follows, post data flush and '
-            'notifications of a batch (Stage B) beside the load, accounts, posts and community phases of the '
-            'next one (Stage A)',
-            default=False,
+            help='during massive sync, run the votes, payouts, follows, post data flush and notifications of a '
+            'batch (Stage B) beside the load, accounts, posts and community phases of the next one (Stage A); '
+            'on by default, --massive-sync-pipelined=false runs each batch\'s phases one after the other',
+            default=True,
         )
         add(
             '--vacuum-workers',
@@ -148,8 +148,8 @@ class Conf:
             env_var='TEST_PIPELINE_KILL',
             help='(debug) POINT:BLOCK exits the sync at once at POINT of the massive batch starting at BLOCK, '
             'for crash replay tests: stage_a_committed (the next batch\'s Stage A has committed and this '
-            'batch\'s Stage B has not started; needs --massive-sync-pipelined) or flush_committed (this '
-            'batch\'s post data flush has committed)',
+            'batch\'s Stage B has not started; refused with --massive-sync-pipelined=false) or flush_committed '
+            '(this batch\'s post data flush has committed)',
             default=None,
         )
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
@@ -314,7 +314,7 @@ class Conf:
         assert self._args, "run init_argparse()"
         return self._args[param]
 
-    def mode(self):
+    def mode(self) -> str:
         """Get the CLI runmode.
 
         - `sync`: db sync process
@@ -322,7 +322,7 @@ class Conf:
         """
         return '/'.join(self.get('mode'))
 
-    def log_level(self):
+    def log_level(self) -> int:
         """Get `logger`s internal int level from config string."""
         return int_log_level(self.get('log_level'))
 

@@ -264,7 +264,7 @@ def strtobool(val) -> bool:
     raise ValueError(f"not booleany: {val!r}")
 
 
-def int_log_level(str_log_level):
+def int_log_level(str_log_level: str) -> int:
     """Get `logger`s internal int level from config string."""
     if not str_log_level:
         raise ValueError('Empty log level passed')

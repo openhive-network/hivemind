@@ -1,5 +1,7 @@
 #!/bin/bash
 # run.sh LABEL LIMIT MAXBLOCK [KILL_AT_BLOCK]
+#   SYNC_ARGS: more `hive sync` options. Massive sync is pipelined by default (#523): a sequential
+#     run passes SYNC_ARGS=--massive-sync-pipelined=false (the README's results ran sequential)
 set -uo pipefail
 label=$1; limit=$2; max=$3; kill_at=${4:-}
 cd /scratch/hm470
@@ -17,7 +19,7 @@ python3 activity_sampler.py logs/$label.activity.jsonl $pg & ap=$!
 sync_once() {
   docker run --rm --name $hv --network hm470 -e PYTHONPATH=/src -v /scratch/hm470/src:/src -w /src --entrypoint python3 $RT \
     -m hive.cli sync --database-url=postgresql://hivemind@$pg:5432/haf_block_log --reptracker-schema-name=reptracker_app \
-    --test-max-block=$max --massive-sync-batch-blocks=$limit --prometheus-port 11011 --test-profile=False 2>&1 \
+    --test-max-block=$max --massive-sync-batch-blocks=$limit --prometheus-port 11011 --test-profile=False ${SYNC_ARGS:-} 2>&1 \
     | python3 -u -c 'import sys,time
 for l in sys.stdin: sys.stdout.write(f"{time.time():.3f} {l}"); sys.stdout.flush()'
   return ${PIPESTATUS[0]}

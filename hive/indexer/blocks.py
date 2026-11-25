@@ -100,7 +100,10 @@ class Blocks:
         cls._pipelined = bool(conf.get('massive_sync_pipelined'))
         cls._kill_point = _parse_kill_point(conf.get('test_pipeline_kill'))
         if cls._kill_point is not None and cls._kill_point[0] == 'stage_a_committed' and not cls._pipelined:
-            raise ValueError('--test-pipeline-kill=stage_a_committed:BLOCK needs --massive-sync-pipelined')
+            raise ValueError(
+                '--test-pipeline-kill=stage_a_committed:BLOCK needs pipelined massive sync, '
+                'which --massive-sync-pipelined=false turns off'
+            )
 
     @classmethod
     def is_pipelined(cls) -> bool:

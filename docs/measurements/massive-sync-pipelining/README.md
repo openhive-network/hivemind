@@ -216,7 +216,8 @@ feature than a flag.
 
 To measure it, on a non-production HAF copy at or past 30 M, set up like `../massive-sync-batch-size/` (ZFS
 clones of one installed snapshot, steem-20's `50-perf.conf`):
-1. **Base run.** Hivemind at the base commit, `hive sync --test-max-block=30000000` from a snapshot taken
+1. **Base run.** Hivemind at the base commit, `hive sync --test-max-block=30000000` (since #523,
+   `--massive-sync-pipelined=false` for a sequential base) from a snapshot taken
    after syncing to 10,000,000. Keep every `[PHASE-SUMMARY]` line with a timestamp (`fidelity_run.sh` does
    this). Once a second, `activity_sampler.py` records host CPU (busy, user, system) and IO wait from
    `/proc/stat`, and `pg_stat_activity` rows counted by application, state and wait event, one JSON line per
@@ -238,18 +239,20 @@ clones of one installed snapshot, steem-20's `50-perf.conf`):
 Proceed to the implementation if the pipelined run is at least 25 % faster over 10–30 M (base about 805
 blocks/s here, stalls removed) and every dump is identical.
 
-## The prototype: `--massive-sync-pipelined` (#512)
+## Pipelined massive sync: `--massive-sync-pipelined` (#512, default since #523)
 
-The design above is implemented behind a sync option that defaults to off. #500 runs it on blocks 10–30 M and
-decides whether it becomes the default.
+The design above is implemented behind a sync option (#512). It was off by default until #500 measured it on
+steem-19 over blocks 10–30 M: 27 % faster than sequential, no deadlocks with #517, and every natural-key dump
+identical to sequential with #520. Since #523 it is on by default.
 
-### Switching it on
+### Switching it off
 
-`hive sync --massive-sync-pipelined=true` (or `MASSIVE_SYNC_PIPELINED=true`). It applies to the two massive
-stages only. A crash replay runs its batches one after the other, and live sync is unchanged: at the first live
-iteration the handoff tables are dropped (`set_stage_b_handoff(FALSE)`).
+`hive sync --massive-sync-pipelined=false` (or `MASSIVE_SYNC_PIPELINED=false`) runs each batch sequentially, as
+before #512. The option applies to the two massive stages only. A crash replay runs its batches one after the
+other, and live sync is unchanged: at the first live iteration the handoff tables are dropped
+(`set_stage_b_handoff(FALSE)`).
 
-With the option off, a batch runs its phases in today's order and on today's connections, with the order-neutral
+With the option off, a batch runs its phases in the pre-#512 order and on the same connections, with the order-neutral
 fixes below. Stage B then reads views of Stage A's tables, so its statements plan as they did on those tables.
 
 ### What runs where
@@ -371,8 +374,9 @@ With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PH
   has committed (pipelined only).
 - **`flush_committed`** exits right after the batch's post data flush has committed.
 
-`../massive-sync-batch-size/fidelity_run.sh` runs one with `PIPELINE_KILL=POINT:F` (and the option with
-`SYNC_ARGS=--massive-sync-pipelined=true`), restarts, and dumps. `fidelity_dump.sql` now also dumps `hive_accounts`
+`../massive-sync-batch-size/fidelity_run.sh` runs one with `PIPELINE_KILL=POINT:F`, restarts, and dumps. The
+runs below passed `SYNC_ARGS=--massive-sync-pipelined=true`, from before #523 made it the default; a sequential
+arm now passes `SYNC_ARGS=--massive-sync-pipelined=false`. `fidelity_dump.sql` now also dumps `hive_accounts`
 (every column), the follow, mute and blacklist lists on natural keys, `hive_reblogs` with their ids, and the feed
 cache. `fidelity_compare.py` diffs them too.
 

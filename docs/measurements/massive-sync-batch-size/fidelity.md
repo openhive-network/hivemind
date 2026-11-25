@@ -23,7 +23,8 @@ sync does with each block.
 
 HAF 5M fixture on steem-4, set up as in the README (blocks 0–4,990,000, reptracker synced first, no mocks),
 in `/scratch/hm477`: a copy of this directory's `pg.sh` and `install.sh` with `hm470` renamed. Each run is a
-ZFS clone of one installed snapshot (`fidelity_run.sh`); `fidelity_dump.sql` dumps posts (all versions), votes,
+ZFS clone of one installed snapshot (`fidelity_run.sh`; these runs predate pipelined massive sync, and since
+#523 repeating them takes `SYNC_ARGS=--massive-sync-pipelined=false`); `fidelity_dump.sql` dumps posts (all versions), votes,
 notifications, `hive_mentions` and post data on natural keys, and `fidelity_compare.py` diffs two runs after
 dropping surrogate ids drawn in processing order (`permlink_id`, `category_id`). The 1000 and 10000 runs
 below ran the final code; the one-block reference and the crash runs ran earlier revisions of it whose mention
@@ -212,7 +213,7 @@ REST twins fail on the one-block run):
 ## Ids are internal: compare natural keys (#519)
 
 Hivemind's surrogate ids (post, permlink, category, vote, reblog, mention and notification ids) are internal.
-A resumed sync or a pipelined one (`--massive-sync-pipelined`) may draw them in another order than a sequential
+A resumed sync or a pipelined one (the default since #523) may draw them in another order than a sequential
 sync of the same blocks, and that is not a difference: two runs have the same data when their rows match on
 natural keys. On steem-19, the #500 kill-a and kill-f runs differed only in `votes.txt` (`permlink_id`, in
 110,392,000 rows), `reblogs.txt` (the reblog id, in 1,082,962 rows) and `counts.txt` (`max_reblog_id`,

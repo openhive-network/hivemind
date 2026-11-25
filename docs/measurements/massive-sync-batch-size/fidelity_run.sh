@@ -4,9 +4,12 @@
 # then natural-key dumps of its data into logs/LABEL/.
 #   NAME (default hm477): the work directory /scratch/NAME, its scratch/NAME-base@installed
 #     snapshot, and the prefix of the clones and containers
-#   SYNC_ARGS: more `hive sync` options, e.g. --massive-sync-pipelined=true
+#   SYNC_ARGS: more `hive sync` options. Massive sync is pipelined by default (#523): a sequential
+#     arm passes SYNC_ARGS=--massive-sync-pipelined=false (the results recorded before #523 ran
+#     sequential with SYNC_ARGS empty)
 #   PIPELINE_KILL=POINT:BLOCK: the first sync runs with --test-pipeline-kill=POINT:BLOCK, which
-#     exits it at that point (pipelined massive sync, #512), and a second sync replays and finishes
+#     exits it at that point (stage_a_committed needs pipelined massive sync, #512), and a second
+#     sync replays and finishes
 set -uo pipefail
 label=$1; src=$2; limit=$3; max=$4; kill_at=${5:-}
 name=${NAME:-hm477}

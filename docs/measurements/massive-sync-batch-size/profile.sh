@@ -1,5 +1,5 @@
 #!/bin/bash
-# profile.sh LABEL LIMIT MAXBLOCK: like run.sh, with auto_explain of nested statements over 3s
+# profile.sh LABEL LIMIT MAXBLOCK: like run.sh (and its SYNC_ARGS), with auto_explain of nested statements over 3s
 set -uo pipefail
 label=$1; limit=$2; max=$3
 cd /scratch/hm470
@@ -24,7 +24,7 @@ docker run -d --name "$pg" --network hm470 --shm-size=32g -e PGCTLTIMEOUT=600 -e
 until docker exec "$pg" psql -h 127.0.0.1 -U haf_admin -d haf_block_log -Atc "select 1" >/dev/null 2>&1; do sleep 5; done
 docker run --rm --name $hv --network hm470 -e PYTHONPATH=/src -v /scratch/hm470/src:/src -w /src --entrypoint python3 $RT \
     -m hive.cli sync --database-url=postgresql://hivemind@$pg:5432/haf_block_log --reptracker-schema-name=reptracker_app \
-    --test-max-block=$max --massive-sync-batch-blocks=$limit --prometheus-port 11011 --test-profile=False > logs/$label.log 2>&1
+    --test-max-block=$max --massive-sync-batch-blocks=$limit --prometheus-port 11011 --test-profile=False ${SYNC_ARGS:-} > logs/$label.log 2>&1
 docker exec $pg sudo -n cat /var/log/postgresql/postgresql-18-main.log > logs/$label.pglog
 docker stop -t 120 $pg >/dev/null; docker rm $pg >/dev/null
 echo PROFILE_DONE $label
