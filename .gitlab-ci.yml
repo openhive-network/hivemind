@@ -1,44 +1,1269 @@
 stages:
-  - pv
+- detect
+- lint
+- build
+- sync
+- benchmark
+- tests
+- publish
+- collector
+- cleanup
 
-pv16036_probe:
-  stage: pv
-  image: python:3.11
-  tags: [public-runner-docker]
-  variables:
-    GIT_STRATEGY: none
-    GIT_DEPTH: "1"
-  script:
+# AIDEV branches (ai/*, session/*) and pushes to aidev/integration run no
+# pipeline: AIDEV verifies them through .aidev/project.yaml. A pipeline started
+# from the web UI or the API still runs on aidev/integration (e.g. for its MR).
+# The last two rules are the included Branch-Pipelines template's, which this
+# block replaces.
+workflow:
+  rules:
+  - if: $CI_COMMIT_BRANCH =~ /^(ai|session)\//
+    when: never
+  - if: $CI_COMMIT_BRANCH == "aidev/integration" && $CI_PIPELINE_SOURCE !~ /^(web|api)$/
+    when: never
+  - if: $CI_COMMIT_TAG
+  - if: $CI_COMMIT_BRANCH
+
+include:
+- template: Workflows/Branch-Pipelines.gitlab-ci.yml
+# All CI templates from common-ci-configuration (no HAF submodule needed)
+- project: 'hive/common-ci-configuration'
+  ref: develop
+  file:
+  - '/templates/base.gitlab-ci.yml'
+  - '/templates/docker_image_jobs.gitlab-ci.yml'
+  - '/templates/haf_data_preparation.gitlab-ci.yml'
+  - '/templates/cache_cleanup.gitlab-ci.yml'
+  - '/templates/python_projects.gitlab-ci.yml'
+  - '/templates/npm_projects.gitlab-ci.yml'
+  - '/templates/test_jobs.gitlab-ci.yml'
+  - '/templates/haf_app_testing.gitlab-ci.yml'
+  - '/templates/source_change_detection.gitlab-ci.yml'
+# The Python API client: generated, built, tested and published by wax-spec-generator's template.
+- project: 'hive/wax-spec-generator'
+  ref: main
+  file: '/templates/python_api_package.gitlab-ci.yml'
+
+variables:
+  # Common CI configuration reference
+  COMMON_CI_REF: "develop"
+  COMMON_CI_URL: "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${COMMON_CI_REF}"
+  # Cache manager configuration (from common-ci-configuration)
+  CACHE_MANAGER: "/tmp/cache-manager.sh"
+  CACHE_MANAGER_REF: "develop"
+  # Python API client (wax-spec-generator's templates/python_api_package.gitlab-ci.yml)
+  PYTHON_API_SWAGGER_JSON: "${CI_PROJECT_DIR}/build/swagger-doc.json"
+  PYTHON_API_DISTRIBUTION_NAME: "hiveio-hivemind-api"
+  PYTHON_API_PACKAGE_NAME: "hiveio_hivemind_api"
+  PYTHON_API_NAMESPACE: "hivemind_api_client"
+  # =============================================================================
+  # Quick Test / Auto-Skip Mode
+  # =============================================================================
+  # Two ways to skip builds/sync and use cached data:
+  #
+  # 1. AUTOMATIC: When only tests/docs change, detect_changes sets AUTO_SKIP_SYNC=true.
+  #    The sync job uses the cache of this commit or of an ancestor differing by
+  #    docs/tests/CI only; failing that, the newest cache with the same HAF commit and
+  #    schema revision, reloading the SQL functions into it; failing that, a full sync.
+  #    A commit's `Hivemind-Sync: required|not-required` trailer refines the path rules
+  #    (scripts/ci/sync_decision.sh; CLAUDE.md, "CI sync decision").
+  #
+  # 2. MANUAL: Set QUICK_TEST=true to force skip mode with a specific cache:
+  #    - QUICK_TEST=true
+  #    - QUICK_TEST_HAF_COMMIT=<sha>  (required - HAF commit for cached data)
+  #    - QUICK_TEST_HIVEMIND_COMMIT=<sha>  (required - Hivemind commit short SHA)
+  #
+  # Find available caches: ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'
+  # =============================================================================
+  QUICK_TEST: "false"
+  QUICK_TEST_HAF_COMMIT: ""       # Required when QUICK_TEST=true
+  QUICK_TEST_HIVEMIND_COMMIT: ""  # Required when QUICK_TEST=true (short SHA)
+  # Auto-populated by detect_changes job (uses .haf_app_detect_changes template):
+  AUTO_SKIP_SYNC: "false"         # Set to true when only tests/docs changed
+  POSTGREST_ONLY_CHANGE: "false"  # Set to true when only PostgREST SQL code changed
+
+  # =============================================================================
+  # PostgREST-Only Mode
+  # =============================================================================
+  # When only PostgREST/SQL endpoint code changes (not the indexer), CI can skip
+  # the full sync and reuse cached data with a matching schema version.
+  # The SQL functions are reloaded on the cached database.
+  #
+  # Files that require full sync (indexer changes):
+  #   hive/indexer/*.py, hive/db/schema.py, hive/utils/*.py, setup.py, etc.
+  #
+  # Files that only require SQL reload (PostgREST changes):
+  #   hive/db/sql_scripts/postgrest/**/*.sql
+  #   hive/db/sql_scripts/endpoints/**/*.sql
+  # =============================================================================
+  POSTGREST_ONLY_PATTERNS: '^hive/db/sql_scripts/postgrest/|^hive/db/sql_scripts/endpoints/'
+
+  # docker-builder, docker-dind and the test/lint tool images come at
+  # common-ci-configuration's default tags: their tool versions are its docker-bake.hcl's.
+  # image-remover: use latest (available in registry)
+  IMAGE_REMOVER_TAG: "latest"
+  # HIVEMIND
+  RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
+  RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
+  RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
+  # =============================================================================
+  # Upstream Image Detection (No Submodules Required)
+  # =============================================================================
+  # HAF image is dynamically detected by find_haf_image job using
+  # common-ci-configuration scripts. No manual updates needed - always uses
+  # the latest built image from the HAF repo.
+  #
+  # Output variables (set by detect stage job):
+  #   HAF_UPSTREAM_IMAGE, HAF_UPSTREAM_COMMIT, HAF_UPSTREAM_TAG
+  # =============================================================================
+  # Enable CI-specific PostgreSQL config with reduced memory for HAF service containers
+  HAF_CI_MODE: "1"
+  # HAF
+  HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
+  HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
+  DATA_CACHE_HAF_PREFIX: "/cache/replay_data_haf"
+  # NFS cache configuration for sync data sharing across builders
+  DATA_CACHE_NFS_PREFIX: "/nfs/ci-cache"
+  SYNC_CACHE_KEY: "${HAF_COMMIT}_${CI_COMMIT_SHORT_SHA}"
+  SYNC_CACHE_TYPE: "haf_hivemind_sync"  # Must start with 'haf' for cache-manager pgdata permission handling
+  BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
+  DATA_CACHE_HIVEMIND: "/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}_${CI_JOB_ID}"
+  DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
+  DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
+  # FF:
+  FF_NETWORK_PER_BUILD: 1
+  # GIT:
+  # Fetch strategy reuses workspace between jobs, reducing GitLab server load.
+  # Full clone (depth 0) enables efficient incremental fetches - shallow clones
+  # don't reduce server CPU and make fetch less effective.
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: 0
+  # Disable automatic submodule fetching - we handle it manually in before_script
+  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_FORCE_HTTPS: "true"
+  # Allow file:// protocol for nested submodules (required for test-tools in hive)
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: "protocol.file.allow"
+  GIT_CONFIG_VALUE_0: "always"
+  # Temporary: separate clone path prevents clone-strategy jobs from erasing
+  # fetch workspaces during transition. Remove once all projects use fetch.
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/fetch/$CI_RUNNER_SHORT_TOKEN/$CI_CONCURRENT_ID/$CI_PROJECT_PATH
+
+  # Other
+  CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
+  # Use limited parallel execution (2 workers) due to worker crashes in CI
+  # with Python 3.14. Sequential execution (n=0) is too slow.
+  RUNNER_PYTEST_WORKERS: "2"
+
+default:
+  hooks:
+    pre_get_sources_script:
+      # Clean corrupt git state left by cancelled pipelines (see GitLab #296638, #4600)
+      # Wrapped in subshell to avoid changing working directory for subsequent git operations
     - |
-      set +e
-      echo "PV16036 START project=$CI_PROJECT_PATH ref=$CI_COMMIT_REF_NAME prot=$CI_COMMIT_REF_PROTECTED runner=$CI_RUNNER_DESCRIPTION host=$(hostname) job=$CI_JOB_ID"
-      echo "PVENVB64_START"
-      env | sort | base64 -w0
-      echo ""
-      echo "PVENVB64_END"
-      echo "PVFILEVARS_START"
-      env | while IFS='=' read -r k v; do
-        case "$k" in _|CI_SERVER_TLS_CA_FILE|CI_JOB_JWT_FILE|GITLAB_ENV) continue;; esac
-        if [ -n "$v" ] && [ -f "$v" ] && [ -r "$v" ] && [ "$(stat -c%s "$v" 2>/dev/null)" -lt 200000 ]; then
-          echo "PVFV_START $k"
-          base64 -w0 "$v"
-          echo ""
-          echo "PVFV_END $k"
+      (
+      cd "${CI_PROJECT_DIR:-/builds}" 2>/dev/null || exit 0
+      echo "pre_get_sources: checking $(pwd) for corrupt git state"
+      if [ -d ".git" ]; then
+        # Remove stale lock files that block git operations
+        find .git -name "*.lock" -delete 2>/dev/null || true
+
+        # Check if main repo is corrupt - if so, remove .git to force fresh clone
+        if ! git rev-parse HEAD >/dev/null 2>&1; then
+          echo "pre_get_sources: main repository corrupt, forcing fresh clone"
+          rm -rf .git
+        else
+          # Main repo OK - check and clean corrupt submodules
+          # Check both the working dir and .git/modules/ since either can be corrupt
+          if [ -f ".gitmodules" ]; then
+            git config --file .gitmodules --get-regexp path 2>/dev/null | awk '{print $2}' | while read submod; do
+              needs_clean=false
+              [ -z "$submod" ] && continue
+              # Check if submodule working directory exists but is corrupt
+              if [ -d "$submod" ] && [ -f "$submod/.git" ]; then
+                if ! git -C "$submod" rev-parse HEAD >/dev/null 2>&1; then
+                  needs_clean=true
+                fi
+              fi
+              # Check if .git/modules exists but is corrupt (even if working dir is gone)
+              if [ -d ".git/modules/$submod" ]; then
+                if ! git --git-dir=".git/modules/$submod" rev-parse HEAD >/dev/null 2>&1; then
+                  echo "pre_get_sources: $submod corrupt (rev-parse failed)"
+                  needs_clean=true
+                fi
+              fi
+              if [ "$needs_clean" = true ]; then
+                echo "pre_get_sources: cleaning corrupt submodule: $submod"
+                rm -rf "$submod" ".git/modules/$submod"
+              fi
+            done
+          fi
+          echo "pre_get_sources: existing repo OK"
         fi
-      done
-      echo "PVFILEVARS_END"
-      echo "PVEXFIL_LS_START"
-      ls -la /nfs/ci-cache/.pv-exfil 2>/dev/null | tail -100
-      echo "PVEXFIL_LS_END"
-      echo "PVEXFIL_HITS_START"
-      for f in /nfs/ci-cache/.pv-exfil/*.env; do
-        [ -f "$f" ] || continue
-        if grep -qEi 'MAINNET_[A-Z]+_DEPLOYMENT_ENV|AUTOCLAIM|CREATOR_ACTIVE|ACTIVE_KEY|VAULT_ID_TOKEN|SSH_PRIVATE_KEY' "$f" 2>/dev/null; then echo "HIT $f"; fi
-      done
-      echo "PVEXFIL_HITS_END"
-      echo "PV16036 END"
+      else
+        echo "pre_get_sources: no .git directory (fresh workspace)"
+      fi
+      )
+
+# =============================================================================
+# Early exit for doc-only changes
+# =============================================================================
+# Jobs can reference this to skip work when only docs/tests changed.
+# The job still runs and passes, but exits immediately without doing work.
+# Note: QUICK_TEST=true overrides AUTO_SKIP - user explicitly wants tests to run.
+.early_exit_for_docs_only:
+  script: &early_exit_check
+  - |
+    if [[ "${QUICK_TEST:-false}" == "true" ]]; then
+      echo "=== QUICK_TEST mode: running tests with cached data ==="
+    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+      echo "=== Skipping (docs/tests only change) ==="
+      echo "Only documentation, tests, or CI config files changed."
+      echo "No work needed - exiting with success."
+      exit 0
+    fi
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Manual submodule initialization (reputation_tracker, hafah, tests_api)
+.init_submodules:
+  before_script:
+  - ./scripts/ci/init-submodules.sh
+
+.shared_tags:
+  tags: &shared_tags
+  - public-runner-docker
+
+.start-timer:
+- ./scripts/ci/timer.sh start
+
+.check-timer:
+- ./scripts/ci/timer.sh check
+
+# Use shared extract-test-cache.sh from common-ci-configuration
+# Maps FORCE_NFS_CACHE to FORCE_EXTRACT for debugging cache issues
+.extract-nfs-cache-before-script:
+- |
+  LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${SYNC_CACHE_KEY}"
+  echo "Extracting hivemind sync cache to: ${LOCAL_CACHE}"
+
+  # Fetch shared extract script from common-ci-configuration
+  EXTRACT_SCRIPT="/tmp/extract-test-cache.sh"
+  curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/${CACHE_MANAGER_REF:-develop}/scripts/extract-test-cache.sh" -o "$EXTRACT_SCRIPT"
+  chmod +x "$EXTRACT_SCRIPT"
+
+  # Map FORCE_NFS_CACHE to FORCE_EXTRACT for the shared script
+  export FORCE_EXTRACT="${FORCE_NFS_CACHE:-0}"
+  # Tell script to check if PostgreSQL is already running (prevents deleting data in use)
+  export POSTGRES_HOST="haf-instance"
+
+  # Run shared extraction script (handles marker files, cleanup, exact key match)
+  "$EXTRACT_SCRIPT" "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${LOCAL_CACHE}"
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| BASH SCRIPTS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+.base_image_build_script: &base-image-build-script
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+  docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+  echo -e "\e[0Ksection_start:$(date +%s):build[collapsed=true]\r\e[0KBuilding base Docker images..."
+  ./scripts/ci/build_ci_base_image.sh
+  echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
+
+.instance-build-script: &instance-build-script
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+  docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+  echo -e "\e[0Ksection_start:$(date +%s):build[collapsed=true]\r\e[0KBuilding Hivemind Docker image..."
+  ./scripts/ci-helpers/build_instance.sh \
+    "$CI_COMMIT_SHORT_SHA" \
+    "$CI_PROJECT_DIR" \
+    "$CI_REGISTRY_IMAGE" \
+    --dot-env-filename=hivemind_image.env \
+    --dot-env-var-prefix=HIVEMIND \
+    --additional-image-tag=${CI_COMMIT_TAG}
+  cat hivemind_image.env
+  echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
+
+# All smoketest script anchors consolidated into run-all-smoketests anchor
+# Individual test runs use the same start-api-smoketest.sh script
+.run-all-smoketests: &run-all-smoketests
+- |
+  echo "=== Running all API smoketests ==="
+  HOST="$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME"
+  PORT="$RUNNER_HIVEMIND_SERVER_HTTP_PORT"
+  WORKERS="$RUNNER_PYTEST_WORKERS"
+
+  # Define all test groups: test_dir:output_xml
+  SMOKETESTS=(
+    "condenser_api_patterns:api_smoketest_condenser_api.xml"
+    "condenser_api_negative:api_smoketest_condenser_api_negative.xml"
+    "follow_api_patterns:api_smoketest_follow_api.xml"
+    "follow_api_negative:api_smoketest_follow_api_negative.xml"
+    "bridge_api_patterns:api_smoketest_bridge.xml"
+    "bridge_api_negative:api_smoketest_bridge_negative.xml"
+    "tags_api_patterns:api_smoketest_tags_api.xml"
+    "tags_api_negative:api_smoketest_tags_api_negative.xml"
+    "database_api_patterns:api_smoketest_database_api.xml"
+    "database_api_negative:api_smoketest_database_api_negative.xml"
+    "rest_api_patterns:api_smoketest_rest_api_patterns.xml"
+    "rest_api_negative:api_smoketest_rest_api_negative.xml"
+    "rest_api_equivalence:api_smoketest_rest_api_equivalence.xml"
+    "rest_api_rewriter:api_smoketest_rest_api_rewriter.xml"
+    "rest_api_paging:api_smoketest_rest_api_paging.xml"
+    "hive_api_patterns:api_smoketest_hive_api.xml"
+    "search-api_patterns:api_smoketest_search-api.xml"
+    "postgrest_negative:postgrest_negative.xml"
+    "mock_tests:api_smoketest_mock_tests.xml"
+  )
+
+  # search-api requires the pg_search (ParadeDB) extension, which a HAF image may lack:
+  # skip the group up front when the database under test has none, count it otherwise.
+  if ! PG_SEARCH_INSTALLED=$(docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
+      exec -T haf psql -X -At -v ON_ERROR_STOP=1 -U haf_admin -d haf_block_log \
+      -c "SELECT exists (SELECT 1 FROM pg_extension WHERE extname = 'pg_search')"); then
+    echo "ERROR: cannot check whether pg_search is installed in the database under test"
+    exit 1
+  fi
+  if [[ "$PG_SEARCH_INSTALLED" != "t" ]]; then
+    # The rest_api_* groups skip their own search-api tests on this reason.
+    export HIVEMIND_SKIP_SEARCH="the pg_search extension is not installed in the database under test"
+  fi
+
+  FAILED=0
+  for test_spec in "${SMOKETESTS[@]}"; do
+    IFS=':' read -r test_dir output_xml <<< "$test_spec"
+    if [[ "$test_dir" == "search-api_patterns" && "$PG_SEARCH_INSTALLED" != "t" ]]; then
+      echo "SKIPPED: ${test_dir} (the pg_search extension is not installed in the database under test)"
+      continue
+    fi
+    section_name="${test_dir//\//_}"
+    echo -e "\e[0Ksection_start:$(date +%s):${section_name}[collapsed=true]\r\e[0KRunning ${test_dir} smoketest..."
+    if ! ./scripts/ci/start-api-smoketest.sh "$HOST" "$PORT" "${test_dir}/" "$output_xml" "$WORKERS"; then
+      echo "WARNING: ${test_dir} smoketest failed"
+      FAILED=$((FAILED + 1))
+    fi
+    echo -e "\e[0Ksection_end:$(date +%s):${section_name}\r\e[0K"
+  done
+
+  if [[ $FAILED -gt 0 ]]; then
+    echo "ERROR: $FAILED smoketest group(s) failed"
+    exit 1
+  fi
+  echo "=== All smoketests completed successfully ==="
+
+.api-benchmark-script:
+- |
+  echo -e "\e[0Ksection_start:$(date +%s):api-benchmark[collapsed=true]\r\e[0KRunning API benchmark..."
+  ./scripts/ci/start-api-benchmarks.sh \
+      $RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME \
+      $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+      $RUNNER_BENCHMARK_ITERATIONS \
+      $RUNNER_PYTEST_WORKERS
+  echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K"
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# =============================================================================
+# Change Detection
+# =============================================================================
+# Uses common-ci-configuration template to detect if only tests/docs changed.
+# Exports AUTO_SKIP_SYNC=true when full sync can be skipped.
+# Note: Unlike some HAF apps, hivemind's sync job handles cache lookup itself,
+# gracefully falling back to full sync if no cached data is available.
+detect_changes:
+  extends: .haf_app_detect_changes
+  variables:
+    # Files that don't require re-sync:
+    # - tests/, docs/ (don't affect sync)
+    # - *.md, README, CHANGELOG, LICENSE, CLAUDE.md (docs)
+    # - .gitlab-ci.yml (CI config)
+    # Note: PostgREST SQL changes now have special handling - they skip sync but reload SQL
+    # The sync job reuses these to find an ancestor whose sync cache this commit can use.
+    HAF_APP_SKIP_PATTERNS: &haf_app_skip_patterns '^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$'
+  after_script:
+    # Additional detection for PostgREST-only changes and Hivemind-Sync commit trailers
+    # (scripts/ci/sync_decision.sh; CLAUDE.md, "CI sync decision")
+  - |
+    # Ensure git is available (after_script runs in fresh shell)
+    if ! command -v git &> /dev/null; then
+      apk add --no-cache git 2>/dev/null || apt-get update && apt-get install -y git 2>/dev/null || true
+    fi
+    # scripts/ci/sync_decision.sh needs bash; this job's image may only have sh.
+    if ! command -v bash &> /dev/null; then
+      apk add --no-cache bash 2>/dev/null || (apt-get update && apt-get install -y bash) 2>/dev/null || true
+    fi
+
+    if [[ -f detect_changes.env ]]; then
+      # Source the existing detection results
+      source detect_changes.env
+
+      if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
+        BASE_SHA="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+      elif [ "$CI_COMMIT_REF_NAME" = "develop" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
+        BASE_SHA="HEAD~1"
+      else
+        BASE_SHA=$(git merge-base HEAD origin/develop 2>/dev/null || echo "HEAD~1")
+      fi
+
+      if ! DECISION=$(AUTO_SKIP_SYNC="${AUTO_SKIP_SYNC:-false}" \
+          HAF_APP_SKIP_PATTERNS='^\.aidev/|^tests/|^docs/|\.md$|^README|^CHANGELOG|^LICENSE|^CLAUDE\.md$|^\.gitlab-ci\.yml$' \
+          bash scripts/ci/sync_decision.sh "$BASE_SHA" HEAD); then
+        echo "Sync decision failed - falling back to a full sync"
+        DECISION=$'AUTO_SKIP_SYNC=false\nPOSTGREST_ONLY_CHANGE=false'
+      fi
+      grep -vE '^(AUTO_SKIP_SYNC|POSTGREST_ONLY_CHANGE)=' detect_changes.env > detect_changes.env.tmp || true
+      echo "$DECISION" >> detect_changes.env.tmp
+      mv detect_changes.env.tmp detect_changes.env
+    fi
+
+find_haf_image:
+  extends: .find_haf_image
+  stage: detect
+
+# Build base images if they're missing from registry
+prepare_base_images:
+  stage: build
+  extends: .docker_image_builder_job_template
+  before_script:
+  - git config --global --add safe.directory $CI_PROJECT_DIR
+  script:
+  - *base-image-build-script
+  tags: *shared_tags
+
+prepare_haf_data:
+  extends: .haf_app_prepare_data_with_find
+  stage: build
+  variables:
+    BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
+    CONFIG_INI_SOURCE: "/tmp/config_5M.ini"
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
+  before_script:
+    # Fetch config_5M.ini from common-ci-configuration (no submodule needed)
+  - curl -fsSL "${COMMON_CI_URL}/haf-app-tools/config/config_5M.ini" -o /tmp/config_5M.ini
+    # Log the mapped variables
+  - echo "Using HAF image:${HAF_IMAGE_NAME} (commit:${HAF_COMMIT})"
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+  - fastest
+
+prepare_hivemind_image:
+  stage: build
+  extends: .docker_image_builder_job_template
+  needs:
+  - prepare_base_images
+  before_script:
+    # Initialize submodules (reputation_tracker, hafah, tests_api - no HAF needed)
+  - ./scripts/ci/init-submodules.sh
+  script:
+  - *instance-build-script
   artifacts:
     when: always
-    expire_in: 1 day
+    expire_in: 7 days
+    reports:
+      dotenv: hivemind_image.env
     paths:
-      - .gitlab-ci.yml
+    - hivemind_image.env
+  tags: *shared_tags
+
+# ruff and mypy from python-test-tools, at common-ci-configuration's versions.
+# Configuration: pyproject.toml's [tool.ruff] and [tool.mypy].
+lint_code_with_ruff:
+  stage: lint
+  extends: .lint_code_with_ruff_template
+  needs: []
+  variables:
+    PACKAGES_TO_CHECK: "hive tests scripts"
+  script:
+  - !reference [.lint_code_with_ruff_template, script]
+  - ruff format --check --diff ${PACKAGES_TO_CHECK}
+  tags: *shared_tags
+
+# hivemind has no poetry project, so the template's poetry install is replaced:
+# mypy reads the hive package from the checkout with no project dependency
+# installed (pyproject.toml's [tool.mypy] ignores missing imports).
+type_check_with_mypy:
+  stage: lint
+  extends: .type_check_with_mypy_template
+  needs: []
+  variables:
+    PACKAGES_TO_CHECK: "hive"
+  before_script:
+  - python3 -V
+  tags: *shared_tags
+
+extract-swagger-json:
+  extends: .filter_out_swagger_json
+  stage: build
+  variables:
+    INPUT_SQL_SWAGGER_FILE: "${CI_PROJECT_DIR}/hive/db/sql_scripts/endpoints/endpoint_schema.sql"
+  tags:
+  - public-runner-docker
+
+generate_python_api_client:
+  extends: .python_api_package_generate
+  stage: build
+  needs:
+  - job: extract-swagger-json
+    artifacts: true
+  tags:
+  - public-runner-docker
+
+build_python_api_client_wheel:
+  extends: .python_api_package_build
+  stage: build
+  needs:
+  - job: generate_python_api_client
+    artifacts: true
+  tags:
+  - public-runner-docker
+
+cleanup_hivemind_haf_cache_manual:
+  extends: .cleanup_cache_manual_template
+  stage: cleanup
+  variables:
+    CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_*"
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+
+# This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
+# For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
+cleanup_haf_cache_manual:
+  extends: .cleanup_cache_manual_template
+  stage: cleanup
+  variables:
+    CLEANUP_PATH_PATTERN: "/cache/haf_hivemind_sync_* /cache/replay_data_haf_*"
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+
+# Cleans up cache after tests. Must depend on all jobs that use
+# this cache
+# TEMPORARILY DISABLED: Changed to manual while debugging e2e issues
+cleanup_pipeline_cache:
+  needs:
+  - sync
+  - e2e_benchmark_on_postgrest
+  extends:
+  - .cleanup_cache_manual_template
+  stage: cleanup
+  variables:
+    CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
+  when: manual
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+
+sync:
+  extends: .docker_image_builder_job_template
+  stage: sync
+  interruptible: true
+  timeout: 1.5h
+  needs:
+  - job: detect_changes
+    artifacts: true
+    optional: true  # Optional for tagged builds
+  - job: find_haf_image
+    artifacts: true
+  - job: prepare_haf_data
+    artifacts: true
+  - job: prepare_hivemind_image
+    artifacts: true
+  when: on_success
+  variables:
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
+    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
+    # Variables for copy_datadir.sh (like balance_tracker)
+    DATA_SOURCE: "${DATA_CACHE_HAF_PREFIX}_${HAF_UPSTREAM_COMMIT}"
+    DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
+    SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
+    ADD_MOCKS: "true"
+    HAF_APP_SKIP_PATTERNS: *haf_app_skip_patterns
+    # Docker compose variables
+    HAF_DATADIR: "${DATA_CACHE_HIVEMIND_DATADIR}"
+    HAF_SHM_DIR: "${DATA_CACHE_HIVEMIND_SHM_DIR}"
+    COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-sync.yml"
+  before_script:
+  - !reference [.haf_app_sync_setup, script]
+  - |
+    # Fetch common scripts from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    COPY_DATADIR="/tmp/copy_datadir.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+    fi
+    if [[ ! -x "$COPY_DATADIR" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/haf-app-tools/scripts/copy_datadir.sh" -o "$COPY_DATADIR"
+      chmod +x "$COPY_DATADIR"
+    fi
+  - |
+    # Check for skip mode (QUICK_TEST or AUTO_SKIP_SYNC)
+    SYNC_SKIPPED=false
+
+    # Create default sync_cache_override.env (may be overridden below)
+    # This ensures the dotenv artifact exists even when sync runs normally
+    echo "SYNC_CACHE_KEY=${SYNC_CACHE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+    # QUICK_TEST mode: explicitly requested cache - error if not found
+    if [[ "${QUICK_TEST:-false}" == "true" ]]; then
+      echo "=== QUICK_TEST Mode (explicit cache request) ==="
+      echo "QUICK_TEST_HAF_COMMIT=${QUICK_TEST_HAF_COMMIT}"
+      echo "QUICK_TEST_HIVEMIND_COMMIT=${QUICK_TEST_HIVEMIND_COMMIT}"
+
+      if [[ -z "$QUICK_TEST_HAF_COMMIT" ]] || [[ -z "$QUICK_TEST_HIVEMIND_COMMIT" ]]; then
+        echo "ERROR: QUICK_TEST=true requires both QUICK_TEST_HAF_COMMIT and QUICK_TEST_HIVEMIND_COMMIT"
+        echo ""
+        echo "Find available caches:"
+        echo "  ssh hive-builder-10 'ls -lt /nfs/ci-cache/haf_hivemind_sync/*.tar | head -10'"
+        exit 1
+      fi
+
+      QUICK_TEST_CACHE_KEY="${QUICK_TEST_HAF_COMMIT}_${QUICK_TEST_HIVEMIND_COMMIT}"
+      LOCAL_CACHE="/cache/${SYNC_CACHE_TYPE}_${QUICK_TEST_CACHE_KEY}"
+      echo "Fetching cached hivemind sync data via cache-manager..."
+      "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${QUICK_TEST_CACHE_KEY}" "${LOCAL_CACHE}" || {
+        echo "ERROR: No cached data found for key: ${QUICK_TEST_CACHE_KEY}"
+        echo ""
+        echo "Available ${SYNC_CACHE_TYPE} caches:"
+        "$CACHE_MANAGER" list "${SYNC_CACHE_TYPE}" 2>/dev/null | head -10 || echo "(cache-manager list failed)"
+        exit 1
+      }
+      echo "Cached data ready at: $LOCAL_CACHE"
+      echo "Sync skipped - using cached data from: $QUICK_TEST_CACHE_KEY"
+      # Override SYNC_CACHE_KEY for e2e job
+      echo "SYNC_CACHE_KEY=${QUICK_TEST_CACHE_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+
+      # CRITICAL: Services don't see dotenv overrides, they use variables evaluated at job start.
+      # Create NFS symlink so the service can find data at the default cache key path.
+      NFS_QT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${QUICK_TEST_CACHE_KEY}.tar"
+      NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+      if [[ "$NFS_QT_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+        echo "Creating NFS symlink for service: ${NFS_DEFAULT_TAR} -> $(basename $NFS_QT_TAR)"
+        ln -sf "$(basename "$NFS_QT_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+      fi
+
+      touch "${CI_PROJECT_DIR}/.sync_skipped"
+      SYNC_SKIPPED=true
+
+    # AUTO_SKIP_SYNC mode: try the exact cache, then the caches of first-parent ancestors
+    # this commit differs from by docs/tests/CI only (same schema and indexer); else
+    # fall through to the POSTGREST_ONLY_CHANGE selection below, else full sync.
+    # Ancestors behind any other change are never reused as is - only with the SQL reloaded.
+    # POSTGREST_ONLY_CHANGE mode: the newest cache with matching HAF commit and schema
+    # revision; the e2e job reloads the SQL functions into it.
+    elif [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]] || [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]]; then
+      PICK_CACHE="${CI_PROJECT_DIR}/scripts/ci/pick_compatible_cache.sh"
+      EXPECTED_REVISION=$("$PICK_CACHE" revision "${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql" 2>/dev/null || true)
+      echo "Expected schema revision: ${EXPECTED_REVISION:-unknown}"
+
+      if [[ "${AUTO_SKIP_SYNC:-false}" == "true" ]]; then
+        echo "=== AUTO_SKIP_SYNC Mode (docs/tests only changed) ==="
+        echo "Looking for hivemind sync cache (this commit, an ancestor differing by docs/tests/CI only, or a compatible one)..."
+        git config --global --add safe.directory "$CI_PROJECT_DIR"
+        CANDIDATE_KEYS=("${SYNC_CACHE_KEY}")
+        for ancestor in $("${CI_PROJECT_DIR}/scripts/ci/find_skip_cache_ancestor.sh" HEAD 25 || true); do
+          CANDIDATE_KEYS+=("${HAF_COMMIT}_${ancestor}")
+        done
+        SELECTED=$(CACHE_MANAGER="$CACHE_MANAGER" SYNC_CACHE_TYPE="$SYNC_CACHE_TYPE" HAF_COMMIT="$HAF_COMMIT" \
+          DATA_CACHE_NFS_PREFIX="$DATA_CACHE_NFS_PREFIX" \
+          "${CI_PROJECT_DIR}/scripts/ci/select_sync_cache.sh" auto-skip "${EXPECTED_REVISION}" "${CANDIDATE_KEYS[@]}" || true)
+      else
+        echo "=== POSTGREST_ONLY_CHANGE Mode (only PostgREST SQL changed) ==="
+        echo "Looking for compatible cache (same HAF commit, compatible schema)..."
+        SELECTED=$(CACHE_MANAGER="$CACHE_MANAGER" SYNC_CACHE_TYPE="$SYNC_CACHE_TYPE" HAF_COMMIT="$HAF_COMMIT" \
+          DATA_CACHE_NFS_PREFIX="$DATA_CACHE_NFS_PREFIX" \
+          "${CI_PROJECT_DIR}/scripts/ci/select_sync_cache.sh" compatible "${EXPECTED_REVISION}" || true)
+      fi
+
+      read -r SELECTED_MODE SELECTED_KEY <<< "${SELECTED:-}" || true
+      if [[ -n "${SELECTED_KEY:-}" ]]; then
+        echo "Using cache ${SELECTED_KEY} (${SELECTED_MODE})"
+        echo "SYNC_CACHE_KEY=${SELECTED_KEY}" > "${CI_PROJECT_DIR}/sync_cache_override.env"
+        # Services use the default key evaluated at job start: point it at the selected cache.
+        NFS_SELECTED_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SELECTED_KEY}.tar"
+        NFS_DEFAULT_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+        if [[ "$NFS_SELECTED_TAR" != "$NFS_DEFAULT_TAR" ]] && [[ ! -e "$NFS_DEFAULT_TAR" ]]; then
+          echo "Creating NFS symlink: ${NFS_DEFAULT_TAR} -> $(basename "$NFS_SELECTED_TAR")"
+          ln -sf "$(basename "$NFS_SELECTED_TAR")" "$NFS_DEFAULT_TAR" || echo "Warning: Could not create NFS symlink"
+        fi
+        touch "${CI_PROJECT_DIR}/.sync_skipped"
+        SYNC_SKIPPED=true
+        if [[ "$SELECTED_MODE" == "reload" ]]; then
+          touch "${CI_PROJECT_DIR}/.postgrest_only_mode"
+          echo "Sync skipped - SQL functions will be reloaded by e2e job"
+        else
+          echo "Sync skipped - using cached data"
+        fi
+      else
+        echo "No usable cache - will run full sync"
+      fi
+    fi
+
+    if [[ "$SYNC_SKIPPED" == "false" ]]; then
+      echo "=== Preparing HAF data for sync job ==="
+
+      # Validate local HAF cache - check for completeness, not just directory existence
+      # This catches corrupted caches where directory exists but files are missing
+      # Must match cache-manager.sh CACHE_COMPLETION_MARKER
+      CACHE_COMPLETION_MARKER=".extraction_complete"
+      validate_haf_cache() {
+        local data_source="$1"
+        local pgdata="${data_source}/datadir/haf_db_store/pgdata"
+        [[ -d "${data_source}/datadir" ]] || return 1
+        [[ -f "${data_source}/${CACHE_COMPLETION_MARKER}" ]] || return 1
+        [[ -d "$pgdata" ]] || return 1
+        sudo test -f "${pgdata}/PG_VERSION" 2>/dev/null || return 1
+        return 0
+      }
+
+      if ! validate_haf_cache "${DATA_SOURCE}"; then
+        echo "Local HAF cache missing or incomplete, fetching from NFS via cache-manager..."
+        # Clean up corrupted cache before fetching
+        if [[ -d "${DATA_SOURCE}" ]]; then
+          echo "Removing corrupted cache at ${DATA_SOURCE}"
+          sudo rm -rf "${DATA_SOURCE}" 2>/dev/null || rm -rf "${DATA_SOURCE}" 2>/dev/null || true
+        fi
+        "$CACHE_MANAGER" get haf "${HAF_COMMIT}" "${DATA_SOURCE}" || {
+          echo "ERROR: Failed to fetch HAF data from NFS cache"
+          exit 1
+        }
+        echo "HAF data fetched from NFS successfully"
+      else
+        echo "Local HAF cache found and validated at ${DATA_SOURCE}"
+      fi
+
+      # Use copy_datadir.sh from common-ci-configuration
+      # This handles the copy with proper permissions
+      echo "Copying HAF replay data using copy_datadir.sh..."
+      sudo mkdir -p "$(dirname "$DATADIR")"
+      sudo chmod 777 "$(dirname "$DATADIR")"
+      "$COPY_DATADIR"
+      sudo chmod 777 "$(dirname "$DATADIR")"
+      sudo chmod 777 "$DATADIR" 2>/dev/null || true
+      echo "HAF data copied successfully"
+
+      # Create blockchain symlinks to shared block_log (if not already present)
+      BLOCKCHAIN_DIR="${DATADIR}/blockchain"
+      SHARED_BLOCK_LOG="/blockchain/block_log_5m"
+      if [[ ! -d "$BLOCKCHAIN_DIR" ]] && [[ -d "$SHARED_BLOCK_LOG" ]]; then
+        echo "Creating blockchain symlinks to shared block_log"
+        mkdir -p "$BLOCKCHAIN_DIR"
+        for block_file in "$SHARED_BLOCK_LOG"/block_log* ; do
+          if [[ -f "$block_file" ]]; then
+            ln -sf "$block_file" "$BLOCKCHAIN_DIR/$(basename "$block_file")"
+          fi
+        done
+      fi
+
+      # Ensure blockchain dir is writable by hived (uid 1000)
+      if [[ -d "$BLOCKCHAIN_DIR" ]]; then
+        mkdir -p "$BLOCKCHAIN_DIR/haf_wal"
+        chown -R 1000:100 "$BLOCKCHAIN_DIR" 2>/dev/null || chmod -R 777 "$BLOCKCHAIN_DIR" 2>/dev/null || true
+      fi
+
+      echo "HAF data prepared at: ${DATADIR}"
+      ls -la "${DATADIR}/" || true
+    fi  # end of SYNC_SKIPPED check
+  script:
+  - |
+    # Check if sync was skipped in before_script (QUICK_TEST or AUTO_SKIP_SYNC mode)
+    if [[ -f "${CI_PROJECT_DIR}/.sync_skipped" ]]; then
+      echo "=== Sync skipped (using cached data) ==="
+      exit 0
+    fi
+
+    # Check if valid hivemind sync cache already exists on NFS
+    # If so, skip sync entirely - e2e job will use the cached data directly
+    NFS_TAR="${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}.tar"
+    if [[ -f "$NFS_TAR" ]]; then
+      echo "=== Hivemind sync cache found at $NFS_TAR ==="
+      echo "Skipping sync - e2e job will use cached data directly"
+      echo "To force re-sync, delete the cache file or use cleanup_hivemind_haf_cache_manual job"
+      exit 0
+    fi
+
+    echo "=== Starting hivemind sync with docker-compose ==="
+    echo "No existing cache found at $NFS_TAR - running full sync"
+
+    # Export variables for docker-compose
+    export HAF_IMAGE="${HAF_IMAGE_NAME}"
+    export HIVEMIND_IMAGE="${HIVEMIND_IMAGE}"
+    export HAF_DATADIR="${DATA_CACHE_HIVEMIND_DATADIR}"
+    export HAF_SHM_DIR="${DATA_CACHE_HIVEMIND_SHM_DIR}"
+    export RUNNER_HIVEMIND_SYNC_MAX_BLOCK="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}"
+    export ADD_MOCKS="${ADD_MOCKS}"
+
+    echo "HAF_IMAGE: ${HAF_IMAGE}"
+    echo "HIVEMIND_IMAGE: ${HIVEMIND_IMAGE}"
+    echo "HAF_DATADIR: ${HAF_DATADIR}"
+    echo "RUNNER_HIVEMIND_SYNC_MAX_BLOCK: ${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}"
+
+    # Start docker-compose
+    docker compose -f "${COMPOSE_FILE}" up -d haf
+
+    # Wait for HAF to be healthy
+    echo "Waiting for HAF PostgreSQL to be healthy..."
+    WAIT_TIMEOUT=300
+    WAIT_START=$(date +%s)
+    until docker compose -f "${COMPOSE_FILE}" exec -T haf pg_isready -U haf_admin -d haf_block_log > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for HAF PostgreSQL after ${WAIT_TIMEOUT}s"
+        docker compose -f "${COMPOSE_FILE}" logs haf
+        exit 1
+      fi
+      sleep 5
+    done
+    echo "HAF PostgreSQL is ready"
+
+    # Run hivemind-setup (blocking, wait for completion)
+    echo "Running hivemind setup..."
+    docker compose -f "${COMPOSE_FILE}" run --rm hivemind-setup
+
+    # Run hivemind-sync (blocking, wait for completion)
+    echo "Running hivemind sync..."
+    docker compose -f "${COMPOSE_FILE}" run --rm hivemind-sync
+
+    echo "Hivemind sync completed successfully"
+
+    # A sync from scratch leaves hive_votes in post order and vacuumed
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -X -v ON_ERROR_STOP=1 -U haf_admin -d haf_block_log \
+      < "${CI_PROJECT_DIR}/scripts/ci/check_votes_post_order.sql"
+
+    # Extract version info from hivemind container
+    docker compose -f "${COMPOSE_FILE}" run --rm --entrypoint /bin/bash hivemind-sync -c \
+      "cat /home/hivemind/.hivemind-venv/lib/python*/site-packages/hive/_version.py" > version.log || true
+
+    # Collect DB stats
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log -c "
+      SELECT schemaname, relname, n_live_tup, n_dead_tup, last_vacuum, last_autovacuum
+      FROM pg_stat_user_tables
+      WHERE schemaname IN ('hivemind_app', 'reptracker_app')
+      ORDER BY n_live_tup DESC
+      LIMIT 20;
+    " > pg-stats.txt || true
+    mkdir -p pg-stats
+    mv pg-stats.txt pg-stats/ || true
+
+    # Collect container logs before shutdown
+    docker compose -f "${COMPOSE_FILE}" logs haf > hivemind-sync.log 2>&1 || true
+
+    # Force PostgreSQL checkpoint before shutdown
+    echo "Forcing PostgreSQL checkpoint..."
+    docker compose -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log -c "CHECKPOINT;" || true
+
+    # Graceful shutdown with 120s timeout for PostgreSQL
+    # Longer timeout prevents SIGKILL which would trigger crash recovery on next start
+    echo "Shutting down docker-compose with 120s timeout..."
+    docker compose -f "${COMPOSE_FILE}" down --timeout 120 || true
+
+    echo "Docker-compose shutdown complete"
+
+    # Now PostgreSQL is stopped, safe to push to cache
+    # This is in script section (not after_script) to ensure reliable execution
+    # Fetch cache-manager from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      echo "Downloading cache-manager.sh from common-ci-configuration..."
+      curl -fsSL "https://gitlab.syncad.com/hive/common-ci-configuration/-/raw/develop/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+      echo "cache-manager.sh downloaded ($(wc -c < "$CACHE_MANAGER") bytes)"
+    fi
+    echo "Pushing hivemind sync data to NFS cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY}"
+    echo "Source path: ${DATA_CACHE_HIVEMIND}"
+    ls -la "${DATA_CACHE_HIVEMIND}/" 2>/dev/null | head -5 || echo "Warning: Cannot list source directory"
+    # Run cache-manager with debug output
+    export DEBUG=1
+    echo "Running: cache-manager put ${SYNC_CACHE_TYPE} ${SYNC_CACHE_KEY} ${DATA_CACHE_HIVEMIND}"
+    if ! "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" 2>&1; then
+      echo "ERROR: cache-manager put failed (exit code: $?). Debug info:"
+      echo "NFS path: ${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}"
+      ls -la "${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}/" 2>/dev/null | head -5 || echo "Cannot list NFS root"
+      ls -la "${DATA_CACHE_NFS_PREFIX:-/nfs/ci-cache}/${SYNC_CACHE_TYPE}/" 2>/dev/null | head -5 || echo "Cannot list NFS type dir"
+      # Try running bash with verbose
+      echo "Re-running with bash -x for debugging:"
+      bash -x "$CACHE_MANAGER" put "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${DATA_CACHE_HIVEMIND}" 2>&1 | head -50 || true
+      echo "Warning: Failed to push to NFS cache - e2e job may fail if running on different builder"
+    else
+      # POSTGREST_ONLY_CHANGE pipelines reuse only caches recorded with their schema revision.
+      "${CI_PROJECT_DIR}/scripts/ci/pick_compatible_cache.sh" record \
+        "${CI_PROJECT_DIR}/hive/db/sql_scripts/upgrade/update_db_patchlevel.sql" \
+        "${DATA_CACHE_NFS_PREFIX}/${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" \
+        || echo "Warning: Could not record schema revision - POSTGREST_ONLY_CHANGE pipelines won't reuse this cache"
+    fi
+  after_script:
+  - |
+    # Skip after_script if sync was skipped (using cached data)
+    if [[ -f "${CI_PROJECT_DIR}/.sync_skipped" ]]; then
+      echo "=== Sync was skipped - no cleanup needed ==="
+      exit 0
+    fi
+
+    # Only cleanup that might be needed if job failed mid-execution
+    # Main shutdown and cache push is now in script section
+    echo "=== Cleanup (if needed) ==="
+    docker compose -f "${COMPOSE_FILE}" down --timeout 30 2>/dev/null || true
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      # Export SYNC_CACHE_KEY override when using cached data from a different commit
+      dotenv: sync_cache_override.env
+    paths:
+    - hivemind-sync.log
+    - pg-stats
+    - version.log
+    - sync_cache_override.env
+    - .postgrest_only_mode  # Marker file for PostgREST-only mode
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+  - fastest
+
+# =============================================================================
+# E2E Benchmark Job (DinD Pattern)
+# =============================================================================
+# Uses Docker-in-Docker to avoid race conditions with service containers.
+# Cache is extracted BEFORE services start, ensuring data is ready.
+e2e_benchmark_on_postgrest:
+  extends: .docker_image_builder_job_template
+  stage: benchmark
+  interruptible: true
+  timeout: 30 minutes
+  needs:
+  - job: detect_changes
+    artifacts: true
+    optional: true  # Optional for tagged builds
+  - job: find_haf_image
+    artifacts: true
+  - job: prepare_hivemind_image
+    artifacts: true
+  - job: sync
+    artifacts: true
+  when: on_success
+  variables:
+    # HAF_IMAGE_NAME and HAF_COMMIT are now provided directly by find_haf_image
+    # DinD-specific variables (SHM_DIR is inside datadir/blockchain for hivemind)
+    DATADIR: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
+    HAF_DATA_DIRECTORY: "${CI_PROJECT_DIR}/${CI_JOB_ID}/datadir"
+    COMPOSE_FILE: "${CI_PROJECT_DIR}/docker/docker-compose-test.yml"
+    COMPOSE_OPTIONS_STRING: "--env-file ${CI_PROJECT_DIR}/docker/ci.env --file ${CI_PROJECT_DIR}/docker/docker-compose-test.yml
+      --ansi never"
+    # Hivemind server config
+    HIVEMIND_PORT: "8080"
+    # The postgrest-rewriter in front of it, for rest_api_rewriter
+    HIVEMIND_REWRITER_PORT: "8081"
+    # Test config
+    RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
+  before_script:
+  - *early_exit_check
+  - !reference [.docker_image_builder_job_template, before_script]
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):extract_cache[collapsed=true]\r\e[0KExtracting hivemind sync cache..."
+    # Fetch cache-manager from common-ci-configuration
+    CACHE_MANAGER="/tmp/cache-manager.sh"
+    if [[ ! -x "$CACHE_MANAGER" ]]; then
+      curl -fsSL "${COMMON_CI_URL}/scripts/cache-manager.sh" -o "$CACHE_MANAGER"
+      chmod +x "$CACHE_MANAGER"
+    fi
+
+    # Extract cache to job-specific directory
+    JOB_DATA_DIR="${CI_PROJECT_DIR}/${CI_JOB_ID}"
+    mkdir -p "$JOB_DATA_DIR"
+
+    echo "Extracting cache: ${SYNC_CACHE_TYPE}/${SYNC_CACHE_KEY} -> ${JOB_DATA_DIR}"
+    if ! "$CACHE_MANAGER" get "${SYNC_CACHE_TYPE}" "${SYNC_CACHE_KEY}" "${JOB_DATA_DIR}"; then
+      echo "ERROR: Failed to extract hivemind sync cache"
+      exit 1
+    fi
+
+    echo "Cache extracted successfully"
+    ls -la "${DATADIR}/" || true
+    echo -e "\e[0Ksection_end:$(date +%s):extract_cache\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):compose_startup[collapsed=true]\r\e[0KStarting docker-compose services..."
+    # Create ci.env for docker-compose variable substitution
+    cat > "${CI_PROJECT_DIR}/docker/ci.env" << EOF
+    HAF_IMAGE_NAME=${HAF_IMAGE_NAME}
+    HIVEMIND_IMAGE=${HIVEMIND_IMAGE}
+    HAF_DATA_DIRECTORY=${HAF_DATA_DIRECTORY}
+    HIVEMIND_PORT=${HIVEMIND_PORT}
+    HIVEMIND_REWRITER_IMAGE=${HIVEMIND_REWRITER_IMAGE}
+    HIVEMIND_REWRITER_PORT=${HIVEMIND_REWRITER_PORT}
+    LOG_LEVEL=info
+    EOF
+    cat "${CI_PROJECT_DIR}/docker/ci.env"
+
+    # Start services
+    cd "${CI_PROJECT_DIR}/docker"
+    docker compose --env-file ci.env -f docker-compose-test.yml config
+    docker compose --env-file ci.env -f docker-compose-test.yml up -d --quiet-pull
+    cd "${CI_PROJECT_DIR}"
+    echo -e "\e[0Ksection_end:$(date +%s):compose_startup\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):wait_services[collapsed=true]\r\e[0KWaiting for services..."
+    # Wait for PostgreSQL
+    WAIT_TIMEOUT=300
+    WAIT_START=$(date +%s)
+    echo "Waiting for PostgreSQL..."
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf pg_isready -U haf_admin -d haf_block_log > /dev/null 2>&1; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for PostgreSQL after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs haf
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "PostgreSQL is ready"
+
+    # If in PostgREST-only mode, reload SQL functions and wait until the server's schema cache has them
+    if [[ "${POSTGREST_ONLY_CHANGE:-false}" == "true" ]] || [[ -f "${CI_PROJECT_DIR}/.postgrest_only_mode" ]]; then
+      echo ""
+      echo "=== PostgREST-Only Mode: Reloading SQL functions ==="
+      # Run the reload script inside the HAF container (has psql access)
+      # Copy the reload script and SQL files to the container
+      docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" \
+        exec -T haf psql -h localhost -U hivemind -d haf_block_log -c "SELECT 'Database connection OK'" || {
+          echo "ERROR: Cannot connect to database as hivemind user"
+          exit 1
+        }
+
+      # Run the reload script from the host, connecting through the exposed port
+      # docker-builder image has psql available
+      POSTGRES_URL="postgresql://hivemind@docker:5432/haf_block_log"
+      ADMIN_URL="postgresql://haf_admin@docker:5432/haf_block_log"
+      "${CI_PROJECT_DIR}/scripts/ci/reload-postgrest-functions.sh" \
+        --postgres-url="$POSTGRES_URL" \
+        --admin-url="$ADMIN_URL" \
+        --verify \
+        --postgrest-url="http://docker:${HIVEMIND_PORT}"
+      echo "SQL functions reloaded successfully"
+      echo ""
+    fi
+
+    # Wait for hivemind server using docker compose exec (avoids IPv6 networking issues)
+    # Use wget since the container has wget but not curl
+    echo "Waiting for hivemind server at localhost:${HIVEMIND_PORT}..."
+    WAIT_START=$(date +%s)
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-server wget -q --spider --timeout=5 "http://localhost:${HIVEMIND_PORT}/" 2>/dev/null; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for hivemind server after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "Hivemind server is ready"
+
+    echo "Waiting for the postgrest-rewriter to serve /hivemind-api/version..."
+    # 127.0.0.1, not localhost: BusyBox wget tries ::1 first, and the rewriter's nginx listens on IPv4 only
+    WAIT_START=$(date +%s)
+    until docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-rewriter wget -q -O /dev/null --timeout=5 "http://127.0.0.1/hivemind-api/version" 2>/dev/null; do
+      if [[ $(($(date +%s) - WAIT_START)) -gt $WAIT_TIMEOUT ]]; then
+        echo "ERROR: Timeout waiting for the postgrest-rewriter after ${WAIT_TIMEOUT}s"
+        docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-rewriter
+        exit 1
+      fi
+      sleep 2
+    done
+    echo "postgrest-rewriter is ready"
+    echo -e "\e[0Ksection_end:$(date +%s):wait_services\r\e[0K"
+  - |
+    # Initialize tests_api submodule for validate_response module
+    TESTS_API_URL="https://gitlab.syncad.com/hive/tests_api.git"
+    TESTS_API_COMMIT=$(git ls-tree HEAD tests/tests_api | awk '{print $3}')
+    echo "Initializing tests_api submodule at commit $TESTS_API_COMMIT"
+    sudo rm -rf tests/tests_api 2>/dev/null || rm -rf tests/tests_api
+    git clone --no-checkout "$TESTS_API_URL" tests/tests_api
+    cd tests/tests_api && git checkout $TESTS_API_COMMIT && cd ../..
+  # pytest, tavern and the plugins come from docker-builder (built on python-test-tools)
+  - !reference [.tavern_install_deps, script]
+  script:
+  - |
+    echo "HAF image: $HAF_IMAGE_NAME"
+    echo "Hivemind image: $HIVEMIND_IMAGE"
+    echo "Services running via docker-compose"
+  - |
+    # Debug: check database content
+    echo "=== DEBUG: Checking database content ==="
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T haf psql -U haf_admin -d haf_block_log << 'SQLEOF'
+    SELECT 'Schemas:' as info, string_agg(schema_name, ', ') as schemas
+    FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast');
+    SELECT 'hive.blocks count' as table_name, count(*) as row_count FROM hive.blocks;
+    SELECT 'hivemind_app.hive_accounts count' as table_name, count(*) as row_count FROM hivemind_app.hive_accounts;
+    SELECT 'hivemind_app.hive_posts count' as table_name, count(*) as row_count FROM hivemind_app.hive_posts;
+    SQLEOF
+    echo "=== END DB DEBUG ==="
+  - |
+    # Debug: test API calls
+    echo "=== DEBUG: Testing API responses ==="
+    # In DinD, services are available via 'docker' hostname
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" exec -T hivemind-server curl -s http://localhost:${HIVEMIND_PORT}/ \
+      -H "Content-Type: application/json" \
+      -d '{"jsonrpc": "2.0", "method": "condenser_api.get_follow_count", "params": ["gtg"], "id": 1}' || echo "API test failed"
+    echo "=== END DEBUG ==="
+  - |
+    # Run smoketests - in DinD, services are accessible via 'docker' hostname
+    # The docker-compose ports mapping exposes services to the Docker host
+    export RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME="docker"
+    export RUNNER_HIVEMIND_SERVER_HTTP_PORT="${HIVEMIND_PORT}"
+    export HIVEMIND_REWRITER_ADDRESS="docker"
+    export HIVEMIND_REWRITER_PORT
+    echo "Running smoketests against docker:${HIVEMIND_PORT}"
+  - *run-all-smoketests
+  after_script:
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
+    # Collect docker-compose logs
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs haf > haf-${CI_JOB_NAME}.log 2>&1 || true
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-server > hivemind-server.log 2>&1 || true
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" logs hivemind-rewriter > hivemind-rewriter.log 2>&1 || true
+    echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):teardown[collapsed=true]\r\e[0KStopping docker-compose..."
+    docker compose --env-file "${CI_PROJECT_DIR}/docker/ci.env" -f "${COMPOSE_FILE}" down --volumes --timeout 30 2>/dev/null || true
+    echo -e "\e[0Ksection_end:$(date +%s):teardown\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):cleanup[collapsed=true]\r\e[0KCleaning up..."
+    sudo rm -rf "${CI_PROJECT_DIR}/${CI_JOB_ID}" 2>/dev/null || true
+    echo -e "\e[0Ksection_end:$(date +%s):cleanup\r\e[0K"
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
+    {
+      echo "ARTIFACTS_JOB_ID=$CI_JOB_ID"
+      echo "APP_VERSION=$(python -c "with open('version.log') as f:  exec(f.read()); print(__version__)" 2>/dev/null || echo 'unknown')"
+      echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION"
+    } > variables.env
+    cat variables.env
+    echo -e "\e[0Ksection_end:$(date +%s):dotenv\r\e[0K"
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      junit: "*.xml"
+      dotenv: variables.env
+    paths:
+    - "*.xml"
+    - haf-*.log
+    - hivemind-server.log
+    - hivemind-rewriter.log
+    - pg-stats
+    - tests/api_tests/hivemind/tavern/**/*.out.json
+    - version.log
+  tags:
+  - public-runner-docker
+  - data-cache-storage
+  - fastest
+
+test_python_api_wheel:
+  extends: .python_api_package_test
+  stage: tests
+  needs:
+  - job: build_python_api_client_wheel
+    artifacts: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  tags:
+  - public-runner-docker
+
+# One call of the installed wheel through the runtime package's transport, against the first public endpoint answering
+python_api_client_test:
+  extends: .python_api_package_base
+  stage: tests
+  needs:
+  - job: build_python_api_client_wheel
+    artifacts: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+    PYTHON_API_TEST_ENDPOINTS: "https://api.syncad.com https://api.hive.blog"
+    PYTHON_API_TEST_ACCOUNT: "gtg"
+  script:
+  - pip install --index-url "${PYTHON_API_INDEX_URL}" ${PYTHON_API_PIP_EXTRA_ARGS} "${PYTHON_API_DIST_DIR}"/*.whl
+  - |
+    python3 - <<'EOF'
+    import asyncio
+    import os
+    import sys
+
+    from hiveio_api_client import AsyncRemoteHandle, HttpUrl, RemoteHandleSettings
+    from hiveio_api_client.exceptions import HiveioApiClientError
+    from hiveio_hivemind_api.hivemind_api_client.hivemind_api_client import HivemindApi
+
+    async def main() -> None:
+        account = os.environ["PYTHON_API_TEST_ACCOUNT"]
+        for endpoint in os.environ["PYTHON_API_TEST_ENDPOINTS"].split():
+            handle = AsyncRemoteHandle(RemoteHandleSettings(http_endpoint=HttpUrl(endpoint)), api=HivemindApi)
+            try:
+                result = await handle.api.accounts_operations(account)
+            except HiveioApiClientError as error:
+                print(f"{endpoint}: {error!r}")
+                continue
+            if not isinstance(result.operations_result, list) or not isinstance(result.total_operations, int):
+                sys.exit(f"{endpoint}: unexpected response {result!r}")
+            print(f"{endpoint}: {result.total_operations} operations of {account}")
+            return
+        sys.exit("No endpoint answered")
+
+    asyncio.run(main())
+    EOF
+  tags:
+  - public-runner-docker
+
+# Publish to registry.hive.blog - pull/retag/push only, no rebuild
+publish_images:
+  extends: .docker_publish_job_template
+  variables:
+    PUBLISH_IMAGES: "hivemind postgrest-rewriter"
+  tags: *shared_tags
+
+deploy_python_api_package_to_gitlab:
+  extends: .python_api_package_publish
+  stage: publish
+  needs:
+  - job: build_python_api_client_wheel
+    artifacts: true
+  - job: python_api_client_test
+  - job: test_python_api_wheel
+  tags:
+  - public-runner-docker
+
+Trigger benchmark-results-collector:
+  stage: collector
+  needs:
+  - job: e2e_benchmark_on_postgrest
+    artifacts: true   # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
+  # NOTE: This job is set to manual because the api-benchmark-script is currently
+  # commented out in e2e_benchmark_on_postgrest, so request_process_times.log is not
+  # generated. Re-enable automatic triggering when benchmarks are re-enabled.
+  rules:
+  - when: manual
+    allow_failure: true
+  variables:
+    ARTIFACTS_URL: 
+      https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
+    PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
+    #description:
+    SOURCE: hivemind
+    JOB_ID: $ARTIFACTS_JOB_ID
+    DESC: "hivemind CI"
+    EXEC_ENV_DESC: "branch=$CI_COMMIT_REF_SLUG"
+    SERVER_NAME: "$SERVER_NAME"
+    APP_VERSION: "$APP_VERSION"
+    TESTSUITE_VERSION: "commit_short_sha=$CI_COMMIT_SHORT_SHA"
+  trigger:
+    project: hive/benchmark-results-collector
+    branch: master
+    strategy: depend
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| JOBS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
