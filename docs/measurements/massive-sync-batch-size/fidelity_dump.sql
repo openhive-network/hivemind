@@ -2,13 +2,28 @@
 -- resume or in a pipelined sync, so every file keys and prints rows by account names, permlinks, categories,
 -- community names, the post key pk.k and block numbers, and no id column survives. post_ids.txt and
 -- notif_ids.txt alone show ids as drawn; they are informational (fidelity.md).
-CREATE TEMP TABLE pk AS
+--
+-- The lookup tables are UNLOGGED tables in their own schema, dropped at the end, not TEMP tables: parallel
+-- workers cannot read a session's temporary tables, so a join to one runs in the leader alone, after the
+-- Gather Merge, through temp_buffers (fidelity.md, #524). FETCH_COUNT keeps psql from holding a whole result.
+\set FETCH_COUNT 20000
+DROP SCHEMA IF EXISTS fidelity_dump CASCADE;
+CREATE SCHEMA fidelity_dump;
+SET search_path TO fidelity_dump, public;
+
+CREATE UNLOGGED TABLE pk AS
 SELECT hp.id, ha.name || '/' || hpd.permlink || '#' || hp.counter_deleted AS k
 FROM hivemind_app.hive_posts hp
 JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
 JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id;
 CREATE INDEX ON pk (id);
 ANALYZE pk;
+
+-- Each account's rank by name: votes sort on integers, in name order whatever ids the accounts drew
+CREATE UNLOGGED TABLE account_rank AS
+SELECT id, name, row_number() OVER (ORDER BY name COLLATE "C")::int AS r
+FROM hivemind_app.hive_accounts;
+ANALYZE account_rank;
 
 \o posts.txt
 SELECT pk.k, ppk.k AS parent, rpk.k AS root, hcd.category, hc.name AS community,
@@ -21,15 +36,23 @@ LEFT JOIN hivemind_app.hive_category_data hcd ON hcd.id = hp.category_id
 LEFT JOIN hivemind_app.hive_communities hc ON hc.id = hp.community_id
 ORDER BY 1;
 
+-- Votes by voter, author and permlink. The columns after the post key are every hive_votes column but the ids,
+-- in table order, read from the catalog so that a column added later is compared too; a record's text form
+-- tells NULL from an empty string.
 \o votes.txt
-SELECT v.name || '>' || hpd.permlink || '@' || a.name AS k, pk.k AS post,
-       (to_jsonb(hv) - 'id' - 'post_id' - 'voter_id' - 'author_id' - 'permlink_id')::text
+SELECT format($q$
+SELECT v.name, a.name, hpd.permlink, pk.k AS post, ROW(%s)::text
 FROM hivemind_app.hive_votes hv
-JOIN hivemind_app.hive_accounts v ON v.id = hv.voter_id
-JOIN hivemind_app.hive_accounts a ON a.id = hv.author_id
+JOIN account_rank v ON v.id = hv.voter_id
+JOIN account_rank a ON a.id = hv.author_id
 JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hv.permlink_id
 LEFT JOIN pk ON pk.id = hv.post_id
-ORDER BY 1;
+ORDER BY v.r, a.r, hpd.permlink COLLATE "C"$q$,
+  string_agg('hv.' || quote_ident(attname), ', ' ORDER BY attnum))
+FROM pg_attribute
+WHERE attrelid = 'hivemind_app.hive_votes'::regclass AND attnum > 0 AND NOT attisdropped
+  AND attname NOT IN ('id', 'post_id', 'voter_id', 'author_id', 'permlink_id')
+\gexec
 
 \o notifs.txt
 SELECT n.type_id, n.block_num, sa.name AS src, da.name AS dst, pk.k AS post, dpk.k AS dst_post,
@@ -123,7 +146,9 @@ LEFT JOIN pk ON pk.id = f.post_id
 ORDER BY 1, 2;
 
 \o counts.txt
-SELECT 'posts', count(*) FROM hivemind_app.hive_posts
+-- The dump's format; fidelity_compare.py refuses to compare dumps of two formats
+SELECT 'dump_format', 2
+UNION ALL SELECT 'posts', count(*) FROM hivemind_app.hive_posts
 UNION ALL SELECT 'deleted_posts', count(*) FROM hivemind_app.hive_posts WHERE counter_deleted > 0
 UNION ALL SELECT 'votes', count(*) FROM hivemind_app.hive_votes
 UNION ALL SELECT 'votes_on_deleted', count(*) FROM hivemind_app.hive_votes hv JOIN hivemind_app.hive_posts hp ON hp.id = hv.post_id WHERE hp.counter_deleted > 0
@@ -140,3 +165,6 @@ UNION ALL SELECT 'reblogs', count(*) FROM hivemind_app.hive_reblogs
 UNION ALL SELECT 'feed_cache', count(*) FROM hivemind_app.hive_feed_cache
 UNION ALL SELECT 'last_completed', last_completed_block_num FROM hivemind_app.hive_state;
 \o
+
+RESET search_path;
+DROP SCHEMA fidelity_dump CASCADE;

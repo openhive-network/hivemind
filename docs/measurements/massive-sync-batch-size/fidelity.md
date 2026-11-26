@@ -244,3 +244,55 @@ differences in miniature), this one is identical in every compared file, with `p
 reported as differing. A vote weight changed from 100 to 101 in one copy, and a reblog moved to another post,
 show as one line each in `votes` and `reblogs`, and the verdict is `DIFFERENT: votes, reblogs`. This check has
 not been run on two fixture syncs.
+
+## The votes dump in minutes (#524)
+
+Dumping one 1M–30M database of #500 on steem-19 took about 4.9 h, 4.06 h of it in the votes statement
+(14,618 s on `hm500-pipe520` and 14,663 s on `hm500-base`, 2026-11-25, from the PostgreSQL log). The plan
+sorted the votes in four parallel workers, and the leader then looked each of the 372,763,611 votes' post up
+in `pk` after the Gather Merge, alone: `pk` was a `TEMP` table, which parallel workers cannot read, and the
+session's 8 MB of `temp_buffers` read its 69 M rows back from disk lookup by lookup. On a 2% sample of the
+votes (voters with `id % 50 = 7`, 7,256,114 votes) on a ZFS clone of `hm500-base`, the statement ran 527 s, of
+which 416 s were reads of `pk`'s local buffers; the sort was not the cost (C collation, abbreviated keys).
+
+`fidelity_dump.sql` now:
+- builds `pk` and an account rank (`account_rank`: id, name, rank by name under `COLLATE "C"`) as `UNLOGGED`
+  tables in a schema `fidelity_dump`, dropped at the end (and at the start, after a failed run), so the joins
+  run in the parallel workers below the Gather Merge, through shared buffers;
+- sorts the votes by (voter rank, author rank, permlink `COLLATE "C"`): the account ranks come from the names
+  of the whole `hive_accounts` table, so the order depends on names only, whatever ids were drawn, and the
+  unique (voter, author, permlink) makes it total. Permlinks are not ranked: a permlink is compared only
+  between two votes of one voter on one author, and ranking `hive_permlink_data` would sort its 68 M rows;
+- prints each vote as voter, author, permlink, post key (empty when the post is missing, as before) and the
+  record of every other `hive_votes` column but the ids (`ROW(...)::text`, which quotes as needed and tells
+  NULL from an empty string), the column list read from `pg_attribute` at dump time, so a column added to
+  `hive_votes` later is compared too;
+- sets `FETCH_COUNT` so psql streams each result instead of holding it;
+- writes `dump_format 2` as the first line of `counts.txt`. `fidelity_compare.py` exits 2 without comparing
+  when the two runs' `dump_format` differ: an earlier dump has none, so a dump from before this change is
+  never compared with one after it. Both runs have to be dumped with the same `fidelity_dump.sql`.
+
+The other files are unchanged; their joins to `pk` may now also run in parallel workers.
+
+| votes statement | old | new |
+|---|---|---|
+| 2% sample, `hm524-base` (clone of `hm500-base`), EXPLAIN ANALYZE | 527 s | 25 s |
+| full, 372,763,611 votes, `hm500-base` / clone `hm524-base` | 14,663 s | 601 s |
+| full, `hm500-pipe520` / clone `hm524-pipe520` | 14,618 s | 709 s |
+| posts statement, `hm500-base` / `hm524-base` | 2,547 s | 949 s |
+| whole dump, `hm500-base` / `hm524-base` | 18,026 s | 1,963 s |
+
+The new runs are on ZFS clones of the kept databases (the originals unchanged) on the same host, with the same
+HAF settings as the old dumps (16 GB `shared_buffers`, 4 workers per Gather), one database up at a time, each
+file hashed with its line count as the #500 runs did. `votes.txt` has 372,763,611 lines in both, and every file
+of the two databases has the same hash, as with the old dump. Against the old dump of `hm500-base`, every file
+but `votes` and `counts` (the added `dump_format`) has the same hash.
+
+**Check.** Two scratch databases in the same cluster, with all 1,211,461 accounts, the 107,635 votes of voters
+with `id % 2000 = 7`, their 105,575 posts and their permlinks, the second drawing every account, permlink,
+post and vote id in reverse (`M - id`) and inserted in reverse order: `votes.txt` is byte-identical, every
+compared file is identical and `post_ids` differs. Parsed back to fields, the old and the new `votes.txt` of
+each database hold the same 107,635 votes. With one vote's weight raised by 1, one vote deleted and one vote
+copied to another voter in the second database, `votes` shows 2 lines only in each run and the verdict is
+`DIFFERENT: votes` (the vote count is equal); a vote whose post is deleted is still dumped, with an empty post.
+An old-format dump against a new one exits 2.
