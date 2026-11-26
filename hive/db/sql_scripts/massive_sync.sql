@@ -127,8 +127,13 @@ CREATE INDEX _ops_staging_block_num_id_idx ON hivemind_app._ops_staging (block_n
 ALTER TABLE hivemind_app._ops_staging SET (autovacuum_enabled = false);
 
 -- The next massive batch's operations, loaded by prefetch_ops_staging while the current
--- batch runs, and moved to _ops_staging by load_ops_staging_from_prefetch.
+-- batch runs, and moved to _ops_staging by load_ops_staging_from_prefetch, or, with
+-- pipelined massive sync's handoff tables, by take_prefetched_ops_staging, which trades
+-- the names of the two tables. Indexed and out of autovacuum like _ops_staging for that.
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging_next (LIKE hivemind_app._ops_staging);
+CREATE INDEX IF NOT EXISTS _ops_staging_next_op_type_id_idx ON hivemind_app._ops_staging_next (op_type_id);
+CREATE INDEX IF NOT EXISTS _ops_staging_next_block_num_id_idx ON hivemind_app._ops_staging_next (block_num, id);
+ALTER TABLE hivemind_app._ops_staging_next SET (autovacuum_enabled = false);
 
 -- Persistent unlogged tables for process_posts_from_staging (avoids PL/pgSQL stale OID with temp tables)
 DROP TABLE IF EXISTS hivemind_app._comment_staging;
@@ -565,7 +570,12 @@ BEGIN
         OR ho.custom_json_type_id IN (
             SELECT cjt.id FROM hafd.custom_json_types cjt
             WHERE cjt.custom_json_id IN ('follow', 'reblog', 'community', 'notify')
-        ));
+        ))
+    -- the order load_ops_staging_from_prefetch inserts in, for take_prefetched_ops_staging
+    ORDER BY ho.id;
+
+    -- What load_ops_staging analyzes, done here, off the batch's own load
+    ANALYZE hivemind_app._ops_staging_next (op_type_id, block_num);
 
     RETURN _loaded_last;
 END
@@ -587,6 +597,40 @@ BEGIN
     ORDER BY n.id;
 
     ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+-- load_ops_staging_from_prefetch(_first_block, _last_block) by trading the names of
+-- _ops_staging_next and _ops_staging, indexes included, as hand_off_to_stage_b trades
+-- _ops_staging's with _ops_staging_b: the prefetch has already sorted, indexed and analyzed
+-- the rows, so the batch's own load copies none. The prefetch must cover the range and have
+-- committed. Only with the handoff tables (set_stage_b_handoff(TRUE)): the views of the
+-- other mode would follow _ops_staging to its new name. The next prefetch truncates what
+-- _ops_staging held, now _ops_staging_next.
+CREATE OR REPLACE FUNCTION hivemind_app.take_prefetched_ops_staging(
+    _first_block INT,
+    _last_block INT
+) RETURNS VOID AS $function$
+BEGIN
+    IF (SELECT c.relkind FROM pg_class c WHERE c.oid = to_regclass('hivemind_app._ops_staging_b')) IS DISTINCT FROM 'r' THEN
+        RAISE EXCEPTION 'take_prefetched_ops_staging needs the handoff tables (set_stage_b_handoff(TRUE))';
+    END IF;
+
+    ALTER TABLE hivemind_app._ops_staging RENAME TO _ops_staging_swap;
+    ALTER INDEX hivemind_app._ops_staging_op_type_id_idx RENAME TO _ops_staging_swap_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_block_num_id_idx RENAME TO _ops_staging_swap_block_num_id_idx;
+    ALTER TABLE hivemind_app._ops_staging_next RENAME TO _ops_staging;
+    ALTER INDEX hivemind_app._ops_staging_next_op_type_id_idx RENAME TO _ops_staging_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_next_block_num_id_idx RENAME TO _ops_staging_block_num_id_idx;
+    ALTER TABLE hivemind_app._ops_staging_swap RENAME TO _ops_staging_next;
+    ALTER INDEX hivemind_app._ops_staging_swap_op_type_id_idx RENAME TO _ops_staging_next_op_type_id_idx;
+    ALTER INDEX hivemind_app._ops_staging_swap_block_num_id_idx RENAME TO _ops_staging_next_block_num_id_idx;
+
+    -- HAF handed out a shorter range than the one prefetched, as at a stage change
+    DELETE FROM hivemind_app._ops_staging WHERE block_num NOT BETWEEN _first_block AND _last_block;
+    IF FOUND THEN
+        ANALYZE hivemind_app._ops_staging (op_type_id, block_num);
+    END IF;
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
@@ -1247,8 +1291,17 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- 8. process_payouts_from_staging(_last_safe_cashout_block)
 -- ============================================================================
 
+-- With _parts > 1, applies only the payouts of the posts whose author/permlink hashes to
+-- _part: massive sync runs the _parts partitions on separate connections at once. A post's
+-- versions share its author and permlink, so the partitions update disjoint hive_posts
+-- rows, each partition locking its own in id order (#517). A partition run again after it
+-- committed, as a deadlock retry or a crash replay runs it, changes nothing: the
+-- last_payout_block guard keeps author_rewards, and every other column is set, not added to.
+DROP FUNCTION IF EXISTS hivemind_app.process_payouts_from_staging(INT);
 CREATE OR REPLACE FUNCTION hivemind_app.process_payouts_from_staging(
-    _last_safe_cashout_block INT DEFAULT 0
+    _last_safe_cashout_block INT DEFAULT 0,
+    _part INT DEFAULT 0,
+    _parts INT DEFAULT 1
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
@@ -1287,6 +1340,8 @@ BEGIN
             (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight
         FROM hivemind_app._ops_staging_b s
         WHERE s.op_type_id IN (51, 53, 61, 72)
+          AND (_parts = 1
+            OR (hashtext((s.val->>'author') || '/' || (s.val->>'permlink')) & 2147483647) % _parts = _part)
         GROUP BY s.val->>'author', s.val->>'permlink', s.block_num
     ),
     pair_version AS MATERIALIZED (

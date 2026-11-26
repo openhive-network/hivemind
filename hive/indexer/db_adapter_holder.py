@@ -6,14 +6,14 @@ from hive.db.adapter import Db  # noqa: E402
 
 
 class DbLiveContextHolder:
-    _live_context = None
+    _live_context: bool | None = None
 
     @classmethod
     def set_live_context(cls, live_context):
         cls._live_context = live_context
 
     @classmethod
-    def is_live_context(cls):
+    def is_live_context(cls) -> bool | None:
         return cls._live_context
 
 
@@ -25,14 +25,14 @@ class DbAdapterHolder:
     _inside_sync_tx = False
 
     @classmethod
-    def setup_own_db_access(cls, sharedDb, name):
+    def setup_own_db_access(cls, sharedDb: Db, name: str) -> None:
         if DbLiveContextHolder.is_live_context():
             cls.db = sharedDb
         else:
             cls.db = sharedDb.clone(name)
 
     @classmethod
-    def close_own_db_access(cls):
+    def close_own_db_access(cls) -> None:
         if cls.db is not None:
             cls.db.close()
             cls.db = None
@@ -90,3 +90,29 @@ class DbAdapterHolder:
         if DbAdapterHolder._stage_b_processing_db is not None:
             DbAdapterHolder._stage_b_processing_db.close()
             DbAdapterHolder._stage_b_processing_db = None
+
+
+class PartitionedDbAdapterHolder(DbAdapterHolder):
+    """A DbAdapterHolder whose massive-sync phase runs in partitions: `db`, plus in massive sync one connection per further partition."""
+
+    _worker_dbs: list[Db] = []
+
+    @classmethod
+    def setup_worker_db_access(cls, shared_db: Db, workers: int) -> None:
+        """Open the connections of partitions 2..`workers`; none in live sync."""
+        if not DbLiveContextHolder.is_live_context():
+            cls._worker_dbs = [shared_db.clone(f"{cls.__name__}_{i}") for i in range(1, workers)]
+
+    @classmethod
+    def close_own_db_access(cls) -> None:
+        for db in cls._worker_dbs:
+            db.close()
+        cls._worker_dbs = []
+        super().close_own_db_access()
+
+    @classmethod
+    def partition_dbs(cls) -> list[Db]:
+        """One connection per partition, `db` first; raises RuntimeError before setup_own_db_access."""
+        if cls.db is None:
+            raise RuntimeError(f'{cls.__name__} has no db access; setup_own_db_access was not called')
+        return [cls.db, *cls._worker_dbs]

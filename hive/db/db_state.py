@@ -755,7 +755,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         cls._fk_were_enabled = False
 
     @classmethod
-    def are_indexes_enabled(cls):
+    def are_indexes_enabled(cls) -> bool:
         return cls._indexes_were_enabled
 
     @classmethod

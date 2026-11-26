@@ -9,8 +9,9 @@ back):
 - order: with `low` locked by another session, each statement waits on `low` without
   holding `high`, although its operations name `high` first;
 - overlap: with `high` held, Stage A's posts phase (editing `high` then `low`) and Stage B's
-  payouts, then its rshares update, on both posts finish without a deadlock once `high` is
-  released.
+  payouts, then its rshares update, then its payouts in partitions, on both posts finish
+  without a deadlock once `high` is released;
+- partitions: the payout partitions update each post exactly once between them.
 
 The other sessions lock FOR NO KEY UPDATE: it conflicts with every lock the stages take, and
 not with the FOR KEY SHARE locks an installed database's foreign key checks take (massive sync
@@ -105,6 +106,21 @@ def _payouts(cur: Cursor) -> None:
     ops = [(61, {'author': AUTHOR, 'permlink': p}) for p in ('slo-high', 'slo-low')]
     _stage_ops(cur, 20_000_004_010, ops)
     cur.execute("SELECT hivemind_app.process_payouts_from_staging(0)")
+
+
+PAYOUT_PARTS = 4
+
+
+def _payout_partitions(cur: Cursor) -> None:
+    """The payouts as massive sync's partitions apply them, one after another in one transaction."""
+    ops = [(61, {'author': AUTHOR, 'permlink': p}) for p in ('slo-high', 'slo-low')]
+    _stage_ops(cur, 20_000_004_030, ops)
+    updated = 0
+    for part in range(PAYOUT_PARTS):
+        cur.execute("SELECT hivemind_app.process_payouts_from_staging(0, %s, %s)", (part, PAYOUT_PARTS))
+        updated += _scalar(cur)
+    if updated != len(ops):
+        raise AssertionError(f"the {PAYOUT_PARTS} payout partitions updated {updated} posts, expected {len(ops)}")
 
 
 def _rshares(posts: dict[str, int]) -> Callable[[Cursor], None]:
@@ -279,6 +295,7 @@ def main(url: str) -> int:
         check_order(url, cur, posts, 'rshares update', _rshares(posts))
         check_overlap(url, cur, posts, 'payouts', _payouts)
         check_overlap(url, cur, posts, 'rshares update', _rshares(posts))
+        check_overlap(url, cur, posts, 'payout partitions', _payout_partitions)
     except AssertionError as err:
         print(f"stage lock order check failed: {err}")
         return 1
