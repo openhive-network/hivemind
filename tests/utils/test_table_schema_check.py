@@ -245,6 +245,7 @@ def test_sync_entry_exits_non_zero_on_a_behind_schema(caplog: pytest.LogCaptureF
         _installer(_Database(recorded=_STALE)),
         patch('hive.indexer.sync.set_custom_signal_handlers'),
         patch.object(DbState, 'vacuum_workers', DbState.vacuum_workers),
+        patch.object(DbState, 'finalization_workers', DbState.finalization_workers),
         patch.object(Community, 'start_block', Community.start_block),
         pytest.raises(SystemExit) as exited,
     ):
