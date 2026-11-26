@@ -186,7 +186,17 @@ has no rule and blocks unless quarantined.
    printing `skip search-api_patterns (<reason naming pg_search>)`, when it has none;
    the other groups then get that reason as `HIVEMIND_SKIP_SEARCH` and skip their
    own search-api tests;
-6. moves the `.out.json` files tavern writes next to the patterns to
+6. once PostgREST is stopped, runs `tests/finalization/test_finalization_equality.py`
+   on the same clone as the group `finalization` (`tavern-finalization.xml`): it puts
+   the finalization's inputs back to their pre-finalization state, runs the post-sync
+   finalization serially (CLUSTER, the one-range recompute, BM25 after it) and as
+   `DbState` runs it now (the parallel hive_votes rewrite beside the BM25 build, the
+   recompute over post id ranges on 4 connections), and requires the same hive_posts,
+   hive_votes and its ordering mark, feed cache, notifications and valid indexes, plus
+   planted defects (a dropped range, a skipped mark) to be caught. It writes the
+   clone, so it runs after every tavern group. A re-run takes its node ids
+   (`tests/finalization/<module>.py[::<test>]`);
+7. moves the `.out.json` files tavern writes next to the patterns to
    `test-results/full/tavern-out/` and drops the clone, also when the run fails. A
    clone a killed run leaves behind is reaped after 6 hours.
 
