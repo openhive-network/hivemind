@@ -32,9 +32,14 @@ TOAST_AUTOVACUUM_RESET = ('alter', 'ALTER TABLE hivemind_app.hive_post_data RESE
 class _FakeBuildDb:
     """A connection whose CREATE INDEX raises DataCorrupted for the first `failures` calls."""
 
-    def __init__(self, calls: list[Call], failures: int) -> None:
+    def __init__(self, calls: list[Call], failures: int, index_exists: bool = False) -> None:
         self._calls = calls
         self._failures = failures
+        self._index_exists = index_exists
+
+    def query_one(self, sql: str, **kwargs: Any) -> bool:
+        assert "to_regclass('hivemind_app.hive_post_data_bm25_idx')" in sql, sql
+        return self._index_exists
 
     def query_no_return(self, sql: str, **kwargs: Any) -> None:
         if sql.startswith('ALTER TABLE'):
@@ -64,10 +69,11 @@ def _run(
     failures: int,
     recompute_delay: float = 0.0,
     hive_posts: Callable[..., None] | None = None,
+    index_exists: bool = False,
 ) -> tuple[Any, list[Call]]:
     """Run _finish_all_tables with the real Part 0 pool and BM25 task; every other task only records itself."""
     calls: list[Call] = []
-    build_db = _FakeBuildDb(calls, failures)
+    build_db = _FakeBuildDb(calls, failures, index_exists)
 
     def disposer(db: Any, name: str) -> MagicMock:
         mgr = MagicMock()
@@ -176,3 +182,11 @@ def test_build_skipped_when_the_hive_posts_task_fails_before_its_recompute_commi
 
     assert isinstance(result, psycopg2.errors.QueryCanceled)
     assert not any(c[0] in ('alter', 'create_bm25', 'marker') for c in calls)
+
+
+def test_index_built_by_the_index_restore_is_not_built_again() -> None:
+    completed, calls = _run(massive_sync_preconditions=True, failures=0, index_exists=True)
+
+    assert completed is True
+    assert not any(c[0] in ('alter', 'create_bm25', 'vacuum') for c in calls)
+    assert [c for c in calls if c[0] == 'marker'] == [('marker', True, 100, 200)]

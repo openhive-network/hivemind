@@ -109,6 +109,9 @@ class DbState:
     # from --vacuum-workers. Not Db.max_connections: the server's slots are shared
     # with the other HAF apps.
     vacuum_workers = 4
+    # Connections of finalization's range-split recompute, and parallel workers of the
+    # sort that orders hive_votes by post; set from --finalization-workers.
+    finalization_workers = 4
     _VACUUM_CONNECT_ATTEMPTS = 5
     _VACUUM_CONNECT_BACKOFF_SECONDS = 2.0
     _VISIBILITY_VACUUM_NAME = "visibility_vacuum"
@@ -156,6 +159,14 @@ class DbState:
     # votes was the API's largest source of heap reads. Votes older than about a week
     # no longer change, so the order outlives the sync.
     _VOTES_ORDER_INDEX = 'hive_votes_post_id_voter_id_idx'
+    # The UNLOGGED table hive_votes is sorted into and copied back from, inside the
+    # transaction of the rewrite (_rewrite_hive_votes_in_post_order).
+    _VOTES_SORTED_COPY = '__hive_votes_sorted'
+
+    # The full recompute splits the post ids into this many ranges per connection, so
+    # that a connection finishing a sparse range early takes another.
+    _RECOMPUTE_RANGES_PER_WORKER = 4
+    _MAX_POST_ID = 2**31 - 1
 
     # Tables finalization (_finish_all_tables) writes; frozen by the vacuum after it.
     _FINALIZATION_WRITTEN_TABLES = [
@@ -416,17 +427,15 @@ class DbState:
             log.info("[MASSIVE] Restored indexes for %s in %.4fs", full_table_name, perf_counter() - time_start)
 
     @classmethod
-    def _order_hive_votes_by_post(cls, db: Db) -> None:
-        """Rewrite hive_votes in (post_id, voter_id) order and vacuum it; skipped when already done.
+    def _order_hive_votes_by_post(cls, db: Db) -> bool:
+        """Rewrite hive_votes in (post_id, voter_id) order; False when it is ordered already or cannot be.
 
-        CLUSTER needs an index to name the order, so the registered
-        _VOTES_ORDER_INDEX is built first, from its registered command: being
-        CREATE INDEX IF NOT EXISTS, the restore that follows keeps the index
-        CLUSTER rebuilt instead of building it a third time. CLUSTER marks the
-        index clustered, which is how a rerun after a crash knows the rewrite is
-        done (an index drop of massive sync clears the mark). The vacuum sets the
-        visibility map the rewrite left empty; when other apps' snapshots keep it
-        from doing so, the VisibilityWatch of live sync finishes it.
+        Everything happens in one transaction (_rewrite_hive_votes_in_post_order),
+        which ends by marking the registered _VOTES_ORDER_INDEX as the table's
+        clustering index, as CLUSTER would. The mark (pg_index.indisclustered) is
+        how a rerun after a crash knows the rewrite is done: an interruption before
+        the commit leaves neither the rewrite nor the mark. An index drop of massive
+        sync clears the mark.
         """
         table = f'{SCHEMA_NAME}.hive_votes'
         with AutoDbDisposer(db, 'order_hive_votes') as db_mgr:
@@ -440,43 +449,120 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             )
             if row is None:
                 log.warning("[MASSIVE] %s is not registered; %s left in insertion order", cls._VOTES_ORDER_INDEX, table)
-                return
+                return False
             if row._mapping['clustered']:
                 log.info("[MASSIVE] %s already ordered by %s", table, cls._VOTES_ORDER_INDEX)
-                return
+                return False
 
-            log.info("[MASSIVE] Ordering %s by %s", table, cls._VOTES_ORDER_INDEX)
+            log.info(
+                "[MASSIVE] Ordering %s by %s, sorting with %d parallel workers",
+                table,
+                cls._VOTES_ORDER_INDEX,
+                cls.finalization_workers,
+            )
             time_start = perf_counter()
+            timings: list[float] = []
             cls._retry_ddl(
-                lambda: db_mgr.db.query_no_return(row._mapping['command']), f"build {cls._VOTES_ORDER_INDEX}"
+                lambda: timings.extend(cls._rewrite_hive_votes_in_post_order(db_mgr.db, row._mapping['command'])),
+                f"order {table}",
             )
-            index_time = perf_counter() - time_start
-            cls._retry_ddl(
-                lambda: db_mgr.db.query_no_return(f"CLUSTER {table} USING {cls._VOTES_ORDER_INDEX}"),
-                f"cluster {table}",
+            sort_time, copy_time, rebuild_time, order_index_time = timings
+            log.info(
+                "[MASSIVE] Ordered %s by post_id in %.4fs (parallel sort %.4fs, copy-back %.4fs, "
+                "index and constraint rebuild %.4fs, %s %.4fs)",
+                table,
+                perf_counter() - time_start,
+                sort_time,
+                copy_time,
+                rebuild_time,
+                cls._VOTES_ORDER_INDEX,
+                order_index_time,
             )
-            cluster_time = perf_counter() - time_start - index_time
-            cls._run_vacuum(db, "order_vacuum", f"VACUUM (FREEZE, ANALYZE) {table}")
-            vacuum_time = perf_counter() - time_start - index_time - cluster_time
+            return True
+
+    @classmethod
+    def _rewrite_hive_votes_in_post_order(cls, db: Db, order_index_command: str) -> list[float]:
+        """Sort hive_votes into a copy, copy it back and mark the order, in one transaction; return the steps' seconds.
+
+        CLUSTER sorts on one process; here a parallel query sorts the table into an
+        UNLOGGED copy, on up to finalization_workers workers, and
+        copy_back_hive_votes replaces the table's rows by the copy's and rebuilds
+        its indexes. The order index is then built from its registered command
+        (CREATE INDEX IF NOT EXISTS, so the restore that follows keeps it), marked
+        as the clustering index, and the copy is dropped. The ACCESS EXCLUSIVE lock
+        CLUSTER would hold is taken first, so that no lock is upgraded midway.
+        Returns the seconds of the sort, the copy-back, the rebuild and the order
+        index, in that order.
+        """
+        table = f'{SCHEMA_NAME}.hive_votes'
+        copy = f'{SCHEMA_NAME}.{cls._VOTES_SORTED_COPY}'
+        db.query_no_return("START TRANSACTION")
+        try:
+            db.query_no_return(f"LOCK TABLE {table} IN ACCESS EXCLUSIVE MODE")
+            db.query_no_return(f"SET LOCAL max_parallel_workers_per_gather = {cls.finalization_workers}")
+            # An index on (post_id, voter_id) left by an earlier hivemind would be read in
+            # its order, with a heap page fetched per vote.
+            db.query_no_return("SET LOCAL enable_indexscan = off")
+            time_start = perf_counter()
+            cls._execute_query_with_modified_work_mem(
+                db=db,
+                sql=f"CREATE UNLOGGED TABLE {copy} AS SELECT * FROM {table} ORDER BY post_id, voter_id",
+                separate_transaction=False,
+            )
+            sort_time = perf_counter() - time_start
+            copied = db.query_all(f"SELECT * FROM {SCHEMA_NAME}.copy_back_hive_votes('{copy}')")[0]._mapping
+            time_start = perf_counter()
+            db.query_no_return(order_index_command)
+            db.query_no_return(f"ALTER TABLE {table} CLUSTER ON {cls._VOTES_ORDER_INDEX}")
+            db.query_no_return(f"DROP TABLE {copy}")
+            order_index_time = perf_counter() - time_start
+            db.query_no_return("COMMIT")
+        except BaseException:
+            try:
+                db.query_no_return("ROLLBACK")
+            except psycopg2.Error:
+                log.warning("Ignoring ROLLBACK failure while aborting the ordering of %s", table, exc_info=True)
+            raise
+        return [sort_time, copied['copy_seconds'], copied['rebuild_seconds'], order_index_time]
+
+    @classmethod
+    def _vacuum_ordered_hive_votes(cls, db: Db, search_index_built: Future[None]) -> None:
+        """VACUUM (FREEZE, ANALYZE) hive_votes after its rewrite, once `search_index_built` is resolved.
+
+        The rewritten rows carry the rewrite's transaction id. A BM25 build started
+        before the rewrite committed holds the xmin horizon below that id until it
+        ends, and a vacuum beside it could neither freeze those rows nor mark their
+        pages all-visible. The vacuum sets the visibility map the rewrite left
+        empty; when other apps' snapshots keep it from doing so, the
+        VisibilityWatch of live sync finishes it.
+        """
+        table = f'{SCHEMA_NAME}.hive_votes'
+        time_start = perf_counter()
+        search_index_built.exception()
+        wait_time = perf_counter() - time_start
+        cls._run_vacuum(db, "order_vacuum", f"VACUUM (FREEZE, ANALYZE) {table}")
+        vacuum_time = perf_counter() - time_start - wait_time
+        with AutoDbDisposer(db, 'order_hive_votes_visibility') as db_mgr:
             visibility = db_mgr.db.query_row(
                 f"SELECT relpages, relallvisible FROM pg_class WHERE oid = '{table}'::regclass"
             )._mapping
-            log.info(
-                "[MASSIVE] Ordered %s by post_id in %.4fs (index build %.4fs, CLUSTER %.4fs, VACUUM %.4fs); "
-                "%s of %s pages all-visible",
-                table,
-                perf_counter() - time_start,
-                index_time,
-                cluster_time,
-                vacuum_time,
-                visibility['relallvisible'],
-                visibility['relpages'],
-            )
+        log.info(
+            "[MASSIVE] Vacuumed %s after its ordering in %.4fs, after waiting %.4fs for the BM25 build; "
+            "%s of %s pages all-visible",
+            table,
+            vacuum_time,
+            wait_time,
+            visibility['relallvisible'],
+            visibility['relpages'],
+        )
 
     @classmethod
-    def _order_and_restore_hive_votes(cls, db: Db, full_table_name: str) -> None:
-        cls._order_hive_votes_by_post(db)
+    def _order_and_restore_hive_votes(cls, db: Db, full_table_name: str, search_index_built: Future[None]) -> None:
+        """Order hive_votes by post, restore its indexes, then vacuum it if it was rewritten."""
+        ordered = cls._order_hive_votes_by_post(db)
         cls._restore_indexes_per_table(db, full_table_name)
+        if ordered:
+            cls._vacuum_ordered_hive_votes(db, search_index_built)
 
     @classmethod
     def _restore_bm25_index(cls, db) -> None:
@@ -485,10 +571,10 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         Not registered with HAF because pg_search left internal metadata
         (MetaPage) that prevented the UNLOGGED conversion older versions did,
         even after the index was dropped. Instead we manage this index manually:
-        created here during the fills phase, dropped explicitly in
-        ensure_indexes_are_disabled.
+        created here, in an initial sync's last index restore or else during the
+        fills phase, dropped explicitly in ensure_indexes_are_disabled.
 
-        Skipped when pg_search extension is not available.
+        Skipped when pg_search extension is not available or the index exists.
         """
         from hive.db.schema import pg_search_available
 
@@ -498,6 +584,9 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
 
         table = f"{SCHEMA_NAME}.hive_post_data"
         with AutoDbDisposer(db, 'restore_bm25') as db_mgr:
+            if db_mgr.db.query_one(f"SELECT to_regclass('{SCHEMA_NAME}.hive_post_data_bm25_idx') IS NOT NULL"):
+                log.info("[MASSIVE] BM25 index already exists")
+                return
             # Taking the toast table's ShareUpdateExclusiveLock cancels a toast
             # autovacuum already running; none starts again until the RESET.
             # A crash in between leaves the option set, and the next start's
@@ -511,7 +600,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
     @classmethod
     def _build_bm25_index(cls, db: Db, build_db: Db, table: str) -> None:
         for attempt in range(1, cls._BM25_BUILD_ATTEMPTS + 1):
-            log.info("[MASSIVE] Creating BM25 index (deferred from index phase)")
+            log.info("[MASSIVE] Creating BM25 index")
             time_start = perf_counter()
             try:
                 build_db.query_no_return(bm25_index_sql())
@@ -534,14 +623,23 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             return
 
     @classmethod
+    def _restore_bm25_index_resolving(cls, db: Db, built: Future[None]) -> None:
+        """Build the BM25 index, then resolve `built`, also when the build failed."""
+        try:
+            cls._restore_bm25_index(db)
+        finally:
+            built.set_result(None)
+
+    @classmethod
     def _restore_bm25_index_after_recompute(cls, db: Db, recomputed: Future[None]) -> None:
         """Build the BM25 index once the hive_posts recompute has committed; skip it when that task failed first.
 
-        The build holds a snapshot for its whole length, often longer than the
-        recompute. Started beside the recompute, that snapshot keeps every row
-        version the recompute replaced (about 76 M at mainnet scale) visible to
-        it, so hive_posts' index restore indexes them all and the vacuums after
-        cannot remove them.
+        A no-op when an initial sync's index restore built it already. The build
+        holds a snapshot for its whole length, often longer than the recompute.
+        Started beside the recompute, that snapshot keeps every row version the
+        recompute replaced (about 76 M at mainnet scale) visible to it, so
+        hive_posts' index restore indexes them all and the vacuums after cannot
+        remove them.
         """
         if recomputed.exception() is not None:
             log.info("[MASSIVE] Skipping BM25 index creation: the hive_posts task failed")
@@ -558,29 +656,35 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         FOSM.clear()
 
     @classmethod
-    def _restore_indexes_in_threads(cls, deferred: Sequence[str] = (), order_votes: bool = False) -> None:
+    def _restore_indexes_in_threads(
+        cls, deferred: Sequence[str] = (), order_votes: bool = False, build_search_index: bool = False
+    ) -> None:
         """Restore all registered indexes in parallel across tables, except those of `deferred`.
 
         With `order_votes`, hive_votes is rewritten in post order first, on the
-        thread that then restores its indexes. Excludes hive_post_data — the BM25
-        index is deferred to the fills phase where it runs in parallel with other
-        finalization work.
+        thread that then restores its indexes. With `build_search_index`,
+        hive_post_data's BM25 index is built on a thread of its own, and the
+        vacuum after the hive_votes rewrite waits for it
+        (_vacuum_ordered_hive_votes); without it, the fills phase builds the index.
         """
         cls._ensure_tables_exist(cls._TABLES_WITH_REGISTERED_INDEXES)
         start_time = FOSM.start()
 
-        methods = []
+        methods: list[tuple[str, Callable[..., Any], Sequence[Any]]] = []
+        search_index_built: Future[None] = Future()
+        if build_search_index:
+            methods.append(('bm25_index', cls._restore_bm25_index_resolving, [cls.db(), search_index_built]))
+        else:
+            search_index_built.set_result(None)
         for table in cls._TABLES_WITH_REGISTERED_INDEXES:
             if table in deferred:
                 log.info("[MASSIVE] Deferring index restore of %s.%s to finalization", SCHEMA_NAME, table)
                 continue
             full_name = f'{SCHEMA_NAME}.{table}'
-            restore = (
-                cls._order_and_restore_hive_votes
-                if order_votes and table == 'hive_votes'
-                else cls._restore_indexes_per_table
-            )
-            methods.append((table, restore, [cls.db(), full_name]))
+            if order_votes and table == 'hive_votes':
+                methods.append((table, cls._order_and_restore_hive_votes, [cls.db(), full_name, search_index_built]))
+            else:
+                methods.append((table, cls._restore_indexes_per_table, [cls.db(), full_name]))
         # Include reptracker index
         methods.append(
             (
@@ -759,7 +863,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         return cls._indexes_were_enabled
 
     @classmethod
-    def ensure_indexes_are_enabled(cls, defer_to_finalization: bool = False) -> None:
+    def ensure_indexes_are_enabled(cls, defer_to_finalization: bool = False, build_search_index: bool = False) -> None:
         """Restore the registered indexes, after SET LOGGED on any table still UNLOGGED.
 
         On an initial sync, hive_votes is first rewritten in post order
@@ -767,6 +871,9 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         sync, the indexes of _INDEX_RESTORE_DEFERRED_TABLES are left for the
         finalization that follows (ensure_finalize_massive_sync) to restore after
         its recompute. Without it, indexes an earlier call deferred are restored too.
+        With `build_search_index` on an initial sync, for a restore that no massive
+        batch follows (each would update the index), the BM25 index is built beside
+        the others instead of in finalization.
         """
         if cls.are_indexes_enabled():
             if not defer_to_finalization:
@@ -785,7 +892,11 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         log.info("Creating indexes: started")
         if defer_to_finalization and cls.is_initial_sync():
             cls._deferred_index_tables = list(cls._INDEX_RESTORE_DEFERRED_TABLES)
-        cls._restore_indexes_in_threads(deferred=cls._deferred_index_tables, order_votes=cls.is_initial_sync())
+        cls._restore_indexes_in_threads(
+            deferred=cls._deferred_index_tables,
+            order_votes=cls.is_initial_sync(),
+            build_search_index=build_search_index and cls.is_initial_sync(),
+        )
         if not defer_to_finalization:
             cls._restore_deferred_indexes()
         log.info("Creating indexes: finished")
@@ -836,7 +947,9 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
 
         Two long UPDATEs of hive_posts in parallel would wait on each other's row
         locks for the length of the longer one, or deadlock; serialized, each sees
-        the other's committed rows, and they write disjoint columns.
+        the other's committed rows, and they write disjoint columns. The recompute
+        runs on several connections, each on posts no other one writes
+        (_recalculate_all_posts_votes_and_children), and ends before the next UPDATE.
 
         The indexes an initial sync deferred are restored after the recompute and
         before the root_id repair and the muted-parent propagation, which find
@@ -857,14 +970,7 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                 # applies *deltas*, so it must commit exactly once — it runs inside the
                 # completion-marker transaction instead (_finalize_completion_marker).
                 if massive_sync_preconditions:
-                    time_start = perf_counter()
-                    cls._execute_query_with_modified_work_mem(
-                        db=db_mgr.db, sql=f"SELECT {SCHEMA_NAME}.recalculate_all_posts_votes_and_children()"
-                    )
-                    log.info(
-                        "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs",
-                        perf_counter() - time_start,
-                    )
+                    cls._recalculate_all_posts_votes_and_children(db_mgr.db)
                 recomputed.set_result(None)
 
                 cls._restore_deferred_indexes()
@@ -888,6 +994,58 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
 
         if massive_sync_preconditions:
             cls._finish_muted_parents(db)
+
+    @classmethod
+    def _recalculate_all_posts_votes_and_children(cls, db: Db) -> None:
+        """recalculate_all_posts_votes_and_children's steps, its post id ranges on finalization_workers connections.
+
+        Each range is a transaction of its own that writes only its own posts, so
+        the ranges never wait on each other's row locks. Every step is idempotent:
+        a rerun after an interruption anywhere computes the same values and
+        rewrites only the rows still stale.
+        """
+        time_start = perf_counter()
+        cls._execute_query_with_modified_work_mem(db=db, sql=f"SELECT {SCHEMA_NAME}.prepare_posts_children()")
+        prepare_time = perf_counter() - time_start
+
+        max_id = db.query_one(f"SELECT COALESCE(MAX(id), 0) FROM {SCHEMA_NAME}.hive_posts")
+        ranges = cls._post_id_ranges(max_id, cls.finalization_workers * cls._RECOMPUTE_RANGES_PER_WORKER)
+        methods = [
+            (f'hive_posts ids {first}..{last}', cls._recalculate_posts_range, [db, first, last])
+            for first, last in ranges
+        ]
+        ranges_start = perf_counter()
+        cls.process_tasks_in_threads(
+            "[MASSIVE] Recalculated the posts' votes and children by ranges.",
+            methods,
+            max_workers=cls.finalization_workers,
+        )
+        ranges_time = perf_counter() - ranges_start
+        db.query_no_return(f"TRUNCATE TABLE {SCHEMA_NAME}.__post_children")
+        log.info(
+            "[MASSIVE] recalculate_all_posts_votes_and_children executed in %.4fs "
+            "(prepare_posts_children %.4fs, %d ranges on %d connections %.4fs)",
+            perf_counter() - time_start,
+            prepare_time,
+            len(ranges),
+            cls.finalization_workers,
+            ranges_time,
+        )
+
+    @classmethod
+    def _post_id_ranges(cls, max_id: int, count: int) -> list[tuple[int, int]]:
+        """`count` disjoint ranges of equal width covering the post ids 0 .. _MAX_POST_ID, the last one open-ended."""
+        width = max_id // count + 1
+        ranges = [(i * width, (i + 1) * width - 1) for i in range(count)]
+        ranges[-1] = (ranges[-1][0], cls._MAX_POST_ID)
+        return ranges
+
+    @classmethod
+    def _recalculate_posts_range(cls, db: Db, first_id: int, last_id: int) -> None:
+        with AutoDbDisposer(db, f"recalculate_posts_{first_id}") as db_mgr:
+            cls._execute_query(
+                db_mgr.db, f"SELECT {SCHEMA_NAME}.recalculate_posts_votes_and_children({first_id}, {last_id})"
+            )
 
     @classmethod
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block) -> None:
@@ -1158,12 +1316,14 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             return False
 
         # Dependency graph (A <- B: B reads what A writes), which the parts follow:
-        #   hive_posts: vote aggregates + children, root_id repair, muted parents
-        #       (one thread, see _finish_hive_posts) <- vote_notifications of the
-        #       initial path, which scores by vote_rshares/abs_rshares
+        #   hive_posts: vote aggregates + children (by post id ranges on several
+        #       connections), root_id repair, muted parents (one thread, see
+        #       _finish_hive_posts) <- vote_notifications of the initial path, which
+        #       scores by vote_rshares/abs_rshares
         #   feed cache, payout_stats_view, communities rank, BM25 index: read no
         #       column a finalization task writes, so they run beside hive_posts;
-        #       the BM25 build starts after the hive_posts recompute commits
+        #       an initial sync's index restore built the BM25 index already, else
+        #       its build starts after the hive_posts recompute commits
         #       (_restore_bm25_index_after_recompute)
         #   notification_cache, vote_notifications <- reputation scores
         #   every task <- completion marker
@@ -1193,9 +1353,10 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                     [cls.db(), last_imported_block, current_imported_block],
                 )
             )
-        # BM25 index creation is deferred from the index phase to here. It runs in
-        # parallel with the fills above, off their critical path, from the moment the
-        # hive_posts recompute commits (_restore_bm25_index_after_recompute).
+        # The BM25 index when the index restore did not build it (a restore that massive
+        # batches followed, or a catch-up). It runs in parallel with the fills above,
+        # off their critical path, from the moment the hive_posts recompute commits
+        # (_restore_bm25_index_after_recompute).
         methods.append(('bm25_index', cls._restore_bm25_index_after_recompute, [cls.db(), recomputed]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 

@@ -68,12 +68,19 @@ $BODY$
 
 DROP FUNCTION IF EXISTS hivemind_app.recalculate_all_posts_rshares;
 DROP FUNCTION IF EXISTS hivemind_app.recalculate_all_posts_votes_and_children;
+DROP FUNCTION IF EXISTS hivemind_app.prepare_posts_children;
+DROP FUNCTION IF EXISTS hivemind_app.recalculate_posts_votes_and_children;
 --- Full recomputation of the vote aggregates (update_posts_rshares' columns) and
---- `children` of every post. Both are written by one UPDATE, so a hive_posts row
---- gets one new version instead of one per aggregate. An initial sync runs it
---- before hive_posts' registered indexes are restored (DbState defers them), so
---- it must not depend on any of them: only the primary key is guaranteed.
-CREATE OR REPLACE FUNCTION hivemind_app.recalculate_all_posts_votes_and_children()
+--- `children` of every post, in three steps that finalization runs on several
+--- connections: prepare_posts_children once, recalculate_posts_votes_and_children
+--- over disjoint post id ranges covering 0 .. 2147483647, any number at a time,
+--- then a TRUNCATE of __post_children. recalculate_all_posts_votes_and_children
+--- runs the three on one connection.
+---
+--- The child count of every post into __post_children, which the ranges read. The
+--- table is UNLOGGED and holds no state of its own: a step interrupted anywhere is
+--- redone from the start of prepare_posts_children.
+CREATE OR REPLACE FUNCTION hivemind_app.prepare_posts_children()
 RETURNS VOID
 LANGUAGE 'plpgsql'
 VOLATILE
@@ -128,6 +135,36 @@ SET LOCAL work_mem='512MB';
     __depth := __depth -1;
   END LOOP;
 
+  DROP TABLE hivemind_app.__post_tree;
+  -- The ranges' plans estimate their share of the table from these statistics.
+  ANALYZE hivemind_app.__post_children;
+
+RESET work_mem;
+
+END;
+
+$BODY$
+;
+
+--- The posts with ids in _first_id .. _last_id. Writes no column but those of the
+--- recomputation and no row outside the range, so ranges run at the same time
+--- never wait on each other's rows. hive_votes is read through an index on its
+--- post_id (DbState restores hive_votes' indexes before finalization), hive_posts and
+--- __post_children by their primary keys: an initial sync runs this before
+--- hive_posts' registered indexes are restored (DbState defers them), so it must not
+--- depend on any of them.
+CREATE OR REPLACE FUNCTION hivemind_app.recalculate_posts_votes_and_children(_first_id INT, _last_id INT)
+RETURNS VOID
+LANGUAGE 'plpgsql'
+VOLATILE
+AS
+$BODY$
+BEGIN
+SET LOCAL work_mem='512MB';
+-- A generic plan would estimate every range at the default selectivity of a range
+-- condition, whatever its width.
+SET LOCAL plan_cache_mode = force_custom_plan;
+
   -- Vote aggregates go to posts with votes that are not deleted, `children` to
   -- posts with a count that differs; each keeps its old value elsewhere. A row
   -- none of whose values change is not written: a finalization re-run after an
@@ -136,8 +173,7 @@ SET LOCAL work_mem='512MB';
   -- Hash-free: hive_votes is read in post_id order and __post_children by its
   -- primary key, so a sorted aggregate and a merge full join need no memory. A
   -- hash aggregate holds about 430 bytes per voted post (tens of GB on mainnet),
-  -- and the planner picks it whenever it underestimates the post count, e.g. on
-  -- __post_children, whose statistics predate its contents.
+  -- and the planner picks it whenever it underestimates the post count.
   SET LOCAL enable_hashagg = off;
   SET LOCAL enable_hashjoin = off;
   UPDATE hivemind_app.hive_posts hp
@@ -180,11 +216,18 @@ SET LOCAL work_mem='512MB';
                     ELSE -1
                   END ) as net_votes
           FROM hivemind_app.hive_votes hv
+          WHERE hv.post_id BETWEEN _first_id AND _last_id
           GROUP BY hv.post_id
         ) as votes_rshares
-      FULL JOIN hivemind_app.__post_children pc ON pc.id = votes_rshares.post_id
+      FULL JOIN
+        (
+          SELECT pc.id, pc.child_count
+          FROM hivemind_app.__post_children pc
+          WHERE pc.id BETWEEN _first_id AND _last_id
+        ) as pc ON pc.id = votes_rshares.post_id
     ) as s
   WHERE hp.id = s.post_id
+  AND hp.id BETWEEN _first_id AND _last_id
   AND (
     s.child_count != hp.children
     OR (
@@ -202,13 +245,26 @@ SET LOCAL work_mem='512MB';
     )
   );
 
-  TRUNCATE TABLE hivemind_app.__post_children;
-  DROP TABLE hivemind_app.__post_tree;
-
 RESET enable_hashjoin;
 RESET enable_hashagg;
+RESET plan_cache_mode;
 RESET work_mem;
 
+END;
+
+$BODY$
+;
+
+CREATE OR REPLACE FUNCTION hivemind_app.recalculate_all_posts_votes_and_children()
+RETURNS VOID
+LANGUAGE 'plpgsql'
+VOLATILE
+AS
+$BODY$
+BEGIN
+  PERFORM hivemind_app.prepare_posts_children();
+  PERFORM hivemind_app.recalculate_posts_votes_and_children(0, 2147483647);
+  TRUNCATE TABLE hivemind_app.__post_children;
 END;
 
 $BODY$

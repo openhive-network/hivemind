@@ -131,6 +131,15 @@ class Conf:
             help='vacuums of hivemind tables run at most this many at a time, each on a connection of its own',
             default=4,
         )
+        add(
+            '--finalization-workers',
+            type=_positive_int,
+            env_var='FINALIZATION_WORKERS',
+            help='after an initial massive sync, the connections that recompute the posts\' vote aggregates and '
+            'children counts, each on its own range of posts, and the parallel workers of the sort that orders '
+            'hive_votes by post',
+            default=4,
+        )
 
         # --sync-to-s3 seems to be unnecessary
         add(
