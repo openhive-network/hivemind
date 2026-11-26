@@ -260,6 +260,8 @@ SQL_TESTS = [
     "tests/sql/massive_sync_reply_parents.sql",
     "tests/sql/post_count_maintained.sql",
     "tests/sql/recalculate_votes_children_rerun.sql",
+    "tests/sql/recalculate_votes_children_split.sql",
+    "tests/sql/order_hive_votes_copy_back.sql",
     "tests/sql/autovacuum_insert_reloptions.sql",
     "tests/sql/staging_autovacuum_off.sql",
     "tests/sql/vote_batch_analyze_gate.sql",
