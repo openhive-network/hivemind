@@ -92,6 +92,7 @@ class SyncHiveDb:
 
         Community.start_block = self._conf.get("community_start_block")
         DbState.vacuum_workers = self._conf.get("vacuum_workers")
+        DbState.finalization_workers = self._conf.get("finalization_workers")
         try:
             DbState.initialize(self._enter_sync, self._upgrade_schema)
         except TableSchemaBehindError as exc:
@@ -334,7 +335,7 @@ class SyncHiveDb:
 
                     DbState.ensure_on_synchronous_commit()
                     Blocks.set_stage_b_handoff(self._db, False)
-                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
+                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True, build_search_index=True)
                     DbState.restore_wal_safety_after_massive_sync()
                     DbState.close_admin_db()  # No longer needed after massive sync
 
@@ -652,7 +653,7 @@ class SyncHiveDb:
                 restore_default_signal_handlers()
                 self._on_stop_synchronization(active_connections_before, sigint_during_massive=True)
                 return True
-            DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
+            DbState.ensure_indexes_are_enabled(defer_to_finalization=True, build_search_index=True)
             DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
