@@ -100,6 +100,14 @@ class Conf:
             default=4,
         )
         add(
+            '--massive-payout-workers',
+            type=_positive_int,
+            env_var='MASSIVE_PAYOUT_WORKERS',
+            help='connections that apply a batch\'s payouts to hive_posts concurrently during massive sync, '
+            'each on its own share of the posts (1 = a single connection, as in live sync)',
+            default=4,
+        )
+        add(
             '--massive-sync-batch-blocks',
             type=_positive_int,
             env_var='MASSIVE_SYNC_BATCH_BLOCKS',
@@ -148,7 +156,8 @@ class Conf:
             env_var='TEST_PIPELINE_KILL',
             help='(debug) POINT:BLOCK exits the sync at once at POINT of the massive batch starting at BLOCK, '
             'for crash replay tests: stage_a_committed (the next batch\'s Stage A has committed and this '
-            'batch\'s Stage B has not started; refused with --massive-sync-pipelined=false) or flush_committed '
+            'batch\'s Stage B has not started; refused with --massive-sync-pipelined=false), payouts_committed '
+            '(this batch\'s payout partitions have committed, its reblogs and follows maybe not) or flush_committed '
             '(this batch\'s post data flush has committed)',
             default=None,
         )

@@ -9,6 +9,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import psycopg2
+import psycopg2.errors
 import pytest
 
 import hive.conf
@@ -18,10 +19,11 @@ from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.follow import Follow
+from hive.indexer.payouts import Payouts
 from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
 from hive.indexer.sync import SyncHiveDb
+from hive.indexer.votes import Votes
 
 
 class _Pipeline:
@@ -53,13 +55,14 @@ class _Pipeline:
         applied: bool,
         phase_times: dict[str, float],
         cashout: int,
-    ) -> None:
+    ) -> dict[str, float]:
         assert db is self.stage_b_db, 'Stage B runs on its own connection'
         assert self.gate(first).wait(5), f'Stage B of {first} was never released'
         if first in self.failing:
             raise RuntimeError(f'Stage B of {first} failed')
         self.cashout[first] = cashout
         self.events.append(('B', first))
+        return {'votes_payouts': 0.25, 'follows': 0.125}
 
     def hand_off(self, db: Any) -> None:
         self.events.append('handoff')
@@ -135,6 +138,10 @@ def test_stage_a_of_the_next_batch_runs_beside_stage_b_and_hands_off_only_after_
     ]
     (second_a,) = (t for t in timing if 'blocks=11-20 stage=A' in t)
     assert float(second_a.split('wait_for_b=')[1].split()[0]) > 0, 'Stage A of 11-20 waited for Stage B of 1-10'
+    assert second_a.endswith(' posts=0.000'), 'the A line names its phases'
+    (second_b,) = (t for t in timing if 'blocks=11-20 stage=B' in t)
+    assert second_b.endswith(' votes_payouts=0.250 follows=0.125'), 'the B line names its lanes'
+    assert 'posts=' not in second_b, "the B line leaves out Stage A's phases"
 
 
 def test_a_failed_stage_b_stops_the_next_batch_before_its_handoff_and_keeps_its_row(pipeline: _Pipeline) -> None:
@@ -215,32 +222,203 @@ def test_stage_a_truncates_its_tables_before_its_load_and_keeps_what_it_staged_f
     ]
 
 
-def test_a_deadlocked_phase_4_task_runs_again_alone(monkeypatch: pytest.MonkeyPatch) -> None:
-    tasks = {name: MagicMock(name=name) for name in ('reblogs', 'follows', 'payouts')}
-    tasks['payouts'].query_all_raw.side_effect = [
-        psycopg2.extensions.TransactionRollbackError('deadlock detected'),
-        [(None,)],
-    ]
-    monkeypatch.setattr(Reblog, 'db', tasks['reblogs'])
-    monkeypatch.setattr(Follow, 'db', tasks['follows'])
-    monkeypatch.setattr(Posts, 'db', tasks['payouts'])
-    monkeypatch.setattr(Blocks, '_process_votes_massive', MagicMock())
+class _Conn:
+    """A connection recording its statements into a shared log; `on_sql` may block or raise for one."""
+
+    def __init__(self, name: str, log: list[tuple[str, str]], on_sql: Any = None) -> None:
+        self.name = name
+        self._log = log
+        self._on_sql = on_sql
+
+    def query_no_return(self, sql: str, **kwargs: Any) -> None:
+        self._log.append((self.name, sql))
+        if self._on_sql is not None and sql not in ('START TRANSACTION', 'COMMIT', 'ROLLBACK'):
+            self._on_sql(self.name, sql)
+
+    def query_all_raw(self, sql: str) -> list[tuple[int]]:
+        self.query_no_return(sql)
+        return [(1,)]
+
+
+@pytest.fixture
+def stage_b(monkeypatch: pytest.MonkeyPatch) -> Any:
+    """Installs recording connections for Stage B's phases; returns the function installing them."""
     monkeypatch.setattr(Blocks, '_handoff_tables', False)
+    monkeypatch.setattr(Blocks, '_kill_point', None)
     monkeypatch.setattr(PostDataCache, 'flush', MagicMock())
     monkeypatch.setattr(DbState, 'are_indexes_enabled', MagicMock(return_value=False))
     monkeypatch.setattr(DbState, 'run_boundary_vacuums', MagicMock())
     monkeypatch.setattr('hive.indexer.blocks.sleep', lambda _: None)
+
+    def install(log: list[tuple[str, str]], on_sql: Any = None, votes: int = 2, payouts: int = 3) -> None:
+        def conns(prefix: str, count: int) -> list[_Conn]:
+            return [_Conn(f'{prefix}{i}', log, on_sql) for i in range(count)]
+
+        vote_dbs, payout_dbs = conns('votes', votes), conns('payouts', payouts)
+        monkeypatch.setattr(Votes, 'db', vote_dbs[0])
+        monkeypatch.setattr(Votes, '_worker_dbs', vote_dbs[1:])
+        monkeypatch.setattr(Payouts, 'db', payout_dbs[0])
+        monkeypatch.setattr(Payouts, '_worker_dbs', payout_dbs[1:])
+        monkeypatch.setattr(Reblog, 'db', _Conn('reblogs', log, on_sql))
+        monkeypatch.setattr(Follow, 'db', _Conn('follows', log, on_sql))
+
+    return install
+
+
+def _stage_b_db() -> MagicMock:
     db = MagicMock()
     db.query_one.return_value = 2**31 - 1  # no notification flush
+    return db
 
-    Blocks._run_stage_b(db, 4500001, 4510000, [], True, {}, 4000000)
 
-    assert tasks['reblogs'].query_all_raw.call_count == 1, 'a committed reblogs task would draw hive_reblogs ids again'
-    assert tasks['follows'].query_all_raw.call_count == 1
-    assert tasks['payouts'].query_all_raw.call_count == 2
-    assert tasks['payouts'].query_all_raw.call_args.args == (
-        'SELECT hivemind_app.process_payouts_from_staging(4000000)',
+def _ran(log: list[tuple[str, str]], name: str) -> list[str]:
+    return [sql for conn, sql in log if conn == name and sql not in ('START TRANSACTION', 'COMMIT')]
+
+
+def test_a_deadlocked_phase_4_task_runs_again_alone(stage_b: Any) -> None:
+    log: list[tuple[str, str]] = []
+    deadlocked: list[str] = []
+
+    def on_sql(name: str, sql: str) -> None:
+        if name == 'follows' and not deadlocked:
+            deadlocked.append(sql)
+            raise psycopg2.extensions.TransactionRollbackError('deadlock detected')
+
+    stage_b(log, on_sql)
+
+    Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000)
+
+    follows = 'SELECT * FROM hivemind_app.process_follows_for_blocks(4500001, 4510000)'
+    assert _ran(log, 'follows') == [follows, 'ROLLBACK', follows]
+    assert _ran(log, 'reblogs') == ['SELECT hivemind_app.process_reblogs_from_staging(4510000)'], (
+        'a committed reblogs task would draw hive_reblogs ids again'
     )
+    assert _ran(log, 'votes0') == [
+        'SELECT hivemind_app.prepare_votes_from_staging()',
+        'SELECT hivemind_app.upsert_votes_partition(0, 2)',
+    ]
+    assert len(_ran(log, 'payouts0')) == 1
+
+
+def test_the_payouts_run_in_partitions_after_the_votes_and_beside_reblogs_and_follows(stage_b: Any) -> None:
+    log: list[tuple[str, str]] = []
+    votes_started = threading.Event()
+
+    def on_sql(name: str, sql: str) -> None:
+        if 'prepare_votes_from_staging' in sql:
+            votes_started.set()
+        if name in ('reblogs', 'follows') and not votes_started.wait(5):
+            raise RuntimeError(f'{name} ran only after the votes lane had ended')
+
+    stage_b(log, on_sql)
+
+    lane_times = Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000)
+
+    sqls = [sql for _, sql in log]
+    payouts = [(conn, sql) for conn, sql in log if 'process_payouts_from_staging' in sql]
+    assert sorted(payouts) == [
+        (f'payouts{i}', f'SELECT hivemind_app.process_payouts_from_staging(4000000, {i}, 3)') for i in range(3)
+    ]
+    last_vote = max(i for i, sql in enumerate(sqls) if 'upsert_votes_partition' in sql)
+    first_payout = min(i for i, sql in enumerate(sqls) if 'process_payouts_from_staging' in sql)
+    assert last_vote < first_payout, 'the payouts run once the votes have been written'
+    assert set(lane_times) == {
+        'votes_prepare',
+        'votes_upsert',
+        'payouts',
+        'votes_payouts',
+        'reblogs',
+        'follows',
+        'account_updates',
+    }
+
+
+def test_one_payout_connection_runs_the_whole_payouts_and_retries_a_deadlock(stage_b: Any) -> None:
+    log: list[tuple[str, str]] = []
+    failures = [psycopg2.extensions.TransactionRollbackError('deadlock detected')]
+
+    def on_sql(name: str, sql: str) -> None:
+        if 'process_payouts_from_staging' in sql and failures:
+            raise failures.pop()
+
+    stage_b(log, on_sql, votes=1, payouts=1)
+    deadlocks = Blocks._deadlocks['B']
+
+    Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000)
+
+    assert _ran(log, 'payouts0') == [
+        'SELECT hivemind_app.process_payouts_from_staging(4000000)',
+        'ROLLBACK',
+        'SELECT hivemind_app.process_payouts_from_staging(4000000)',
+    ]
+    assert Blocks._deadlocks['B'] == deadlocks + 1
+
+
+def test_a_failed_lane_fails_stage_b_once_the_other_lanes_have_ended(
+    stage_b: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    log: list[tuple[str, str]] = []
+    follows_done = threading.Event()
+
+    def on_sql(name: str, sql: str) -> None:
+        if name == 'reblogs':
+            raise psycopg2.errors.UniqueViolation('duplicate key')
+        if name == 'follows':
+            threading.Event().wait(0.05)
+            follows_done.set()
+
+    stage_b(log, on_sql)
+    flush = MagicMock()
+    monkeypatch.setattr(PostDataCache, 'flush', flush)
+
+    with pytest.raises(psycopg2.errors.UniqueViolation, match='duplicate key'):
+        Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000)
+
+    assert follows_done.is_set()
+    flush.assert_not_called()
+
+
+def test_the_payouts_committed_kill_point_exits_after_the_payouts(
+    stage_b: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    log: list[tuple[str, str]] = []
+    stage_b(log)
+    monkeypatch.setattr(Blocks, '_kill_point', ('payouts_committed', 4500001))
+    exits = MagicMock(side_effect=SystemExit)
+    monkeypatch.setattr('hive.indexer.blocks.os._exit', exits)
+
+    with pytest.raises(SystemExit):
+        Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000)
+
+    exits.assert_called_once_with(1)
+    assert sorted(sql for _, sql in log if 'process_payouts_from_staging' in sql) == [
+        f'SELECT hivemind_app.process_payouts_from_staging(4000000, {i}, 3)' for i in range(3)
+    ]
+    assert not any('process_account_updates_from_staging' in sql for _, sql in log)
+
+
+@pytest.mark.parametrize(
+    ('handoff_tables', 'load'),
+    [(True, 'take_prefetched_ops_staging'), (False, 'load_ops_staging_from_prefetch')],
+)
+def test_stage_a_takes_the_prefetched_rows_by_rename_only_with_the_handoff_tables(
+    monkeypatch: pytest.MonkeyPatch, handoff_tables: bool, load: str
+) -> None:
+    statements: list[str] = []
+    db = MagicMock()
+    db.query_no_return.side_effect = lambda sql, **kwargs: statements.append(sql)
+    db.query_all.return_value = []
+    prefetch = MagicMock()
+    prefetch.take.return_value = 1.5
+    monkeypatch.setattr(Blocks, '_handoff_tables', handoff_tables)
+    monkeypatch.setattr(Blocks, '_since_stage_reset', {'A': [0, 0], 'B': [0, 0]})
+    monkeypatch.setattr(Community, 'start_block', 37500000)
+
+    assert Blocks._run_stage_a(db, 4500001, 4510000, prefetch, (4510001, 4520000), {})[2] == 1.5
+
+    loads = [sql for sql in statements if 'ops_staging' in sql and 'reset_' not in sql]
+    assert loads == [f'SELECT hivemind_app.{load}(4500001, 4510000)']
+    prefetch.start.assert_called_once_with(4510001, 4520000)
 
 
 def test_the_stage_a_committed_kill_point_needs_pipelining(monkeypatch: pytest.MonkeyPatch) -> None:

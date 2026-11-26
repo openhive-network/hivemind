@@ -355,8 +355,8 @@ Stage B reads `_ops_staging_b`, `_post_results_b` and `_deleted_posts_b`.
 With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PHASE-SUMMARY]` (none with it off):
 
 ```
-[STAGE-TIMING] blocks=F-L stage=A start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> wait_for_b=<s> handoff=<s>
-[STAGE-TIMING] blocks=F-L stage=B start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n>
+[STAGE-TIMING] blocks=F-L stage=A start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> wait_for_b=<s> handoff=<s> <A's phases>
+[STAGE-TIMING] blocks=F-L stage=B start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> <B's phases> <Phase 4's lanes>
 ```
 
 - **Overlap.** Stage A of N+1 overlaps Stage B of N from `max(start)` to `min(end)` of the two lines.
@@ -372,6 +372,8 @@ With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PH
 `--test-pipeline-kill=POINT:F` exits the process at once, as a crash would, in the batch starting at block F:
 - **`stage_a_committed`** holds Stage B of F before its first statement, and exits when the next batch's Stage A
   has committed (pipelined only).
+- **`payouts_committed`** exits in Stage B's votes lane right after the batch's payout partitions have committed
+  (#526). Its reblogs and follows lanes may or may not have committed by then, and 4b has not run.
 - **`flush_committed`** exits right after the batch's post data flush has committed.
 
 `../massive-sync-batch-size/fidelity_run.sh` runs one with `PIPELINE_KILL=POINT:F`, restarts, and dumps. The
@@ -426,3 +428,87 @@ Phase 4.
 - indicative timing, the two runs sharing the host: `on517` took 428.3 s from the first Stage A to the last Stage B
   (Stage A 245.9 s, Stage B 384.7 s, overlapping for 205.6 s). Summed `[PHASE-SUMMARY]` totals of the option-off
   runs: `off517` 628.9 s (posts 189.4 s), `b10k` 600.7 s (posts 175.4 s), `off10k` 643.0 s (posts 178.1 s).
+
+## Shorter stages: Phase 4 lanes, payout partitions, a renamed load (#526)
+
+On the steem-20 rebuild `20261125-bd170b60` Stage B bounded each batch: votes (`prepare_votes_from_staging` 1.6 s,
+then the four upsert partitions 0.7 s), then Phase 4 with `process_payouts_from_staging` (3.1 s) as its long pole
+beside reblogs (0.5 s) and follows (1.4 s). Stage A spent 0.8 s of its 6 s copying the prefetched operations
+(`load_ops_staging_from_prefetch`). Three changes shorten the two critical paths.
+
+### Stage B: three lanes, payouts in partitions
+
+Phase 4 (`Blocks._run_stage_b`) runs three lanes at once, each on connections of its own, with the body merge
+(Phase 3b) on Stage B's thread beside them:
+- **votes, then payouts** (`_run_votes_and_payouts`): the votes phase as before, then in `MASSIVE_WITH_INDEXES`
+  the rshares update of the voted posts, then the payouts. The rshares update reads the votes and, like the
+  payouts, updates the voted posts, so the lane keeps the three in that order;
+- **reblogs**;
+- **follows**.
+
+The votes no longer wait in front of the reblogs and follows. Neither reads or writes anything the votes write,
+and with the foreign keys dropped through massive sync the votes take no lock on the `hive_accounts` rows the
+follows lock (an FK check's `FOR KEY SHARE` would conflict with their `FOR UPDATE`). 4b stays after all three
+lanes, serialising the `hive_accounts` writers as before.
+
+The payouts run in `--massive-payout-workers` partitions (default 4, `MASSIVE_PAYOUT_WORKERS`), each on a
+connection of its own (`Payouts`, like `Votes`' upsert workers). `process_payouts_from_staging(_last_safe_cashout_block,
+_part, _parts)` applies the payout ops whose `author/permlink` hashes to `_part`. All versions of a post share
+its author and permlink, so the partitions update disjoint `hive_posts` rows, and each partition locks its rows in
+id order as #517 requires. A deadlock retry runs every partition again (`_run_parallel_sql`), and so does a
+crash replay of Stage B. That is safe: a partition run again after committing changes nothing, as the
+`last_payout_block` guard keeps `author_rewards` and every other column is set, not added to.
+`.aidev/stage_lock_order_check.py` checks that the partitions together update each post once, and that they
+finish beside the posts phase on the same posts without a deadlock.
+
+Stage B's critical path becomes the longest lane rather than the votes plus the longest Phase 4 task: on that
+rebuild's means, from about 2.3 + 3.1 = 5.4 s to about 2.3 + 3.1 / 4 = 3.1 s, assuming the partitions scale.
+Each one still scans every payout op of the batch to hash it, but it aggregates and updates only its own
+share. That is an estimate, not a measurement (see below).
+
+### Stage A: the prefetched operations are renamed, not copied
+
+`prefetch_ops_staging` already loads the next batch's operations on a thread and connection of its own while
+Stage A runs. It now also sorts them by id, indexes them and analyzes them (`_ops_staging_next` has the indexes of
+`_ops_staging`). With the handoff tables, `take_prefetched_ops_staging` then takes the rows by trading the names
+of `_ops_staging_next` and `_ops_staging`, indexes included, as the handoff trades `_ops_staging` with
+`_ops_staging_b`. The next prefetch truncates what `_ops_staging` held. That removes the copy and the `ANALYZE`
+(about 0.8 s per 10,000 blocks on that rebuild) from Stage A. The batch's rows, their physical order and their
+statistics are those the copy left. A prefetch covering more than the batch has the extra blocks deleted (and
+the table analyzed again), as at a stage change.
+
+The two other modes still copy (`load_ops_staging_from_prefetch`). With the option off, `_ops_staging_b` is a view
+of `_ops_staging`, and a view follows its table by OID, so a rename would leave it reading `_ops_staging_next`. A
+crash replay's Stage B reload copies too. `.aidev/ops_prefetch_check.sql` checks that the rename stages the rows
+and order the load does, for a shorter range too, keeps both tables' indexes, and is refused without the handoff
+tables.
+
+The prefetch does not move to batch N+2. Prefetching N+1 runs beside all of Stage A of N (posts alone take about
+4 s, the prefetch about 1.2 s), so only its copy was on the critical path. With no new stage there is no new
+staged batch for a crash to leave behind: the prefetched table is unlogged and marker-free, as before, and a
+restart reloads every batch from HAF.
+
+### Sub-phase times
+
+`[STAGE-TIMING]` lines now name their phases (format above):
+- **The A line** gives Stage A's phases: `staging_reset_a`, `load`, `accounts_community`, `posts`, `community_post`.
+- **The B line** gives Stage B's sequential phases (`parallel`, `flush`, `notify`, `vacuum`, `staging_reset`), then
+  Phase 4's lanes and sub-phases: `votes_prepare`, `votes_upsert`, `rshares_incr` (`MASSIVE_WITH_INDEXES`),
+  `payouts`, `votes_payouts` (the whole lane), `reblogs`, `follows`, `cache_merge` (when it ran) and
+  `account_updates` (4b).
+
+The lanes overlap one another and all fall within `parallel`. `[PHASE-SUMMARY]` therefore keeps only phases
+that do not overlap, so its `total` is their sum: `votes` and `rshares_incr` are now part of `parallel`, and
+`cache_merge`, which `total` used to count twice, is on the B line only.
+
+### Not measured here
+
+The acceptance runs were not done in this change's workflow:
+- the #500 harness on steem-19 over 10–30 M (sequential base and pipelined, at the forked tip);
+- the #524 fidelity dumps;
+- the kill-and-resume runs at `payouts_committed`;
+- the steem-20 rebuild comparison.
+
+The expected gain per change above is derived from the rebuild's per-statement means, not measured. The partitioned
+payouts' scaling, in particular, depends on the CPU and IO they get beside Stage A.
+

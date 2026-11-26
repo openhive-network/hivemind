@@ -4,7 +4,10 @@
 --   - reads no block past HAF's consistent block, even when asked for more;
 --   - loads into _ops_staging, through load_ops_staging_from_prefetch, the rows
 --     load_ops_staging loads from the context's views once HAF has handed the range out,
---     for a range shorter than the one prefetched too.
+--     for a range shorter than the one prefetched too;
+--   - leaves the same rows in _ops_staging, in the same order, through
+--     take_prefetched_ops_staging (the handoff tables' rename), with both tables keeping
+--     their indexes, and refuses it without the handoff tables.
 -- Needs an empty HAF (no blocks), as .aidev/test-stack.compose.yml starts it.
 --   psql -X -v ON_ERROR_STOP=1 -f .aidev/ops_prefetch_check.sql
 \set QUIET on
@@ -56,6 +59,7 @@ CREATE TEMP TABLE loaded AS SELECT * FROM hivemind_app._ops_staging;
 DO $$
 DECLARE
     __loaded_last INT;
+    __range INT[];
 BEGIN
     ASSERT ( SELECT count(*) FROM loaded ) = 30,
         format( 'load_ops_staging(11, 20) staged %s operations, expected 30', ( SELECT count(*) FROM loaded ) );
@@ -81,6 +85,34 @@ BEGIN
        AND NOT EXISTS ( SELECT * FROM loaded_short EXCEPT ALL SELECT * FROM hivemind_app._ops_staging ),
         'the prefetched operations of 11..15 differ from what load_ops_staging(11, 15) stages';
 
+    -- the rename, with the handoff tables of pipelined massive sync
+    BEGIN
+        PERFORM hivemind_app.take_prefetched_ops_staging( 11, 20 );
+        ASSERT FALSE, 'take_prefetched_ops_staging ran without the handoff tables';
+    EXCEPTION WHEN raise_exception THEN
+        NULL;
+    END;
+    PERFORM hivemind_app.set_stage_b_handoff( TRUE );
+    FOREACH __range SLICE 1 IN ARRAY ARRAY[ [ 11, 20 ], [ 11, 15 ] ] LOOP
+        PERFORM hivemind_app.load_ops_staging( __range[1], __range[2] );
+        DROP TABLE IF EXISTS loaded_range;
+        CREATE TEMP TABLE loaded_range AS SELECT * FROM hivemind_app._ops_staging;
+        PERFORM hivemind_app.prefetch_ops_staging( 11, 40 );
+        PERFORM hivemind_app.take_prefetched_ops_staging( __range[1], __range[2] );
+        ASSERT ( SELECT array_agg( id ORDER BY ctid ) FROM hivemind_app._ops_staging )
+             = ( SELECT array_agg( id ORDER BY id ) FROM loaded_range )
+           AND NOT EXISTS ( SELECT * FROM hivemind_app._ops_staging EXCEPT ALL SELECT * FROM loaded_range )
+           AND NOT EXISTS ( SELECT * FROM loaded_range EXCEPT ALL SELECT * FROM hivemind_app._ops_staging ),
+            format( 'the operations take_prefetched_ops_staging(%s, %s) took differ from what load_ops_staging stages', __range[1], __range[2] );
+        ASSERT ( SELECT count(*) FROM pg_index i WHERE i.indrelid = 'hivemind_app._ops_staging'::regclass ) = 2
+           AND ( SELECT count(*) FROM pg_index i WHERE i.indrelid = 'hivemind_app._ops_staging_next'::regclass ) = 2
+           AND to_regclass( 'hivemind_app._ops_staging_op_type_id_idx' ) IN
+               ( SELECT i.indexrelid FROM pg_index i WHERE i.indrelid = 'hivemind_app._ops_staging'::regclass )
+           AND to_regclass( 'hivemind_app._ops_staging_next_block_num_id_idx' ) IN
+               ( SELECT i.indexrelid FROM pg_index i WHERE i.indrelid = 'hivemind_app._ops_staging_next'::regclass ),
+            'take_prefetched_ops_staging left an index behind or under the other table''s name';
+    END LOOP;
+
     __loaded_last := hivemind_app.prefetch_ops_staging( 26, 30 );
     ASSERT __loaded_last IS NULL, format( 'prefetch_ops_staging(26, 30) loaded up to block %s past the consistent block 25', __loaded_last );
     ASSERT NOT EXISTS ( SELECT 1 FROM hivemind_app._ops_staging_next ), 'a prefetch past the consistent block left rows staged';
@@ -88,4 +120,4 @@ END
 $$;
 
 ROLLBACK;
-\echo ops prefetch: the next batch is staged as load_ops_staging stages it, up to the consistent block of HAF
+\echo ops prefetch: the next batch is staged as load_ops_staging stages it, up to the consistent block of HAF, copied or renamed
