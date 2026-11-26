@@ -52,7 +52,9 @@
 #                .aidev/hivemind_smoke.py; one junit case per call
 #   - tavern     CI's tavern API suite against a clone of the shared synced hivemind
 #                (sandbox.external hivemind), with this tree's PostgREST SQL reloaded
-#                into it: .aidev/hivemind_tavern.py; one junit report per group
+#                into it: .aidev/hivemind_tavern.py; one junit report per group; then, on
+#                the same clone, the parallel post-sync finalization against the serial
+#                one: tests/finalization/test_finalization_equality.py, group `finalization`
 #
 # install, reinstall, mock-wrapper and api-smoke need the HAF stack (.aidev/test-stack.compose.yml),
 # tavern the shared hivemind service. A step exiting 77 is skipped, not failed: its
@@ -567,7 +569,7 @@ if [ ${#rerun[@]} -eq 0 ]; then
             reinstall) step reinstall "" reinstall ;;
             mock-wrapper) step mock-wrapper "" mock_wrapper ;;
             api-smoke) step api-smoke "$out/api-smoke.xml" python3 .aidev/hivemind_smoke.py "$out" ;;
-            tavern) step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" ;;
+            tavern) ensure_version; step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" ;;
         esac
     done
 else
@@ -593,8 +595,7 @@ else
             no_verdict+=(install)
         fi
     fi
-    [ ${#tavern_ids[@]} -eq 0 ] ||
-        step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" "${tavern_ids[@]}"
+    [ ${#tavern_ids[@]} -eq 0 ] || { ensure_version; step tavern "$out/tavern-*.xml" python3 .aidev/hivemind_tavern.py "$out" "${tavern_ids[@]}"; }
     if [ ${#unowned[@]} -gt 0 ]; then
         status=1
         echo "re-run ids no listed step (${steps[*]}) runs: ${unowned[*]}" >&2
