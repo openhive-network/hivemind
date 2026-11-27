@@ -24,7 +24,11 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
    each tavern group of .gitlab-ci.yml's SMOKETESTS the way
    scripts/ci/start-api-smoketest.sh does (RUN_TESTS_WITH_MARKER as in
    e2e_benchmark_on_postgrest), one junit report per group, OUT_DIR/tavern-<group>.xml;
-4. moves the .out.json files tavern writes next to the patterns to
+4. runs the finalization equality test (FINALIZATION_TESTS) on the clone once
+   PostgREST is stopped, as the group `finalization`: it runs the post-sync
+   finalization serially and in parallel there and compares the data, so it
+   comes after every group reading the clone; OUT_DIR/tavern-finalization.xml;
+5. moves the .out.json files tavern writes next to the patterns to
    OUT_DIR/tavern-out/ and drops the clone.
 
 A group whose host precondition the clone lacks (search-api without pg_search)
@@ -39,7 +43,9 @@ or a path under the tavern directory or the repository root:
   across files (`Hivemind`). The dotted path is matched against the tree's files,
   so a file name holding a dot (`bing.com.tavern.yaml`) resolves;
 - a test of a plain Python group (rest_api_*), `<group>/<module>.py[::<test>]`:
-  the node id runs as given.
+  the node id runs as given;
+- a test of the finalization equality test, `tests/finalization/<module>.py[::<test>]`:
+  the node id runs as given, in the group `finalization`.
 A selector naming no file of a group in SMOKETESTS names no test of this tree:
 that is a verdict, reached before the provider is asked for anything, so it is
 recorded as the failing case `rerun-ids` of OUT_DIR/tavern-rerun-ids.xml, which
@@ -105,6 +111,8 @@ MARKER = "not postgrest_ignore"
 # As .gitlab-ci.yml's run-all-smoketests: search-api needs pg_search, which a
 # HAF image may lack, and the admin-level preprocess_search_query.
 SEARCH_GROUP = "search-api_patterns"
+FINALIZATION_GROUP = "finalization"
+FINALIZATION_TESTS = os.path.join("tests", "finalization")
 _SMOKETESTS_RE = re.compile(r"SMOKETESTS=\((.*?)\)", re.DOTALL)
 _SMOKETEST_ENTRY_RE = re.compile(r'"([^":\s]+):[^"\s]+"')
 
@@ -152,6 +160,16 @@ def resolve_selectors(selectors: list[str], groups: list[str]) -> tuple[dict[str
             if target not in group:
                 group.append(target)
     return {group: selected[group] for group in groups if group in selected}, unresolved
+
+
+def split_finalization_selectors(selectors: list[str]) -> tuple[list[str], list[str]]:
+    """The selectors of `selectors` naming a file of the finalization equality test, and the others."""
+    finalization = [
+        s
+        for s in selectors
+        if s.startswith(FINALIZATION_TESTS + os.sep) and os.path.isfile(os.path.join(ROOT, s.partition("::")[0]))
+    ]
+    return finalization, [s for s in selectors if s not in finalization]
 
 
 def _group_of(target: str) -> str:
@@ -305,6 +323,28 @@ def _run_group(
         return subprocess.run(args, cwd=TAVERN_DIR, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
 
 
+def _run_finalization(run_url: str, targets: list[str], out: str) -> int:
+    """Run the finalization equality test `targets` on the clone `run_url`; pytest's exit status."""
+    env = dict(
+        os.environ,
+        HIVEMIND_FINALIZATION_DB_URL=run_url,
+        PYTHONPATH=ROOT,
+        PYTHONFAULTHANDLER="1",
+        PYTHONUNBUFFERED="1",
+    )
+    args = [
+        sys.executable, "-m", "pytest", "-p", "no:cacheprovider", "--rootdir", ROOT,
+        "-v", "--tb=short", "--log-level=INFO",
+        f"--junitxml={os.path.join(out, f'tavern-{FINALIZATION_GROUP}.xml')}",
+        *targets,
+    ]  # fmt: skip
+    t0 = time.monotonic()
+    with open(os.path.join(out, f"tavern-{FINALIZATION_GROUP}.log"), "w") as log:
+        rc = subprocess.run(args, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
+    print(f"{'ok  ' if rc == 0 else 'FAIL'} {FINALIZATION_GROUP} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
+    return rc
+
+
 def _collect_outputs(out: str) -> int:
     moved = 0
     for directory, _, files in os.walk(TAVERN_DIR):
@@ -368,14 +408,18 @@ def main(out: str, selectors: list[str]) -> int:
     with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
         groups = smoketest_groups(handle.read())
     if selectors:
-        selected, unresolved = resolve_selectors(selectors, groups)
+        finalization, tavern_selectors = split_finalization_selectors(selectors)
+        selected, unresolved = resolve_selectors(tavern_selectors, groups) if tavern_selectors else ({}, [])
         if unresolved:
             print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
             write_unresolved_report(out, unresolved)
+        if finalization:
+            selected[FINALIZATION_GROUP] = finalization
         if not selected:
             return TESTS_FAILED
     else:
         selected, unresolved = {group: [f"{group}/"] for group in groups}, []
+        selected[FINALIZATION_GROUP] = [FINALIZATION_TESTS]
     with open(os.path.join(ROOT, shared_fixture.PATCHLEVEL_SQL), encoding="utf-8") as handle:
         revision = shared_fixture.revision(handle.read())
     if revision is None:
@@ -438,7 +482,10 @@ def main(out: str, selectors: list[str]) -> int:
                 "next start. Until then the clone lacks the admin-level scripts and search-api is skipped"
             )
         skips = precondition_skips(run_url, groups, can_install_admin)
-        exits = _serve_and_test(run_url, out, selected, skips)
+        tavern_groups = {group: targets for group, targets in selected.items() if group != FINALIZATION_GROUP}
+        exits = _serve_and_test(run_url, out, tavern_groups, skips) if tavern_groups else {}
+        if FINALIZATION_GROUP in selected:
+            exits[FINALIZATION_GROUP] = _run_finalization(run_url, selected[FINALIZATION_GROUP], out)
     finally:
         print(f"moved {_collect_outputs(out)} .out.json files to {os.path.join(out, 'tavern-out')}")
         try:
