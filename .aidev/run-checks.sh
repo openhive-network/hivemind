@@ -28,8 +28,9 @@
 #                and the pending-rewards endpoints read each account's own posts and votes:
 #                .aidev/account_keyspace_check.sql; that pipelined massive sync's Stage A
 #                (posts, community post ops) and Stage B (payouts, rshares) lock hive_posts
-#                rows in id order and do not deadlock on shared posts:
-#                .aidev/stage_lock_order_check.py; that no function
+#                rows in id order and do not deadlock on shared posts, and that Stage B's
+#                payouts defer a post Stage A holds instead of waiting for it and apply it
+#                later to the same columns: .aidev/stage_lock_order_check.py; that no function
 #                in hivemind_endpoints is VOLATILE: .aidev/endpoint_volatility_check.sql; and that the
 #                hivemind role holds no TRUNCATE, REFERENCES or TRIGGER on HAF's control
 #                tables: .aidev/haf_control_table_privileges_check.sql; and that it is

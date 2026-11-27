@@ -1544,6 +1544,9 @@ WHERE table_schema = '{SCHEMA_NAME}' AND table_type = 'BASE TABLE'
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
 
+            # The payouts the last pipelined Stage B left, before the recompute reads is_paidout.
+            cls.db().query_no_return(f"SELECT {SCHEMA_NAME}.apply_deferred_payouts()")
+
             # Idempotent on purpose: after a crash the process-local state is gone
             # but the reloptions persist, so always RESET them at finalization.
             cls.restore_autovacuum_after_massive_sync()

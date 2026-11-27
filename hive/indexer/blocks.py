@@ -18,6 +18,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.follow import Follow
+from hive.indexer.lock_waits import LockWaitSampler, connection_name
 from hive.indexer.mentions import Mentions
 from hive.indexer.notification_cache import (
     FollowNotificationCache,
@@ -110,6 +111,8 @@ class Blocks:
     # Stage B's Phase 4 lanes count theirs from threads of their own.
     _deadlocks_lock = threading.Lock()
     _MAX_DEADLOCK_RETRIES = 3
+    # Pipelined massive sync: how long the stages' connections wait on locks, for [STAGE-TIMING].
+    _lock_waits: LockWaitSampler | None = None
 
     @classmethod
     def setup(cls, conf: Conf):
@@ -144,6 +147,8 @@ class Blocks:
             DbAdapterHolder.open_common_blocks_in_background_processing_db()
             if cls._pipelined:
                 DbAdapterHolder.open_stage_b_processing_db()
+                cls._lock_waits = LockWaitSampler(shared_db_adapter.clone("LockWaits"))
+                cls._lock_waits.start()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
@@ -164,6 +169,9 @@ class Blocks:
     @classmethod
     def close_own_db_access(cls) -> None:
         cls._shut_down_stage_b()
+        if cls._lock_waits is not None:
+            cls._lock_waits.stop()
+            cls._lock_waits = None
         DbAdapterHolder.close_common_blocks_in_background_processing_db()
         DbAdapterHolder.close_stage_b_processing_db()
 
@@ -271,6 +279,7 @@ class Blocks:
             t0 = perf_counter()
             cls._hand_off_to_stage_b(db)
             phase_times['handoff'] = perf_counter() - t0
+        cls._apply_deferred_payouts(db)
         cls._run_stage_b(
             db, first_block, last_block, post_results, post_data_applied, phase_times, cls._last_safe_cashout_block
         )
@@ -303,29 +312,39 @@ class Blocks:
 
         started = time()
         deadlocks = cls._deadlocks['A']
+        stage_a_connections = [connection_name(db)]
+        lock_wait = cls._lock_wait(stage_a_connections)
         post_results, post_data_applied, prefetched = cls._run_stage_a(
             db, first_block, last_block, ops_prefetch, next_range, phase_times
         )
         ended = time()
+        lock_wait = cls._lock_wait(stage_a_connections) - lock_wait
         cls._kill_if_at('stage_a_committed', cls._stage_b_first_block)
 
         cls.wait_for_stage_b()
         waited = time() - ended
+        # Between the two Stage Bs: no other transaction writes hive_posts now.
+        t0 = perf_counter()
+        deferred_payouts = cls._apply_deferred_payouts(db)
+        phase_times['apply_deferred'] = perf_counter() - t0
         t0 = perf_counter()
         cls._hand_off_to_stage_b(db)
         phase_times['handoff'] = perf_counter() - t0
         log.info(
-            "[STAGE-TIMING] blocks=%d-%d stage=A start=%.3f end=%.3f elapsed=%.3f deadlocks=%d "
-            "wait_for_b=%.3f handoff=%.3f %s",
+            "[STAGE-TIMING] blocks=%d-%d stage=A start=%.3f end=%.3f elapsed=%.3f deadlocks=%d lock_wait=%.3f "
+            "wait_for_b=%.3f handoff=%.3f apply_deferred=%.3f deferred_payouts=%d %s",
             first_block,
             last_block,
             started,
             ended,
             ended - started,
             cls._deadlocks['A'] - deadlocks,
+            lock_wait,
             waited,
             phase_times['handoff'],
-            _format_times({k: v for k, v in phase_times.items() if k != 'handoff'}),
+            phase_times['apply_deferred'],
+            deferred_payouts,
+            _format_times({k: v for k, v in phase_times.items() if k not in ('handoff', 'apply_deferred')}),
         )
 
         if cls._stage_b_pool is None:
@@ -368,19 +387,33 @@ class Blocks:
             deadlocks = cls._deadlocks['B']
             db = DbAdapterHolder.stage_b_processing_db()
             a_phases = set(phase_times)
+            lanes = cls._stage_b_connections(db)
+            lock_waits = {lane: cls._lock_wait(names) for lane, names in lanes.items()}
             lane_times = cls._run_stage_b(
-                db, first_block, last_block, post_results, post_data_applied, phase_times, last_safe_cashout_block
+                db,
+                first_block,
+                last_block,
+                post_results,
+                post_data_applied,
+                phase_times,
+                last_safe_cashout_block,
+                defer_locked_payouts=True,
             )
             cls._in_transaction(db, f"DELETE FROM {SCHEMA_NAME}._batch_queue WHERE first_block = {first_block:d}")
             ended = time()
+            lock_waits = {lane: cls._lock_wait(names) - lock_waits[lane] for lane, names in lanes.items()}
             log.info(
-                "[STAGE-TIMING] blocks=%d-%d stage=B start=%.3f end=%.3f elapsed=%.3f deadlocks=%d %s %s",
+                "[STAGE-TIMING] blocks=%d-%d stage=B start=%.3f end=%.3f elapsed=%.3f deadlocks=%d %s %s %s",
                 first_block,
                 last_block,
                 started,
                 ended,
                 ended - started,
                 cls._deadlocks['B'] - deadlocks,
+                ' '.join(
+                    f"{'lock_wait' if lane == 'all' else f'lock_wait_{lane}'}={wait:.3f}"
+                    for lane, wait in lock_waits.items()
+                ),
                 _format_times({k: v for k, v in phase_times.items() if k not in a_phases}),
                 _format_times(lane_times),
             )
@@ -465,6 +498,7 @@ class Blocks:
             t0 = perf_counter()
             cls._hand_off_to_stage_b(db)
             phase_times['handoff'] = perf_counter() - t0
+        cls._apply_deferred_payouts(db)
         cls._run_stage_b(
             db, first_block, last_block, post_results, post_data_applied, phase_times, cls._last_safe_cashout_block
         )
@@ -570,12 +604,14 @@ class Blocks:
         post_data_applied: bool,
         phase_times: dict[str, float],
         last_safe_cashout_block: int,
+        defer_locked_payouts: bool = False,
     ) -> dict[str, float]:
         """Run a batch's Stage B (phases 4-7) on `db` and its phases' own connections, from what Stage A handed off.
 
-        Payouts take `last_safe_cashout_block` as set_end_of_sync_lib set it for the batch.
-        Returns the times of Phase 4's lanes and sub-phases, which overlap one another and
-        are all within phase_times['parallel'].
+        Payouts take `last_safe_cashout_block` as set_end_of_sync_lib set it for the batch;
+        with `defer_locked_payouts`, those of the posts another transaction holds are left in
+        _deferred_payouts (_apply_deferred_payouts). Returns the times of Phase 4's lanes and
+        sub-phases, which overlap one another and are all within phase_times['parallel'].
         """
         # Phase 4+3b: three lanes, each on connections of its own, beside Python's body merge
         # (Phase 3b) on this thread:
@@ -600,7 +636,7 @@ class Blocks:
         t0 = perf_counter()
         lanes: dict[str, Callable[[], object]] = {
             'votes_payouts': lambda: cls._run_votes_and_payouts(
-                db, first_block, last_block, last_safe_cashout_block, lane_times
+                db, first_block, last_block, last_safe_cashout_block, lane_times, defer_locked_payouts
             ),
             'reblogs': lambda: cls._run_task(
                 Reblog.db, "Reblogs", f"SELECT {SCHEMA_NAME}.process_reblogs_from_staging({last_block:d})"
@@ -701,7 +737,13 @@ class Blocks:
 
     @classmethod
     def _run_votes_and_payouts(
-        cls, db: Db, first_block: int, last_block: int, last_safe_cashout_block: int, times: dict[str, float]
+        cls,
+        db: Db,
+        first_block: int,
+        last_block: int,
+        last_safe_cashout_block: int,
+        times: dict[str, float],
+        defer_locked_payouts: bool = False,
     ) -> None:
         """Stage B's votes lane: votes, the rshares update of the voted posts (MASSIVE_WITH_INDEXES), payouts.
 
@@ -736,7 +778,7 @@ class Blocks:
                 )
             times['rshares_incr'] = perf_counter() - t0
 
-        _timed(times, 'payouts', lambda: cls._process_payouts_massive(last_safe_cashout_block))
+        _timed(times, 'payouts', lambda: cls._process_payouts_massive(last_safe_cashout_block, defer_locked_payouts))
         cls._kill_if_at('payouts_committed', first_block)
 
     @classmethod
@@ -1037,21 +1079,23 @@ class Blocks:
         )
 
     @classmethod
-    def _process_payouts_massive(cls, last_safe_cashout_block: int) -> int:
+    def _process_payouts_massive(cls, last_safe_cashout_block: int, defer_locked: bool = False) -> int:
         """Apply a massive batch's payouts; return the number of hive_posts rows updated.
 
         With more than one connection, each applies its own share of the batch's posts
         (process_payouts_from_staging's partitions), all at once. A deadlock retry re-runs
         every partition: one that already committed applies the same payouts again, which
-        changes nothing.
+        changes nothing. With `defer_locked`, the payouts of the posts another transaction
+        holds are left in _deferred_payouts instead of waited for.
         """
         dbs = Payouts.partition_dbs()
-        if len(dbs) == 1:
+        if len(dbs) == 1 and not defer_locked:
             return int(
                 cls._run_parallel_sql(
                     [(dbs[0], f"SELECT {SCHEMA_NAME}.process_payouts_from_staging({last_safe_cashout_block:d})")]
                 )[0]
             )
+        defer = ', TRUE' if defer_locked else ''
         return sum(
             int(count)
             for count in cls._run_parallel_sql(
@@ -1059,12 +1103,45 @@ class Blocks:
                     (
                         db,
                         f"SELECT {SCHEMA_NAME}.process_payouts_from_staging"
-                        f"({last_safe_cashout_block:d}, {part}, {len(dbs)})",
+                        f"({last_safe_cashout_block:d}, {part}, {len(dbs)}{defer})",
                     )
                     for part, db in enumerate(dbs)
                 ]
             )
         )
+
+    @staticmethod
+    def _apply_deferred_payouts(db: Db) -> int:
+        """Apply on `db` the payouts a pipelined Stage B left in _deferred_payouts; return the number of posts updated.
+
+        Runs while no Stage B does, before the next one's rshares update and payouts, so that
+        each post's payouts are applied in batch order.
+        """
+        return int(db.query_one(f"SELECT {SCHEMA_NAME}.apply_deferred_payouts()"))
+
+    @classmethod
+    def _lock_wait(cls, names: list[str]) -> float:
+        """Seconds the connections of these application names have waited on locks so far; 0 without sampling."""
+        return 0.0 if cls._lock_waits is None else cls._lock_waits.total(names)
+
+    @staticmethod
+    def _stage_b_connections(db: Db) -> dict[str, list[str]]:
+        """The application names of Stage B's connections ('all', `db` included), and of each Phase 4 lane's."""
+        lanes = {
+            'votes_payouts': [connection_name(d) for d in (*Votes.upsert_dbs(), *Payouts.partition_dbs())],
+            'reblogs': [connection_name(d) for d in (Reblog.db,) if d is not None],
+            'follows': [connection_name(d) for d in (Follow.db,) if d is not None],
+        }
+        others = (
+            db,
+            PostDataCache.db,
+            PostNotificationCache.db,
+            FollowNotificationCache.db,
+            ReblogNotificationCache.db,
+        )
+        everything = [name for names in lanes.values() for name in names]
+        everything += [connection_name(d) for d in others if d is not None]
+        return {'all': everything, **lanes}
 
     @staticmethod
     def _run_parallel_sql(tasks: list[tuple[Db | None, str]], max_retries: int = 3) -> list[Any]:
