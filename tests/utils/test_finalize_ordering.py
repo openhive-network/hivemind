@@ -40,10 +40,15 @@ def _run(
     def can_continue() -> bool:
         return allowed_continue_checks is None or next(counter) < allowed_continue_checks
 
+    def fake_wait(db: Any, block_num: int) -> bool:
+        calls.append(('_wait_for_reputation_tracker', block_num))
+        return True
+
     patches: dict[str, Any] = {
         k: (v if v is not None else staticmethod(lambda *a, _name=k, **kw: calls.append((_name,))))
         for k, v in BASE.items()
     }
+    patches['_wait_for_reputation_tracker'] = staticmethod(fake_wait)
     with (
         patch.multiple(DbState, **patches),
         patch.object(DbState, 'process_tasks_in_threads', staticmethod(fake_tasks)),
@@ -84,7 +89,13 @@ def test_short_initial_sync_rescores_reputation_notifications_before_marker() ->
     """An initial sync's flushes defer the score > 0 cut to the rescore, whatever its length."""
     completed, calls = _run(massive_sync_preconditions=False, last_completed=1)
     assert completed is True
-    assert [c[0] for c in calls] == ['parallel', '_finish_reputation_notification_scores', 'marker']
+    assert [c[0] for c in calls] == [
+        'parallel',
+        '_wait_for_reputation_tracker',
+        '_finish_reputation_notification_scores',
+        'marker',
+    ]
+    assert calls[1] == ('_wait_for_reputation_tracker', 200), "the rescoring waits for reptracker at hivemind's block"
 
 
 def test_interrupt_before_fills_skips_everything():

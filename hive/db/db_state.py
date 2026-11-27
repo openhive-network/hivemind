@@ -14,6 +14,7 @@ import psycopg2.extensions
 
 import hive.db.schema as schema_module
 from hive.conf import (
+    APP_NAME,
     MASSIVE_WITHOUT_INDEXES_THRESHOLD_BLOCKS,
     REPTRACKER_SCHEMA_NAME,
     SCHEMA_NAME,
@@ -115,6 +116,8 @@ class DbState:
     _VACUUM_CONNECT_ATTEMPTS = 5
     _VACUUM_CONNECT_BACKOFF_SECONDS = 2.0
     _VISIBILITY_VACUUM_NAME = "visibility_vacuum"
+    _REPTRACKER_POLL_SECONDS = 10.0
+    _REPTRACKER_LOG_EVERY_POLLS = 6
 
     # Max retries for DDL operations that can deadlock with other HAF apps
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
@@ -1191,6 +1194,64 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
             )
 
     @classmethod
+    def _reptracker_block_processor_running(cls, db: Db) -> bool:
+        """True when a session other than a hivemind one holds reputation_tracker's HAF block-processor lock.
+
+        Every reptracker main() holds that lock for its lifetime; hivemind's sync holds it
+        too (it reads reptracker_app), alongside its own, which tells its sessions apart.
+        """
+        return bool(
+            db.query_one(
+                "SELECT EXISTS (SELECT 1 FROM pg_locks l "
+                "WHERE l.locktype = 'advisory' AND l.granted "
+                "AND l.classid = hashtext('hive_fork_manager_app_lock') AND l.objid = hashtext('reputation_tracker') "
+                "AND NOT EXISTS (SELECT 1 FROM pg_locks h WHERE h.pid = l.pid AND h.locktype = 'advisory' "
+                "AND h.granted AND h.classid = hashtext('hive_fork_manager_app_lock') "
+                "AND h.objid = hashtext(:app_name)))",
+                app_name=APP_NAME,
+            )
+        )
+
+    @classmethod
+    def _wait_for_reputation_tracker(cls, db: Db, block_num: int) -> bool:
+        """Wait until reputation_tracker has processed `block_num`, so the rescoring reads final reputations.
+
+        Faster massive sync reaches finalization before reptracker reaches its block, and a
+        rescoring then reads reputations that are still behind (#531). Returns True once
+        reptracker reached the block, or as soon as no reptracker block processor runs
+        (nothing would advance it, e.g. a test setup that syncs it after hivemind): the
+        rescoring then reads the reputations as they are, with a warning. Returns False
+        when a shutdown request stops the wait.
+        """
+        polls = 0
+        while True:
+            reptracker_block = db.query_one(f"SELECT hive.app_get_current_block_num('{REPTRACKER_SCHEMA_NAME}')") or 0
+            if reptracker_block >= block_num:
+                if polls:
+                    log.info("[MASSIVE] %s reached block %d", REPTRACKER_SCHEMA_NAME, reptracker_block)
+                return True
+            if not cls._reptracker_block_processor_running(db):
+                log.warning(
+                    "[MASSIVE] %s is at block %d, behind hivemind's %d, and no reputation_tracker block processor "
+                    "runs; rescoring reputation notifications from the reputations as they are",
+                    REPTRACKER_SCHEMA_NAME,
+                    reptracker_block,
+                    block_num,
+                )
+                return True
+            if cls._interrupted("reputation notification scores"):
+                return False
+            if polls % cls._REPTRACKER_LOG_EVERY_POLLS == 0:
+                log.info(
+                    "[MASSIVE] Waiting for %s (block %d) to reach block %d before rescoring reputation notifications",
+                    REPTRACKER_SCHEMA_NAME,
+                    reptracker_block,
+                    block_num,
+                )
+            polls += 1
+            sleep(cls._REPTRACKER_POLL_SECONDS)
+
+    @classmethod
     def _finish_reputation_notification_scores(cls, db) -> None:
         """Recalculate reputation-based notification scores using final reputation data.
 
@@ -1375,7 +1436,11 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         # flushed (and, on the initial-massive path, muted ones cleared). Runs sequentially
         # to avoid concurrent access to hive_notification_cache with the tasks above. Every
         # initial sync needs it, however short: its flushes deferred the score > 0 cut here.
+        # reptracker syncs beside hivemind, so the rescoring waits for it to reach hivemind's
+        # block first; the reputations it reads are then those live sync scores with.
         if massive_sync_preconditions or last_imported_block <= SEED_LAST_COMPLETED_BLOCK:
+            if not cls._wait_for_reputation_tracker(cls.db(), current_imported_block):
+                return False
             cls._finish_reputation_notification_scores(cls.db())
 
         if cls._interrupted("completion marker"):
