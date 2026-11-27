@@ -19,6 +19,7 @@ from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.follow import Follow
+from hive.indexer.notification_cache import FollowNotificationCache, PostNotificationCache, ReblogNotificationCache
 from hive.indexer.payouts import Payouts
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.reblog import Reblog
@@ -34,7 +35,20 @@ class _Pipeline:
         self.gates: dict[int, threading.Event] = {}
         self.failing: set[int] = set()
         self.cashout: dict[int, int] = {}
-        self.stage_b_db = MagicMock(name='stage_b_db')
+        self.deferred: dict[int, bool] = {}
+        self.stage_b_db = _named_db('stage_b_instance')
+        self.common_db = _named_db('massive_instance')
+        self.common_db.query_one.side_effect = self.query_one
+        self.lock_waits: dict[str, float] = {}
+
+    def query_one(self, sql: str) -> int:
+        assert sql == 'SELECT hivemind_app.apply_deferred_payouts()', sql
+        self.events.append('apply_deferred')
+        return 2
+
+    def total(self, names: list[str]) -> float:
+        """The lock wait sampler's totals."""
+        return sum(self.lock_waits.get(name, 0.0) for name in set(names))
 
     def gate(self, first_block: int) -> threading.Event:
         return self.gates.setdefault(first_block, threading.Event())
@@ -44,6 +58,7 @@ class _Pipeline:
     ) -> tuple[list[Any], bool, None]:
         self.events.append(('A', first))
         phase_times['posts'] = 0.0
+        self.lock_waits['hivemind_massive_instance'] = self.lock_waits.get('hivemind_massive_instance', 0.0) + 0.25
         return [], False, None
 
     def stage_b(
@@ -55,12 +70,16 @@ class _Pipeline:
         applied: bool,
         phase_times: dict[str, float],
         cashout: int,
+        defer_locked_payouts: bool = False,
     ) -> dict[str, float]:
         assert db is self.stage_b_db, 'Stage B runs on its own connection'
         assert self.gate(first).wait(5), f'Stage B of {first} was never released'
         if first in self.failing:
             raise RuntimeError(f'Stage B of {first} failed')
         self.cashout[first] = cashout
+        self.deferred[first] = defer_locked_payouts
+        self.lock_waits['hivemind_Payouts_1'] = self.lock_waits.get('hivemind_Payouts_1', 0.0) + 1.5
+        self.lock_waits['hivemind_Follow'] = self.lock_waits.get('hivemind_Follow', 0.0) + 0.125
         self.events.append(('B', first))
         return {'votes_payouts': 0.25, 'follows': 0.125}
 
@@ -71,9 +90,22 @@ class _Pipeline:
         return [c.args[0] for c in self.stage_b_db.query_no_return.call_args_list if 'DELETE' in c.args[0]]
 
 
+def _named_db(name: str) -> MagicMock:
+    db = MagicMock(name=name)
+    db.name = name
+    return db
+
+
 @pytest.fixture
 def pipeline(monkeypatch: pytest.MonkeyPatch) -> Iterator[_Pipeline]:
     p = _Pipeline()
+    monkeypatch.setattr(Blocks, '_lock_waits', p)
+    for holder in (Votes, Payouts, Reblog, Follow, PostDataCache):
+        monkeypatch.setattr(holder, 'db', _named_db(holder.__name__))
+    for cache in (PostNotificationCache, FollowNotificationCache, ReblogNotificationCache):
+        monkeypatch.setattr(cache, 'db', None)
+    monkeypatch.setattr(Votes, '_worker_dbs', [])
+    monkeypatch.setattr(Payouts, '_worker_dbs', [_named_db('Payouts_1')])
     monkeypatch.setattr(Blocks, '_pipelined', True)
     monkeypatch.setattr(Blocks, '_kill_point', None)
     monkeypatch.setattr(Blocks, '_stage_b_future', None)
@@ -84,7 +116,7 @@ def pipeline(monkeypatch: pytest.MonkeyPatch) -> Iterator[_Pipeline]:
     monkeypatch.setattr(Blocks, '_hand_off_to_stage_b', p.hand_off)
     monkeypatch.setattr(Blocks, '_log_phase_summary', lambda *args: None)
     monkeypatch.setattr(DbAdapterHolder, '_stage_b_processing_db', p.stage_b_db)
-    monkeypatch.setattr(DbAdapterHolder, '_block_processing_thread_sync_db', MagicMock(name='common_db'))
+    monkeypatch.setattr(DbAdapterHolder, '_block_processing_thread_sync_db', p.common_db)
     monkeypatch.setattr('hive.indexer.blocks.set_exception_thrown', MagicMock())
     yield p
     for gate in p.gates.values():
@@ -106,7 +138,7 @@ def test_stage_a_of_the_next_batch_runs_beside_stage_b_and_hands_off_only_after_
 
     monkeypatch.setattr(Blocks, '_last_safe_cashout_block', 100)
     Blocks.process_multi_sql_pipelined(1, 10)
-    assert pipeline.events == [('A', 1), 'handoff']
+    assert pipeline.events == [('A', 1), 'apply_deferred', 'handoff']
 
     monkeypatch.setattr(Blocks, '_last_safe_cashout_block', 200)  # set_end_of_sync_lib for the next batch
     second = _in_thread(Blocks.process_multi_sql_pipelined, 11, 20)
@@ -115,7 +147,9 @@ def test_stage_a_of_the_next_batch_runs_beside_stage_b_and_hands_off_only_after_
             break
         threading.Event().wait(0.01)
     threading.Event().wait(0.05)
-    assert pipeline.events == [('A', 1), 'handoff', ('A', 11)], 'no handoff while Stage B of the batch before runs'
+    assert pipeline.events == [('A', 1), 'apply_deferred', 'handoff', ('A', 11)], (
+        'no handoff while Stage B of the batch before runs'
+    )
     assert not second.done()
 
     pipeline.gate(1).set()
@@ -123,8 +157,18 @@ def test_stage_a_of_the_next_batch_runs_beside_stage_b_and_hands_off_only_after_
     pipeline.gate(11).set()
     Blocks.wait_for_stage_b()
 
-    assert pipeline.events == [('A', 1), 'handoff', ('A', 11), ('B', 1), 'handoff', ('B', 11)]
+    assert pipeline.events == [
+        ('A', 1),
+        'apply_deferred',
+        'handoff',
+        ('A', 11),
+        ('B', 1),
+        'apply_deferred',
+        'handoff',
+        ('B', 11),
+    ], "the payouts Stage B of 1-10 deferred are applied before Stage B of 11-20 starts"
     assert pipeline.cashout == {1: 100, 11: 200}, 'each Stage B pays out as of its own batch'
+    assert pipeline.deferred == {1: True, 11: True}, 'beside a Stage A, Stage B defers the payouts of held posts'
     assert pipeline.deleted_rows() == [
         'DELETE FROM hivemind_app._batch_queue WHERE first_block = 1',
         'DELETE FROM hivemind_app._batch_queue WHERE first_block = 11',
@@ -139,9 +183,14 @@ def test_stage_a_of_the_next_batch_runs_beside_stage_b_and_hands_off_only_after_
     (second_a,) = (t for t in timing if 'blocks=11-20 stage=A' in t)
     assert float(second_a.split('wait_for_b=')[1].split()[0]) > 0, 'Stage A of 11-20 waited for Stage B of 1-10'
     assert second_a.endswith(' posts=0.000'), 'the A line names its phases'
+    assert ' deferred_payouts=2 ' in second_a, 'the A line counts the deferred payouts it applied'
+    assert ' lock_wait=0.250 ' in second_a, "the A line holds its own connection's lock waits"
     (second_b,) = (t for t in timing if 'blocks=11-20 stage=B' in t)
     assert second_b.endswith(' votes_payouts=0.250 follows=0.125'), 'the B line names its lanes'
     assert 'posts=' not in second_b, "the B line leaves out Stage A's phases"
+    assert ' lock_wait=1.625 lock_wait_votes_payouts=1.500 lock_wait_reblogs=0.000 lock_wait_follows=0.125 ' in (
+        second_b
+    ), "the B line holds its connections' lock waits during its own run, in all and per lane"
 
 
 def test_a_failed_stage_b_stops_the_next_batch_before_its_handoff_and_keeps_its_row(pipeline: _Pipeline) -> None:
@@ -152,7 +201,7 @@ def test_a_failed_stage_b_stops_the_next_batch_before_its_handoff_and_keeps_its_
     with pytest.raises(RuntimeError, match='Stage B of 1 failed'):
         Blocks.process_multi_sql_pipelined(11, 20)
 
-    assert pipeline.events == [('A', 1), 'handoff', ('A', 11)]
+    assert pipeline.events == [('A', 1), 'apply_deferred', 'handoff', ('A', 11)]
     assert pipeline.deleted_rows() == []
     Blocks.wait_for_stage_b()  # raised once only
 
@@ -185,7 +234,7 @@ def test_the_stage_a_committed_kill_point_exits_after_the_next_stage_a_with_stag
         Blocks.process_multi_sql_pipelined(11, 20)
 
     exits.assert_called_once_with(1)
-    assert pipeline.events == [('A', 1), 'handoff', ('A', 11)], 'Stage B of the first batch never ran'
+    assert pipeline.events == [('A', 1), 'apply_deferred', 'handoff', ('A', 11)], 'Stage B of the first batch never ran'
     held.set()
     pipeline.gate(1).set()
 
@@ -352,6 +401,55 @@ def test_one_payout_connection_runs_the_whole_payouts_and_retries_a_deadlock(sta
         'SELECT hivemind_app.process_payouts_from_staging(4000000)',
     ]
     assert Blocks._deadlocks['B'] == deadlocks + 1
+
+
+@pytest.mark.parametrize(
+    ('payouts', 'calls'),
+    [(3, [(4000000, i, 3) for i in range(3)]), (1, [(4000000, 0, 1)])],
+    ids=['partitions', 'one-connection'],
+)
+def test_stage_b_beside_a_stage_a_defers_the_payouts_of_the_posts_another_transaction_holds(
+    stage_b: Any, payouts: int, calls: list[tuple[int, int, int]]
+) -> None:
+    log: list[tuple[str, str]] = []
+    stage_b(log, payouts=payouts)
+
+    Blocks._run_stage_b(_stage_b_db(), 4500001, 4510000, [], True, {}, 4000000, defer_locked_payouts=True)
+
+    assert sorted(sql for _, sql in log if 'process_payouts_from_staging' in sql) == [
+        f'SELECT hivemind_app.process_payouts_from_staging({c}, {p}, {n}, TRUE)' for c, p, n in calls
+    ]
+
+
+@pytest.mark.parametrize('entry', ['process_multi_sql', 'process_stage_b_of_batch'])
+def test_a_stage_b_run_alone_applies_the_deferred_payouts_first(monkeypatch: pytest.MonkeyPatch, entry: str) -> None:
+    events: list[str] = []
+    db = MagicMock()
+
+    def query_one(sql: str) -> Any:
+        if 'apply_deferred_payouts' in sql:
+            events.append('apply_deferred')
+            return 0
+        return 4510000 if 'prefetch_ops_staging' in sql else True
+
+    def stage_b(*args: Any, defer_locked_payouts: bool = False) -> dict[str, float]:
+        assert not defer_locked_payouts, 'nothing runs beside it, so nothing is deferred'
+        events.append('stage B')
+        return {}
+
+    db.query_one.side_effect = query_one
+    db.query_all.return_value = []
+    monkeypatch.setattr(DbAdapterHolder, '_block_processing_thread_sync_db', db)
+    monkeypatch.setattr(Blocks, '_handoff_tables', False)
+    monkeypatch.setattr(Blocks, '_run_stage_a', lambda *args: ([], True, None))
+    monkeypatch.setattr(Blocks, '_run_stage_b', stage_b)
+    monkeypatch.setattr(Blocks, '_log_phase_summary', lambda *args: None)
+
+    getattr(Blocks, entry)(4500001, 4510000)
+
+    assert events == ['apply_deferred', 'stage B'], (
+        'the payouts a pipelined Stage B deferred come before the next rshares update and payouts'
+    )
 
 
 def test_a_failed_lane_fails_stage_b_once_the_other_lanes_have_ended(

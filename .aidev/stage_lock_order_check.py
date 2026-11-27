@@ -11,7 +11,11 @@ back):
 - overlap: with `high` held, Stage A's posts phase (editing `high` then `low`) and Stage B's
   payouts, then its rshares update, then its payouts in partitions, on both posts finish
   without a deadlock once `high` is released;
-- partitions: the payout partitions update each post exactly once between them.
+- partitions: the payout partitions update each post exactly once between them;
+- deferral: with `high` held, as the next batch's posts phase holds it beside pipelined Stage B,
+  Stage B's payouts (_defer_locked, in partitions) do not wait: they update `low` and leave
+  `high`'s payouts in _deferred_payouts, which apply_deferred_payouts applies once `high` is
+  released; both posts then hold the payout columns the payouts give when nothing is held.
 
 The other sessions lock FOR NO KEY UPDATE: it conflicts with every lock the stages take, and
 not with the FOR KEY SHARE locks an installed database's foreign key checks take (massive sync
@@ -121,6 +125,101 @@ def _payout_partitions(cur: Cursor) -> None:
         updated += _scalar(cur)
     if updated != len(ops):
         raise AssertionError(f"the {PAYOUT_PARTS} payout partitions updated {updated} posts, expected {len(ops)}")
+
+
+# A paid-out post (comment_reward, author_reward, then comment_payout_update) and a voted one.
+_DEFERRAL_OPS: list[tuple[int, Mapping[str, object]]] = [
+    (
+        53,
+        {
+            'author': AUTHOR,
+            'permlink': 'slo-high',
+            'author_rewards': 1234,
+            'total_payout_value': {'amount': '2000', 'precision': 3, 'nai': '@@000000013'},
+            'curator_payout_value': {'amount': '500', 'precision': 3, 'nai': '@@000000013'},
+            'beneficiary_payout_value': {'amount': '0', 'precision': 3, 'nai': '@@000000013'},
+        },
+    ),
+    (
+        51,
+        {
+            'author': AUTHOR,
+            'permlink': 'slo-high',
+            'hive_payout': {'amount': '7'},
+            'hbd_payout': {'amount': '8'},
+            'vesting_payout': {'amount': '9'},
+        },
+    ),
+    (61, {'author': AUTHOR, 'permlink': 'slo-high'}),
+    (
+        72,
+        {
+            'author': AUTHOR,
+            'permlink': 'slo-low',
+            'pending_payout': {'amount': '1500', 'precision': 3, 'nai': '@@000000013'},
+            'total_vote_weight': '4321',
+        },
+    ),
+]
+_PAYOUT_COLUMNS = (
+    "total_payout_value, curator_payout_value, last_payout_block, author_rewards, author_rewards_hive, "
+    "author_rewards_hbd, author_rewards_vests, payout, pending_payout, payout_at, last_payout_at, cashout_time, "
+    "is_paidout, total_vote_weight"
+)
+
+
+def _payout_columns(cur: Cursor, posts: dict[str, int]) -> list[tuple[object, ...]]:
+    cur.execute(
+        f"SELECT {_PAYOUT_COLUMNS} FROM hivemind_app.hive_posts WHERE id = ANY(%s) ORDER BY id",
+        ([posts['slo-low'], posts['slo-high']],),
+    )
+    return [tuple(row) for row in cur.fetchall()]
+
+
+def check_deferral(url: str, cur: Cursor, posts: dict[str, int]) -> None:
+    """Payouts deferred past a held post leave the same payout columns as payouts that held nothing back."""
+    cur.execute("BEGIN")
+    try:
+        _stage_ops(cur, 20_000_004_040, _DEFERRAL_OPS)
+        cur.execute("SELECT hivemind_app.process_payouts_from_staging(0)")
+        expected = _payout_columns(cur, posts)
+    finally:
+        cur.execute("ROLLBACK")
+
+    holder = _hold(url, posts['slo-high'])
+    released = False
+    cur.execute("BEGIN")
+    try:
+        cur.execute("SET LOCAL lock_timeout = '5s'")
+        _stage_ops(cur, 20_000_004_040, _DEFERRAL_OPS)
+        updated = 0
+        for part in range(PAYOUT_PARTS):
+            cur.execute("SELECT hivemind_app.process_payouts_from_staging(0, %s, %s, TRUE)", (part, PAYOUT_PARTS))
+            updated += _scalar(cur)
+        cur.execute("SELECT array_agg(post_id) FROM hivemind_app._deferred_payouts")
+        deferred = (cur.fetchone() or [None])[0]
+        if updated != 1 or deferred != [posts['slo-high']]:
+            raise AssertionError(
+                f"with post high held the payouts updated {updated} posts and deferred {deferred}, "
+                f"expected 1 and [{posts['slo-high']}]"
+            )
+        _release(holder)
+        released = True
+        cur.execute("SELECT hivemind_app.apply_deferred_payouts()")
+        if _scalar(cur) != 1:
+            raise AssertionError("apply_deferred_payouts did not update the deferred post")
+        cur.execute("SELECT count(*) FROM hivemind_app._deferred_payouts")
+        if _scalar(cur) != 0:
+            raise AssertionError("apply_deferred_payouts left rows in _deferred_payouts")
+        if (actual := _payout_columns(cur, posts)) != expected:
+            raise AssertionError(f"deferred payouts left {actual}, the payouts without a held post {expected}")
+    except psycopg2.errors.LockNotAvailable as err:
+        raise AssertionError(f"the deferring payouts waited on held post high: {err}") from err
+    finally:
+        cur.execute("ROLLBACK")
+        if not released:
+            _release(holder)
+    print("deferral: the payouts deferred held post high, and applying it later gave the same payout columns")
 
 
 def _rshares(posts: dict[str, int]) -> Callable[[Cursor], None]:
@@ -296,6 +395,7 @@ def main(url: str) -> int:
         check_overlap(url, cur, posts, 'payouts', _payouts)
         check_overlap(url, cur, posts, 'rshares update', _rshares(posts))
         check_overlap(url, cur, posts, 'payout partitions', _payout_partitions)
+        check_deferral(url, cur, posts)
     except AssertionError as err:
         print(f"stage lock order check failed: {err}")
         return 1

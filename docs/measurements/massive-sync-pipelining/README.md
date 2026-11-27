@@ -355,8 +355,8 @@ Stage B reads `_ops_staging_b`, `_post_results_b` and `_deleted_posts_b`.
 With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PHASE-SUMMARY]` (none with it off):
 
 ```
-[STAGE-TIMING] blocks=F-L stage=A start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> wait_for_b=<s> handoff=<s> <A's phases>
-[STAGE-TIMING] blocks=F-L stage=B start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> <B's phases> <Phase 4's lanes>
+[STAGE-TIMING] blocks=F-L stage=A start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> lock_wait=<s> wait_for_b=<s> handoff=<s> apply_deferred=<s> deferred_payouts=<n> <A's phases>
+[STAGE-TIMING] blocks=F-L stage=B start=<epoch s> end=<epoch s> elapsed=<s> deadlocks=<n> lock_wait=<s> lock_wait_votes_payouts=<s> lock_wait_reblogs=<s> lock_wait_follows=<s> <B's phases> <Phase 4's lanes>
 ```
 
 - **Overlap.** Stage A of N+1 overlaps Stage B of N from `max(start)` to `min(end)` of the two lines.
@@ -366,6 +366,12 @@ With the option on, every batch logs two `[STAGE-TIMING]` lines next to its `[PH
 - **`[PHASE-SUMMARY]`** is written when the batch's Stage B ends. It holds both stages' phases and `handoff`.
 - **Deadlocks.** `deadlocks` counts the 40P01 retries per stage. PostgreSQL's log has the matching `deadlock
   detected` lines.
+- **Lock waits** (#534). `lock_wait` is how long the stage's connections waited on a lock (pg_stat_activity
+  `wait_event_type = 'Lock'`, sampled every 0.1 s by `hive/indexer/lock_waits.py`) between the stage's start and
+  end: Stage A's own connection, and all of Stage B's, then those of each Phase 4 lane.
+- **Deferred payouts** (#534). `deferred_payouts` is how many posts' payouts Stage B of N−1 left in
+  `_deferred_payouts` because Stage A of N held them, and `apply_deferred` how long Stage A of N took to apply
+  them once Stage B of N−1 had ended, before its handoff.
 
 ### Kill tests
 
@@ -573,3 +579,65 @@ estimate above, which assumed the four partitions scale.
 **Next candidates.** After #526 Stage B's critical path is the votes lane. From 10 to 25 M the payouts are its
 largest piece, so partitioning them further comes next there. From 25 M on the serial `prepare_votes_from_staging`
 (about 1.65 s per batch) leads, so splitting its resolution step is the next candidate for that range.
+
+### Stage B's payouts wait on the next batch's posts phase (#534)
+
+**What waited.** On the steem-20 perf rebuild of 2026-11-26 (hivemind 848d81ed, #526), PostgreSQL logged every lock
+wait of 5 s or more (`log_lock_waits`, `deadlock_timeout` 5 s). Of hivemind's, all 2,485 `still waiting for
+ShareLock on transaction` lines came from the four payout partitions (`hivemind_Payouts`, `_1`, `_2`, `_3`, 615 to
+628 each). All of them were `while locking tuple ... in relation "hive_posts"` in `process_payouts_from_staging`,
+and every holder was `hivemind_massive_instance`, Stage A's connection, running `process_posts_from_staging`. The
+2,346 `acquired` lines add up to 19,542 s of waiting, at most 30 s each; shorter waits are not logged. No other
+hivemind connection logged a wait, and none waited on the payouts.
+
+So the conflicting pair is not two Stage B lanes. It is Stage B's payouts of batch N (Phase 4, votes lane, every
+partition) against Stage A's posts phase of batch N+1. Step 0 of the posts phase locks the posts its edits, deletes
+and comment_options name, and holds them to the phase's commit, 10–15 s per batch in replay hours 1–3. The payouts
+update every post voted in the batch (`effective_comment_vote` carries `pending_payout`), so an active post that is
+voted in N and edited in N+1 kept all four partitions waiting for most of the posts phase. The rebuild's
+`[STAGE-TIMING]` lines agree: in hour 1 `payouts` averaged 10.98 s per batch, against 4.2 s of votes before it and
+14.94 s of `posts` beside it.
+
+**What changed.** The two write different `hive_posts` columns and neither reads the other's, so the payouts may
+come after the posts phase:
+- Beside a Stage A, Stage B's payout partitions lock their rows `SKIP LOCKED`
+  (`process_payouts_from_staging(..., _defer_locked => TRUE)`). They update the rows they got and put the folded
+  payouts of the rest into `_deferred_payouts` (logged, one row per post), in the same transaction.
+- Stage A of N+1 applies them (`apply_deferred_payouts`) once Stage B of N has ended and before its handoff. Nothing
+  else writes `hive_posts` then, so each post's payouts are applied in batch order, before the next batch's rshares
+  update reads `is_paidout`.
+- A Stage B that runs alone (sequential massive sync, the crash replays) applies them first, and finalization
+  applies any left before its recompute. `process_payouts_from_staging` itself applies its partition's leftovers
+  before the batch's, so a payout is never applied after a later one.
+- `[STAGE-TIMING]` logs the lock waits (`lock_wait`, per lane on the B line) and the deferred payouts (format above).
+
+**Measured on the 5 M fixture** (steem-4, a ZFS clone per arm of one install of the base tree c98ad4c1, 499
+pipelined batches of 10,000 blocks to 4,990,000, base and candidate side by side; `activity_sampler.py` samples
+`pg_stat_activity` once a second):
+
+| | base c98ad4c1 | candidate |
+|---|---|---|
+| sync wall time | 505 s | 462 s |
+| Stage B elapsed / Stage A's `wait_for_b` | 304.7 / 136.9 s | 256.9 / 94.0 s |
+| `payouts` (votes lane) | 96.2 s | 48.3 s |
+| payout partitions' samples: CPU / `Lock:transactionid` | 175 / 169 | 175 / 0 |
+| active hivemind backend-samples / of them `Lock` | 1,182 / 169 (14.3 %) | 1,031 / 1 (0.1 %) |
+| `lock_wait` logged, Stage B / Stage A, all batches | — | 0.7 / 0.1 s |
+| posts deferred / `apply_deferred` | — | 13,586 / 0.7 s |
+
+A first candidate run tried each row against the locked ones with a `NOT EXISTS` anti-join of two CTE scans, which
+doubled the partitions' CPU (401 samples against 193); the per-row lateral lock attempt replaced it.
+
+**Fidelity.** #524's `fidelity_dump.sql` (dump_format 2): the candidate against both base runs, all 13 compared files
+IDENTICAL (post and notification ids as drawn too). Kill and resume, each killed sync exiting rc=1 at its point and
+the resumed one finishing with rc=0, each IDENTICAL to the base run:
+- `--test-pipeline-kill=payouts_committed:4500001`, the batch whose Stage B deferred 70 posts' payouts in the
+  uninterrupted run (the replay applies them before it runs that Stage B again);
+- `flush_committed:4600001`;
+- `stage_a_committed:4700001`.
+
+**Not measured here.** The fixture's posts phase takes 0.4 s per batch, against 10–15 s in steem-20's replay
+hours 1–4, so the production share of `Lock:transactionid` and HAF's replay-to-head time come from the next
+steem-20 rebuild. The rshares update of `MASSIVE_WITH_INDEXES` still waits for the posts it updates, as before. It
+reads `is_paidout` before the batch's payouts set it, so deferring it would defer those posts' payouts with it; the
+measured rebuild never left `MASSIVE_WITHOUT_INDEXES` (`rshares_incr` 0 throughout).

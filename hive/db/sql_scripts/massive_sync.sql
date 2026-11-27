@@ -107,6 +107,30 @@ CREATE TABLE IF NOT EXISTS hivemind_app._batch_deleted_posts (
     author_id   INT NOT NULL
 );
 
+-- The payouts pipelined massive sync's Stage B left for later, one row per post, as
+-- apply_payouts' version_payouts folds them: the rows the next batch's Stage A, which runs
+-- beside it, held (process_payouts_from_staging with _defer_locked). They are applied
+-- (apply_deferred_payouts) before the next Stage B starts and before finalization, so they
+-- hold the payouts of one batch at most.
+-- MUST remain LOGGED, like _batch_queue: the batch whose payouts these are has left _batch_queue.
+CREATE TABLE IF NOT EXISTS hivemind_app._deferred_payouts (
+    post_id                  INT NOT NULL PRIMARY KEY,
+    part_key                 INT NOT NULL,  -- the payout partition hash of the post's author/permlink
+    cpu_payout_date          TIMESTAMP,
+    has_cpu                  BOOLEAN,
+    author_rewards_hive      BIGINT,
+    author_rewards_hbd       BIGINT,
+    author_rewards_vests     BIGINT,
+    author_rewards           NUMERIC,
+    total_payout_value       JSONB,
+    curator_payout_value     JSONB,
+    beneficiary_payout_value JSONB,
+    last_payout_at           TIMESTAMP,
+    pending_payout           NUMERIC,
+    total_vote_weight        NUMERIC,
+    max_payout_block         INT
+);
+
 CREATE UNLOGGED TABLE IF NOT EXISTS hivemind_app._ops_staging (
     id          BIGINT NOT NULL,       -- HAF operation ID (ordering)
     block_num   INT NOT NULL,
@@ -1291,17 +1315,30 @@ $function$ LANGUAGE plpgsql VOLATILE;
 -- 8. process_payouts_from_staging(_last_safe_cashout_block)
 -- ============================================================================
 
+-- Applies payouts to hive_posts: the batch's (_from_deferred false), as processing it one
+-- block at a time would apply them, or the _deferred_payouts rows (_from_deferred true).
+-- Returns the number of hive_posts rows updated.
+--
 -- With _parts > 1, applies only the payouts of the posts whose author/permlink hashes to
--- _part: massive sync runs the _parts partitions on separate connections at once. A post's
--- versions share its author and permlink, so the partitions update disjoint hive_posts
--- rows, each partition locking its own in id order (#517). A partition run again after it
--- committed, as a deadlock retry or a crash replay runs it, changes nothing: the
--- last_payout_block guard keeps author_rewards, and every other column is set, not added to.
+-- _part (part_key): massive sync runs the _parts partitions on separate connections at once.
+-- A post's versions share its author and permlink, so the partitions update disjoint
+-- hive_posts rows, each partition locking its own in id order (#517).
+--
+-- With _skip_locked, the rows another transaction holds are not waited for: their payouts
+-- go to _deferred_payouts instead, for apply_deferred_payouts. Pipelined massive sync's
+-- Stage B runs the payouts beside the next batch's posts phase, which holds the posts its
+-- edits, deletes and comment_options name until it commits (process_posts_from_staging,
+-- Step 0); waiting for it kept every payout partition waiting for most of that phase
+-- (#534). The two write different columns, and neither reads the other's, so the
+-- payouts may come after it.
 DROP FUNCTION IF EXISTS hivemind_app.process_payouts_from_staging(INT);
-CREATE OR REPLACE FUNCTION hivemind_app.process_payouts_from_staging(
-    _last_safe_cashout_block INT DEFAULT 0,
-    _part INT DEFAULT 0,
-    _parts INT DEFAULT 1
+DROP FUNCTION IF EXISTS hivemind_app.process_payouts_from_staging(INT, INT, INT);
+CREATE OR REPLACE FUNCTION hivemind_app.apply_payouts(
+    _last_safe_cashout_block INT,
+    _part INT,
+    _parts INT,
+    _from_deferred BOOLEAN,
+    _skip_locked BOOLEAN
 ) RETURNS INT AS $function$
 DECLARE
     _count INT := 0;
@@ -1339,7 +1376,8 @@ BEGIN
             (array_agg(s.val->'pending_payout' ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS pending_payout_json,
             (array_agg((s.val->>'total_vote_weight')::NUMERIC ORDER BY s.id DESC) FILTER (WHERE s.op_type_id = 72 AND s.block_num > _last_safe_cashout_block))[1] AS total_vote_weight
         FROM hivemind_app._ops_staging_b s
-        WHERE s.op_type_id IN (51, 53, 61, 72)
+        WHERE NOT _from_deferred
+          AND s.op_type_id IN (51, 53, 61, 72)
           AND (_parts = 1
             OR (hashtext((s.val->>'author') || '/' || (s.val->>'permlink')) & 2147483647) % _parts = _part)
         GROUP BY s.val->>'author', s.val->>'permlink', s.block_num
@@ -1350,6 +1388,7 @@ BEGIN
         SELECT
             t.author,
             t.permlink,
+            hashtext(t.author || '/' || t.permlink) & 2147483647 AS part_key,
             hp.id AS post_id,
             hp.block_num_created,
             CASE WHEN hp.counter_deleted = 0 THEN NULL ELSE hp.block_num END AS deleted_block
@@ -1363,6 +1402,7 @@ BEGIN
         -- block, so each column is the last block's non-NULL value.
         SELECT
             pv.post_id,
+            pv.part_key,
             (array_agg(bp.cpu_payout_date ORDER BY bp.block_num DESC) FILTER (WHERE bp.has_cpu))[1] AS cpu_payout_date,
             bool_or(bp.has_cpu) AS has_cpu,
             (array_agg(bp.author_rewards_hive ORDER BY bp.block_num DESC) FILTER (WHERE bp.author_rewards_hive IS NOT NULL))[1] AS author_rewards_hive,
@@ -1390,17 +1430,61 @@ BEGIN
             AND pv.permlink = bp.permlink
             AND pv.block_num_created <= bp.block_num
             AND (pv.deleted_block IS NULL OR pv.deleted_block > bp.block_num)
-        GROUP BY pv.post_id
+        GROUP BY pv.post_id, pv.part_key
     ),
-    locked AS MATERIALIZED (
-        -- The rows in id order, as the posts phase locks them (process_posts_from_staging,
-        -- Step 0), which pipelined massive sync runs beside this. The UPDATE reads them from
-        -- here, so each row is locked here before it is updated.
-        SELECT m.*
-        FROM version_payouts m
-        JOIN hivemind_app.hive_posts hp ON hp.id = m.post_id
-        ORDER BY hp.id
-        FOR NO KEY UPDATE OF hp
+    payouts AS MATERIALIZED (
+        SELECT
+            vp.post_id, vp.part_key, vp.cpu_payout_date, vp.has_cpu, vp.author_rewards_hive,
+            vp.author_rewards_hbd, vp.author_rewards_vests, vp.author_rewards, vp.total_payout_value,
+            vp.curator_payout_value, vp.beneficiary_payout_value, vp.last_payout_at, vp.pending_payout,
+            vp.total_vote_weight, vp.max_payout_block
+        FROM version_payouts vp
+        UNION ALL
+        SELECT
+            d.post_id, d.part_key, d.cpu_payout_date, d.has_cpu, d.author_rewards_hive,
+            d.author_rewards_hbd, d.author_rewards_vests, d.author_rewards, d.total_payout_value,
+            d.curator_payout_value, d.beneficiary_payout_value, d.last_payout_at, d.pending_payout,
+            d.total_vote_weight, d.max_payout_block
+        FROM hivemind_app._deferred_payouts d
+        WHERE _from_deferred AND (_parts = 1 OR d.part_key % _parts = _part)
+    ),
+    attempted AS MATERIALIZED (
+        -- Each row locked, as the posts phase locks them (process_posts_from_staging, Step 0),
+        -- which pipelined massive sync runs beside this. The UPDATE reads the rows from here,
+        -- so each row is locked here before it is updated. Only one of the two branches runs:
+        -- the first waits for a row another transaction holds, in id order; the second leaves
+        -- it unlocked (is_locked false), so it waits for none. Each row's lock is tried in a
+        -- lateral subquery, as an anti-join of the rows against those locked would compare
+        -- every pair of the two CTEs.
+        SELECT waited.*, TRUE AS is_locked FROM (
+            SELECT m.*
+            FROM payouts m
+            JOIN hivemind_app.hive_posts hp ON hp.id = m.post_id
+            WHERE NOT _skip_locked
+            ORDER BY hp.id
+            FOR NO KEY UPDATE OF hp
+        ) waited
+        UNION ALL
+        SELECT m.*, l.id IS NOT NULL
+        FROM (SELECT * FROM payouts WHERE _skip_locked ORDER BY post_id) m
+        LEFT JOIN LATERAL (
+            SELECT hp.id
+            FROM hivemind_app.hive_posts hp
+            WHERE hp.id = m.post_id
+            FOR NO KEY UPDATE OF hp SKIP LOCKED
+        ) l ON TRUE
+    ),
+    deferred AS (
+        INSERT INTO hivemind_app._deferred_payouts
+            (post_id, part_key, cpu_payout_date, has_cpu, author_rewards_hive, author_rewards_hbd,
+             author_rewards_vests, author_rewards, total_payout_value, curator_payout_value,
+             beneficiary_payout_value, last_payout_at, pending_payout, total_vote_weight, max_payout_block)
+        SELECT
+            m.post_id, m.part_key, m.cpu_payout_date, m.has_cpu, m.author_rewards_hive, m.author_rewards_hbd,
+            m.author_rewards_vests, m.author_rewards, m.total_payout_value, m.curator_payout_value,
+            m.beneficiary_payout_value, m.last_payout_at, m.pending_payout, m.total_vote_weight, m.max_payout_block
+        FROM attempted m
+        WHERE NOT m.is_locked AND NOT _from_deferred
     )
     UPDATE hivemind_app.hive_posts hp
     SET
@@ -1442,12 +1526,54 @@ BEGIN
             ELSE hp.is_paidout
         END,
         total_vote_weight = COALESCE(m.total_vote_weight, hp.total_vote_weight)
-    FROM locked m
-    WHERE hp.id = m.post_id;
+    FROM attempted m
+    WHERE m.is_locked AND hp.id = m.post_id;
 
     GET DIAGNOSTICS _count = ROW_COUNT;
 
     RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- Applies the _deferred_payouts rows of partition _part of _parts, waiting for the rows
+-- another transaction holds, and removes them; returns the number of hive_posts rows
+-- updated. Pipelined massive sync runs it between a batch's Stage B and the next one's,
+-- when no other transaction writes hive_posts, so that each post's payouts are applied in
+-- batch order and the next batch's rshares update reads is_paidout as they leave it.
+CREATE OR REPLACE FUNCTION hivemind_app.apply_deferred_payouts(
+    _part INT DEFAULT 0,
+    _parts INT DEFAULT 1
+) RETURNS INT AS $function$
+DECLARE
+    _count INT;
+BEGIN
+    -- the usual case, as each Stage B starts
+    IF NOT EXISTS (SELECT 1 FROM hivemind_app._deferred_payouts d WHERE _parts = 1 OR d.part_key % _parts = _part) THEN
+        RETURN 0;
+    END IF;
+    _count := hivemind_app.apply_payouts(0, _part, _parts, TRUE, FALSE);
+    DELETE FROM hivemind_app._deferred_payouts d WHERE _parts = 1 OR d.part_key % _parts = _part;
+    RETURN _count;
+END
+$function$ LANGUAGE plpgsql VOLATILE;
+
+
+-- Applies the batch's payouts in _ops_staging_b (apply_payouts); returns the number of
+-- hive_posts rows updated. With _defer_locked, the payouts of the rows another transaction
+-- holds are left in _deferred_payouts. A partition's deferred rows left by an earlier call
+-- are applied first, so that each post's payouts are applied in batch order. A partition run
+-- again after it committed, as a deadlock retry or a crash replay runs it, changes nothing:
+-- the last_payout_block guard keeps author_rewards, and every other column is set, not added to.
+CREATE OR REPLACE FUNCTION hivemind_app.process_payouts_from_staging(
+    _last_safe_cashout_block INT DEFAULT 0,
+    _part INT DEFAULT 0,
+    _parts INT DEFAULT 1,
+    _defer_locked BOOLEAN DEFAULT FALSE
+) RETURNS INT AS $function$
+BEGIN
+    RETURN hivemind_app.apply_deferred_payouts(_part, _parts)
+        + hivemind_app.apply_payouts(_last_safe_cashout_block, _part, _parts, FALSE, _defer_locked);
 END
 $function$ LANGUAGE plpgsql VOLATILE;
 
