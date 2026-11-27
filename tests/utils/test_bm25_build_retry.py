@@ -101,6 +101,7 @@ def _run(
             '_finish_reputation_notification_scores',
         )
     }
+    stubs['_wait_for_reputation_tracker'] = staticmethod(lambda *a: True)
     stubs['_finish_hive_posts'] = staticmethod(hive_posts or _recompute(calls, recompute_delay))
     with (
         patch.multiple(DbState, db=MagicMock(return_value=MagicMock()), **stubs),

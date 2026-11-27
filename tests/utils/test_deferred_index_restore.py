@@ -73,6 +73,7 @@ def _db_state(initial_sync: bool, max_post_id: int = 0) -> Iterator[list[str]]:
             _indexes_were_enabled=False,
             _indexes_were_disabled=True,
             _deferred_index_tables=[],
+            _wait_for_reputation_tracker=staticmethod(lambda *a: True),
             _finish_reputation_notification_scores=staticmethod(lambda *a: None),
             _finalize_completion_marker=staticmethod(lambda *a: statements.append(_MARKER)),
         ),
