@@ -1,12 +1,13 @@
--- The rewrite of hive_votes in post order (DbState._rewrite_hive_votes_in_post_order:
--- a sort into an UNLOGGED copy, copy_back_hive_votes, the order index and its
--- clustering mark) keeps every row, stores them in (post_id, voter_id) order, and
--- leaves the table with the same valid indexes and constraints and the mark set.
+-- The rewrite of hive_votes in post order (DbState._order_hive_votes_by_post: the
+-- order index from its registered command, then CLUSTER on it) keeps every row,
+-- stores them in (post_id, voter_id) order, and leaves the table with the same valid
+-- indexes and constraints and the index marked as the clustering one, the mark a
+-- restart reads to skip the rewrite.
 -- Seeds its own accounts, posts and votes, in an order the rewrite has to change, in
 -- a transaction it rolls back, so it runs on any installed hivemind schema, including
 -- an empty chain:
 --
---   psql -v ON_ERROR_STOP=1 -d <hivemind url> -f tests/sql/order_hive_votes_copy_back.sql
+--   psql -v ON_ERROR_STOP=1 -d <hivemind url> -f tests/sql/order_hive_votes_cluster.sql
 
 \set ON_ERROR_STOP 1
 BEGIN;
@@ -56,13 +57,8 @@ BEGIN
 END;
 $$;
 
-LOCK TABLE hivemind_app.hive_votes IN ACCESS EXCLUSIVE MODE;
-SET LOCAL enable_indexscan = off;
-CREATE UNLOGGED TABLE hivemind_app.__hive_votes_sorted AS SELECT * FROM hivemind_app.hive_votes ORDER BY post_id, voter_id;
-CREATE TEMP TABLE ov_copied AS SELECT * FROM hivemind_app.copy_back_hive_votes('hivemind_app.__hive_votes_sorted');
 CREATE INDEX IF NOT EXISTS hive_votes_post_id_voter_id_idx ON hivemind_app.hive_votes (post_id, voter_id);
-ALTER TABLE hivemind_app.hive_votes CLUSTER ON hive_votes_post_id_voter_id_idx;
-DROP TABLE hivemind_app.__hive_votes_sorted;
+CLUSTER hivemind_app.hive_votes USING hive_votes_post_id_voter_id_idx;
 
 DO $$
 DECLARE
@@ -102,14 +98,6 @@ BEGIN
 
   IF NOT (SELECT indisclustered FROM pg_index WHERE indexrelid = 'hivemind_app.hive_votes_post_id_voter_id_idx'::REGCLASS) THEN
     RAISE EXCEPTION 'hive_votes_post_id_voter_id_idx is not marked as the clustering index';
-  END IF;
-
-  IF to_regclass('hivemind_app.__hive_votes_sorted') IS NOT NULL THEN
-    RAISE EXCEPTION 'the sorted copy of hive_votes was left behind';
-  END IF;
-
-  IF (SELECT copy_seconds < 0 OR rebuild_seconds < 0 FROM ov_copied) THEN
-    RAISE EXCEPTION 'copy_back_hive_votes returned negative durations: %', (SELECT row(c.*) FROM ov_copied c);
   END IF;
 END;
 $$;
