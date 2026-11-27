@@ -132,11 +132,17 @@ verification:
         files: ["--rerun", "{files}"]
   full:
     suites:
+      # Each suite's wall is declared, sized for a loaded host: on session24 the tavern
+      # groups alone ran past a 15-minute wall (rest_api_equivalence at 79 % after 6 min,
+      # 43 s on steem-3). A suite after `checks` gets only what the activity has left,
+      # so the finalization equality test, which takes about as long again, is
+      # `concurrent` to get a wall of its own.
       - name: checks
         adapter: command
         args: [".aidev/run-checks.sh", "full", "unit", "ruff", "install", "reinstall", "mock-wrapper", "api-smoke", "tavern"]
         artifacts: ["test-results/full/"]
         honor_quarantine: true
+        timeout: 1800
         rerun:
           - classify: true
             match: "\\.tavern\\.yaml::"
@@ -154,6 +160,21 @@ verification:
             match: "^api-smoke::"
             file_pattern: "^api-smoke$"
             ids: ["--rerun", "{ids}"]
+      # Beside `checks`, from the slot's start, on a clone of the shared hivemind of its
+      # own (.aidev/hivemind_finalization.py): it writes nothing another suite reads.
+      - name: finalization
+        adapter: command
+        args: [".aidev/run-checks.sh", "full-finalization", "finalization"]
+        artifacts: ["test-results/full-finalization/"]
+        honor_quarantine: true
+        concurrent: true
+        timeout: 2100
+        rerun:
+          - classify: true
+            match: "^tests/finalization/[^/]+\\.py::"
+            file_pattern: "^tests/finalization/(test_[^/]*|[^/]*_test)\\.py$"
+            ids: ["--rerun", "{ids}"]
+            files: ["--rerun", "{files}"]
       # After `checks`, which creates test-results/ (`--report` writes no directory).
       - name: db_shape
         adapter: command

@@ -341,7 +341,13 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _git_identity(monkeypatch)
     root = tmp_path / 'tree'
     (root / '.aidev' / 'shared-hivemind').mkdir(parents=True)
-    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py', 'junit_cases.py'):
+    for name in (
+        'hivemind_tavern.py',
+        'hivemind_finalization.py',
+        'hivemind_smoke.py',
+        'hivemind_rewriter.py',
+        'junit_cases.py',
+    ):
         shutil.copy(AIDEV / name, root / '.aidev' / name)
     shutil.copy(FIXTURE_PY, root / '.aidev' / 'shared-hivemind' / 'shared_fixture.py')
     (root / PATCHLEVEL).parent.mkdir(parents=True)
@@ -366,9 +372,11 @@ def tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return root
 
 
-def _run_step(tree: Path, out: Path, *selectors: str) -> tuple[int, list[str], list[dict[str, Any]]]:
+def _run_step(
+    tree: Path, out: Path, *selectors: str, step: str = 'hivemind_tavern.py'
+) -> tuple[int, list[str], list[dict[str, Any]]]:
     proc = subprocess.run(
-        [sys.executable, str(tree / '.aidev' / 'hivemind_tavern.py'), str(out), *selectors],
+        [sys.executable, str(tree / '.aidev' / step), str(out), *selectors],
         capture_output=True,
         text=True,
     )
@@ -535,6 +543,41 @@ def test_an_exact_hit_clones_that_template_without_a_seed_request_and_drops_the_
         'reload refused: --postgres-url=postgresql://hivemind@hivemind:5432/run_tavern-'
         in (tmp_path / 'out' / 'tavern-reload.log').read_text()
     )
+
+
+def test_the_finalization_step_clones_a_database_of_its_own_and_drops_it_when_the_run_fails(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    recipe = fixture.recipe_of_tree(str(tree), HAF)
+    monkeypatch.setenv('FAKE_TEMPLATES', f'{REV_B}:{recipe}')
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out', step='hivemind_finalization.py')
+
+    clones = [call['vars'] for call in calls if 'clone_run_database' in call['sql']]
+    drops = [call['vars'] for call in calls if 'drop_run_database' in call['sql']]
+    assert len(clones) == 1
+    assert (clones[0]['rev'], clones[0]['recipe']) == (REV_B, recipe)
+    assert re.fullmatch(r'finalization-\d{8}t\d{6}-[0-9a-f]{8}', clones[0]['run'])
+    assert drops == [{'run': clones[0]['run']}]
+    assert not (tmp_path / 'out' / 'tavern-reload.log').exists()
+    # The tree holds no tests/finalization, so pytest runs no test: no verdict, not a test failure.
+    assert rc == 2
+    assert (
+        lines[-1]
+        == 'the finalization equality test failed without running its tests and recording each failure (exit 4)'
+    )
+
+
+def test_the_finalization_step_without_a_fixture_skips_by_name(
+    tree: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv('FAKE_TEMPLATES', f'{REV_A}:{RECIPE_A}')
+
+    rc, lines, calls = _run_step(tree, tmp_path / 'out', step='hivemind_finalization.py')
+
+    assert rc == SKIP
+    assert lines[-1].startswith(f'no hivemind fixture for schema revision {REV_B}')
+    assert not any('clone_run_database' in call['sql'] for call in calls)
 
 
 @pytest.mark.parametrize(

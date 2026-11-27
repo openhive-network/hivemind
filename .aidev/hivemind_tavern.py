@@ -24,11 +24,7 @@ reached at AIDEV_EXTERNAL_HIVEMIND_HOST:AIDEV_EXTERNAL_HIVEMIND_PORT; see
    each tavern group of .gitlab-ci.yml's SMOKETESTS the way
    scripts/ci/start-api-smoketest.sh does (RUN_TESTS_WITH_MARKER as in
    e2e_benchmark_on_postgrest), one junit report per group, OUT_DIR/tavern-<group>.xml;
-4. runs the finalization equality test (FINALIZATION_TESTS) on the clone once
-   PostgREST is stopped, as the group `finalization`: it runs the post-sync
-   finalization serially and in parallel there and compares the data, so it
-   comes after every group reading the clone; OUT_DIR/tavern-finalization.xml;
-5. moves the .out.json files tavern writes next to the patterns to
+4. moves the .out.json files tavern writes next to the patterns to
    OUT_DIR/tavern-out/ and drops the clone.
 
 A group whose host precondition the clone lacks (search-api without pg_search)
@@ -43,9 +39,7 @@ or a path under the tavern directory or the repository root:
   across files (`Hivemind`). The dotted path is matched against the tree's files,
   so a file name holding a dot (`bing.com.tavern.yaml`) resolves;
 - a test of a plain Python group (rest_api_*), `<group>/<module>.py[::<test>]`:
-  the node id runs as given;
-- a test of the finalization equality test, `tests/finalization/<module>.py[::<test>]`:
-  the node id runs as given, in the group `finalization`.
+  the node id runs as given.
 A selector naming no file of a group in SMOKETESTS names no test of this tree:
 that is a verdict, reached before the provider is asked for anything, so it is
 recorded as the failing case `rerun-ids` of OUT_DIR/tavern-rerun-ids.xml, which
@@ -61,6 +55,10 @@ recorded no failure, a selected group skipped on its precondition, a setup error
 the provider refusing or an uncaught exception; SKIP (77) on a revision miss, no
 provider or a provider whose clone API predates sync recipes; the last line
 printed is the reason.
+
+clone_fixture picks the template and clones it (step 1 and the clone of step 2),
+drop_clone drops the clone; .aidev/hivemind_finalization.py takes a clone of its
+own through them.
 """
 
 import importlib.util
@@ -71,6 +69,7 @@ import subprocess
 import sys
 import time
 import traceback
+from dataclasses import dataclass
 from types import ModuleType
 from typing import Any
 from xml.sax.saxutils import quoteattr
@@ -111,14 +110,26 @@ MARKER = "not postgrest_ignore"
 # As .gitlab-ci.yml's run-all-smoketests: search-api needs pg_search, which a
 # HAF image may lack, and the admin-level preprocess_search_query.
 SEARCH_GROUP = "search-api_patterns"
-FINALIZATION_GROUP = "finalization"
-FINALIZATION_TESTS = os.path.join("tests", "finalization")
 _SMOKETESTS_RE = re.compile(r"SMOKETESTS=\((.*?)\)", re.DOTALL)
 _SMOKETEST_ENTRY_RE = re.compile(r'"([^":\s]+):[^"\s]+"')
 
 
 class ProviderError(RuntimeError):
     """The shared hivemind service refused or could not be reached."""
+
+
+@dataclass(frozen=True)
+class Clone:
+    """A run database cloned from the shared hivemind's template for this tree."""
+
+    #: The provider's clone API.
+    api_url: str
+    #: The clone, as the `hivemind` role.
+    url: str
+    run_id: str
+    database: str
+    template: Any
+    can_install_admin: bool
 
 
 def smoketest_groups(gitlab_ci: str) -> list[str]:
@@ -162,28 +173,20 @@ def resolve_selectors(selectors: list[str], groups: list[str]) -> tuple[dict[str
     return {group: selected[group] for group in groups if group in selected}, unresolved
 
 
-def split_finalization_selectors(selectors: list[str]) -> tuple[list[str], list[str]]:
-    """The selectors of `selectors` naming a file of the finalization equality test, and the others."""
-    finalization = [
-        s
-        for s in selectors
-        if s.startswith(FINALIZATION_TESTS + os.sep) and os.path.isfile(os.path.join(ROOT, s.partition("::")[0]))
-    ]
-    return finalization, [s for s in selectors if s not in finalization]
-
-
 def _group_of(target: str) -> str:
     return os.path.normpath(target).split(os.sep)[0]
 
 
-def write_unresolved_report(out: str, unresolved: list[str]) -> None:
-    """Record `unresolved` as one failing case of OUT_DIR/tavern-rerun-ids.xml, under a name none of them is."""
-    message = quoteattr(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
-    with open(os.path.join(out, "tavern-rerun-ids.xml"), "w", encoding="utf-8") as report:
+def write_unresolved_report(
+    out: str, unresolved: list[str], step: str = "tavern", what: str = "a tavern group"
+) -> None:
+    """Record `unresolved` as one failing case of OUT_DIR/<step>-rerun-ids.xml, under a name none of them is."""
+    message = quoteattr(f"selectors naming no test of {what}: {' '.join(unresolved)}")
+    with open(os.path.join(out, f"{step}-rerun-ids.xml"), "w", encoding="utf-8") as report:
         report.write(
             '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<testsuite name="tavern" tests="1" failures="1" errors="0" skipped="0">\n'
-            f'<testcase classname="tavern" name="rerun-ids"><failure message={message}/></testcase>\n'
+            f'<testsuite name="{step}" tests="1" failures="1" errors="0" skipped="0">\n'
+            f'<testcase classname="{step}" name="rerun-ids"><failure message={message}/></testcase>\n'
             "</testsuite>\n"
         )
 
@@ -323,28 +326,6 @@ def _run_group(
         return subprocess.run(args, cwd=TAVERN_DIR, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
 
 
-def _run_finalization(run_url: str, targets: list[str], out: str) -> int:
-    """Run the finalization equality test `targets` on the clone `run_url`; pytest's exit status."""
-    env = dict(
-        os.environ,
-        HIVEMIND_FINALIZATION_DB_URL=run_url,
-        PYTHONPATH=ROOT,
-        PYTHONFAULTHANDLER="1",
-        PYTHONUNBUFFERED="1",
-    )
-    args = [
-        sys.executable, "-m", "pytest", "-p", "no:cacheprovider", "--rootdir", ROOT,
-        "-v", "--tb=short", "--log-level=INFO",
-        f"--junitxml={os.path.join(out, f'tavern-{FINALIZATION_GROUP}.xml')}",
-        *targets,
-    ]  # fmt: skip
-    t0 = time.monotonic()
-    with open(os.path.join(out, f"tavern-{FINALIZATION_GROUP}.log"), "w") as log:
-        rc = subprocess.run(args, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
-    print(f"{'ok  ' if rc == 0 else 'FAIL'} {FINALIZATION_GROUP} ({time.monotonic() - t0:.0f}s, exit {rc})", flush=True)
-    return rc
-
-
 def _collect_outputs(out: str) -> int:
     moved = 0
     for directory, _, files in os.walk(TAVERN_DIR):
@@ -403,23 +384,9 @@ def _serve_and_test(run_url: str, out: str, selected: dict[str, list[str]], skip
     return exits
 
 
-def main(out: str, selectors: list[str]) -> int:
-    os.makedirs(out, exist_ok=True)
-    with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
-        groups = smoketest_groups(handle.read())
-    if selectors:
-        finalization, tavern_selectors = split_finalization_selectors(selectors)
-        selected, unresolved = resolve_selectors(tavern_selectors, groups) if tavern_selectors else ({}, [])
-        if unresolved:
-            print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
-            write_unresolved_report(out, unresolved)
-        if finalization:
-            selected[FINALIZATION_GROUP] = finalization
-        if not selected:
-            return TESTS_FAILED
-    else:
-        selected, unresolved = {group: [f"{group}/"] for group in groups}, []
-        selected[FINALIZATION_GROUP] = [FINALIZATION_TESTS]
+def clone_fixture(run_prefix: str) -> Clone | int:
+    """A clone of the shared hivemind's template for this tree, run id `run_prefix`-…, or the exit status
+    (SKIP, UNREPORTED) to end the step with, its reason printed: steps 1 and 2 of the module docstring."""
     with open(os.path.join(ROOT, shared_fixture.PATCHLEVEL_SQL), encoding="utf-8") as handle:
         revision = shared_fixture.revision(handle.read())
     if revision is None:
@@ -462,7 +429,7 @@ def main(out: str, selectors: list[str]) -> int:
             return SKIP
         print(shared_fixture.fallback_message(template, recipe, requested=requested, why_not=why_not))
 
-    run_id = shared_fixture.new_run_id("tavern")
+    run_id = shared_fixture.new_run_id(run_prefix)
     database = _psql(
         api_url,
         "select hivemind_shared.clone_run_database(:'run', :'rev', :'recipe');",
@@ -471,33 +438,60 @@ def main(out: str, selectors: list[str]) -> int:
         recipe=template.recipe,
     )
     print(f"cloned {template.database} into {database}")
+    return Clone(
+        api_url=api_url,
+        url=f"postgresql://hivemind@{host}:{port}/{database}",
+        run_id=run_id,
+        database=database,
+        template=template,
+        can_install_admin=can_install_admin,
+    )
+
+
+def drop_clone(clone: Clone) -> None:
+    """Drop `clone`, leaving it to the provider's reaper when the provider refuses."""
     try:
-        run_url = f"postgresql://hivemind@{host}:{port}/{database}"
-        _reload_sql(run_url, os.path.join(out, "tavern-reload.log"))
-        if can_install_admin:
-            _install_admin_scripts(api_url, run_id)
+        _psql(clone.api_url, "select hivemind_shared.drop_run_database(:'run');", run=clone.run_id)
+        print(f"dropped {clone.database}")
+    except ProviderError as err:
+        print(f"dropping {clone.database} failed ({err}); the provider's reaper drops it after its TTL")
+
+
+def main(out: str, selectors: list[str]) -> int:
+    os.makedirs(out, exist_ok=True)
+    with open(os.path.join(ROOT, ".gitlab-ci.yml"), encoding="utf-8") as handle:
+        groups = smoketest_groups(handle.read())
+    if selectors:
+        selected, unresolved = resolve_selectors(selectors, groups)
+        if unresolved:
+            print(f"selectors naming no test of a tavern group: {' '.join(unresolved)}")
+            write_unresolved_report(out, unresolved)
+        if not selected:
+            return TESTS_FAILED
+    else:
+        selected, unresolved = {group: [f"{group}/"] for group in groups}, []
+    clone = clone_fixture("tavern")
+    if isinstance(clone, int):
+        return clone
+    try:
+        _reload_sql(clone.url, os.path.join(out, "tavern-reload.log"))
+        if clone.can_install_admin:
+            _install_admin_scripts(clone.api_url, clone.run_id)
         else:
             print(
                 "the shared hivemind service's clone API predates install_admin_script; it installs it on its "
                 "next start. Until then the clone lacks the admin-level scripts and search-api is skipped"
             )
-        skips = precondition_skips(run_url, groups, can_install_admin)
-        tavern_groups = {group: targets for group, targets in selected.items() if group != FINALIZATION_GROUP}
-        exits = _serve_and_test(run_url, out, tavern_groups, skips) if tavern_groups else {}
-        if FINALIZATION_GROUP in selected:
-            exits[FINALIZATION_GROUP] = _run_finalization(run_url, selected[FINALIZATION_GROUP], out)
+        skips = precondition_skips(clone.url, groups, clone.can_install_admin)
+        exits = _serve_and_test(clone.url, out, selected, skips)
     finally:
         print(f"moved {_collect_outputs(out)} .out.json files to {os.path.join(out, 'tavern-out')}")
-        try:
-            _psql(api_url, "select hivemind_shared.drop_run_database(:'run');", run=run_id)
-            print(f"dropped {database}")
-        except ProviderError as err:
-            print(f"dropping {database} failed ({err}); the provider's reaper drops it after its TTL")
+        drop_clone(clone)
     status = run_status(out, selected, skips, exits, bool(selectors), unresolved)
     if status == 0:
         not_run = sum(1 for group in selected if group in skips)
         skipped = f", {not_run} skipped" if not_run else ""
-        print(f"{len(selected) - not_run} tavern groups passed{skipped} against {template.database}")
+        print(f"{len(selected) - not_run} tavern groups passed{skipped} against {clone.template.database}")
     return status
 
 
