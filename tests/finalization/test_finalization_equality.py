@@ -11,8 +11,8 @@ index. From that state the finalization runs twice:
   recalculate_all_posts_votes_and_children (one range, one connection), then the
   BM25 build;
 - parallel, as DbState runs it now (finalization_workers = 4): the index phase
-  that rewrites hive_votes in post order beside the BM25 build, then the recompute
-  over post id ranges on several connections.
+  that CLUSTERs hive_votes in post order and vacuums it beside the BM25 build, then
+  the recompute over post id ranges on several connections.
 
 Both then fill the feed cache and the notifications (clear_muted_notifications,
 the vote notification flush, the reputation scores) with the same code, and the
@@ -22,14 +22,15 @@ clustering one, hive_feed_cache, hive_notification_cache (on everything but the
 drawn id), and the same valid indexes, BM25 included when pg_search is installed.
 
 Planted defects show that the comparison sees what it guards: the recompute with
-one of its ranges dropped leaves exactly that range's stale posts different, the
-rewrite without its ordering mark is reported as unmarked, and a range applied
-twice changes nothing, since the recompute writes absolute values, not deltas.
+one of its ranges dropped and another applied twice leaves exactly the dropped
+range's stale posts different, since the recompute writes absolute values, not
+deltas; the hive_votes ordering with its CLUSTER left out, run on the
+pre-finalization state before the serial run, is reported as out of order and
+unmarked. They share the module's one setup and serial run, so the whole module
+fits one suite wall on a loaded host.
 
-The fixture is small, so the parallel sort may plan no parallel workers there; the
-equality does not depend on their number. Unlike a real initial sync, hive_votes
-and hive_posts keep their indexes through the run (copy_back_hive_votes drops and
-rebuilds hive_votes' own). Without HIVEMIND_FINALIZATION_DB_URL every test is skipped.
+Unlike a real initial sync, hive_votes and hive_posts keep their indexes through
+the run (putting hive_votes back in insertion order drops and rebuilds its own). Without HIVEMIND_FINALIZATION_DB_URL every test is skipped.
 
   HIVEMIND_FINALIZATION_DB_URL=postgresql://hivemind@<host>/<clone> \\
       python3 -m pytest tests/finalization/test_finalization_equality.py
@@ -58,7 +59,7 @@ pytestmark = pytest.mark.skipif(not _URL, reason=f'{_URL_VARIABLE} names no disp
 
 _SQL_SCRIPTS = Path(__file__).resolve().parents[2] / 'hive' / 'db' / 'sql_scripts'
 # The SQL of the pieces under test, loaded from this tree in case the clone was synced by another one.
-_FINALIZATION_SCRIPTS = ('update_posts_rshares.sql', 'order_hive_votes.sql')
+_FINALIZATION_SCRIPTS = ('update_posts_rshares.sql',)
 _WORKERS = 4
 _ORDER_INDEX = 'hive_votes_post_id_voter_id_idx'
 _BM25_INDEX = 'hive_post_data_bm25_idx'
@@ -71,6 +72,43 @@ _TABLES = {
     'hive_feed_cache': 'to_jsonb(t)',
     'hive_notification_cache': "to_jsonb(t) - 'id'",
 }
+# hive_votes' rows replaced by fe_votes_unordered's, in its heap order: its indexes and the
+# constraints they back are dropped for the copy and rebuilt from the copied heap, as a
+# CLUSTER rebuilds them, so none is marked clustering.
+_RESTORE_UNORDERED_VOTES = """
+DO $$
+DECLARE
+  __drop TEXT[];
+  __rebuild TEXT[];
+  __sql TEXT;
+BEGIN
+  -- A synchronized scan may start in the middle of the heap.
+  SET LOCAL synchronize_seqscans = off;
+  SELECT
+      array_agg(CASE WHEN c.oid IS NULL
+                  THEN format('DROP INDEX %s', i.indexrelid::REGCLASS)
+                  ELSE format('ALTER TABLE hivemind_app.hive_votes DROP CONSTRAINT %I', c.conname)
+                END)
+    , array_agg(CASE WHEN c.oid IS NULL
+                  THEN pg_get_indexdef(i.indexrelid)
+                  ELSE format('ALTER TABLE hivemind_app.hive_votes ADD CONSTRAINT %I %s', c.conname, pg_get_constraintdef(c.oid))
+                END)
+  INTO __drop, __rebuild
+  FROM pg_index i
+  LEFT JOIN pg_constraint c
+    ON c.conindid = i.indexrelid AND c.conrelid = i.indrelid AND c.contype IN ('p', 'u', 'x')
+  WHERE i.indrelid = 'hivemind_app.hive_votes'::REGCLASS;
+  FOREACH __sql IN ARRAY COALESCE(__drop, '{}') LOOP
+    EXECUTE __sql;
+  END LOOP;
+  TRUNCATE TABLE hivemind_app.hive_votes;
+  INSERT INTO hivemind_app.hive_votes SELECT * FROM fe_votes_unordered;
+  FOREACH __sql IN ARRAY COALESCE(__rebuild, '{}') LOOP
+    EXECUTE __sql;
+  END LOOP;
+END
+$$
+"""
 _INDEXES = """
 SELECT pg_get_indexdef(i.indexrelid) AS definition
 FROM pg_index i
@@ -85,14 +123,14 @@ def _row(alias: str) -> str:
     return '(' + ', '.join(f'{alias}.{column}' for column in _RECOMPUTED_COLUMNS) + ')'
 
 
-class _MarkerSkippingDb(Db):
-    """A connection, and its clones, that leave out the statement marking hive_votes' clustering index."""
+class _ClusterSkippingDb(Db):
+    """A connection, and its clones, that leave out the CLUSTER ordering hive_votes."""
 
     def clone(self, name: str) -> Db:
-        return _MarkerSkippingDb(self._url, name)
+        return _ClusterSkippingDb(self._url, name)
 
     def query_no_return(self, sql: str, **kwargs: Any) -> None:
-        if ' CLUSTER ON ' not in sql:
+        if not sql.lstrip().startswith('CLUSTER '):
             super().query_no_return(sql, **kwargs)
 
 
@@ -105,6 +143,7 @@ class _Finalization:
         self.conn.autocommit = True
         self.db = Db(url, 'finalization_equality')
         self.search = bool(self.one("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_search')"))
+        self.unclustered_problems: dict[str, Any] = {}
 
     def run(self, sql: str) -> None:
         with self.conn.cursor() as cur:
@@ -152,8 +191,7 @@ class _Finalization:
 
     def restore_votes(self) -> None:
         """hive_votes in the saved order, its order index unmarked."""
-        self.run('ALTER TABLE hivemind_app.hive_votes SET WITHOUT CLUSTER')
-        self.run("SELECT * FROM hivemind_app.copy_back_hive_votes('fe_votes_unordered')")
+        self.run(_RESTORE_UNORDERED_VOTES)
 
     def restore_posts(self) -> None:
         self.run(
@@ -266,6 +304,26 @@ class _Finalization:
         problems: dict[str, Any] = {f'{table} rows': n for table in _TABLES if (n := self.differing_rows(table))}
         return problems | self.votes_order_problems() | self.index_problems()
 
+    def posts_unlike_the_serial_ones(self) -> int:
+        """The posts whose recomputed values differ from the serial result's."""
+        return int(
+            self.one(
+                f"""
+                SELECT count(*) FROM hivemind_app.hive_posts hp JOIN fe_serial_posts s ON s.id = hp.id
+                WHERE {_row('hp')} IS DISTINCT FROM {_row('s')}
+                """
+            )
+        )
+
+    def order_without_cluster(self) -> dict[str, Any]:
+        """The ordering problems hive_votes is left with by its ordering with the CLUSTER left out."""
+        db = _ClusterSkippingDb(self.url, 'finalization_equality_unclustered')
+        try:
+            DbState._order_hive_votes_by_post(db)
+        finally:
+            db.close()
+        return self.votes_order_problems()
+
     def stale_post_ids(self) -> list[int]:
         """The posts whose saved pre-finalization values differ from the serial result's."""
         return self.column(
@@ -297,6 +355,8 @@ def finalization() -> Iterator[_Finalization]:
             raise AssertionError(
                 'hive_votes is in post order before finalization, so the ordering check measures nothing'
             )
+        # Leaves the rows and their heap order as they are, so the serial run starts from the same state.
+        fin.unclustered_problems = fin.order_without_cluster()
         fin.run_serial()
         fin.save_serial()
         if not fin.stale_post_ids():
@@ -311,15 +371,14 @@ def finalization() -> Iterator[_Finalization]:
         fin.conn.close()
 
 
-def _range_holding(post_id: int) -> tuple[int, int]:
+def _recompute_ranges() -> list[tuple[int, int]]:
     max_id = DbState.db().query_one('SELECT COALESCE(MAX(id), 0) FROM hivemind_app.hive_posts')
-    ranges = DbState._post_id_ranges(max_id, DbState.finalization_workers * DbState._RECOMPUTE_RANGES_PER_WORKER)
-    return next(r for r in ranges if r[0] <= post_id <= r[1])
+    return DbState._post_id_ranges(max_id, DbState.finalization_workers * DbState._RECOMPUTE_RANGES_PER_WORKER)
 
 
 def test_the_parallel_finalization_gives_the_serial_ones_data(finalization: _Finalization) -> None:
     finalization.restore()
-    assert finalization.differences(), (
+    assert finalization.votes_order_problems() and finalization.posts_unlike_the_serial_ones(), (
         'the pre-finalization state equals the serial result, so the check measures nothing'
     )
 
@@ -328,16 +387,21 @@ def test_the_parallel_finalization_gives_the_serial_ones_data(finalization: _Fin
     assert finalization.differences() == {}
 
 
-def test_a_recompute_with_a_range_dropped_differs_in_exactly_that_ranges_stale_posts(
+def test_a_recompute_with_a_range_dropped_and_another_applied_twice_differs_in_the_dropped_ranges_stale_posts(
     finalization: _Finalization, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     stale = finalization.stale_post_ids()
-    dropped = _range_holding(stale[len(stale) // 2])
-    split = DbState._post_id_ranges
+    ranges = _recompute_ranges()
+    stale_ranges = [r for r in ranges if any(r[0] <= post_id <= r[1] for post_id in stale)]
+    if len(stale_ranges) < 2:
+        raise AssertionError(
+            f'stale posts lie in {len(stale_ranges)} recompute range(s), so the check measures nothing'
+        )
+    dropped, repeated = stale_ranges[len(stale_ranges) // 2], stale_ranges[0]
     monkeypatch.setattr(
         DbState,
         '_post_id_ranges',
-        classmethod(lambda cls, max_id, count: [r for r in split(max_id, count) if r != dropped]),
+        classmethod(lambda cls, max_id, count: [*(r for r in ranges if r != dropped), repeated]),
     )
     finalization.restore_posts()
 
@@ -347,32 +411,8 @@ def test_a_recompute_with_a_range_dropped_differs_in_exactly_that_ranges_stale_p
     assert finalization.differing_rows('hive_posts') == 2 * stale_in_dropped
 
 
-def test_a_recompute_with_a_range_applied_twice_gives_the_serial_ones_posts(
-    finalization: _Finalization, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    stale = finalization.stale_post_ids()
-    repeated = _range_holding(stale[len(stale) // 2])
-    split = DbState._post_id_ranges
-    monkeypatch.setattr(
-        DbState, '_post_id_ranges', classmethod(lambda cls, max_id, count: [*split(max_id, count), repeated])
-    )
-    finalization.restore_posts()
-    assert finalization.differing_rows('hive_posts') > 0
+def test_an_ordering_without_its_cluster_is_reported_out_of_order_and_unmarked(finalization: _Finalization) -> None:
+    problems = finalization.unclustered_problems
 
-    DbState._recalculate_all_posts_votes_and_children(DbState.db())
-
-    assert finalization.differing_rows('hive_posts') == 0
-
-
-def test_a_rewrite_of_hive_votes_without_its_ordering_mark_is_reported_unmarked(finalization: _Finalization) -> None:
-    finalization.restore_votes()
-    db = _MarkerSkippingDb(finalization.url, 'finalization_equality_unmarked')
-    try:
-        assert DbState._order_hive_votes_by_post(db)
-    finally:
-        db.close()
-
-    assert finalization.differing_rows('hive_votes') == 0
-    assert finalization.votes_order_problems() == {
-        'ordering mark': f'{_ORDER_INDEX} is not marked as the clustering index'
-    }
+    assert set(problems) == {'hive_votes rows following a greater (post_id, voter_id)', 'ordering mark'}
+    assert problems['ordering mark'] == f'{_ORDER_INDEX} is not marked as the clustering index'

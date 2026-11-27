@@ -11,7 +11,8 @@ AIDEV branches (`ai/*`, `session/*`, pushes to `aidev/integration`); see
 `.aidev/run-checks.sh <suite> <step>...` runs the named steps and writes
 `test-results/<suite>/junit.xml`, one test case per step, with the step's log tail as
 the failure body. `unit` also writes one case per test (`unit.xml`), `api-smoke` one
-per call (`api-smoke.xml`), `tavern` one report per tavern group (`tavern-<group>.xml`).
+per call (`api-smoke.xml`), `tavern` one report per tavern group (`tavern-<group>.xml`),
+`finalization` one case per test (`finalization.xml`).
 A step that exits 77 is recorded as skipped, with the last line it printed as the reason:
 its precondition belongs to the host environment, not to the change.
 
@@ -24,6 +25,7 @@ its precondition belongs to the host environment, not to the change.
 | `mock-wrapper` | `.aidev/app_next_block_wrapper_check.sql`: applies `scripts/ci/wrapper_for_app_next_block.sql` (which `scripts/ci/add-mocks-to-db.sh` applies in CI's `sync` and the shared hivemind's seed) twice to the stack's HAF, in a transaction it rolls back, and checks that the 3-argument `hive.app_next_block` delegates to `app_next_block_haf`, that re-applying changes nothing, the 4999979 cap with HAF's range stubbed, and that `hive.get_estimated_hive_head_block` returns `hive.get_irreversible_head_block()` with HAF's original kept as `get_estimated_hive_head_block_haf` and its EXECUTE grants matched |
 | `api-smoke` | `.aidev/hivemind_smoke.py`: PostgREST over the installed schema (as `scripts/start_postgrest.sh` starts it), then JSON-RPC calls to `/rpc/home` (`hive`, `condenser_api`, `follow_api`, `tags_api`, `bridge`, unknown API / method) and `GET /rpc/get_sync_status`, each checked against the shape an empty chain answers with, then the psql scripts of its `SQL_TESTS`; a script still running after `SQL_TEST_TIMEOUT_S` fails with what its backend waited on and who blocked it, and is terminated. A failing script's case carries its psql output and how psql ended (its exit code, or the signal that killed it and whether the container's memory cgroup did) as its failure text (`sql/<script>.log`). Each case's line in `api-smoke.log` and row in `api-smoke.tsv` is flushed as it completes, and a script's `run` line before it starts, so a killed run names the case it was in |
 | `tavern` | `.aidev/hivemind_tavern.py`: CI's tavern API suite against a per-run clone of the shared synced hivemind, with this tree's PostgREST SQL reloaded into it; see [The `tavern` step](#the-tavern-step) |
+| `finalization` | `.aidev/hivemind_finalization.py`: `tests/finalization/test_finalization_equality.py` on a per-run clone of its own; see [The `finalization` suite](#the-finalization-suite) |
 
 The install steps copy `scripts/`, `reputation_tracker/` and `hafah/` to a scratch
 directory and write the submodules' `scripts/set_version_in_sql.pgsql` there
@@ -44,11 +46,23 @@ pinned `17c8606f` includes #354, so only the `events_queue` reason remains.
 |---|---|---|
 | quick | unit, ruff | no |
 | coverage | unit | no |
-| full | unit, ruff, install, reinstall, mock-wrapper, api-smoke, tavern; then `db_shape` (see [The mainnet shape](#the-mainnet-shape-performanceshape-performancequeries)) | yes, and the shared hivemind |
+| full | `checks`: unit, ruff, install, reinstall, mock-wrapper, api-smoke, tavern; beside it `finalization`: finalization; then `db_shape` (see [The mainnet shape](#the-mainnet-shape-performanceshape-performancequeries)) | yes, and the shared hivemind |
 | canary | unit, ruff, install, reinstall, mock-wrapper, api-smoke | yes |
 | baseline | install, reinstall, api-smoke | yes |
 
 `static` and `system` are unbound: AIDEV runs neither for a project.
+
+`full`'s `checks` and `finalization` suites each declare their `timeout`, sized for a
+loaded host, rather than taking the load-scaled default. A suite after `checks` gets
+only what the `run_full_tests` activity has left (at most 2100 s for all of them), so
+`finalization` is `concurrent: true`: it starts with the slot and runs beside `checks`
+under a wall of its own. `checks` declares 1800 s: on session24 its tavern groups
+alone outran a 15-minute wall (`rest_api_equivalence`, 43 s on steem-3, was at 79 %
+after 6 minutes). `finalization` declares the 2100 s ceiling: with four tests the
+module took 1517 s on its own on session24 (setup and serial run 460 s, the parallel
+run and comparison 640 s, the planted defects 417 s), and ran past 19 minutes beside
+the tavern groups on steem-3; with the planted defects on the shared setup, 1147 s
+(469 s, 579 s and 99 s).
 
 Not covered yet: the python API client tests and the benchmarks. They stay in GitLab CI.
 
@@ -69,7 +83,8 @@ install steps.
 The ids are the junit's: `tests/utils/test_x.py::test_y` (unit),
 `bridge_api_patterns.get_post.foo.tavern.yaml::Hivemind` (tavern: pytest's dotted
 classname and the file's `test_name`), `rest_api_paging/test_paging.py::test_z`
-(the plain Python tavern groups), `api-smoke::<call>`. The suites declare
+(the plain Python tavern groups), `api-smoke::<call>`,
+`tests/finalization/test_finalization_equality.py::test_z` (finalization). The suites declare
 `honor_quarantine: true`, so an id in `.aidev/known_failures.txt` (`aidev test
 quarantine <id> --reason "see #N"`) is pardoned with its tracking issue named.
 
@@ -80,7 +95,8 @@ repeat-new-tests re-run failing ids through the wrapper:
 
 It runs only the named tests, through the listed steps owning them (a `.py` under
 `tests/utils`, `tests/steem` or `tests/ci` is `unit`'s, an `api-smoke::<call>` id
-`api-smoke`'s, anything else `tavern`'s), and reports to
+`api-smoke`'s, anything under `tests/finalization/` `finalization`'s, anything else
+`tavern`'s), and reports to
 `test-results/<suite>/rerun/<n>/`, leaving the run's own reports intact. An
 `api-smoke` re-run makes only the named calls (`hivemind_smoke.py OUT CALL...`,
 named as `hivemind_smoke.py --list` prints them) after the `install` step, when
@@ -100,7 +116,8 @@ way a test the change adds shows up on base: a unit node id pytest does not coll
 not run and fails the re-run as the `rerun-absent` case of `junit.xml`, and a
 tavern selector no SMOKETESTS group holds
 fails it as the `rerun-ids` case of `tavern-rerun-ids.xml`, written before the
-provider is asked for anything. An owning step exiting other than 0 or 1 (a skip,
+provider is asked for anything; a finalization selector naming no file under
+`tests/finalization/` does the same in `finalization-rerun-ids.xml`. An owning step exiting other than 0 or 1 (a skip,
 a crash, a setup or collection error; for `api-smoke`, PostgREST not serving or
 `install` failing first) reached no verdict: its own reports and `junit.xml` are
 renamed `<name>.xml.no-verdict`, so with no report the non-zero exit reads as the
@@ -108,8 +125,10 @@ id failing on base. Another owning step's reports are kept.
 
 Each rule's `file_pattern` accepts only what that slot's steps run, as ids and as
 the changed files repeat-new-tests repeats: `quick` and `canary` the unit tests,
-`full` also the tavern files under `tests/api_tests/hivemind/tavern/` (not
-`tavern_full_sync/`) and the `rest_api_*` modules. `full`'s `checks`, `canary` and
+`full`'s `checks` also the tavern files under `tests/api_tests/hivemind/tavern/` (not
+`tavern_full_sync/`) and the `rest_api_*` modules, `full`'s `finalization` only the
+modules of `tests/finalization/` (`.aidev/run-checks.sh full-finalization finalization
+--rerun <node id>`). `full`'s `checks`, `canary` and
 `baseline`, which run `api-smoke`, also re-run its ids; an `api-smoke` id names a
 call rather than a file, so that rule declares no `files:` and repeat-new-tests
 repeats no changed file through it. A failing step (`install`, `ruff`, a crash)
@@ -186,19 +205,31 @@ has no rule and blocks unless quarantined.
    printing `skip search-api_patterns (<reason naming pg_search>)`, when it has none;
    the other groups then get that reason as `HIVEMIND_SKIP_SEARCH` and skip their
    own search-api tests;
-6. once PostgREST is stopped, runs `tests/finalization/test_finalization_equality.py`
-   on the same clone as the group `finalization` (`tavern-finalization.xml`): it puts
-   the finalization's inputs back to their pre-finalization state, runs the post-sync
-   finalization serially (CLUSTER, the one-range recompute, BM25 after it) and as
-   `DbState` runs it now (the parallel hive_votes rewrite beside the BM25 build, the
-   recompute over post id ranges on 4 connections), and requires the same hive_posts,
-   hive_votes and its ordering mark, feed cache, notifications and valid indexes, plus
-   planted defects (a dropped range, a skipped mark) to be caught. It writes the
-   clone, so it runs after every tavern group. A re-run takes its node ids
-   (`tests/finalization/<module>.py[::<test>]`);
-7. moves the `.out.json` files tavern writes next to the patterns to
+6. moves the `.out.json` files tavern writes next to the patterns to
    `test-results/full/tavern-out/` and drops the clone, also when the run fails. A
    clone a killed run leaves behind is reaped after 6 hours.
+
+### The `finalization` suite
+
+`full`'s `finalization` suite (`.aidev/run-checks.sh full-finalization finalization`,
+reports in `test-results/full-finalization/`) runs
+`tests/finalization/test_finalization_equality.py` through
+`.aidev/hivemind_finalization.py`. The test rewrites hive_votes, hive_posts and the
+caches of the database it is given, so the step takes a clone of its own, of the
+template the `tavern` step would take (steps 1–3 above, run id `finalization-…`,
+without the PostgREST reload, which the test reads nothing of), and drops it when the
+run ends, also when it fails. On the clone the test puts the finalization's inputs
+back to their pre-finalization state, runs the post-sync finalization serially
+(CLUSTER, the one-range recompute, BM25 after it) and as `DbState` runs it now (the
+index phase CLUSTERing and vacuuming hive_votes beside the BM25 build, the recompute
+over post id ranges on 4 connections), and requires the same hive_posts, hive_votes
+and its ordering mark, feed cache, notifications and valid indexes. Planted defects
+(one recompute with a range dropped and another applied twice, the hive_votes
+ordering without its CLUSTER) share
+the one setup and serial run and must be caught. `finalization-tests.log` ends with
+pytest's `--durations` table. Without a template of the tree's schema revision the suite skips
+as the `tavern` step does. A re-run takes its node ids
+(`tests/finalization/<module>.py[::<test>]`).
 
 **Adding or refreshing a pattern.** Write the `.tavern.yaml` and a first
 `.pat.json` (or change the SQL), run `aidev test run --slot full`, and read the

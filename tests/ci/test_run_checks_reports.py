@@ -248,13 +248,18 @@ def test_a_rerun_keeps_the_reports_of_a_step_that_reached_a_verdict_beside_one_t
 _EXISTING_TAVERN_ID = 'bridge_api_patterns.get_post.gtg.tavern.yaml::Hivemind'
 
 
+_FINALIZATION_TEST = 'tests/finalization/test_sample.py'
+
+
 @pytest.fixture
 def tavern_tree(tree: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """`tree` with the real tavern step, the files it reads before asking the provider, and one tavern test."""
-    for name in ('hivemind_tavern.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
+    for name in ('hivemind_tavern.py', 'hivemind_finalization.py', 'hivemind_smoke.py', 'hivemind_rewriter.py'):
         shutil.copy(AIDEV / name, tree / '.aidev' / name)
     (tree / '.aidev' / 'shared-hivemind').mkdir()
     shutil.copy(AIDEV / 'shared-hivemind' / 'shared_fixture.py', tree / '.aidev' / 'shared-hivemind')
+    (tree / _FINALIZATION_TEST).parent.mkdir(parents=True)
+    (tree / _FINALIZATION_TEST).write_text('def test_x():\n    pass\n')
     patchlevel = tree / 'hive' / 'db' / 'sql_scripts' / 'upgrade' / 'update_db_patchlevel.sql'
     patchlevel.parent.mkdir(parents=True)
     patchlevel.write_text(f"values (now(), '{'a' * 40}') -- merge request\n")
@@ -307,6 +312,51 @@ def test_a_tavern_rerun_of_a_file_in_the_tree_without_a_provider_skips_and_leave
     outcome, message = _cases(rerun / 'junit.xml.no-verdict')['tavern']
     assert outcome == 'skipped'
     assert 'AIDEV_EXTERNAL_HIVEMIND_HOST/PORT unset' in message
+
+
+@pytest.mark.parametrize('provider', [False, True])
+def test_a_finalization_rerun_of_a_file_not_in_the_tree_is_a_verdict_of_absent(
+    tavern_tree: Path, monkeypatch: pytest.MonkeyPatch, provider: bool
+) -> None:
+    if provider:
+        # Unreachable: the selector is resolved before the provider is asked for anything.
+        monkeypatch.setenv('AIDEV_EXTERNAL_HIVEMIND_HOST', 'hivemind.invalid')
+        monkeypatch.setenv('AIDEV_EXTERNAL_HIVEMIND_PORT', '5432')
+    missing = 'tests/finalization/test_gone.py::test_x'
+
+    proc = _run(tavern_tree, 'full-finalization', 'finalization', '--rerun', missing)
+
+    assert proc.returncode == 1
+    rerun = tavern_tree / 'test-results' / 'full-finalization' / 'rerun' / '1'
+    assert _xml_reports(rerun) == [rerun / 'finalization-rerun-ids.xml', rerun / 'junit.xml']
+    assert _cases(rerun / 'finalization-rerun-ids.xml') == {
+        'rerun-ids': ('failure', f'selectors naming no test of tests/finalization: {missing}')
+    }
+    assert _cases(rerun / 'junit.xml')['finalization'][0] == 'skipped'
+    for report in _xml_reports(rerun):
+        assert missing not in _names(report)
+
+
+def test_a_finalization_rerun_without_a_provider_skips_and_leaves_no_report(tavern_tree: Path) -> None:
+    proc = _run(tavern_tree, 'full-finalization', 'finalization', '--rerun', f'{_FINALIZATION_TEST}::test_x')
+
+    assert proc.returncode == 1
+    rerun = tavern_tree / 'test-results' / 'full-finalization' / 'rerun' / '1'
+    assert _xml_reports(rerun) == []
+    outcome, message = _cases(rerun / 'junit.xml.no-verdict')['finalization']
+    assert outcome == 'skipped'
+    assert 'AIDEV_EXTERNAL_HIVEMIND_HOST/PORT unset' in message
+
+
+def test_the_tavern_step_does_not_own_a_finalization_test(tavern_tree: Path) -> None:
+    test_id = f'{_FINALIZATION_TEST}::test_x'
+
+    proc = _run(tavern_tree, 'full', 'unit', 'tavern', '--rerun', test_id)
+
+    assert proc.returncode == 1
+    outcome, message = _cases(tavern_tree / 'test-results' / 'full' / 'rerun' / '1' / 'junit.xml')['rerun-ids']
+    assert outcome == 'failure'
+    assert message == f're-run ids no listed step runs: {test_id}'
 
 
 _SMOKE_SQL_ID = 'api-smoke::sql/tests/sql/post_batches_staged_join.sql'
