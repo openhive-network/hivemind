@@ -501,14 +501,75 @@ The lanes overlap one another and all fall within `parallel`. `[PHASE-SUMMARY]` 
 that do not overlap, so its `total` is their sum: `votes` and `rshares_incr` are now part of `parallel`, and
 `cache_merge`, which `total` used to count twice, is on the B line only.
 
-### Not measured here
+### Measured on steem-19 over 10–30 M (#527)
 
-The acceptance runs were not done in this change's workflow:
-- the #500 harness on steem-19 over 10–30 M (sequential base and pipelined, at the forked tip);
-- the #524 fidelity dumps;
-- the kill-and-resume runs at `payouts_committed`;
-- the steem-20 rebuild comparison.
+**Setup.** steem-19, the snapshot `haf-pool/ab-hm-quiet@hm-10m-rt30m` (`hivemind_app` at 10,000,000,
+`reptracker_app` at 30,110,000), one arm at a time on a ZFS clone of its own, from 10 M to 30 M (16 M for the kill
+arms), 2,000 batches of 10,000 blocks. Both images were built locally from the repository's Dockerfile:
+- base: `hivemind:base-6140f96b`, image id `sha256:49cd6524aeb8747ff5bc18871fc5619c7d78ef31d2c527ae00a3e632f74279bb`
+  (6140f96bb, the tip #526 forked from, after #521);
+- candidate: `hivemind:cand-848d81ed`, image id `sha256:41c863174688a56f673293109ec803203507ba5c1837a1e731ca9a4ae5c67285`
+  (848d81ed7, #526).
 
-The expected gain per change above is derived from the rebuild's per-statement means, not measured. The partitioned
-payouts' scaling, in particular, depends on the CPU and IO they get beside Stage A.
+The per-arm clones were destroyed after their runs; only the `hm500-results` and `hm527-results` datasets remain.
 
+**Sync times, 10–30 M**, from sync start to exit, with the mean 1-minute load average of the 32-core host during
+the run:
+
+| arm | image / flags | sync | load mean |
+|---|---|---|---|
+| base | 6140f96b, pipelined | 24,734 s | 30.9 |
+| candidate | 848d81ed, pipelined | 15,086 s | 11.2 |
+| candidate, `--massive-payout-workers=1` | lanes and rename only | 18,015 s | 17.1 |
+| sequential | 848d81ed, `--massive-sync-pipelined=false` | 29,891 s | 26.9 |
+
+**The load was not even, so these are not a clean A/B.** steem-19 is a shared aidev worker host, and other fleet
+sessions loaded it unevenly: hourly load means ran from 9 to 46, and the base and sequential arms ran overnight at
+about three times the candidate's load. The base-against-candidate gap (−39 %) therefore overstates #526's gain,
+and the payout partitions' gain (18,015 → 15,086 s, −16 %) is partly load as well. The earlier quiet baseline was
+15,595 s. The stage breakdown below comes from each run's own `[STAGE-TIMING]` lines and does not depend on the
+load. The live speed-up is #526's own check on steem-20: 25.8 M blocks behind HAF against 32.6 M at 5.43 h.
+
+**Fidelity.** #524's `fidelity_dump.sql` (dump_format 2), 14 of 14 compared files:
+- sequential against candidate, against base and against `--massive-payout-workers=1`: all IDENTICAL;
+- `deadlock detected` lines in postgresql.log: 0 in every arm.
+
+**Kill and resume**, 10–16 M, each compared with an uninterrupted 16 M candidate run (`ref16`, 2,810 s); in each,
+the killed sync exited with rc=1 and the resumed one with rc=0:
+
+| kill point | result |
+|---|---|
+| `--test-pipeline-kill=payouts_committed:15000001` | IDENTICAL |
+| `flush_committed:15100001` | IDENTICAL |
+| `stage_a_committed:15200001` | IDENTICAL |
+
+No run logged a deadlock.
+
+**Stage B's critical path, candidate, 10–30 M**, summed over the 2,000 batches:
+- Stage A elapsed 9,487 s (posts 9,423 s) and waited 3,091 s for Stage B; Stage B elapsed 12,519 s, so Stage B
+  still bounds the pipeline;
+- Stage B: `parallel` 9,988 s, of which the `votes_payouts` lane 9,820 s, `follows` 3,966 s, `reblogs` 1,309 s;
+  then `flush` 2,372 s, `cache_merge` 581 s, `account_updates` 152 s;
+- **the votes lane is the longest lane in 1,973 of 2,000 batches** (the follows in the other 27);
+- inside the votes lane: `payouts` 5,714 s (58 %), `votes_prepare` 3,298 s (34 %, a mean of 1.65 s per batch),
+  `votes_upsert` 809 s;
+- the longest single piece of a batch: `payouts` in 901 batches, `votes_prepare` in 669, `follows` in 430.
+
+Per 5 M range:
+
+| range | payouts / votes_prepare share of the votes lane | Stage B elapsed |
+|---|---|---|
+| 10–15 M | 63 % / 30 % | 1,387 s |
+| 15–20 M | 69 % / 26 % | 4,079 s |
+| 20–25 M | 60 % / 32 % | 5,061 s |
+| 25–30 M | 28 % / 56 % | 1,993 s |
+
+From 25 M on `votes_prepare` is the longest piece in 384 of 500 batches.
+
+**Payout partitions.** Against `--massive-payout-workers=1`, the default 4 partitions took the payouts from 7,740 to
+5,714 s (−26 %) and the votes lane from 12,467 to 9,820 s, with the load caveat above. That is short of the
+estimate above, which assumed the four partitions scale.
+
+**Next candidates.** After #526 Stage B's critical path is the votes lane. From 10 to 25 M the payouts are its
+largest piece, so partitioning them further comes next there. From 25 M on the serial `prepare_votes_from_staging`
+(about 1.65 s per batch) leads, so splitting its resolution step is the next candidate for that range.
