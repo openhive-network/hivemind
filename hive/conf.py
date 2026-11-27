@@ -136,8 +136,7 @@ class Conf:
             type=_positive_int,
             env_var='FINALIZATION_WORKERS',
             help='after an initial massive sync, the connections that recompute the posts\' vote aggregates and '
-            'children counts, each on its own range of posts, and the parallel workers of the sort that orders '
-            'hive_votes by post',
+            'children counts, each on its own range of posts',
             default=4,
         )
 
