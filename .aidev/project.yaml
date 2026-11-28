@@ -170,7 +170,11 @@ verification:
         concurrent: true
         timeout: 2100
         rerun:
+          # One run of the module takes most of the wall (its setup and serial run
+          # are shared by every test), so the fleet's repeat of a changed file,
+          # which runs after the suite, cannot finish one more run.
           - classify: true
+            repeat: 1
             match: "^tests/finalization/[^/]+\\.py::"
             file_pattern: "^tests/finalization/(test_[^/]*|[^/]*_test)\\.py$"
             ids: ["--rerun", "{ids}"]
