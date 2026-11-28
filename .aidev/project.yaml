@@ -175,6 +175,9 @@ verification:
             file_pattern: "^tests/finalization/(test_[^/]*|[^/]*_test)\\.py$"
             ids: ["--rerun", "{ids}"]
             files: ["--rerun", "{files}"]
+            # No repeat-new-tests: one run of the equality test takes about 27 min, far
+            # past a repeat's limit, and its 5 cases already run every time the suite runs.
+            repeat: 1
       # After `checks`, which creates test-results/ (`--report` writes no directory).
       - name: db_shape
         adapter: command
