@@ -314,6 +314,7 @@ default:
     "rest_api_equivalence:api_smoketest_rest_api_equivalence.xml"
     "rest_api_rewriter:api_smoketest_rest_api_rewriter.xml"
     "rest_api_paging:api_smoketest_rest_api_paging.xml"
+    "rest_api_json_rpc:api_smoketest_rest_api_json_rpc.xml"
     "hive_api_patterns:api_smoketest_hive_api.xml"
     "search-api_patterns:api_smoketest_search-api.xml"
     "postgrest_negative:postgrest_negative.xml"

@@ -7,7 +7,7 @@ AS
 $$
 DECLARE
   __request_data JSON = $1;
-  __id TEXT;
+  __id JSON;
   __jsonrpc TEXT;
   __method TEXT;
   __params JSON;
@@ -21,8 +21,8 @@ BEGIN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
   END IF;
 
-  __id = __request_data->>'id';
-  IF __id IS NULL THEN
+  __id = __request_data->'id';
+  IF __id IS NULL OR json_typeof(__id) = 'null' THEN
     return json_build_object('id', null, 'jsonrpc', '2.0', 'error', 'id required');
   END IF;
 

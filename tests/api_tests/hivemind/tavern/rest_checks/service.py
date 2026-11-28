@@ -42,10 +42,14 @@ def search_skip_reason() -> str | None:
     return os.environ.get("HIVEMIND_SKIP_SEARCH") or None
 
 
+def json_rpc_post(body: Any) -> requests.Response:
+    """The server's answer to `body` posted, as it is, to the JSON-RPC root."""
+    return requests.post(f"{server_url()}/", json=body, timeout=_TIMEOUT_SECONDS)
+
+
 def json_rpc(method: str, params: Any) -> Any:
     """The JSON-RPC response object for `method` called with `params`."""
-    body = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
-    response = requests.post(f"{server_url()}/", json=body, timeout=_TIMEOUT_SECONDS)
+    response = json_rpc_post({"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
     response.raise_for_status()
     return response.json()
 
