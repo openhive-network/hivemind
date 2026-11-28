@@ -499,8 +499,8 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         Not registered with HAF because pg_search left internal metadata
         (MetaPage) that prevented the UNLOGGED conversion older versions did,
         even after the index was dropped. Instead we manage this index manually:
-        created here, in an initial sync's last index restore or else during the
-        fills phase, dropped explicitly in ensure_indexes_are_disabled.
+        created here, in an initial sync's index restore or else during the fills
+        phase, dropped explicitly in ensure_indexes_are_disabled.
 
         Skipped when pg_search extension is not available or the index exists.
         """
@@ -789,9 +789,9 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         sync, the indexes of _INDEX_RESTORE_DEFERRED_TABLES are left for the
         finalization that follows (ensure_finalize_massive_sync) to restore after
         its recompute. Without it, indexes an earlier call deferred are restored too.
-        With `build_search_index` on an initial sync, for a restore that no massive
-        batch follows (each would update the index), the BM25 index is built beside
-        the others instead of in finalization.
+        With `build_search_index` on an initial sync, the BM25 index is built beside
+        the others instead of in finalization; massive batches that follow the restore
+        update it like the registered indexes.
         """
         if cls.are_indexes_enabled():
             if not defer_to_finalization:
@@ -1329,9 +1329,9 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                     [cls.db(), last_imported_block, current_imported_block],
                 )
             )
-        # The BM25 index when the index restore did not build it (a restore that massive
-        # batches followed, or a catch-up). It runs in parallel with the fills above,
-        # off their critical path, from the moment the hive_posts recompute commits
+        # The BM25 index when the index restore did not build it (a catch-up on a node
+        # without it). It runs in parallel with the fills above, off their critical
+        # path, from the moment the hive_posts recompute commits
         # (_restore_bm25_index_after_recompute).
         methods.append(('bm25_index', cls._restore_bm25_index_after_recompute, [cls.db(), recomputed]))
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)

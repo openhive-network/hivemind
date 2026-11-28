@@ -217,7 +217,7 @@ def test_bm25_build_runs_beside_the_ordering_without_holding_back_its_vacuum() -
     assert statements.index(_VACUUM) < statements.index('bm25 built')
 
 
-def test_bm25_build_waits_for_finalization_when_massive_batches_follow_the_restore() -> None:
+def test_a_restore_without_build_search_index_leaves_bm25_to_finalization() -> None:
     database = _Database()
     build = MagicMock()
     with _db_state(database), patch.object(DbState, '_restore_bm25_index', build):
