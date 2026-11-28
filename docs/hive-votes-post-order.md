@@ -22,11 +22,11 @@ does three things before it restores that table's other indexes
    statistics.
 
 The restore that follows skips the index from step 1, because it already exists. The other
-tables restore their indexes in parallel threads, so they don't wait for this step. When the
-restore goes straight into finalization (no massive batch follows it), hivemind builds the
-BM25 index on another thread at the same time. `CLUSTER` keeps each row's `xmin`, and the
-rows predate that build's snapshot, so the vacuum freezes them and marks their pages
-all-visible beside it.
+tables restore their indexes in parallel threads, so they don't wait for this step. Hivemind
+builds the BM25 index on another thread at the same time, whether the restore goes straight
+into finalization or MASSIVE_WITH_INDEXES batches follow it (they update the index as they
+write posts). `CLUSTER` keeps each row's `xmin`, and the rows predate that build's snapshot,
+so the vacuum freezes them and marks their pages all-visible beside it.
 
 The sync log reports the step's added time:
 

@@ -308,8 +308,10 @@ class SyncHiveDb:
                         continue
                     # Batches run the SQL of the stage without indexes, plus an rshares
                     # update by primary key, so hive_posts' registered indexes can wait
-                    # for finalization's recompute.
-                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True)
+                    # for finalization's recompute. The BM25 index is built here, beside
+                    # the hive_votes ordering: the batches that follow keep it up to date
+                    # with their few posts, as every catch-up's batches do.
+                    DbState.ensure_indexes_are_enabled(defer_to_finalization=True, build_search_index=True)
 
                 self._process_massive_blocks(self._lbound, self._ubound, application_stage)
             elif application_stage == "live":
