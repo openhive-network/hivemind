@@ -20,7 +20,11 @@ BASE = {
 
 
 def _run(
-    massive_sync_preconditions: bool, allowed_continue_checks: int | None = None, last_completed: int = 100
+    massive_sync_preconditions: bool,
+    allowed_continue_checks: int | None = None,
+    last_completed: int = 100,
+    rescore_pending: bool = False,
+    rescore_due: bool = True,
 ) -> tuple[bool, list[tuple[Any, ...]]]:
     """Run _finish_all_tables with recorded task order and an optional interrupt point.
 
@@ -40,15 +44,20 @@ def _run(
     def can_continue() -> bool:
         return allowed_continue_checks is None or next(counter) < allowed_continue_checks
 
-    def fake_wait(db: Any, block_num: int) -> bool:
-        calls.append(('_wait_for_reputation_tracker', block_num))
-        return True
+    def fake_due(db: Any, block_num: int) -> bool:
+        calls.append(('_reputation_rescore_due', block_num))
+        return rescore_due
+
+    def fake_defer(db: Any, block_num: int) -> None:
+        calls.append(('_defer_reputation_notification_scores', block_num))
 
     patches: dict[str, Any] = {
         k: (v if v is not None else staticmethod(lambda *a, _name=k, **kw: calls.append((_name,))))
         for k, v in BASE.items()
     }
-    patches['_wait_for_reputation_tracker'] = staticmethod(fake_wait)
+    patches['_reputation_rescore_pending'] = staticmethod(lambda db: rescore_pending)
+    patches['_reputation_rescore_due'] = staticmethod(fake_due)
+    patches['_defer_reputation_notification_scores'] = staticmethod(fake_defer)
     with (
         patch.multiple(DbState, **patches),
         patch.object(DbState, 'process_tasks_in_threads', staticmethod(fake_tasks)),
@@ -91,11 +100,37 @@ def test_short_initial_sync_rescores_reputation_notifications_before_marker() ->
     assert completed is True
     assert [c[0] for c in calls] == [
         'parallel',
-        '_wait_for_reputation_tracker',
+        '_reputation_rescore_due',
         '_finish_reputation_notification_scores',
         'marker',
     ]
-    assert calls[1] == ('_wait_for_reputation_tracker', 200), "the rescoring waits for reptracker at hivemind's block"
+    assert calls[1] == ('_reputation_rescore_due', 200), "the rescore is due once reptracker has hivemind's block"
+
+
+def test_a_rescore_reptracker_is_not_ready_for_is_left_to_live_sync_before_the_marker() -> None:
+    """reptracker behind hivemind's block does not hold the completion marker: the pending rescore commits first."""
+    completed, calls = _run(massive_sync_preconditions=True, rescore_due=False)
+    assert completed is True
+    assert [c[0] for c in calls] == [
+        'parallel',
+        'parallel',
+        '_reputation_rescore_due',
+        '_defer_reputation_notification_scores',
+        'marker',
+    ]
+    assert calls[3] == ('_defer_reputation_notification_scores', 200)
+
+
+def test_a_catch_up_after_a_deferred_rescore_runs_it_when_due() -> None:
+    """A rescore an earlier finalization left pending is owed by the next one, however short."""
+    completed, calls = _run(massive_sync_preconditions=False, rescore_pending=True)
+    assert completed is True
+    assert [c[0] for c in calls] == [
+        'parallel',
+        '_reputation_rescore_due',
+        '_finish_reputation_notification_scores',
+        'marker',
+    ]
 
 
 def test_interrupt_before_fills_skips_everything():

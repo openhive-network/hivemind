@@ -115,8 +115,9 @@ class DbState:
     _VACUUM_CONNECT_ATTEMPTS = 5
     _VACUUM_CONNECT_BACKOFF_SECONDS = 2.0
     _VISIBILITY_VACUUM_NAME = "visibility_vacuum"
-    _REPTRACKER_POLL_SECONDS = 10.0
-    _REPTRACKER_LOG_EVERY_POLLS = 6
+    # A pending reputation notification rescore logs its wait every this many live ranges.
+    _REPTRACKER_LOG_EVERY_CHECKS = 100
+    _rescore_wait_checks = 0
 
     # Max retries for DDL operations that can deadlock with other HAF apps
     # (e.g. proxy-whitelist reading hivemind tables while hivemind drops FKs).
@@ -1128,60 +1129,110 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         )
 
     @classmethod
-    def _wait_for_reputation_tracker(cls, db: Db, block_num: int) -> bool:
-        """Wait until reputation_tracker has processed `block_num`, so the rescoring reads final reputations.
-
-        Faster massive sync reaches finalization before reptracker reaches its block, and a
-        rescoring then reads reputations that are still behind (#531). Returns True once
-        reptracker reached the block, or as soon as no reptracker block processor runs
-        (nothing would advance it, e.g. a test setup that syncs it after hivemind): the
-        rescoring then reads the reputations as they are, with a warning. Returns False
-        when a shutdown request stops the wait.
-        """
-        polls = 0
-        while True:
-            reptracker_block = db.query_one(f"SELECT hive.app_get_current_block_num('{REPTRACKER_SCHEMA_NAME}')") or 0
-            if reptracker_block >= block_num:
-                if polls:
-                    log.info("[MASSIVE] %s reached block %d", REPTRACKER_SCHEMA_NAME, reptracker_block)
-                return True
-            if not cls._reptracker_block_processor_running(db):
-                log.warning(
-                    "[MASSIVE] %s is at block %d, behind hivemind's %d, and no reputation_tracker block processor "
-                    "runs; rescoring reputation notifications from the reputations as they are",
-                    REPTRACKER_SCHEMA_NAME,
-                    reptracker_block,
-                    block_num,
-                )
-                return True
-            if cls._interrupted("reputation notification scores"):
-                return False
-            if polls % cls._REPTRACKER_LOG_EVERY_POLLS == 0:
-                log.info(
-                    "[MASSIVE] Waiting for %s (block %d) to reach block %d before rescoring reputation notifications",
-                    REPTRACKER_SCHEMA_NAME,
-                    reptracker_block,
-                    block_num,
-                )
-            polls += 1
-            sleep(cls._REPTRACKER_POLL_SECONDS)
+    def _reptracker_block(cls, db: Db) -> int:
+        return db.query_one(f"SELECT hive.app_get_current_block_num('{REPTRACKER_SCHEMA_NAME}')") or 0
 
     @classmethod
-    def _finish_reputation_notification_scores(cls, db) -> None:
-        """Recalculate reputation-based notification scores using final reputation data.
+    def _reputation_rescore_pending(cls, db: Db) -> bool:
+        return bool(db.query_one(f"SELECT EXISTS (SELECT 1 FROM {SCHEMA_NAME}._reputation_rescore_pending)"))
 
-        During massive sync, the scores of the notifications scored by their
-        source's reputation (subscribe, reply, reblog, follow, mention) are computed
-        from reptracker_app.account_reputations at flush time. Since the reputation
-        tracker runs concurrently, scores may reflect incomplete reputation data.
-        This finalization step corrects them using the final values. The initial
-        sync's flushes keep these rows whatever their score
-        (reputation_notification_cut_deferred), so the score > 0 cut that live
-        sync applies at write time is applied here, on the final scores.
+    @classmethod
+    def _reputation_rescore_due(cls, db: Db, block_num: int) -> bool:
+        """True when finalization rescores reputation notifications itself rather than leaving it to live sync.
+
+        That is when reptracker has processed `block_num`, so the rescoring reads the
+        reputations live sync scores with, or when no reptracker block processor runs
+        (nothing would advance it, e.g. a test setup that syncs it after hivemind): the
+        rescoring then reads the reputations as they are, with a warning.
         """
-        with AutoDbDisposer(db, "finish_reputation_notification_scores") as db_mgr:
-            time_start = perf_counter()
-            sql = f"""
+        reptracker_block = cls._reptracker_block(db)
+        if reptracker_block >= block_num:
+            return True
+        if not cls._reptracker_block_processor_running(db):
+            log.warning(
+                "[MASSIVE] %s is at block %d, behind hivemind's %d, and no reputation_tracker block processor "
+                "runs; rescoring reputation notifications from the reputations as they are",
+                REPTRACKER_SCHEMA_NAME,
+                reptracker_block,
+                block_num,
+            )
+            return True
+        log.info(
+            "[MASSIVE] %s is at block %d, behind hivemind's %d: live sync rescores reputation notifications "
+            "once it reaches hivemind's block",
+            REPTRACKER_SCHEMA_NAME,
+            reptracker_block,
+            block_num,
+        )
+        return False
+
+    @classmethod
+    def _defer_reputation_notification_scores(cls, db: Db, block_num: int) -> None:
+        """Leave the rescoring to live sync (rescore_pending_reputation_notifications), in a durable marker.
+
+        It commits before the completion marker, so the writers of reputation-scored
+        notifications keep deferring the score > 0 cut (reputation_notification_cut_deferred)
+        from the moment the initial sync's deferral ends until the rescoring applies it.
+        """
+        with AutoDbDisposer(db, "defer_reputation_notification_scores") as db_mgr:
+            db_mgr.db.query("START TRANSACTION")
+            db_mgr.db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._reputation_rescore_pending")
+            db_mgr.db.query_no_return(
+                f"INSERT INTO {SCHEMA_NAME}._reputation_rescore_pending (block_num) VALUES ({block_num:d})"
+            )
+            db_mgr.db.query("COMMIT")
+
+    @classmethod
+    def rescore_pending_reputation_notifications(cls, db: Db, completed_block: int) -> None:
+        """Rescore reputation notifications in the caller's transaction if finalization left it to live sync.
+
+        Live sync calls it in the transaction of each range it processes, before writing the
+        range's notifications: once reptracker has processed `completed_block` (the last block
+        hivemind completed), every reputation-scored notification hivemind has written is
+        rescored from the reputations live sync scores with, those scoring <= 0 are deleted
+        and the pending marker with them, so the range's own writers apply the score > 0 cut.
+        Being in live sync's transaction, it races none of its writes. A no-op when nothing
+        is pending.
+        """
+        rows = db.query_all(
+            f"SELECT p.block_num, hive.app_get_current_block_num('{REPTRACKER_SCHEMA_NAME}') AS reptracker_block "
+            f"FROM {SCHEMA_NAME}._reputation_rescore_pending p LIMIT 1"
+        )
+        if not rows:
+            return
+        finalized_block, reptracker_block = rows[0][0], rows[0][1] or 0
+        if reptracker_block < completed_block:
+            if cls._rescore_wait_checks % cls._REPTRACKER_LOG_EVERY_CHECKS == 0:
+                log.info(
+                    "[SINGLE] Reputation notification rescore pending since block %d: waiting for %s (block %d) "
+                    "to reach block %d",
+                    finalized_block,
+                    REPTRACKER_SCHEMA_NAME,
+                    reptracker_block,
+                    completed_block,
+                )
+            cls._rescore_wait_checks += 1
+            return
+        time_start = perf_counter()
+        update_sql, delete_sql = cls._reputation_rescore_sql()
+        db.query_no_return(update_sql)
+        db.query_no_return(delete_sql)
+        db.query_no_return(f"DELETE FROM {SCHEMA_NAME}._reputation_rescore_pending")
+        cls._rescore_wait_checks = 0
+        log.info(
+            "[SINGLE] Deferred reputation notification rescore (pending since block %d) ran at block %d, "
+            "%s at block %d, in %.4fs",
+            finalized_block,
+            completed_block,
+            REPTRACKER_SCHEMA_NAME,
+            reptracker_block,
+            perf_counter() - time_start,
+        )
+
+    @classmethod
+    def _reputation_rescore_sql(cls) -> tuple[str, str]:
+        """The rescoring of the reputation-scored notifications (types 11-16) and the deletion of those scoring <= 0."""
+        update_sql = f"""
                 WITH log_account_rep AS (
                     SELECT account_id,
                         LOG(10, ABS(nullif(reputation, 0))) AS rep,
@@ -1203,14 +1254,34 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
                     AND hnc.type_id IN (11, 12, 13, 14, 15, 16)
                     AND hnc.score != COALESCE(fr.rep, 25)
             """
-            delete_sql = f"""
+        delete_sql = f"""
                 DELETE FROM {SCHEMA_NAME}.hive_notification_cache
                 WHERE type_id IN (11, 12, 13, 14, 15, 16)
                     AND score <= 0
             """
+        return update_sql, delete_sql
+
+    @classmethod
+    def _finish_reputation_notification_scores(cls, db: Db) -> None:
+        """Recalculate reputation-based notification scores using final reputation data.
+
+        During massive sync, the scores of the notifications scored by their
+        source's reputation (subscribe, reply, reblog, follow, mention) are computed
+        from reptracker_app.account_reputations at flush time. Since the reputation
+        tracker runs concurrently, scores may reflect incomplete reputation data.
+        This finalization step corrects them using the final values. The initial
+        sync's flushes keep these rows whatever their score
+        (reputation_notification_cut_deferred), so the score > 0 cut that live
+        sync applies at write time is applied here, on the final scores. A rescore
+        an earlier finalization left to live sync is done with it.
+        """
+        with AutoDbDisposer(db, "finish_reputation_notification_scores") as db_mgr:
+            time_start = perf_counter()
+            update_sql, delete_sql = cls._reputation_rescore_sql()
             db_mgr.db.query("START TRANSACTION")
-            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql, separate_transaction=False)
+            cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=update_sql, separate_transaction=False)
             cls._execute_query(db_mgr.db, delete_sql)
+            cls._execute_query(db_mgr.db, f"DELETE FROM {SCHEMA_NAME}._reputation_rescore_pending")
             db_mgr.db.query("COMMIT")
             log.info(
                 "[MASSIVE] finish_reputation_notification_scores executed in %.4fs",
@@ -1301,7 +1372,8 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         #       an initial sync's index restore built the BM25 index already, else
         #       its build starts after the hive_posts recompute commits
         #       (_restore_bm25_index_after_recompute)
-        #   notification_cache, vote_notifications <- reputation scores
+        #   notification_cache, vote_notifications <- reputation scores (or their
+        #       deferral to live sync)
         #   every task <- completion marker
         # Part 0 is everything without a predecessor; its critical path is the
         # hive_posts thread.
@@ -1350,13 +1422,20 @@ WHERE ic.table_name = '{table}' AND ic.index_constraint_name = '{cls._VOTES_ORDE
         # Recalculate reputation-based notification scores after all notifications are
         # flushed (and, on the initial-massive path, muted ones cleared). Runs sequentially
         # to avoid concurrent access to hive_notification_cache with the tasks above. Every
-        # initial sync needs it, however short: its flushes deferred the score > 0 cut here.
-        # reptracker syncs beside hivemind, so the rescoring waits for it to reach hivemind's
-        # block first; the reputations it reads are then those live sync scores with.
-        if massive_sync_preconditions or last_imported_block <= SEED_LAST_COMPLETED_BLOCK:
-            if not cls._wait_for_reputation_tracker(cls.db(), current_imported_block):
-                return False
-            cls._finish_reputation_notification_scores(cls.db())
+        # initial sync needs it, however short: its flushes deferred the score > 0 cut here;
+        # so does a sync whose earlier finalization left it pending. reptracker syncs beside
+        # hivemind and may be far behind its block: rather than hold the completion marker
+        # (and go-live) for it, the rescoring is then left to live sync, which runs it once
+        # reptracker reaches hivemind's block (rescore_pending_reputation_notifications).
+        if (
+            massive_sync_preconditions
+            or last_imported_block <= SEED_LAST_COMPLETED_BLOCK
+            or cls._reputation_rescore_pending(cls.db())
+        ):
+            if cls._reputation_rescore_due(cls.db(), current_imported_block):
+                cls._finish_reputation_notification_scores(cls.db())
+            else:
+                cls._defer_reputation_notification_scores(cls.db(), current_imported_block)
 
         if cls._interrupted("completion marker"):
             return False

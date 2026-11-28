@@ -28,6 +28,12 @@ clustering one, hive_feed_cache, hive_notification_cache (on everything but the
 drawn id), and the same valid indexes, BM25 included when pg_search is installed,
 finding the same posts for the batch's new and replaced bodies.
 
+The reputation notification rescore finalization leaves to live sync when reptracker
+is behind hivemind's block gives the same notifications as the one it runs itself:
+with the rescore pending, the writers keep the rows whatever their score, a live
+range reptracker has not reached yet leaves the rows as they are, and the first one
+it has reached rescores them to the serial result, once.
+
 Planted defects show that the comparison sees what it guards: the recompute with
 one of its ranges dropped and another applied twice leaves exactly the dropped
 range's stale posts different, since the recompute writes absolute values, not
@@ -68,7 +74,7 @@ pytestmark = pytest.mark.skipif(not _URL, reason=f'{_URL_VARIABLE} names no disp
 
 _SQL_SCRIPTS = Path(__file__).resolve().parents[2] / 'hive' / 'db' / 'sql_scripts'
 # The SQL of the pieces under test, loaded from this tree in case the clone was synced by another one.
-_FINALIZATION_SCRIPTS = ('update_posts_rshares.sql',)
+_FINALIZATION_SCRIPTS = ('update_posts_rshares.sql', 'reputation_notification_scores.sql')
 _WORKERS = 4
 _ORDER_INDEX = 'hive_votes_post_id_voter_id_idx'
 _BM25_INDEX = 'hive_post_data_bm25_idx'
@@ -260,8 +266,7 @@ class _Finalization:
     def restore_outputs(self) -> None:
         """No feed cache, the saved notifications and no BM25 index."""
         self.run('TRUNCATE TABLE hivemind_app.hive_feed_cache')
-        self.run('DELETE FROM hivemind_app.hive_notification_cache')
-        self.run('INSERT INTO hivemind_app.hive_notification_cache SELECT * FROM fe_pre_notifications')
+        self.restore_notifications()
         self.run(f'DROP INDEX IF EXISTS hivemind_app.{_BM25_INDEX}')
 
     def restore(self) -> None:
@@ -274,9 +279,22 @@ class _Finalization:
         """The finalization steps both arms share: feed cache and notifications."""
         head = self.one("SELECT hive.app_get_current_block_num('hivemind_app')")
         DbState._finish_hive_feed_cache(self.db, 0, head)
+        self.fill_notifications_before_rescore()
+        DbState._finish_reputation_notification_scores(self.db)
+
+    def fill_notifications_before_rescore(self) -> None:
         DbState._finish_notification_cache(self.db)
         DbState._finish_vote_notifications(self.db)
-        DbState._finish_reputation_notification_scores(self.db)
+
+    def restore_notifications(self) -> None:
+        self.run('DELETE FROM hivemind_app.hive_notification_cache')
+        self.run('INSERT INTO hivemind_app.hive_notification_cache SELECT * FROM fe_pre_notifications')
+
+    def live_range(self, completed_block: int) -> None:
+        """What a live range after `completed_block` runs of the deferred rescore, in its own transaction."""
+        self.db.query_no_return('START TRANSACTION')
+        DbState.rescore_pending_reputation_notifications(self.db, completed_block)
+        self.db.query_no_return('COMMIT')
 
     def run_serial(self) -> None:
         self.write_batch()
@@ -543,3 +561,47 @@ def test_an_ordering_without_its_cluster_is_reported_out_of_order_and_unmarked(f
 
     assert set(problems) == {'hive_votes rows following a greater (post_id, voter_id)', 'ordering mark'}
     assert problems['ordering mark'] == f'{_ORDER_INDEX} is not marked as the clustering index'
+
+
+# Reputation-scored notifications written while the rescore is pending, scored from reputations
+# behind their source's: half of them at 0, which the writers keep while the cut is deferred.
+_STALE_GAP_SCORES = """
+UPDATE hivemind_app.hive_notification_cache
+SET score = CASE WHEN src % 2 = 0 THEN 0 ELSE score + 7 END
+WHERE type_id IN (11, 12, 13, 14, 15, 16)
+  AND block_num > (SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY block_num)
+                   FROM hivemind_app.hive_notification_cache WHERE type_id IN (11, 12, 13, 14, 15, 16))
+"""
+
+
+def test_a_rescore_left_to_live_sync_gives_the_notifications_of_a_finalization_that_waited(
+    finalization: _Finalization,
+) -> None:
+    head = finalization.one("SELECT hive.app_get_current_block_num('hivemind_app')")
+    reptracker = finalization.one("SELECT hive.app_get_current_block_num('reptracker_app')")
+    finalization.restore_notifications()
+    finalization.fill_notifications_before_rescore()
+    try:
+        DbState._defer_reputation_notification_scores(DbState.db(), head)
+        assert finalization.one('SELECT hivemind_app.reputation_notification_cut_deferred()') is True, (
+            'with the rescore pending, the writers must keep a row whatever its score'
+        )
+        finalization.run(_STALE_GAP_SCORES)
+        gap = finalization.differing_rows('hive_notification_cache')
+        assert gap, 'the gap notifications equal the rescored ones, so the check measures nothing'
+
+        finalization.live_range(reptracker + 1)
+        assert finalization.differing_rows('hive_notification_cache') == gap, 'rescored before reptracker had its block'
+        assert finalization.one('SELECT count(*) FROM hivemind_app._reputation_rescore_pending') == 1
+
+        finalization.live_range(reptracker)
+        assert finalization.differing_rows('hive_notification_cache') == 0
+        assert finalization.one('SELECT count(*) FROM hivemind_app._reputation_rescore_pending') == 0
+        assert finalization.one('SELECT hivemind_app.reputation_notification_cut_deferred()') is False
+
+        finalization.run(_STALE_GAP_SCORES)
+        restaled = finalization.differing_rows('hive_notification_cache')
+        finalization.live_range(reptracker)
+        assert finalization.differing_rows('hive_notification_cache') == restaled, 'the rescore ran a second time'
+    finally:
+        finalization.run('DELETE FROM hivemind_app._reputation_rescore_pending')

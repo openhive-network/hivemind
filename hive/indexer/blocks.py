@@ -909,6 +909,10 @@ class Blocks:
         if not db.is_trx_active():
             db.query_no_return("START TRANSACTION")
 
+        # The reputation notification rescore finalization left to live sync, before this
+        # range's notification writers read whether the score > 0 cut is still deferred.
+        DbState.rescore_pending_reputation_notifications(db, first_block - 1)
+
         # Phase 1: Load staging table
         db.query_no_return(f"SELECT {SCHEMA_NAME}.load_ops_staging({first_block}, {last_block})")
 

@@ -43,7 +43,8 @@ def _initial_finalization_vacuums() -> list[tuple[str, str]]:
         patch.object(DbState, 'process_tasks_in_threads', staticmethod(run_vacuums_only)),
         patch.multiple(
             DbState,
-            _wait_for_reputation_tracker=staticmethod(lambda *a: True),
+            _reputation_rescore_pending=staticmethod(lambda *a: False),
+            _reputation_rescore_due=staticmethod(lambda *a: True),
             _finish_reputation_notification_scores=staticmethod(lambda *a: None),
             _finalize_completion_marker=staticmethod(lambda *a: None),
         ),

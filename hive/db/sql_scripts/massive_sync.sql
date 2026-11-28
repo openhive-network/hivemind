@@ -3525,20 +3525,6 @@ RETURNS INT AS $$
 $$ LANGUAGE sql STABLE;
 
 
--- True while a batch of the initial massive sync runs: a batch is in flight
--- (_batch_queue holds its range; live sync leaves it empty) and no finalization
--- has completed yet (hive_state still holds its seed). reptracker syncs beside
--- that sync, so a source's reputation at flush time is not its final one: the
--- writers of reputation-scored notifications (types 11-16) then keep a row
--- whatever its score, and finalization (_finish_reputation_notification_scores)
--- rescores the rows from final reputations and deletes those scoring <= 0.
-CREATE OR REPLACE FUNCTION hivemind_app.reputation_notification_cut_deferred()
-RETURNS BOOLEAN AS $$
-    SELECT EXISTS (SELECT 1 FROM hivemind_app._batch_queue)
-       AND (SELECT last_completed_block_num FROM hivemind_app.hive_state) <= 1;
-$$ LANGUAGE sql STABLE;
-
-
 -- 11b. flush_post_notifications_for_blocks
 CREATE OR REPLACE FUNCTION hivemind_app.flush_post_notifications_for_blocks(
     _first_block INT, _last_block INT

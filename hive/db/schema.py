@@ -297,6 +297,7 @@ def setup_runtime_code(db) -> None:
         "upgrade/update_db_patchlevel.sql",
         "hafapp_api.sql",
         "massive_sync.sql",
+        "reputation_notification_scores.sql",
         "grant_hivemind_user.sql",
         "community.sql",
         "community_utils.sql",

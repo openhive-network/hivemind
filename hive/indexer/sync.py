@@ -571,6 +571,7 @@ class SyncHiveDb:
             '_batch_post_results',
             '_batch_deleted_posts',
             '_deferred_payouts',
+            '_reputation_rescore_pending',
             '_ops_staging',
             '_comment_staging',
             '_post_results',
