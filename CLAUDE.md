@@ -295,6 +295,7 @@ In both massive stages a batch's votes, payouts, follows, post data flush and no
 - `rest_api_equivalence/`: at collection, every JSON-RPC tavern test of a method a REST endpoint wraps becomes a REST test checked against that test's own `.pat.json`, or a skip naming why it has no REST form; the job log prints the mapped/skipped count per endpoint. A new wrapping endpoint is added to `MAPPINGS` in `rest_checks/equivalence.py`.
 - `rest_api_rewriter/`: every path of the OpenAPI document, at its public `/hivemind-api/...` URL through the postgrest-rewriter (`HIVEMIND_REWRITER_ADDRESS`/`PORT`), must reach its own function. A new path needs an entry in `_REQUESTS`.
 - `rest_api_paging/`: following each paged REST endpoint's and JSON-RPC method's continuation with a small page size must give the one large page.
+- `rest_api_json_rpc/`: the JSON-RPC root must answer every request, result or error, with the request's id of the same JSON type and value.
 
 **Tests that need real data:**
 
